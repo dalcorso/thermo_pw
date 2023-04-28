@@ -40,7 +40,6 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   USE upf_params,           ONLY : lmaxx
   USE initial_param,        ONLY : ethr0
   USE cell_base,            ONLY : fix_volume, fix_area
-  USE ions_base,            ONLY : if_pos
   USE control_flags,        ONLY : conv_elec, gamma_only, ethr, lscf, treinit_gvecs
   USE control_flags,        ONLY : conv_ions, istep, nstep, restart, lmd, &
                                    lbfgs, io_level, lensemb, lforce=>tprnfor, &
@@ -59,11 +58,23 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   USE qmmm,                 ONLY : qmmm_initialization, qmmm_shutdown, &
                                    qmmm_update_positions, qmmm_update_forces
   USE qexsd_module,         ONLY : qexsd_set_status, qexsd_reset_steps
-  USE xc_lib,               ONLY : xclib_dft_is, stop_exx
+  USE xc_lib,               ONLY : xclib_dft_is, stop_exx, exx_is_active
   USE beef,                 ONLY : beef_energies
   USE ldaU,                 ONLY : lda_plus_u
+  USE add_dmft_occ,         ONLY : dmft
+  USE extffield,            ONLY : init_extffield, close_extffield
+  USE input_parameters,     ONLY : nextffield
 
   USE device_fbuff_m,             ONLY : dev_buf
+#if defined (__ENVIRON)
+  USE plugin_flags,      ONLY : use_environ
+  USE environ_pw_module, ONLY : is_ms_gcs, init_ms_gcs
+#endif
+#if defined (__OSCDFT)
+  USE plugin_flags,      ONLY : use_oscdft
+  USE oscdft_base,       ONLY : oscdft_ctx
+  USE oscdft_functions,  ONLY : oscdft_run_pwscf
+#endif
   !
   IMPLICIT NONE
   INTEGER, INTENT(OUT) :: exit_status
@@ -85,6 +96,11 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   !
   LOGICAL :: optimizer_failed = .FALSE.
   !
+  IF (lscf_) THEN
+     CALL start_clock('tpw_scf_pw')
+  ELSE
+     CALL start_clock('tpw_nscf_pw')
+  ENDIF
   exit_status = 0
   ions_status = 3
   IF ( ionode ) WRITE( UNIT = stdout, FMT = 9010 ) ntypx, npk, lmaxx
@@ -115,7 +131,16 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   !
   ! call to void routine for user defined / plugin patches initializations
   !
+#if defined(__LEGACY_PLUGINS)
   CALL plugin_initialization()
+#endif
+#if defined (__ENVIRON)
+  IF (use_environ) THEN
+     IF (is_ms_gcs()) CALL init_ms_gcs()
+  END IF
+#endif
+  !
+  CALL check_stop_init()
   !
   CALL setup_tpw ()
   !
@@ -129,7 +154,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
      CALL data_structure( gamma_only )
      CALL summary()
      CALL memory_report()
-     CALL qexsd_set_status(255)
+     CALL qexsd_set_status( exit_status )
      CALL punch( 'config-init' )
      exit_status = 255
      RETURN
@@ -137,8 +162,16 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   !
   CALL init_run()
   !
+  !  read external force fields parameters
+  !
+  IF ( nextffield > 0 .AND. ionode) THEN
+     !
+     CALL init_extffield( 'PW', nextffield )
+     !
+  END IF
+  !
   IF ( check_stop_now() ) THEN
-     CALL qexsd_set_status( 255 )
+     CALL qexsd_set_status( exit_status )
      CALL punch( 'config' )
      exit_status = 255
      RETURN
@@ -148,19 +181,39 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
      !
      ! ... electronic self-consistency or band structure calculation
      !
+#if defined (__OSCDFT)
+     IF (use_oscdft) THEN
+        CALL oscdft_run_pwscf(oscdft_ctx)
+     ELSE
+#endif
      IF ( .NOT. lscf) THEN
         CALL non_scf()
      ELSE
         CALL electrons_tpw()
      END IF
+#if defined (__OSCDFT)
+     END IF
+#endif
+
      !
      ! ... code stopped by user or not converged
      !
      IF ( check_stop_now() .OR. .NOT. conv_elec ) THEN
-        IF ( check_stop_now() ) exit_status = 255
-        IF ( .NOT. conv_elec )  exit_status =  2
+        IF ( check_stop_now() ) THEN
+            exit_status = 255
+        ELSE
+           IF (dmft) THEN
+              exit_status =  131
+           ELSE
+              exit_status = 2
+           ENDIF
+        ENDIF
         CALL qexsd_set_status(exit_status)
-        CALL punch( 'config' )
+        IF(exx_is_active()) then
+          CALL punch( 'all' )
+        ELSE
+          CALL punch( 'config' )
+        ENDIF
         RETURN
      ENDIF
      !
@@ -179,7 +232,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
      !
      ! ... force calculation
      !
-     IF ( lforce .AND. ANY( if_pos(:,:) == 1 )) CALL forces()
+     IF ( lforce ) CALL forces()
      !
      ! ... stress calculation
      !
@@ -209,7 +262,8 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
         ! ... save restart information for the new configuration
         !
         IF ( idone <= nstep .AND. .NOT. conv_ions ) THEN
-            CALL qexsd_set_status( 255 )
+            exit_status = 255
+            CALL qexsd_set_status( exit_status )
             CALL punch( 'config-only' )
         END IF
         !
@@ -285,10 +339,19 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
      ethr = 1.0D-6
      !
      CALL dev_buf%reinit( ierr )
-     IF ( ierr .ne. 0 ) CALL errore( 'run_pwscf', 'Cannot reset GPU buffers!  Buffers still locked: ', abs(ierr) )
+     IF ( ierr .ne. 0 ) CALL infomsg( 'run_pwscf', 'Cannot reset GPU buffers! Some buffers still locked.' )
      !
      !
   ENDDO main_loop
+  !
+  ! Set correct exit_status
+  !
+  IF ( .NOT. conv_ions .OR. optimizer_failed ) THEN
+      exit_status =  3
+  ELSE
+      ! All good
+      exit_status = 0
+  END IF
   !
   ! ... save final data file
   !
@@ -299,12 +362,16 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   !
   CALL qmmm_shutdown()
   !
-  IF ( .NOT. conv_ions .OR. optimizer_failed )  exit_status =  3
-  !
   CALL close_files(.TRUE.)
   !
+  CALL laxlib_end()
+  IF (lscf_) THEN
+     CALL stop_clock('tpw_scf_pw')
+  ELSE
+     CALL stop_clock('tpw_nscf_pw')
+  ENDIF
   CALL clean_pw( .FALSE. )
-
+  !
   RETURN
   !
 9010 FORMAT( /,5X,'Current dimensions of program PWSCF are:', &

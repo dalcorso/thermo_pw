@@ -136,8 +136,7 @@ SUBROUTINE c_bands_nscf_tpw( )
         !
         IF ( lsda ) current_spin = isk(ik)
         !
-        IF (.NOT.use_gpu) CALL g2_kin( ik )
-        IF (use_gpu) CALL g2_kin_gpu( ik )
+        CALL g2_kin( ik )
         ! 
         ! ... More stuff needed by the hamiltonian: nonlocal projectors
         !

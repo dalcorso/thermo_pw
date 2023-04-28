@@ -13,7 +13,7 @@ MODULE parameters
   IMPLICIT NONE
   SAVE
 
-  INTEGER, PARAMETER :: npk = 12000
+  INTEGER, PARAMETER :: npk = 120000
   !! max number of k-points
   INTEGER, PARAMETER :: ntypx = 10
   !! max number of different types of atom

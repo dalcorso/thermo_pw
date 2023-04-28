@@ -219,7 +219,7 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
         CALL set_kup_and_kdw_tpw( xk, wk, isk, nkstot, npk, lgamma, &
                                          diago_bands, isym_bands, ik_origin )
      ELSE
-        CALL set_kup_and_kdw( xk, wk, isk, nkstot, npk, lgamma)
+        CALL set_kup_and_kdw( xk, wk, isk, nkstot, npk)
         diago_bands(1:nkstot)=.TRUE.
      ENDIF
      !

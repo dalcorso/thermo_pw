@@ -68,7 +68,8 @@ subroutine solve_e_tpw(drhoscf)
   USE magnetic_charges,      ONLY : alpha_me
   USE cell_base,             ONLY : bg
   USE gvect,                 ONLY : gg
-  USE uspp_init,            ONLY : init_us_2
+  USE uspp_init,             ONLY : init_us_2
+  USE apply_dpot_mod,        ONLY : apply_dpot_bands
 
   implicit none
 
@@ -93,7 +94,7 @@ subroutine solve_e_tpw(drhoscf)
                    dbecsum(:,:,:,:), & ! the becsum with dpsi
                    dbecsum_nc(:,:,:,:,:), & ! the becsum with dpsi
                    mixin(:), mixout(:), &  ! auxiliary for paw mixing
-                   aux1 (:,:),  ps (:,:), &
+                   ps (:,:), &
                    tg_dv(:,:), &
                    tg_psic(:,:), aux2(:,:)
 
@@ -105,14 +106,14 @@ subroutine solve_e_tpw(drhoscf)
   integer :: npw, npwq
   integer :: kter, iter0, ipol, ibnd, iter, lter, ik, ig, is, nrec, ndim, ios
   ! counters
-  integer :: ltaver, lintercall, incr, jpol, v_siz
+  integer :: ltaver, lintercall, incr, jpol, v_siz, nnr, nnrs
   integer :: ikk, ikq
   integer :: icart, jcart
 
   real(DP) :: tcpu, get_clock
   ! timing variables
 
-  external ch_psi_all_tpw, cg_psi
+  external ch_psi_all, cg_psi
 
   call start_clock ('solve_e')
   !
@@ -125,11 +126,15 @@ subroutine solve_e_tpw(drhoscf)
      alpha_work = (0.0_DP, 0.0_DP)
   END IF
   allocate (dvscfin( dfftp%nnr, nspin_mag, 3))
+  nnr=dfftp%nnr
   if (doublegrid) then
      allocate (dvscfins(dffts%nnr, nspin_mag, 3))
+     nnrs=dffts%nnr
   else
      dvscfins => dvscfin
+     nnrs=nnr
   endif
+  !$acc enter data create(dvscfins(1:nnrs, 1:nspin_mag, 1:3))
   allocate (dvscfout(dfftp%nnr, nspin_mag, 3))
   IF (okpaw) THEN
      ALLOCATE (mixin(dfftp%nnr*nspin_mag*3+(nhm*(nhm+1)*nat*nspin_mag*3)/2) )
@@ -142,9 +147,9 @@ subroutine solve_e_tpw(drhoscf)
   ENDIF
   allocate (dbecsum( nhm*(nhm+1)/2, nat, nspin_mag, 3))
   IF (noncolin) allocate (dbecsum_nc (nhm, nhm, nat, nspin, 3))
-  allocate (aux1(dffts%nnr,npol))
   allocate (h_diag(npwx*npol, nbnd))
   allocate (aux2(npwx*npol, nbnd))
+  !$acc enter data create (aux2(1:npwx*npol, 1:nbnd) )
   IF (okpaw) mixin=(0.0_DP,0.0_DP)
 
   if (rec_code_read == -20.AND.ext_recover) then
@@ -225,11 +230,9 @@ subroutine solve_e_tpw(drhoscf)
         !
         IF ( nkb>0 ) THEN
            CALL init_us_2 (npw, igk_k(1,ikk), xk (1, ikk), vkb, use_gpu)
-           IF (iter==1.AND.use_gpu) CALL init_us_2 (npw, igk_k(1,ikk), &
-                                                        xk (1, ikk), vkb)
+           !$acc update host(vkb)
         ENDIF
         CALL g2_kin(ikk)
-        IF (use_gpu) CALL g2_kin_gpu(ikk)
         !
         ! compute preconditioning matrix h_diag used by cgsolve_all
         !
@@ -246,35 +249,9 @@ subroutine solve_e_tpw(drhoscf)
               ! calculates dvscf_q*psi_k in G_space, for all bands, k=kpoint
               ! dvscf_q from previous iteration (mix_potential)
               !
-              IF( dffts%has_task_groups ) THEN
-                 IF (noncolin) THEN
-                    CALL tg_cgather( dffts, dvscfins(:,1,ipol), &
-                                                                tg_dv(:,1))
-                    IF (domag) THEN
-                       DO jpol=2,4
-                          CALL tg_cgather( dffts, dvscfins(:,jpol,ipol), &
-                                                             tg_dv(:,jpol))
-                       ENDDO
-                    ENDIF
-                 ELSE
-                    CALL tg_cgather( dffts, dvscfins(:,current_spin,ipol), &
-                                                             tg_dv(:,1))
-                 ENDIF
-              ENDIF
-              aux2=(0.0_DP,0.0_DP)
-              do ibnd = 1, nbnd_occ (ikk), incr
-                 IF ( dffts%has_task_groups ) THEN
-                    call cft_wave_tg (ik, evc, tg_psic, 1, v_siz, ibnd, &
-                                      nbnd_occ (ikk) )
-                    call apply_dpot(v_siz, tg_psic, tg_dv, 1)
-                    call cft_wave_tg (ik, aux2, tg_psic, -1, v_siz, ibnd, &
-                                      nbnd_occ (ikk))
-                 ELSE
-                    call cft_wave (ik, evc (1, ibnd), aux1, +1)
-                    call apply_dpot(dffts%nnr, aux1, dvscfins(1,1,ipol), current_spin)
-                    call cft_wave (ik, aux2 (1, ibnd), aux1, -1)
-                 ENDIF
-              enddo
+              CALL apply_dpot_bands(ik, nbnd_occ(ikk), &
+                                dvscfins(:, :, ipol), evc, aux2)
+              !
               dvpsi=dvpsi+aux2
               !
               call adddvscf(ipol,ik)
@@ -319,7 +296,7 @@ subroutine solve_e_tpw(drhoscf)
 
            conv_root = .true.
 
-           call cgsolve_all (ch_psi_all_tpw,cg_psi,et(1,ikk),dvpsi,dpsi, &
+           call cgsolve_all (ch_psi_all,cg_psi,et(1,ikk),dvpsi,dpsi, &
               h_diag,npwx,npw,thresh,ik,lter,conv_root,anorm,&
               nbnd_occ(ikk),npol)
 
@@ -506,7 +483,6 @@ IF (noncolin.AND.domag) then
 ENDIF
 
   deallocate (h_diag)
-  deallocate (aux1)
   deallocate (dbecsum)
   deallocate (dvscfout)
   IF (nlcc_any.AND.zeu) DEALLOCATE(drhoscfh)
@@ -514,9 +490,11 @@ ENDIF
      DEALLOCATE(mixin)
      DEALLOCATE(mixout)
   ENDIF
+  !$acc exit data delete(dvscfins)
   if (doublegrid) deallocate (dvscfins)
   deallocate (dvscfin)
   if (noncolin) deallocate(dbecsum_nc)
+  !$acc exit data delete(aux2)
   deallocate(aux2)
   IF ( dffts%has_task_groups ) THEN
      !

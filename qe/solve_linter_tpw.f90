@@ -138,6 +138,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
              ikmkmq,     & ! index of mk-mq
              npw,        & ! number of plane waves at k  
              npwq,       & ! number of plane waves at k+q
+             nnr, nnrs,  & ! number of FFT mesh point
              mode          ! mode index
 
   INTEGER  :: iq_dummy
@@ -158,11 +159,15 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   ENDIF
 
   ALLOCATE (dvscfin ( dfftp%nnr , nspin_mag , npe))
+  nnr=dfftp%nnr
   IF (doublegrid) THEN
      allocate (dvscfins (dffts%nnr , nspin_mag , npe))
+     nnrs=dffts%nnr
   ELSE
      dvscfins => dvscfin
+     nnrs=nnr
   ENDIF
+  !$acc enter data create(dvscfins(1:nnr, 1:nspin_mag, 1:npe))
   ALLOCATE (drhoscfh ( dfftp%nnr, nspin_mag , npe))
   ALLOCATE (dvscfout ( dfftp%nnr, nspin_mag , npe))
   ALLOCATE (dbecsum ( (nhm * (nhm + 1))/2 , nat , nspin_mag , npe))
@@ -259,16 +264,11 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
         ! compute beta functions and kinetic energy for k-point ikq
         ! needed by h_psi, called by ch_psi_all, called by cgsolve_all
         !
-        IF ( nkb > 0 ) THEN
+        IF ( nkb > 0 .AND.(iter==1.OR.alpha_pv>0.0_DP)) THEN
            CALL init_us_2( npwq, igk_k(1,ikq), xk(1,ikq), vkb, use_gpu)
-        !
-        !  This is needed to build the right hand side
-        !
-           IF (use_gpu.AND.(iter==1.OR.alpha_pv>0.0_DP)) &
-                      CALL init_us_2( npwq, igk_k(1,ikq), xk(1,ikq), vkb)
+           !$acc update host(vkb)
         ENDIF
         CALL g2_kin (ikq) 
-        IF (use_gpu) CALL g2_kin_gpu (ikq) 
         !
         ! Start the loop on the two linear systems, one at B and one at
         ! -B
@@ -609,6 +609,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   IF (noncolin) DEALLOCATE (dbecsum_nc)
   DEALLOCATE (dvscfout)
   DEALLOCATE (drhoscfh)
+  !$acc exit data delete(dvscfins)
   IF (doublegrid) DEALLOCATE (dvscfins)
   DEALLOCATE (dvscfin)
   DEALLOCATE (drhoc)
