@@ -65,6 +65,9 @@ ENDIF
 !
 ALLOCATE (aux1(dffts%nnr, npol))
 ALLOCATE (aux2(npwx*npol, nbnd))
+!$acc enter data create (aux1(1:dffts%nnr, 1:npol), aux2(1:npwx*npol, 1:nbnd))
+!$acc enter data copyin(evc) 
+!$acc update device(dvscfins(1:dffts%nnr, 1:nspin_mag, 1:npe))
 ikk = ikks(ik)
 IF (lsda) current_spin = isk (ikk)
 !
@@ -92,7 +95,9 @@ ENDIF
 !
 !  apply the potential
 !
+!$acc kernels
 aux2=(0.0_DP,0.0_DP)
+!$acc end kernels
 DO ibnd = 1, nbnd_occ (ikk), incr
    IF (dffts%has_task_groups) THEN
       CALL cft_wave_tg (ik, evc, tg_psic, 1, v_siz, ibnd, nbnd_occ(ikk) )
@@ -107,7 +112,10 @@ ENDDO
 !
 !  add the computed term to dvpsi
 !
-CALL ZAXPY(npwx*npol*nbnd, (1.0_DP,0.0_DP), aux2, 1, dvpsi, 1)
+!CALL ZAXPY(npwx*npol*nbnd, (1.0_DP,0.0_DP), aux2, 1, dvpsi, 1)
+!$acc kernels
+    dvpsi=dvpsi+aux2
+!$acc end kernels
 
 CALL stop_clock ('vpsifft')
 !
@@ -133,6 +141,8 @@ IF (isolv==2) THEN
    IF (okvan) int3_nc(:,:,:,:,ipert)=int3_save(:,:,:,:,ipert,1)
 ENDIF
 
+!$acc exit data delete (evc)
+!$acc exit data delete (aux1, aux2)
 DEALLOCATE(aux2)
 DEALLOCATE(aux1)
 !
