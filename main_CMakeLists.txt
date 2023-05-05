@@ -778,7 +778,6 @@ add_custom_target(tpw_tools
         qe_tpw_emp_f_exe
         qe_tpw_emp_g_exe
         qe_tpw_epsilon_tpw_exe
-        qe_tpw_eos_test_exe
         qe_tpw_gener_2d_slab_exe
         qe_tpw_gener_3d_slab_exe
         qe_tpw_gener_nanowire_exe
@@ -793,6 +792,7 @@ add_custom_target(tpw_tools
         qe_tpw_space_groups_exe
         qe_tpw_supercell_exe
         qe_tpw_test_colors_exe
+        qe_tpw_test_eos_exe
         qe_tpw_translate_exe
         qe_tpw_units_exe
     COMMENT

@@ -61,6 +61,9 @@ patches given below.</p>
 
 **Patches for thermo_pw.1.8.0**:
 <br>
+* To compile using cmake copy the thermo_pw/CMakeLists.txt of thermo_pw.1.8.1
+in the thermo_pw directory.
+<br>
 **Patches for thermo_pw.1.7.1**:
 <br>
 **Patches for thermo_pw.1.7.0**:

@@ -110,6 +110,7 @@ set(src_tpw_qe
     qe/init_representations_tpw.f90
     qe/irrek.f90
     qe/kpoint_grid.f90
+    qe/kpoint_grid_serial_tpw.f90
     qe/lanczos_write_restart.f90
     qe/lr_dot_tpw.f90
     qe/lr_restart.f90
@@ -229,6 +230,7 @@ set(src_tpw
     src/do_berry.f90
     src/do_phonon_tpw.f90
     src/do_pwscf.f90
+    src/dos_ph.f90
     src/dos_sub.f90
     src/dynmatrix_tpw.f90
     src/elastic_constants_t.f90
@@ -241,11 +243,13 @@ set(src_tpw
     src/find_band_sym_proj.f90
     src/find_mode_sym_proj.f90
     src/find_representations_mode_q.f90
+    src/find_t_debye.f90
     src/find_symmetry.f90
     src/fit_frequencies.f90
     src/generalized_phdos.f90
     src/generate_k_along_lines_kz.f90
     src/gen_qpoints.f90
+    src/geometry_file.f90
     src/initialize_elastic_cons.f90
     src/initialize_thermo_work.f90
     src/interpolate_bfact.f90
@@ -286,7 +290,7 @@ set(src_tpw
     src/plot_bz.f90
     src/plot_dispersion.f90
     src/plot_dos.f90
-    src/plot_dw_anhar.f90
+    src/plot_anhar_dw.f90
     src/plot_ef.f90
     src/plot_e_ke.f90
     src/plot_elastic_t.f90
@@ -790,15 +794,15 @@ target_link_libraries(qe_tpw_emp_g_exe
         qe_modules)
 
 ###########################################################
-# eos_test.x
+# test_eos.x
 ###########################################################
-set(src_eos_test_x tools/eos_test.f90)
-qe_enable_cuda_fortran("${src_eos_test_x}")
-qe_add_executable(qe_tpw_eos_test_exe ${src_eos_test_x})
-set_target_properties(qe_tpw_eos_test_exe
+set(src_test_eos_x tools/test_eos.f90)
+qe_enable_cuda_fortran("${src_test_eos_x}")
+qe_add_executable(qe_tpw_test_eos_exe ${src_test_eos_x})
+set_target_properties(qe_tpw_test_eos_exe
     PROPERTIES
-        OUTPUT_NAME eos_test.x)
-target_link_libraries(qe_tpw_eos_test_exe
+        OUTPUT_NAME test_eos.x)
+target_link_libraries(qe_tpw_test_eos_exe
     PRIVATE
         qe_tpw_lib
         qe_modules)
@@ -835,7 +839,7 @@ qe_install_targets(
     qe_tpw_elastic_exe
     qe_tpw_emp_f_exe
     qe_tpw_emp_g_exe
-    qe_tpw_eos_test_exe
+    qe_tpw_test_eos_exe
     qe_tpw_epsilon_tpw_exe
     qe_tpw_gener_2d_slab_exe
     qe_tpw_gener_3d_slab_exe
