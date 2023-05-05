@@ -26,7 +26,7 @@ SUBROUTINE write_ph_freq(igeom)
   USE control_dosq,  ONLY : nq1_d, nq2_d, nq3_d
   USE data_files,    ONLY : fldosfrq
   USE ph_freq_thermodynamics, ONLY : ph_freq_save
-  USE symm_base,      ONLY : nrot
+  USE symm_base,      ONLY : nsym
   USE control_thermo, ONLY : with_eigen
   USE ph_freq_module, ONLY : init_ph_freq
   USE matdyn_mod,     ONLY : matdyn_interp
@@ -66,7 +66,7 @@ SUBROUTINE write_ph_freq(igeom)
 !   Otherwise computes the q points, the weights and the frequencies.
 !   First generates the q points
 !
-     nqx = nq1_d * nq2_d * 2 / MAX(2,nrot) * nq3_d 
+     nqx = nq1_d * nq2_d * 2 / MAX(2,nsym) * nq3_d 
      IF (nqx<0) CALL errore('write_ph_freq','nq1_d*nq2_d*nq3_d too large',1)
      nqxr=nqx
      IF (nqxr*32<1.D9/nproc) THEN
