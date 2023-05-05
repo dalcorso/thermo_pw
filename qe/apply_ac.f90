@@ -70,8 +70,11 @@ SUBROUTINE apply_ac (ndmx, n, h, ah, ik, m, indi, iflag)
   ALLOCATE (e  (m))
   ALLOCATE (hpsi( npwx*npol , m))
   ALLOCATE (spsi( npwx*npol , m))
+ !$acc enter data create(hpsi(1:npwx*npol,1:m), spsi(1:npwx*npol,1:m), ps(1:nbnd, 1:m), e(1:m))
+  !$acc kernels present(hpsi,spsi)
   hpsi (:,:) = (0.d0, 0.d0)
   spsi (:,:) = (0.d0, 0.d0)
+  !$acc end kernels
   iw=current_w
   IF (iflag==1) THEN
      DO ibnd=1,m
@@ -82,25 +85,38 @@ SUBROUTINE apply_ac (ndmx, n, h, ah, ik, m, indi, iflag)
         e(ibnd) = CMPLX(et(indi(ibnd), ikks(ik))+DREAL(iw),-DIMAG(iw), KIND=DP) 
      ENDDO
   ENDIF
+  !$acc update device(e(1:m))
   !
   !   compute the product of the hamiltonian with the h vector
   !
   current_k = ikqs(ik)
+#if defined(__CUDA)
+  !$acc data present(h, hpsi, spsi)
+  !$acc host_data use_device(h, hpsi, spsi)
+  CALL h_psi_gpu (npwx, n, m, h, hpsi)
+  CALL s_psi_gpu (npwx, n, m, h, spsi)
+  !$acc end host_data
+  !$acc end data
+#else
   CALL h_psi (npwx, n, m, h, hpsi)
   CALL s_psi (npwx, n, m, h, spsi)
-
-
+#endif
   CALL start_clock ('last')
   !
   !   then we compute the operator H-epsilon S
   !
+  !$acc kernels present(ah)
   ah=(0.d0,0.d0)
+  !$acc end kernels
+ 
+  !$acc parallel loop collapse(2) present(hpsi, spsi, ah, e)
   DO ibnd = 1, m
      DO ig = 1, n
         ah (ig, ibnd) = hpsi (ig, ibnd) - e (ibnd) * spsi (ig, ibnd)
      ENDDO
   ENDDO
   IF (noncolin) THEN
+     !$acc parallel loop collapse(2) present(hpsi, spsi, ah, e)
      DO ibnd = 1, m
         DO ig = 1, n
            ah (ig+npwx,ibnd)=hpsi(ig+npwx,ibnd)-e(ibnd)*spsi(ig+npwx,ibnd)
@@ -121,7 +137,7 @@ SUBROUTINE apply_ac (ndmx, n, h, ah, ik, m, indi, iflag)
         CALL ch_psi_all_k()
      ENDIF
   ENDIF
-
+  !$acc exit data delete(hpsi, spsi, ps, e)
   DEALLOCATE (spsi)
   DEALLOCATE (hpsi)
   DEALLOCATE (e)
@@ -142,13 +158,22 @@ CONTAINS
 !-----------------------------------------------------------------------
 
     USE becmod, ONLY : becp, calbec
+#if defined(__CUDA)
+    USE becmod_gpum, ONLY : becp_d
+    USE becmod_subs_gpum, ONLY : calbec_gpu,  using_becp_d_auto
+    USE cublas
+#endif
     
     IMPLICIT NONE
     !
     !   Here we compute the projector in the valence band
     !
+    !$acc kernels present(ps)
     ps (:,:) = (0.d0, 0.d0)
-    
+    !$acc end kernels 
+
+    !$acc data present(evq, ps, hpsi, spsi)
+    !$acc host_data use_device(spsi, ps, evq)
     IF (noncolin) THEN
        CALL zgemm ('C', 'N', nbnd_occ (ikq) , m, npwx*npol, (1.d0, 0.d0) , evq, &
             npwx*npol, spsi, npwx*npol, (0.d0, 0.d0) , ps, nbnd)
@@ -156,10 +181,17 @@ CONTAINS
        CALL zgemm ('C', 'N', nbnd_occ (ikq) , m, n, (1.d0, 0.d0) , evq, &
             npwx, spsi, npwx, (0.d0, 0.d0) , ps, nbnd)
     ENDIF
+    !$acc end host_data
+
+    !$acc kernels present(ps,hpsi)
     ps (:,:) = ps(:,:) * alpha_pv
-    CALL mp_sum ( ps, intra_bgrp_comm )
-    
     hpsi (:,:) = (0.d0, 0.d0)
+    !$acc end kernels
+    !$acc host_data use_device(ps)
+    CALL mp_sum ( ps, intra_bgrp_comm )
+    !$acc end host_data 
+    
+    !$acc host_data use_device(hpsi, ps, evq)
     IF (noncolin) THEN
        CALL zgemm ('N', 'N', npwx*npol, m, nbnd_occ (ikq) , (1.d0, 0.d0) , evq, &
             npwx*npol, ps, nbnd, (1.d0, 0.d0) , hpsi, npwx*npol)
@@ -167,18 +199,37 @@ CONTAINS
        CALL zgemm ('N', 'N', n, m, nbnd_occ (ikq) , (1.d0, 0.d0) , evq, &
             npwx, ps, nbnd, (1.d0, 0.d0) , hpsi, npwx)
     END IF
+    !$acc end host_data
+    !$acc kernels present(spsi, hpsi)
     spsi(:,:) = hpsi(:,:)
+    !$acc end kernels
+    !$acc end data
     !
     !    And apply S again
     !
+#if defined(__CUDA)
+    CALL using_becp_d_auto(2)
+    !$acc host_data use_device(hpsi,vkb)
+    CALL calbec_gpu (n, vkb(:,:), hpsi, becp_d, m)
+    !$acc end host_data
+#else
     CALL calbec (n, vkb, hpsi, becp, m)
+#endif
+#if defined(__CUDA)
+    !$acc host_data use_device(hpsi, spsi)
+    CALL s_psi_gpu (npwx, n, m, hpsi, spsi)
+    !$acc end host_data
+#else
     CALL s_psi (npwx, n, m, hpsi, spsi)
+#endif
+    !$acc parallel loop collapse(2) present(ah, spsi)
     DO ibnd = 1, m
        DO ig = 1, n
           ah (ig, ibnd) = ah (ig, ibnd) + spsi (ig, ibnd)
        ENDDO
     ENDDO
     IF (noncolin) THEN
+       !$acc parallel loop collapse(2) present(ah, spsi)
        DO ibnd = 1, m
           DO ig = 1, n
              ah (ig+npwx, ibnd) = ah (ig+npwx, ibnd) + spsi (ig+npwx, ibnd)
@@ -197,22 +248,34 @@ CONTAINS
     
     USE becmod, ONLY : becp,  calbec
     use gvect,                only : gstart
-
+#if defined(__CUDA)
+    USE becmod_gpum, ONLY : becp_d
+    USE becmod_subs_gpum, ONLY : calbec_gpu,  using_becp_d_auto
+    USE cublas
+#endif
     IMPLICIT NONE
 
+    !$acc data present(evc, ps, hpsi, spsi)
+    !$acc kernels present(ps)
     ps (:,:) = 0.d0
+    !$acc end kernels
     
     IF (noncolin) THEN
        CALL errore('ch_psi_all', 'non collin in gamma point not implemented',1)
     ELSE
+       !$acc host_data use_device(spsi, ps, evc)
        CALL DGEMM( 'C', 'N', nbnd, m, 2*n, 2.D0,evc, 2*npwx*npol, spsi, 2*npwx*npol, 0.D0, ps, nbnd )
-       if(gstart==2) CALL DGER(nbnd, m, -1.0_DP, evc, 2*npwx, spsi, 2*npwx, ps, nbnd )
+!       if(gstart==2) CALL DGER(nbnd, m, -1.0_DP, evc, 2*npwx, spsi, 2*npwx, ps, nbnd )
+       !$acc end host_data
     ENDIF
+    !$acc kernels present(ps,hpsi)
     ps (:,:) = ps(:,:) * alpha_pv
-    CALL mp_sum ( ps, intra_bgrp_comm )
-
     hpsi (:,:) = (0.d0, 0.d0)
-
+    !$acc end kernels
+    !$acc host_data use_device(ps)
+    CALL mp_sum ( ps, intra_bgrp_comm )
+    !$acc end host_data
+    !$acc host_data use_device(hpsi, ps, evc)
     IF (noncolin) THEN
        CALL ZGEMM ('N', 'N', npwx*npol, m, nbnd_occ (ik) , (1.d0, 0.d0) , evc, &
             npwx*npol, ps, nbnd, (1.d0, 0.d0) , hpsi, npwx*npol)
@@ -220,18 +283,37 @@ CONTAINS
        CALL DGEMM ('N', 'N', 2*n, m, nbnd_occ (ik) , 1.d0 , evc, &
             2*npwx, ps, nbnd, 1.d0 , hpsi, 2*npwx)
     ENDIF
+    !$acc end host_data
+    !$acc kernels present(spsi, hpsi)
     spsi(:,:) = hpsi(:,:)
+    !$acc end  kernels
+    !$acc end data
     !
     !    And apply S again
     !
+#if defined(__CUDA)
+    CALL using_becp_d_auto(2)
+    !$acc host_data use_device(hpsi,vkb)
+    CALL calbec_gpu (n, vkb(:,:), hpsi, becp_d, m)
+    !$acc end host_data
+#else
     CALL calbec (n, vkb, hpsi, becp, m)
+#endif
+#if defined(__CUDA)
+    !$acc host_data use_device(hpsi, spsi)
+    CALL s_psi_gpu (npwx, n, m, hpsi, spsi)
+    !$acc end host_data
+#else       
     CALL s_psi (npwx, n, m, hpsi, spsi)
+#endif
+    !$acc parallel loop collapse(2) present(ah, spsi)
     DO ibnd = 1, m
        DO ig = 1, n
           ah (ig, ibnd) = ah (ig, ibnd) + spsi (ig, ibnd)
        ENDDO
     ENDDO
     IF (noncolin) THEN
+       !$acc parallel loop collapse(2) present(ah, spsi)
        DO ibnd = 1, m
           DO ig = 1, n
              ah (ig+npwx, ibnd) = ah (ig+npwx, ibnd) + spsi (ig+npwx, ibnd)

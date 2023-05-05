@@ -33,6 +33,7 @@ SUBROUTINE ccg_psi_tpw (lda, n, m, psi, h_diag, flag)
   ! counter on bands
   ! counter on the elements of the vector
   !
+  !$acc parallel loop collapse(2) present(psi,h_diag)
   do k = 1, m
      do i = 1, n
        if (flag .eq. 1) then
@@ -43,8 +44,11 @@ SUBROUTINE ccg_psi_tpw (lda, n, m, psi, h_diag, flag)
          print*, 'flag is neither 1 nor -1. Stop'
        endif  
      enddo
-     IF (noncolin) THEN
-        shift=lda/npol
+  enddo
+  IF (noncolin) THEN
+     shift=lda/npol
+     !$acc parallel loop collapse(2) present(psi,h_diag)
+     do k = 1, m
         do i = 1, n
            if (flag .eq. 1) then
               psi (i+shift, k) = psi (i+shift, k) * h_diag (i+shift, k)
@@ -54,7 +58,7 @@ SUBROUTINE ccg_psi_tpw (lda, n, m, psi, h_diag, flag)
               print*, 'flag is neither 1 nor -1. Stop'
            endif  
         end do
-     END IF
-  enddo
+     enddo
+  ENDIF
   return
 END SUBROUTINE ccg_psi_tpw

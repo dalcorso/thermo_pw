@@ -43,7 +43,7 @@ subroutine solve_eq(iu, flag)
   USE check_stop,            ONLY : check_stop_now
   USE buffers,               ONLY : get_buffer, save_buffer
   USE wavefunctions,         ONLY : evc
-  USE uspp,                  ONLY : okvan, vkb
+  USE uspp,                  ONLY : okvan, nkb, vkb
   USE uspp_param,            ONLY : nhm
   USE noncollin_module,      ONLY : noncolin, npol, nspin_mag, domag
   USE scf,                   ONLY : rho, v_of_0
@@ -56,6 +56,7 @@ subroutine solve_eq(iu, flag)
   USE units_lr,              ONLY : lrdwf, iudwf, lrwfc, iuwfc
   USE units_ph,              ONLY : lrdrho, iudrho, lrbar, iubar
   USE output,                ONLY : fildrho
+  USE control_flags,         ONLY : use_gpu
   USE control_ph,            ONLY : ext_recover, rec_code, &
                                     lnoloc, convt, tr2_ph, &
                                     alpha_mix, lgamma_gamma, niter_ph, &
@@ -78,7 +79,7 @@ subroutine solve_eq(iu, flag)
   USE mp,                    ONLY : mp_sum
   USE fft_helper_subroutines, ONLY : fftx_ntgrp
   USE uspp_init,            ONLY : init_us_2
-
+  USE apply_dpot_mod,       ONLY : apply_dpot_bands
 
   implicit none
 
@@ -119,7 +120,7 @@ subroutine solve_eq(iu, flag)
   ! conv_root: true if linear system is converged
 
   integer :: kter, iter0, ipol, ibnd, iter, lter, ik, ikk, ikq, &
-             ig, is, nrec, ndim, npw, npwq, ios
+             ig, is, nrec, ndim, npw, npwq, nnr, nnrs, ios
   ! counters
   integer :: ltaver, lintercall, incr, jpol, v_siz
   real(DP) :: xqmod2, alpha_pv0
@@ -147,11 +148,15 @@ subroutine solve_eq(iu, flag)
 
 
   allocate (dvscfin( dfftp%nnr, nspin_mag, 1))
+  nnr=dfftp%nnr
   if (doublegrid) then
      allocate (dvscfins(dffts%nnr, nspin_mag, 1))
+     nnrs=dffts%nnr
   else
      dvscfins => dvscfin
+     nnrs=nnr
   endif
+  !$acc enter data create(dvscfins(1:nnrs, 1:nspin_mag, 1:3))
   allocate (dvscfout(dfftp%nnr, nspin_mag, 1))
   allocate (drhoscfout(dfftp%nnr, nspin_mag))
   IF (okpaw) THEN
@@ -172,6 +177,7 @@ subroutine solve_eq(iu, flag)
   ENDIF
   allocate (aux1(dffts%nnr,npol))
   allocate (aux2(npwx*npol, nbnd))
+  !$acc enter data create (aux2(1:npwx*npol, 1:nbnd) )
   IF (okpaw) mixin=(0.0_DP,0.0_DP)
 
   if (rec_code_read == -20.AND.ext_recover) then
@@ -236,7 +242,10 @@ subroutine solve_eq(iu, flag)
         !
         ! reads unperturbed wavefuctions psi_k in G_space, for all bands
         !
-        call init_us_2 (npwq, igk_k(1,ikq), xk (1, ikq), vkb)
+        IF (nkb>0) THEN
+           call init_us_2 (npwq, igk_k(1,ikq), xk (1, ikq), vkb, use_gpu)
+           !$acc update host(vkb)
+        ENDIF
         !
         ! reads unperturbed wavefuctions psi(k) and psi(k+q)
         !
@@ -311,36 +320,8 @@ subroutine solve_eq(iu, flag)
               ! calculates dvscf_q*psi_k in G_space, for all bands, k=kpoint
               ! dvscf_q from previous iteration (mix_potential)
               !
-              IF( dffts%has_task_groups ) THEN
-                 IF (noncolin) THEN
-                    CALL tg_cgather( dffts, dvscfins(:,1,ipol), &
-                                                                tg_dv(:,1))
-                    IF (domag) THEN
-                       DO jpol=2,4
-                          CALL tg_cgather( dffts, dvscfins(:,jpol,ipol), &
-                                                             tg_dv(:,jpol))
-                       ENDDO
-                    ENDIF
-                 ELSE
-                    CALL tg_cgather( dffts, dvscfins(:,current_spin,ipol), &
-                                                             tg_dv(:,1))
-                 ENDIF
-              ENDIF
-              aux2=(0.0_DP,0.0_DP)
-              do ibnd = 1, nbnd_occ (ikk), incr
-                 IF ( dffts%has_task_groups ) THEN
-                    call cft_wave_tg (ik, evc, tg_psic, 1, v_siz, ibnd, &
-                                      nbnd_occ (ikk) )
-                    call apply_dpot(v_siz, tg_psic, tg_dv, 1)
-                    call cft_wave_tg (ik, aux2, tg_psic, -1, v_siz, ibnd, &
-                                      nbnd_occ (ikk))
-                 ELSE
-                    call cft_wave (ik, evc (1, ibnd), aux1, +1)
-                    call apply_dpot(dffts%nnr, aux1, dvscfins(1,1,ipol), &
-                                                                current_spin)
-                    call cft_wave (ik, aux2 (1, ibnd), aux1, -1)
-                 ENDIF
-              enddo
+              CALL apply_dpot_bands(ik, nbnd_occ(ik), &
+                                dvscfins(:, :, ipol), evc, aux2)
               dvpsi=dvpsi+aux2
               !
               call adddvscf(ipol,ik)
@@ -662,9 +643,11 @@ subroutine solve_eq(iu, flag)
      DEALLOCATE(mixout)
   ENDIF
   deallocate (drhoscfout)
+  !$acc exit data delete(dvscfins)
   if (doublegrid) deallocate (dvscfins)
   deallocate (dvscfin)
   if (noncolin) deallocate(dbecsum_nc)
+  !$acc exit data delete(aux2)
   deallocate(aux2)
   IF ( dffts%has_task_groups ) THEN
      !

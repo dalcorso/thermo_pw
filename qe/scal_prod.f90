@@ -20,6 +20,9 @@ USE gvect,              ONLY : gstart
 
 USE mp, ONLY : mp_sum
 USE mp_bands, ONLY : intra_bgrp_comm
+#if defined(__CUDA)
+USE cublas
+#endif
 
 IMPLICIT NONE
 COMPLEX(DP) :: scal_prod
@@ -27,8 +30,10 @@ INTEGER :: ndx, ndim
 
 COMPLEX(DP) :: psi1(ndx), psi2(ndx)
 COMPLEX(DP) :: aux
-REAL(DP) :: ddot
+REAL(DP) :: MYDDOTV3
+#if ! defined(__CUDA)
 COMPLEX(DP) :: zdotc
+#endif
 
 INTEGER :: ndmx
 
@@ -38,8 +43,11 @@ ELSE
    ndmx = ndx
 ENDIF
 
+!$acc data present(psi1,psi2)
+
+!$acc host_data use_device(psi1,psi2)
 IF (gamma_only) THEN
-   aux=2.0_DP*ddot(2*ndmx*npol,psi1,1,psi2,1)
+   aux=2.0_DP*MYDDOTV3(2*ndmx*npol,psi1,1,psi2,1)
    IF  (gstart==2) aux=aux-DBLE(psi1(1))*DBLE(psi2(1))
 ELSE
   IF (noncolin) THEN
@@ -49,8 +57,12 @@ ELSE
      aux= ZDOTC (ndim, psi1, 1, psi2, 1)
   ENDIF
 ENDIF
+!$acc end host_data
+!$acc end data
+
 CALL mp_sum(aux, intra_bgrp_comm )
 
 scal_prod = aux
 RETURN
 END FUNCTION scal_prod
+

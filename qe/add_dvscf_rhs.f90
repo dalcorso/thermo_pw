@@ -67,7 +67,6 @@ ALLOCATE (aux1(dffts%nnr, npol))
 ALLOCATE (aux2(npwx*npol, nbnd))
 !$acc enter data create (aux1(1:dffts%nnr, 1:npol), aux2(1:npwx*npol, 1:nbnd))
 !$acc enter data copyin(evc) 
-!$acc update device(dvscfins(1:dffts%nnr, 1:nspin_mag, 1:npe))
 ikk = ikks(ik)
 IF (lsda) current_spin = isk (ikk)
 !
@@ -77,6 +76,7 @@ IF (isolv==2) THEN
    dvscfins(:,2:4,ipert)=-dvscfins(:,2:4,ipert)
    IF (okvan) int3_nc(:,:,:,:,ipert)=int3_save(:,:,:,:,ipert,2)
 ENDIF
+!$acc update device(dvscfins(1:dffts%nnr, 1:nspin_mag, 1:npe))
 !
 !  Set the potential for task groups
 !

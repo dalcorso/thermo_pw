@@ -74,6 +74,7 @@ SUBROUTINE cg_many_vectors (apply_a, precond, scal_prod, d0psi, dpsi, &
   !
   !   written 29/01/2016  by A. Dal Corso modifying the old routine
   !   contained in cgsolve_all of Quantum ESPRESSO.
+
   !
   USE kinds,          ONLY : DP
   USE io_global,       ONLY : stdout
@@ -317,9 +318,15 @@ SUBROUTINE ccg_many_vectors (apply_a, precond, scal_prod, d0psi, dpsi, &
   !                 d0psi    is corrupted on exit
   !
   !   written 29/01/2016  by A. Dal Corso 
+  !   openacc update 30/04/2023 by A. Dal Corso
   !
-  USE kinds,          ONLY : DP
+  USE kinds,           ONLY : DP
   USE io_global,       ONLY : stdout
+  USE wavefunctions,   ONLY : evc
+  USE eqv,             ONLY : evq
+#if defined(__CUDA)
+  USE cublas
+#endif
 
   IMPLICIT NONE
   !
@@ -378,7 +385,7 @@ SUBROUTINE ccg_many_vectors (apply_a, precond, scal_prod, d0psi, dpsi, &
   !
   CALL start_clock ('ccg_many_vectors')
 
-  ALLOCATE ( g(ndmx,nbnd), t(ndmx,nbnd), h(ndmx,nbnd),hold(ndmx ,nbnd) )
+  ALLOCATE ( g(ndmx,nbnd), t(ndmx,nbnd), h(ndmx,nbnd), hold(ndmx ,nbnd) )
   ALLOCATE ( gs(ndmx,nbnd), ts(ndmx,nbnd), hs(ndmx,nbnd), hsold(ndmx,nbnd) )
   ALLOCATE (a(nbnd), c(nbnd))
   ALLOCATE (conv (nbnd))
@@ -388,6 +395,8 @@ SUBROUTINE ccg_many_vectors (apply_a, precond, scal_prod, d0psi, dpsi, &
 
   kter_eff = 0.d0
   conv= 0
+ !$acc enter data create(rho(1:nbnd),a(1:nbnd),c(1:nbnd),t(1:ndmx,1:nbnd),g(1:ndmx,1:nbnd),h(1:ndmx,1:nbnd),hold(1:ndmx,1:nbnd),ts(1:ndmx,1:nbnd),gs(1:ndmx,1:nbnd),hs(1:ndmx,1:nbnd),hsold(1:ndmx,1:nbnd)) copyin(dpsi(1:ndmx,1:nbnd),evc,evq,h_diag(1:ndmx,1:nbnd),d0psi(1:ndmx,1:nbnd))
+  !$acc kernels present(g,t,h,hold,gs,ts,hs,hsold)
   g=(0.d0,0.d0)
   t=(0.d0,0.d0)
   h=(0.d0,0.d0)
@@ -396,6 +405,7 @@ SUBROUTINE ccg_many_vectors (apply_a, precond, scal_prod, d0psi, dpsi, &
   ts=(0.d0,0.d0)
   hs=(0.d0,0.d0)
   hsold=(0.d0,0.d0)
+  !$acc end kernels
   DO ibnd=1,nbnd
      indb(ibnd)=ibnd
   END DO
@@ -405,10 +415,14 @@ SUBROUTINE ccg_many_vectors (apply_a, precond, scal_prod, d0psi, dpsi, &
      !
      IF (iter == 1) THEN
         CALL apply_a (ndmx, ndim, dpsi, g, ik, nbnd, indb, 1)
+        !$acc host_data use_device(d0psi,g)
         DO ibnd = 1, nbnd
            CALL zaxpy (ndmx, (-1.d0,0.d0), d0psi(1,ibnd), 1, g(1,ibnd), 1)
         ENDDO
+        !$acc end host_data
+        !$acc kernels present(gs,g)
         gs(:,:) = CONJG(g(:,:))
+        !$acc end kernels
      ENDIF
      !
      !    compute preconditioned residual vectors and convergence check
@@ -417,11 +431,13 @@ SUBROUTINE ccg_many_vectors (apply_a, precond, scal_prod, d0psi, dpsi, &
      DO ibnd = 1, nbnd
         IF (conv (ibnd) == 0) THEN
            lbnd = lbnd+1
+           !$acc host_data use_device(g,h,gs,hs)
            CALL zcopy (ndmx, g (1, ibnd), 1, h (1, ibnd), 1)
            CALL zcopy (ndmx, gs (1, ibnd), 1, hs (1, ibnd), 1)
+           !$acc end host_data
            CALL precond(ndmx, ndim, 1, h(1,ibnd), h_diag(1,ibnd), 1 )
            CALL precond(ndmx, ndim, 1, hs(1,ibnd), h_diag(1,ibnd), -1 )
-           rho(lbnd) = scal_prod (ndmx, ndim, hs(1,ibnd), g(1,ibnd))
+           rho(lbnd)= scal_prod (ndmx, ndim, hs(1,ibnd), g(1,ibnd))
         ENDIF
      ENDDO
      kter_eff = kter_eff + DBLE (lbnd) / DBLE (nbnd)
@@ -434,6 +450,7 @@ SUBROUTINE ccg_many_vectors (apply_a, precond, scal_prod, d0psi, dpsi, &
            IF (anorm < ethr) conv (ibnd) = 1
         ENDIF
      ENDDO
+!     !$acc update device(rho)
 !
      conv_root = .true.
      DO ibnd = 1, nbnd
@@ -449,13 +466,22 @@ SUBROUTINE ccg_many_vectors (apply_a, precond, scal_prod, d0psi, dpsi, &
 !
 !          change sign to h and hs
 !
+#if defined(__CUDA)
+           !$acc kernels present(h,hs)
+           h(:,ibnd)=-1.0_DP * h(:,ibnd)
+           hs(:,ibnd)=-1.0_DP * hs(:,ibnd)
+           !$acc end kernels
+#else
            CALL dscal (2 * ndmx, - 1.d0, h (1, ibnd), 1)
            CALL dscal (2 * ndmx, - 1.d0, hs (1, ibnd), 1)
+#endif
            IF (iter /= 1) THEN
               dcgamma = rho (ibnd) / rhoold (ibnd)
               dcgamma1 = CONJG(dcgamma)
+              !$acc host_data use_device(hold,h,hsold,hs)
               CALL zaxpy (ndmx, dcgamma, hold (1, ibnd), 1, h (1, ibnd), 1)
               CALL zaxpy (ndmx, dcgamma1, hsold (1, ibnd), 1, hs (1, ibnd), 1)
+              !$acc end host_data
            ENDIF
 
 !
@@ -463,8 +489,10 @@ SUBROUTINE ccg_many_vectors (apply_a, precond, scal_prod, d0psi, dpsi, &
 ! it is later set to the current (becoming old) value of h
 !
            lbnd = lbnd+1
+           !$acc host_data use_device(hold,h,hsold,hs)
            CALL zcopy (ndmx, h (1, ibnd), 1, hold (1, lbnd), 1)
            CALL zcopy (ndmx, hs (1, ibnd), 1, hsold (1, lbnd), 1)
+           !$acc end host_data
            indb (lbnd) = ibnd
         ENDIF
      ENDDO
@@ -493,6 +521,7 @@ SUBROUTINE ccg_many_vectors (apply_a, precond, scal_prod, d0psi, dpsi, &
            !
            !    move to new position
            !
+           !$acc host_data use_device(dpsi,h,t,g,hs,ts,gs,hold,hsold)
            CALL zaxpy (ndmx, dclambda, h(1,ibnd), 1, dpsi(1,ibnd), 1)
            !
            !    update to get the gradient
@@ -505,11 +534,14 @@ SUBROUTINE ccg_many_vectors (apply_a, precond, scal_prod, d0psi, dpsi, &
            !
            CALL zcopy (ndmx, h(1,ibnd), 1, hold(1,ibnd), 1)
            CALL zcopy (ndmx, hs(1,ibnd), 1, hsold(1,ibnd), 1)
+           !$acc end host_data
            rhoold (ibnd) = rho (ibnd)
         ENDIF
      ENDDO
   ENDDO
 100 CONTINUE
+!$acc exit data delete(rho,evc,evq,a,c,g,h,t,hold,gs,hs,ts,hsold,h_diag,d0psi) copyout(dpsi)
+
   kter = kter_eff
   DEALLOCATE (indb)
   DEALLOCATE (rho, rhoold)

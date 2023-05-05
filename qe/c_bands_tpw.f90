@@ -177,6 +177,7 @@ SUBROUTINE c_bands_nscf_tpw( )
         !  When lgamma is true we have only k and -k
         !
         IF (noncolin.AND.domag) THEN
+           CALL using_evc(0)
            IF (lgamma.AND. MOD(ik,2)==0) THEN
               CALL start_clock( 't_rev' )
               CALL apply_trev(evc, ik, ik-1)
@@ -190,7 +191,7 @@ SUBROUTINE c_bands_nscf_tpw( )
         !
         ! ... save wave-functions (unless disabled in input)
         !
-        IF ( io_level > -1 ) CALL using_evc(0)
+        CALL using_evc(0)
         IF ( io_level > -1 ) CALL save_buffer ( evc, nwordwfc, iunwfc, ik )
         !
         !

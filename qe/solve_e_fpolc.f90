@@ -50,6 +50,7 @@ SUBROUTINE solve_e_fpolc(iu)
   USE units_ph,              ONLY : lrdrho, iudrho
   USE units_lr,              ONLY : lrdwf, iudwf, lrwfc, iuwfc
   USE output,                ONLY : fildrho
+  USE control_flags,         ONLY : use_gpu
   USE control_ph,            ONLY : ext_recover, rec_code, &
                                     lnoloc, convt, tr2_ph, nmix_ph, &
                                     alpha_mix, lgamma_gamma, niter_ph, &
@@ -70,6 +71,7 @@ SUBROUTINE solve_e_fpolc(iu)
   USE fft_helper_subroutines, ONLY : fftx_ntgrp
   USE fft_interfaces,         ONLY : fft_interpolate
   USE uspp_init,            ONLY : init_us_2
+  USE apply_dpot_mod,        ONLY : apply_dpot_bands
 
   implicit none
 
@@ -103,7 +105,7 @@ SUBROUTINE solve_e_fpolc(iu)
   ! conv_root: true if linear system is converged
 
   integer :: kter, iter0, ipol, ibnd, iter, lter, ik, ig, is, nrec, ndim, ios, &
-             nmix_ph_eff
+             nmix_ph_eff, nnr, nnrs
   ! counters
   integer :: ltaver, lintercall, incr, jpol, v_siz, npw, npwq
 
@@ -132,11 +134,15 @@ SUBROUTINE solve_e_fpolc(iu)
   nmix_ph_eff=max(nmix_ph,8)
 
   allocate (dvscfin( dfftp%nnr, nspin_mag, 3))
+  nnr=dfftp%nnr
   if (doublegrid) then
      allocate (dvscfins(dffts%nnr, nspin_mag, 3))
+     nnrs=dffts%nnr
   else
      dvscfins => dvscfin
+     nnrs=nnr
   endif
+  !$acc enter data create(dvscfins(1:nnrs, 1:nspin_mag, 1:3))
   allocate (dvscfout(dfftp%nnr, nspin_mag, 3))
   IF (okpaw) THEN
      ALLOCATE (mixin(dfftp%nnr*nspin_mag*3+(nhm*(nhm+1)*nat*nspin_mag*3)/2) )
@@ -156,6 +162,7 @@ SUBROUTINE solve_e_fpolc(iu)
   ENDIF
   allocate (aux1(dffts%nnr,npol))
   allocate (aux2(npwx*npol, nbnd))
+  !$acc enter data create (aux2(1:npwx*npol, 1:nbnd) )
   IF (okpaw) mixin=(0.0_DP,0.0_DP)
 
 
@@ -217,7 +224,8 @@ SUBROUTINE solve_e_fpolc(iu)
         !
         if (nksq.gt.1) call get_buffer (evc, lrwfc, iuwfc, ik)
         npwq = npw
-        call init_us_2 (npw, igk_k(1,ik), xk (1, ik), vkb)
+        call init_us_2 (npw, igk_k(1,ik), xk (1, ik), vkb, use_gpu)
+        !$acc update host(vkb)
         !
         ! compute the kinetic energy
         !
@@ -272,35 +280,38 @@ SUBROUTINE solve_e_fpolc(iu)
               ! calculates dvscf_q*psi_k in G_space, for all bands, k=kpoint
               ! dvscf_q from previous iteration (mix_potential)
               !
-              IF ( dffts%has_task_groups ) THEN
-                 IF (noncolin) THEN
-                    CALL tg_cgather( dffts, dvscfins(:,1,ipol), &
-                                                                tg_dv(:,1))
-                    IF (domag) THEN
-                       DO jpol=2,4
-                          CALL tg_cgather( dffts, dvscfins(:,jpol,ipol), &
-                                                             tg_dv(:,jpol))
-                       ENDDO
-                    ENDIF
-                 ELSE
-                    CALL tg_cgather( dffts, dvscfins(:,current_spin,ipol), &
-                                                             tg_dv(:,1))
-                 ENDIF
-              ENDIF
-              aux2=(0.0_DP,0.0_DP)
-              do ibnd = 1, nbnd_occ (ik), incr
-                 IF ( dffts%has_task_groups ) THEN
-                    call cft_wave_tg (ik, evc, tg_psic, 1, v_siz, ibnd, &
-                                      nbnd_occ (ik) )
-                    call apply_dpot(v_siz, tg_psic, tg_dv, 1)
-                    call cft_wave_tg (ik, aux2, tg_psic, -1, v_siz, ibnd, &
-                                      nbnd_occ (ik))
-                 ELSE
-                    call cft_wave (ik, evc (1, ibnd), aux1, +1)
-                    call apply_dpot(dffts%nnr, aux1, dvscfins(1,1,ipol), current_spin)
-                    call cft_wave (ik, aux2 (1, ibnd), aux1, -1)
-                 ENDIF
-              enddo
+!              IF ( dffts%has_task_groups ) THEN
+!                 IF (noncolin) THEN
+!                    CALL tg_cgather( dffts, dvscfins(:,1,ipol), &
+!                                                                tg_dv(:,1))
+!                    IF (domag) THEN
+!                       DO jpol=2,4
+!                          CALL tg_cgather( dffts, dvscfins(:,jpol,ipol), &
+!                                                             tg_dv(:,jpol))
+!                       ENDDO
+!                    ENDIF
+!                 ELSE
+!                    CALL tg_cgather( dffts, dvscfins(:,current_spin,ipol), &
+!                                                             tg_dv(:,1))
+!                 ENDIF
+!              ENDIF
+!              aux2=(0.0_DP,0.0_DP)
+!              do ibnd = 1, nbnd_occ (ik), incr
+!                 IF ( dffts%has_task_groups ) THEN
+!                    call cft_wave_tg (ik, evc, tg_psic, 1, v_siz, ibnd, &
+!                                      nbnd_occ (ik) )
+!                    call apply_dpot(v_siz, tg_psic, tg_dv, 1)
+!                    call cft_wave_tg (ik, aux2, tg_psic, -1, v_siz, ibnd, &
+!                                      nbnd_occ (ik))
+!                 ELSE
+!                    call cft_wave (ik, evc (1, ibnd), aux1, +1)
+!                    call apply_dpot(dffts%nnr, aux1, dvscfins(1,1,ipol), current_spin)
+!                    call cft_wave (ik, aux2 (1, ibnd), aux1, -1)
+!                 ENDIF
+!              enddo
+              CALL apply_dpot_bands(ik, nbnd_occ(ik), &
+                                dvscfins(:, :, ipol), evc, aux2)
+
               dvpsi=dvpsi+aux2
               !
               call adddvscf(ipol,ik)
@@ -357,6 +368,7 @@ SUBROUTINE solve_e_fpolc(iu)
 !
 !    zero frequency. The standard QE solver
 !
+             CALL errore('solve_e_fpolc','not programmed',1)
              call cgsolve_all (ch_psi_all,cg_psi,et(1,ik),dvpsi,dpsi, &
                h_diagr,npwx,npw,thresh,ik,lter,conv_root,anorm,nbnd_occ(ik), &
                                                                      npol)
@@ -366,7 +378,7 @@ SUBROUTINE solve_e_fpolc(iu)
            ltaver = ltaver + lter
            lintercall = lintercall + 1
            if (.not.conv_root) WRITE( stdout, "(5x,'kpoint',i4,' ibnd',i4, &
-                &         ' solve_e: root not converged ',es10.3)") ik &
+                &         ' solve_e_fpolc: root not converged ',es10.3)") ik &
                 &, ibnd, anorm
            !
            ! writes delta_psi on iunit iudwf, k=kpoint,
@@ -569,9 +581,11 @@ SUBROUTINE solve_e_fpolc(iu)
      DEALLOCATE(mixin)
      DEALLOCATE(mixout)
   ENDIF
+  !$acc exit data delete(dvscfins)
   IF (doublegrid) DEALLOCATE (dvscfins)
   DEALLOCATE (dvscfin)
   IF (noncolin) DEALLOCATE(dbecsum_nc)
+  !$acc exit data delete(aux2)
   DEALLOCATE(aux2)
   IF ( dffts%has_task_groups ) THEN
      !

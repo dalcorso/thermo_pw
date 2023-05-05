@@ -13,6 +13,9 @@ SUBROUTINE solve_linear_system(dvpsi, dpsi, h_diag, thresh, ik, isolv, lter)
 !
 USE kinds,        ONLY : DP
 USE scf,          ONLY : vrs
+#if defined(__CUDA)
+  USE scf_gpum,   ONLY : vrs_d
+#endif
 USE klist,        ONLY : ngk
 USE control_lr,   ONLY : nbnd_occ
 USE wvfct,        ONLY : nbnd, npwx, et
@@ -43,7 +46,13 @@ ikmk=ikk
 IF (isolv==2) THEN
    ikmk=ikmks(ik)
    vrs(:,2:4)=-vrs(:,2:4)
-   IF (okvan) deeq_nc(:,:,:,:)=deeq_nc_save(:,:,:,:,2)
+#if defined(__CUDA)
+   vrs_d = vrs
+#endif
+   IF (okvan) THEN
+      deeq_nc(:,:,:,:)=deeq_nc_save(:,:,:,:,2)
+      !$acc update device(deeq_nc)
+   ENDIF
 ENDIF
 
 conv_root=.TRUE.
@@ -53,7 +62,13 @@ CALL cgsolve_all (ch_psi_all, cg_psi, et(1,ikmk), dvpsi, dpsi, &
 
 IF (isolv==2) THEN
    vrs(:,2:4)=-vrs(:,2:4)
-   IF (okvan) deeq_nc(:,:,:,:)=deeq_nc_save(:,:,:,:,1)
+#if defined(__CUDA)
+   vrs_d = vrs
+#endif
+   IF (okvan) THEN
+      deeq_nc(:,:,:,:)=deeq_nc_save(:,:,:,:,1)
+      !$acc update device(deeq_nc)
+   ENDIF
 ENDIF
 
 IF (.NOT.conv_root) WRITE( stdout, '(5x,"kpoint",i4, " solve_linter: &

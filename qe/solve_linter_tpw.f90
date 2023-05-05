@@ -32,7 +32,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   USE fft_base,             ONLY : dfftp, dffts
   USE lsda_mod,             ONLY : lsda, nspin, current_spin, isk
   USE wvfct,                ONLY : nbnd, npwx
-  USE scf,                  ONLY : rho, vrs
+  USE scf,                  ONLY : rho
   USE uspp,                 ONLY : okvan, nkb, vkb, deeq_nc
   USE uspp_param,           ONLY : nhm
   USE noncollin_module,     ONLY : noncolin, npol, nspin_mag, domag
@@ -167,7 +167,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
      dvscfins => dvscfin
      nnrs=nnr
   ENDIF
-  !$acc enter data create(dvscfins(1:nnr, 1:nspin_mag, 1:npe))
+  !$acc enter data create(dvscfins(1:nnrs, 1:nspin_mag, 1:npe))
   ALLOCATE (drhoscfh ( dfftp%nnr, nspin_mag , npe))
   ALLOCATE (dvscfout ( dfftp%nnr, nspin_mag , npe))
   ALLOCATE (dbecsum ( (nhm * (nhm + 1))/2 , nat , nspin_mag , npe))
@@ -333,12 +333,14 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
                  ELSE
                     IF (okvan) THEN
                        deeq_nc(:,:,:,:)=deeq_nc_save(:,:,:,:,2)
+                       !$acc update device(deeq_nc)
                        int1_nc(:,:,:,:,:)=int1_nc_save(:,:,:,:,:,2)
                     ENDIF
                     CALL dvqpsi_us_tpw (ik, u (1, mode),.false., becpt, &
                                                                  alphapt)
                     IF (okvan) THEN
                        deeq_nc(:,:,:,:)=deeq_nc_save(:,:,:,:,1)
+                       !$acc update device(deeq_nc)
                        int1_nc(:,:,:,:,:)=int1_nc_save(:,:,:,:,:,1)
                     ENDIF
                  ENDIF
@@ -376,6 +378,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
               !
               CALL solve_linear_system(dvpsi, dpsi, h_diag, thresh, ik, &
                                                             isolv, lter)
+
               ltaver = ltaver + lter
               lintercall = lintercall + 1
               !
