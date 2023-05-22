@@ -1,0 +1,6 @@
+This directory contains a few lapack routines 
+(see https://netlib.org/lapack/). 
+Declared as device routines, they can be called by a single thread 
+within the GPU. (Contributed by Xuejun Gong).
+NB: zpotrf2.f90 has been substituted by a non recursive routine
+(from wikipedia) since recursive device routines are still not available.
