@@ -1,0 +1,6 @@
+This directory contains the routines of fftpack5.1. See the web page
+
+https://people.sc.fsu.edu/~jburkardt/f77_src/fftpack5.1/fftpack5.1.html
+
+These routines have been transformed into device routines that can be
+called by a single thread within the GPU (Contributed by Xuejun Gong).
