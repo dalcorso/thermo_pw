@@ -20,13 +20,18 @@ add_zstar_ue_tpw.o \
 add_zstar_us.o \
 adddvscf_tran.o \
 addnlcc_zstar_eu_us_tpw.o \
+add_vuspsi_tpw.o \
+add_vuspsi_gpu_tpw.o \
 allocate_cg.o \
 allocate_lanczos.o \
 allocate_phq_tpw.o \
 apply_ac.o \
 apply_trev_r.o \
+c_bands_many_k.o \
 c_bands_tpw.o \
 calc_chi.o \
+cegterg_vk.o \
+cegterg_vk_dev.o \
 check_bands.o \
 check_initial_geometry.o \
 check_initial_status_tpw.o \
@@ -41,6 +46,7 @@ control_qe.o \
 ccg_psi.o \
 deallocate_ph_tpw.o \
 dielec_tpw.o \
+diago_dev.o \
 divide_class.o \
 divide_class_so.o \
 do_cg_e.o \
@@ -64,9 +70,17 @@ find_info_group.o \
 find_inverse_s.o \
 find_mode_sym.o \
 float_to_char.o \
+g_psi_tpw.o \
+g_psi_dev.o \
+hdiag_dev.o \
 h_pcg_step.o \
+h_psi_dev.o \
+h_psi_gpu_tpw.o \
+h_psi_tpw.o \
 initialize_ph_tpw.o \
 init_representations_tpw.o \
+init_run_tpw.o \
+init_us_2_kernel.o \
 irrek.o \
 kpoint_grid.o \
 kpoint_grid_serial_tpw.o \
@@ -76,6 +90,7 @@ lr_restart.o \
 lr_sm1_psi_tpw.o \
 lr_sym_mod_tpw.o \
 lr_us.o  \
+many_k.o \
 manage_mixing.o \
 mix_pot.o \
 nh_lanczos_step.o \
@@ -107,6 +122,7 @@ rotate_and_add_dyn.o \
 rotate_charges.o \
 run_nscf_tpw.o \
 scal_prod.o \
+select_c_bands.o \
 set_defaults_pw.o \
 set_fxc_tran.o \
 set_int3q.o \
@@ -123,6 +139,8 @@ solve_eq.o \
 solve_eq_tran.o \
 solve_linter_tpw.o \
 solve_linear_system.o \
+s_psi_gpu_tpw.o \
+s_psi_tpw.o \
 star_q.o \
 summarize_alpha.o \
 sym_and_write_magnetic_charges.o \
@@ -131,8 +149,12 @@ symmetrize_drho.o \
 transform_intq_nc.o \
 transform_intq_so.o \
 tra_write_zstar.o \
+vloc_psi_tpw.o \
+vloc_psi_gpu_tpw.o \
 write_group_info_ph.o \
 write_rec_tpw.o \
+ylm2_dev.o \
+ylmr2_dev.o \
 zstar_eu_tpw.o \
 zstar_eu_loc.o \
 zstar_eu_us_tpw.o    
