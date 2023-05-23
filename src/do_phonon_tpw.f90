@@ -43,6 +43,7 @@ SUBROUTINE do_phonon_tpw(auxdyn)
   !
   USE elph_tetra_mod, ONLY : elph_tetra, elph_tetra_lambda, elph_tetra_gamma
   USE elph_scdft_mod, ONLY : elph_scdft
+  USE many_k_mod,     ONLY : deallocate_many_k
 
   IMPLICIT NONE
   !
@@ -152,6 +153,7 @@ SUBROUTINE do_phonon_tpw(auxdyn)
      ! ... cleanup of the variables for the next q point
      !
 100  CALL deallocate_phq_tpw()
+     CALL deallocate_many_k()
      CALL clean_pw_ph(iq)
         !
   END DO

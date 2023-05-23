@@ -56,7 +56,8 @@ SUBROUTINE bcast_thermo_input()
                               use_free_energy, start_geometry_qha, &
                               last_geometry_qha
   USE piezoelectric_tensor, ONLY : nppl
-  USE control_qe,      ONLY : force_band_calculation, use_ph_images
+  USE control_qe,       ONLY : force_band_calculation, use_ph_images, many_k
+  USE many_k_mod,       ONLY : memgpu
   USE band_computation, ONLY : sym_for_diago
 
   USE thermo_mod,      ONLY : what, ngeo, step_ngeo, reduced_grid, fact_ngeo, &
@@ -220,6 +221,8 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( flepsilon, meta_ionode_id, world_comm )
   CALL mp_bcast( flpsepsilon, meta_ionode_id, world_comm )
   CALL mp_bcast( force_band_calculation, meta_ionode_id, world_comm )
+  CALL mp_bcast( many_k, meta_ionode_id, world_comm )
+  CALL mp_bcast( memgpu, meta_ionode_id, world_comm )
   CALL mp_bcast( use_ph_images, meta_ionode_id, world_comm )
   CALL mp_bcast( sym_for_diago, meta_ionode_id, world_comm )
 !

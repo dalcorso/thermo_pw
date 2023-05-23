@@ -40,6 +40,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   USE upf_params,           ONLY : lmaxx
   USE initial_param,        ONLY : ethr0
   USE cell_base,            ONLY : fix_volume, fix_area
+  USE many_k_mod,           ONLY : deallocate_many_k, alloc_many_k
   USE control_flags,        ONLY : conv_elec, gamma_only, ethr, lscf, treinit_gvecs
   USE control_flags,        ONLY : conv_ions, istep, nstep, restart, lmd, &
                                    lbfgs, io_level, lensemb, lforce=>tprnfor, &
@@ -52,6 +53,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   USE basis,                ONLY : starting_pot, starting_wfc, startingconfig
   USE mp_images,            ONLY : intra_image_comm
   USE extrapolation,        ONLY : update_file, update_pot
+  USE control_qe,           ONLY : many_k
   USE scf,                  ONLY : rho
   USE lsda_mod,             ONLY : nspin
   USE fft_base,             ONLY : dfftp
@@ -160,7 +162,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
      RETURN
   ENDIF
   !
-  CALL init_run()
+  CALL init_run_tpw()
   !
   !  read external force fields parameters
   !
@@ -341,6 +343,8 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
      CALL dev_buf%reinit( ierr )
      IF ( ierr .ne. 0 ) CALL infomsg( 'run_pwscf', 'Cannot reset GPU buffers! Some buffers still locked.' )
      !
+     !   reset the calculation of vkbk and of the others many_k quantities
+     IF (many_k) alloc_many_k=.FALSE.
      !
   ENDDO main_loop
   !
@@ -363,6 +367,8 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   CALL qmmm_shutdown()
   !
   CALL close_files(.TRUE.)
+  !
+  IF (many_k) CALL deallocate_many_k()
   !
   CALL laxlib_end()
   IF (lscf_) THEN

@@ -103,7 +103,9 @@ SUBROUTINE thermo_readin()
 
   USE grun_anharmonic,      ONLY : poly_degree_grun
   USE images_omega,         ONLY : omega_group
-  USE control_qe,           ONLY : force_band_calculation, use_ph_images
+  USE control_qe,           ONLY : force_band_calculation, use_ph_images, &
+                                   many_k
+  USE many_k_mod,           ONLY : memgpu
   USE band_computation,     ONLY : sym_for_diago
 !
 !  the QE variables needed here. max_seconds, zasr, xmldyn and fildyn
@@ -226,6 +228,8 @@ SUBROUTINE thermo_readin()
                             floptical,                      &
                             flpsoptical,                    &
                             force_band_calculation,         &
+                            many_k,                         &
+                            memgpu,                         &
                             use_ph_images,                  &
                             sym_for_diago,                  &
 !
@@ -449,6 +453,8 @@ SUBROUTINE thermo_readin()
   flpsoptical='output_optical'
 
   force_band_calculation=.FALSE.
+  many_k=.FALSE.
+  memgpu=10.0_DP    ! default memory used 10 Gbytes
   IF (nimage>1) THEN
      use_ph_images=.FALSE.
   ELSE

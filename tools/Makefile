@@ -23,7 +23,8 @@ QEMODS = ../../Modules/libqemod.a \
          ../../dft-d3/libdftd3qe.a
 
 #libraries of thermo_pw
-LIBTHERMO= ../lib/thermo_lib.a \
+LIBTHERMO= ../lapack/lapack_qe.a \
+           ../lib/thermo_lib.a \
            ../qe/thermo_qe.a 
 
 MODULES = $(LIBTHERMO) $(PWOBJS) $(QEMODS) $(LIBOBJS) $(BASEMODS)

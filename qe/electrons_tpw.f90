@@ -672,7 +672,7 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
         IF ( lelfield ) THEN
            CALL c_bands_efield( iter )
         ELSE
-           CALL c_bands( iter )
+           CALL select_c_bands( iter )
         ENDIF
 #if defined (__OSCDFT)
         END IF

@@ -20,6 +20,7 @@ MODULE control_qe
   LOGICAL  :: tcollect_all=.FALSE.
   LOGICAL  :: force_band_calculation=.FALSE.
   LOGICAL  :: use_ph_images=.FALSE.
+  LOGICAL  :: many_k=.FALSE.
 
   LOGICAL, ALLOCATABLE :: this_pcxpsi_is_on_file_tpw(:,:,:)
 
