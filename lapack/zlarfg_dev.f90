@@ -109,13 +109,11 @@
 #endif
 
 #include<dlamch_interf.f90>
-#include<zlarfg_interf.f90>
 #include<dlapy3_interf.f90>
 #include<dznrm2_interf.f90>
 #include<zdscal_interf.f90>
 #include<zscal_interf.f90>
 #include<zladiv_interf.f90>
-#include<zlarfg_interf.f90>
 !
 !  -- LAPACK auxiliary routine --
 !  -- LAPACK is a software package provided by Univ. of Tennessee,    --

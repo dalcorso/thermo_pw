@@ -166,7 +166,6 @@
 #endif
 
 #include<lsame_interf.f90>
-#include<zlarft_interf.f90>
 #include<zgemv_interf.f90>
 #include<ztrmv_interf.f90>
 #include<zgemm_interf.f90>

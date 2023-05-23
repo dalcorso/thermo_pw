@@ -80,7 +80,6 @@
       SUBROUTINE ZSCAL_XG(N,ZA,ZX,INCX)
 #endif
 
-#include<zscal_interf.f90>
 !
 !  -- Reference BLAS level1 routine --
 !  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --

@@ -200,7 +200,6 @@
 
 #include<lsame_interf.f90>
 #include<zcopy_interf.f90>
-#include<zlarfb_interf.f90>
 #include<zlacgv_interf.f90>
 #include<ztrmm_interf.f90>
 #include<zgemm_interf.f90>
