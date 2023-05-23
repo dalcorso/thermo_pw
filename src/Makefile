@@ -10,6 +10,8 @@ MODFLAGS= $(BASEMOD_FLAGS) \
           $(MOD_FLAG)../../PHonon/PH \
           $(MOD_FLAG)../lib \
           $(MOD_FLAG)../qe \
+          $(MOD_FLAG)../lapack \
+          $(MOD_FLAG)../fftpack5.1 \
           $(MOD_FLAG).
 
 #objects of libthermo_pw.a
@@ -124,6 +126,7 @@ plot_xrdp.o \
 plotband_sub.o \
 prepare_do_phonon.o \
 print_polarization.o \
+print_thermo_clocks.o \
 proj_band_structure.o \
 q2r_sub.o \
 quadratic_fit.o \
@@ -191,7 +194,9 @@ QEMODS = ../../Modules/libqemod.a \
          ../../dft-d3/libdftd3qe.a
 
 #libraries of thermo_pw
-LIBTHERMO = ../qe/thermo_qe.a \
+LIBTHERMO = ../lapack/lapack_qe.a \
+            ../fftpack5.1/fftpack5.1.a  \
+            ../qe/thermo_qe.a \
             ../lib/thermo_lib.a 
 
 MODULES = $(LIBTHERMO) $(LRMODS) $(PWOBJS) $(QEMODS) $(BASEMODS)

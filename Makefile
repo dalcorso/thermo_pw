@@ -8,7 +8,7 @@ all: thermo_pw thermo_tools
 thermo_tools: thermo_lib
 	( cd tools ; $(MAKE) all || exit 1 )
 
-thermo_pw: thermo_lib thermo_qe
+thermo_pw: thermo_lapack thermo_fft thermo_lib thermo_qe
 	( cd src ; $(MAKE) all || exit 1 )
 
 thermo_lib: 
@@ -16,6 +16,14 @@ thermo_lib:
 
 thermo_qe: 
 	( cd qe ; $(MAKE) all || exit 1 )
+
+thermo_lapack: 
+	( cd lapack ; $(MAKE) all || exit 1 )
+
+thermo_fft: 
+	( cd fftpack5.1 ; $(MAKE) all || exit 1 )
+
+
 
 join_qe:
 	if test -f ./main_Makefile ; then mv ../Makefile Makefile_qe ; \
@@ -53,7 +61,7 @@ leave_qe:
            ./QESUB/clocks_handler.f90 ; \
 	   mv ./QESUB/clocks_handler.f90_qe ../UtilXlib/clocks_handler.f90 ; fi
 
-clean: thermo_tools_clean thermo_pw_clean thermo_lib_clean thermo_qe_clean examples_clean examples_qe_clean space_groups_clean doc_clean
+clean: thermo_tools_clean thermo_pw_clean thermo_lib_clean thermo_lapack_clean thermo_fft_clean thermo_qe_clean examples_clean examples_qe_clean space_groups_clean doc_clean
 
 thermo_pw_clean:
 	( cd src ; $(MAKE) clean )
@@ -66,6 +74,12 @@ thermo_lib_clean:
 
 thermo_qe_clean:
 	( cd qe ; $(MAKE) clean )
+
+thermo_lapack_clean:
+	( cd lapack ; $(MAKE) clean )
+
+thermo_fft_clean: 
+	( cd fftpack5.1 ; $(MAKE) clean )
 
 examples_clean:
 	if test -d examples ; then \

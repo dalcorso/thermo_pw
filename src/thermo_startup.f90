@@ -5,9 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-!-------------------------------------------------
+!--------------------------------------------------------------------------
 SUBROUTINE thermo_startup(code)
-!-------------------------------------------------
+!--------------------------------------------------------------------------
 !
 ! Initialize MPI, clocks, pools, bands, images, etc. print initial messages
 !
@@ -38,6 +38,8 @@ USE environment,      ONLY : environment_end
 
 IMPLICIT NONE
 CHARACTER(LEN=*), INTENT(IN) :: code
+   !
+   CALL print_thermo_clocks()
    !
    CALL deallocate_thermo()
    !

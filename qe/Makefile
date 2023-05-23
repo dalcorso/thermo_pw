@@ -9,6 +9,8 @@ MODFLAGS= $(BASEMOD_FLAGS)  \
           $(MOD_FLAG)../../LR_Modules \
           $(MOD_FLAG)../../PHonon/PH \
           $(MOD_FLAG)../lib \
+          $(MOD_FLAG)../lapack \
+          $(MOD_FLAG)../fftpack5.1 \
           $(MOD_FLAG).
 
 MODULES = \

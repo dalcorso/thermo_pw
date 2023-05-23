@@ -51,6 +51,7 @@ SUBROUTINE do_phonon_tpw(auxdyn)
   LOGICAL :: do_band, do_iq, setup_pw
   LOGICAL, EXTERNAL  :: check_gpu_support
   !
+  CALL start_clock('tpw_ph')
   DO iq = 1, nqs
      !
      CALL prepare_q_tpw(auxdyn, do_band, do_iq, setup_pw, iq)
@@ -62,7 +63,9 @@ SUBROUTINE do_phonon_tpw(auxdyn)
      !  If necessary the bands are recalculated
      !
      use_gpu = check_gpu_support()
+     CALL start_clock('tpw_nscf_ph')
      IF (setup_pw) CALL run_nscf_tpw(do_band, iq)
+     CALL stop_clock('tpw_nscf_ph')
      !
      !  If only_wfc=.TRUE. the code computes only the wavefunctions 
      !
@@ -75,7 +78,9 @@ SUBROUTINE do_phonon_tpw(auxdyn)
      !  Initialize the quantities which do not depend on
      !  the linear response of the system
      !
+     CALL start_clock('tpw_init_ph')
      CALL initialize_ph_tpw()
+     CALL stop_clock('tpw_init_ph')
      !
      !  electric field perturbation
      !
@@ -151,5 +156,6 @@ SUBROUTINE do_phonon_tpw(auxdyn)
         !
   END DO
   call wfck2r_clean_files()
+  CALL stop_clock('tpw_ph')
 
 END SUBROUTINE do_phonon_tpw
