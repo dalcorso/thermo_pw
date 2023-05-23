@@ -24,6 +24,7 @@ QEMODS = ../../Modules/libqemod.a \
 
 #libraries of thermo_pw
 LIBTHERMO= ../lapack/lapack_qe.a \
+           ../fftpack5.1/fftpack5.1.a  \
            ../lib/thermo_lib.a \
            ../qe/thermo_qe.a 
 
