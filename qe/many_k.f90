@@ -387,8 +387,6 @@ igk_k_d=igk_k
 tau_d=tau
 ityp_d=ityp
 nh_d=nh
-type1ps_d=type1ps
-tvanp_d=tvanp
 xk_d(1:3,1:nks)=xk(1:3,1:nks)
 wk_d(1:nks)=wk(1:nks)
 isk_d(1:nks)=isk(1:nks)
@@ -423,6 +421,8 @@ DO nt=1,ntyp
    tvanp(nt)=upf(nt)%tvanp
 ENDDO
 nbeta_d=nbeta_cpu
+type1ps_d=type1ps
+tvanp_d=tvanp
 #endif
 
 RETURN

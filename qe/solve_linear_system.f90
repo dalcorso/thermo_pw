@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!---------------------------------------------------------------------------
 SUBROUTINE solve_linear_system(dvpsi, dpsi, h_diag, thresh, ik, isolv, lter)
+!---------------------------------------------------------------------------
 !
 !   This routine is a driver that solves the linear system of the
 !   phonon or electric field perturbation and possibly

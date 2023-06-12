@@ -94,6 +94,7 @@ INTERFACE cegterg_interf
    ATTRIBUTES(GLOBAL) SUBROUTINE cegterg_upd0(outk_d, nbasek_d, st_d, aux_d, &
                        conv_d, nb1k_d, vc, ew, e, nvecx, nvec, kter, nk)
   !-----------------------------------------------------------------------
+    USE cudafor
     USE util_param, ONLY : DP
     IMPLICIT NONE
     INTEGER, VALUE :: nk, nvecx, nvec, kter

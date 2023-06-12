@@ -4,6 +4,9 @@ INTERFACE ylm2_interf
     !
     USE cudafor
     USE kinds,        ONLY : DP
+
+    IMPLICIT NONE
+
     INTEGER, VALUE, INTENT(IN) :: lmaxkb, npwx, nk
     INTEGER, INTENT(IN), DEVICE :: ikt(nk)
     REAL(DP), DEVICE, INTENT(OUT) :: ylm_d((lmaxkb + 1) **2, npwx, nk)

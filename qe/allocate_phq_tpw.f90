@@ -25,7 +25,6 @@ SUBROUTINE allocate_phq_tpw
   USE wvfct,            ONLY : nbnd
   USE uspp,             ONLY : nkb, okvan
   USE uspp_param,       ONLY : nhm
-  USE nc_mag_aux,       ONLY : int1_nc_save, deeq_nc_save
   USE control_qe,       ONLY : this_pcxpsi_is_on_file_tpw
   USE control_lr,       ONLY : lgamma
   USE control_ph,       ONLY : epsil
@@ -58,7 +57,6 @@ SUBROUTINE deallocate_phq_tpw()
 USE zstar_add,        ONLY : zstareu0_rec
 USE qpoint,           ONLY : nksq
 USE becmod,           ONLY : deallocate_bec_type
-USE nc_mag_aux,       ONLY : int1_nc_save, deeq_nc_save
 USE control_qe,       ONLY : this_pcxpsi_is_on_file_tpw
 USE magnetic_charges, ONLY : mag_charge_mode, mag_charge, alpha_me
 
