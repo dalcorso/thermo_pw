@@ -14,7 +14,7 @@
 !-------------------------------------------------------------------------
   SUBROUTINE h_s_psik_dev(npwx, outk_d, kdimk_d, npw_d, nveck_d, nb1k_d, &
              st_d, stx_d, ikt_d, ikblk_d, npol, psi, hpsi, spsi, psicmr, &
-             nvec, nvecx, nnr, nset)
+             nvec, nvecx, nnr, nset, minus_b)
 !-------------------------------------------------------------------------
 !
 !  This subroutine applies H and S to a set of wavefunctions contained in
@@ -32,6 +32,9 @@
 !  of device memory sufficient to contain up to nvec*nset smooth FFT meshes.
 !  This array must be already allocated on device. 
 !  The array outk allows to skip entirely all calculations for some set.
+!  If the logical value minus_b is .TRUE. and we are doing a magnetic 
+!  noncollinear calculation, nset is divided in two. The first half is 
+!  calculated with B, the second set with -B.
 !
   USE cudafor
   USE kinds,       ONLY : DP
@@ -49,7 +52,10 @@
   !! input: the number of vectors in each set for psi, hpsi, and spsi.
   !! input: the fft dimension.
   !! input: the number of components of each wavefunction.
-  LOGICAL,INTENT(IN), DEVICE :: outk_d(nset)
+  LOGICAL, INTENT(IN) :: minus_b
+  !! input: if true the second half of sets is computed with -B_xc
+  !!        (only noncollinear magnetic case).
+  LOGICAL, INTENT(IN), DEVICE :: outk_d(nset)
   !! input: when .TRUE. the set is not calculated
   INTEGER, INTENT(IN), DEVICE :: kdimk_d(nset), npw_d(nset)
   !! input: kdim is npwx*npol in the noncollinear case, or equal to npw_d
@@ -109,7 +115,7 @@
      ierr=cudaDeviceSynchronize()
   ELSE
      CALL compute_ps_nc_gpu<<<dim3(nset,nvec,1),dim3(1,1,1)>>>(outk_d, &
-                                nveck_d, nset)
+                                nveck_d, nset, minus_b)
      ierr=cudaDeviceSynchronize()
   ENDIF
 !
@@ -161,7 +167,7 @@
 !   ... apply potential to psi
 !
  CALL vlocpsi_gpu_vp<<<dim3(nset,nvec,nnr/32+1),dim3(1,1,32)>>> &
-            (outk_d, nveck_d, st_d, ikt_d, npol, psicmr, nvec, nnr, nset)
+      (outk_d, nveck_d, st_d, ikt_d, npol, psicmr, nvec, nnr, nset, minus_b)
  ierr=cudaDeviceSynchronize()
 !
 !   ... direct fft in the direction x
@@ -206,7 +212,7 @@ END SUBROUTINE h_s_psik_dev
 !-------------------------------------------------------------------------
   SUBROUTINE h_psik_dev(npwx, outk_d, kdimk_d, npw_d, nveck_d, nb1k_d, &
              st_d, stx_d, ikt_d, ikblk_d, npol, psi, hpsi, psicmr, nvec, &
-             nvecx, nnr, nset)
+             nvecx, nnr, nset, minus_b)
 !-------------------------------------------------------------------------
 !
 !  This subroutine applies H to a set of wavefunctions contained in
@@ -224,6 +230,9 @@ END SUBROUTINE h_s_psik_dev
 !  of device memory sufficient to contain up to nvec*nset smooth FFT meshes.
 !  This array must be already allocated on device. 
 !  The array outk allows to skip entirely all calculations for some sets.
+!  If the logical value minus_b is .TRUE. and we are doing a magnetic 
+!  noncollinear calculation, nset is divided in two. The first half is 
+!  calculated with B_xc, the second set with -B_xc.
 !
   USE cudafor
   USE kinds,       ONLY : DP
@@ -244,6 +253,9 @@ END SUBROUTINE h_s_psik_dev
   !! input: the number of vectors in each set for psi, hpsi, and spsi.
   !! input: the fft dimension.
   !! input: the number of components of each wavefunction.
+  LOGICAL, INTENT(IN) :: minus_b
+  !! input: if true the second half of sets is computed with -B_xc
+  !!        (only noncollinear magnetic case).
   LOGICAL,INTENT(IN), DEVICE :: outk_d(nset)
   !! input: when .TRUE. the k point is not calculated
   INTEGER, INTENT(IN), DEVICE :: kdimk_d(nset), npw_d(nset)
@@ -302,7 +314,7 @@ END SUBROUTINE h_s_psik_dev
      ierr=cudaDeviceSynchronize()
   ELSE
      CALL compute_ps_nc_gpu<<<dim3(nset,nvec,1),dim3(1,1,1)>>>(outk_d, &
-                                nveck_d, nset)
+                                nveck_d, nset, minus_b)
      ierr=cudaDeviceSynchronize()
   ENDIF
 !
@@ -346,7 +358,7 @@ END SUBROUTINE h_s_psik_dev
 !   ... apply potential to psi
 !
  CALL vlocpsi_gpu_vp<<<dim3(nset,nvec,nnr/32+1),dim3(1,1,32)>>> &
-            (outk_d, nveck_d, st_d, ikt_d, npol, psicmr, nvec, nnr, nset)
+      (outk_d, nveck_d, st_d, ikt_d, npol, psicmr, nvec, nnr, nset, minus_b)
  ierr=cudaDeviceSynchronize()
 !
 !   ... direct fft in the direction x
@@ -859,7 +871,7 @@ ATTRIBUTES(GLOBAL) SUBROUTINE compute_ps_gpu( outk, nveck, ikt, nset)
 END SUBROUTINE compute_ps_gpu
 !
 !-----------------------------------------------------------------------
-ATTRIBUTES(GLOBAL) SUBROUTINE compute_ps_nc_gpu(outk, nveck, nset)
+ATTRIBUTES(GLOBAL) SUBROUTINE compute_ps_nc_gpu(outk, nveck, nset, minus_b)
   !-----------------------------------------------------------------------
   !
   ! This routines fills psk_d and pssk_d with sum_n becp(n,ibnd) * D_mn 
@@ -875,10 +887,12 @@ ATTRIBUTES(GLOBAL) SUBROUTINE compute_ps_nc_gpu(outk, nveck, nset)
                              qq_at=>qq_at_d, deeq_nc=>deeq_nc_d,        &
                              qq_so=>qq_so_d, nkb => nkb_d,              &
                              lspinorb => lspinorb_d, okvan => okvan_d
-
+  USE many_k_ph_mod,  ONLY:  deeq_nc_save=> deeq_nc_save_d
   USE uspp, ONLY : ofsbeta=>ofsbeta_d
   IMPLICIT NONE
   !
+  LOGICAL, INTENT(IN), VALUE :: minus_b
+  !! input: if true the second set of psi is calculate with minus B_xc
   INTEGER, INTENT(IN), VALUE :: nset
   !! input: the number of sets
   LOGICAL, INTENT(IN), DEVICE :: outk(nset)
@@ -888,12 +902,14 @@ ATTRIBUTES(GLOBAL) SUBROUTINE compute_ps_nc_gpu(outk, nveck, nset)
   !
   !  ... local variables
   !
-  INTEGER :: k0, ik, mb, k, j, nt, na, nhnt
+  INTEGER :: k0, ik, mb, k, j, nt, na, nhnt, iset
   !
   COMPLEX(DP) :: asum, bsum
   !
   ik=(BlockIdx%x-1)*BlockDim%x + ThreadIdx%x
   IF (ik>nset) RETURN
+  iset=1
+  IF (minus_b.AND.(ik>nset/2)) iset=2
   IF (outk(ik)) RETURN
   IF (nkb == 0) RETURN
   mb=nveck(ik) 
@@ -916,18 +932,27 @@ ATTRIBUTES(GLOBAL) SUBROUTINE compute_ps_nc_gpu(outk, nveck, nset)
            !
            DO k=1, nhnt
               asum=(0.0_DP,0.0_DP)
-              DO j=1, nhnt
-                 asum=asum+deeq_nc(k,j,na,1)*becpk_d(ofsbeta(na)+j,1,k0,ik) &
-                          +deeq_nc(k,j,na,2)*becpk_d(ofsbeta(na)+j,2,k0,ik)
-              ENDDO
+              IF (minus_b) THEN
+                 DO j=1, nhnt
+                    asum=asum+deeq_nc_save(k,j,na,1,iset)*      &
+                              becpk_d(ofsbeta(na)+j,1,k0,ik)    &
+                             +deeq_nc_save(k,j,na,2,iset)*      &
+                              becpk_d(ofsbeta(na)+j,2,k0,ik)
+                 ENDDO
+              ELSE
+                 DO j=1, nhnt
+                    asum=asum+deeq_nc(k,j,na,1)*becpk_d(ofsbeta(na)+j,1,k0,ik)&
+                             +deeq_nc(k,j,na,2)*becpk_d(ofsbeta(na)+j,2,k0,ik)
+                 ENDDO
+              ENDIF
               psk_d(ofsbeta(na)+k,1,k0,ik)=psk_d(ofsbeta(na)+k,1,k0,ik)+asum
               IF (okvan) THEN
                  bsum=(0.0_DP,0.0_DP)
                  IF (lspinorb) THEN
                     DO j=1, nhnt
-                       bsum=bsum                                             &
-                             +qq_so(k,j,1,nt)*becpk_d(ofsbeta(na)+j,1,k0,ik) &
-                             +qq_so(k,j,2,nt)*becpk_d(ofsbeta(na)+j,2,k0,ik)
+                       bsum = bsum                                           &
+                            + qq_so(k,j,1,nt)*becpk_d(ofsbeta(na)+j,1,k0,ik) &
+                            + qq_so(k,j,2,nt)*becpk_d(ofsbeta(na)+j,2,k0,ik)
                     ENDDO
                  ELSE
                     DO j=1, nhnt
@@ -940,10 +965,21 @@ ATTRIBUTES(GLOBAL) SUBROUTINE compute_ps_nc_gpu(outk, nveck, nset)
            ENDDO
            DO k=1, nhnt
               asum=(0.0_DP,0.0_DP)
-              DO j=1, nhnt
-                 asum=asum+deeq_nc(k,j,na,3)*becpk_d(ofsbeta(na)+j,1,k0,ik) &
-                          +deeq_nc(k,j,na,4)*becpk_d(ofsbeta(na)+j,2,k0,ik)
-              ENDDO
+              IF (minus_b) THEN
+                 DO j=1, nhnt
+                    asum=asum + deeq_nc_save(k,j,na,3,iset)*             &
+                                becpk_d(ofsbeta(na)+j,1,k0,ik) &
+                              + deeq_nc_save(k,j,na,4,iset)*             &
+                                becpk_d(ofsbeta(na)+j,2,k0,ik)
+                 ENDDO
+              ELSE
+                 DO j=1, nhnt
+                    asum=asum + deeq_nc(k,j,na,3)*             &
+                                becpk_d(ofsbeta(na)+j,1,k0,ik) &
+                              + deeq_nc(k,j,na,4)*             &
+                                becpk_d(ofsbeta(na)+j,2,k0,ik)
+                 ENDDO
+              ENDIF
               psk_d(ofsbeta(na)+k,2,k0,ik)=psk_d(ofsbeta(na)+k,2,k0,ik)+asum
               IF (okvan) THEN
                  bsum=(0.0_DP,0.0_DP)
@@ -976,10 +1012,10 @@ END SUBROUTINE compute_ps_nc_gpu
 !
 !-----------------------------------------------------------------------
 ATTRIBUTES(GLOBAL) SUBROUTINE vlocpsi_gpu_vp(outk, nveck, st, ikt, npol, &
-                             psicr, nvec, nnr, nset)
+                              psicr, nvec, nnr, nset, minus_b)
 !----------------------------------------------------------------------- 
 !  
-  ! This routine apply the local potential to the wavefunctions 
+  ! This routine applies the local potential to the wavefunctions 
   ! in parallel for all sets, bands and real space points.
   !
   USE cudafor
@@ -989,6 +1025,9 @@ ATTRIBUTES(GLOBAL) SUBROUTINE vlocpsi_gpu_vp(outk, nveck, st, ikt, npol, &
                              noncolin => noncolin_d
   IMPLICIT NONE
   !
+  LOGICAL, INTENT(IN), VALUE :: minus_b
+  !! if .TRUE. in the noncollinear magnetic case applies -B_xc to the 
+  !! second half of the sets
   INTEGER, INTENT(IN), VALUE :: nset, nnr, nvec
   !! input: the number of sets
   !! input: the number of points of the smooth mesh
@@ -1010,11 +1049,15 @@ ATTRIBUTES(GLOBAL) SUBROUTINE vlocpsi_gpu_vp(outk, nveck, st, ikt, npol, &
   !
   INTEGER :: ik, ik2, k0, k2, i, mb, ipol, is_, st_
 
+  REAL(DP) :: bsign
+
   COMPLEX(DP) :: aux1, aux2, sup, sdwn
   !
   ik=(BlockIdx%x-1)*BlockDim%x + ThreadIdx%x
   IF (ik>nset) RETURN
   IF (outk(ik)) RETURN
+  bsign=1.0_DP
+  IF (minus_b.AND.ik>nset/2) bsign=-1.0_DP
   st_=st(ik)
   ik2=ikt(ik)
   mb=nveck(ik) 
@@ -1031,10 +1074,10 @@ ATTRIBUTES(GLOBAL) SUBROUTINE vlocpsi_gpu_vp(outk, nveck, st, ikt, npol, &
   IF (noncolin.AND.domag) THEN
      aux1 = CMPLX(psicr(1,i,1,k2),psicr(2,i,1,k2),KIND=DP)
      aux2 = CMPLX(psicr(1,i,2,k2),psicr(2,i,2,k2),KIND=DP)
-     sup  = aux1 * (vrs_d(i,1)+vrs_d(i,4)) + &
-            aux2 * (vrs_d(i,2)-(0.d0,1.d0)*vrs_d(i,3))
-     sdwn = aux2 * (vrs_d(i,1)-vrs_d(i,4)) + &
-            aux1 * (vrs_d(i,2)+(0.d0,1.d0)*vrs_d(i,3))
+     sup  = aux1 * (vrs_d(i,1)+bsign*vrs_d(i,4)) + &
+            aux2 * (vrs_d(i,2)-(0.d0,1.d0)*vrs_d(i,3)) * bsign
+     sdwn = aux2 * (vrs_d(i,1)-bsign*vrs_d(i,4)) + &
+            aux1 * (vrs_d(i,2)+(0.d0,1.d0)*vrs_d(i,3)) * bsign
      psicr(1,i,1,k2) = DBLE(sup)
      psicr(2,i,1,k2) = AIMAG(sup)
      psicr(1,i,2,k2) = DBLE(sdwn)
@@ -1255,14 +1298,14 @@ ATTRIBUTES(GLOBAL) SUBROUTINE add_grid_to_hpsi( lda, outk, npw, nveck, &
   DO i=1,np
      iv=nl_d(igk_k_d(i,ik2))
      hpsi_d(i,k1)=hpsi_d(i,k1)+CMPLX(psicr(1,iv,1,k2), &
-                                     psicr(2,iv,1,k2), KIND=DP)
+                                     psicr(2,iv,1,k2), KIND=DP) 
   ENDDO
 
   IF (npol==2) THEN
      DO i=1,np
         iv=nl_d(igk_k_d(i,ik2))
         hpsi_d(lda+i,k1)=hpsi_d(lda+i,k1)+CMPLX(psicr(1,iv,2,k2), &
-                                                psicr(2,iv,2,k2), KIND=DP)
+                                 psicr(2,iv,2,k2), KIND=DP) 
      ENDDO
   ENDIF
 

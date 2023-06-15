@@ -15,6 +15,8 @@ INTERFACE h_psi_gpu_interf
   !
   USE cudafor
   USE util_param,     ONLY : DP
+  !
+  IMPLICIT NONE
 
   INTEGER, INTENT(IN), VALUE :: lda
   INTEGER, INTENT(IN), VALUE :: nset, nvecx
@@ -120,12 +122,13 @@ ATTRIBUTES(GLOBAL) SUBROUTINE h_psi_calbec( lda, outk, npw, nveck, &
 
 !-----------------------------------------------------------------------
 ATTRIBUTES(GLOBAL) SUBROUTINE vlocpsi_gpu_vp(outk, nveck, st, ikt, npol, &
-                              psicr, nvec, nnr, nset)
+                              psicr, nvec, nnr, nset, minus_b)
 !-----------------------------------------------------------------------
   !
   USE cudafor
   USE util_param,     ONLY : DP
 
+  LOGICAL, INTENT(IN), VALUE  :: minus_b
   INTEGER, INTENT(IN), VALUE  :: nset, nnr, nvec
   LOGICAL, INTENT(IN), DEVICE :: outk(nset)
   INTEGER, INTENT(IN), DEVICE :: nveck(nset)
@@ -164,6 +167,7 @@ ATTRIBUTES(GLOBAL) SUBROUTINE put_psi_on_grid( lda, outk, npw, nveck,  &
   USE util_param,     ONLY : DP
   !
   IMPLICIT NONE
+  !
   INTEGER, INTENT(IN), VALUE :: lda
   INTEGER, INTENT(IN), VALUE :: nset, nnr, nvecx, nvec
   LOGICAL, INTENT(IN), DEVICE :: outk(nset)
@@ -328,7 +332,7 @@ ATTRIBUTES(GLOBAL) SUBROUTINE compute_ps_gpu(outk, nveck, ikt, nset)
   END SUBROUTINE compute_ps_gpu
 !
 !-----------------------------------------------------------------------
-ATTRIBUTES(GLOBAL) SUBROUTINE compute_ps_nc_gpu(outk, nveck, nset)
+ATTRIBUTES(GLOBAL) SUBROUTINE compute_ps_nc_gpu(outk, nveck, nset, minus_b)
   !-----------------------------------------------------------------------
   !
   ! This routine computes becp for all k points.
@@ -337,6 +341,7 @@ ATTRIBUTES(GLOBAL) SUBROUTINE compute_ps_nc_gpu(outk, nveck, nset)
   USE util_param,     ONLY : DP
   IMPLICIT NONE
   !
+  LOGICAL, INTENT(IN), VALUE :: minus_b
   INTEGER, INTENT(IN), VALUE :: nset
   LOGICAL, INTENT(IN), DEVICE :: outk(nset)
   INTEGER, INTENT(IN), DEVICE :: nveck(nset)

@@ -27,12 +27,13 @@ SUBROUTINE non_scf_tpw( )
   !
   USE wavefunctions_gpum, ONLY : using_evc
   USE wvfct_gpum,                ONLY : using_et
-!civn 
   USE exx,                  ONLY : exxinit, aceinit, use_ace
   USE scf,                  ONLY : rho, rho_core, rhog_core, v, vltot, vrs, kedtau
   USE ener,                 ONLY : ehart, etxc, vtxc, epaw
   USE ldaU,                 ONLY : eth
   USE extfield,             ONLY : etotefield
+  USE control_qe,           ONLY : many_k
+  USE noncollin_module,     ONLY : noncolin, domag
   USE paw_onecenter,        ONLY : PAW_potential
   USE paw_variables,        ONLY : okpaw, ddd_paw
   USE fft_base,             ONLY : dfftp
@@ -48,7 +49,6 @@ SUBROUTINE non_scf_tpw( )
   INTEGER :: iter, i, dr2 = 0.0_dp
   REAL(dp):: ef_scf, ef_scf_up, ef_scf_dw
   REAL(DP), EXTERNAL :: get_clock
-!civn 
   REAL(DP) :: charge
   REAL(DP) :: etot_cmp_paw(nat,2,2)
 !
@@ -67,7 +67,15 @@ SUBROUTINE non_scf_tpw( )
      !
   ELSE
      !
-     CALL c_bands_nscf_tpw()
+     IF (many_k) THEN
+        IF (noncolin.AND.domag) THEN
+           CALL c_bands_nscf_tpw()
+        ELSE
+           CALL c_bands_many_k(1)
+        ENDIF
+     ELSE
+        CALL c_bands_nscf_tpw()
+     ENDIF
      !
   ENDIF
   !
@@ -149,7 +157,6 @@ SUBROUTINE non_scf_tpw( )
      RETURN
   ENDIF
   !
-!civn 
   ! ... for exact exchange case update the ACE projector with the actual number of bands 
   !
   IF(xclib_dft_is('hybrid')) THEN 
