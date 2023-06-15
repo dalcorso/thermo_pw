@@ -74,8 +74,8 @@ ALLOCATE( ikt( nksbx ))
    ALLOCATE(ikt_d( nksbx ))
 #endif
 
-CALL allocate_becps_many_k(1)
-CALL initialize_fft_factors(1)
+CALL allocate_becps_many_k(1,1)
+CALL initialize_fft_factors(1,1)
 CALL initialize_device_variables()
 
 lrot=(iter==1)

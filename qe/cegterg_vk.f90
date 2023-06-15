@@ -373,11 +373,11 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
   IF (uspp) THEN
      CALL h_s_psik_dev(npwx, outk_d, kdimk_d, npw_d, notcnvk_d, nb1k_d, &
              st_d, stx_d, ikt_d, ikblk_d, npol, psi, hpsi, spsi, psicmr, &
-             nvec, nvecx, nnrs, nk)
+             nvec, nvecx, nnrs, nk, .FALSE.)
   ELSE
      CALL h_psik_dev(npwx, outk_d, kdimk_d, npw_d, notcnvk_d, nb1k_d, st_d, &
           stx_d, ikt_d, ikblk_d, npol, psi, hpsi, psicmr, nvec, nvecx, &
-          nnrs, nk)
+          nnrs, nk, .FALSE.)
   ENDIF
   !$acc end host_data
 #endif
@@ -887,11 +887,11 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
      IF (uspp) THEN
         CALL h_s_psik_dev(npwx, outk_d, kdimk_d, npw_d, notcnvk_d, nb1k_d, &
              st_d, stx_d, ikt_d, ikblk_d, npol, psi, hpsi, spsi, psicmr,   &
-             nvec, nvecx, nnrs, nk)
+             nvec, nvecx, nnrs, nk, .FALSE.)
      ELSE
         CALL h_psik_dev(npwx, outk_d, kdimk_d, npw_d, notcnvk_d, nb1k_d, &
              st_d, stx_d, ikt_d, ikblk_d, npol, psi, hpsi, psicmr, nvec, &
-             nvecx, nnrs, nk)
+             nvecx, nnrs, nk, .FALSE.)
      ENDIF
      !$acc end host_data
 #else

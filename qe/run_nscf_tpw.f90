@@ -25,13 +25,16 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   USE cell_base, ONLY: at, bg, tpiba
   USE gvect,     ONLY: gcutm
   USE gvecs,     ONLY: gcutms
-  USE klist,     ONLY : qnorm, nelec
+  USE gvect,     ONLY: eigts1, eigts1_d, eigts2, eigts2_d, eigts3, eigts3_d
+  USE klist,     ONLY: qnorm, nelec, nks
+  USE wvfct,     ONLY: nbnd, nbndx, npwx
   !!!
   USE disp,            ONLY : lgamma_iq
   USE control_ph,      ONLY : reduce_io, recover, tmp_dir_phq, &
                               ext_restart, bands_computed, newgrid, qplot, &
                               only_wfc
   USE io_global,       ONLY : stdout
+  USE uspp,            ONLY : okvan
   USE grid_irr_iq,     ONLY : done_bands
   USE acfdtest,        ONLY : acfdt_is_active, acfdt_num_der, ir_point, delta_vrs
   USE scf,             ONLY : vrs
@@ -43,10 +46,13 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   USE lr_symm_base,    ONLY : minus_q, nsymq, invsymq
   USE control_lr,      ONLY : ethr_nscf
   USE qpoint,          ONLY : xq
-  USE noncollin_module,ONLY : noncolin, domag
+  USE noncollin_module,ONLY : noncolin, domag, npol
   USE el_phon,         ONLY : elph_mat
   USE ahc,             ONLY : elph_ahc
   USE rism_module,     ONLY : lrism, rism_set_restart
+  USE control_qe,      ONLY : many_k
+  USE many_k_mod,      ONLY : deallocate_many_k, allocate_many_k, init_k_blocks
+  USE wvfct_gpum,      ONLY : using_et_d
   !
  !
   IMPLICIT NONE
@@ -55,6 +61,7 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   INTEGER, INTENT(IN) :: iq
   !
   LOGICAL :: exst
+  INTEGER :: nsolv
   !
   CALL start_clock( 'PWSCF' )
   !
@@ -62,6 +69,7 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   ! FIXME: following section does not belong to this subroutine
   IF (done_bands(iq)) THEN
      WRITE (stdout,'(/,5x,"Bands found: reading from ",a)') TRIM(tmp_dir_phq)
+     IF (many_k) CALL deallocate_many_k()
      CALL clean_pw( .TRUE. )
      CALL close_files(.true.)
      wfc_dir=tmp_dir_phq
@@ -78,9 +86,26 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
      qnorm = SQRT(xq(1)**2+xq(2)**2+xq(3)**2) * tpiba
      CALL read_file()
      CALL set_small_group_of_q(nsymq,invsymq,minus_q)
+     IF (many_k) THEN
+        CALL init_k_blocks(npwx,npol,nbndx,nks,nbnd,dffts%nnr,okvan)
+        nsolv=1
+        IF (noncolin.AND.domag) nsolv=2
+        CALL allocate_many_k(nsolv)
+#if defined(__CUDA)
+!
+!  this should be taken care by read_file, but for some unknown reason
+!  it is presently not updating these variables on the device
+!
+        CALL using_et_d(0)
+        eigts1_d=eigts1
+        eigts2_d=eigts2
+        eigts3_d=eigts3
+#endif
+     ENDIF
      RETURN
   ENDIF
   !
+  IF (many_k) CALL deallocate_many_k()
   CALL clean_pw( .FALSE. )
   !
   CALL close_files(.true.)
@@ -109,7 +134,7 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   !
   CALL setup_nscf_tpw ( newgrid, xq, elph_mat .OR. elph_ahc )
   !
-  CALL init_run()
+  CALL init_run_tpw()
 !°°°°°°°°°°°°°°°°°°°° ACFDT TEST °°°°°°°°°°°°°°°°°°°°°°°°°
   IF (acfdt_is_active) THEN
     ! ACFDT mumerical derivative test: modify the potential
@@ -152,7 +177,6 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
      CALL mp_barrier( intra_image_comm )  
   ENDIF
   !
-
   bands_computed=.TRUE.
   !
   CALL stop_clock( 'PWSCF' )

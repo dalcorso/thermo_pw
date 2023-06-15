@@ -175,7 +175,7 @@ SUBROUTINE init_run_tpw()
   CALL allocate_wfc_k()
   IF (many_k) THEN
      CALL init_k_blocks(npwx,npol,nbndx,nks,nbnd,dffts%nnr,okvan)
-     CALL allocate_many_k()
+     CALL allocate_many_k(1)
   ENDIF
   !
   CALL openfil()

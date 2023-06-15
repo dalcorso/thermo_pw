@@ -44,7 +44,7 @@ SUBROUTINE phqscf_tpw
   USE write_hub
   USE magnetic_charges, ONLY : mag_charge_mode, mag_charge
   USE control_lr,       ONLY : lgamma
-
+  USE control_qe,       ONLY : many_k
 
   IMPLICIT NONE
 
@@ -120,7 +120,11 @@ SUBROUTINE phqscf_tpw
            CALL do_cg_ph (irr, imode0, drhoscfs)
            CALL deallocate_cg()
         ELSE
-           CALL solve_linter_tpw (irr, imode0, npe, drhoscfs)
+           IF (many_k) THEN
+              CALL solve_linter_many_k (irr, imode0, npe, drhoscfs)
+           ELSE
+              CALL solve_linter_tpw (irr, imode0, npe, drhoscfs)
+           ENDIF
         ENDIF
         !
         WRITE( stdout, '(/,5x,"End of self-consistent calculation")')

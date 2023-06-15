@@ -144,7 +144,6 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   INTEGER  :: iq_dummy
   REAL(DP) :: tcpu, get_clock ! timing variables
   CHARACTER(LEN=256) :: filename
-
   !
   IF (rec_code_read > 20 ) RETURN
 
@@ -314,7 +313,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
                  !
                  ! calculates dvscf_q*psi_k in G_space, for all bands, k=kpoint
                  !
-                 CALL add_dvscf_rhs( dvscfins, isolv, ipert, ik, npe )
+                 CALL add_dvscf_rhs( dvscfins, isolv, ipert, ik, npe, .TRUE. )
 
               ELSE
                  !

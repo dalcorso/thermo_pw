@@ -284,7 +284,7 @@ RETURN
 END SUBROUTINE init_k_blocks
 
 !------------------------------------------------------------------
-SUBROUTINE allocate_many_k()
+SUBROUTINE allocate_many_k(nsolv)
 !------------------------------------------------------------------
 USE wvfct,            ONLY : nbnd, npwx
 USE uspp,             ONLY : nkb
@@ -297,10 +297,10 @@ USE klist,            ONLY : nks
 
 IMPLICIT NONE
 
+INTEGER :: nsolv
+
 ALLOCATE(vkbk_d(npwx,nkb*nksbx))
 ALLOCATE(g2kink_d(npwx,nksbx))
-ALLOCATE(evck(npwx*npol,nbnd*nksbx))
-ALLOCATE(evck_d(npwx*npol,nbnd*nksbx))
 ALLOCATE(h_diagk_d(npwx,npol,nksbx))
 ALLOCATE(s_diagk_d(npwx,npol,nksbx))
 
@@ -322,7 +322,8 @@ ELSE
    ALLOCATE(deeq_d(nhm,nhm,nat,nspin))
    ALLOCATE(qq_at_d(nhm,nhm,nat))
 ENDIF
-
+ALLOCATE(evck(npwx*npol,nbnd*nksbx*nsolv))
+ALLOCATE(evck_d(npwx*npol,nbnd*nksbx*nsolv))
 
 RETURN
 END SUBROUTINE allocate_many_k
@@ -338,8 +339,6 @@ IF (ALLOCATED(startkb_d)) DEALLOCATE(startkb_d)
 
 IF (ALLOCATED(vkbk_d)) DEALLOCATE(vkbk_d)
 IF (ALLOCATED(g2kink_d)) DEALLOCATE(g2kink_d)
-IF (ALLOCATED(evck_d)) DEALLOCATE(evck_d)
-IF (ALLOCATED(evck)) DEALLOCATE(evck)
 IF (ALLOCATED(h_diagk_d)) DEALLOCATE(h_diagk_d)
 IF (ALLOCATED(s_diagk_d)) DEALLOCATE(s_diagk_d)
 
@@ -358,6 +357,8 @@ IF (ALLOCATED(deeq_d)) DEALLOCATE(deeq_d)
 IF (ALLOCATED(deeq_nc_d)) DEALLOCATE(deeq_nc_d)
 IF (ALLOCATED(qq_at_d)) DEALLOCATE(qq_at_d)
 IF (ALLOCATED(qq_so_d)) DEALLOCATE(qq_so_d)
+IF (ALLOCATED(evck_d))  DEALLOCATE(evck_d)
+IF (ALLOCATED(evck))    DEALLOCATE(evck)
 
 RETURN
 END SUBROUTINE deallocate_many_k
@@ -429,18 +430,18 @@ RETURN
 END SUBROUTINE initialize_device_variables
 !
 !------------------------------------------------------------------
-SUBROUTINE allocate_becps_many_k(npe)
+SUBROUTINE allocate_becps_many_k(npe, nsolv)
 !------------------------------------------------------------------
 USE wvfct,            ONLY : nbnd, npwx
 USE uspp,             ONLY : nkb
 USE noncollin_module, ONLY : npol
 
 IMPLICIT NONE
-INTEGER :: npe
+INTEGER :: npe, nsolv
 
-ALLOCATE(becpk_d(nkb,npol,nbnd,nksbx*npe))
-ALLOCATE(psk_d(nkb,npol,nbnd,nksbx*npe))
-ALLOCATE(pssk_d(nkb,npol,nbnd,nksbx*npe))
+ALLOCATE(becpk_d(nkb,npol,nbnd,nksbx*npe*nsolv))
+ALLOCATE(psk_d(nkb,npol,nbnd,nksbx*npe*nsolv))
+ALLOCATE(pssk_d(nkb,npol,nbnd,nksbx*npe*nsolv))
 
 RETURN
 END SUBROUTINE allocate_becps_many_k
@@ -459,13 +460,13 @@ RETURN
 END SUBROUTINE deallocate_becps_many_k
 !
 !------------------------------------------------------------------
-SUBROUTINE initialize_fft_factors(npe)
+SUBROUTINE initialize_fft_factors(npe, nsolv)
 !------------------------------------------------------------------
 USE fft_base,   ONLY : dffts
 USE constants,  ONLY : pi
 USE wvfct,      ONLY : nbnd
 IMPLICIT NONE
-INTEGER :: npe
+INTEGER :: npe, nsolv
 
 INTEGER :: nr1, nr2, nr3, nr1x, nr2x, adim
 REAL(DP) :: arg
@@ -486,7 +487,7 @@ lensav = 2 * adim + INT ( LOG ( REAL ( adim, KIND = DP ) ) &
                                       / LOG ( 2.0_DP ) ) + 4
 lenwrk_d=lenwrk
 lensav_d=lensav
-ALLOCATE(work_d(lenwrk,nbnd*nksbx*npe*adim))
+ALLOCATE(work_d(lenwrk,nbnd*nksbx*npe*nsolv*adim))
 ALLOCATE(wsave_d(lensav,3))
 ALLOCATE(isindex_d(nr1x*nr2x))
 ALLOCATE(iplane_d(nr1x))

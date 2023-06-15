@@ -189,7 +189,11 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
      ELSE
 #endif
      IF ( .NOT. lscf) THEN
-        CALL non_scf()
+        IF (many_k) THEN
+           CALL non_scf_tpw()
+        ELSE
+           CALL non_scf()
+        ENDIF
      ELSE
         CALL electrons_tpw()
      END IF
