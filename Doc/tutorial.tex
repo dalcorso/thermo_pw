@@ -594,4 +594,42 @@ irreducible representation. Relevant character tables are given in the
 \texttt{point\_groups.pdf} manual, in the \thermo\ output, or by the
 \texttt{crystal\_point\_group.x} tool.
 
+\newpage
+{\color{coral}\section{How do I specify a custom path for 
+plotting the electronic bands and phonon dispersions?}}
+\color{black}
+You have to give an explicit path after the \texttt{INPUT\_THERMO}
+namelist (see \texttt{what='scf\_bands'} and \texttt{what='scf\_2d\_bands'}). 
+There are two possibilities to specify a path in the Brillouin zone.
+You can use explicit coordinates of the first and last points of 
+each line (in cartesian or crystal coordinates) and a weight that indicates
+the number of points in the line, or you can use labels to 
+indicate the first and/or the last points. The available labels depend on
+the Brillouin zone and are illustrated in the file
+\texttt{Doc/brillouin\_zones.pdf} in the main QE documentation.
+Labels for points given by explicit coordinates can be added after 
+the weights. 
+Usually the same labels used to indicate the coordinates of the points
+are written also in the dispersion plot, but it is also possible
+to override these labels, adding a letter after the weights as for 
+the points given by explicit coordinates. 
+Note that labels are given without quotes, while the additional letter
+after the weight must be written between single quotes.
+An example of a path for the fcc lattice:
+\begin{verbatim}
+
+6
+gG   20   
+X    20
+W    20  'gS1'
+1.0 1.0 0.0 20 'X'
+gG   20   
+L     0
+\end{verbatim}
+This path has five lines, the first from $\Gamma$ to $X$ with $20$ points,
+the second from $X$ to $W$ (that in the plot will have the label $\Sigma_1$)
+with 20 points, the third from $W$ to a point of coordinates $(1.0, 1.0, 0.0)$ 
+(that in the plot will have the label $X$), the fourth from $(1.0, 1.0, 0.0)$ 
+to $\Gamma$ with $20$ points and a final line from $\Gamma$ to $L$ with 
+$20$ points.
 \end{document}
