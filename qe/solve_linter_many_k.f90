@@ -470,6 +470,13 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
                                 evck_d(i,nbnd*(ikwf-1)+1:nbnd*ikwf)
                     ENDDO
                  ENDIF
+              ELSEIF (nksq==1) THEN
+                 IF (lgamma) THEN
+                    evqk_d(:,nbnd*(ik1-1)+1:nbnd*ik1) = evc(:,:)
+                 ELSE
+                    evqk_d(:,nbnd*(ik1-1)+1:nbnd*ik1) = evq(:,:)
+                 ENDIF
+                 evck_d(:,nbnd*(ik1-1)+1:nbnd*ik1) = evc(:,:
               ENDIF
               !
               ! compute preconditioning matrix h_diag used by cgsolve_all

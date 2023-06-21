@@ -112,7 +112,9 @@ DO ikb=1,nkblocks
            ENDIF
            evck(1:npwx*npol,nbnd*(ik1-1)+1:nbnd*ik1)=evc(1:npwx*npol,1:nbnd)
            !
-        ENDIF
+         ELSEIF (nks==1) THEN
+           evck(1:npwx*npol,nbnd*(ik1-1)+1:nbnd*ik1)=evc(1:npwx*npol,1:nbnd)
+         ENDIF
       ENDDO
       evck_d=evck
 #if defined(__CUDA)
@@ -197,8 +199,11 @@ DO ikb=1,nkblocks
 !      DO i=1,ngk(ik)
 !         evc(i,1:nbnd)=evck_d(i,nbnd*(ik1-1)+1:nbnd*ik1)
 !      ENDDO
-      IF ( nks > 1 ) &
-      CALL save_buffer (evck(1,nbnd*(ik1-1)+1), nwordwfc, iunwfc, ik )
+      IF ( nks > 1 ) THEN
+         CALL save_buffer (evck(1,nbnd*(ik1-1)+1), nwordwfc, iunwfc, ik )
+      ELSE
+         evc(1:npwx*npol,1:nbnd)=evck(1:npwx*npol,nbnd*(ik1-1)+1:nbnd*ik1)
+      ENDIF
    ENDDO
 
    DO ik=1,nksb(ikb)
