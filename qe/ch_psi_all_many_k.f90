@@ -79,13 +79,13 @@ SUBROUTINE ch_psi_all_many_k (n, h, ah, hpsi, spsi, ps, e, ik, m, id)
   ik1=ik-startkb_ph(current_ikb_ph)
 #if ! defined(__CUDA)
   !$acc kernels present(evc,evck_d)
-  DO i=1, n
+  DO i=1, npwx*npol
      evc(i,1:nbnd)=evck_d(i,nbnd*(ik1-1)+1:nbnd*ik1)
   ENDDO
   !$acc end kernels
   IF (.NOT.lgamma) THEN
      !$acc kernels present(evq)
-     DO i=1, n
+     DO i=1, npwx*npol
         evq(i,1:nbnd)=evqk_d(i,nbnd*(ik1-1)+1:nbnd*ik1)
      ENDDO
      !$acc end kernels
@@ -150,7 +150,6 @@ SUBROUTINE ch_psi_all_many_k (n, h, ah, hpsi, spsi, ps, e, ik, m, id)
 
   CALL h_psi (npwx, n, m, h, hpsi)
   CALL s_psi (npwx, n, m, h, spsi)
-
 #endif
 
   !
@@ -297,7 +296,13 @@ CONTAINS
                  hpsi(:,m_start:m_end), becpk_d(:,1,:,id), m_end- m_start + 1)
        endif
     else
-       CALL calbec (n, vkbk_d(:,nkb*(ik1-1)+1:nkb*ik1), hpsi, becpk_d(:,1,:,id), m)
+       IF (noncolin) THEN
+          CALL calbec (n, vkbk_d(:,nkb*(ik1-1)+1:nkb*ik1), hpsi, &
+                                                    becpk_d(:,:,:,id), m)
+       ELSE
+          CALL calbec (n, vkbk_d(:,nkb*(ik1-1)+1:nkb*ik1), hpsi, &
+                                                    becpk_d(:,1,:,id), m)
+       ENDIF
     endif
 #endif
     CALL stop_clock_gpu ('ch_psi_calbec')
@@ -306,8 +311,8 @@ CONTAINS
     CALL s_psi_ch_gpu (npwx, n, m, hpsi, spsi, ik, id)
     !$acc end host_data
 #else
-!    CALL s_psi_ch (npwx, n, m, hpsi, spsi, ik, id)
-     spsi=hpsi
+    CALL s_psi_ch (npwx, n, m, hpsi, spsi, ik, id)
+!    spsi=hpsi
 #endif
     !$acc parallel loop collapse(2) present(ah, spsi)
     DO ibnd = 1, m

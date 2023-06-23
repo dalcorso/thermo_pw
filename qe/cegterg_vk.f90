@@ -393,6 +393,7 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
      IF ( uspp ) CALL s_psii( npwx, npw(ik), nvec, psi(1,stx_+1), &
                                                   spsi(1,stx_+1), ik )
   ENDDO
+
 #endif
   DO ik=1,nk
      nhpsi(ik) = nhpsi(ik) + nvec

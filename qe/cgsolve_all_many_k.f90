@@ -66,9 +66,13 @@ SUBROUTINE cgsolve_all_many_k (ch_psi, cg_psi, e, d0psi, dpsi_d, h_diag,  &
   USE eqv,            ONLY : evq
   USE uspp,           ONLY : okvan
   USE wavefunctions,  ONLY : evc
+  USE lsda_mod,       ONLY : lsda, current_spin, isk
+  USE scf,            ONLY : vrs
   USE many_k_ph_mod,  ONLY : current_ikb_ph, startkb_ph, evqk_d
+  USE uspp,           ONLY : okvan, deeq_nc
   USE fft_base,       ONLY : dffts
   USE uspp,           ONLY : nkb
+  USE nc_mag_aux,     ONLY : deeq_nc_save
   USE control_lr,     ONLY : alpha_pv
   USE qpoint_aux,     ONLY : ikmks
 #if defined(__CUDA)
@@ -280,6 +284,7 @@ ATTRIBUTES(DEVICE) :: h_diag, d0psi, dpsi_d
   ikblk_d=ikblk
   st_d=st
   outk_d=outk
+#endif
   DO ik1=1,nk
      ik=ik1+startkb_ph(current_ikb_ph)
      ikk=ikks(ik)
@@ -296,7 +301,6 @@ ATTRIBUTES(DEVICE) :: h_diag, d0psi, dpsi_d
         ENDDO
      ENDDO
   ENDDO
-#endif
 
 iterate:  do iter = 1, maxter
      !
@@ -341,9 +345,14 @@ iterate:  do iter = 1, maxter
            ikk=ikks(ik)
            ikq=ikqs(ik)
            ndim=ngk(ikq)
+           IF (lsda) current_spin = isk (ikk)
            DO isolv=1, nsolv
               ikmk=ikk
-              IF (isolv==2) ikmk=ikmks(ik)
+              IF (isolv==2) THEN
+                 ikmk=ikmks(ik)
+                 vrs(:,2:4)=-vrs(:,2:4)
+                 IF (okvan) deeq_nc(:,:,:,:)=deeq_nc_save(:,:,:,:,2)
+              ENDIF
               DO ipert=1,npe
                  id=ik1 + (ipert-1)*nk + (isolv-1)*nk*npe
                  IF (outk(id)) CYCLE
@@ -352,6 +361,10 @@ iterate:  do iter = 1, maxter
                    hpsi(1,st_+1), spsi(1,st_+1), ps(1,st_+1),        &
                    e(n_start,ikmk), ik, nbnd_occ(ikk), id)
               ENDDO
+              IF (isolv==2) THEN
+                 vrs(:,2:4)=-vrs(:,2:4)
+                 IF (okvan) deeq_nc(:,:,:,:)=deeq_nc_save(:,:,:,:,1)
+              ENDIF
            ENDDO
         ENDDO
 #endif        
@@ -532,7 +545,8 @@ iterate:  do iter = 1, maxter
         ikk=ikks(ik)
         ikq=ikqs(ik)
         ndim=ngk(ikq)
-           DO isolv=1, nsolv
+        DO isolv=1, nsolv
+           IF (isolv==2) ikk=ikmks(ik)
            DO ipert=1,npe
               id=ik1+(ipert-1)*nk+(isolv-1)*nk*npe
               IF (outk(id)) CYCLE
@@ -544,16 +558,7 @@ iterate:  do iter = 1, maxter
               do ibnd = n_start, n_end ; ibnd_ = ibnd - n_start + 1
                  IF (ibnd>nbnd_occ(ikk)) CYCLE
                  if (conv (st_+ibnd) .eq.0) then
-!
-!          change sign to h
-!
-#if defined(__CUDA)
-                    !$acc kernels 
-                    h(:,st_+ibnd_)=-1.0d0*h(:,st_+ibnd_)    
-                    !$acc end kernels 
-#else
                     call dscal (2 * ndmx * npol, - 1.d0, h (1, st_+ibnd_), 1)
-#endif
                     if (iter.ne.1) then
                        dcgamma = rho (st_+ibnd_) / rhoold (st_+ibnd_)
                        !$acc host_data use_device(hold,h)
@@ -617,7 +622,12 @@ iterate:  do iter = 1, maxter
         ikk=ikks(ik)
         ikq=ikqs(ik)
         ndim=ngk(ikq)
+        IF (lsda) current_spin = isk (ikk)
         DO isolv=1, nsolv
+           IF (isolv==2) THEN
+              vrs(:,2:4)=-vrs(:,2:4)
+              IF (okvan) deeq_nc(:,:,:,:)=deeq_nc_save(:,:,:,:,2)
+           ENDIF
            DO ipert=1,npe
               id=ik1+(ipert-1)*nk+(isolv-1)*nk*npe
               IF (outk(id)) CYCLE
@@ -629,6 +639,10 @@ iterate:  do iter = 1, maxter
                         hpsi(1,st_+1), spsi(1,st_+1), ps(1,st_+1), &
                         eu(st_+1), ik, lbnd(id), id)
            ENDDO
+           IF (isolv==2) THEN
+              vrs(:,2:4)=-vrs(:,2:4)
+              IF (okvan) deeq_nc(:,:,:,:)=deeq_nc_save(:,:,:,:,1)
+           ENDIF
         ENDDO
      ENDDO
 #endif     

@@ -189,8 +189,7 @@ SUBROUTINE h_psii_( lda, n, m, psi, hpsi, ik )
      !
   ELSEIF ( noncolin ) THEN 
      !
-     CALL errore('h_psii_', 'multiple k and noncolin not available',1)
-     CALL vloc_psi_nc( lda, n, m, psi, vrs, hpsi )
+     CALL vloc_psik_nc( lda, n, m, psi, vrs, hpsi, ik )
      !
   ELSE  
      ! 

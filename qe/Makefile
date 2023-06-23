@@ -157,6 +157,7 @@ solve_linear_system.o \
 solve_linear_system_many_k.o \
 s_psi_gpu_tpw.o \
 s_psi_tpw.o \
+s_psi_ch.o \
 s_psi_ch_gpu.o \
 star_q.o \
 summarize_alpha.o \

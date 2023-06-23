@@ -476,7 +476,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
                  ELSE
                     evqk_d(:,nbnd*(ik1-1)+1:nbnd*ik1) = evq(:,:)
                  ENDIF
-                 evck_d(:,nbnd*(ik1-1)+1:nbnd*ik1) = evc(:,:
+                 evck_d(:,nbnd*(ik1-1)+1:nbnd*ik1) = evc(:,:)
               ENDIF
               !
               ! compute preconditioning matrix h_diag used by cgsolve_all
@@ -593,22 +593,18 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
                        IF (lda_plus_u) CALL dvqhub_barepsi_us (ik, u(1,mode))
                        !
                     ELSE
+#if ! defined(__CUDA)
                        IF (okvan) THEN
                           deeq_nc(:,:,:,:)=deeq_nc_save(:,:,:,:,2)
                           int1_nc(:,:,:,:,:)=int1_nc_save(:,:,:,:,:,2)
                        ENDIF
-!                    CALL dvqpsi_us(ik, u (1, mode),.false., becpt, &
-!                                                                 alphapt)
-!                       CALL dvqpsi_us_tpw(ik, id, u (1, mode),.false., becpt, &
-!                                                                 alphapt)
-#if ! defined(__CUDA)
                        CALL dvqpsi_us_many_k(ik, id, u (1, mode), becpt, &
                                                       alphapt, dvloc(1,ipert))
-#endif
                        IF (okvan) THEN
                           deeq_nc(:,:,:,:)=deeq_nc_save(:,:,:,:,1)
                           int1_nc(:,:,:,:,:)=int1_nc_save(:,:,:,:,:,1)
                        ENDIF
+#endif
                     ENDIF
                  ENDIF
 #if defined(__CUDA)

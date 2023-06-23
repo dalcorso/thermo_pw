@@ -1,13 +1,13 @@
 !
 ! Copyright (C) 2001-2016 Quantum ESPRESSO group
-! Copyright (C) 2023 Andrea Dal Corso (generalization to many k)
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!
 !----------------------------------------------------------------------
-SUBROUTINE s_psii( lda, n, m, psi, spsi, ik )
+SUBROUTINE s_psi_ch( lda, n, m, psi, spsi, ik, id )
   !--------------------------------------------------------------------
   !! This routine applies the S matrix to m wavefunctions psi and puts 
   !! the results in spsi.
@@ -32,10 +32,12 @@ SUBROUTINE s_psii( lda, n, m, psi, spsi, ik )
   !! leading dimension of arrays psi, spsi
   INTEGER, INTENT(IN) :: n
   !! true dimension of psi, spsi
+  INTEGER, INTENT(IN) :: ik
+  !! index of the k points
+  INTEGER, INTENT(IN) :: id
+  !! composite index of k, perturbation, etc.
   INTEGER, INTENT(IN) :: m
   !! number of states psi
-  INTEGER, INTENT(IN) :: ik
-  !! k point index
   COMPLEX(DP), INTENT(IN) :: psi(lda*npol,m)
   !! the m wavefunctions
   COMPLEX(DP), INTENT(OUT)::spsi(lda*npol,m)
@@ -57,7 +59,7 @@ SUBROUTINE s_psii( lda, n, m, psi, spsi, ik )
      !
      ! Check if there at least one band in this band group
      IF (m_end >= m_start) &
-        CALL s_psii_( lda, n, m_end-m_start+1, psi(1,m_start), spsi(1,m_start), ik )
+        CALL s_psi_ch_( lda, n, m_end-m_start+1, psi(1,m_start), spsi(1,m_start), ik, id )
      CALL mp_allgather( spsi, column_type, recv_counts, displs, inter_bgrp_comm )
      !
      CALL mp_type_free( column_type )
@@ -65,7 +67,7 @@ SUBROUTINE s_psii( lda, n, m, psi, spsi, ik )
      DEALLOCATE( displs )
   ELSE
      ! don't use band parallelization here
-     CALL s_psii_( lda, n, m, psi, spsi, ik )
+     CALL s_psi_ch_( lda, n, m, psi, spsi, ik, id )
   ENDIF
   !
   CALL stop_clock( 's_psi_bgrp' )
@@ -73,10 +75,11 @@ SUBROUTINE s_psii( lda, n, m, psi, spsi, ik )
   !
   RETURN
   !
-END SUBROUTINE s_psii
+END SUBROUTINE s_psi_ch
+!
 !
 !----------------------------------------------------------------------------
-SUBROUTINE s_psii_( lda, n, m, psi, spsi, ik )
+SUBROUTINE s_psi_ch_( lda, n, m, psi, spsi, ik, id)
   !----------------------------------------------------------------------------
   !! This routine applies the S matrix to m wavefunctions psi and puts 
   !! the results in spsi.
@@ -86,7 +89,6 @@ SUBROUTINE s_psii_( lda, n, m, psi, spsi, ik )
   USE kinds,            ONLY: DP
   USE becmod,           ONLY: becp
   USE uspp,             ONLY: vkb, nkb, okvan, qq_at, qq_so, ofsbeta
-  USE many_k_mod,       ONLY: vkbk_d
   USE uspp_param,       ONLY: upf, nh, nhm
   USE ions_base,        ONLY: nat, nsp, ityp
   USE control_flags,    ONLY: gamma_only 
@@ -95,6 +97,8 @@ SUBROUTINE s_psii_( lda, n, m, psi, spsi, ik )
                               fwfft_orbital_gamma, calbec_rs_gamma, &
                               s_psir_gamma, invfft_orbital_k,       &
                               fwfft_orbital_k, calbec_rs_k, s_psir_k
+  USE many_k_mod,       ONLY: vkbk_d, becpk_d
+  USE many_k_ph_mod,    ONLY: current_ikb_ph, startkb_ph
   USE wavefunctions,    ONLY: psic
   USE fft_base,         ONLY: dffts
   !
@@ -107,7 +111,9 @@ SUBROUTINE s_psii_( lda, n, m, psi, spsi, ik )
   INTEGER, INTENT(IN) :: m
   !! number of states psi
   INTEGER, INTENT(IN) :: ik
-  !! the k point
+  !! index of the k points
+  INTEGER, INTENT(IN) :: id
+  !! composite index of k, perturbation, etc.
   COMPLEX(DP), INTENT(IN) :: psi(lda*npol,m)
   !! the m wavefunctions
   COMPLEX(DP), INTENT(OUT)::spsi(lda*npol,m)
@@ -115,11 +121,12 @@ SUBROUTINE s_psii_( lda, n, m, psi, spsi, ik )
   !
   ! ... local variables
   !
-  INTEGER :: ibnd
+  INTEGER :: ibnd, ik1
   !
   !
   ! ... initialize  spsi
   !
+  ik1=ik-startkb_ph(current_ikb_ph)
   CALL threaded_memcpy( spsi, psi, lda*npol*m*2 )
   !
   IF ( nkb == 0 .OR. .NOT. okvan ) RETURN
@@ -130,17 +137,33 @@ SUBROUTINE s_psii_( lda, n, m, psi, spsi, ik )
   !
   IF ( gamma_only ) THEN
      !
-     CALL errore('s_psii_', 'multiple k and gamma_only not available',1)
+     IF ( real_space ) THEN
+        !
+        DO ibnd = 1, m, 2
+!SdG: the becp are already computed ! no need to invfft psi to real space.
+!           CALL invfft_orbital_gamma( psi, ibnd, m ) 
+!SdG: we just need to clean psic in real space ...
+           CALL threaded_barrier_memset(psic, 0.D0, dffts%nnr*2)
+!SdG: ... before computing the us-only contribution ...
+           CALL s_psir_gamma( ibnd, m )
+!SdG: ... and add it to spsi (already containing psi).
+           CALL fwfft_orbital_gamma( spsi, ibnd, m, add_to_orbital=.TRUE. )
+        ENDDO
+        !
+     ELSE
+        !
+        CALL s_psi_ch_gamma()
+        !
+     ENDIF
      !
   ELSEIF ( noncolin ) THEN
      !
-     CALL s_psik_nc()
+     CALL s_psi_ch_nc()
      !
   ELSE 
      !
      IF ( real_space ) THEN
         !
-        CALL errore('s_psii_', 'multiple k and realus not available',1)
         DO ibnd = 1, m
 !SdG: the becp are already computed ! no need to invfft psi to real space.
 !           CALL invfft_orbital_k( psi, ibnd, m )
@@ -154,7 +177,7 @@ SUBROUTINE s_psii_( lda, n, m, psi, spsi, ik )
         !
      ELSE
         !
-        CALL s_psik_k()
+        CALL s_psi_ch_k()
         !
      ENDIF    
      !
@@ -168,7 +191,120 @@ SUBROUTINE s_psii_( lda, n, m, psi, spsi, ik )
   CONTAINS
      !
      !-----------------------------------------------------------------------
-     SUBROUTINE s_psik_k()
+     SUBROUTINE s_psi_ch_gamma()
+       !---------------------------------------------------------------------
+       !! Gamma version of \(\textrm{s_psi}\) routine.
+       !
+       USE mp,            ONLY : mp_get_comm_null, mp_circular_shift_left
+       USE becmod_gpum,   ONLY : using_becp_r
+       !
+       IMPLICIT NONE  
+       !
+       ! ... local variables
+       !
+       INTEGER :: ikb, jkb, ih, jh, na, nt, ibnd, ierr
+       ! counters
+       INTEGER :: nproc, mype, m_loc, m_begin, ibnd_loc, icyc, icur_blk, m_max
+       ! data distribution indexes
+       INTEGER, EXTERNAL :: ldim_block, gind_block
+       ! data distribution functions
+       REAL(DP), ALLOCATABLE :: ps(:,:)
+       ! the product vkb and psi
+       !
+       CALL using_becp_r(0)
+       !
+       IF( becp%comm == mp_get_comm_null() ) THEN
+          nproc   = 1
+          mype    = 0
+          m_loc   = m
+          m_begin = 1
+          m_max   = m
+       ELSE
+          !
+          ! becp(l,i) = <beta_l|psi_i>, with vkb(n,l)=|beta_l>
+          ! in this case becp(l,i) are distributed (index i is)
+          !
+          nproc   = becp%nproc
+          mype    = becp%mype
+          m_loc   = becp%nbnd_loc
+          m_begin = becp%ibnd_begin
+          m_max   = SIZE( becp%r, 2 )
+          IF( ( m_begin + m_loc - 1 ) > m ) m_loc = m - m_begin + 1
+       ENDIF
+       !
+       ALLOCATE( ps( nkb, m_max ), STAT=ierr )
+       IF( ierr /= 0 ) &
+          CALL errore( ' s_psi_gamma ', ' cannot allocate memory (ps) ', ABS(ierr) )
+       !    
+       ps(:,:) = 0.0_DP
+       !
+       !   In becp=<vkb_i|psi_j> terms corresponding to atom na of type nt
+       !   run from index i=ofsbeta(na)+1 to i=ofsbeta(na)+nh(nt)
+       !
+       DO nt = 1, nsp
+          IF ( upf(nt)%tvanp ) THEN
+             DO na = 1, nat
+                IF ( ityp(na) == nt ) THEN
+                   !
+                   ! Next operation computes ps(l',i)=\sum_m qq(l,m) becp(m',i)
+                   ! (l'=l+ijkb0, m'=m+ijkb0, indices run from 1 to nh(nt))
+                   !
+                   IF ( m_loc > 0 ) THEN
+                      CALL DGEMM('N', 'N', nh(nt), m_loc, nh(nt), 1.0_dp, &
+                                  qq_at(1,1,na), nhm, becp%r(ofsbeta(na)+1,1),&
+                                  nkb, 0.0_dp, ps(ofsbeta(na)+1,1), nkb )
+                   ENDIF
+                ENDIF
+             ENDDO
+          ENDIF
+       ENDDO
+       !
+       IF( becp%comm == mp_get_comm_null() ) THEN
+          IF ( m == 1 ) THEN
+             CALL DGEMV( 'N', 2 * n, nkb, 1.D0, vkb, &
+                  2 * lda, ps, 1, 1.D0, spsi, 1 )
+          ELSE
+             CALL DGEMM( 'N', 'N', 2 * n, m, nkb, 1.D0, vkb, &
+                  2 * lda, ps, nkb, 1.D0, spsi, 2*lda )
+          ENDIF
+       ELSE
+          !
+          ! parallel block multiplication of vkb and ps
+          !
+          icur_blk = mype
+          !
+          DO icyc = 0, nproc-1
+
+             m_loc   = ldim_block( becp%nbnd , nproc, icur_blk )
+             m_begin = gind_block( 1,  becp%nbnd, nproc, icur_blk )
+
+             IF( (m_begin + m_loc-1) > m ) m_loc = m - m_begin + 1
+
+             IF( m_loc > 0 ) THEN
+                CALL DGEMM( 'N', 'N', 2*n, m_loc, nkb, 1.D0, vkb, &
+                            2*lda, ps, nkb, 1.D0, spsi(1,m_begin), 2*lda )
+             ENDIF
+             !
+             ! block rotation
+             !
+             CALL mp_circular_shift_left( ps, icyc, becp%comm )
+             !
+             icur_blk = icur_blk + 1
+             IF( icur_blk == nproc ) icur_blk = 0
+             !
+          ENDDO
+          !
+       ENDIF
+       !
+       DEALLOCATE( ps ) 
+       !
+       !
+       RETURN
+       !
+     END SUBROUTINE s_psi_ch_gamma
+     !
+     !-----------------------------------------------------------------------
+     SUBROUTINE s_psi_ch_k()
        !-----------------------------------------------------------------------
        !! k-points version of \(\textrm{s_psi}\) routine.
        !
@@ -200,7 +336,7 @@ SUBROUTINE s_psii_( lda, n, m, psi, spsi, ik )
                 IF ( ityp(na) == nt ) THEN
                    qqc(:,:) = CMPLX ( qq_at(1:nh(nt),1:nh(nt),na), 0.0_DP, KIND=DP )
                    CALL ZGEMM('N','N', nh(nt), m, nh(nt), (1.0_DP,0.0_DP), &
-                        qqc, nh(nt), becp%k(ofsbeta(na)+1,1), nkb, &
+                        qqc, nh(nt), becpk_d(ofsbeta(na)+1,1,1,id), nkb, &
                         (0.0_DP,0.0_DP), ps(ofsbeta(na)+1,1), nkb )
                 ENDIF
              ENDDO
@@ -222,14 +358,13 @@ SUBROUTINE s_psii_( lda, n, m, psi, spsi, ik )
        !
        IF ( m == 1 ) THEN
           !
-          CALL ZGEMV( 'N', n, nkb, ( 1.D0, 0.D0 ), vkbk_d(1,nkb*(ik-1)+1), &
-                      lda, ps, 1, ( 1.D0, 0.D0 ), spsi, 1 )
+          CALL ZGEMV( 'N', n, nkb, ( 1.D0, 0.D0 ), vkbk_d(:,&
+             (ik1-1)*nkb+1:ik1*nkb), lda, ps, 1, ( 1.D0, 0.D0 ), spsi, 1 )
           !
        ELSE
           !
-          CALL ZGEMM( 'N', 'N', n, m, nkb, ( 1.D0, 0.D0 ), &
-                      vkbk_d(1,nkb*(ik-1)+1), lda, ps, nkb,   &
-                      ( 1.D0, 0.D0 ), spsi, lda )
+          CALL ZGEMM( 'N', 'N', n, m, nkb, ( 1.D0, 0.D0 ), vkbk_d(:,&
+             (ik1-1)*nkb+1:ik1*nkb), lda, ps, nkb, ( 1.D0, 0.D0 ), spsi, lda )
           !
        ENDIF
        !
@@ -238,11 +373,11 @@ SUBROUTINE s_psii_( lda, n, m, psi, spsi, ik )
        !
        RETURN
        !
-     END SUBROUTINE s_psik_k     
+     END SUBROUTINE s_psi_ch_k     
      !
      !
      !-----------------------------------------------------------------------
-       SUBROUTINE s_psik_nc ( )
+       SUBROUTINE s_psi_ch_nc ( )
        !-----------------------------------------------------------------------
        !! k-points noncolinear/spinorbit version of \(\textrm{s_psi}\) routine.
        !
@@ -278,17 +413,17 @@ SUBROUTINE s_psii_( lda, n, m, psi, spsi, ik )
                             DO ipol = 1, npol
                                DO ibnd = 1, m
                                   ps(ikb,ipol,ibnd) = ps(ikb,ipol,ibnd) + &
-                                       qq_at(ih,jh,na)*becp%nc(jkb,ipol,ibnd)
+                                    qq_at(ih,jh,na)*becpk_d(jkb,ipol,ibnd,id)
                                ENDDO
                             ENDDO
                          ELSE
                             DO ibnd = 1, m
                                ps(ikb,1,ibnd) = ps(ikb,1,ibnd) + &
-                                    qq_so(ih,jh,1,nt)*becp%nc(jkb,1,ibnd)+ &
-                                    qq_so(ih,jh,2,nt)*becp%nc(jkb,2,ibnd)
+                                    qq_so(ih,jh,1,nt)*becpk_d(jkb,1,ibnd,id)+ &
+                                    qq_so(ih,jh,2,nt)*becpk_d(jkb,2,ibnd,id)
                                ps(ikb,2,ibnd) = ps(ikb,2,ibnd) + &
-                                    qq_so(ih,jh,3,nt)*becp%nc(jkb,1,ibnd)+ &
-                                    qq_so(ih,jh,4,nt)*becp%nc(jkb,2,ibnd)
+                                    qq_so(ih,jh,3,nt)*becpk_d(jkb,1,ibnd,id)+ &
+                                    qq_so(ih,jh,4,nt)*becpk_d(jkb,2,ibnd,id)
                             ENDDO
                          ENDIF
                       ENDDO
@@ -300,15 +435,15 @@ SUBROUTINE s_psii_( lda, n, m, psi, spsi, ik )
           !
        ENDDO
        !
-       CALL ZGEMM ( 'N', 'N', n, m*npol, nkb, (1.d0,0.d0), &
-            vkbk_d(1,nkb*(ik-1)+1), lda, ps, nkb, (1.d0,0.d0), &
-            spsi(1,1), lda )
+       CALL ZGEMM ( 'N', 'N', n, m*npol, nkb, (1.d0,0.d0) , vkbk_d(:,&
+              (ik1-1)*nkb+1:ik1*nkb), lda, ps, nkb, (1.d0,0.d0), &
+              spsi(1,1), lda )
        !
        DEALLOCATE( ps )
        !
        !
        RETURN
        !
-    END SUBROUTINE s_psik_nc
+    END SUBROUTINE s_psi_ch_nc
     !
-END SUBROUTINE s_psii_
+END SUBROUTINE s_psi_ch_

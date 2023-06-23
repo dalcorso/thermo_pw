@@ -234,9 +234,9 @@ subroutine dvqpsi_us_only_tpw (ik, id, uact, becp1, alphap)
            enddo
            do ibnd = 1, nbnd
               IF (noncolin) THEN
-!                 call zaxpy(npwq,ps2_nc(ikb,1,ibnd,ipol),aux,1,dvpsi(1,ibnd),1)
-!                 call zaxpy(npwq,ps2_nc(ikb,2,ibnd,ipol),aux,1, &
-!                                                         dvpsi(1+npwx,ibnd),1)
+                 call zaxpy(npwq,ps2_nc(ikb,1,ibnd,ipol),aux,1,dvpsi(1,ibnd),1)
+                 call zaxpy(npwq,ps2_nc(ikb,2,ibnd,ipol),aux,1, &
+                                                         dvpsi(1+npwx,ibnd),1)
               ELSE
                  call zaxpy (npwq, ps2k(ikb,ibnd,ipol,id), aux, 1, &
                          dvpsi(1,ibnd), 1)
