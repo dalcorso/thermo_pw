@@ -66,6 +66,7 @@ COMPLEX(DP), ALLOCATABLE :: u_d(:,:)
 INTEGER,     ALLOCATABLE :: nbnd_occ_d(:) 
 INTEGER,     ALLOCATABLE :: ikks_d(:) 
 INTEGER,     ALLOCATABLE :: ikqs_d(:) 
+INTEGER,     ALLOCATABLE :: ikmks_d(:) 
 
 #if defined(__CUDA)
 ATTRIBUTES(DEVICE) :: startkb_ph_d
@@ -97,6 +98,7 @@ ATTRIBUTES(DEVICE) :: u_d
 ATTRIBUTES(DEVICE) :: nbnd_occ_d
 ATTRIBUTES(DEVICE) :: ikks_d
 ATTRIBUTES(DEVICE) :: ikqs_d
+ATTRIBUTES(DEVICE) :: ikmks_d
 #endif
 !
 ! variables needed to divide in blocks the phonon k points
@@ -112,7 +114,7 @@ PUBLIC dvpsik_d, dpsik_d, evqk_d, h_diagk_ph_d, becp1k_d, alphak_d, dbecq_d, &
 !  Variables needed to copy on device the phonon variables
 !
 PUBLIC deff_d, deff_nc_d, int1_d, int2_d, int1_nc_d, int2_so_d, dbecsum_d, &
-       u_d, nbnd_occ_d, ikks_d, ikqs_d, deeq_nc_d, deeq_nc_save_d,         &
+       u_d, nbnd_occ_d, ikks_d, ikqs_d, ikmks_d, deeq_nc_d, deeq_nc_save_d,&
        int1_nc_save_d
 !
 !  Routines of this module
@@ -231,6 +233,7 @@ USE qpoint,       ONLY : ikks, ikqs
 USE phus,         ONLY : int1, int2, int1_nc, int2_so
 USE uspp,         ONLY : deeq_nc
 USE nc_mag_aux,   ONLY : int1_nc_save, deeq_nc_save
+USE qpoint_aux,   ONLY : ikmks
 USE noncollin_module, ONLY : noncolin
 USE uspp,         ONLY : okvan
 
@@ -259,6 +262,7 @@ nbnd_occ_d=nbnd_occ
 startkb_ph_d=startkb_ph
 ikqs_d=ikqs
 ikks_d=ikks
+ikmks_d=ikmks
 #endif
 
 RETURN
@@ -322,6 +326,7 @@ INTEGER, INTENT(IN) :: npe, nsolv
  ALLOCATE(nbnd_occ_d(nks))
  ALLOCATE(ikks_d(nksq))
  ALLOCATE(ikqs_d(nksq))
+ ALLOCATE(ikmks_d(nksq))
 #endif
 
 RETURN
@@ -367,6 +372,7 @@ IF (ALLOCATED(u_d)) DEALLOCATE(u_d)
 IF (ALLOCATED(nbnd_occ_d)) DEALLOCATE(nbnd_occ_d)
 IF (ALLOCATED(ikks_d)) DEALLOCATE(ikks_d)
 IF (ALLOCATED(ikqs_d)) DEALLOCATE(ikqs_d)
+IF (ALLOCATED(ikmks_d)) DEALLOCATE(ikmks_d)
 
 RETURN
 END SUBROUTINE deallocate_many_k_ph

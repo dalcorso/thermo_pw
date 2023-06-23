@@ -6,7 +6,7 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !-----------------------------------------------------------------------
-SUBROUTINE ch_psi_all_many_k (n, h, ah, hpsi, spsi, ps, e, ik, m, id)
+SUBROUTINE ch_psi_all_many_k (n, h, ah, hpsi, spsi, ps, e, ik, m, id, isolv)
   !-----------------------------------------------------------------------
   !
   ! This routine applies the operator ( H - \epsilon S + alpha_pv P_v)
@@ -37,14 +37,14 @@ SUBROUTINE ch_psi_all_many_k (n, h, ah, hpsi, spsi, ps, e, ik, m, id)
   USE ldaU,                 ONLY : lda_plus_u, wfcU, lda_plus_u_kind
   USE units_lr,             ONLY : iuatswfc
   USE many_k_mod,           ONLY : vkbk_d, evck_d, g2kink_d, becpk_d
-  USE many_k_ph_mod,        ONLY : evqk_d, current_ikb_ph, startkb_ph
+  USE many_k_ph_mod,        ONLY : evqk_d, current_ikb_ph, startkb_ph, nksb_ph
 #if defined(__CUDA)
   USE becmod_gpum,          ONLY : becp_d
 #endif
 
   IMPLICIT NONE
 
-  INTEGER, INTENT(IN) :: n, m, ik, id
+  INTEGER, INTENT(IN) :: n, m, ik, id, isolv
   ! input: the dimension of h
   ! input: the number of bands
   ! input: the k point
@@ -60,7 +60,7 @@ SUBROUTINE ch_psi_all_many_k (n, h, ah, hpsi, spsi, ps, e, ik, m, id)
   !
   !   local variables
   !
-  INTEGER :: ibnd, ig, ik1, i
+  INTEGER :: ibnd, ig, ik1, i, kstart
   ! counter on bands
   ! counter on G vetors
 
@@ -78,29 +78,24 @@ SUBROUTINE ch_psi_all_many_k (n, h, ah, hpsi, spsi, ps, e, ik, m, id)
   CALL start_clock('chp:initial')
   ik1=ik-startkb_ph(current_ikb_ph)
 #if ! defined(__CUDA)
-  !$acc kernels present(evc,evck_d)
+  kstart=nbnd*(ik1-1)+(isolv-1) * nksb_ph(current_ikb_ph) * nbnd
   DO i=1, npwx*npol
-     evc(i,1:nbnd)=evck_d(i,nbnd*(ik1-1)+1:nbnd*ik1)
+     evc(i,1:nbnd)=evck_d(i,kstart+1:kstart+nbnd)
   ENDDO
-  !$acc end kernels
+
   IF (.NOT.lgamma) THEN
-     !$acc kernels present(evq)
      DO i=1, npwx*npol
-        evq(i,1:nbnd)=evqk_d(i,nbnd*(ik1-1)+1:nbnd*ik1)
+        evq(i,1:nbnd)=evqk_d(i,kstart+1:kstart+nbnd)
      ENDDO
-     !$acc end kernels
   ENDIF
-!  !$acc kernels present(vkb,vkbk_d)
+
   DO i=1, n
      vkb(i,1:nkb)=vkbk_d(i,nkb*(ik1-1)+1:nkb*ik1)
   ENDDO
-!  !$acc end kernels
 
-  !$acc kernels present(g2kin,g2kink_d)
   DO i=1, n
      g2kin(i)=g2kink_d(i,ik1)
   ENDDO
-  !$acc end kernels
 #endif
   CALL stop_clock('chp:initial')
 

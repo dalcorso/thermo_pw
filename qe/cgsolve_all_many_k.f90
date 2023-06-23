@@ -359,7 +359,7 @@ iterate:  do iter = 1, maxter
                  st_=st(id)
                  CALL ch_psi (ndim, dpsi(1,st_+n_start), g(1,st_+1), &
                    hpsi(1,st_+1), spsi(1,st_+1), ps(1,st_+1),        &
-                   e(n_start,ikmk), ik, nbnd_occ(ikk), id)
+                   e(n_start,ikmk), ik, nbnd_occ(ikk), id, isolv)
               ENDDO
               IF (isolv==2) THEN
                  vrs(:,2:4)=-vrs(:,2:4)
@@ -546,7 +546,8 @@ iterate:  do iter = 1, maxter
         ikq=ikqs(ik)
         ndim=ngk(ikq)
         DO isolv=1, nsolv
-           IF (isolv==2) ikk=ikmks(ik)
+           ikmk=ikk
+           IF (isolv==2) ikmk=ikmks(ik)
            DO ipert=1,npe
               id=ik1+(ipert-1)*nk+(isolv-1)*nk*npe
               IF (outk(id)) CYCLE
@@ -576,7 +577,7 @@ iterate:  do iter = 1, maxter
                                                   hold (1, st_+lbnd(id)), 1)
                     !$acc end host_data
                     !$acc serial 
-                    eu (st_+lbnd(id)) = e (ibnd,ikk)
+                    eu (st_+lbnd(id)) = e (ibnd,ikmk)
                     !$acc end serial
                  endif
               enddo
@@ -637,7 +638,7 @@ iterate:  do iter = 1, maxter
               !
               call ch_psi (ndim, hold(1,st_+1), t(1,st_+1), &
                         hpsi(1,st_+1), spsi(1,st_+1), ps(1,st_+1), &
-                        eu(st_+1), ik, lbnd(id), id)
+                        eu(st_+1), ik, lbnd(id), id, isolv)
            ENDDO
            IF (isolv==2) THEN
               vrs(:,2:4)=-vrs(:,2:4)

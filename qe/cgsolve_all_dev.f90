@@ -91,7 +91,7 @@
  USE util_param,    ONLY : DP
 
  USE many_k_ph_mod, ONLY : ikks => ikks_d, startkb_ph => startkb_ph_d,      &
-                           nbnd_occ => nbnd_occ_d
+                           nbnd_occ => nbnd_occ_d, ikmks => ikmks_d
 
  IMPLICIT NONE
 
@@ -109,7 +109,7 @@
  REAL(DP), DEVICE :: eu(my_nbnd*nk*npe*nsolv)
  REAL(DP), DEVICE :: e(nbnd,nks)
 
- INTEGER :: ik1, ik, ikk, ipert, id, st_, ibnd, lbnd, ig, isp, isolv
+ INTEGER :: ik1, ik, ikmk, ikk, ipert, id, st_, ibnd, lbnd, ig, isp, isolv
 
  COMPLEX(DP) :: dcgamma
 
@@ -118,11 +118,13 @@
 
  ik=ik1+startkb_ph(current_ikb_ph)
  ikk=ikks(ik)
+ ikmk=ikk
 
  isp=(BlockIdx%y-1)*BlockDim%y + ThreadIdx%y
  IF (isp>npe*nsolv) RETURN
  isolv=(isp-1)/npe+1
  ipert=MOD(isp-1,npe)+1
+ IF (isolv==2) ikmk=ikmks(ik)
 
  id=ik1+(ipert-1)*nk + (isolv-1)*nk*npe
  IF (outk(id)) RETURN
@@ -149,7 +151,7 @@
     hold (ig, st_+lbnd)= h (ig, st_+ibnd)
  ENDDO
 
- eu (st_+lbnd) = e (ibnd,ikk)
+ eu (st_+lbnd) = e (ibnd,ikmk)
 
  RETURN
 
