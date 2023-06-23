@@ -2562,7 +2562,11 @@ in \texttt{thermo\_pw}. It has many limitations so it has to be used
 only for particular cases. It is implemented with \texttt{Davidson} 
 diagonalization for \texttt{LDA} and \texttt{GGA} functionals. It
 is working for norm conserving, ultrasoft, and PAW pseudopotentials,
-both scalar and fully relativistic.
+both scalar and fully relativistic, but not for hybrid functionals or
+for LDA+U schemes. When the response to a phonon
+perturbation is calculated by \texttt{thermo\_pw} with the 
+flag \texttt{many\_k=.TRUE.} the new routines are used, while
+the old ones are used for the other perturbations. 
 The method is found to be useful only when FFT sizes are smaller than
 approximately ${48\times 48 \times 48}$. It is not compatible with
 {\bf G}-vectors parallelization, but it can be used with \texttt{pools} 
@@ -2571,7 +2575,9 @@ parallelization. It must be used with a number of
 of \texttt{pools} equal to the number of \texttt{MPI} processes (one pool per
 GPU). It uses \texttt{CUDA} fortran so it is active only
 on NVIDIA GPUs. It has been tested on \texttt{marconi100} at CINECA
-loading modules \texttt{hpc-sdk/2022} or \texttt{hpc-sdk/2023}.\\
+loading modules \texttt{hpc-sdk/2022--binary} or \texttt{hpc-sdk/2023--binary}.
+The \texttt{many_k} routines are active also on the CPU version of the code
+for testing purposes, but there is no advantage to use them with CPU.\\
 
 \begin{verbatim}
 many_k: If .TRUE., the part of the code that loads 
