@@ -618,11 +618,12 @@ after the weight must be written between single quotes.
 An example of a path for the fcc lattice:
 \begin{verbatim}
 
-6
+7
 gG   20   
 X    20
 W    20  'gS1'
 1.0 1.0 0.0 20 'X'
+gG    0
 gG   20   
 L     0
 \end{verbatim}
@@ -633,4 +634,9 @@ $(1.0, 1.0, 0.0)$
 (that in the plot will have the label $X$), the fourth from $(1.0, 1.0, 0.0)$ 
 to $\Gamma$ with $20$ points and a final line from $\Gamma$ to $L$ with 
 $20$ points.
+Until version \texttt{1.8.1} labels are read as three characters, so it 
+is important not to write the weights too close to the labels.
+Gr\"uneisen parameters are not analytic at the $\Gamma$ 
+point so to obtain a correct plot, the $\Gamma$ label in the middle of a 
+plot must be repeated twice, as in the example.
 \end{document}

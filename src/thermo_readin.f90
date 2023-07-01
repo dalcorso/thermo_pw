@@ -137,6 +137,8 @@ SUBROUTINE thermo_readin()
   REAL(DP) :: sigma_ry(max_sigma)
   INTEGER :: ivol_plot(max_opt)
   LOGICAL :: tend, terr, read_paths, exst, has_xml
+  CHARACTER(LEN=1) :: char1
+  CHARACTER(LEN=2) :: char2
   CHARACTER(LEN=6) :: int_to_char
   CHARACTER(LEN=512) :: dummy
   CHARACTER(LEN=256), ALLOCATABLE :: input(:)
@@ -798,12 +800,24 @@ SUBROUTINE thermo_readin()
            ELSEIF ((ICHAR(input_line(j:j)) < 123 .AND. &
                     ICHAR(input_line(j:j)) > 64))  THEN
 !
-!   This is a letter, not a space character. We read the next three 
+!   This is a letter, not a space character. 
+!   Check where is the space
+              IF (ICHAR(input_line(j+1:j+1))==32) THEN
+                 npk_label=npk_label+1
+                 READ(input_line(j:j),'(a1)') char1
+                 letter(npk_label)=char1//'  '
+              ELSEIF (ICHAR(input_line(j+2:j+2))==32) THEN
+                 npk_label=npk_label+1
+                 READ(input_line(j:j+1),'(a2)') char2
+                 letter(npk_label)=char2//' '
+              ELSE
+!   We read the next three 
 !   characters and save them in the letter array, save also which q point
 !   it is
 !
-              npk_label=npk_label+1
-              READ(input_line(j:),'(a3)') letter(npk_label)
+                 npk_label=npk_label+1
+                 READ(input_line(j:),'(a3)') letter(npk_label)
+              ENDIF
               label_list(npk_label)=iq
               letter_path(iq)=letter(npk_label)
 !
