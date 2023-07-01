@@ -96,8 +96,8 @@ properties directly comparable with experiment.
 \texttt{lib/}      & : source files for modules used by \thermo\ \\
 \texttt{qe/}       & : routines of \qe\ that require some \\
                    &   change \\
-\texttt{fft}       & : some fft routines that can run on the GPU.
-\texttt{lapack}    & : some lapack routines that can run on the GPU.
+\texttt{fft}       & : some fft routines that can run on the GPU. \\
+\texttt{lapack}    & : some lapack routines that can run on the GPU. \\
 \texttt{src/}      & : source files for \thermo\ \\
 \texttt{tools/}    & : source files for auxiliary tools \\
 \texttt{tools\_input/}  & : examples of inputs for the auxiliary tools \\
@@ -2576,7 +2576,7 @@ of \texttt{pools} equal to the number of \texttt{MPI} processes (one pool per
 GPU). It uses \texttt{CUDA} fortran so it is active only
 on NVIDIA GPUs. It has been tested on \texttt{marconi100} at CINECA
 loading modules \texttt{hpc-sdk/2022--binary} or \texttt{hpc-sdk/2023--binary}.
-The \texttt{many_k} routines are active also on the CPU version of the code
+The \texttt{many\_k} routines are active also on the CPU version of the code
 for testing purposes, but there is no advantage to use them with CPU.\\
 
 \begin{verbatim}
