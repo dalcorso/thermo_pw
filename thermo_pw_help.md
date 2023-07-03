@@ -61,11 +61,17 @@ patches given below.</p>
 
 **Patches for thermo_pw.1.8.1**:
 <br>
+A problem with calculation of electronic free energy 
+See bug fix aeedce4 of Jul. 3, 2023.
+<br>
 
 **Patches for thermo_pw.1.8.0**:
 <br>
 * To compile using cmake copy the thermo_pw/CMakeLists.txt of thermo_pw.1.8.1
 in the thermo_pw directory.
+<br>
+A problem with calculation of electronic free energy 
+See bug fix aeedce4 of Jul. 3, 2023.
 <br>
 
 **Patches for thermo_pw.1.7.1**:
