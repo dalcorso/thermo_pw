@@ -21,8 +21,7 @@ USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,           &
                              gnuplot_set_fact
 USE data_files,       ONLY : flanhar, fl_el_cons
 USE postscript_files, ONLY : flpsanhar
-USE control_elastic_constants,  ONLY : lelastic, lelasticf, lelastic_p, &
-                             el_cons_t_available
+USE control_elastic_constants,  ONLY : lelastic, lelasticf, lelastic_p
 USE control_grun,     ONLY : lb0_t
 USE control_pressure, ONLY : pmin, pmax
 USE temperature,      ONLY : tmin, tmax
@@ -537,8 +536,7 @@ USE color_mod,        ONLY : color
 USE data_files,       ONLY : flanhar, fl_el_cons
 USE elastic_constants, ONLY : get_ec_type, ec_present, ect_names, ecm_names
 USE postscript_files, ONLY : flpsanhar, flps_el_cons
-USE control_elastic_constants,  ONLY : lelastic, lelasticf, lelastic_p, &
-                             el_cons_t_available
+USE control_elastic_constants,  ONLY : lelastic, lelasticf, lelastic_p
 USE control_grun,     ONLY : lb0_t
 USE control_pressure, ONLY : pmin, pmax
 USE temperature,      ONLY : tmin, tmax
@@ -691,8 +689,7 @@ USE color_mod,        ONLY : color
 USE data_files,       ONLY : flanhar, fl_el_cons
 USE elastic_constants, ONLY : get_ec_type, ec_present, ect_names, ecm_names
 USE postscript_files, ONLY : flpsanhar, flps_el_cons
-USE control_elastic_constants,  ONLY : lelastic, lelasticf, lelastic_p, &
-                             el_cons_t_available
+USE control_elastic_constants,  ONLY : lelastic, lelasticf, lelastic_p
 USE control_grun,     ONLY : lb0_t
 USE control_pressure, ONLY : pmin, pmax, npress_plot, ipress_plot, press
 USE temperature,      ONLY : tmin, tmax
@@ -819,8 +816,7 @@ USE color_mod,        ONLY : color
 USE data_files,       ONLY : flanhar, fl_el_cons
 USE elastic_constants, ONLY : get_ec_type, ec_present, ect_names, ecm_names
 USE postscript_files, ONLY : flpsanhar, flps_el_cons
-USE control_elastic_constants,  ONLY : lelastic, lelasticf, lelastic_p, &
-                             el_cons_t_available
+USE control_elastic_constants,  ONLY : lelastic, lelasticf, lelastic_p
 USE control_grun,     ONLY : lb0_t
 USE control_pressure, ONLY : pmin, pmax
 USE temperature,      ONLY : temp, ntemp_plot, itemp_plot

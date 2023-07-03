@@ -1050,7 +1050,7 @@ MODULE control_elastic_constants
                                 ! means that the elastic constant have been
                                 ! read from file and are available
 
-  LOGICAL :: el_cons_t_available=.FALSE.  ! when this flag becomes true it
+  LOGICAL :: el_cons_geo_available=.FALSE.  ! when this flag becomes true it
                                 ! means that the elastic constants for each 
                                 ! geometry are available and can be 
                                 ! interpolated at each temperature

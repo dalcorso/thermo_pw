@@ -25,7 +25,8 @@ USE ph_freq_anharmonic,    ONLY : el_consf_t, el_compf_t, b0f_t
 USE control_macro_elasticity, ONLY: macro_el
 USE temperature,           ONLY : ntemp
 USE elastic_constants,     ONLY : el_con, el_compliances
-USE control_elastic_constants, ONLY : el_cons_available, el_cons_t_available, &
+USE control_elastic_constants, ONLY : el_cons_available,                 &
+                                  el_cons_geo_available,                 &
                                   el_cons_qha_available,                 &
                                   el_cons_qha_geo_available,             &
                                   el_consf_qha_available,                &
@@ -38,7 +39,7 @@ INTEGER :: itemp
 IF (lb0_t) THEN
    IF (el_cons_qha_geo_available.OR.el_consf_qha_geo_available) THEN
       CALL write_elastic_t_qha()
-   ELSEIF (el_cons_t_available) THEN
+   ELSEIF (el_cons_geo_available) THEN
       CALL write_elastic_t()
    ELSEIF(el_cons_qha_available.OR.el_consf_qha_available) THEN
 !

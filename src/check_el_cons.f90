@@ -11,7 +11,7 @@ SUBROUTINE check_el_cons()
   !  This routine tries to read the elastic constants from file for all
   !  the geometries considered in the calculation.
   !  If it finds one geometry it sets el_cons_available to true.
-  !  If it finds all geometries it sets also el_cons_t_available to true.
+  !  If it finds all geometries it sets also el_cons_geo_available to true.
   !  In the variables el_cons and el_compliances and macro_el it sets
   !  the elastic properties of the central geometry if available or of
   !  the last geometry read if not available.
@@ -25,7 +25,7 @@ SUBROUTINE check_el_cons()
                                 print_elastic_constants, &
                                 print_elastic_compliances
   USE control_elastic_constants, ONLY : el_cons_available, frozen_ions, &
-                                        el_cons_t_available, el_con_geo
+                                        el_cons_geo_available, el_con_geo
   USE control_macro_elasticity,  ONLY : macro_el
   USE thermo_mod,        ONLY : tot_ngeo, no_ph
   USE data_files,        ONLY : fl_el_cons
@@ -44,7 +44,7 @@ SUBROUTINE check_el_cons()
   el_con_geo=0.0_DP
   found=.FALSE.
   el_cons_available=.FALSE.
-  el_cons_t_available=.FALSE.
+  el_cons_geo_available=.FALSE.
   DO igeo = 1, tot_ngeo
      CALL add_geometry_number('elastic_constants/', fl_el_cons, &
                                 filelastic, igeo)
@@ -77,9 +77,9 @@ SUBROUTINE check_el_cons()
 !  If the code arrives here we check if the elastic constants have been
 !  found for all geometries and in that case set the appropriate flag.
 ! 
-  el_cons_t_available=.TRUE.
+  el_cons_geo_available=.TRUE.
   DO igeo=1,tot_ngeo
-     el_cons_t_available=el_cons_t_available.AND.found(igeo)
+     el_cons_geo_available=el_cons_geo_available.AND.found(igeo)
   ENDDO     
 
   RETURN

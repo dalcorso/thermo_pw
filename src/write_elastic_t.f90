@@ -168,7 +168,7 @@ USE initial_conf,       ONLY : ibrav_save
 USE elastic_constants,  ONLY : write_el_cons_on_file, write_macro_el_on_file, &
                                write_sound_on_file, print_sound_velocities
 USE control_elastic_constants, ONLY : el_con_geo, lelastic_p, &
-                               el_cons_t_available
+                               el_cons_geo_available
 USE lattices,           ONLY : crystal_parameters
 USE control_thermo,     ONLY : ltherm_dos, ltherm_freq
 USE control_macro_elasticity, ONLY: macro_el
@@ -193,7 +193,7 @@ INTEGER :: compute_nwork
 lelastic_p=.FALSE.
 IF (npress==0) RETURN
 CALL check_el_cons()
-IF (.NOT.el_cons_t_available) RETURN
+IF (.NOT.el_cons_geo_available) RETURN
 
 ibrav=ibrav_geo(1)
 nvar=crystal_parameters(ibrav)
@@ -318,7 +318,7 @@ USE elastic_constants,  ONLY : write_el_cons_on_file, write_macro_el_on_file, &
                                print_macro_elasticity, &
                                compute_elastic_compliances
 USE control_elastic_constants, ONLY : el_con_geo, lelastic_p, &
-                               el_cons_t_available
+                               el_cons_geo_available
 USE thermo_sym,         ONLY : laue
 USE geometry_file,      ONLY : press_file
 USE control_thermo,     ONLY : lgeo_from_file
@@ -334,7 +334,7 @@ INTEGER :: i, j, idata, itemp, ipress
 lelastic_p=.FALSE.
 IF (.NOT.lgeo_from_file) RETURN
 CALL check_el_cons()
-IF (.NOT.el_cons_t_available) RETURN
+IF (.NOT.el_cons_geo_available) RETURN
 
 ALLOCATE(el_cons_p(6,6,ngeo(1)))
 ALLOCATE(el_comp_p(6,6,ngeo(1)))

@@ -247,7 +247,7 @@ USE io_global,             ONLY : ionode, stdout
 USE mp,                    ONLY : mp_sum
 USE mp_world,              ONLY : world_comm
 
-USE control_elastic_constants, ONLY : lelastic, lelasticf, el_cons_t_available
+USE control_elastic_constants, ONLY : lelastic, lelasticf
 
 IMPLICIT NONE
 INTEGER :: itemp, itempp, igeom, startt, lastt, idata, ndata
