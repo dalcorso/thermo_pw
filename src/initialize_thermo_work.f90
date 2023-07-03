@@ -189,7 +189,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
 !
         CASE ('mur_lc')
            lpart2_pw=lel_free_energy
-           do_punch=.FALSE.
+           do_punch=lel_free_energy
            lev_syn_1=.TRUE.
            lpwscf_syn_1=do_scf_relax
            CALL initialize_mur(nwork)
