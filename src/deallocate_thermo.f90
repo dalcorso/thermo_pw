@@ -90,7 +90,8 @@ SUBROUTINE deallocate_thermo()
   USE control_elastic_constants, ONLY : rot_mat, el_con_geo, &
                              el_con_ibrav_geo, el_con_celldm_geo, &
                              el_con_tau_crys_geo, el_con_omega_geo, &
-                             epsil_geo
+                             epsil_geo, all_geometry_done_geo,     &
+                             found_dos_ec, found_ph_ec
   USE control_pressure, ONLY : press_plot, ipress_plot
   USE control_vol,      ONLY : ivol_plot
   USE control_debye,    ONLY : deb_energy, deb_free_energy, deb_entropy, &
@@ -121,6 +122,8 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (omega_geo) )       DEALLOCATE(omega_geo) 
   IF ( ALLOCATED (ibrav_geo) )       DEALLOCATE(ibrav_geo) 
   IF ( ALLOCATED (no_ph) )           DEALLOCATE(no_ph) 
+  IF ( ALLOCATED (found_dos_ec) )    DEALLOCATE(found_dos_ec) 
+  IF ( ALLOCATED (found_ph_ec) )     DEALLOCATE(found_ph_ec) 
   IF ( ALLOCATED (in_degree) )       DEALLOCATE(in_degree) 
   IF ( ALLOCATED (dynmat_on_file) )  DEALLOCATE(dynmat_on_file) 
   IF ( ALLOCATED (vmin_t) )          DEALLOCATE(vmin_t) 
@@ -128,6 +131,7 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (keden) )           DEALLOCATE(keden) 
   IF ( ALLOCATED (nk_test) )         DEALLOCATE(nk_test) 
   IF ( ALLOCATED (sigma_test) )      DEALLOCATE(sigma_test) 
+  IF ( ALLOCATED (all_geometry_done_geo)) DEALLOCATE(all_geometry_done_geo)
 
   IF ( ALLOCATED (ph_free_ener) )    DEALLOCATE(ph_free_ener)
   IF ( ALLOCATED (ph_ener) )         DEALLOCATE(ph_ener)

@@ -20,8 +20,9 @@ SUBROUTINE check_all_geometries_done(all_geometry_done)
 
 USE thermo_mod, ONLY : tot_ngeo, no_ph, start_geometry, last_geometry
 USE control_elastic_constants, ONLY : start_geometry_qha, last_geometry_qha, &
-                       ngeom
+                       ngeom, all_geometry_done_geo
 USE output, ONLY : fildyn
+USE io_global, ONLY : stdout
 
 IMPLICIT NONE
 
@@ -36,14 +37,17 @@ IF ((start_geometry/=((start_geometry_qha-1)*work_base+1)) &
    .OR.(last_geometry/=(last_geometry_qha*work_base))) RETURN
 
 all_geometry_done=.TRUE.
-DO igeom_qha=start_geometry_qha, last_geometry_qha
+DO igeom_qha=1, ngeom
+   all_geometry_done_geo(igeom_qha)=.TRUE.
    DO iwork=1,work_base
       igeom=(igeom_qha-1)*work_base+iwork
       IF (no_ph(igeom)) CYCLE
       CALL set_fildyn_name(igeom)
+      IF (all_geometry_done_geo(igeom_qha)) all_geometry_done_geo(igeom_qha)=&
+         all_geometry_done_geo(igeom_qha).AND.check_dyn_file_exists(fildyn)
       IF (all_geometry_done) all_geometry_done=all_geometry_done.AND. &
-           check_dyn_file_exists(fildyn)
-      IF (.NOT.all_geometry_done) RETURN
+         all_geometry_done_geo(igeom_qha) 
+!      IF (.NOT.all_geometry_done) RETURN
    ENDDO
 ENDDO
 !
@@ -51,7 +55,7 @@ ENDDO
 !!  dynamical matrices for the missing geometries are on file and
 !!  we read the thermal properties of the geometries not computed in this run
 !!
-!CALL check_thermo_all_geo()
+CALL check_thermo_all_geo()
 
 RETURN
 END SUBROUTINE check_all_geometries_done

@@ -378,8 +378,6 @@ IF (.NOT.(el_cons_qha_available.OR.el_consf_qha_available)) &
 !  at the crystal parameters found in the quadratic/quartic fit
 !
 CALL set_elastic_constants_t()
-CALL write_elastic_pt()
-CALL write_elastic_ptt()
 
 IF (ltherm_dos) THEN
    CALL write_anhar_anis()

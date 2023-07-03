@@ -10,7 +10,11 @@ SUBROUTINE plot_elastic_t(iflag, with_s)
 !---------------------------------------------------------------------
 !
 !  This is a driver to plot the elastic constants as a function of
-!  temperature
+!  temperature or pressure
+!  iflag    0   elastic constants as a function of temperature
+!           1   elastic compliances as a function of temperature
+!           2   elastic constants as a function of pressure
+!           3   elastic compliances as a function of pressure
 !
 USE kinds,            ONLY : DP
 USE constants,        ONLY : ry_kbar
@@ -37,6 +41,7 @@ INTEGER :: ibrav
 INTEGER :: ierr, system
 
 IF ( my_image_id /= root_image ) RETURN
+
 IF (.NOT.(lelastic.OR.lelasticf.OR.lelastic_p).OR..NOT.lb0_t) RETURN
 
 ibrav=ibrav_geo(1)
@@ -69,6 +74,7 @@ ELSE
       IF (with_s) CALL errore('plot_elastic_t','Called in the wrong case',1)
    ENDIF
 ENDIF
+
 CALL gnuplot_start(gnu_filename)
 
 IF (iflag<2) THEN
@@ -453,14 +459,14 @@ SUBROUTINE plot_one_elastic_constant(i, j, label, lelastic, lelasticf, &
 USE gnuplot, ONLY : gnuplot_ylabel, &
                     gnuplot_write_file_mul_data
 USE color_mod, ONLY : color
-USE control_elastic_constants, ONLY : ngeom
+USE control_elastic_constants, ONLY : ngeom, all_geometry_done_geo
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: i, j
 LOGICAL, INTENT(IN) :: lelastic, lelasticf, with_s
 CHARACTER(LEN=*) :: label
 CHARACTER(LEN=256), INTENT(IN) :: filelastic, filelastic_s
 
-INTEGER :: igeom
+INTEGER :: igeom, last_ngeom
 CHARACTER(LEN=256) :: filename, filename_s
 CHARACTER(LEN=6) :: int_to_char
 
@@ -471,6 +477,11 @@ IF (with_s.AND.ngeom>1) CALL errore('plot_one_elastic_constant',&
 filename=TRIM(filelastic)//"_ph"
 filename_s=TRIM(filelastic_s)//"_ph"
 
+last_ngeom=1
+DO igeom=1,ngeom
+   IF (all_geometry_done_geo(igeom)) last_ngeom=igeom
+ENDDO
+
 CALL gnuplot_ylabel(TRIM(label),.FALSE.) 
 IF (lelastic) THEN
    IF (ngeom==1) THEN
@@ -478,10 +489,11 @@ IF (lelastic) THEN
                                                       .NOT.with_s,.FALSE.)
    ELSE
       DO igeom=1, ngeom
+         IF (.NOT.all_geometry_done_geo(igeom)) CYCLE
          filename=TRIM(filelastic)//".g"//TRIM(int_to_char(igeom))
          ic=MOD(igeom-1,8)+1
          CALL gnuplot_write_file_mul_data(filename,i,j,color(ic),&
-                   (igeom==1), (igeom==ngeom).AND..NOT.lelasticf,.FALSE.)
+                   (igeom==1), (igeom==last_ngeom).AND..NOT.lelasticf,.FALSE.)
       END DO
    ENDIF
    IF (with_s) &
@@ -497,10 +509,11 @@ IF (lelasticf) THEN
 !   In this case with_s is false
 !
       DO igeom=1, ngeom
+         IF (.NOT.all_geometry_done_geo(igeom)) CYCLE
          filename=TRIM(filelastic)//".g"//TRIM(int_to_char(igeom))//"_ph"
          ic=MOD(igeom-1,8)+1
          CALL gnuplot_write_file_mul_data(filename,i,j,color(ic), &
-             .NOT.lelastic.AND.(igeom==1), (igeom==ngeom),.FALSE.)
+             .NOT.lelastic.AND.(igeom==1), (igeom==last_ngeom),.FALSE.)
       ENDDO
    ENDIF
    IF (with_s) &

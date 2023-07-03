@@ -17,13 +17,14 @@ USE thermo_mod,        ONLY : energy_geo, tot_ngeo
 USE control_elastic_constants, ONLY : ngeo_strain, elcpvar, ngeom, &
                               work_base, el_con_omega_geo,         &
                               start_geometry_qha, last_geometry_qha, &
-                              lelastic, lelasticf
+                              lelastic, lelasticf, all_geometry_done_geo
 USE initial_conf,      ONLY : ibrav_save
 USE thermo_sym,        ONLY : laue
 USE elastic_constants, ONLY : epsilon_geo, el_con, el_compliances,         &
                               compute_elastic_constants_ene,               &
                               write_el_cons_on_file  
 USE thermodynamics,    ONLY : ph_free_ener
+USE control_thermo,  ONLY : lstress
 USE ph_freq_thermodynamics, ONLY : phf_free_ener
 USE el_thermodynamics, ONLY : el_ener, el_free_ener, el_entr, el_ce
 USE anharmonic,        ONLY : el_cons_t, el_comp_t, b0_t
@@ -39,13 +40,14 @@ USE mp,                ONLY : mp_sum
 IMPLICIT NONE
 
 REAL(DP), ALLOCATABLE :: free_energy_geo(:), epsilon_geo_loc(:,:,:)
-INTEGER :: itemp, startt, lastt, igeom, base_ind
+INTEGER :: itemp, startt, lastt, igeom, base_ind, iwork
 CHARACTER(LEN=256)  :: filelastic, filename, filedata
 CHARACTER(LEN=6) :: int_to_char
-LOGICAL :: all_geometry_done, all_el_free, exst, ldummy, check_file_exists
+LOGICAL :: all_geometry_done, all_el_free, exst, ldummy, check_file_exists, &
+           all_found, run
 
 CALL check_all_geometries_done(all_geometry_done)
-IF (.NOT.all_geometry_done) RETURN
+!IF (.NOT.all_geometry_done) RETURN
 IF (lel_free_energy) THEN
    CALL check_all_el_free_ener_done(all_el_free)
    IF (.NOT.all_el_free) CALL errore('manage_anhar',&
@@ -74,11 +76,27 @@ ELSE
 CALL divide(world_comm, ntemp, startt, lastt)
 ALLOCATE(free_energy_geo(work_base))
 ALLOCATE(epsilon_geo_loc(3,3,work_base))
+ALLOCATE(lstress(work_base*ngeom))
+lstress=.FALSE.
 
-DO igeom=start_geometry_qha, last_geometry_qha
+DO igeom=1, ngeom
    base_ind=(igeom-1)*work_base
    el_cons_t=0.0_DP
    el_consf_t=0.0_DP
+   IF (.NOT.all_geometry_done_geo(igeom)) CYCLE
+!
+!  If for some geometry the energy is not available, try to read it
+!  from the restart file. If not available for some geometry the elastic
+!  constants are not computed for this igeom.
+!
+   all_found=.TRUE.
+   DO iwork=1,work_base
+      run=.FALSE.
+      IF (energy_geo(base_ind+iwork)==0.0_DP) &
+           CALL check_existence(base_ind+iwork,1,run)
+      all_found=all_found.AND..NOT.run
+   ENDDO
+   IF (.NOT.all_found) CYCLE
    DO itemp = startt, lastt
       WRITE(stdout,'(5x, 70("-"))') 
       WRITE(stdout,'(5x,"Computing elastic constants at temperature",&
@@ -145,6 +163,7 @@ ENDDO
 
 DEALLOCATE(free_energy_geo)
 DEALLOCATE(epsilon_geo_loc)
+DEALLOCATE(lstress)
 
 CALL plot_elastic_t(0,.FALSE.)
 CALL plot_elastic_t(1,.FALSE.)

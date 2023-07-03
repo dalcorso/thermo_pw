@@ -794,7 +794,7 @@ USE anharmonic_pt,  ONLY : alpha_anis_pt, vmin_pt, b0_pt, celldm_pt, beta_pt, &
                            v_pt, v_s_pt, density_pt, csmct_pt
 USE initial_conf,   ONLY : ibrav_save
 USE control_eldos,  ONLY : lel_free_energy
-USE control_elastic_constants, ONLY : lelastic
+USE control_elastic_constants, ONLY : lelastic_pt
 USE control_pressure, ONLY : press, npress_plot, ipress_plot
 USE elastic_constants, ONLY : compute_elastic_compliances, &
                               write_el_cons_on_file, print_macro_elasticity, &
@@ -835,7 +835,7 @@ DO ipressp=1, npress_plot
    CALL compute_beta(vmin_pt(:,ipressp), beta_pt(:,ipressp), temp, ntemp)
 
 
-   IF (lelastic) THEN
+   IF (lelastic_pt) THEN
       CALL isostress_heat_capacity(vmin_pt(:,ipressp), &
             el_cons_pt(:,:,:,ipressp), alpha_anis_pt(:,:,:,ipressp), &
             temp, cpmce_anis_pt(:,ipressp),ntemp)
@@ -922,7 +922,7 @@ DO ipressp=1, npress_plot
 !
 !   here auxiliary quantities calculated from the phonon dos
 !
-      IF (lelastic) THEN
+      IF (lelastic_pt) THEN
       !
       !   here the bulk modulus and the gruneisen parameter
       !
@@ -979,7 +979,7 @@ DO ipressp=1, npress_plot
          CALL write_heat_anhar_small(temp, ce_pt(:,ipressp), ntemp, filename)
       ENDIF
    ENDIF
-   IF (lelastic) THEN
+   IF (lelastic_pt) THEN
 !
 !   Here the elastic constants at constant entropy
 !
@@ -1053,7 +1053,7 @@ USE el_anharmonic,  ONLY : el_ce_ptt
 USE control_eldos,  ONLY : lel_free_energy
 USE initial_conf,   ONLY : ibrav_save
 USE control_eldos,  ONLY : lel_free_energy
-USE control_elastic_constants, ONLY : lelastic
+USE control_elastic_constants, ONLY : lelastic_ptt
 USE control_pressure, ONLY : press, npress
 USE temperature,    ONLY : temp, ntemp_plot, itemp_plot
 USE elastic_constants, ONLY : compute_elastic_compliances, &
@@ -1104,7 +1104,7 @@ DO itempp=1, ntemp_plot
                        vmin_ptt_m1(:,itempp), beta_ptt(:,itempp), &
                        press, npress)
 
-   IF (lelastic) THEN
+   IF (lelastic_ptt) THEN
       CALL isostress_heat_capacity(vmin_ptt(:,itempp),               &
             el_cons_ptt(:,:,:,itempp), alpha_anis_ptt(:,:,:,itempp), &
             temp, cpmce_anis_ptt(:,itempp),npress)
@@ -1195,7 +1195,7 @@ DO itempp=1, ntemp_plot
 !
 !   here auxiliary quantities calculated from the phonon dos
 !
-      IF (lelastic) THEN
+      IF (lelastic_ptt) THEN
       !
       !   here the bulk modulus and the gruneisen parameter
       !
@@ -1255,7 +1255,7 @@ DO itempp=1, ntemp_plot
                                                         npress, filename)
       ENDIF
    ENDIF
-   IF (lelastic) THEN
+   IF (lelastic_ptt) THEN
 !
 !   Here the elastic constants at constant entropy
 !

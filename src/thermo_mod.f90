@@ -1045,6 +1045,10 @@ MODULE control_elastic_constants
                                 ! available in some approximation
   LOGICAL :: lelastic_p=.FALSE. ! elastic constants as a function of pressure
                                 ! available
+  LOGICAL :: lelastic_pt=.FALSE. ! elastic constants as a function of 
+                                ! temperature for a few pressures available
+  LOGICAL :: lelastic_ptt=.FALSE. ! elastic constants as a function of 
+                                ! pressure for a few temperatures available
                                 !
   LOGICAL :: el_cons_available=.FALSE.  ! when this flag becomes true it
                                 ! means that the elastic constant have been
@@ -1093,6 +1097,25 @@ MODULE control_elastic_constants
   INTEGER :: start_geometry_qha ! initial geometry calculated in this run
 
   INTEGER :: last_geometry_qha  ! last_geometry calculated in this run 
+
+  LOGICAL, ALLOCATABLE :: all_geometry_done_geo(:) ! for each unperturbed
+                                ! geometry it is true if all dynamical
+                                ! matrices of that geometry are computed
+
+  INTEGER :: fndos_ec           ! number of qha elastic constants found on file
+                                ! free energy computed from phonon dos
+
+  INTEGER :: fnph_ec            ! number of qha elastic constants found on file
+                                ! free energy computed from direct integral
+
+  INTEGER :: f_geodos_ec        ! the first geometry that has qha ec
+
+  INTEGER :: f_geoph_ec         ! the first geometry that has qha ec
+
+  LOGICAL, ALLOCATABLE :: found_dos_ec(:) ! for each geometry it is true if
+                                ! qha elastic constant have been found
+  LOGICAL, ALLOCATABLE :: found_ph_ec(:) ! for each geometry it is true if
+                                ! qha elastic constant have been found
 
 END MODULE control_elastic_constants
   !

@@ -39,8 +39,12 @@ INTEGER :: itemp
 IF (lb0_t) THEN
    IF (el_cons_qha_geo_available.OR.el_consf_qha_geo_available) THEN
       CALL write_elastic_t_qha()
+      CALL write_elastic_pt_qha()
+      CALL write_elastic_ptt_qha()
    ELSEIF (el_cons_geo_available) THEN
       CALL write_elastic_t()
+      CALL write_elastic_pt()
+      CALL write_elastic_ptt()
    ELSEIF(el_cons_qha_available.OR.el_consf_qha_available) THEN
 !
 !  In this case do nothing because el_cons_t and el_comp_t or

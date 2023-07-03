@@ -58,7 +58,7 @@ LOGICAL             :: check_dyn_file_exists
 
 IF (check_dyn_file_exists(fildyn)) dynmat_on_file(igeom)=.TRUE.
 IF (after_disp.AND..NOT.dynmat_on_file(igeom)) &
-   CALL errore('check_dynmat_on_file','after_disp but dynamical matrix &
+   CALL errore('check_dynmat_on_file_1g','after_disp but dynamical matrix &
                       &files not found', 1)
 RETURN
 END SUBROUTINE check_dynmat_on_file_1g

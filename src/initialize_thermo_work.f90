@@ -38,7 +38,9 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   USE control_elastic_constants, ONLY : rot_mat, ngeom, use_free_energy,   &
                                    elalgen, work_base, start_geometry_qha, &
                                    last_geometry_qha, elastic_algorithm,   &
-                                   el_con_omega_geo, el_con_geo
+                                   el_con_omega_geo, el_con_geo,           &
+                                   all_geometry_done_geo, found_dos_ec,    &
+                                   found_ph_ec
   USE control_eldos, ONLY : lel_free_energy
   USE gvecw,          ONLY : ecutwfc
   USE gvect,          ONLY : ecutrho
@@ -294,6 +296,9 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            lev_syn_2=.TRUE.
            tot_ngeo=nwork
            ALLOCATE(no_ph(tot_ngeo))
+           ALLOCATE(found_dos_ec(tot_ngeo))
+           ALLOCATE(found_ph_ec(tot_ngeo))
+           ALLOCATE(all_geometry_done_geo(tot_ngeo))
            IF (reduced_grid) ALLOCATE(in_degree(tot_ngeo))
            CALL initialize_no_ph(no_ph, tot_ngeo, ibrav_save)
            CALL summarize_geometries(nwork)
@@ -313,7 +318,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            IF (.NOT.lph) lpart2_pw=lel_free_energy
            lq2r = use_free_energy
            ltherm = use_free_energy
-           do_punch=use_free_energy
+           do_punch=(use_free_energy.OR.lel_free_energy)
            CALL initialize_mur_qha(ngeom)
            IF (start_geometry_qha<1) start_geometry_qha=1
            IF (last_geometry_qha>ngeom) last_geometry_qha=ngeom
@@ -323,6 +328,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            last_geometry=MIN(last_geometry_qha*work_base, last_geometry)
            tot_ngeo=nwork
            ALLOCATE(energy_geo(tot_ngeo))
+           ALLOCATE(all_geometry_done_geo(ngeom))
            IF (.NOT.lph) ALLOCATE(el_con_geo(6,6,ngeom))
            ALLOCATE(no_ph(tot_ngeo))
            IF (lel_free_energy) ALLOCATE(ef_geo(tot_ngeo))
