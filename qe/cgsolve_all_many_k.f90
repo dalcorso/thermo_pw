@@ -81,7 +81,9 @@ SUBROUTINE cgsolve_all_many_k (ch_psi, cg_psi, e, d0psi, dpsi_d, h_diag,  &
 
   implicit none
 
+#if defined(__CUDA)
 #include<cgsolve_all_interf.f90>
+#endif
   !
   !   first the I/O variables
   !

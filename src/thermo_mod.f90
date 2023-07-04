@@ -364,7 +364,7 @@ MODULE anharmonic
 !   The variables needed to describe the anharmonic quantities calculated
 !   from the minimum of the free energy fitted by an equation of state.
 !   Quantities obtained from the free energy calculated from
-!   the phonon dos
+!   the phonon dos.
 !
   USE kinds, ONLY: DP
   USE polynomial,  ONLY : poly1, poly2, poly3, poly4
@@ -494,8 +494,7 @@ MODULE anharmonic_pt
   REAL(DP), ALLOCATABLE :: b0_pt(:,:)    ! bulk modulus for all T
   REAL(DP), ALLOCATABLE :: b01_pt(:,:)   ! pressure derivative of b0
   REAL(DP), ALLOCATABLE :: b02_pt(:,:)   ! second pressure derivative of b0
-  REAL(DP), ALLOCATABLE :: emin_pt(:,:)  ! gibbs energy at the minimum
-
+  REAL(DP), ALLOCATABLE :: emin_pt(:,:)  ! Gibbs energy at the minimum
 !
 !  Interpolated harmonic quantities
 !
@@ -517,10 +516,9 @@ MODULE anharmonic_pt
   REAL(DP), ALLOCATABLE :: beta_pt(:,:)  ! the thermal expansion as a
                                          ! function of temperature for 
                                          ! selected pressures
-                                         ! geometries
-  REAL(DP), ALLOCATABLE :: b0_s_pt(:,:)  ! The bulk modulus at constant
+  REAL(DP), ALLOCATABLE :: b0_s_pt(:,:)  ! the bulk modulus at constant
                                          ! entropy 
-  REAL(DP), ALLOCATABLE :: gamma_pt(:,:) ! The average gruneisen parameter
+  REAL(DP), ALLOCATABLE :: gamma_pt(:,:) ! the average Gruneisen parameter
 !
 ! Anharmonic quantities for anisotropic thermodynamic
 !
@@ -529,11 +527,10 @@ MODULE anharmonic_pt
   REAL(DP), ALLOCATABLE :: alpha_anis_pt(:,:,:,:) ! the thermal expansion
   REAL(DP), ALLOCATABLE :: cpmce_anis_pt(:,:)    ! the difference cp-ce
   REAL(DP), ALLOCATABLE :: bths_pt(:,:,:,:)      ! the thermal stress
-  REAL(DP), ALLOCATABLE :: ggamma_pt(:,:,:,:)    ! the generalized gruneisen
-
+  REAL(DP), ALLOCATABLE :: ggamma_pt(:,:,:,:)    ! the generalized Gruneisen
+                                                 ! parameters
   REAL(DP), ALLOCATABLE :: csmct_pt(:,:,:,:) ! isoentropic elastic constants
                                              ! - isothermal ones
-
   REAL(DP), ALLOCATABLE :: el_cons_pt(:,:,:,:)   ! isothermal elast. cons.
   REAL(DP), ALLOCATABLE :: el_comp_pt(:,:,:,:)   ! isothermal elast. comp.
   REAL(DP), ALLOCATABLE :: el_cons_s_pt(:,:,:,:) ! isoentropic elast. cons.
@@ -569,8 +566,10 @@ MODULE anharmonic_ptt
   REAL(DP), ALLOCATABLE :: b02_ptt(:,:)   ! the second pressure derivative 
                                           ! of b0
   REAL(DP), ALLOCATABLE :: emin_ptt(:,:)  ! the Gibbs energy at the minimum
-  REAL(DP), ALLOCATABLE :: emin_ptt_p1(:,:)  ! the Gibbs energy at the minimum
-  REAL(DP), ALLOCATABLE :: emin_ptt_m1(:,:)  ! the Gibbs energy at the minimum
+  REAL(DP), ALLOCATABLE :: emin_ptt_p1(:,:) ! the Gibbs energy at the minimum
+                                          ! for all P at T+deltat
+  REAL(DP), ALLOCATABLE :: emin_ptt_m1(:,:) ! the Gibbs energy at the minimum
+                                          ! for all P at T-deltat
 !
 !  The interpolated harmonic quantities
 !
@@ -585,21 +584,22 @@ MODULE anharmonic_ptt
   REAL(DP), ALLOCATABLE :: cp_ptt(:,:)    ! the constant pressure heat 
                                           ! capacity
   REAL(DP), ALLOCATABLE :: b0_s_ptt(:,:)  ! the isoentropic bulk modulus
-  REAL(DP), ALLOCATABLE :: gamma_ptt(:,:) ! The average gruneisen parameter
+  REAL(DP), ALLOCATABLE :: gamma_ptt(:,:) ! the average Gruneisen parameter
 !
 ! Anharmonic quantities for anisotropic thermodynamics
 !
   REAL(DP), ALLOCATABLE :: celldm_ptt(:,:,:)      ! the crystal parameters 
   REAL(DP), ALLOCATABLE :: celldm_ptt_p1(:,:,:)   ! the crystal parameters at
-                                                  ! a close temperature 
+                                                  ! T+deltat
   REAL(DP), ALLOCATABLE :: celldm_ptt_m1(:,:,:)   ! the crystal parameters at
-                                                  ! a close temperature
-  REAL(DP), ALLOCATABLE :: alpha_anis_ptt(:,:,:,:)!the thermal expansion tensor
+                                                  ! T-deltat
+  REAL(DP), ALLOCATABLE :: alpha_anis_ptt(:,:,:,:)! the thermal expansion 
+                                                  ! tensor
   REAL(DP), ALLOCATABLE :: density_ptt(:,:)       ! the density
   REAL(DP), ALLOCATABLE :: cpmce_anis_ptt(:,:)    ! the difference cp-ce
   REAL(DP), ALLOCATABLE :: bths_ptt(:,:,:,:)      ! the thermal stress
-  REAL(DP), ALLOCATABLE :: ggamma_ptt(:,:,:,:)    ! the generalized gruneisen
-
+  REAL(DP), ALLOCATABLE :: ggamma_ptt(:,:,:,:)    ! the generalized Gruneisen
+                                                  ! parameters
   REAL(DP), ALLOCATABLE :: csmct_ptt(:,:,:,:) ! isoentropic elastic constants
                                              ! - isothermal ones
   REAL(DP), ALLOCATABLE :: el_cons_ptt(:,:,:,:)    ! isothermal elast. cons.
@@ -620,7 +620,7 @@ MODULE anharmonic_vt
 !   The variables needed to describe the anharmonic quantities calculated
 !   from the minimum of the Helmholtz free energy fitted by an equation 
 !   of state plus a polynomial. These variables are computed at all 
-!   temperatures for selected volume.
+!   temperatures for selected volumes.
 !
   USE kinds, ONLY: DP
   SAVE
@@ -628,7 +628,6 @@ MODULE anharmonic_vt
                            ! of volume for selected temperatures
   REAL(DP), ALLOCATABLE :: press_vtt(:,:) ! the thermal pressure as a function
                            ! of temperature for selected volumes
-
 END MODULE anharmonic_vt
 
 !----------------------------------------------------------------------------
