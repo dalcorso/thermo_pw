@@ -333,9 +333,11 @@ inside the \texttt{thermo\_pw}\ directory, produces the executable
 and linked in the \qe\ \texttt{bin/} directory.
 
 Starting from version 1.5.1 \texttt{thermo\_pw}\ can be compiled also
-with \texttt{cmake}. After writing \texttt{make join\_qe} follow the 
+with \texttt{cmake}. The command \texttt{make join\_qe} substitutes
+the \texttt{CMakeLists.txt} file of QE with the one contained
+in \texttt{thermo\_pw}. After writing \texttt{make join\_qe} follow the 
 QE instructions to compile using \texttt{cmake}. Two new commands are
-available: \texttt{make thermo\_pw} produces the \texttt{thermo\_pw.x}  
+available: \texttt{make thermo\_pw} produces \texttt{thermo\_pw.x}  
 and \texttt{make tpw\_tools} produces the tools codes.
 
 \thermo\ has been written on a PC with the Linux operating system using a

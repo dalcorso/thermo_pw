@@ -52,6 +52,134 @@ target_link_libraries(qe_tpw_lib
         qe_openmp_fortran
         qe_mpi_fortran)
 
+set(src_tpw_fftpack5.1
+    fftpack5.1/cfft1b_dev.f90
+    fftpack5.1/cfft1f_dev.f90
+    fftpack5.1/cfft1i_dev.f90
+    fftpack5.1/c1f2kb_dev.f90
+    fftpack5.1/c1f2kf_dev.f90
+    fftpack5.1/c1f3kb_dev.f90
+    fftpack5.1/c1f3kf_dev.f90
+    fftpack5.1/c1f4kb_dev.f90
+    fftpack5.1/c1f4kf_dev.f90
+    fftpack5.1/c1f5kf_dev.f90
+    fftpack5.1/c1f5kb_dev.f90
+    fftpack5.1/c1fgkb_dev.f90
+    fftpack5.1/c1fgkf_dev.f90
+    fftpack5.1/c1fm1b_dev.f90
+    fftpack5.1/c1fm1f_dev.f90
+    fftpack5.1/r8_factor_dev.f90
+    fftpack5.1/r8_mcfti1_dev.f90
+    fftpack5.1/r8_tables_dev.f90
+    fftpack5.1/xerfft_dev.f90)
+qe_enable_cuda_fortran("${src_tpw_fftpack5.1}")
+
+qe_add_library(qe_tpw_fftpack5.1 ${src_tpw_fftpack5.1})
+target_link_libraries(qe_tpw_fftpack5.1)
+target_include_directories(qe_tpw_fftpack5.1 PRIVATE fftpack5.1)
+
+set(src_tpw_lapack
+    lapack/dcabs1_dev.f90
+    lapack/dcopy_dev.f90
+    lapack/disnan_dev.f90
+    lapack/dladiv1_dev.f90
+    lapack/dladiv2_dev.f90
+    lapack/dladiv_dev.f90
+    lapack/dlae2_dev.f90
+    lapack/dlaebz_dev.f90
+    lapack/dlaev2_dev.f90
+    lapack/dlagtf_dev.f90
+    lapack/dlagts_dev.f90
+    lapack/dlaisnan_dev.f90
+    lapack/dlamc3_dev.f90
+    lapack/dlamch_dev.f90
+    lapack/dlanst_dev.f90
+    lapack/dlapy2_dev.f90
+    lapack/dlapy3_dev.f90
+    lapack/dlarnv_dev.f90
+    lapack/dlartg_dev.f90
+    lapack/dlaruv_dev.f90
+    lapack/dlascl_dev.f90
+    lapack/dlasrt_dev.f90
+    lapack/dlassq_dev.f90
+    lapack/dnrm2_dev.f90
+    lapack/dscal_dev.f90
+    lapack/dstebz_dev.f90
+    lapack/dsterf_dev.f90
+    lapack/dznrm2_dev.f90
+    lapack/idamax_dev.f90
+    lapack/ieeeck_dev.f90
+    lapack/ilaenv_dev.f90
+    lapack/ilazlc_dev.f90
+    lapack/ilazlr_dev.f90
+    lapack/iparmq_dev.f90
+    lapack/la_constants_dev.f90
+    lapack/la_xisnan_dev.f90
+    lapack/lsame_dev.f90
+    lapack/xerbla_dev.f90
+    lapack/zaxpy_dev.f90
+    lapack/zcopy_dev.f90
+    lapack/zdotc_dev.f90
+    lapack/zdscal_dev.f90
+    lapack/zgemm_dev.f90
+    lapack/zgemv_dev.f90
+    lapack/zgerc_dev.f90
+    lapack/zheev_dev.f90
+    lapack/zheevx_dev.f90
+    lapack/zhegs2_dev.f90
+    lapack/zhegst_dev.f90
+    lapack/zhegv_dev.f90
+    lapack/zhegvx_dev.f90
+    lapack/zhemm_dev.f90
+    lapack/zhemv_dev.f90
+    lapack/zher2_dev.f90
+    lapack/zher2k_dev.f90
+    lapack/zherk_dev.f90
+    lapack/zhetd2_dev.f90
+    lapack/zhetrd_dev.f90
+    lapack/zlacgv_dev.f90
+    lapack/zlacpy_dev.f90
+    lapack/zladiv_dev.f90
+    lapack/zlanhe_dev.f90
+    lapack/zlarfb_dev.f90
+    lapack/zlarf_dev.f90
+    lapack/zlarfg_dev.f90
+    lapack/zlarft_dev.f90
+    lapack/zlartg_dev.f90
+    lapack/zlascl_dev.f90
+    lapack/zlaset_dev.f90
+    lapack/zlasr_dev.f90
+    lapack/zlassq_dev.f90
+    lapack/zlatrd_dev.f90
+    lapack/zpotrf2_x_dev.f90
+    lapack/zpotrf_dev.f90
+    lapack/zscal_dev.f90
+    lapack/zstein_dev.f90
+    lapack/zsteqr_dev.f90
+    lapack/zswap_dev.f90
+    lapack/ztrmm_dev.f90
+    lapack/ztrmv_dev.f90
+    lapack/ztrsm_dev.f90
+    lapack/ztrsv_dev.f90
+    lapack/zung2l_dev.f90
+    lapack/zung2r_dev.f90
+    lapack/zungql_dev.f90
+    lapack/zungqr_dev.f90
+    lapack/zungtr_dev.f90
+    lapack/zunm2l_dev.f90
+    lapack/zunm2r_dev.f90
+    lapack/zunmql_dev.f90
+    lapack/zunmqr_dev.f90
+    lapack/zunmtr_dev.f90)
+
+qe_enable_cuda_fortran("${src_tpw_lapack}")
+
+qe_add_library(qe_tpw_lapack ${src_tpw_lapack})
+
+if (QE_ENABLE_CUDA) 
+   target_compile_options(qe_tpw_lapack PUBLIC "-cuda=charstring")
+endif()
+target_include_directories(qe_tpw_lapack PRIVATE lapack)
 
 set(src_tpw_qe
     qe/add_dkmds_tpw.f90
@@ -77,9 +205,13 @@ set(src_tpw_qe
     qe/check_initial_geometry.f90
     qe/check_initial_status_tpw.f90
     qe/ch_psi_all_tpw.f90
+    qe/ch_psi_all_dev.f90
     qe/cegterg_vk.f90
+    qe/cegterg_vk_dev.f90
+    qe/cgsolve_all_dev.f90
     qe/clean_all_pw.f90
     qe/collect_grid_files.f90
+    qe/compute_deff_dev.f90
     qe/compute_dvloc_tpw.f90
     qe/compute_drhous_nc_tpw.f90
     qe/compute_drhous_tpw.f90
@@ -102,6 +234,7 @@ set(src_tpw_qe
     qe/dvkb3_tpw.f90
     qe/dvqpsi_us_only_tpw.f90
     qe/dvqpsi_us_many_k.f90
+    qe/dvqpsi_dev.f90
     qe/dv_of_drho_clf.f90
     qe/dv_of_drho_tran.f90
     qe/dvqpsi_us_tpw.f90
@@ -116,11 +249,17 @@ set(src_tpw_qe
     qe/find_mode_sym.f90
     qe/float_to_char.f90
     qe/g_psi_tpw.f90
+    qe/g_psi_dev.f90
     qe/h_pcg_step.f90
+    qe/h_psi_dev.f90
     qe/h_psi_tpw.f90
+    qe/h_psi_gpu_tpw.f90
+    qe/hdiag_dev.f90
+    qe/incdrhoscf_dev.f90
     qe/initialize_ph_tpw.f90
     qe/init_representations_tpw.f90
     qe/init_run_tpw.f90
+    qe/init_us_2_kernel.f90
     qe/irrek.f90
     qe/kpoint_grid.f90
     qe/kpoint_grid_serial_tpw.f90
@@ -185,6 +324,8 @@ set(src_tpw_qe
     qe/solve_linear_system_many_k.f90
     qe/solve_linter_tpw.f90
     qe/solve_linter_many_k.f90
+    qe/s_psi_gpu_tpw.f90
+    qe/s_psi_ch_gpu.f90
     qe/star_q.f90
     qe/summarize_alpha.f90
     qe/sym_and_write_magnetic_charges.f90
@@ -194,16 +335,22 @@ set(src_tpw_qe
     qe/transform_intq_so.f90
     qe/tra_write_zstar.f90
     qe/vloc_psi_tpw.f90
+    qe/vloc_psi_gpu_tpw.f90
     qe/write_group_info_ph.f90
     qe/write_rec_tpw.f90
+    qe/ylm2_dev.f90
+    qe/ylmr2_dev.f90
     qe/zstar_eu_loc.f90
     qe/zstar_eu_tpw.f90
     qe/zstar_eu_us_tpw.f90)
 qe_enable_cuda_fortran("${src_tpw_qe}")
 
 qe_add_library(qe_tpw_qe ${src_tpw_qe})
+target_include_directories(qe_tpw_qe PRIVATE qe lapack fftpack5.1)
 target_link_libraries(qe_tpw_qe
     PRIVATE
+        qe_tpw_fftpack5.1
+        qe_tpw_lapack
         qe_tpw_lib
         qe_pw
         qe_phonon_ph
@@ -422,6 +569,8 @@ set_target_properties(qe_tpw_exe
         OUTPUT_NAME thermo_pw.x)
 target_link_libraries(qe_tpw_exe
     PRIVATE
+        qe_tpw_lapack
+        qe_tpw_fftpack5.1
         qe_tpw
         qe_tpw_qe
         qe_tpw_lib
@@ -849,6 +998,8 @@ target_link_libraries(qe_tpw_merge_interp_exe
 
 
 qe_install_targets(
+    qe_tpw_lapack
+    qe_tpw_fftpack5.1
     qe_tpw_lib
     qe_tpw_qe
     qe_tpw
