@@ -82,6 +82,7 @@ SUBROUTINE thermo_setup()
   USE fft_base,             ONLY : dfftp
   USE klist,                ONLY : degauss, ltetra
   USE control_flags,        ONLY : ethr
+  USE gnuplot,              ONLY : determine_backspace
   USE io_global,            ONLY : stdout
   USE mp_images,            ONLY : nimage
   USE mp_asyn,              ONLY : with_asyn_images
@@ -339,6 +340,11 @@ SUBROUTINE thermo_setup()
 !
    CALL initialize_file_names()
    CALL initialize_el_file_names()
+!
+!  Determine how the backspace is written on file. This is required by the
+!  gnuplot library
+!
+   CALL determine_backspace()
 
   RETURN
   !

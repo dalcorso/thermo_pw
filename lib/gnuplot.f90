@@ -18,6 +18,7 @@ MODULE gnuplot
     INTEGER :: contour_max
     INTEGER :: counterv=0
     CHARACTER(LEN=20), ALLOCATABLE :: contour_color(:)
+    LOGICAL :: lbackspace=.TRUE.
 
     PUBLIC iun_gnuplot, gnuplot_write_header, &
            gnuplot_write_vertical_line, gnuplot_write_horizontal_line, &
@@ -40,7 +41,8 @@ MODULE gnuplot
            gnuplot_set_contour, gnuplot_rectangle, gnuplot_polygon, &
            gnuplot_put_label, gnuplot_put_label_yl, gnuplot_circle, &
            gnuplot_line_v, gnuplot_rectangle_yl,&
-           gnuplot_line, gnuplot_print_objects, gnuplot_close_2dplot_prep
+           gnuplot_line, gnuplot_print_objects, gnuplot_close_2dplot_prep, &
+           determine_backspace
 
 CONTAINS
 
@@ -551,11 +553,11 @@ string=" """//TRIM(data_file)//""" u ($1*xscale-xshift):($2" &
             //"*fact-eref)*gfact w l lw "//TRIM(lw)//" lc rgb "//TRIM(color)
 
 IF (start) string="plot "//TRIM(string)
-#if defined (__PGI) || defined (__XLF)
-IF (.NOT.last) string=TRIM(string)//", \\"
-#else
-IF (.NOT.last) string=TRIM(string)//", \"
-#endif
+IF (lbackspace) THEN
+   IF (.NOT.last) string=TRIM(string)//", \ "
+ELSE
+   IF (.NOT.last) string=TRIM(string)//", \\"
+ENDIF
 IF (comment) string = '# ' // TRIM(string)
 
 IF (ionode) &
@@ -588,11 +590,11 @@ string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//"*xscale-xshi
             //")*fact-eref)*gfact w l lw 3 lc rgb "//TRIM(color)
 
 IF (start) string="plot "//TRIM(string)
-#if defined (__PGI) || defined (__XLF)
-IF (.NOT.last) string=TRIM(string)//", \\"
-#else
-IF (.NOT.last) string=TRIM(string)//", \"
-#endif
+IF (lbackspace) THEN
+   IF (.NOT.last) string=TRIM(string)//", \ "
+ELSE
+   IF (.NOT.last) string=TRIM(string)//", \\"
+ENDIF
 IF (comment) string = '# ' // TRIM(string)
 
 IF (ionode) &
@@ -625,11 +627,11 @@ string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//"*xscale-xshi
             //")*fact-eref)*gfact w l lw 3 lc rgb "//TRIM(color)
 
 IF (start) string="plot "//TRIM(string)
-#if defined (__PGI) || defined (__XLF)
-IF (.NOT.last) string=TRIM(string)//", \\"
-#else
-IF (.NOT.last) string=TRIM(string)//", \"
-#endif
+IF (lbackspace) THEN
+   IF (.NOT.last) string=TRIM(string)//", \ "
+ELSE
+   IF (.NOT.last) string=TRIM(string)//", \\"
+ENDIF
 IF (comment) string = '# ' // TRIM(string)
 
 IF (ionode) &
@@ -662,11 +664,11 @@ string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//"*xscale-xshi
       //")*fact-eref)*gfact w p pt 82 ps point_size lc rgb "//TRIM(color)
 
 IF (start) string="plot "//TRIM(string)
-#if defined (__PGI) || defined (__XLF)
-IF (.NOT.last) string=TRIM(string)//", \\"
-#else
-IF (.NOT.last) string=TRIM(string)//", \"
-#endif
+IF (lbackspace) THEN
+   IF (.NOT.last) string=TRIM(string)//", \ "
+ELSE
+   IF (.NOT.last) string=TRIM(string)//", \\"
+ENDIF
 IF (comment) string = '# ' // TRIM(string)
 
 IF (ionode) &
@@ -699,11 +701,11 @@ string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//"*xscale-xshi
             //")*fact-eref)*gfact w l lw 3 lc rgb "//TRIM(color)
 
 IF (start) string="plot "//TRIM(string)
-#if defined (__PGI) || defined (__XLF)
-IF (.NOT.last) string=TRIM(string)//", \\"
-#else
-IF (.NOT.last) string=TRIM(string)//", \"
-#endif
+IF (lbackspace) THEN
+   IF (.NOT.last) string=TRIM(string)//", \ "
+ELSE
+   IF (.NOT.last) string=TRIM(string)//", \\"
+ENDIF
 IF (comment) string = '# ' // TRIM(string)
 
 IF (ionode) &
@@ -736,11 +738,11 @@ string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//&
             //"*fact-eref)*gfact w l lw 3 lc rgb "//TRIM(color)
 
 IF (start) string="plot "//TRIM(string)
-#if defined (__PGI) || defined (__XLF)
-IF (.NOT.last) string=TRIM(string)//", \\"
-#else
-IF (.NOT.last) string=TRIM(string)//", \"
-#endif
+IF (lbackspace) THEN
+   IF (.NOT.last) string=TRIM(string)//", \ "
+ELSE
+   IF (.NOT.last) string=TRIM(string)//", \\"
+ENDIF
 IF (comment) string = '# ' // TRIM(string)
 
 IF (ionode) &
@@ -773,11 +775,11 @@ string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//&
             //"*fact-eref)*gfact) w l lw 3 lc rgb "//TRIM(color)
 
 IF (start) string="plot "//TRIM(string)
-#if defined (__PGI) || defined (__XLF)
-IF (.NOT.last) string=TRIM(string)//", \\"
-#else
-IF (.NOT.last) string=TRIM(string)//", \"
-#endif
+IF (lbackspace) THEN
+   IF (.NOT.last) string=TRIM(string)//", \ "
+ELSE
+   IF (.NOT.last) string=TRIM(string)//", \\"
+ENDIF
 IF (comment) string = '# ' // TRIM(string)
 
 IF (ionode) &
@@ -810,11 +812,11 @@ string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//&
             //"*fact-eref)*gfact w l lw 3 lc rgb "//TRIM(color)
 
 IF (start) string="plot "//TRIM(string)
-#if defined (__PGI) || defined (__XLF)
-IF (.NOT.last) string=TRIM(string)//", \\"
-#else
-IF (.NOT.last) string=TRIM(string)//", \"
-#endif
+IF (lbackspace) THEN
+   IF (.NOT.last) string=TRIM(string)//", \ "
+ELSE
+   IF (.NOT.last) string=TRIM(string)//", \\"
+ENDIF
 IF (comment) string = '# ' // TRIM(string)
 
 IF (ionode) &
@@ -847,11 +849,11 @@ string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//"*xscale-xshi
             //"*fact-eref)*gfact w p pt 82 ps point_size lc rgb "//TRIM(color)
 
 IF (start) string="plot "//TRIM(string)
-#if defined (__PGI) || defined (__XLF)
-IF (.NOT.last) string=TRIM(string)//", \\"
-#else
-IF (.NOT.last) string=TRIM(string)//", \"
-#endif
+IF (lbackspace) THEN
+   IF (.NOT.last) string=TRIM(string)//", \ "
+ELSE
+   IF (.NOT.last) string=TRIM(string)//", \\"
+ENDIF
 IF (comment) string = '# ' // TRIM(string)
 
 IF (ionode) &
@@ -886,11 +888,11 @@ string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//"*xscale-xshi
 
 IF (start) string="plot "//TRIM(string)
 IF (continue) string="replot "//TRIM(string)
-#if defined (__PGI) || defined (__XLF)
-IF (.NOT.last) string=TRIM(string)//", \\"
-#else
-IF (.NOT.last) string=TRIM(string)//", \"
-#endif
+IF (lbackspace) THEN
+   IF (.NOT.last) string=TRIM(string)//", \ "
+ELSE
+   IF (.NOT.last) string=TRIM(string)//", \\"
+ENDIF
 IF (comment) string = '# ' // TRIM(string)
 
 IF (ionode) &
@@ -1280,5 +1282,43 @@ ELSE
 ENDIF
 RETURN
 END SUBROUTINE set_ws_from_label
+
+!----------------------------------------------------------------------------
+  SUBROUTINE determine_backspace()
+!----------------------------------------------------------------------------
+  !
+  ! This routine has to be called once. It determines if the 
+  ! Fortran treats the backspace character as an escape (as in C)
+  ! or as a character as is usually the case.
+  ! lbackspace is set to .TRUE. in the second case.
+  ! This routine must be called by all processors.
+  !
+  ! If the routine is not called this module sets lbackspace to .TRUE..
+  !
+
+  USE mp,        ONLY : mp_bcast
+  USE mp_world,  ONLY : world_comm
+  USE io_global, ONLY : meta_ionode, meta_ionode_id
+  IMPLICIT NONE
+  INTEGER :: outunit, filesize
+  INTEGER :: find_free_unit
+
+  IF (meta_ionode) THEN 
+     outunit=find_free_unit()
+     OPEN(UNIT=outunit, FILE='test.txt', STATUS='unknown')
+     WRITE(outunit,'(a)') '\\'
+     CLOSE(UNIT=outunit,STATUS='KEEP')
+     OPEN(UNIT=outunit, FILE='test.txt', STATUS='old')
+     INQUIRE(UNIT=outunit, SIZE=filesize)
+     CLOSE(UNIT=outunit,STATUS='DELETE')
+  ENDIF
+  CALL mp_bcast(filesize, meta_ionode_id, world_comm)
+  IF (filesize==3) THEN
+     lbackspace=.TRUE.
+  ELSE
+     lbackspace=.FALSE.
+  ENDIF
+   
+  END SUBROUTINE determine_backspace
 
 END MODULE gnuplot
