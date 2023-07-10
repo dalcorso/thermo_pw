@@ -397,7 +397,7 @@ DO igeo=1, tot_ngeo
    f(ndata)=ph_e0(igeo)
 ENDDO
 !
-!  compute the geometry corresponding to the zero temperature
+!  compute the geometry corresponding to the lowest temperature
 !
 IF (lmurn) THEN
    x_pos_min(1)=vmin_t(1)

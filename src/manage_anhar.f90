@@ -37,7 +37,9 @@ LOGICAL :: all_geometry_done, all_el_free, ldummy
 CALL check_all_geometries_done(all_geometry_done)
 IF (.NOT.all_geometry_done) RETURN
 
-IF (lel_free_energy.AND..NOT.hot_electrons) THEN
+IF (hot_electrons) THEN
+   CALL manage_hot_electrons()
+ELSEIF (lel_free_energy) THEN
    CALL check_all_el_free_ener_done(all_el_free)
    IF (.NOT.all_el_free) CALL errore('manage_anhar',&
                         'missing electron thermodynamics',1)
@@ -65,7 +67,6 @@ ELSE
    emp_ce=0.0_DP
 ENDIF
 
-IF (hot_electrons) CALL manage_hot_electrons()
 
 IF (ltherm_dos) THEN
    WRITE(stdout,'(/,2x,76("-"))')
@@ -134,7 +135,7 @@ IF (ltherm_dos) THEN
 !  at several temperatures
 !
    IF (ltherm_glob) THEN
-      CALL write_anhar_glob_t() 
+      CALL write_anhar_glob_ptt() 
    ELSE
       CALL write_anhar_ptt() 
    ENDIF
@@ -214,7 +215,7 @@ CALL write_grun_anharmonic()
 !
 CALL manage_plot_anhar()
 !
-!   summarize the main anharmonic quantities of a solid
+!   summarize on output the main anharmonic quantities 
 !
 CALL summarize_anhar()
 RETURN
@@ -271,6 +272,11 @@ IF (lel_free_energy) THEN
                        el_ce(:,igeom), ldummy, filedata)
    ENDDO
    CALL restore_el_file_names()
+ELSE
+   el_ener=0.0_DP
+   el_free_ener=0.0_DP
+   el_entr=0.0_DP
+   el_ce=0.0_DP
 ENDIF
 !
 !    Anisotropic solid. Compute the crystal parameters, the thermal expansion 
@@ -430,13 +436,14 @@ ELSE
 ENDIF
 !
 !    calculate the Gruneisen parameters and the anharmonic quantities
-!    and plot them
 !
 CALL write_grun_anhar_anis()
-
+!
+!    and plot them
+!
 CALL manage_plot_anhar_anis()
 !
-!   summarize the main anharmonic quantities of a solid
+!   summarize on output the main anharmonic quantities 
 !
 CALL summarize_anhar()
 !

@@ -1388,7 +1388,7 @@ SUBROUTINE write_anhar_pt()
 !-----------------------------------------------------------------------
 !
 !   This routine writes on output the anharmonic quantities calculated
-!   at the volume that minimize the gibbs free energy (computed from 
+!   at the volume that minimizes the Gibbs free energy (computed from 
 !   phonon dos).
 !   In this routine the pressure is a parameter and the quantities
 !   are calculated as a function of temperature at selected pressures
@@ -1410,7 +1410,6 @@ LOGICAL :: subtract_el
 
 REAL(DP) :: aux(ntemp)
 !
-
 DO ipressp=1,npress_plot
 !
 !  Compute beta at several pressures if required in input
@@ -1426,7 +1425,7 @@ DO ipressp=1,npress_plot
       aux(:)=vmin_pt(:,ipressp)
    ENDIF
 !
-!  Compute the isobaric heat capacity, the isoentropic bulk modulus and
+!  Compute the isobaric heat capacity, the isoentropic bulk modulus, and
 !  the Gruneisen parameter. ce_pt must have been interpolated outside
 !  the routine
 !
@@ -1441,7 +1440,6 @@ DO ipressp=1,npress_plot
    CALL add_value(filename, press(ipress))
    CALL write_ener_beta_vol(temp, vmin_pt(:,ipressp), aux(:), &
                   emin_pt(:,ipressp), beta_pt(:,ipressp), ntemp, filename)
-
 !
 !  The bulk modulus and its derivative as a function of temperature at
 !  several pressures

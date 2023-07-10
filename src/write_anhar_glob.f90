@@ -6,7 +6,7 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !-------------------------------------------------------------------------
-SUBROUTINE write_anhar_glob_t()
+SUBROUTINE write_anhar_glob_ptt()
 !-------------------------------------------------------------------------
 !
 !  This routine computes the volume thermal expansion, the bulk modulus,
@@ -69,7 +69,7 @@ ENDDO
 DO itempp=1,ntemp_plot
    itemp=itemp_plot(itempp)
    CALL write_mur_pol_glob(vmin_t(itemp), b0_t(itemp), b01_t(itemp), &
-           b02_t(itemp), free_e_min_t(itemp), a_t(:,itemp), m1, itempp)
+           b02_t(itemp), free_e_min_t(itemp), itempp)
    CALL write_thermal_press(a_t(:,itemp), m1, itempp)
 
    DO ipress=startp,lastp
@@ -150,7 +150,7 @@ ENDIF
 DEALLOCATE(aux)
 
 RETURN
-END SUBROUTINE write_anhar_glob_t
+END SUBROUTINE write_anhar_glob_ptt
 !
 !-----------------------------------------------------------------------
 SUBROUTINE anhar_ev_glob_t()
@@ -457,15 +457,13 @@ RETURN
 END SUBROUTINE anhar_ev_glob_ptt
 !
 !----------------------------------------------------------------------
-SUBROUTINE write_mur_pol_glob(omega0, b0, b01, b02, emin, a_t, m1, itempp)
+SUBROUTINE write_mur_pol_glob(omega0, b0, b01, b02, emin, itempp)
 !----------------------------------------------------------------------
 !
 !  This routine writes on file the energy versus volume
 !  curve, together with the pressure versus volume curve. Depending
 !  on which equation of state has been used to interpolate the
 !  T=0 K energy, it calls the appropriate routine.
-!  It receives also the coefficients of the polynomial which interpolates
-!  the phonon (+ electron if available) free energy.
 !  It receives the parameters of the equation of state:
 !
 ! in input emin in Ry, omega0 in (a.u.)**3, b0 in kbar, b01 adimensional
@@ -488,12 +486,12 @@ USE io_global,        ONLY : meta_ionode
 
 IMPLICIT NONE
 
-REAL(DP), INTENT(IN) :: emin, omega0, b0, b01, b02, a_t(m1)
+REAL(DP), INTENT(IN) :: emin, omega0, b0, b01, b02
 INTEGER, INTENT(IN) :: itempp
 CHARACTER(LEN=256)   :: filename, filename1
 CHARACTER(LEN=8) :: float_to_char
 REAL(DP) :: omega, free, pres, e, p
-INTEGER  :: i, j, m1, iu_mur, itemp
+INTEGER  :: i, j, iu_mur, itemp
 INTEGER  :: find_free_unit
 
 itemp=itemp_plot(itempp)
