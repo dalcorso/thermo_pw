@@ -143,7 +143,7 @@ SUBROUTINE ev_sub(vmin,b0,b01,b02,emin_out,inputfile)
 ! par(3) = dB/dP (adimensional)
 ! par(4) = d^2B/dP^2 (in KBar^(-1), used only by 2nd order formulae)
 !
-     par(2) = 500.0d0
+     par(2) = 1000.0d0
      par(3) = 5.0d0
      par(4) = -0.01d0
 !
@@ -236,7 +236,7 @@ ENDDO
 ! par(3) = dB/dP (adimensional)
 ! par(4) = d^2B/dP^2 (in KBar^(-1), used only by 2nd order formulae)
 !
-par(2) = 500.0d0
+par(2) = 1000.0d0
 par(3) = 5.0d0
 par(4) = -0.01d0
 
