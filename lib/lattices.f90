@@ -656,7 +656,7 @@ CONTAINS
 !
 !  hexagonal case  D_6h or trigonal D_3d
 !
-        IF (ABS(tmod(1)-tmod(2))>eps1.AND.ABS(tmod(1)-tmod(3))>eps1) THEN
+        IF (ABS(tmod(1)-tmod(2))>eps1.OR.ABS(tmod(1)-tmod(3))>eps1) THEN
            DO isym=1,nsym
               ts=tipo_sym(sr(1,1,isym))
               IF (ts==3 .AND. ABS(angle_rot(sr(1,1,isym))-60.0_DP)<eps1 ) THEN
