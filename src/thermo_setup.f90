@@ -188,7 +188,7 @@ SUBROUTINE thermo_setup()
      IF (ABS(celldm(6))>eps1) &
         WRITE(stdout,'(5x,"celldm(6)= ", f15.10,",")') celldm(6)
 
-     WRITE(stdout,'(/,"ATOMIC COORDINATES (alat)")')
+     WRITE(stdout,'(/,"ATOMIC_POSITIONS (alat)")')
      DO ia=1,nat
         IF (if_pos(1,ia) /= 1 .OR. if_pos(2,ia) /= 1 .OR. if_pos(3,ia) /=1) &
            THEN
