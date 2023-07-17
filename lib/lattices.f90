@@ -358,6 +358,7 @@ CONTAINS
   cangle(1) = sp(1) / tmod(1) / tmod(2)
   cangle(2) = sp(2) / tmod(1) / tmod(3)
   cangle(3) = sp(3) / tmod(2) / tmod(3)
+
 !
 !  In order to find a possible global rotation of the input vector with
 !  respect to the standard orientation we use the rotation axis of the 
@@ -1876,7 +1877,7 @@ SELECT CASE (ibrav)
    CASE(4,5,6,7)
       cm(1)=x(1)
       IF (ibrav==5) THEN
-         cm(4)=x(2)
+         cm(4)=COS(x(2))
       ELSE
          cm(3)= x(2)
       ENDIF
