@@ -296,6 +296,8 @@ INTEGER :: i, j, idata, itemp, ipressp, ipress, startt, lastt, &
                  pdelc_dos, pdelc_ph
 INTEGER :: compute_nwork 
 
+IF (npress_plot==0) RETURN 
+
 ibrav=ibrav_geo(1)
 nvar=crystal_parameters(ibrav)
 ndata=compute_nwork()
@@ -459,6 +461,8 @@ INTEGER :: i, j, idata, itemp, itempp, ipress, startp, lastp, &
                  pdelc_dos, pdelc_ph
 INTEGER :: compute_nwork 
 
+IF (ntemp_plot==0) RETURN
+ 
 ibrav=ibrav_geo(1)
 nvar=crystal_parameters(ibrav)
 ndata=compute_nwork()
