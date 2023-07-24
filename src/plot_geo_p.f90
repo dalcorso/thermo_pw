@@ -84,7 +84,7 @@ ENDIF
 !  plot cos(alpha)
 !
 IF (ibrav_save==5.OR.ibrav_save==12.OR.ibrav_save==13.OR.ibrav_save==14) THEN
-   CALL gnuplot_ylabel('cos({\Symbol a})',.FALSE.) 
+   CALL gnuplot_ylabel('cos({/Symbol a})',.FALSE.) 
    CALL gnuplot_write_file_mul_data(filename1,1,5,'color_red',.TRUE.,.TRUE.,&
                                                                      .FALSE.)
 ENDIF
@@ -92,7 +92,7 @@ ENDIF
 !  plot cos(beta)
 !
 IF (ibrav_save==-12.OR.ibrav_save==-13.OR.ibrav_save==14) THEN
-   CALL gnuplot_ylabel('cos({\Symbol b})',.FALSE.) 
+   CALL gnuplot_ylabel('cos({/Symbol b})',.FALSE.) 
    CALL gnuplot_write_file_mul_data(filename1,1,5,'color_red',.TRUE.,.TRUE.,&
                                                                      .FALSE.)
 ENDIF
@@ -100,7 +100,7 @@ ENDIF
 !  plot cos(gamma)
 !
 IF (ibrav_save==14) THEN
-   CALL gnuplot_ylabel('cos({\Symbol c})',.FALSE.) 
+   CALL gnuplot_ylabel('cos({/Symbol c})',.FALSE.) 
    CALL gnuplot_write_file_mul_data(filename1,1,5,'color_red',.TRUE.,.TRUE.,&
                                                                      .FALSE.)
 ENDIF
@@ -245,7 +245,7 @@ ENDIF
 !  plot cos(alpha)
 !
 IF (ibrav_save==5.OR.ibrav_save==12.OR.ibrav_save==13.OR.ibrav_save==14) THEN
-   CALL gnuplot_ylabel('cos({\Symbol a})',.FALSE.) 
+   CALL gnuplot_ylabel('cos({/Symbol a})',.FALSE.) 
    istep=0
    DO itempp=1,ntemp_plot
       first_step=(itempp==1)
@@ -263,7 +263,7 @@ ENDIF
 !  plot cos(beta)
 !
 IF (ibrav_save==-12.OR.ibrav_save==-13.OR.ibrav_save==14) THEN
-   CALL gnuplot_ylabel('cos({\Symbol b})',.FALSE.) 
+   CALL gnuplot_ylabel('cos({/Symbol b})',.FALSE.) 
    istep=0
    DO itempp=1,ntemp_plot
       first_step=(itempp==1)
@@ -281,7 +281,7 @@ ENDIF
 !  plot cos(gamma)
 !
 IF (ibrav_save==14) THEN
-   CALL gnuplot_ylabel('cos({\Symbol c})',.FALSE.) 
+   CALL gnuplot_ylabel('cos({/Symbol c})',.FALSE.) 
    istep=0
    DO itempp=1,ntemp_plot
       first_step=(itempp==1)
