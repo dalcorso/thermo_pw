@@ -46,7 +46,7 @@ CALL add_pressure(filetherm)
 filename="anhar_files/"//TRIM(flanhar)//'.therm_ph'
 CALL add_pressure(filename)
 
-gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//'_therm_anhar'
+gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//'_anhar_therm'
 CALL add_pressure(gnu_filename)
 
 CALL gnuplot_start(gnu_filename)

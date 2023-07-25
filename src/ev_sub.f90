@@ -189,7 +189,7 @@ SUBROUTINE ev_sub_nodisk(vmin,b0,b01,b02,emin_out)
 !  This routine is similar to ev_sub, but it receives the input data
 !  directly from the shared variables without the need to write on
 !  disk. It does not write any output. It can be called by any processor.
-!  This routine is not parallel. The CPU that calls it receive the result.
+!  This routine is not parallel. The CPU that calls it receives the result.
 !  
 !  Before calling this routine the user must set in the module control_ev
 !  ieos : the equation of state to use

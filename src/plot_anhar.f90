@@ -1354,7 +1354,7 @@ IF ( ntemp_plot==0 .AND. nvol_plot==0 ) RETURN
 !
 !   gnuplot script
 !
-gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//'_pressure'
+gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//'_anhar_pressure'
 CALL add_pressure(gnu_filename)
 !
 !  name of the postcript file
@@ -1502,7 +1502,7 @@ IF (.NOT.lmurn) RETURN
 !
 !   gnuplot script
 !
-gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//'.dbulk'
+gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//'_anhar_dbulk'
 CALL add_pressure(gnu_filename)
 !
 !  name of the postcript file
