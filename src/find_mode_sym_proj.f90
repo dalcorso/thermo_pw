@@ -187,6 +187,7 @@ SUBROUTINE find_mode_sym_proj (u, w2, tau, nat, nsym, s, sr, ft, gk, invs, &
   !
   DO igroup=1,ngroup
      counter=istart(igroup)
+     dim_rap(igroup)=istart(igroup+1)-istart(igroup)
 !
 !   If the frequency is so small probably it has not been calculated.
 !   This value 
