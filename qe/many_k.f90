@@ -189,7 +189,7 @@ PUBLIC prepare_phase_factors
 CONTAINS
 !
 !------------------------------------------------------------------
-SUBROUTINE init_k_blocks(npwx,npol,nbndx,nks,nbnd,nnrs,uspp)
+SUBROUTINE init_k_blocks(npwx,npol,nbndx,nks,nbnd,nnrs,okvan)
 !------------------------------------------------------------------
 !
 USE uspp,       ONLY : nkb
@@ -206,13 +206,13 @@ USE ions_base,  ONLY : nat, ntyp => nsp
 !
 IMPLICIT NONE
 INTEGER :: npwx, npol, nbndx, nks, nbnd, nnrs
-LOGICAL :: uspp
+LOGICAL :: okvan
 REAL(DP) :: totmem, fftmem, fixmem
 
 INTEGER :: fact, i, rest
 
 fact=2
-IF (uspp) fact=3
+IF (okvan) fact=3
 !
 !  This is an estimate of the memory not due to many_k already allocated.
 !
