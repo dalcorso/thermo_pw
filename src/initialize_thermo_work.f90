@@ -343,7 +343,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               ENDDO
               CALL summarize_geometries(nwork)
            ENDIF
-           IF (use_free_energy) THEN
+           IF (use_free_energy.OR.lel_free_energy) THEN
               CALL allocate_thermodynamics()
               CALL allocate_anharmonic()
            ELSE
