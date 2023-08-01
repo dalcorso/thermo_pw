@@ -516,7 +516,12 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            IF (use_free_energy) THEN
               CALL initialize_flags_for_ph(nwork)
            ELSE
-              lpwband(1:nwork)=.TRUE.
+              DO igeom_qha=start_geometry_qha, last_geometry_qha
+                 DO iwork=1,work_base
+                    iwork_tot= (igeom_qha-1)*work_base + iwork
+                    lpwband(iwork_tot)=.TRUE.
+                 ENDDO
+              ENDDO
            ENDIF
 !
 !  Here the cases in which there are pwscf calculation in the second part
