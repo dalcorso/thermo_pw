@@ -84,9 +84,9 @@ CALL gnuplot_xlabel('T (K)',.FALSE.)
 CALL gnuplot_set_fact(1.0_DP,.FALSE.)
 
 IF (pressure_kb /= 0.0_DP) THEN
-   CALL gnuplot_ylabel('Gibbs Free Energy (Ry)',.FALSE.) 
+   CALL gnuplot_ylabel('Gibbs free energy (Ry)',.FALSE.) 
 ELSE
-   CALL gnuplot_ylabel('Helmholtz Free Energy (Ry)',.FALSE.) 
+   CALL gnuplot_ylabel('Helmholtz free energy (Ry)',.FALSE.) 
 ENDIF
 
 IF (ltherm_dos) &
@@ -114,11 +114,11 @@ DO itempp=1,ntemp_plot
    IF (first_step) THEN
       CALL gnuplot_xlabel('Volume ((a.u.)^3)',.FALSE.) 
       IF (pressure_kb /= 0.0_DP) THEN
-         label='Gibbs free-energy (Ry)    p= '//&
+         label='Gibbs free energy (Ry)    p= '//&
                     &TRIM(float_to_char(pressure_kb,1))//' kbar'
          CALL gnuplot_ylabel(TRIM(label),.FALSE.) 
       ELSE
-         CALL gnuplot_ylabel('Helmholtz Free Energy (Ry)',.FALSE.) 
+         CALL gnuplot_ylabel('Helmholtz free energy (Ry)',.FALSE.) 
       END IF
       WRITE(label,'("set xrange [",f12.5,":",f12.5,"]")') vmin_input, &
                                                           vmax_input
@@ -147,7 +147,7 @@ DO itempp=1,ntemp_plot
       WRITE(label,'("set xrange [",f12.5,":",f12.5,"]")') pmin*ry_kbar, &
                                                           pmax*ry_kbar
       CALL gnuplot_write_command(TRIM(label),.FALSE.)
-      CALL gnuplot_ylabel('Gibbs free-energy (Ry)',.FALSE.) 
+      CALL gnuplot_ylabel('Gibbs free energy (Ry)',.FALSE.) 
    ENDIF
    CALL gnuplot_write_file_mul_data(filename,4,3,color(istep),first_step, &
                                                   last_step, .FALSE.)
