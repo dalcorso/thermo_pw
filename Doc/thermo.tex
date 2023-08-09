@@ -484,6 +484,14 @@ and for the unit cell volume:
 \Omega'=\Omega \left( 1+\sum_{i=1}^3 \epsilon_{i,i} \right).
 \end{equation}
 
+From the Bravais lattice vectors ${\bf a}'_{j,i}$ of a strained solid and 
+the reciprocal lattice vectors ${\bf b}_{k,i}$ of the unstrained solid, 
+we can find the strain with the following relationship:
+\begin{equation}
+\epsilon_{j,k} = {1\over 2 \pi} \sum_{i=1}^3 {\bf a}'_{j,i} {\bf b}_{k,i}
+                - \delta_{j,k}.
+\end{equation}
+
 In general, a strain changes both the size 
 and the shape of the unit cell and might change the Bravais lattice. \\
 In this section we consider some strains of interest for our applications: 
@@ -1823,6 +1831,7 @@ The heat capacity measures the variation of the temperature of the solid
 when a certain quantity of heat is given to it at constant strain:
 \begin{equation}
 C_\epsilon= T {d S \over dT}\Big|_\epsilon = { d U \over d T}\Big|_\epsilon.
+\label{heat_cap_ce}
 \end{equation}
 The terms in $U$ that depend on temperature are $U_{el}$ and $U_{ph}$. 
 Once the phonon dispersions 
@@ -3179,11 +3188,12 @@ and at constant strain is given by:
 C_\sigma - C_\epsilon = - T V \sum_{ij} \alpha_{ij} b_{ij}.
 \end{equation}
 
-Since a uniform pressure can be identified with a constant stress, $C_\sigma$
-is also the measured isobaric heat capacity ($C_P=C_\sigma$).
+Since an isotropic pressure can be identified with a constant stress, 
+$C_\sigma$ is also the measured isobaric heat capacity ($C_P=C_\sigma$)
+in solids in which the stress is an isotropic pressure.
 
-The difference between the isobaric and the isochoric heat capacities 
-is given by:
+For such solids, the difference between the isobaric and the isochoric 
+heat capacities is given by:
 \begin{equation}
 C_P - C_V = T V \beta^2 B_T.
 \end{equation}
