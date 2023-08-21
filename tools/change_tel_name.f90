@@ -27,7 +27,7 @@ INTEGER :: n
 INTEGER, ALLOCATABLE :: orig(:), new(:)
 CHARACTER(LEN=256), ALLOCATABLE :: save_name(:)
 CHARACTER(LEN=6) :: int_to_char
-LOGICAL :: xmldyn, has_xml
+LOGICAL :: has_ph
 INTEGER :: i, len1, nfiles, ios
 INTEGER :: ierr, system
 
@@ -36,11 +36,15 @@ READ(5,*) n
 
 ALLOCATE(orig(n))
 ALLOCATE(new(n))
-ALLOCATE(save_name(n))
+ALLOCATE(save_name(2*n))
 
 DO i=1, n
    READ(5,*) orig(i), new(i)
 ENDDO
+
+has_ph=.FALSE.
+READ(5,*,END=10) has_ph
+10 CONTINUE
 
 nfiles=0
 DO i=1,n
@@ -54,6 +58,20 @@ DO i=1,n
       save_name(nfiles)=file_out
    ENDIF
 ENDDO
+
+IF (has_ph) THEN
+   DO i=1,n
+      file_in=TRIM(filename)//'.g'//TRIM(int_to_char(orig(i)))//'_ph'
+      IF (new(i)==0) THEN
+         ierr=system('rm '//TRIM(file_in))
+      ELSE
+         file_out=TRIM(filename)//'.g'//TRIM(int_to_char(new(i)))//'_ph.b'
+         ierr=system('mv '//TRIM(file_in)//' '//TRIM(file_out))
+         nfiles=nfiles+1
+         save_name(nfiles)=file_out
+      ENDIF
+   ENDDO
+ENDIF
 
 DO i=1,nfiles
    file_in=save_name(i)
