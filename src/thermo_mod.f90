@@ -76,6 +76,8 @@ MODULE thermo_mod
   INTEGER :: start_geometry, last_geometry      ! These variables control
                                                 ! which geometries are done
                                                 ! in each run
+  REAL(DP) :: celldm_p1(6), celldm_m1(6)
+
 
 END MODULE thermo_mod
 
@@ -235,9 +237,18 @@ MODULE uniform_pressure
                                                 ! etc.
                             v_p(:,:),         & ! sound velocities
                             density_p(:)        ! density
+                                                !
    TYPE(poly2), ALLOCATABLE :: p2_p(:)          ! the polynomial interpolating
                                                 ! enthalpy (quadratic)
    TYPE(poly4), ALLOCATABLE :: p4_p(:)          ! (quartic)
+
+   TYPE(poly2) :: p2_p_p1       ! the polynomial interpolating
+                                ! enthalpy (quadratic)
+   TYPE(poly4) :: p4_p_p1       ! (quartic) at pressure+deltap
+
+   TYPE(poly2) :: p2_p_m1       ! the polynomial interpolating
+                                ! enthalpy (quadratic)
+   TYPE(poly4) :: p4_p_m1       ! (quartic) at pressure-deltap
 
 END MODULE uniform_pressure
 !
@@ -349,10 +360,21 @@ MODULE emp_anharmonic
   REAL(DP), ALLOCATABLE :: emp_ce_pt(:,:) ! empirical heat capacity at
                                           ! several pressures
 !
+!  Empirical quantities interpolated at the temperature dependent geometry 
+!  at selected pressures 
+!
+  REAL(DP), ALLOCATABLE :: emp_free_enerf_pt(:,:) ! empirical free energy
+  REAL(DP), ALLOCATABLE :: emp_enerf_pt(:,:) ! empirical energy
+  REAL(DP), ALLOCATABLE :: emp_entrf_pt(:,:) ! empirical entropy
+  REAL(DP), ALLOCATABLE :: emp_cef_pt(:,:)   ! empirical heat capacity at
+                                             ! several pressures
+!
 !  Empirical quantities interpolated at the pressure dependent geometries
 !  at selected temperatures
 !
   REAL(DP), ALLOCATABLE :: emp_ce_ptt(:,:) ! empirical heat capacity at
+                                           ! several temperatures
+  REAL(DP), ALLOCATABLE :: emp_cef_ptt(:,:) ! empirical heat capacity at
                                            ! several temperatures
 !
 END MODULE emp_anharmonic
@@ -446,7 +468,10 @@ MODULE anharmonic
 !
   REAL(DP), ALLOCATABLE :: vmin_noe_t(:)  ! minimum volume at each T 
                                           ! without el.
-  REAL(DP), ALLOCATABLE :: b0_noe_t(:)    ! bulk modulus at each T !
+  REAL(DP), ALLOCATABLE :: celldm_noe_t(:,:)  ! the lattice parameters as a 
+                                          ! function of temperature
+  REAL(DP), ALLOCATABLE :: density_noe_t(:)  ! the density
+  REAL(DP), ALLOCATABLE :: b0_noe_t(:)    ! bulk modulus at each T 
                                           ! without elec.
   REAL(DP), ALLOCATABLE :: b01_noe_t(:)   ! pressure derivative of b0 at each T
                                           ! without electrons
@@ -454,9 +479,18 @@ MODULE anharmonic
                                           ! at each T without electrons
   REAL(DP), ALLOCATABLE :: free_e_min_noe_t(:) ! total free energy at 
                                        ! the minimum at each T without el.
+  REAL(DP), ALLOCATABLE :: ener_noe_t(:)   ! vibrational energy (T)
+  REAL(DP), ALLOCATABLE :: free_ener_noe_t(:) ! vibrational free energy (T)
+  REAL(DP), ALLOCATABLE :: entropy_noe_t(:)! entropy (T)
+  REAL(DP) :: e0_noe_t                     ! zero point energy 
+
   REAL(DP), ALLOCATABLE :: a_noe_t(:,:) ! the coefficients of the polynomial
                            ! that interpolates the free energy at each
                            ! temperature
+  TYPE(poly1), ALLOCATABLE :: p1t_noe_t(:) ! coefficients of the polynomial
+  TYPE(poly2), ALLOCATABLE :: p2t_noe_t(:) ! that interpolate the free energy
+  TYPE(poly3), ALLOCATABLE :: p3t_noe_t(:) ! with multidimensional integral.
+  TYPE(poly4), ALLOCATABLE :: p4t_noe_t(:)
 !
 !  The interpolated harmonic quantities neglecting the electronic effect
 !
@@ -474,6 +508,14 @@ MODULE anharmonic
                                            ! contribution is not added to 
                                            ! cv when computing the average
                                            ! Gruneisen parameter
+  REAL(DP), ALLOCATABLE :: celldm_t_p1(:,:)! the celldm at the pressure+dp
+                                           ! as a function of T
+  REAL(DP), ALLOCATABLE :: celldm_t_m1(:,:)! the celldm at the pressure-dp
+                                           ! as a function of T
+  REAL(DP), ALLOCATABLE :: celldm_noe_t_p1(:,:)! the celldm at the pressure+dp
+                                           ! as a function of T
+  REAL(DP), ALLOCATABLE :: celldm_noe_t_m1(:,:)! the celldm at the pressure-dp
+                                           ! as a function of T
 END MODULE anharmonic
 
 !----------------------------------------------------------------------------
@@ -540,7 +582,78 @@ MODULE anharmonic_pt
   REAL(DP), ALLOCATABLE :: v_pt(:,:,:)           ! isothermal sound speed
   REAL(DP), ALLOCATABLE :: v_s_pt(:,:,:)         ! isoentropic sound speed
 
+  REAL(DP), ALLOCATABLE :: celldm_pt_p1(:,:,:)   ! crystal parameters at p+dp
+  REAL(DP), ALLOCATABLE :: celldm_pt_m1(:,:,:)   ! crystal parameters at p-dp
+
 END MODULE anharmonic_pt
+!----------------------------------------------------------------------------
+MODULE ph_freq_anharmonic_pt
+!----------------------------------------------------------------------------
+!
+!   The variables needed to describe the anharmonic quantities calculated
+!   from the minimum of the Gibbs free energy fitted by an equation of state
+!   plus a polynomial. These variables are computed at all temperatures 
+!   for selected pressures.
+!
+  USE kinds, ONLY: DP
+  SAVE
+!
+!  Parameters of the interpolation
+!
+  REAL(DP), ALLOCATABLE :: vminf_pt(:,:)  ! the volume at the minimum
+  REAL(DP), ALLOCATABLE :: b0f_pt(:,:)    ! bulk modulus for all T
+  REAL(DP), ALLOCATABLE :: b01f_pt(:,:)   ! pressure derivative of b0
+  REAL(DP), ALLOCATABLE :: b02f_pt(:,:)   ! second pressure derivative of b0
+  REAL(DP), ALLOCATABLE :: eminf_pt(:,:)  ! Gibbs energy at the minimum
+!
+!  Interpolated harmonic quantities
+!
+  REAL(DP), ALLOCATABLE :: free_enerf_pt(:,:)  ! the free energy for selected
+                                         ! pressures
+  REAL(DP), ALLOCATABLE :: enerf_pt(:,:)  ! the energy for selected pressures
+  REAL(DP), ALLOCATABLE :: entrf_pt(:,:)  ! the entropy for selected pressures
+  REAL(DP), ALLOCATABLE :: cef_pt(:,:)    ! the constant strain specific
+                                         ! heat as a function of temperature
+                                         ! at selected pressures
+  REAL(DP), ALLOCATABLE :: cvf_pt(:,:)    ! the constant volume specific
+                                         ! heat as a function of temperature
+                                         ! at selected pressures
+!
+!  The calculated anharmonic quantities
+!
+  REAL(DP), ALLOCATABLE :: cpf_pt(:,:)    ! the isobaric specific heat 
+                                         ! at several pressures
+  REAL(DP), ALLOCATABLE :: betaf_pt(:,:)  ! the thermal expansion as a
+                                         ! function of temperature for 
+                                         ! selected pressures
+  REAL(DP), ALLOCATABLE :: b0f_s_pt(:,:)  ! the bulk modulus at constant
+                                         ! entropy 
+  REAL(DP), ALLOCATABLE :: gammaf_pt(:,:) ! the average Gruneisen parameter
+!
+! Anharmonic quantities for anisotropic thermodynamic
+!
+  REAL(DP), ALLOCATABLE :: celldmf_pt(:,:,:)      ! crystal parameters
+  REAL(DP), ALLOCATABLE :: densityf_pt(:,:)       ! the density
+  REAL(DP), ALLOCATABLE :: alphaf_anis_pt(:,:,:,:) ! the thermal expansion
+  REAL(DP), ALLOCATABLE :: cpmcef_anis_pt(:,:)    ! the difference cp-ce
+  REAL(DP), ALLOCATABLE :: bthsf_pt(:,:,:,:)      ! the thermal stress
+  REAL(DP), ALLOCATABLE :: ggammaf_pt(:,:,:,:)    ! the generalized Gruneisen
+                                                 ! parameters
+  REAL(DP), ALLOCATABLE :: csmctf_pt(:,:,:,:) ! isoentropic elastic constants
+                                             ! - isothermal ones
+  REAL(DP), ALLOCATABLE :: el_consf_pt(:,:,:,:)   ! isothermal elast. cons.
+  REAL(DP), ALLOCATABLE :: el_compf_pt(:,:,:,:)   ! isothermal elast. comp.
+  REAL(DP), ALLOCATABLE :: el_consf_s_pt(:,:,:,:) ! isoentropic elast. cons.
+  REAL(DP), ALLOCATABLE :: el_compf_s_pt(:,:,:,:) ! isoentropic elast. comp.
+  REAL(DP), ALLOCATABLE :: macro_elf_pt(:,:,:)    ! macroscopic elasticity
+  REAL(DP), ALLOCATABLE :: macro_elf_s_pt(:,:,:)  ! isoentropic macroscopic ela.
+  REAL(DP), ALLOCATABLE :: vf_pt(:,:,:)           ! isothermal sound speed
+  REAL(DP), ALLOCATABLE :: vf_s_pt(:,:,:)         ! isoentropic sound speed
+
+  REAL(DP), ALLOCATABLE :: celldmf_pt_p1(:,:,:)   ! crystal parameters at p+dp
+  REAL(DP), ALLOCATABLE :: celldmf_pt_m1(:,:,:)   ! crystal parameters at p-dp
+
+END MODULE ph_freq_anharmonic_pt
 
 !----------------------------------------------------------------------------
 MODULE anharmonic_ptt
@@ -612,6 +725,76 @@ MODULE anharmonic_ptt
   REAL(DP), ALLOCATABLE :: v_s_ptt(:,:,:)          ! isoentropic sound speed
 
 END MODULE anharmonic_ptt
+!----------------------------------------------------------------------------
+MODULE ph_freq_anharmonic_ptt
+!----------------------------------------------------------------------------
+!
+!   The variables needed to describe the anharmonic quantities calculated
+!   from the minimum of the Gibbs free energy fitted by an equation of state
+!   plus a polynomial. These variables are computed at all pressures 
+!   for selected temperatures.
+!
+  USE kinds, ONLY: DP
+  SAVE
+!
+!  The parameters of the interpolation
+!
+  REAL(DP), ALLOCATABLE :: vminf_ptt(:,:)! the volume at the minimum for all P
+  REAL(DP), ALLOCATABLE :: vminf_ptt_p1(:,:) ! the volume at the minimum 
+                                          ! for all P at T+deltat
+  REAL(DP), ALLOCATABLE :: vminf_ptt_m1(:,:) ! the volume at the minimum 
+                                          ! for all P at T-deltat
+  REAL(DP), ALLOCATABLE :: b0f_ptt(:,:)    ! the bulk modulus for all P
+  REAL(DP), ALLOCATABLE :: b01f_ptt(:,:)   ! the pressure derivative of b0
+  REAL(DP), ALLOCATABLE :: b02f_ptt(:,:)   ! the second pressure derivative 
+                                          ! of b0
+  REAL(DP), ALLOCATABLE :: eminf_ptt(:,:)  ! the Gibbs energy at the minimum
+  REAL(DP), ALLOCATABLE :: eminf_ptt_p1(:,:) ! the Gibbs energy at the minimum
+                                          ! for all P at T+deltat
+  REAL(DP), ALLOCATABLE :: eminf_ptt_m1(:,:) ! the Gibbs energy at the minimum
+                                          ! for all P at T-deltat
+!
+!  The interpolated harmonic quantities
+!
+  REAL(DP), ALLOCATABLE :: enerf_ptt(:,:)  ! the energy
+  REAL(DP), ALLOCATABLE :: entrf_ptt(:,:)  ! the entropy
+  REAL(DP), ALLOCATABLE :: cef_ptt(:,:)    ! the constant strain heat capacity
+  REAL(DP), ALLOCATABLE :: cvf_ptt(:,:)    ! the constant volume heat capacity
+!
+!  The anharmonic quantities
+!
+  REAL(DP), ALLOCATABLE :: betaf_ptt(:,:)  ! the volume thermal expansion 
+  REAL(DP), ALLOCATABLE :: cpf_ptt(:,:)    ! the constant pressure heat 
+                                          ! capacity
+  REAL(DP), ALLOCATABLE :: b0f_s_ptt(:,:)  ! the isoentropic bulk modulus
+  REAL(DP), ALLOCATABLE :: gammaf_ptt(:,:) ! the average Gruneisen parameter
+!
+! Anharmonic quantities for anisotropic thermodynamics
+!
+  REAL(DP), ALLOCATABLE :: celldmf_ptt(:,:,:)      ! the crystal parameters 
+  REAL(DP), ALLOCATABLE :: celldmf_ptt_p1(:,:,:)   ! the crystal parameters at
+                                                  ! T+deltat
+  REAL(DP), ALLOCATABLE :: celldmf_ptt_m1(:,:,:)   ! the crystal parameters at
+                                                  ! T-deltat
+  REAL(DP), ALLOCATABLE :: alphaf_anis_ptt(:,:,:,:)! the thermal expansion 
+                                                  ! tensor
+  REAL(DP), ALLOCATABLE :: densityf_ptt(:,:)       ! the density
+  REAL(DP), ALLOCATABLE :: cpmcef_anis_ptt(:,:)    ! the difference cp-ce
+  REAL(DP), ALLOCATABLE :: bthsf_ptt(:,:,:,:)      ! the thermal stress
+  REAL(DP), ALLOCATABLE :: ggammaf_ptt(:,:,:,:)    ! the generalized Gruneisen
+                                                  ! parameters
+  REAL(DP), ALLOCATABLE :: csmctf_ptt(:,:,:,:) ! isoentropic elastic constants
+                                             ! - isothermal ones
+  REAL(DP), ALLOCATABLE :: el_consf_ptt(:,:,:,:)    ! isothermal elast. cons.
+  REAL(DP), ALLOCATABLE :: el_compf_ptt(:,:,:,:)    ! isothermal elast. comp.
+  REAL(DP), ALLOCATABLE :: el_consf_s_ptt(:,:,:,:)  ! isoentropic elast. cons.
+  REAL(DP), ALLOCATABLE :: el_compf_s_ptt(:,:,:,:)  ! isoentropic elast. comp.
+  REAL(DP), ALLOCATABLE :: macro_elf_ptt(:,:,:)     ! macroscopic elasticity
+  REAL(DP), ALLOCATABLE :: macro_elf_s_ptt(:,:,:)   ! isoentropic macros. ela.
+  REAL(DP), ALLOCATABLE :: vf_ptt(:,:,:)            ! isothermal sound speed
+  REAL(DP), ALLOCATABLE :: vf_s_ptt(:,:,:)          ! isoentropic sound speed
+
+END MODULE ph_freq_anharmonic_ptt
 !
 !----------------------------------------------------------------------------
 MODULE anharmonic_vt
@@ -629,6 +812,22 @@ MODULE anharmonic_vt
   REAL(DP), ALLOCATABLE :: press_vtt(:,:) ! the thermal pressure as a function
                            ! of temperature for selected volumes
 END MODULE anharmonic_vt
+!----------------------------------------------------------------------------
+MODULE ph_freq_anharmonic_vt
+!----------------------------------------------------------------------------
+!
+!   The variables needed to describe the anharmonic quantities calculated
+!   from the minimum of the Helmholtz free energy fitted by an equation 
+!   of state plus a polynomial. These variables are computed at all 
+!   temperatures for selected volumes.
+!
+  USE kinds, ONLY: DP
+  SAVE
+  REAL(DP), ALLOCATABLE :: pressf_vt(:,:) ! the thermal pressure as a function
+                           ! of volume for selected temperatures
+  REAL(DP), ALLOCATABLE :: pressf_vtt(:,:) ! the thermal pressure as a function
+                           ! of temperature for selected volumes
+END MODULE ph_freq_anharmonic_vt
 
 !----------------------------------------------------------------------------
 MODULE ph_freq_anharmonic
@@ -640,6 +839,7 @@ MODULE ph_freq_anharmonic
 !   the frequencies.
 !
   USE kinds, ONLY: DP
+  USE polynomial,  ONLY : poly1, poly2, poly3, poly4
   SAVE
 !
 !  The parameters of the interpolation at each temperature
@@ -651,6 +851,10 @@ MODULE ph_freq_anharmonic
   REAL(DP), ALLOCATABLE :: free_e_minf_t(:) ! total free energy at the minimum
   REAL(DP), ALLOCATABLE :: af_t(:,:) ! the coefficients of the polynomial
                            ! that interpolates the free energy 
+  TYPE(poly1), ALLOCATABLE :: p1tf_t(:)    ! coefficients of the polynomial
+  TYPE(poly2), ALLOCATABLE :: p2tf_t(:)    ! that interpolate the free energy
+  TYPE(poly3), ALLOCATABLE :: p3tf_t(:)    ! with multidimensional integral.
+  TYPE(poly4), ALLOCATABLE :: p4tf_t(:)
 !
 !  The interpolated harmonic quantities
 !
@@ -685,6 +889,48 @@ MODULE ph_freq_anharmonic
   REAL(DP), ALLOCATABLE :: bthsf_t(:,:,:)   ! thermal stress
   REAL(DP), ALLOCATABLE :: ggammaf_t(:,:,:) ! generalized average gruneisen 
                                           ! parameter
+
+!
+!  The parameters of the interpolation neglecting the electronic exitation
+!  contribution
+!
+  REAL(DP), ALLOCATABLE :: vminf_noe_t(:)  ! minimum volume at each T 
+                                          ! without el.
+  REAL(DP), ALLOCATABLE :: celldmf_noe_t(:,:)  ! the lattice parameters as a 
+                                          ! function of temperature
+  REAL(DP), ALLOCATABLE :: densityf_noe_t(:)  ! the density
+  REAL(DP), ALLOCATABLE :: b0f_noe_t(:)    ! bulk modulus at each T 
+                                          ! without elec.
+  REAL(DP), ALLOCATABLE :: b01f_noe_t(:)   ! pressure derivative of b0 at each T
+                                          ! without electrons
+  REAL(DP), ALLOCATABLE :: b02f_noe_t(:)   ! second pressure derivative of b0
+                                          ! at each T without electrons
+  REAL(DP), ALLOCATABLE :: free_e_minf_noe_t(:) ! total free energy at 
+                                       ! the minimum at each T without el.
+  REAL(DP), ALLOCATABLE :: enerf_noe_t(:)   ! vibrational energy (T)
+  REAL(DP), ALLOCATABLE :: free_enerf_noe_t(:) ! vibrational free energy (T)
+  REAL(DP), ALLOCATABLE :: entropyf_noe_t(:)! entropy (T)
+  REAL(DP) :: e0f_noe_t                     ! zero point energy 
+
+  REAL(DP), ALLOCATABLE :: af_noe_t(:,:) ! the coefficients of the polynomial
+                           ! that interpolates the free energy at each
+                           ! temperature
+  TYPE(poly1), ALLOCATABLE :: p1tf_noe_t(:) ! coefficients of the polynomial
+  TYPE(poly2), ALLOCATABLE :: p2tf_noe_t(:) ! that interpolate the free energy
+  TYPE(poly3), ALLOCATABLE :: p3tf_noe_t(:) ! with multidimensional integral.
+  TYPE(poly4), ALLOCATABLE :: p4tf_noe_t(:)
+!
+!  The interpolated harmonic quantities neglecting the electronic effect
+!
+  REAL(DP), ALLOCATABLE :: cef_noe_t(:)     ! constant strain heat capacity (T)
+  REAL(DP), ALLOCATABLE :: cvf_noe_t(:)     ! isocoric heat capacity (T)
+!
+!  The anharmonic quantities neglecting the electronic effect
+!
+  REAL(DP), ALLOCATABLE :: cpf_noe_t(:)     ! isobaric heat capacity (T)
+  REAL(DP), ALLOCATABLE :: b0f_noe_s(:)     ! constant entropy bulk modulus
+  REAL(DP), ALLOCATABLE :: betaf_noe_t(:)   ! volume thermal expansion
+  REAL(DP), ALLOCATABLE :: gammaf_noe_t(:)  ! average gruneisen parameter
 !
 !  elastic constants and related quantities
 !
@@ -707,6 +953,15 @@ MODULE ph_freq_anharmonic
   REAL(DP), ALLOCATABLE :: el_conf_geo_t(:,:,:,:) ! the temperature dependent
                                             ! elastic constants at all 
                                             ! geometries
+  REAL(DP), ALLOCATABLE :: celldmf_t_p1(:,:)! the celldm at the pressure+dp
+                                           ! as a function of T
+  REAL(DP), ALLOCATABLE :: celldmf_t_m1(:,:)! the celldm at the pressure-dp
+                                           ! as a function of T
+  REAL(DP), ALLOCATABLE :: celldmf_noe_t_p1(:,:)! the celldm at the pressure+dp
+                                           ! as a function of T
+  REAL(DP), ALLOCATABLE :: celldmf_noe_t_m1(:,:)! the celldm at the pressure-dp
+                                           ! as a function of T
+
 END MODULE ph_freq_anharmonic
 
 !----------------------------------------------------------------------------
@@ -822,10 +1077,20 @@ MODULE el_anharmonic
   REAL(DP), ALLOCATABLE :: el_entr_pt(:,:) ! entropy
   REAL(DP), ALLOCATABLE :: el_ce_pt(:,:) ! heat capacity
 !
+!  Harmonic quantities interpolated at the temperature dependent geometry 
+!  at selected pressures 
+!
+  REAL(DP), ALLOCATABLE :: el_free_enerf_pt(:,:) ! energy
+  REAL(DP), ALLOCATABLE :: el_enerf_pt(:,:) ! energy
+  REAL(DP), ALLOCATABLE :: el_entrf_pt(:,:) ! entropy
+  REAL(DP), ALLOCATABLE :: el_cef_pt(:,:) ! heat capacity
+!
 !  Harmonic quantities interpolated at the pressure dependent geometries
 !  at selected temperatures
 !
   REAL(DP), ALLOCATABLE :: el_ce_ptt(:,:) ! heat capacity
+
+  REAL(DP), ALLOCATABLE :: el_cef_ptt(:,:) ! heat capacity
 
 END MODULE el_anharmonic
 
@@ -1074,6 +1339,11 @@ MODULE control_elastic_constants
                                 ! true the QHA with BZ integration 
                                 ! elastic constants are available for 
                                 ! all geometries
+  LOGICAL :: lelasticf_pt=.FALSE. ! elastic constants as a function of 
+                                ! temperature for a few pressures available
+  LOGICAL :: lelasticf_ptt=.FALSE. ! elastic constants as a function of 
+                                ! pressure for a few temperatures available
+                                !
 
   REAL(DP), ALLOCATABLE :: el_con_geo(:,:,:)  ! the elastic constants at
                                 ! each geometry

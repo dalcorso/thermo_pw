@@ -390,6 +390,72 @@ CALL mp_sum(emin_pt, world_comm)
 RETURN
 END SUBROUTINE anhar_ev_glob_pt
 !
+!-----------------------------------------------------------------------
+SUBROUTINE anhar_ev_glob_ph_pt()
+!-----------------------------------------------------------------------
+!
+!  This subroutine computes the equilibrium volume, bulk modulus, and its
+!  derivatives as a function of temperature for the npress_plot pressures 
+!  that we want to plot in output.
+!
+USE kinds,          ONLY : DP
+USE constants,      ONLY : ry_kbar
+USE thermo_mod,     ONLY : ngeo, omega_geo, energy_geo
+USE control_pressure, ONLY : npress, press, npress_plot, ipress_plot
+USE control_ev,     ONLY : npt, v0, e0
+USE temperature,    ONLY : ntemp
+USE ph_freq_thermodynamics, ONLY : phf_free_ener
+USE el_thermodynamics, ONLY : el_free_ener
+USE ph_freq_anharmonic_pt,  ONLY : vminf_pt, b0f_pt, b01f_pt, b02f_pt, eminf_pt
+USE control_eldos,  ONLY : lel_free_energy
+USE mp,             ONLY : mp_sum
+USE mp_world,       ONLY : world_comm
+
+IMPLICIT NONE
+INTEGER  :: itemp, ipt, ipress, ipressp, startt, lastt
+REAL(DP) :: vm
+
+IF (npress_plot==0) RETURN
+
+vminf_pt=0.0_DP
+b0f_pt=0.0_DP
+b01f_pt=0.0_DP
+b02f_pt=0.0_DP
+eminf_pt=0.0_DP
+
+CALL divide(world_comm, ntemp, startt, lastt)
+
+npt=ngeo(1)
+ALLOCATE(v0(npt))
+ALLOCATE(e0(npt))
+DO ipt=1, npt
+   v0(ipt)=omega_geo(ipt)
+ENDDO
+
+DO ipressp=1, npress_plot
+   ipress=ipress_plot(ipressp)
+   DO itemp=startt,lastt
+      DO ipt=1,npt
+         e0(ipt)=energy_geo(ipt) + press(ipress) * v0(ipt) / ry_kbar + &
+                                                   phf_free_ener(itemp,ipt)
+         IF (lel_free_energy) e0(ipt)=e0(ipt)+el_free_ener(itemp,ipt)
+      ENDDO
+      CALL ev_sub_nodisk(vminf_pt(itemp,ipressp), b0f_pt(itemp,ipressp), &
+       b01f_pt(itemp,ipressp), b02f_pt(itemp,ipressp), eminf_pt(itemp,ipressp))
+   ENDDO
+ENDDO
+DEALLOCATE(e0)
+DEALLOCATE(v0)
+
+CALL mp_sum(vminf_pt, world_comm)
+CALL mp_sum(b0f_pt,   world_comm)
+CALL mp_sum(b01f_pt,  world_comm)
+CALL mp_sum(b02f_pt,  world_comm)
+CALL mp_sum(eminf_pt, world_comm)
+
+RETURN
+END SUBROUTINE anhar_ev_glob_ph_pt
+!
 !-------------------------------------------------------------------------
 SUBROUTINE anhar_ev_glob_ptt()
 !-------------------------------------------------------------------------
@@ -455,6 +521,74 @@ CALL mp_sum(emin_ptt, world_comm)
 
 RETURN
 END SUBROUTINE anhar_ev_glob_ptt
+!
+!-------------------------------------------------------------------------
+SUBROUTINE anhar_ev_glob_ph_ptt()
+!-------------------------------------------------------------------------
+!
+!  This routine computes the volume thermal expansion, the bulk modulus,
+!  the heat capacity and the average Gruneisen parameter as a function 
+!  of pressure for selected temperatures.
+!
+USE kinds,          ONLY : DP
+USE constants,      ONLY : ry_kbar
+USE thermo_mod,     ONLY : ngeo, omega_geo, energy_geo
+USE control_ev,     ONLY : npt, e0, v0
+USE ph_freq_thermodynamics, ONLY : phf_free_ener
+USE el_thermodynamics, ONLY : el_free_ener
+USE control_eldos,  ONLY : lel_free_energy
+USE ph_freq_anharmonic_ptt, ONLY : vminf_ptt, eminf_ptt, b0f_ptt, &
+                           b01f_ptt, b02f_ptt
+USE temperature,    ONLY : ntemp_plot, itemp_plot
+USE control_pressure,  ONLY : press, npress
+USE mp,             ONLY : mp_sum
+USE mp_world,       ONLY : world_comm
+
+IMPLICIT NONE
+
+REAL(DP) :: vm
+INTEGER ::  ipt, ipress, itempp, itemp, startp, lastp
+
+IF (ntemp_plot==0) RETURN
+
+vminf_ptt=0.0_DP
+b0f_ptt=0.0_DP
+b01f_ptt=0.0_DP
+b02f_ptt=0.0_DP
+eminf_ptt=0.0_DP
+CALL divide(world_comm, npress, startp, lastp)
+
+npt=ngeo(1)
+ALLOCATE(v0(npt))
+ALLOCATE(e0(npt))
+DO ipt=1, npt
+   v0(ipt)=omega_geo(ipt)
+ENDDO
+
+DO itempp=1,ntemp_plot
+   itemp=itemp_plot(itempp)
+   DO ipress=startp,lastp
+      DO ipt=1,npt
+         e0(ipt)=energy_geo(ipt) + press(ipress) * v0(ipt) / ry_kbar + &
+                                                   phf_free_ener(itemp,ipt)
+         IF (lel_free_energy) e0(ipt)=e0(ipt)+el_free_ener(itemp,ipt)
+      ENDDO
+      CALL ev_sub_nodisk(vminf_ptt(ipress,itempp), b0f_ptt(ipress,itempp),&
+     b01f_ptt(ipress,itempp), b02f_ptt(ipress,itempp), &
+                              eminf_ptt(ipress,itempp) )
+   ENDDO
+ENDDO
+DEALLOCATE(e0)
+DEALLOCATE(v0)
+
+CALL mp_sum(vminf_ptt, world_comm)
+CALL mp_sum(b0f_ptt, world_comm)
+CALL mp_sum(b01f_ptt, world_comm)
+CALL mp_sum(b02f_ptt, world_comm)
+CALL mp_sum(eminf_ptt, world_comm)
+
+RETURN
+END SUBROUTINE anhar_ev_glob_ph_ptt
 !
 !----------------------------------------------------------------------
 SUBROUTINE write_mur_pol_glob(omega0, b0, b01, b02, emin, itempp)

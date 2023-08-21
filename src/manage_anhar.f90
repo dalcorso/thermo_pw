@@ -11,10 +11,11 @@ SUBROUTINE manage_anhar()
 
 USE kinds,                 ONLY : DP
 USE temperature,           ONLY : ntemp
-USE thermo_mod,            ONLY : tot_ngeo
+USE thermo_mod,            ONLY : what, tot_ngeo
 USE control_thermo,        ONLY : ltherm_dos, ltherm_freq, ltherm_glob
+USE control_elastic_constants, ONLY : el_cons_qha_available, &
+                                  el_consf_qha_available
 USE control_eldos,         ONLY : lel_free_energy, hot_electrons
-USE control_quartic_energy, ONLY : poly_degree_ph
 USE control_emp_free_ener, ONLY : add_empirical, emp_ener, emp_free_ener, &
                                   emp_entr, emp_ce
 USE temperature,           ONLY : temp, ntemp, ntemp_plot, itemp_plot
@@ -23,10 +24,7 @@ USE anharmonic,            ONLY : a_t
 USE el_thermodynamics,     ONLY : el_ener, el_free_ener, el_entr, el_ce
 USE data_files,            ONLY : flanhar, fleltherm
 
-USE control_mur,           ONLY : vmin, b0, b01, b02, emin
 USE io_global,             ONLY : stdout
-USE mp_images,             ONLY : inter_image_comm
-USE mp,                    ONLY : mp_sum
 
 IMPLICIT NONE
 
@@ -93,7 +91,7 @@ IF (ltherm_dos) THEN
       CALL anhar_ev_t()
       CALL anhar_ev_noe_t()
    ENDIF
-   CALL summarize_anhar_param()
+!   CALL summarize_anhar_param()
    CALL interpolate_harmonic()
    CALL interpolate_harmonic_noe_t()
 !
@@ -114,6 +112,7 @@ IF (ltherm_dos) THEN
       CALL anhar_ev_glob_ptt()
    ELSE
       CALL anhar_ev_ptt()
+      CALL anhar_ev_ptt_pm()
    ENDIF
    CALL interpolate_harmonic_ptt()
 !
@@ -122,14 +121,33 @@ IF (ltherm_dos) THEN
 !
    CALL anhar_ev_vt()
 !
-!  calculate several anharmonic quantities at the input pressure
+!  calculate and writes several anharmonic quantities at the input pressure
+!  (beta, b0, cp, gamma)
 !
    CALL write_anhar()
+!
+!  writes anharmonic quantities obtained from equation of state
+!  (b01, b02)
+!
+   CALL write_anhar_mur()
+!
+!  writes other anharmonic quantities (b_fact)
+!
+   CALL write_anhar_aux()
+!
+!  writes anharmonic quantities obtained without electronic contribution
+!
+   CALL write_anhar_noe()
+!
+!  writes electronic contribution to anharmonic quantities 
+!
+   CALL write_anhar_el_cont()
 !
 !   if requested in input writes on files the anharmonic quantities
 !   at several pressures
 !
    CALL write_anhar_pt()
+   CALL write_anhar_mur_pt()
 !
 !  if requested in input writes on files anharmonic quantities 
 !  at several temperatures
@@ -138,6 +156,8 @@ IF (ltherm_dos) THEN
       CALL write_anhar_glob_ptt() 
    ELSE
       CALL write_anhar_ptt() 
+      CALL write_anhar_mur_ptt() 
+      CALL write_tp_ptt()
    ENDIF
 !
 !   if requested in input writes on files the anharmonic quantities
@@ -171,6 +191,7 @@ IF (ltherm_freq) THEN
 !  Fit the vibrational (and possibly electronic free energy) with a polynomial
 !
    CALL fit_free_energy_ph()
+   CALL fit_free_energy_ph_noe()
 !
 !  the crystal parameters as a function of temperature
 !
@@ -178,14 +199,103 @@ IF (ltherm_freq) THEN
       CALL anhar_ev_glob_t_ph()
    ELSE
       CALL anhar_ev_t_ph()
+      CALL anhar_ev_noe_t_ph()
    ENDIF
-   CALL summarize_anhar_param_ph()
+!  CALL summarize_anhar_param_ph()
    CALL interpolate_harmonic_ph()
+   CALL interpolate_harmonic_noe_t_ph()
+
+   IF (ltherm_glob) THEN
+      CALL anhar_ev_glob_ph_pt()
+   ELSE
+      CALL anhar_ev_pt_ph()
+   ENDIF
+   CALL interpolate_harmonicf_pt()
+!
+!  then the crystal parameters as a function of pressure 
+!  at several temperatures
+!
+   IF (ltherm_glob) THEN
+      CALL anhar_ev_glob_ph_ptt()
+   ELSE
+      CALL anhar_ev_ph_ptt()
+      CALL anhar_ev_ph_ptt_pm()
+   ENDIF
+   CALL interpolate_harmonicf_ptt()
+!
+!  some quantities as a function of temperature are needed 
+!  at constant volume, they are computed here
+!
+   CALL ph_freq_anhar_ev_vt()
 !
 !  calculate several anharmonic quantities 
 !
    CALL write_ph_freq_anhar()
+!
+!  writes anharmonic quantities obtained from equation of state
+!
+   CALL write_ph_freq_anhar_mur()
+!
+!  writes other anharmonic quantities (b_factf)
+!
+   CALL write_ph_freq_anhar_aux()
+!
+!  writes anharmonic quantities obtained without electronic contribution
+!
+   CALL write_ph_freq_anhar_noe()
+!
+!  writes electronic contribution to anharmonic quantities 
+!
+   CALL write_ph_freq_anhar_el_cont()
+!
+!   if requested in input writes on files the anharmonic quantities
+!   at several pressures
+!
+   CALL write_ph_freq_anhar_pt()
+   CALL write_ph_freq_anhar_mur_pt()
+!
+!  if requested in input writes on files anharmonic quantities 
+!  at several temperatures
+!
+   IF (ltherm_glob) THEN
+   ELSE
+      CALL write_ph_freq_anhar_ptt()
+      CALL write_ph_freq_anhar_mur_ptt()
+      CALL write_ph_freq_tp_ptt()
+   ENDIF
+!
+!   if requested in input writes on files the anharmonic quantities
+!   at several volumes
+!
+   CALL write_ph_freq_anhar_v()
+!
+!   write on output the electronic contributions if computed to energy,
+!   free_energy, entropy and cv.
+!
+   CALL write_ph_freq_anhar_el()
+   CALL write_ph_freq_anhar_el_pt()
+!
+!  for diagnostic purposes write on file only the vibrational free energy
+!  and the electronic one if available
+!
+   CALL write_free_energy_ph()
 ENDIF
+!
+!  Check if the elastic constants are on file. 
+!  First look for the quasi-harmonic ones
+!
+CALL check_el_cons_qha()
+!
+!  If not found search those at T=0 in the elastic_constants directory
+!
+IF (.NOT.(el_cons_qha_available.OR.el_consf_qha_available)) &
+                                                CALL check_el_cons()
+!
+!  If the elastic constants are on file and the user allows it, the code 
+!  computes the elastic constants as a function of temperature interpolating 
+!  at the crystal parameters found in the quadratic/quartic fit
+!
+CALL set_elastic_constants_t()
 
 WRITE(stdout,'(/,2x,76("-"))')
 WRITE(stdout,'(5x,"Computing the anharmonic properties within ")')
@@ -214,21 +324,34 @@ CALL write_grun_anharmonic()
 !   now plot all the computed quantities
 !
 CALL manage_plot_anhar()
+
+IF (what=='mur_lc_t') THEN
+   CALL plot_elastic_t(0,.FALSE.)
+   CALL plot_elastic_t(1,.FALSE.)
+   CALL plot_elastic_pt(0,.FALSE.)
+   CALL plot_elastic_pt(1,.FALSE.)
+   CALL plot_elastic_ptt(0,.FALSE.)
+   CALL plot_elastic_ptt(1,.FALSE.)
+
+!   CALL plot_macro_el_t()
+!   CALL plot_macro_el_pt()
+!   CALL plot_macro_el_ptt()
+ENDIF
 !
 !   summarize on output the main anharmonic quantities 
 !
-CALL summarize_anhar()
+IF (ltherm_dos) CALL summarize_anhar()
+IF (ltherm_freq.AND.(.NOT.ltherm_dos)) CALL summarize_anhar_ph()
 RETURN
 END SUBROUTINE manage_anhar
 !
 !-------------------------------------------------------------------------
 SUBROUTINE manage_anhar_anis()
 !-------------------------------------------------------------------------
-
+!
 USE kinds,                 ONLY : DP
 USE thermo_mod,            ONLY : reduced_grid, what, tot_ngeo
 USE temperature,           ONLY : ntemp, temp, ntemp_plot, itemp_plot
-USE control_pressure,      ONLY : pressure_kb
 USE control_thermo,        ONLY : ltherm_dos, ltherm_freq
 USE control_elastic_constants, ONLY : el_cons_qha_available, &
                                   el_consf_qha_available
@@ -239,16 +362,9 @@ USE el_thermodynamics,     ONLY : el_ener, el_free_ener, el_entr, &
                                   el_ce
 USE data_files,            ONLY : fleltherm
 USE internal_files_names,  ONLY : flfrq_thermo, flvec_thermo
-USE anharmonic,            ONLY : celldm_t, free_e_min_t
-USE anharmonic_ptt,        ONLY : celldm_ptt, celldm_ptt_p1, &
-                                  celldm_ptt_m1, emin_ptt, emin_ptt_p1, &
-                                  emin_ptt_m1
-USE ph_freq_anharmonic,    ONLY : celldmf_t, free_e_minf_t
-USE io_global,             ONLY : ionode, stdout
+USE io_global,             ONLY : stdout
 USE mp,                    ONLY : mp_sum
 USE mp_world,              ONLY : world_comm
-
-USE control_elastic_constants, ONLY : lelastic, lelasticf
 
 IMPLICIT NONE
 INTEGER :: itemp, itempp, igeom, startt, lastt, idata, ndata
@@ -284,88 +400,183 @@ ENDIF
 !    of temperature.
 !
 ndata= compute_nwork()
+!
+!  For the bulk modulus we need the celldm at pressure p-dp and p+dp
+!  Here fit the static component
+!
+CALL compute_celldm_pm()
+
 ALLOCATE(phf(ndata))
 CALL divide(world_comm, ntemp, startt, lastt)
 IF (ltherm_dos) THEN
-   celldm_t=0.0_DP
-   free_e_min_t=0.0_DP
-   DO itemp = startt, lastt
-      WRITE(stdout,'(/,5x,70("-"))')
-      IF (pressure_kb > 0.0_DP) THEN
-         WRITE(stdout,'(5x, "Gibbs energy from phdos, at T= ", f12.6)') &
-                                                                  temp(itemp)
-         WRITE(stdout,'(5x, "Pressure is :",f12.6)') pressure_kb
-      ELSE
-         WRITE(stdout,'(5x, "Helmholtz free energy from phdos, at &
-                                                 &T= ", f12.6)') temp(itemp)
-      ENDIF
+!
+!  fit the free energy with a polynomial
+!
+   CALL fit_free_energy_anis_t()
+   CALL fit_free_energy_noe_anis_t()
+!
+!  Use the polynomial to find the celldm_t and the energy at the minimum
+!  of the free energy (Gibbs energy if pressure is given in input)
+!  and the corresponding volumes
+!
+   CALL quadratic_fit_t_run()
+   CALL quadratic_fit_t_noe_run()
+
+   CALL compute_volume_t()
+   CALL compute_volume_noe_t()
+!
+!  Find celldm_t at pressure p+dp and p-dp
+!
+   CALL quadratic_fit_t_pm()
+   CALL quadratic_fit_noe_t_pm()
+!
+!  Here compute the celldm_pt that minimize the Gibbs energy for 
+!  selected pressures and the corresponding volumes
+!
+   CALL quadratic_fit_pt()
+   CALL compute_volume_pt()
+!
+!  Here compute the celldm_pt that minimize the Gibbs energy for 
+!  selected pressures +- delta p for computing the bulk modulus
+!  at selected pressures 
+!
+   CALL quadratic_fit_pt_pm()
+!
+!  Here compute the celldm_ptt that minimize the Gibbs energy for 
+!  selected temperatures and the corresponding volumes
+!
+   CALL quadratic_fit_ptt_run()
+   CALL compute_volume_ptt()
+   CALL write_tp_anis_ptt()
+!
+!  Here compute the celldm_ptt_pm that minimize the Gibbs energy for 
+!  selected temperatures +- deltaT and the corresponding volumes
+!  needed to compute thermal expansion
+!
+   CALL quadratic_fit_ptt_pm()
+   CALL compute_volume_ptt_pm()
+!
+!  Compute the bulk modulus as a funtion of T at the input pressure,
+!  for selected pressures and for selected temperatures 
+!
+   CALL compute_bulk_modulus_t()
+   CALL compute_bulk_modulus_noe_t()
+   CALL compute_bulk_modulus_pt()
+   CALL compute_bulk_modulus_ptt()
+!
+!  Intepolate the thermal energy, free_energy, entropy and c_e at the
+!  minimum of the free energy, at the minimum of the gibbs energy for 
+!  selected pressures and for selected temperatures
+!
+   CALL interpolate_harmonic()
+   CALL interpolate_harmonic_noe_t()
+   CALL interpolate_harmonic_pt()
+   CALL interpolate_harmonic_ptt()
+!
+!  This is obsolete but presently the celldm as a function of pressure
+!  are recalculated and written on file here. Only the writing on file
+!  should remain.
+!
+   DO itempp=1,ntemp_plot
+      itemp=itemp_plot(itempp)
       DO idata=1,ndata
          phf(idata)=ph_free_ener(itemp,idata)
-         IF (lel_free_energy) phf(idata)=phf(idata)+el_free_ener(itemp, idata)
-      ENDDO
-      CALL quadratic_fit_t(itemp, celldm_t(:,itemp), free_e_min_t(itemp), phf,&
-                                                                        ndata)
-   ENDDO
-   CALL mp_sum(celldm_t, world_comm)
-   CALL mp_sum(free_e_min_t, world_comm)
-
-   CALL fit_free_energy_anis_t()
-
-   CALL quadratic_fit_pt()
-   CALL interpolate_harmonic_pt()
-
-   DO itempp=1,ntemp_plot
-!
-!  to obtain the thermal expansion we need the equilibrium celldm at
-!  temperature itemp, itemp+1, and itemp-1
-!
-      itemp=itemp_plot(itempp)
-      CALL quadratic_fit_ptt(celldm_ptt(:,:,itempp), emin_ptt(:,itempp), itemp)
-      CALL quadratic_fit_ptt(celldm_ptt_p1(:,:,itempp), &
-                             emin_ptt_p1(:,itempp), itemp+1)
-      CALL quadratic_fit_ptt(celldm_ptt_m1(:,:,itempp), &
-                             emin_ptt_m1(:,itempp), itemp-1)
-   ENDDO
-   CALL interpolate_harmonic_ptt()
-
-   DO itempp=1,ntemp_plot
-      DO idata=1,ndata
-         phf(idata)=ph_free_ener(itemp_plot(itempp),idata)
          IF (lel_free_energy) phf(idata)=phf(idata)+ &
-                                    el_free_ener(itemp_plot(itempp), idata)
+                                    el_free_ener(itemp, idata)
       ENDDO
-      CALL write_e_omega_t(itemp_plot(itempp), phf, ndata)
+      CALL write_e_omega_t(itemp, phf, ndata, '.mur_temp', '_mur_celldm.' )
    ENDDO
 !
 !  for diagnostic purposes write on file only the vibrational free energy
-!  and the electronic one if available
+!  and the electronic one if available (only for cubic systems)
 !
    CALL write_free_energy()
 
 ENDIF
 
 IF (ltherm_freq) THEN
-   celldmf_t=0.0_DP
-   free_e_minf_t=0.0_DP
-   DO itemp = startt, lastt
-      WRITE(stdout,'(/,5x,70("+"))')
-      IF (pressure_kb > 0.0_DP) THEN
-         WRITE(stdout,'(5x, "Gibbs energy from integration, at T= ", f12.6)') &
-                                                                   temp(itemp)
-         WRITE(stdout,'(5x, "Pressure is :",f12.6)') pressure_kb
-      ELSE
-         WRITE(stdout,'(5x, "Helmholtz Free energy from integration, at T= ", &
-                                                      &f12.6)') temp(itemp)
-      ENDIF
+!
+!  fit the free energy with a polynomial
+!
+   CALL fit_free_energyf_anis_t()
+   CALL fit_free_energyf_noe_anis_t()
+!
+!  Use the polynomial to find the celldm_t and the energy at the minimum
+!  of the free energy (Gibbs energy if pressure is given in input)
+!  and the corresponding volumes
+!
+   CALL quadratic_fitf_t_run()
+   CALL quadratic_fitf_t_noe_run()
+
+   CALL compute_volumef_t()
+   CALL compute_volumef_noe_t()
+!
+!  Find celldmf_t at pressure p+dp and p-dp
+!
+   CALL quadratic_fitf_t_pm()
+   CALL quadratic_fitf_noe_t_pm()
+!
+!  Here compute the celldm_pt that minimize the Gibbs energy for 
+!  selected pressures and the corresponding volumes
+!
+   CALL quadratic_fitf_pt()
+   CALL compute_volumef_pt()
+!
+!  Here compute the celldm_pt that minimize the Gibbs energy for 
+!  selected pressures +- delta p for computing the bulk modulus
+!  at selected pressures 
+!
+   CALL quadratic_fitf_pt_pm()
+!
+!  Here compute the celldm_ptt that minimize the Gibbs energy for 
+!  selected temperatures and the corresponding volumes
+!
+   CALL quadratic_fitf_ptt_run()
+   CALL compute_volumef_ptt()
+   CALL write_ph_freq_tp_anis_ptt()
+!
+!  Here compute the celldm_ptt_pm that minimize the Gibbs energy for 
+!  Here compute the celldm_ptt_pm that minimize the Gibbs energy for 
+!  selected temperatures +- deltaT and the corresponding volumes
+!  needed to compute thermal expansion
+!
+   CALL quadratic_fitf_ptt_pm()
+   CALL compute_volumef_ptt_pm()
+!
+!  Compute the bulk modulus as a funtion of T at the input pressure
+!
+   CALL compute_bulk_modulusf_t()
+   CALL compute_bulk_modulusf_noe_t()
+   CALL compute_bulk_modulusf_pt()
+   CALL compute_bulk_modulusf_ptt()
+!
+!  Intepolate the thermal energy, free_energy, entropy and c_e at the
+!  minimum of the free energy, at the minimum of the gibbs energy for 
+!  selected pressures and for selected temperatures
+!
+   CALL interpolate_harmonic_ph()
+   CALL interpolate_harmonicf_noe_t()
+   CALL interpolate_harmonicf_pt()
+   CALL interpolate_harmonicf_ptt()
+!
+!  This is obsolete but presently the celldm as a function of pressure
+!  are recalculated and written on file here. Only the writing on file
+!  should remain.
+!
+   DO itempp=1,ntemp_plot
+      itemp=itemp_plot(itempp)
       DO idata=1,ndata
          phf(idata)=phf_free_ener(itemp,idata)
-         IF (lel_free_energy) phf(idata)=phf(idata)+el_free_ener(itemp, idata)
+         IF (lel_free_energy) phf(idata)=phf(idata)+ &
+                                    el_free_ener(itemp, idata)
       ENDDO
-      CALL quadratic_fit_t(itemp, celldmf_t(:,itemp), free_e_minf_t(itemp), &
-                                                      phf, ndata)
+      CALL write_e_omega_t(itemp, phf, ndata, '.mur_ph_temp', '_mur_ph_celldm.' )
    ENDDO
-   CALL mp_sum(celldmf_t, world_comm)
-   CALL mp_sum(free_e_minf_t, world_comm)
+!
+!  for diagnostic purposes write on file only the vibrational free energy
+!  and the electronic one if available (only for cubic systems)
+!
+   CALL write_free_energy_ph()
 ENDIF
 DEALLOCATE(phf)
 !
@@ -386,16 +597,50 @@ IF (.NOT.(el_cons_qha_available.OR.el_consf_qha_available)) &
 CALL set_elastic_constants_t()
 
 IF (ltherm_dos) THEN
+!
+!  calculates and writes several anharmonic quantities at the input pressure
+!
+   CALL write_anhar()
+   CALL write_anhar_aux()
    CALL write_anhar_anis()
+
+   CALL write_anhar_noe()
+   CALL write_anhar_el_cont()
+
+   CALL write_anhar_pt()
    CALL write_anhar_anis_pt()
+
+   CALL write_anhar_ptt()
    CALL write_anhar_anis_ptt()
 !
-!   write on output the electronic contributions if computed
+!   write on output the electronic contributions if computed, to
+!   energy, free_energy, entropy and cv
 !
    CALL write_anhar_el()
    CALL write_anhar_el_pt()
 ENDIF
-IF (ltherm_freq) CALL write_ph_freq_anhar_anis()
+IF (ltherm_freq) THEN
+   CALL write_ph_freq_anhar()
+!
+!  writes other anharmonic quantities (b_factf)
+!
+   CALL write_ph_freq_anhar_aux()
+   CALL write_ph_freq_anhar_anis()
+
+   CALL write_ph_freq_anhar_noe()
+   CALL write_ph_freq_anhar_el_cont()
+
+   CALL write_ph_freq_anhar_pt()
+   CALL write_ph_freq_anhar_anis_pt()
+
+   CALL write_ph_freq_anhar_ptt()
+   CALL write_ph_freq_anhar_anis_ptt()
+!
+!   write on output the electronic contributions if computed
+!
+   CALL write_ph_freq_anhar_el()
+   CALL write_ph_freq_anhar_el_pt()
+ENDIF
 !
 !  Plot elastic constants and compliances
 !
@@ -445,7 +690,8 @@ CALL manage_plot_anhar_anis()
 !
 !   summarize on output the main anharmonic quantities 
 !
-CALL summarize_anhar()
+IF (ltherm_dos) CALL summarize_anhar()
+IF (ltherm_freq.AND.(.NOT.ltherm_dos)) CALL summarize_anhar_ph()
 !
 RETURN
 END SUBROUTINE manage_anhar_anis
@@ -492,8 +738,6 @@ CALL mp_sum(free_e_mine_t, inter_image_comm)
 !    fit some electronic harmonic quantities 
 !
 CALL write_el_fit_harmonic()
-
-!CALL plot_el_anhar() 
 
 RETURN
 END SUBROUTINE manage_el_anhar

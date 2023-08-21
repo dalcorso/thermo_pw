@@ -187,7 +187,7 @@ RETURN
 END SUBROUTINE write_e_omega
 
 !-------------------------------------------------------------------------
-SUBROUTINE write_e_omega_t(itemp, phf, ndatatot)
+SUBROUTINE write_e_omega_t(itemp, phf, ndatatot, ext, ext1)
 !-------------------------------------------------------------------------
 !
 ! This routine receives as input the energies at the computed geometries
@@ -235,6 +235,7 @@ REAL(DP) :: phf(ndatatot)
 
 CHARACTER(LEN=256) :: filename, filename1
 CHARACTER(LEN=6) :: int_to_char
+CHARACTER(LEN=*) :: ext, ext1
 INTEGER  :: i, iu_mur, ipress, idata, nvar, ndata
 INTEGER  :: find_free_unit, compute_nwork
 REAL(DP) :: ymin, ymin4
@@ -249,10 +250,10 @@ IF (itemp<=0) RETURN
 !
 !  The name of the output files that will contain the volume, energy, pressure
 !
-filename="anhar_files/"//TRIM(flanhar)//'.mur_temp'
+filename="anhar_files/"//TRIM(flanhar)//TRIM(ext)
 CALL add_value(filename,temp(itemp))
 
-filename1="anhar_files/"//TRIM(flevdat)//'_mur_celldm.'//&
+filename1="anhar_files/"//TRIM(flevdat)//TRIM(ext1)//&
                                                 TRIM(int_to_char(itemp))
 CALL add_pressure(filename1)
 
@@ -404,3 +405,105 @@ omega0=omega(ipress0) - (omega(ipress0+1) - omega(ipress0)) * press(ipress0) &
 
 RETURN
 END SUBROUTINE find_omega0
+
+!-------------------------------------------------------------------------
+SUBROUTINE compute_celldm_pm()
+!-------------------------------------------------------------------------
+!
+! This routine receives as input the energies at the computed geometries
+! and gives as output the celldm that minimize the enthalpy at the 
+! pressures pressure-dp and pressure+dp. 
+!
+USE kinds,            ONLY : DP
+USE constants,        ONLY : ry_kbar
+USE cell_base,        ONLY : ibrav
+USE thermo_mod,       ONLY : omega_geo, celldm_geo, energy_geo, celldm_p1, &
+                             celldm_m1
+USE control_pressure, ONLY : pressure, deltap
+USE uniform_pressure, ONLY : p2_p_p1, p2_p_m1, p4_p_p1, p4_p_m1
+USE control_quartic_energy, ONLY : lquartic, lsolve
+USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_quadratic_extremum, &
+                             print_chisq_quadratic
+USE quartic_surfaces, ONLY : fit_multi_quartic, find_quartic_extremum, &
+                             print_quartic_polynomial, print_chisq_quartic
+USE polynomial,       ONLY : poly2, poly4, init_poly, clean_poly
+USE lattices,         ONLY : compress_celldm, expand_celldm, crystal_parameters
+USE mp_images,        ONLY : root_image, my_image_id
+USE io_global,        ONLY : ionode, stdout
+
+IMPLICIT NONE
+
+CHARACTER(LEN=256) :: filename, filename1
+INTEGER  :: i, iu_mur, idata, nvar, ndata
+INTEGER  :: compute_nwork
+REAL(DP) :: ymin, ymin4
+REAL(DP) :: compute_omega_geo
+REAL(DP), ALLOCATABLE :: f(:), x(:,:), x_pos_min(:), x_min_4(:)
+
+IF (my_image_id /= root_image) RETURN
+
+ndata=compute_nwork()
+
+nvar=crystal_parameters(ibrav)
+
+ALLOCATE(x(nvar,ndata))
+ALLOCATE(x_pos_min(nvar))
+ALLOCATE(f(ndata))
+
+CALL init_poly(nvar,p2_p_p1)
+CALL init_poly(nvar,p2_p_m1)
+IF (lquartic) THEN
+   CALL init_poly(nvar,p4_p_p1)
+   CALL init_poly(nvar,p4_p_m1)
+   ALLOCATE(x_min_4(nvar))
+ENDIF
+
+DO idata=1, ndata
+   CALL compress_celldm(celldm_geo(1,idata), x(1,idata), nvar, ibrav)
+END DO
+!
+!  fit the enthalpy with a quadratic polynomial and find the minimum
+!
+DO idata=1, ndata
+   f(idata)=energy_geo(idata) + (pressure + deltap) * omega_geo(idata) 
+END DO
+CALL fit_multi_quadratic(ndata,nvar,lsolve,x,f,p2_p_p1)
+CALL find_quadratic_extremum(nvar,x_pos_min,ymin,p2_p_p1)
+IF (lquartic) THEN
+!
+!   fit the enthalpy with a quartic polynomial and find the minimum
+!
+   CALL fit_multi_quartic(ndata,nvar,lsolve,x,f,p4_p_p1)
+   x_min_4=x_pos_min
+   CALL find_quartic_extremum(nvar,x_min_4,ymin4,p4_p_p1)
+   CALL expand_celldm(celldm_p1, x_min_4, nvar, ibrav)
+ELSE
+   CALL expand_celldm(celldm_p1, x_pos_min, nvar, ibrav)
+ENDIF
+!
+!   here at pressure p-deltap
+!
+DO idata=1, ndata
+   f(idata)=energy_geo(idata) + (pressure - deltap) * omega_geo(idata) 
+END DO
+CALL fit_multi_quadratic(ndata,nvar,lsolve,x,f,p2_p_m1)
+CALL find_quadratic_extremum(nvar,x_pos_min,ymin,p2_p_m1)
+IF (lquartic) THEN
+!
+!   fit the enthalpy with a quartic polynomial and find the minimum
+!
+   CALL fit_multi_quartic(ndata,nvar,lsolve,x,f,p4_p_m1)
+   x_min_4=x_pos_min
+   CALL find_quartic_extremum(nvar,x_min_4,ymin4,p4_p_m1)
+   CALL expand_celldm(celldm_m1, x_min_4, nvar, ibrav)
+ELSE
+   CALL expand_celldm(celldm_m1, x_pos_min, nvar, ibrav)
+ENDIF
+
+DEALLOCATE(x)
+DEALLOCATE(x_pos_min)
+DEALLOCATE(f)
+IF (lquartic) DEALLOCATE(x_min_4)
+
+RETURN
+END SUBROUTINE compute_celldm_pm

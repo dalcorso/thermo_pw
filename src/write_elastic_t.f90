@@ -408,6 +408,8 @@ USE lattices,       ONLY : crystal_parameters
 USE control_pressure, ONLY : npress_plot, ipress_plot, press
 USE control_thermo, ONLY : ltherm_dos, ltherm_freq
 USE anharmonic_pt,     ONLY : celldm_pt, el_cons_pt, el_comp_pt, b0_pt
+USE ph_freq_anharmonic_pt,     ONLY : celldmf_pt, el_consf_pt, &
+                                      el_compf_pt, b0f_pt
 USE polynomial, ONLY : poly1, poly2, poly3, poly4, init_poly, clean_poly
 USE data_files, ONLY : flanhar
 USE temperature, ONLY : ntemp, temp
@@ -494,6 +496,24 @@ IF (ltherm_dos) THEN
    ENDDO
 ENDIF
 
+IF (ltherm_freq) THEN
+   DO ipressp=1, npress_plot
+      ipress=ipress_plot(ipressp)
+      CALL interpolate_el_cons(celldmf_pt(:,:,ipressp), nvar, ibrav, ec_p1,  &
+           ec_p2, ec_p3, ec_p4, poly_degree_elc, el_consf_pt(:,:,:,ipressp), &
+           el_compf_pt(:,:,:,ipressp), b0f_pt(:,ipressp))
+      lelastic_pt=.TRUE.
+      filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_ph_press'
+      CALL add_value(filelastic, press(ipress))
+      CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, &
+           el_consf_pt(:,:,:,ipressp), b0f_pt(:,ipressp), filelastic, 0)
+      filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp_ph_press'
+      CALL add_value(filelastic, press(ipress))
+      CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, &
+           el_compf_pt(:,:,:,ipressp), b0f_pt(:,ipressp), filelastic, 1)
+   ENDDO
+ENDIF
+
 DEALLOCATE(x)
 DEALLOCATE(f)
 DO i=1,6
@@ -533,13 +553,15 @@ USE cubic_surfaces, ONLY : fit_multi_cubic
 USE quartic_surfaces, ONLY : fit_multi_quartic
 
 USE elastic_constants, ONLY : write_el_cons_on_file
-USE control_elastic_constants, ONLY : el_con_geo, lelastic_ptt
+USE control_elastic_constants, ONLY : el_con_geo, lelastic_ptt, lelasticf_ptt
 USE lattices,       ONLY : crystal_parameters
 USE temperature,    ONLY : ntemp_plot, itemp_plot
 USE control_pressure,  ONLY : npress, press
-USE control_thermo,    ONLY : ltherm_dos
+USE control_thermo,    ONLY : ltherm_dos, ltherm_freq
 USE anharmonic_ptt,    ONLY : celldm_ptt, el_cons_ptt, el_comp_ptt, b0_ptt, &
                                macro_el_ptt
+USE ph_freq_anharmonic_ptt,  ONLY : celldmf_ptt, el_consf_ptt, el_compf_ptt, &
+                               b0f_ptt, macro_elf_ptt
 USE polynomial, ONLY : poly1, poly2, poly3, poly4, init_poly, clean_poly
 USE data_files, ONLY : flanhar
 USE temperature, ONLY : ntemp, temp
@@ -625,6 +647,26 @@ IF (ltherm_dos) THEN
       CALL add_value(filelastic, temp(itemp))
       CALL write_el_cons_on_file(press, npress, ibrav, laue, &
            el_comp_ptt(:,:,:,itempp), b0_ptt(:,itempp), filelastic, 3)
+   ENDDO
+ENDIF
+
+IF (ltherm_freq) THEN
+   DO itempp=1, ntemp_plot
+      itemp=itemp_plot(itempp)
+      CALL interpolate_el_cons_p(celldmf_ptt(:,:,itempp), nvar, ibrav, ec_p1,  &
+           ec_p2, ec_p3, ec_p4, poly_degree_elc, el_consf_ptt(:,:,:,itempp), &
+           el_compf_ptt(:,:,:,itempp), macro_elf_ptt(:,:,itempp))
+      lelasticf_ptt=.TRUE.
+      filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_ph_temp'
+      b0_ptt(:,itempp)= (macro_elf_ptt(1,:,itempp)+&
+                         macro_elf_ptt(5,:,itempp)) * 0.5_DP
+      CALL add_value(filelastic, temp(itemp))
+      CALL write_el_cons_on_file(press, npress, ibrav, laue, &
+           el_consf_ptt(:,:,:,itempp), b0f_ptt(:,itempp), filelastic, 2)
+      filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp_ph_temp'
+      CALL add_value(filelastic, temp(itemp))
+      CALL write_el_cons_on_file(press, npress, ibrav, laue, &
+           el_compf_ptt(:,:,:,itempp), b0f_ptt(:,itempp), filelastic, 3)
    ENDDO
 ENDIF
 
