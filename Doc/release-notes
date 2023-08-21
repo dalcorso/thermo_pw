@@ -1,5 +1,16 @@
 New in version 1.9.0
 
+Plot of pressure dependent quantities is now available also
+for ltherm_freq.
+
+Interpolation of elastic constants is made also when lmurn=.TRUE.
+(In collaboration with X. Gong).
+
+Added the calculation of the bulk modulus in anisotropic solids
+without elastic constants.
+
+Added the many_k option for GPU calculations with many k points.
+(Still experimental, in collaboration with X. Gong)
 
 05/05/2023 Version 1.8.1 is now frozen
 New in version 1.8.1

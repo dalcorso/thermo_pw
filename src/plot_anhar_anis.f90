@@ -42,8 +42,8 @@ USE io_global,       ONLY : ionode
 
 IMPLICIT NONE
 
-CHARACTER(LEN=256) :: gnu_filename, filename, filename1, filename2, &
-                      filename3, filenameps, label
+CHARACTER(LEN=256) :: gnu_filename, filename, filename_ph, filename1, &
+                      filename2, filename3, filenameps, label
 INTEGER :: i, istep, ipressp, ipress, itempp, itemp, iusing, ierr, system, &
            last_iusing
 REAL(DP) :: factor
@@ -120,13 +120,20 @@ DO i=1,6
          istep=MOD(istep,8)+1
          filename="anhar_files/"//TRIM(flanhar)//'.celldm_press'
          CALL add_value(filename,press(ipress))
+         filename_ph="anhar_files/"//TRIM(flanhar)//'.celldm_ph_press'
+         CALL add_value(filename_ph,press(ipress))
          IF (first_step) THEN
             CALL gnuplot_xlabel('T (K)',.FALSE.)
             CALL gnuplot_set_fact(1.0_DP,.FALSE.)
             CALL gnuplot_ylabel(TRIM(celldm_gnuplot_name(i)),.FALSE.)
          ENDIF
-         CALL gnuplot_write_file_mul_data(filename,1,iusing,color(istep), &
-                                        first_step, last_step, .FALSE.)
+         IF (ltherm_dos) &
+            CALL gnuplot_write_file_mul_data(filename,1,iusing,color(istep), &
+                     first_step, (last_step.AND..NOT.ltherm_freq), .FALSE.)
+         IF (ltherm_freq) &
+            CALL gnuplot_write_file_mul_data(filename_ph,1,iusing,   &
+                    color(istep), (first_step.AND..NOT.ltherm_dos),  &
+                                                     last_step, .FALSE.)
       ENDDO
    ENDIF
 ENDDO
@@ -145,13 +152,20 @@ DO i=1,6
          istep=MOD(istep,8)+1
          filename="anhar_files/"//TRIM(flanhar)//'.celldm_temp'
          CALL add_value(filename,temp(itemp))
+         filename_ph="anhar_files/"//TRIM(flanhar)//'.celldm_ph_temp'
+         CALL add_value(filename_ph,temp(itemp))
          IF (first_step) THEN
             CALL gnuplot_xlabel('p (kbar)',.FALSE.)
             CALL gnuplot_set_fact(1.0_DP,.FALSE.)
             CALL gnuplot_ylabel(TRIM(celldm_gnuplot_name(i)),.FALSE.)
          ENDIF
-         CALL gnuplot_write_file_mul_data(filename,1,iusing,color(istep), &
-                                        first_step, last_step, .FALSE.)
+         IF (ltherm_dos) &
+            CALL gnuplot_write_file_mul_data(filename,1,iusing,color(istep), &
+                    first_step, (last_step.AND..NOT.ltherm_freq), .FALSE.)
+         IF (ltherm_freq) &
+            CALL gnuplot_write_file_mul_data(filename_ph,1,iusing, &
+             color(istep), (first_step.AND..NOT.ltherm_dos), last_step, &
+                                                                 .FALSE.)
       ENDDO
    ENDIF
 ENDDO
@@ -206,8 +220,8 @@ USE io_global,       ONLY : ionode
 
 IMPLICIT NONE
 
-CHARACTER(LEN=256) :: gnu_filename, filename, filename1, filename2, &
-                      filename3, filenameps, label
+CHARACTER(LEN=256) :: gnu_filename, filename, filename_ph, filename1, &
+                      filename2, filename3, filenameps, label
 INTEGER :: i, istep, ipressp, ipress, itempp, itemp, iusing, ierr, system, &
            last_iusing
 REAL(DP) :: factor
@@ -293,6 +307,8 @@ DO i=1,6
          istep=MOD(istep,8)+1
          filename="anhar_files/"//TRIM(flanhar)//'.celldm_press'
          CALL add_value(filename,press(ipress))
+         filename_ph="anhar_files/"//TRIM(flanhar)//'.celldm_ph_press'
+         CALL add_value(filename_ph,press(ipress))
          IF (first_step) THEN
             CALL gnuplot_xlabel('T (K)',.FALSE.)
             CALL gnuplot_set_fact(1.0_DP,.FALSE.)
@@ -300,8 +316,12 @@ DO i=1,6
                                               TRIM(thermal_gnuplot_name(i))
             CALL gnuplot_ylabel(TRIM(label),.FALSE.) 
          ENDIF
-         CALL gnuplot_write_file_mul_data(filename,1,iusing,color(istep), &
-                                               first_step,last_step,.FALSE.)
+         IF (ltherm_dos) &
+            CALL gnuplot_write_file_mul_data(filename,1,iusing,color(istep), &
+                   first_step,(last_step.AND..NOT.ltherm_freq),.FALSE.)
+         IF (ltherm_freq) &
+            CALL gnuplot_write_file_mul_data(filename_ph,1,iusing,&
+               color(istep),(first_step.AND..NOT.ltherm_dos),last_step,.FALSE.)
       ENDDO
    ENDIF
 ENDDO
@@ -320,6 +340,8 @@ DO i=1,6
          istep=MOD(istep,8)+1
          filename="anhar_files/"//TRIM(flanhar)//'.celldm_temp'
          CALL add_value(filename,temp(itemp))
+         filename_ph="anhar_files/"//TRIM(flanhar)//'.celldm_ph_temp'
+         CALL add_value(filename_ph,temp(itemp))
          IF (first_step) THEN
             CALL gnuplot_xlabel('p (kbar)',.FALSE.)
             CALL gnuplot_set_fact(1.0_DP,.FALSE.)
@@ -327,8 +349,12 @@ DO i=1,6
                                               TRIM(thermal_gnuplot_name(i))
             CALL gnuplot_ylabel(TRIM(label),.FALSE.) 
          ENDIF
-         CALL gnuplot_write_file_mul_data(filename,1,iusing,color(istep), &
-                                               first_step,last_step,.FALSE.)
+         IF (ltherm_dos) &
+            CALL gnuplot_write_file_mul_data(filename,1,iusing,color(istep), &
+                         first_step,(last_step.AND..NOT.ltherm_freq),.FALSE.)
+         IF (ltherm_freq) &
+            CALL gnuplot_write_file_mul_data(filename_ph,1,iusing,&
+             color(istep), (first_step.AND..NOT.ltherm_dos),last_step,.FALSE.)
       ENDDO
    ENDIF
 ENDDO

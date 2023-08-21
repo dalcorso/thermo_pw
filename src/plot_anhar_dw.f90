@@ -32,7 +32,8 @@ USE io_global,       ONLY : ionode
 
 IMPLICIT NONE
 INTEGER :: ierr, system
-CHARACTER(LEN=256) :: gnu_filename, filename, filename1, filetherm, filepstherm
+CHARACTER(LEN=256) :: gnu_filename, filename, filename1, filename1_ph, &
+                      filetherm, filepstherm
 LOGICAL :: first_step, last_step
 INTEGER :: istep, ipressp, ipress
 REAL(DP) :: factor
@@ -85,13 +86,19 @@ DO ipressp=1,npress_plot
    istep=MOD(istep,8)+1
    filename1="anhar_files/"//TRIM(flanhar)//'.therm_press'
    CALL add_value(filename1,press(ipress))
+   filename1_ph="anhar_files/"//TRIM(flanhar)//'.therm_ph_press'
+   CALL add_value(filename1_ph,press(ipress))
    IF (first_step) THEN
       CALL gnuplot_xlabel('T (K)',.FALSE.)
       CALL gnuplot_set_fact(factor,.FALSE.)
       CALL gnuplot_ylabel('Thermal Energy (kJ / (N mol))',.FALSE.)
    ENDIF
-   CALL gnuplot_write_file_mul_data(filename1,1,2,color(istep),first_step, &
-                                                        last_step, .FALSE.)
+   IF (ltherm_dos) &
+      CALL gnuplot_write_file_mul_data(filename1,1,2,color(istep),first_step, &
+                            (last_step.AND..NOT.ltherm_freq), .FALSE.)
+   IF (ltherm_freq) &
+      CALL gnuplot_write_file_mul_data(filename1_ph,1,2,color(istep), &
+                  (first_step.AND..NOT.ltherm_dos), last_step, .FALSE.)
 ENDDO
 !
 ! End ADC addition
@@ -116,13 +123,19 @@ DO ipressp=1,npress_plot
    istep=MOD(istep,8)+1
    filename1="anhar_files/"//TRIM(flanhar)//'.therm_press'
    CALL add_value(filename1,press(ipress))
+   filename1_ph="anhar_files/"//TRIM(flanhar)//'.therm_ph_press'
+   CALL add_value(filename1_ph,press(ipress))
    IF (first_step) THEN
       CALL gnuplot_xlabel('T (K)',.FALSE.)
       CALL gnuplot_set_fact(factor,.FALSE.)
       CALL gnuplot_ylabel('Thermal Free Energy (kJ / (N mol))',.FALSE.)
    ENDIF
-   CALL gnuplot_write_file_mul_data(filename1,1,3,color(istep),first_step, &
-                                                        last_step, .FALSE.)
+   IF (ltherm_dos) &
+      CALL gnuplot_write_file_mul_data(filename1,1,3,color(istep),first_step, &
+                          (last_step.AND..NOT.ltherm_freq), .FALSE.)
+   IF (ltherm_freq) &
+      CALL gnuplot_write_file_mul_data(filename1_ph,1,3,color(istep),  &
+                          (first_step.AND..NOT.ltherm_dos), last_step, .FALSE.)
 ENDDO
 !
 ! End ADC addition
@@ -148,13 +161,19 @@ DO ipressp=1,npress_plot
    istep=MOD(istep,8)+1
    filename1="anhar_files/"//TRIM(flanhar)//'.therm_press'
    CALL add_value(filename1,press(ipress))
+   filename1_ph="anhar_files/"//TRIM(flanhar)//'.therm_ph_press'
+   CALL add_value(filename1_ph,press(ipress))
    IF (first_step) THEN
       CALL gnuplot_xlabel('T (K)',.FALSE.)
       CALL gnuplot_set_fact(factor,.FALSE.)
       CALL gnuplot_ylabel('Entropy (J / K / (N mol))',.FALSE.)
    ENDIF
-   CALL gnuplot_write_file_mul_data(filename1,1,4,color(istep),first_step, &
-                                                        last_step, .FALSE.)
+   IF (ltherm_dos) &
+      CALL gnuplot_write_file_mul_data(filename1,1,4,color(istep),first_step, &
+                  (last_step.AND..NOT.ltherm_freq), .FALSE.)
+   IF (ltherm_freq) &
+      CALL gnuplot_write_file_mul_data(filename1_ph,1,4,color(istep), &
+                  (first_step.AND..NOT.ltherm_dos), last_step, .FALSE.)
 ENDDO
 !
 ! End ADC addition

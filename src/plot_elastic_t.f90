@@ -486,7 +486,7 @@ CALL gnuplot_ylabel(TRIM(label),.FALSE.)
 IF (lelastic) THEN
    IF (ngeom==1) THEN
       CALL gnuplot_write_file_mul_data(filename,i,j,'color_red', .TRUE.,&
-                                                      .NOT.with_s,.FALSE.)
+                          .NOT.with_s.AND..NOT.lelasticf,.FALSE.)
    ELSE
       DO igeom=1, ngeom
          IF (.NOT.all_geometry_done_geo(igeom)) CYCLE
@@ -797,6 +797,41 @@ DO iec=1,21
    ENDIF
 ENDDO
 
+istep=0
+IF (MOD(iflag,2)==0) THEN
+   DO ipressp=1, npress_plot
+      first_step=(ipressp==1)
+      last_step=(ipressp==npress_plot)
+      ipress=ipress_plot(ipressp)
+      istep=MOD(istep,8)+1
+      filelastic="anhar_files/"//TRIM(flanhar)//'.el_cons_press'
+      CALL add_value(filelastic,press(ipress))
+      IF (first_step) THEN
+         CALL gnuplot_set_fact(1.0_DP, .FALSE.) 
+         WRITE(label,'("Bulk modulus B (kbar)")') 
+         CALL gnuplot_ylabel(TRIM(label),.FALSE.)
+      ENDIF
+      CALL gnuplot_write_file_mul_data(filelastic,1,2,color(istep), &
+                          first_step,last_step,.FALSE.)
+   ENDDO
+ELSE
+   DO ipressp=1, npress_plot
+      first_step=(ipressp==1)
+      last_step=(ipressp==npress_plot)
+      ipress=ipress_plot(ipressp)
+      istep=MOD(istep,8)+1
+      filelastic="anhar_files/"//TRIM(flanhar)//'.el_comp_press'
+      CALL add_value(filelastic,press(ipress))
+      IF (first_step) THEN
+         CALL gnuplot_set_fact(1.D3, .FALSE.) 
+         WRITE(label,'("Compressibility K (Mbar^{-1})")') 
+         CALL gnuplot_ylabel(TRIM(label),.FALSE.)
+      ENDIF
+      CALL gnuplot_write_file_mul_data(filelastic,1,2,color(istep), &
+                          first_step,last_step,.FALSE.)
+   ENDDO
+ENDIF
+
 CALL gnuplot_end()
 
 IF (lgnuplot.AND.ionode) &
@@ -918,6 +953,41 @@ DO iec=1,21
       ENDIF
    ENDIF
 ENDDO
+
+istep=0
+IF (MOD(iflag,2)==0) THEN
+   DO itempp=1, ntemp_plot
+      first_step=(itempp==1)
+      last_step=(itempp==ntemp_plot)
+      itemp=itemp_plot(itempp)
+      istep=MOD(istep,8)+1
+      filelastic="anhar_files/"//TRIM(flanhar)//'.el_cons_temp'
+      CALL add_value(filelastic,temp(itemp))
+      IF (first_step) THEN
+         CALL gnuplot_set_fact(1.0_DP, .FALSE.) 
+         WRITE(label,'("Bulk modulus B (kbar)")') 
+         CALL gnuplot_ylabel(TRIM(label),.FALSE.)
+      ENDIF
+      CALL gnuplot_write_file_mul_data(filelastic,1,2,color(istep), &
+                          first_step,last_step,.FALSE.)
+   ENDDO
+ELSE
+   DO itempp=1, ntemp_plot
+      first_step=(itempp==1)
+      last_step=(itempp==ntemp_plot)
+      itemp=itemp_plot(itempp)
+      istep=MOD(istep,8)+1
+      filelastic="anhar_files/"//TRIM(flanhar)//'.el_comp_temp'
+      CALL add_value(filelastic,temp(itemp))
+      IF (first_step) THEN
+         CALL gnuplot_set_fact(1.D3, .FALSE.) 
+         WRITE(label,'("Compressibility K (Mbar^{-1})")') 
+         CALL gnuplot_ylabel(TRIM(label),.FALSE.)
+      ENDIF
+      CALL gnuplot_write_file_mul_data(filelastic,1,2,color(istep), &
+                          first_step,last_step,.FALSE.)
+   ENDDO
+ENDIF
 
 CALL gnuplot_end()
 
