@@ -22,7 +22,6 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
   USE thermo_mod,       ONLY : what, ibrav_geo, celldm_geo, ef_geo
   USE control_thermo,   ONLY : outdir_thermo
   USE control_elastic_constants, ONLY : frozen_ions, use_free_energy
-  USE control_bands,    ONLY : nbnd_bands
   USE control_conv,     ONLY : ke, keden, nk_test, sigma_test
   USE control_eldos,    ONLY : lel_free_energy
   USE initial_conf,     ONLY : ibrav_save, tau_save_crys
