@@ -2928,27 +2928,25 @@ calculated at constant temperature:
 \begin{equation}
 K_T = - {1 \over V} {d V \over d p}\Bigg|_T.
 \end{equation}
-The bulk modulus is the inverse of the compressibility. 
+The bulk modulus is the inverse of the compressibility:
+\begin{equation}
+B_T = {1 \over K_T}.
+\end{equation}
+When the free energy is fitted by an equation of state that has the
+bulk modulus as a parameter, we obtain it from the equation of state.
 
-In order to calculate it we should calculate the change of volume
-due to an external pressure $p$. Since the change of volume can be
-written as 
+Otherwise we calculate the change of volume due to external 
+pressures $\pm \Delta p$. 
+By minimizing $F + \Delta p \Omega$ and $F - \Delta p \Omega$ we obtain 
+the crystal parameters and hence the volume at pressures 
+$\pm \Delta p$. The bulk modulus is then calculated numerically as:
 \begin{equation}
-dV = V (\epsilon_1 + \epsilon_2 + \epsilon_3)
+B_T = - \Omega { 2 \Delta p \over \Omega (\Delta p) - \Omega(-\Delta p)}.
 \end{equation}
-and we can calculate $\epsilon$ from the elastic compliances and the
-stress $\sigma_1=-p$, $\sigma_2=-p$, $\sigma_3=-p$ we have
-\begin{equation}
-B_T = {1 \over S_{1,1}+S_{2,2}+S_{3,3}+2 S_{1,2}+2 S_{1,3}+2 S_{2,3}}.
-\end{equation}
-%In some cases it might be useful to express the bulk modulus in
-%terms of the elastic constants, for instance when not all the 
-%elastic constants are available and it is not possible to calculate 
-%the elastic compliances. Moreover it is interesting to express
-%the bulk modulus in terms of the derivatives of the free energy with
-%respect to the crystal parameters $\zeta_k$.
-%This depends on the Laue class and on the Bravais lattice, so we discuss
-%this in the following.
+
+When elastic constants are available, the bulk modulus can be written
+in terms of the elastic constants. See below the section on polycrystalline
+averages.
 
 \newpage
 {\color{dark-blue}\chapter{Thermal expansion from Gr\"uneisen parameters}}
@@ -3326,6 +3324,83 @@ we determine $\bar c$ as
 {1\over c_s({\bf \hat q})^3}.
 \end{equation}
 
+\newpage
+
+{\color{dark-blue}\chapter{Polycrystalline averages}}
+\color{black}
+From the elastic constants of a solid it is possible to estimate those
+of a polycrystalline solid through the Voigt-Reuss-Hill method [4].
+From the average elastic constants:
+\begin{equation}
+\langle C'_{11} \rangle = {3 \over 15} \left(C_{11} + C_{22} +C_{33}\right)
++{2 \over 15} \left(C_{12} + C_{13} +C_{23}\right) 
++{4 \over 15} \left(C_{44} + C_{55} +C_{66}\right),
+\end{equation}
+
+\begin{equation}
+\langle C'_{12} \rangle = {1 \over 15} \left(C_{11} + C_{22} +C_{33}\right)
++{4 \over 15} \left(C_{12} + C_{13} +C_{23}\right) 
+-{2 \over 15} \left(C_{44} + C_{55} +C_{66}\right),
+\end{equation}
+
+\begin{equation}
+\langle C'_{44} \rangle = {1 \over 15} \left(C_{11} + C_{22} +C_{33}\right)
+-{1 \over 15} \left(C_{12} + C_{13} +C_{23}\right) 
++{3 \over 15} \left(C_{44} + C_{55} +C_{66}\right),
+\end{equation}
+one obtains the Voigt approximations of the Bulk modulus
+($B_V$), of the Young modulus ($E_V$), of the shear modulus ($G_V$), and of 
+the Poisson ratio ($\nu_V$) as:
+\begin{equation}
+B_V = { \langle C'_{11} \rangle + 2 \langle C'_{12} \rangle \over 3},
+\end{equation}
+\begin{equation}
+E_V = {\left(\langle C'_{11} \rangle - \langle C'_{12} \rangle \right)
+\left( \langle C'_{11} \rangle + 2 \langle C'_{12} \rangle \right) \over 
+\langle C'_{11} \rangle + \langle C'_{12} \rangle },
+\end{equation}
+\begin{equation}
+G_V = \langle C'_{44} \rangle,
+\end{equation}
+\begin{equation}
+\nu_V = {E_V \over 2 G_V} - 1. 
+\end{equation}
+
+The Reuss approximation of these quantities is given in terms of the elastic
+compliances:
+\begin{equation}
+B_R = {1 \over  S_{11} + S_{22} + S_{33} + 2 S_{12} + 2 S_{13} + 2 S_{23} },
+\end{equation}
+\begin{equation}
+E_R = {15 \over 3 \left(S_{11} + S_{22} +S_{33}\right)
++2 \left(S_{12} + S_{13} +S_{23}\right) 
++\left(S_{44} + S_{55} +S_{66}\right) },
+\end{equation}
+\begin{equation}
+G_R = {15 \over 4 \left(S_{11} + S_{22} +S_{33}\right)
+-4 \left(S_{12} + S_{13} +S_{23}\right) 
++ 3 \left(S_{44} + S_{55} +S_{66}\right) },
+\end{equation}
+\begin{equation}
+\nu_R = {E_R \over 2 G_R} - 1.
+\end{equation}
+Finally the Hill approximation is the average of the Voigt and Reuss
+estimates.
+
+From the Hill estimate of these quantities we obtain the average sound
+velocities:
+\begin{equation}
+V_P = \left[{B + {4 G \over 3} \over \rho}\right]^{1/2},
+\end{equation}
+\begin{equation}
+V_B = \left[{B \over \rho}\right]^{1/2},
+\end{equation}
+\begin{equation}
+V_G = \left[{G \over \rho}\right]^{1/2},
+\end{equation}
+where $V_P$, $V_B$, and $V_S$ are the compressional, bulk, and
+shear sound velocities and $\rho$ is the density.
+
 {\color{dark-blue}\chapter{Bibliography}}
 \color{black}
 
@@ -3342,6 +3417,11 @@ Dover edition (1998).
 
 \item
 [3.] T.H.K. Barron and M.L. Klein, Proc. Phys. Soc. {\bf 85}, 523 (1965).
+
+\item
+[4.] R.E. Newnham, {\it Properties of materials: anisotropy, symmetry,
+structure}, Oxford University press (Oxford, 2005).
+
 \end{enumerate}
 
 \newpage
