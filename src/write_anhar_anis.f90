@@ -64,7 +64,7 @@ IF (lelastic) THEN
 
       CALL print_sound_velocities(ibrav_save, el_cons_s(:,:,itemp), &
            el_comp_s(:,:,itemp), density_t(itemp), v_s(1,itemp), v_s(2,itemp),&
-                                                      v_s(3,itemp),.TRUE.)
+                                                      v_s(3,itemp),.FALSE.)
       !
       ! Compute macro-elasticity variables and sound velocities using 
       ! isothermal 
@@ -76,7 +76,7 @@ IF (lelastic) THEN
 
       CALL print_sound_velocities(ibrav_save, el_cons_t(:,:,itemp), &
            el_comp_t(:,:,itemp), density_t(itemp), v_t(1,itemp), v_t(2,itemp),&
-                                                   v_t(3,itemp),.TRUE.)
+                                                   v_t(3,itemp),.FALSE.)
    ENDDO
 ENDIF
 
@@ -533,7 +533,7 @@ IF (lelasticf) THEN
 
       CALL print_sound_velocities(ibrav_save, el_consf_s(:,:,itemp), &
            el_compf_s(:,:,itemp), densityf_t(itemp), vf_s(1,itemp),    &
-           vf_s(2,itemp), vf_s(3,itemp), .TRUE.)
+           vf_s(2,itemp), vf_s(3,itemp), .FALSE.)
 
 
       ! Compute macro-elasticity variables and sound velocities using isothermal 
@@ -544,7 +544,7 @@ IF (lelasticf) THEN
 
       CALL print_sound_velocities(ibrav_save, el_consf_t(:,:,itemp), &
            el_compf_t(:,:,itemp), densityf_t(itemp), vf_t(1,itemp),    &
-           vf_t(2,itemp), vf_t(3,itemp), .TRUE.)
+           vf_t(2,itemp), vf_t(3,itemp), .FALSE.)
 
    ENDDO
 ENDIF
@@ -1005,7 +1005,7 @@ DO ipressp=1, npress_plot
               el_cons_s_pt(:,:,itemp,ipressp),   &
               el_comp_s_pt(:,:,itemp,ipressp), density_pt(itemp,ipressp), &
               v_s_pt(1,itemp,ipressp), v_s_pt(2,itemp,ipressp), &
-                                           v_s_pt(3,itemp,ipressp),.TRUE.)
+                                           v_s_pt(3,itemp,ipressp),.FALSE.)
       !
       ! Compute macro-elasticity variables and sound velocities using 
       ! isothermal 
@@ -1020,7 +1020,7 @@ DO ipressp=1, npress_plot
            el_cons_pt(:,:,itemp,ipressp), el_comp_pt(:,:,itemp,ipressp), &
            density_pt(itemp,ipressp),                    &
            v_pt(1,itemp,ipressp), v_pt(2,itemp,ipressp), &
-           v_pt(3,itemp,ipressp), .TRUE.)
+           v_pt(3,itemp,ipressp), .FALSE.)
       ENDDO
    ENDIF
 
@@ -1222,7 +1222,7 @@ DO ipressp=1, npress_plot
               el_consf_s_pt(:,:,itemp,ipressp),   &
               el_compf_s_pt(:,:,itemp,ipressp), densityf_pt(itemp,ipressp), &
               vf_s_pt(1,itemp,ipressp), vf_s_pt(2,itemp,ipressp), &
-                                           vf_s_pt(3,itemp,ipressp),.TRUE.)
+                                           vf_s_pt(3,itemp,ipressp),.FALSE.)
       !
       ! Compute macro-elasticity variables and sound velocities using 
       ! isothermal 
@@ -1237,7 +1237,7 @@ DO ipressp=1, npress_plot
            el_consf_pt(:,:,itemp,ipressp), el_compf_pt(:,:,itemp,ipressp), &
            densityf_pt(itemp,ipressp),                    &
            vf_pt(1,itemp,ipressp), vf_pt(2,itemp,ipressp), &
-           vf_pt(3,itemp,ipressp), .TRUE.)
+           vf_pt(3,itemp,ipressp), .FALSE.)
       ENDDO
    ENDIF
 
@@ -1464,7 +1464,7 @@ DO itempp=1, ntemp_plot
            el_cons_ptt(:,:,ipress,itempp), el_comp_ptt(:,:,ipress,itempp), &
            density_ptt(ipress,itempp),                    &
            v_ptt(1,ipress,itempp), v_ptt(2,ipress,itempp), &
-           v_ptt(3,ipress,itempp), .TRUE.)
+           v_ptt(3,ipress,itempp), .FALSE.)
       ENDDO
    ENDIF
 
@@ -1680,7 +1680,7 @@ DO itempp=1, ntemp_plot
               el_consf_s_ptt(:,:,ipress,itempp),   &
               el_compf_s_ptt(:,:,ipress,itempp), densityf_ptt(ipress,itempp), &
               vf_s_ptt(1,ipress,itempp), vf_s_ptt(2,ipress,itempp), &
-                                         vf_s_ptt(3,ipress,itempp),.TRUE.)
+                                         vf_s_ptt(3,ipress,itempp),.FALSE.)
      !
      ! Compute macro-elasticity variables and sound velocities using 
      ! isothermal 
@@ -1695,7 +1695,7 @@ DO itempp=1, ntemp_plot
            el_consf_ptt(:,:,ipress,itempp), el_compf_ptt(:,:,ipress,itempp), &
            densityf_ptt(ipress,itempp),                    &
            vf_ptt(1,ipress,itempp), vf_ptt(2,ipress,itempp), &
-           vf_ptt(3,ipress,itempp), .TRUE.)
+           vf_ptt(3,ipress,itempp), .FALSE.)
       ENDDO
    ENDIF
 
