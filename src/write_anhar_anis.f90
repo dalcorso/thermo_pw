@@ -1316,7 +1316,7 @@ DO ipressp=1, npress_plot
 !
 !   Here the elastic constants at constant entropy
 !
-      filename='anhar_files/'//TRIM(flanhar)//'.el_cons_ph_s_press'
+      filename='anhar_files/'//TRIM(flanhar)//'.el_cons_s_ph_press'
       CALL add_value(filename,press(ipress))
       CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue,          &
                  el_consf_s_pt(:,:,:,ipressp), b0f_s_pt(:,ipressp), &
@@ -1324,7 +1324,7 @@ DO ipressp=1, npress_plot
 !
 !  and here the elastic compliances
 !
-      filename='anhar_files/'//TRIM(flanhar)//'.el_comp_ph_s_press'
+      filename='anhar_files/'//TRIM(flanhar)//'.el_comp_s_ph_press'
       CALL add_value(filename,press(ipress))
       CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue, &
            el_compf_s_pt(:,:,:,ipressp), b0f_s_pt(:,ipressp), filename, 1)
@@ -1338,7 +1338,7 @@ DO ipressp=1, npress_plot
 !
 !   Adiabatic macro-elasticity variables
 !
-      filename='anhar_files/'//TRIM(flanhar)//'.macro_el_ph_s_press'
+      filename='anhar_files/'//TRIM(flanhar)//'.macro_el_s_ph_press'
       CALL add_value(filename,press(ipress))
       CALL write_macro_el_on_file(temp, ntemp, macro_elf_s_pt(:,:,ipressp), &
                                                                  filename, 0)
@@ -1351,7 +1351,7 @@ DO ipressp=1, npress_plot
 !
 !   Adiabatic sound velocities
 !
-      filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_ph_s_press'
+      filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_s_ph_press'
       CALL add_value(filename,press(ipress))
       CALL write_sound_on_file(temp, ntemp, vf_s_pt(:,:,ipressp), filename, 0)
    ENDIF

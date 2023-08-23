@@ -38,14 +38,14 @@ IF (.NOT.(lelastic.OR.lelasticf).OR..NOT.lb0_t) RETURN
 
 IF (lelasticf) filelastic="anhar_files/"//TRIM(flanhar)//".macro_el_ph"
 IF (lelastic)  filelastic="anhar_files/"//TRIM(flanhar)//".macro_el"
-gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_macro_el"
+gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_macro_el"
 filenameps=TRIM(flpsanhar)//".macro_el"//TRIM(flext)
 
 CALL plot_one_macro_el(filelastic, gnu_filename, filenameps)
 
 IF (lelasticf) filelastic="anhar_files/"//TRIM(flanhar)//".macro_el_s_ph"
 IF (lelastic)  filelastic="anhar_files/"//TRIM(flanhar)//".macro_el_s"
-gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_macro_el_s"
+gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_macro_el_s"
 filenameps=TRIM(flpsanhar)//".macro_el_s"//TRIM(flext)
 
 CALL plot_one_macro_el(filelastic, gnu_filename, filenameps)
@@ -180,7 +180,7 @@ IF (lelastic) THEN
    filelastic_s="anhar_files/"//TRIM(flanhar)//".sound_vel_s"
 END IF
 
-gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_sound_vel"
+gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_sound_vel"
 filenameps=TRIM(flpsanhar)//".sound_vel"//TRIM(flext)
 
 CALL gnuplot_start(gnu_filename)

@@ -403,7 +403,7 @@ IF (.NOT.(lelastic.OR.lelasticf)) RETURN
 
 IF (.NOT.(ltherm_freq.OR.ltherm_dos)) RETURN
 
-gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'.tstress'
+gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_anhar_tstress'
 CALL gnuplot_start(gnu_filename)
 
 psfilename=TRIM(flpsanhar)//'.tstress'//TRIM(flext)
@@ -511,7 +511,7 @@ IF ( my_image_id /= root_image ) RETURN
 IF (.NOT.(ltherm_freq.OR.ltherm_dos)) RETURN
 IF (.NOT.(lelastic.OR.lelasticf)) RETURN
 
-gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'.ggamma'
+gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_anhar_ggamma'
 CALL gnuplot_start(gnu_filename)
 
 psfilename=TRIM(flpsanhar)//'.ggamma'//TRIM(flext)

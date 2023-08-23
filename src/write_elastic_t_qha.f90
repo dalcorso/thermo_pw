@@ -87,7 +87,7 @@ IF (pdelc_ph/=poly_degree_elc) &
 DO itemp=startt,lastt
    IF (itemp==1.OR.itemp==ntemp) CYCLE
    
-   IF (el_cons_qha_geo_available) THEN
+   IF (el_cons_qha_geo_available.AND.ltherm_dos) THEN
       CALL compress_celldm(celldm_t(:,itemp),xfit,nvar,ibrav)
       f=0.0_DP
       DO i=1,6
@@ -143,7 +143,7 @@ DO itemp=startt,lastt
       b0_t(itemp)=macro_el_t(5,itemp)
    END IF
 
-   IF (el_consf_qha_geo_available) THEN
+   IF (el_consf_qha_geo_available.AND.ltherm_freq) THEN
       CALL compress_celldm(celldmf_t(:,itemp),xfit,nvar,ibrav)
       f=0.0_DP
       DO i=1,6
@@ -210,7 +210,6 @@ IF (ltherm_dos) THEN
    filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons'
    CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, el_cons_t, b0_t, &
                                                        filelastic, 0)
-!   CALL compute_el_comp_t(el_cons_t,el_comp_t,b0_t)
    filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp'
    CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, el_comp_t, b0_t, & 
                                                        filelastic, 1)
@@ -226,7 +225,6 @@ IF (ltherm_freq) THEN
    CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, el_consf_t, b0f_t, &
                                                           filelastic, 0)
 
-!   CALL compute_el_comp_t(el_consf_t,el_compf_t,b0f_t)
    filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp_ph'
    CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, el_compf_t, b0f_t, &
                                                            filelastic,1)
@@ -330,9 +328,9 @@ b0f_pt=0.0_DP
 
 pdelc_dos=MIN(poly_degree_elc,fndos_ec-1)
 pdelc_ph=MIN(poly_degree_elc,fnph_ec-1)
-IF (pdelc_dos/=poly_degree_elc) &
+IF (pdelc_dos/=poly_degree_elc.AND.ltherm_dos) &
    WRITE(stdout,'(5x,"Poly_degree_elc decreased to ",i3," for dos")') pdelc_dos
-IF (pdelc_ph/=poly_degree_elc) &
+IF (pdelc_ph/=poly_degree_elc.AND.ltherm_freq) &
    WRITE(stdout,'(5x,"Poly_degree_elc decreased to ",i3," for ph")') pdelc_ph
 
 DO ipressp=1,npress_plot
@@ -426,13 +424,13 @@ DO ipressp=1,npress_plot
             f=0.0_DP
             DO i=1,6
                DO j=i,6
-                  IF (el_conf_geo_t(i,j,itemp,f_geodos_ec)>0.1_DP) THEN
+                  IF (el_conf_geo_t(i,j,itemp,f_geoph_ec)>0.1_DP) THEN
                      WRITE(stdout,'(/,5x,"Fitting elastic constants C(",i4,",",i4,")")') i,j
                      WRITE(stdout,'(/,5x,"at Temperature",f15.5,"K")') temp(itemp)
 
                      jdata=0
                      DO idata=1,ndata
-                        IF (found_dos_ec(idata)) THEN
+                        IF (found_ph_ec(idata)) THEN
                            jdata=jdata+1
                            x1(:,jdata)=x(:,idata)
                            f(jdata)=el_conf_geo_t(i,j,itemp,idata)
@@ -586,9 +584,9 @@ b0f_ptt=0.0_DP
 
 pdelc_dos=MIN(poly_degree_elc,fndos_ec-1)
 pdelc_ph=MIN(poly_degree_elc,fnph_ec-1)
-IF (pdelc_dos/=poly_degree_elc) &
+IF (pdelc_dos/=poly_degree_elc.AND.ltherm_dos) &
    WRITE(stdout,'(5x,"Poly_degree_elc decreased to ",i3," for dos")') pdelc_dos
-IF (pdelc_ph/=poly_degree_elc) &
+IF (pdelc_ph/=poly_degree_elc.AND.ltherm_freq) &
    WRITE(stdout,'(5x,"Poly_degree_elc decreased to ",i3," for ph")') pdelc_ph
 
 DO itempp=1,ntemp_plot
@@ -674,10 +672,10 @@ DO itempp=1,ntemp_plot
             f=0.0_DP
             DO i=1,6
                DO j=i,6
-                  IF (el_conf_geo_t(i,j,itemp,f_geodos_ec)>0.1_DP) THEN
+                  IF (el_conf_geo_t(i,j,itemp,f_geoph_ec)>0.1_DP) THEN
                      jdata=0
                      DO idata=1,ndata
-                        IF (found_dos_ec(idata)) THEN
+                        IF (found_ph_ec(idata)) THEN
                            jdata=jdata+1
                            x1(:,jdata)=x(:,idata)
                            f(jdata)=el_conf_geo_t(i,j,itemp,idata)
