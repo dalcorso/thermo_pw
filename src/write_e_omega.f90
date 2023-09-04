@@ -55,9 +55,7 @@ INTEGER  :: i, iu_mur, ipress, idata, nvar, ndata
 INTEGER  :: find_free_unit, compute_nwork
 REAL(DP) :: ymin, ymin4
 REAL(DP) :: compute_omega_geo
-REAL(DP), ALLOCATABLE :: f(:), x(:,:), x_pos_min(:), x_min_4(:), e(:), bm_p(:)
-
-IF (my_image_id /= root_image) RETURN
+REAL(DP), ALLOCATABLE :: f(:), x(:,:), x_pos_min(:), x_min_4(:), e(:)
 !
 !  The name of the output files that will contain the volume, energy, pressure
 !
@@ -85,12 +83,7 @@ ALLOCATE(x(nvar,ndata))
 ALLOCATE(x_pos_min(nvar))
 ALLOCATE(f(ndata))
 ALLOCATE(e(npress))
-ALLOCATE(omega_p(npress))
-ALLOCATE(bm_p(npress))
-ALLOCATE(density_p(npress))
-ALLOCATE(celldm_p(6,npress))
-ALLOCATE(p2_p(npress))
-ALLOCATE(p4_p(npress))
+
 DO ipress=1,npress
    CALL init_poly(nvar,p2_p(ipress))
    IF (lquartic) CALL init_poly(nvar,p4_p(ipress))
@@ -138,7 +131,6 @@ IF (lgeo_to_file) CALL write_geometry_output(npress, press, celldm_p)
 DO ipress=1, npress
    CALL compute_density(omega_p(ipress),density_p(ipress),.FALSE.)
 ENDDO
-CALL b_from_v(omega_p,press,npress,bm_p)
 
 IF (vmin_input == 0.0_DP) vmin_input=omega_p(npress) * 0.98_DP
 IF (vmax_input == 0.0_DP) vmax_input=omega_p(1) * 1.02_DP
@@ -439,8 +431,6 @@ INTEGER  :: compute_nwork
 REAL(DP) :: ymin, ymin4
 REAL(DP) :: compute_omega_geo
 REAL(DP), ALLOCATABLE :: f(:), x(:,:), x_pos_min(:), x_min_4(:)
-
-IF (my_image_id /= root_image) RETURN
 
 ndata=compute_nwork()
 

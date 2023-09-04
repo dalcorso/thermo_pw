@@ -6,147 +6,7 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !-------------------------------------------------------------------------
-SUBROUTINE plot_macro_el_t
-!-------------------------------------------------------------------------
-!
-!  This is a driver to plot the macro-elasticity variables (MEVs) as a 
-!  function of temperature. It plots both the MEVs computed from 
-!  isothermal elastic constants (ECs) and from adiabatic ECs in two 
-!  separated files. It compares the results obtained
-!  from Voigt average (color red), Reuss average (color blue) and
-!  Voigt-Reuss-Hill average (color green).
-!  It also plots the three sound velocities (V_P, V_B, V_G) by 
-!  comparing the isothermal 
-!  (red) with the adiabatic (blue) result in the single plot. 
-!  It is used by both quasi-static or quasi-harmonic temperature 
-!  dependent ECs. 
-!  If both lelastic and lelasticf are .TRUE. it uses only the ECs 
-!  obtained from the free energy calculated from the phonon dos.
-!
-USE control_gnuplot,  ONLY : flgnuplot, flext
-USE data_files,       ONLY : flanhar
-USE postscript_files, ONLY : flpsanhar
-USE control_elastic_constants, ONLY : lelastic, lelasticf
-USE control_grun,     ONLY : lb0_t
-USE mp_images,        ONLY : root_image, my_image_id
-
-IMPLICIT NONE
-CHARACTER(LEN=256) :: gnu_filename, filenameps, filelastic
-
-IF ( my_image_id /= root_image ) RETURN
-IF (.NOT.(lelastic.OR.lelasticf).OR..NOT.lb0_t) RETURN
-
-IF (lelasticf) filelastic="anhar_files/"//TRIM(flanhar)//".macro_el_ph"
-IF (lelastic)  filelastic="anhar_files/"//TRIM(flanhar)//".macro_el"
-gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_macro_el"
-filenameps=TRIM(flpsanhar)//".macro_el"//TRIM(flext)
-
-CALL plot_one_macro_el(filelastic, gnu_filename, filenameps)
-
-IF (lelasticf) filelastic="anhar_files/"//TRIM(flanhar)//".macro_el_s_ph"
-IF (lelastic)  filelastic="anhar_files/"//TRIM(flanhar)//".macro_el_s"
-gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_macro_el_s"
-filenameps=TRIM(flpsanhar)//".macro_el_s"//TRIM(flext)
-
-CALL plot_one_macro_el(filelastic, gnu_filename, filenameps)
-
-
-CALL plot_sound()
-
-RETURN
-END SUBROUTINE plot_macro_el_t
-
-!-------------------------------------------------------------------------
-SUBROUTINE plot_one_macro_el(filelastic, gnu_filename, filenameps)
-!-------------------------------------------------------------------------
-
-USE kinds,            ONLY : DP
-USE temperature,      ONLY : tmin, tmax
-USE control_gnuplot,  ONLY : gnuplot_command, lgnuplot, flext
-USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,           &
-                             gnuplot_write_header, gnuplot_xlabel, &
-                             gnuplot_ylabel, gnuplot_write_file_mul_data
-USE io_global,        ONLY : ionode
-
-IMPLICIT NONE
-
-CHARACTER(LEN=256), INTENT(INOUT) :: filelastic, gnu_filename, filenameps
-CHARACTER(LEN=256) :: filelastic_aver
-INTEGER :: ierr, system
-
-filelastic_aver=TRIM(filelastic)//"_aver"
-
-filelastic=TRIM(filelastic)
-filelastic_aver=TRIM(filelastic_aver)
-gnu_filename=TRIM(gnu_filename)
-filenameps=TRIM(filenameps)
-
-CALL gnuplot_start(gnu_filename)
-
-IF (tmin ==1._DP) THEN
-   CALL gnuplot_write_header(filenameps, 0.0_DP, tmax, 0.0_DP, 0.0_DP, &
-                                                       1.0_DP, flext ) 
-ELSE
-   CALL gnuplot_write_header(filenameps, tmin, tmax, 0.0_DP, 0.0_DP, &
-                                                       1.0_DP, flext ) 
-ENDIF
-
-CALL gnuplot_xlabel('T (K)', .FALSE.) 
-
-CALL gnuplot_ylabel('Bulk modulus (kbar)',.FALSE.)
-
-CALL gnuplot_write_file_mul_data(filelastic,1,2,'color_red',.TRUE.,  &
-                                                             .FALSE.,.FALSE.)
-
-CALL gnuplot_write_file_mul_data(filelastic,1,6,'color_blue',.FALSE., &
-                                                             .FALSE.,.FALSE.)
-
-CALL gnuplot_write_file_mul_data(filelastic_aver,1,2,'color_green',.FALSE., &
-                                                              .TRUE.,.FALSE.)
-
-CALL gnuplot_ylabel('Young modulus (kbar)',.FALSE.)
-
-CALL gnuplot_write_file_mul_data(filelastic,1,3,'color_red',.TRUE.,  &
-                                                             .FALSE.,.FALSE.)
-
-CALL gnuplot_write_file_mul_data(filelastic,1,7,'color_blue',.FALSE., &
-                                                             .FALSE.,.FALSE.)
-
-CALL gnuplot_write_file_mul_data(filelastic_aver,1,3,'color_green',.FALSE., &
-                                                              .TRUE.,.FALSE.)
-
-CALL gnuplot_ylabel('Shear modulus (kbar)',.FALSE.)
-        
-CALL gnuplot_write_file_mul_data(filelastic,1,4,'color_red',.TRUE., &
-                                                             .FALSE.,.FALSE.)
-
-CALL gnuplot_write_file_mul_data(filelastic,1,8,'color_blue',.FALSE., &
-                                                             .FALSE.,.FALSE.)
-
-CALL gnuplot_write_file_mul_data(filelastic_aver,1,4,'color_green',.FALSE., &
-                                                              .TRUE.,.FALSE.)
-
-CALL gnuplot_ylabel('Poisson ratio',.FALSE.)
-
-CALL gnuplot_write_file_mul_data(filelastic,1,5,'color_red',.TRUE., &
-                                                             .FALSE.,.FALSE.)
-
-CALL gnuplot_write_file_mul_data(filelastic,1,9,'color_blue',.FALSE., &
-                                                              .FALSE.,.FALSE.)
-
-CALL gnuplot_write_file_mul_data(filelastic_aver,1,5,'color_green',.FALSE., &
-                                                              .TRUE.,.FALSE.)
-CALL gnuplot_end()
-
-IF (lgnuplot.AND.ionode) &
-           ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
-
-RETURN
-
-END SUBROUTINE plot_one_macro_el
-
-!-------------------------------------------------------------------------
-SUBROUTINE plot_sound()
+SUBROUTINE plot_sound_t()
 !-------------------------------------------------------------------------
 
 USE kinds,               ONLY : DP
@@ -163,16 +23,19 @@ USE mp_images,        ONLY : root_image, my_image_id
 
 IMPLICIT NONE
 
-CHARACTER(LEN=256) :: filelastic, filelastic_s, gnu_filename, filenameps
+CHARACTER(LEN=256) :: filelastic, filelastic_s, &
+                      filelastic_ph, filelastic_s_ph, gnu_filename, filenameps
 INTEGER :: ierr, system
+
+IF (.NOT.(lelastic.OR.lelasticf)) RETURN
 
 filelastic=TRIM(filelastic)
 gnu_filename=TRIM(gnu_filename)
 filenameps=TRIM(filenameps)
 
 IF (lelasticf) THEN
-   filelastic="anhar_files/"//TRIM(flanhar)//".sound_vel_ph"
-   filelastic_s="anhar_files/"//TRIM(flanhar)//".sound_vel_s_ph"
+   filelastic_ph="anhar_files/"//TRIM(flanhar)//".sound_vel_ph"
+   filelastic_s_ph="anhar_files/"//TRIM(flanhar)//".sound_vel_s_ph"
 END IF
 
 IF (lelastic) THEN
@@ -197,25 +60,48 @@ CALL gnuplot_xlabel('T (K)', .FALSE.)
 
 CALL gnuplot_ylabel('V_{P} (m/s)',.FALSE.)
 
-CALL gnuplot_write_file_mul_data(filelastic,1,2,'color_red',.TRUE.,  &
+IF (lelastic) THEN
+   CALL gnuplot_write_file_mul_data(filelastic,1,2,'color_red',.TRUE.,  &
                                                              .FALSE.,.FALSE.)
 
-CALL gnuplot_write_file_mul_data(filelastic_s,1,2,'color_blue',.FALSE., &
-                                                              .TRUE.,.FALSE.)
+   CALL gnuplot_write_file_mul_data(filelastic_s,1,2,'color_green',.FALSE., &
+                                                       .NOT.lelasticf,.FALSE.)
+ENDIF
+IF (lelasticf) THEN
+   CALL gnuplot_write_file_mul_data(filelastic_ph,1,2,'color_blue',&
+                                                .NOT.lelastic,.FALSE.,.FALSE.)
+
+   CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,2,'color_orange',&
+                                             .FALSE.,.TRUE.,.FALSE.)
+ENDIF
 CALL gnuplot_ylabel('V_{B} (m/s)',.FALSE.)
 
-CALL gnuplot_write_file_mul_data(filelastic,1,3,'color_red',.TRUE.,  &
+IF (lelastic) THEN
+   CALL gnuplot_write_file_mul_data(filelastic,1,3,'color_red',.TRUE.,  &
                                                              .FALSE.,.FALSE.)
-
-CALL gnuplot_write_file_mul_data(filelastic_s,1,3,'color_blue',.FALSE., &
-                                                              .TRUE.,.FALSE.)
+   CALL gnuplot_write_file_mul_data(filelastic_s,1,3,'color_green',.FALSE., &
+                                                      .NOT.lelasticf,.FALSE.)
+ENDIF
+IF (lelasticf) THEN
+   CALL gnuplot_write_file_mul_data(filelastic_ph,1,3,'color_blue', &
+                                   .NOT.lelastic, .FALSE.,.FALSE.)
+   CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,3,'color_orange',&
+                            .FALSE.,.TRUE.,.FALSE.)
+ENDIF
 CALL gnuplot_ylabel('V_{G} (m/s)',.FALSE.)
 
-CALL gnuplot_write_file_mul_data(filelastic,1,4,'color_red',.TRUE., &
+IF (lelastic) THEN
+   CALL gnuplot_write_file_mul_data(filelastic,1,4,'color_red',.TRUE., &
                                                              .FALSE.,.FALSE.)
-
-CALL gnuplot_write_file_mul_data(filelastic_s,1,4,'color_blue',.FALSE., &
-                                                              .TRUE.,.FALSE.)
+   CALL gnuplot_write_file_mul_data(filelastic_s,1,4,'color_green',.FALSE., &
+                                                     .NOT.lelasticf,.FALSE.)
+ENDIF
+IF (lelasticf) THEN
+   CALL gnuplot_write_file_mul_data(filelastic_ph,1,4,'color_blue', &
+                     .NOT.lelastic,.FALSE.,.FALSE.)
+   CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,4,'color_orange',&
+                                 .FALSE., .TRUE.,.FALSE.)
+ENDIF
 
 CALL gnuplot_end()
 
@@ -224,5 +110,843 @@ IF (lgnuplot.AND.ionode) &
 
 RETURN
 
-END SUBROUTINE plot_sound
+END SUBROUTINE plot_sound_t
 
+! Copyright (C) 2023 Andrea Dal Corso
+!
+!  This routines generalize the previous one by plotting quantities
+!  as a function of temperature at several pressures or as a function
+!  of pressure at several temperatures
+!
+
+!-------------------------------------------------------------------------
+SUBROUTINE plot_macro_el_new_t()
+!-------------------------------------------------------------------------
+
+USE kinds,               ONLY : DP
+USE temperature,         ONLY : tmin, tmax
+USE data_files,          ONLY : flanhar
+USE postscript_files,    ONLY : flpsanhar
+USE control_elastic_constants, ONLY : lelastic, lelasticf
+USE control_gnuplot,     ONLY : gnuplot_command, flgnuplot, lgnuplot, flext
+USE gnuplot,             ONLY : gnuplot_start, gnuplot_end,           &
+                                gnuplot_write_header, gnuplot_xlabel, &
+                                gnuplot_ylabel, gnuplot_write_file_mul_data
+USE io_global,        ONLY : ionode
+USE mp_images,        ONLY : root_image, my_image_id
+
+IMPLICIT NONE
+
+CHARACTER(LEN=256) :: filelastic, filelastic_s, &
+                      filelastic_ph, filelastic_s_ph, gnu_filename, filenameps
+INTEGER :: ierr, system
+
+IF (.NOT.(lelastic.OR.lelasticf)) RETURN
+
+filelastic=TRIM(filelastic)
+gnu_filename=TRIM(gnu_filename)
+filenameps=TRIM(filenameps)
+
+IF (lelasticf) THEN
+   filelastic_ph="anhar_files/"//TRIM(flanhar)//".macro_el_ph_aver"
+   filelastic_s_ph="anhar_files/"//TRIM(flanhar)//".macro_el_s_ph_aver"
+END IF
+
+IF (lelastic) THEN
+   filelastic="anhar_files/"//TRIM(flanhar)//".macro_el_aver"
+   filelastic_s="anhar_files/"//TRIM(flanhar)//".macro_el_s_aver"
+END IF
+
+gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_macro_el"
+filenameps=TRIM(flpsanhar)//".macro_el"//TRIM(flext)
+
+CALL gnuplot_start(gnu_filename)
+
+IF (tmin ==1._DP) THEN
+   CALL gnuplot_write_header(filenameps, 0.0_DP, tmax, 0.0_DP, 0.0_DP, &
+                                                       1.0_DP, flext )
+ELSE
+   CALL gnuplot_write_header(filenameps, tmin, tmax, 0.0_DP, 0.0_DP, &
+                                                       1.0_DP, flext )
+ENDIF
+
+CALL gnuplot_xlabel('T (K)', .FALSE.)
+
+CALL gnuplot_ylabel('Bulk Modulus (kbar)',.FALSE.)
+
+IF (lelastic) THEN
+   CALL gnuplot_write_file_mul_data(filelastic,1,2,'color_red',.TRUE.,  &
+                                                             .FALSE.,.FALSE.)
+
+   CALL gnuplot_write_file_mul_data(filelastic_s,1,2,'color_green',.FALSE., &
+                                                       .NOT.lelasticf,.FALSE.)
+ENDIF
+IF (lelasticf) THEN
+   CALL gnuplot_write_file_mul_data(filelastic_ph,1,2,'color_blue',&
+                                                .NOT.lelastic,.FALSE.,.FALSE.)
+
+   CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,2,'color_orange',&
+                                             .FALSE.,.TRUE.,.FALSE.)
+ENDIF
+CALL gnuplot_ylabel('Young modulus (kbar)',.FALSE.)
+
+IF (lelastic) THEN
+   CALL gnuplot_write_file_mul_data(filelastic,1,3,'color_red',.TRUE.,  &
+                                                             .FALSE.,.FALSE.)
+   CALL gnuplot_write_file_mul_data(filelastic_s,1,3,'color_green',.FALSE., &
+                                                      .NOT.lelasticf,.FALSE.)
+ENDIF
+IF (lelasticf) THEN
+   CALL gnuplot_write_file_mul_data(filelastic_ph,1,3,'color_blue', &
+                                   .NOT.lelastic, .FALSE.,.FALSE.)
+   CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,3,'color_orange',&
+                            .FALSE.,.TRUE.,.FALSE.)
+ENDIF
+CALL gnuplot_ylabel('Shear modulus (kbar)',.FALSE.)
+
+IF (lelastic) THEN
+   CALL gnuplot_write_file_mul_data(filelastic,1,4,'color_red',.TRUE., &
+                                                             .FALSE.,.FALSE.)
+   CALL gnuplot_write_file_mul_data(filelastic_s,1,4,'color_green',.FALSE., &
+                                                     .NOT.lelasticf,.FALSE.)
+ENDIF
+IF (lelasticf) THEN
+   CALL gnuplot_write_file_mul_data(filelastic_ph,1,4,'color_blue', &
+                     .NOT.lelastic,.FALSE.,.FALSE.)
+   CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,4,'color_orange',&
+                                 .FALSE., .TRUE.,.FALSE.)
+ENDIF
+
+CALL gnuplot_ylabel('Poisson ratio',.FALSE.)
+
+IF (lelastic) THEN
+   CALL gnuplot_write_file_mul_data(filelastic,1,5,'color_red',.TRUE., &
+                                                             .FALSE.,.FALSE.)
+   CALL gnuplot_write_file_mul_data(filelastic_s,1,5,'color_green',.FALSE., &
+                                                     .NOT.lelasticf,.FALSE.)
+ENDIF
+IF (lelasticf) THEN
+   CALL gnuplot_write_file_mul_data(filelastic_ph,1,5,'color_blue', &
+                     .NOT.lelastic,.FALSE.,.FALSE.)
+   CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,5,'color_orange',&
+                                 .FALSE., .TRUE.,.FALSE.)
+ENDIF
+
+CALL gnuplot_end()
+
+IF (lgnuplot.AND.ionode) &
+           ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+
+RETURN
+
+END SUBROUTINE plot_macro_el_new_t
+!
+!-------------------------------------------------------------------------
+SUBROUTINE plot_macro_el_new_pt()
+!-------------------------------------------------------------------------
+!
+USE kinds,               ONLY : DP
+USE temperature,         ONLY : tmin, tmax
+USE data_files,          ONLY : flanhar
+USE postscript_files,    ONLY : flpsanhar
+USE control_elastic_constants, ONLY : lelastic, lelasticf
+USE control_pressure,    ONLY : npress_plot, ipress_plot, press
+USE control_gnuplot,     ONLY : gnuplot_command, flgnuplot, lgnuplot, flext
+USE gnuplot,             ONLY : gnuplot_start, gnuplot_end,           &
+                                gnuplot_write_header, gnuplot_xlabel, &
+                                gnuplot_ylabel, gnuplot_write_file_mul_data, &
+                                gnuplot_set_fact
+USE color_mod,           ONLY : color
+USE io_global,           ONLY : ionode
+USE mp_images,           ONLY : root_image, my_image_id
+
+IMPLICIT NONE
+
+CHARACTER(LEN=256) :: filelastic, filelastic_s, &
+                      filelastic_ph, filelastic_s_ph, gnu_filename, filenameps
+LOGICAL :: first_step, last_step
+INTEGER :: istep, ipressp, ipress, ierr, system
+
+IF (npress_plot==0) RETURN
+IF (.NOT.(lelastic.OR.lelasticf)) RETURN
+
+gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_macro_el_p"
+filenameps=TRIM(flpsanhar)//".macro_el_p"//TRIM(flext)
+
+CALL gnuplot_start(gnu_filename)
+
+IF (tmin ==1._DP) THEN
+   CALL gnuplot_write_header(filenameps, 0.0_DP, tmax, 0.0_DP, 0.0_DP, &
+                                                       1.0_DP, flext )
+ELSE
+   CALL gnuplot_write_header(filenameps, tmin, tmax, 0.0_DP, 0.0_DP, &
+                                                       1.0_DP, flext )
+ENDIF
+
+CALL gnuplot_xlabel('T (K)', .FALSE.)
+
+istep=0
+DO ipressp=1, npress_plot
+   first_step=(ipressp==1)
+   last_step=(ipressp==npress_plot)
+   ipress=ipress_plot(ipressp)
+   istep=MOD(istep,8)+1
+   filelastic="anhar_files/"//TRIM(flanhar)//'.macro_el_press'
+   CALL add_value(filelastic,press(ipress))
+   filelastic=TRIM(filelastic)//'_aver'
+   filelastic_s="anhar_files/"//TRIM(flanhar)//'.macro_el_s_press'
+   CALL add_value(filelastic_s,press(ipress))
+   filelastic_s=TRIM(filelastic_s)//'_aver'
+   filelastic_ph="anhar_files/"//TRIM(flanhar)//'.macro_el_ph_press'
+   CALL add_value(filelastic_ph,press(ipress))
+   filelastic_ph=TRIM(filelastic_ph)//'_aver'
+   filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.macro_el_s_ph_press'
+   CALL add_value(filelastic_s_ph,press(ipress))
+   filelastic_s_ph=TRIM(filelastic_s_ph)//'_aver'
+   IF (first_step) THEN
+      CALL gnuplot_set_fact(1.0_DP, .FALSE.)
+      CALL gnuplot_ylabel('Bulk Modulus (kbar)',.FALSE.)
+   ENDIF
+   IF (lelastic) THEN
+      CALL gnuplot_write_file_mul_data(filelastic,1,2,color(istep),first_step,&
+                                                             .FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filelastic_s,1,2,color(istep),.FALSE., &
+                                       last_step.AND..NOT.lelasticf,.FALSE.)
+   ENDIF
+   IF (lelasticf) THEN
+      CALL gnuplot_write_file_mul_data(filelastic_ph,1,2,color(istep),&
+                              first_step.AND..NOT.lelastic,.FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,2,color(istep),&
+                                               .FALSE.,last_step,.FALSE.)
+   ENDIF
+ENDDO
+
+istep=0
+DO ipressp=1, npress_plot
+   first_step=(ipressp==1)
+   last_step=(ipressp==npress_plot)
+   ipress=ipress_plot(ipressp)
+   istep=MOD(istep,8)+1
+   filelastic="anhar_files/"//TRIM(flanhar)//'.macro_el_press'
+   CALL add_value(filelastic,press(ipress))
+   filelastic=TRIM(filelastic)//'_aver'
+   filelastic_s="anhar_files/"//TRIM(flanhar)//'.macro_el_s_press'
+   CALL add_value(filelastic_s,press(ipress))
+   filelastic_s=TRIM(filelastic_s)//'_aver'
+   filelastic_ph="anhar_files/"//TRIM(flanhar)//'.macro_el_ph_press'
+   CALL add_value(filelastic_ph,press(ipress))
+   filelastic_ph=TRIM(filelastic_ph)//'_aver'
+   filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.macro_el_s_ph_press'
+   CALL add_value(filelastic_s_ph,press(ipress))
+   filelastic_s_ph=TRIM(filelastic_s_ph)//'_aver'
+   IF (first_step) THEN
+      CALL gnuplot_set_fact(1.0_DP, .FALSE.)
+      CALL gnuplot_ylabel('Young modulus (kbar)',.FALSE.)
+   ENDIF
+   IF (lelastic) THEN
+      CALL gnuplot_write_file_mul_data(filelastic,1,3,color(istep),first_step,&
+                                                             .FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filelastic_s,1,3,color(istep),.FALSE., &
+                                       last_step.AND..NOT.lelasticf,.FALSE.)
+   ENDIF
+   IF (lelasticf) THEN
+      CALL gnuplot_write_file_mul_data(filelastic_ph,1,3,color(istep),&
+                              first_step.AND..NOT.lelastic,.FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,3,color(istep),&
+                                               .FALSE.,last_step,.FALSE.)
+   ENDIF
+ENDDO
+
+istep=0
+DO ipressp=1, npress_plot
+   first_step=(ipressp==1)
+   last_step=(ipressp==npress_plot)
+   ipress=ipress_plot(ipressp)
+   istep=MOD(istep,8)+1
+   filelastic="anhar_files/"//TRIM(flanhar)//'.macro_el_press'
+   CALL add_value(filelastic,press(ipress))
+   filelastic=TRIM(filelastic)//'_aver'
+   filelastic_s="anhar_files/"//TRIM(flanhar)//'.macro_el_s_press'
+   CALL add_value(filelastic_s,press(ipress))
+   filelastic_s=TRIM(filelastic_s)//'_aver'
+   filelastic_ph="anhar_files/"//TRIM(flanhar)//'.macro_el_ph_press'
+   CALL add_value(filelastic_ph,press(ipress))
+   filelastic_ph=TRIM(filelastic_ph)//'_aver'
+   filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.macro_el_s_ph_press'
+   CALL add_value(filelastic_s_ph,press(ipress))
+   filelastic_s_ph=TRIM(filelastic_s_ph)//'_aver'
+   IF (first_step) THEN
+      CALL gnuplot_set_fact(1.0_DP, .FALSE.)
+      CALL gnuplot_ylabel('Shear modulus (kbar)',.FALSE.)
+   ENDIF
+   IF (lelastic) THEN
+      CALL gnuplot_write_file_mul_data(filelastic,1,4,color(istep),first_step,&
+                                                             .FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filelastic_s,1,4,color(istep),.FALSE., &
+                                       last_step.AND..NOT.lelasticf,.FALSE.)
+   ENDIF
+   IF (lelasticf) THEN
+      CALL gnuplot_write_file_mul_data(filelastic_ph,1,4,color(istep),&
+                              first_step.AND..NOT.lelastic,.FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,4,color(istep),&
+                                               .FALSE.,last_step,.FALSE.)
+   ENDIF
+ENDDO
+
+istep=0
+DO ipressp=1, npress_plot
+   first_step=(ipressp==1)
+   last_step=(ipressp==npress_plot)
+   ipress=ipress_plot(ipressp)
+   istep=MOD(istep,8)+1
+   filelastic="anhar_files/"//TRIM(flanhar)//'.macro_el_press'
+   CALL add_value(filelastic,press(ipress))
+   filelastic=TRIM(filelastic)//'_aver'
+   filelastic_s="anhar_files/"//TRIM(flanhar)//'.macro_el_s_press'
+   CALL add_value(filelastic_s,press(ipress))
+   filelastic_s=TRIM(filelastic_s)//'_aver'
+   filelastic_ph="anhar_files/"//TRIM(flanhar)//'.macro_el_ph_press'
+   CALL add_value(filelastic_ph,press(ipress))
+   filelastic_ph=TRIM(filelastic_ph)//'_aver'
+   filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.macro_el_s_ph_press'
+   CALL add_value(filelastic_s_ph,press(ipress))
+   filelastic_s_ph=TRIM(filelastic_s_ph)//'_aver'
+   IF (first_step) THEN
+      CALL gnuplot_set_fact(1.0_DP, .FALSE.)
+      CALL gnuplot_ylabel('Poisson ratio',.FALSE.)
+   ENDIF
+   IF (lelastic) THEN
+      CALL gnuplot_write_file_mul_data(filelastic,1,5,color(istep),first_step,&
+                                                             .FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filelastic_s,1,5,color(istep),.FALSE., &
+                                       last_step.AND..NOT.lelasticf,.FALSE.)
+   ENDIF
+   IF (lelasticf) THEN
+      CALL gnuplot_write_file_mul_data(filelastic_ph,1,5,color(istep),&
+                              first_step.AND..NOT.lelastic,.FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,5,color(istep),&
+                                               .FALSE.,last_step,.FALSE.)
+   ENDIF
+ENDDO
+
+CALL gnuplot_end()
+
+IF (lgnuplot.AND.ionode) &
+           ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+
+RETURN
+
+END SUBROUTINE plot_macro_el_new_pt
+
+!-------------------------------------------------------------------------
+SUBROUTINE plot_sound_pt()
+!-------------------------------------------------------------------------
+
+USE kinds,               ONLY : DP
+USE temperature,         ONLY : tmin, tmax
+USE data_files,          ONLY : flanhar
+USE postscript_files,    ONLY : flpsanhar
+USE control_elastic_constants, ONLY : lelastic, lelasticf
+USE control_pressure,    ONLY : npress_plot, ipress_plot, press
+USE control_gnuplot,     ONLY : gnuplot_command, flgnuplot, lgnuplot, flext
+USE gnuplot,             ONLY : gnuplot_start, gnuplot_end,           &
+                                gnuplot_write_header, gnuplot_xlabel, &
+                                gnuplot_ylabel, gnuplot_write_file_mul_data, &
+                                gnuplot_set_fact
+USE color_mod,           ONLY : color
+USE io_global,           ONLY : ionode
+USE mp_images,           ONLY : root_image, my_image_id
+
+IMPLICIT NONE
+
+CHARACTER(LEN=256) :: filelastic, filelastic_s, &
+                      filelastic_ph, filelastic_s_ph, gnu_filename, filenameps
+LOGICAL :: first_step, last_step
+INTEGER :: istep, ipressp, ipress, ierr, system
+
+IF (npress_plot==0) RETURN
+IF (.NOT.(lelastic.OR.lelasticf)) RETURN
+
+gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_sound_vel_p"
+filenameps=TRIM(flpsanhar)//".sound_vel_p"//TRIM(flext)
+
+CALL gnuplot_start(gnu_filename)
+
+IF (tmin ==1._DP) THEN
+   CALL gnuplot_write_header(filenameps, 0.0_DP, tmax, 0.0_DP, 0.0_DP, &
+                                                       1.0_DP, flext )
+ELSE
+   CALL gnuplot_write_header(filenameps, tmin, tmax, 0.0_DP, 0.0_DP, &
+                                                       1.0_DP, flext )
+ENDIF
+
+CALL gnuplot_xlabel('T (K)', .FALSE.)
+
+istep=0
+DO ipressp=1, npress_plot
+   first_step=(ipressp==1)
+   last_step=(ipressp==npress_plot)
+   ipress=ipress_plot(ipressp)
+   istep=MOD(istep,8)+1
+   filelastic="anhar_files/"//TRIM(flanhar)//'.sound_vel_press'
+   CALL add_value(filelastic,press(ipress))
+   filelastic_s="anhar_files/"//TRIM(flanhar)//'.sound_vel_s_press'
+   CALL add_value(filelastic_s,press(ipress))
+   filelastic_ph="anhar_files/"//TRIM(flanhar)//'.sound_vel_ph_press'
+   CALL add_value(filelastic_ph,press(ipress))
+   filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.sound_vel_s_ph_press'
+   CALL add_value(filelastic_s_ph,press(ipress))
+   IF (first_step) THEN
+      CALL gnuplot_set_fact(1.0_DP, .FALSE.)
+      CALL gnuplot_ylabel('V_{P} (m/s)',.FALSE.)
+   ENDIF
+   IF (lelastic) THEN
+      CALL gnuplot_write_file_mul_data(filelastic,1,2,color(istep),first_step,&
+                                                             .FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filelastic_s,1,2,color(istep),.FALSE., &
+                                       last_step.AND..NOT.lelasticf,.FALSE.)
+   ENDIF
+   IF (lelasticf) THEN
+      CALL gnuplot_write_file_mul_data(filelastic_ph,1,2,color(istep),&
+                              first_step.AND..NOT.lelastic,.FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,2,color(istep),&
+                                               .FALSE.,last_step,.FALSE.)
+   ENDIF
+ENDDO
+
+istep=0
+DO ipressp=1, npress_plot
+   first_step=(ipressp==1)
+   last_step=(ipressp==npress_plot)
+   ipress=ipress_plot(ipressp)
+   istep=MOD(istep,8)+1
+   filelastic="anhar_files/"//TRIM(flanhar)//'.sound_vel_press'
+   CALL add_value(filelastic,press(ipress))
+   filelastic_s="anhar_files/"//TRIM(flanhar)//'.sound_vel_s_press'
+   CALL add_value(filelastic_s,press(ipress))
+   filelastic_ph="anhar_files/"//TRIM(flanhar)//'.sound_vel_ph_press'
+   CALL add_value(filelastic_ph,press(ipress))
+   filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.sound_vel_s_ph_press'
+   CALL add_value(filelastic_s_ph,press(ipress))
+   IF (first_step) THEN
+      CALL gnuplot_set_fact(1.0_DP, .FALSE.)
+      CALL gnuplot_ylabel('V_{B} (m/s)',.FALSE.)
+   ENDIF
+   IF (lelastic) THEN
+      CALL gnuplot_write_file_mul_data(filelastic,1,3,color(istep),first_step,&
+                                                             .FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filelastic_s,1,3,color(istep),.FALSE., &
+                                       last_step.AND..NOT.lelasticf,.FALSE.)
+   ENDIF
+   IF (lelasticf) THEN
+      CALL gnuplot_write_file_mul_data(filelastic_ph,1,3,color(istep),&
+                              first_step.AND..NOT.lelastic,.FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,3,color(istep),&
+                                               .FALSE.,last_step,.FALSE.)
+   ENDIF
+ENDDO
+
+istep=0
+DO ipressp=1, npress_plot
+   first_step=(ipressp==1)
+   last_step=(ipressp==npress_plot)
+   ipress=ipress_plot(ipressp)
+   istep=MOD(istep,8)+1
+   filelastic="anhar_files/"//TRIM(flanhar)//'.sound_vel_press'
+   CALL add_value(filelastic,press(ipress))
+   filelastic_s="anhar_files/"//TRIM(flanhar)//'.sound_vel_s_press'
+   CALL add_value(filelastic_s,press(ipress))
+   filelastic_ph="anhar_files/"//TRIM(flanhar)//'.sound_vel_ph_press'
+   CALL add_value(filelastic_ph,press(ipress))
+   filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.sound_vel_s_ph_press'
+   CALL add_value(filelastic_s_ph,press(ipress))
+   IF (first_step) THEN
+      CALL gnuplot_set_fact(1.0_DP, .FALSE.)
+      CALL gnuplot_ylabel('V_{G} (m/s)',.FALSE.)
+   ENDIF
+   IF (lelastic) THEN
+      CALL gnuplot_write_file_mul_data(filelastic,1,4,color(istep),first_step,&
+                                                             .FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filelastic_s,1,4,color(istep),.FALSE., &
+                                       last_step.AND..NOT.lelasticf,.FALSE.)
+   ENDIF
+   IF (lelasticf) THEN
+      CALL gnuplot_write_file_mul_data(filelastic_ph,1,4,color(istep),&
+                              first_step.AND..NOT.lelastic,.FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,4,color(istep),&
+                                               .FALSE.,last_step,.FALSE.)
+   ENDIF
+ENDDO
+
+CALL gnuplot_end()
+
+IF (lgnuplot.AND.ionode) &
+           ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+
+RETURN
+
+END SUBROUTINE plot_sound_pt
+
+!-------------------------------------------------------------------------
+SUBROUTINE plot_macro_el_new_ptt()
+!-------------------------------------------------------------------------
+
+USE kinds,               ONLY : DP
+USE constants,           ONLY : ry_kbar
+USE temperature,         ONLY : ntemp_plot, itemp_plot, temp
+USE data_files,          ONLY : flanhar
+USE postscript_files,    ONLY : flpsanhar
+USE control_elastic_constants, ONLY : lelastic, lelasticf
+USE control_pressure,    ONLY : pmin, pmax
+USE control_gnuplot,     ONLY : gnuplot_command, flgnuplot, lgnuplot, flext
+USE gnuplot,             ONLY : gnuplot_start, gnuplot_end,           &
+                                gnuplot_write_header, gnuplot_xlabel, &
+                                gnuplot_ylabel, gnuplot_write_file_mul_data, &
+                                gnuplot_set_fact
+USE color_mod,           ONLY : color
+USE io_global,           ONLY : ionode
+USE mp_images,           ONLY : root_image, my_image_id
+
+IMPLICIT NONE
+
+CHARACTER(LEN=256) :: filelastic, filelastic_s, &
+                      filelastic_ph, filelastic_s_ph, gnu_filename, filenameps
+LOGICAL :: first_step, last_step
+INTEGER :: istep, itempp, itemp, ierr, system
+
+IF ( my_image_id /= root_image ) RETURN
+IF (ntemp_plot==0) RETURN
+IF (.NOT.(lelastic.OR.lelasticf)) RETURN
+
+gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_macro_el_t"
+filenameps=TRIM(flpsanhar)//".macro_el_t"//TRIM(flext)
+
+CALL gnuplot_start(gnu_filename)
+
+CALL gnuplot_write_header(filenameps, pmin*ry_kbar, pmax*ry_kbar, 0.0_DP, &
+                              0.0_DP, 1.0_DP, flext )
+CALL gnuplot_xlabel('p (kbar)', .FALSE.)
+
+istep=0
+DO itempp=1, ntemp_plot
+   first_step=(itempp==1)
+   last_step=(itempp==ntemp_plot)
+   itemp=itemp_plot(itempp)
+   istep=MOD(istep,8)+1
+   filelastic="anhar_files/"//TRIM(flanhar)//'.macro_el_temp'
+   CALL add_value(filelastic,temp(itemp))
+   filelastic=TRIM(filelastic)//'_aver'
+   filelastic_s="anhar_files/"//TRIM(flanhar)//'.macro_el_s_temp'
+   CALL add_value(filelastic_s,temp(itemp))
+   filelastic_s=TRIM(filelastic_s)//'_aver'
+   filelastic_ph="anhar_files/"//TRIM(flanhar)//'.macro_el_ph_temp'
+   CALL add_value(filelastic_ph,temp(itemp))
+   filelastic_ph=TRIM(filelastic_ph)//'_aver'
+   filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.macro_el_s_ph_temp'
+   CALL add_value(filelastic_s_ph,temp(itemp))
+   filelastic_s_ph=TRIM(filelastic_s_ph)//'_aver'
+   IF (first_step) THEN
+      CALL gnuplot_set_fact(1.0_DP, .FALSE.)
+      CALL gnuplot_ylabel('Bulk Modulus (kbar)',.FALSE.)
+   ENDIF
+   IF (lelastic) THEN
+      CALL gnuplot_write_file_mul_data(filelastic,1,2,color(istep),first_step,&
+                                                             .FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filelastic_s,1,2,color(istep),.FALSE., &
+                                       last_step.AND..NOT.lelasticf,.FALSE.)
+   ENDIF
+   IF (lelasticf) THEN
+      CALL gnuplot_write_file_mul_data(filelastic_ph,1,2,color(istep),&
+                              first_step.AND..NOT.lelastic,.FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,2,color(istep),&
+                                               .FALSE.,last_step,.FALSE.)
+   ENDIF
+ENDDO
+istep=0
+DO itempp=1, ntemp_plot
+   first_step=(itempp==1)
+   last_step=(itempp==ntemp_plot)
+   itemp=itemp_plot(itempp)
+   istep=MOD(istep,8)+1
+   filelastic="anhar_files/"//TRIM(flanhar)//'.macro_el_temp'
+   CALL add_value(filelastic,temp(itemp))
+   filelastic=TRIM(filelastic)//'_aver'
+   filelastic_s="anhar_files/"//TRIM(flanhar)//'.macro_el_s_temp'
+   CALL add_value(filelastic_s,temp(itemp))
+   filelastic_s=TRIM(filelastic_s)//'_aver'
+   filelastic_ph="anhar_files/"//TRIM(flanhar)//'.macro_el_ph_temp'
+   CALL add_value(filelastic_ph,temp(itemp))
+   filelastic_ph=TRIM(filelastic_ph)//'_aver'
+   filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.macro_el_s_ph_temp'
+   CALL add_value(filelastic_s_ph,temp(itemp))
+   filelastic_s_ph=TRIM(filelastic_s_ph)//'_aver'
+   IF (first_step) THEN
+      CALL gnuplot_set_fact(1.0_DP, .FALSE.)
+      CALL gnuplot_ylabel('Young modulus (kbar)',.FALSE.)
+   ENDIF
+   IF (lelastic) THEN
+      CALL gnuplot_write_file_mul_data(filelastic,1,3,color(istep),first_step,&
+                                                             .FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filelastic_s,1,3,color(istep),.FALSE., &
+                                       last_step.AND..NOT.lelasticf,.FALSE.)
+   ENDIF
+   IF (lelasticf) THEN
+      CALL gnuplot_write_file_mul_data(filelastic_ph,1,3,color(istep),&
+                              first_step.AND..NOT.lelastic,.FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,3,color(istep),&
+                                               .FALSE.,last_step,.FALSE.)
+   ENDIF
+ENDDO
+
+istep=0
+DO itempp=1, ntemp_plot
+   first_step=(itempp==1)
+   last_step=(itempp==ntemp_plot)
+   itemp=itemp_plot(itempp)
+   istep=MOD(istep,8)+1
+   filelastic="anhar_files/"//TRIM(flanhar)//'.macro_el_temp'
+   CALL add_value(filelastic,temp(itemp))
+   filelastic=TRIM(filelastic)//'_aver'
+   filelastic_s="anhar_files/"//TRIM(flanhar)//'.macro_el_s_temp'
+   CALL add_value(filelastic_s,temp(itemp))
+   filelastic_s=TRIM(filelastic_s)//'_aver'
+   filelastic_ph="anhar_files/"//TRIM(flanhar)//'.macro_el_ph_temp'
+   CALL add_value(filelastic_ph,temp(itemp))
+   filelastic_ph=TRIM(filelastic_ph)//'_aver'
+   filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.macro_el_s_ph_temp'
+   CALL add_value(filelastic_s_ph,temp(itemp))
+   filelastic_s_ph=TRIM(filelastic_s_ph)//'_aver'
+   IF (first_step) THEN
+      CALL gnuplot_set_fact(1.0_DP, .FALSE.)
+      CALL gnuplot_ylabel('Shear modulus (kbar)',.FALSE.)
+   ENDIF
+   IF (lelastic) THEN
+      CALL gnuplot_write_file_mul_data(filelastic,1,4,color(istep),first_step,&
+                                                             .FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filelastic_s,1,4,color(istep),.FALSE., &
+                                       last_step.AND..NOT.lelasticf,.FALSE.)
+   ENDIF
+   IF (lelasticf) THEN
+      CALL gnuplot_write_file_mul_data(filelastic_ph,1,4,color(istep),&
+                              first_step.AND..NOT.lelastic,.FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,4,color(istep),&
+                                               .FALSE.,last_step,.FALSE.)
+   ENDIF
+ENDDO
+
+istep=0
+DO itempp=1, ntemp_plot
+   first_step=(itempp==1)
+   last_step=(itempp==ntemp_plot)
+   itemp=itemp_plot(itempp)
+   istep=MOD(istep,8)+1
+   filelastic="anhar_files/"//TRIM(flanhar)//'.macro_el_temp'
+   CALL add_value(filelastic,temp(itemp))
+   filelastic=TRIM(filelastic)//'_aver'
+   filelastic_s="anhar_files/"//TRIM(flanhar)//'.macro_el_s_temp'
+   CALL add_value(filelastic_s,temp(itemp))
+   filelastic_s=TRIM(filelastic_s)//'_aver'
+   filelastic_ph="anhar_files/"//TRIM(flanhar)//'.macro_el_ph_temp'
+   CALL add_value(filelastic_ph,temp(itemp))
+   filelastic_ph=TRIM(filelastic_ph)//'_aver'
+   filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.macro_el_s_ph_temp'
+   CALL add_value(filelastic_s_ph,temp(itemp))
+   filelastic_s_ph=TRIM(filelastic_s_ph)//'_aver'
+   IF (first_step) THEN
+      CALL gnuplot_set_fact(1.0_DP, .FALSE.)
+      CALL gnuplot_ylabel('Poisson ratio',.FALSE.)
+   ENDIF
+   IF (lelastic) THEN
+      CALL gnuplot_write_file_mul_data(filelastic,1,5,color(istep),first_step,&
+                                                             .FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filelastic_s,1,5,color(istep),.FALSE., &
+                                       last_step.AND..NOT.lelasticf,.FALSE.)
+   ENDIF
+   IF (lelasticf) THEN
+      CALL gnuplot_write_file_mul_data(filelastic_ph,1,5,color(istep),&
+                              first_step.AND..NOT.lelastic,.FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,5,color(istep),&
+                                               .FALSE.,last_step,.FALSE.)
+   ENDIF
+ENDDO
+
+CALL gnuplot_end()
+
+IF (lgnuplot.AND.ionode) &
+           ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+
+RETURN
+
+END SUBROUTINE plot_macro_el_new_ptt
+
+!-------------------------------------------------------------------------
+SUBROUTINE plot_sound_ptt()
+!-------------------------------------------------------------------------
+
+USE kinds,               ONLY : DP
+USE constants,           ONLY : ry_kbar
+USE temperature,         ONLY : ntemp_plot, itemp_plot, temp
+USE data_files,          ONLY : flanhar
+USE postscript_files,    ONLY : flpsanhar
+USE control_elastic_constants, ONLY : lelastic, lelasticf
+USE control_pressure,    ONLY : pmin, pmax
+USE control_gnuplot,     ONLY : gnuplot_command, flgnuplot, lgnuplot, flext
+USE gnuplot,             ONLY : gnuplot_start, gnuplot_end,           &
+                                gnuplot_write_header, gnuplot_xlabel, &
+                                gnuplot_ylabel, gnuplot_write_file_mul_data, &
+                                gnuplot_set_fact
+USE color_mod,           ONLY : color
+USE io_global,           ONLY : ionode
+USE mp_images,           ONLY : root_image, my_image_id
+
+IMPLICIT NONE
+
+CHARACTER(LEN=256) :: filelastic, filelastic_s, &
+                      filelastic_ph, filelastic_s_ph, gnu_filename, filenameps
+LOGICAL :: first_step, last_step
+INTEGER :: istep, itempp, itemp, ierr, system
+
+IF ( my_image_id /= root_image ) RETURN
+IF (ntemp_plot==0) RETURN
+IF (.NOT.(lelastic.OR.lelasticf)) RETURN
+
+gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_sound_vel_t"
+filenameps=TRIM(flpsanhar)//".sound_vel_t"//TRIM(flext)
+
+CALL gnuplot_start(gnu_filename)
+
+CALL gnuplot_write_header(filenameps, pmin*ry_kbar, pmax*ry_kbar, 0.0_DP, &
+                              0.0_DP, 1.0_DP, flext )
+CALL gnuplot_xlabel('p (kbar)', .FALSE.)
+
+istep=0
+DO itempp=1, ntemp_plot
+   first_step=(itempp==1)
+   last_step=(itempp==ntemp_plot)
+   itemp=itemp_plot(itempp)
+   istep=MOD(istep,8)+1
+   filelastic="anhar_files/"//TRIM(flanhar)//'.sound_vel_temp'
+   CALL add_value(filelastic,temp(itemp))
+   filelastic_s="anhar_files/"//TRIM(flanhar)//'.sound_vel_s_temp'
+   CALL add_value(filelastic_s,temp(itemp))
+   filelastic_ph="anhar_files/"//TRIM(flanhar)//'.sound_vel_ph_temp'
+   CALL add_value(filelastic_ph,temp(itemp))
+   filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.sound_vel_s_ph_temp'
+   CALL add_value(filelastic_s_ph,temp(itemp))
+   IF (first_step) THEN
+      CALL gnuplot_set_fact(1.0_DP, .FALSE.)
+      CALL gnuplot_ylabel('V_{P} (m/s)',.FALSE.)
+   ENDIF
+   IF (lelastic) THEN
+      CALL gnuplot_write_file_mul_data(filelastic,1,2,color(istep),first_step,&
+                                                             .FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filelastic_s,1,2,color(istep),.FALSE., &
+                                       last_step.AND..NOT.lelasticf,.FALSE.)
+   ENDIF
+   IF (lelasticf) THEN
+      CALL gnuplot_write_file_mul_data(filelastic_ph,1,2,color(istep),&
+                              first_step.AND..NOT.lelastic,.FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,2,color(istep),&
+                                               .FALSE.,last_step,.FALSE.)
+   ENDIF
+ENDDO
+istep=0
+DO itempp=1, ntemp_plot
+   first_step=(itempp==1)
+   last_step=(itempp==ntemp_plot)
+   itemp=itemp_plot(itempp)
+   istep=MOD(istep,8)+1
+   filelastic="anhar_files/"//TRIM(flanhar)//'.sound_vel_temp'
+   CALL add_value(filelastic,temp(itemp))
+   filelastic_s="anhar_files/"//TRIM(flanhar)//'.sound_vel_s_temp'
+   CALL add_value(filelastic_s,temp(itemp))
+   filelastic_ph="anhar_files/"//TRIM(flanhar)//'.sound_vel_ph_temp'
+   CALL add_value(filelastic_ph,temp(itemp))
+   filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.sound_vel_s_ph_temp'
+   CALL add_value(filelastic_s_ph,temp(itemp))
+   IF (first_step) THEN
+      CALL gnuplot_set_fact(1.0_DP, .FALSE.)
+      CALL gnuplot_ylabel('V_{B} (m/s)',.FALSE.)
+   ENDIF
+   IF (lelastic) THEN
+      CALL gnuplot_write_file_mul_data(filelastic,1,3,color(istep),first_step,&
+                                                             .FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filelastic_s,1,3,color(istep),.FALSE., &
+                                       last_step.AND..NOT.lelasticf,.FALSE.)
+   ENDIF
+   IF (lelasticf) THEN
+      CALL gnuplot_write_file_mul_data(filelastic_ph,1,3,color(istep),&
+                              first_step.AND..NOT.lelastic,.FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,3,color(istep),&
+                                               .FALSE.,last_step,.FALSE.)
+   ENDIF
+ENDDO
+
+istep=0
+DO itempp=1, ntemp_plot
+   first_step=(itempp==1)
+   last_step=(itempp==ntemp_plot)
+   itemp=itemp_plot(itempp)
+   istep=MOD(istep,8)+1
+   filelastic="anhar_files/"//TRIM(flanhar)//'.sound_vel_temp'
+   CALL add_value(filelastic,temp(itemp))
+   filelastic_s="anhar_files/"//TRIM(flanhar)//'.sound_vel_s_temp'
+   CALL add_value(filelastic_s,temp(itemp))
+   filelastic_ph="anhar_files/"//TRIM(flanhar)//'.sound_vel_ph_temp'
+   CALL add_value(filelastic_ph,temp(itemp))
+   filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.sound_vel_s_ph_temp'
+   CALL add_value(filelastic_s_ph,temp(itemp))
+   IF (first_step) THEN
+      CALL gnuplot_set_fact(1.0_DP, .FALSE.)
+      CALL gnuplot_ylabel('V_{G} (m/s)',.FALSE.)
+   ENDIF
+   IF (lelastic) THEN
+      CALL gnuplot_write_file_mul_data(filelastic,1,4,color(istep),first_step,&
+                                                             .FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filelastic_s,1,4,color(istep),.FALSE., &
+                                       last_step.AND..NOT.lelasticf,.FALSE.)
+   ENDIF
+   IF (lelasticf) THEN
+      CALL gnuplot_write_file_mul_data(filelastic_ph,1,4,color(istep),&
+                              first_step.AND..NOT.lelastic,.FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,4,color(istep),&
+                                               .FALSE.,last_step,.FALSE.)
+   ENDIF
+ENDDO
+
+CALL gnuplot_end()
+
+IF (lgnuplot.AND.ionode) &
+           ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+
+RETURN
+
+END SUBROUTINE plot_sound_ptt

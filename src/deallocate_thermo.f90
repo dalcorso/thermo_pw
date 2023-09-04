@@ -110,6 +110,7 @@ SUBROUTINE deallocate_thermo()
   USE control_thermo,   ONLY : all_geometries_together
   USE control_grun,     ONLY : vgrun_t, b0_grun_t, celldm_grun_t
   USE temperature,      ONLY : temp, temp_plot, itemp_plot, sigma_ry
+  USE control_pressure, ONLY : npress
 
   USE control_conv,     ONLY : ke, keden, nk_test, sigma_test
   USE control_mur_p,    ONLY : vmin_p, b0_p, b01_p, b02_p, emin_p
@@ -122,12 +123,13 @@ SUBROUTINE deallocate_thermo()
                              epsil_geo, all_geometry_done_geo,     &
                              found_dos_ec, found_ph_ec
   USE control_pressure, ONLY : press_plot, ipress_plot
+  USE uniform_pressure, ONLY : omega_p, density_p, celldm_p, p2_p, p4_p
   USE control_vol,      ONLY : ivol_plot
   USE control_debye,    ONLY : deb_energy, deb_free_energy, deb_entropy, &
                                deb_cv, deb_b_fact, deb_bfact
-  USE uniform_pressure, ONLY : omega_p, bm_p, celldm_p
   USE control_quadratic_energy, ONLY : p2, hessian_v, hessian_e, x_pos_min
-  USE control_quartic_energy, ONLY :  p4, x_min_4, hessian4_v, hessian4_e
+  USE control_quartic_energy, ONLY :  p4, x_min_4, hessian4_v, hessian4_e, &
+                            lquartic
   USE el_anharmonic, ONLY : el_energy_t, el_free_energy_t, el_entropy_t, &
                             el_ce_t, el_energyf_t, el_free_energyf_t,    &
                             el_entropyf_t, el_cef_t
@@ -145,7 +147,7 @@ SUBROUTINE deallocate_thermo()
   USE polynomial,    ONLY : clean_poly
 
   IMPLICIT NONE
-  INTEGER :: igeom
+  INTEGER :: igeom, ipress
   !
   IF ( ALLOCATED (energy_geo) )      DEALLOCATE(energy_geo)
   IF ( ALLOCATED (ef_geo) )          DEALLOCATE(ef_geo)
@@ -190,10 +192,6 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (emp_entr) )        DEALLOCATE(emp_entr)
   IF ( ALLOCATED (emp_ce) )          DEALLOCATE(emp_ce)
 
-  IF ( ALLOCATED (omega_p) )         DEALLOCATE(omega_p)
-  IF ( ALLOCATED (bm_p) )            DEALLOCATE(bm_p)
-  IF ( ALLOCATED (celldm_p) )        DEALLOCATE(celldm_p)
- 
   IF ( ALLOCATED (vmin_t) )          DEALLOCATE(vmin_t) 
   IF ( ALLOCATED (b0_t) )            DEALLOCATE(b0_t) 
   IF ( ALLOCATED (b01_t) )           DEALLOCATE(b01_t) 
@@ -418,6 +416,16 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (emp_entrf_pt) )      DEALLOCATE(emp_entrf_pt)
   IF ( ALLOCATED (emp_cef_pt) )        DEALLOCATE(emp_cef_pt)
   IF ( ALLOCATED (emp_cef_ptt) )       DEALLOCATE(emp_cef_ptt)
+
+  IF (ALLOCATED(omega_p)) DEALLOCATE(omega_p)
+  IF (ALLOCATED(density_p)) DEALLOCATE(density_p)
+  IF (ALLOCATED(celldm_p)) DEALLOCATE(celldm_p)
+  DO ipress=1,npress
+     CALL clean_poly(p2_p(ipress))
+     IF (lquartic) CALL clean_poly(p4_p(ipress))
+  ENDDO
+  IF (ALLOCATED(p2_p)) DEALLOCATE(p2_p)
+  IF (ALLOCATED(p4_p)) DEALLOCATE(p4_p)
 
   IF ( ALLOCATED (vmin_p) )           DEALLOCATE(vmin_p) 
   IF ( ALLOCATED (p0) )               DEALLOCATE(p0) 

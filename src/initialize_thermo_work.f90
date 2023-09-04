@@ -724,6 +724,7 @@ USE control_vol,   ONLY : nvol, vmin_input, vmax_input, deltav
 USE initial_conf,  ONLY : ibrav_save
 USE temperature,   ONLY : ntemp_plot
 USE geometry_file, ONLY : read_geometry_file
+USE uniform_pressure, ONLY : omega_p, density_p, celldm_p, p2_p, p4_p
 USE control_thermo, ONLY : lgeo_from_file
 USE control_pressure, ONLY : npress, npress_plot
 USE control_mur_p, ONLY : vmin_p, b0_p, b01_p, b02_p, emin_p
@@ -764,6 +765,13 @@ ELSE
    ENDIF
 ENDIF
 ALLOCATE(p0(nvol))
+
+
+ALLOCATE(omega_p(npress))
+ALLOCATE(density_p(npress))
+ALLOCATE(celldm_p(6,npress))
+ALLOCATE(p2_p(npress))
+ALLOCATE(p4_p(npress))
 
 
 IF (ntemp_plot>0.OR.npress_plot>0) THEN

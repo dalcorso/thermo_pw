@@ -652,9 +652,12 @@ IF (what=='mur_lc_t') THEN
    CALL plot_elastic_ptt(0,.TRUE.)
    CALL plot_elastic_ptt(1,.TRUE.)
 
-   CALL plot_macro_el_t()
-!   CALL plot_macro_el_pt()
-!   CALL plot_macro_el_ptt()
+   CALL plot_macro_el_new_t()
+   CALL plot_sound_t()
+   CALL plot_macro_el_new_pt()
+   CALL plot_sound_pt()
+   CALL plot_macro_el_new_ptt()
+   CALL plot_sound_ptt()
 ENDIF
 !
 !    calculate and plot the Gruneisen parameters along the given path.
