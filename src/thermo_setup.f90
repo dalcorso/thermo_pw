@@ -34,7 +34,7 @@ SUBROUTINE thermo_setup()
   USE kinds,                ONLY : DP
   USE constants,            ONLY : ry_kbar
   USE constants,            ONLY : k_boltzmann_ry
-  USE thermo_mod,           ONLY : what, ngeo, fact_ngeo, ngeo_ph    
+  USE thermo_mod,           ONLY : what, ngeo, fact_ngeo, ngeo_ph, lcubic    
   USE temperature,          ONLY : tmin, ntemp_plot
   USE control_thermo,       ONLY : continue_zero_ibrav, find_ibrav, &
                                    set_internal_path, set_2d_path
@@ -94,13 +94,12 @@ SUBROUTINE thermo_setup()
   REAL(DP), PARAMETER :: eps1=1D-8
   REAL(DP) :: ur(3,3), global_s(3,3), rd_ht(3,3), celldm_(6), alat_save, zero
   REAL(DP), ALLOCATABLE :: tau_aux(:,:)
-  LOGICAL :: cubic
   !
   !
   with_asyn_images=(nimage>1)
   !
   !  
-  cubic=(ibrav==1.OR.ibrav==2.OR.ibrav==3) 
+  lcubic=(ibrav==1.OR.ibrav==2.OR.ibrav==3) 
 !  IF ((npress_plot>0.OR.ntemp_plot>0).AND.(.NOT.lmurn)) &
 !    CALL errore('thermo_setup','npress_plot and ntemp_plot need lmurn=.TRUE.',1) 
   !
@@ -292,7 +291,7 @@ SUBROUTINE thermo_setup()
 !   calculation compatible with lmurn=.TRUE.
 !
            ngeo=5
-           IF (cubic) ngeo(1)=9
+           IF (lcubic) ngeo(1)=9
         ENDIF
      ENDIF
   END IF

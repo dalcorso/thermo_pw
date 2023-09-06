@@ -78,6 +78,8 @@ MODULE thermo_mod
                                                 ! in each run
   REAL(DP) :: celldm_p1(6), celldm_m1(6)
 
+  LOGICAL :: lcubic=.FALSE.                     ! .TRUE. when the bravais
+                                                ! lattice is cubic
 
 END MODULE thermo_mod
 
