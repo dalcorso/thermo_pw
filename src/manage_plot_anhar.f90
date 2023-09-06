@@ -56,4 +56,28 @@ CALL manage_plot_anhar()
 
 RETURN
 END SUBROUTINE manage_plot_anhar_anis
+!
+!---------------------------------------------------------------------------
+SUBROUTINE manage_plot_elastic()
+!---------------------------------------------------------------------------
+USE thermo_mod,   ONLY : what
 
+IMPLICIT NONE
+IF (what=='mur_lc_t') THEN
+   CALL plot_elastic_t(0,.TRUE.)
+   CALL plot_elastic_t(1,.TRUE.)
+   CALL plot_elastic_pt(0,.TRUE.)
+   CALL plot_elastic_pt(1,.TRUE.)
+   CALL plot_elastic_ptt(0,.TRUE.)
+   CALL plot_elastic_ptt(1,.TRUE.)
+
+   CALL plot_macro_el_new_t()
+   CALL plot_sound_t()
+   CALL plot_macro_el_new_pt()
+   CALL plot_sound_pt()
+   CALL plot_macro_el_new_ptt()
+   CALL plot_sound_ptt()
+ENDIF
+
+RETURN
+END SUBROUTINE manage_plot_elastic

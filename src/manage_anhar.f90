@@ -11,7 +11,7 @@ SUBROUTINE manage_anhar()
 
 USE kinds,                 ONLY : DP
 USE temperature,           ONLY : ntemp
-USE thermo_mod,            ONLY : what, tot_ngeo
+USE thermo_mod,            ONLY : tot_ngeo
 USE control_thermo,        ONLY : ltherm_dos, ltherm_freq, ltherm_glob
 USE control_elastic_constants, ONLY : el_cons_qha_available, &
                                   el_consf_qha_available
@@ -20,7 +20,6 @@ USE control_emp_free_ener, ONLY : add_empirical, emp_ener, emp_free_ener, &
                                   emp_entr, emp_ce
 USE temperature,           ONLY : temp, ntemp, ntemp_plot, itemp_plot
 USE internal_files_names,  ONLY : flfrq_thermo, flvec_thermo
-USE anharmonic,            ONLY : a_t
 USE el_thermodynamics,     ONLY : el_ener, el_free_ener, el_entr, el_ce
 USE data_files,            ONLY : flanhar, fleltherm
 
@@ -74,7 +73,8 @@ IF (ltherm_dos) THEN
    WRITE(stdout,'(2x,76("-"),/)')
 !
 !  Fit the vibrational (and possibly electronic free energy) with a polynomial
-!  fit_free_energy_noe fits only the vibrational part.
+!  fit_free_energy_noe fits only the vibrational part. The fit is made
+!  also when ltherm_glob is true to calculate the thermal pressure below.
 !
    CALL fit_free_energy()
    CALL fit_free_energy_noe()
@@ -91,6 +91,8 @@ IF (ltherm_dos) THEN
       CALL anhar_ev_t()
       CALL anhar_ev_noe_t()
    ENDIF
+   CALL compute_density_t()
+   CALL compute_density_noe_t()
 !   CALL summarize_anhar_param()
    CALL interpolate_harmonic()
    CALL interpolate_harmonic_noe_t()
@@ -103,6 +105,7 @@ IF (ltherm_dos) THEN
    ELSE
       CALL anhar_ev_pt()
    ENDIF
+   CALL compute_density_pt()
    CALL interpolate_harmonic_pt()
 !
 !  then the crystal parameters as a function of pressure 
@@ -114,6 +117,7 @@ IF (ltherm_dos) THEN
       CALL anhar_ev_ptt()
       CALL anhar_ev_ptt_pm()
    ENDIF
+   CALL compute_density_ptt()
    CALL interpolate_harmonic_ptt()
 !
 !  some quantities as a function of temperature are needed 
@@ -157,8 +161,8 @@ IF (ltherm_dos) THEN
    ELSE
       CALL write_anhar_ptt() 
       CALL write_anhar_mur_ptt() 
-      CALL write_tp_ptt()
    ENDIF
+   CALL write_tp_ptt()
 !
 !   if requested in input writes on files the anharmonic quantities
 !   at several volumes
@@ -197,10 +201,13 @@ IF (ltherm_freq) THEN
 !
    IF (ltherm_glob) THEN
       CALL anhar_ev_glob_t_ph()
+      CALL anhar_ev_glob_noe_t_ph()
    ELSE
       CALL anhar_ev_t_ph()
       CALL anhar_ev_noe_t_ph()
    ENDIF
+   CALL compute_densityf_t()
+   CALL compute_densityf_noe_t()
 !  CALL summarize_anhar_param_ph()
    CALL interpolate_harmonic_ph()
    CALL interpolate_harmonic_noe_t_ph()
@@ -210,6 +217,7 @@ IF (ltherm_freq) THEN
    ELSE
       CALL anhar_ev_pt_ph()
    ENDIF
+   CALL compute_densityf_pt()
    CALL interpolate_harmonicf_pt()
 !
 !  then the crystal parameters as a function of pressure 
@@ -221,6 +229,7 @@ IF (ltherm_freq) THEN
       CALL anhar_ev_ph_ptt()
       CALL anhar_ev_ph_ptt_pm()
    ENDIF
+   CALL compute_densityf_ptt()
    CALL interpolate_harmonicf_ptt()
 !
 !  some quantities as a function of temperature are needed 
@@ -258,11 +267,12 @@ IF (ltherm_freq) THEN
 !  at several temperatures
 !
    IF (ltherm_glob) THEN
+      CALL write_ph_freq_anhar_glob_ptt()
    ELSE
       CALL write_ph_freq_anhar_ptt()
       CALL write_ph_freq_anhar_mur_ptt()
-      CALL write_ph_freq_tp_ptt()
    ENDIF
+   CALL write_ph_freq_tp_ptt()
 !
 !   if requested in input writes on files the anharmonic quantities
 !   at several volumes
@@ -297,6 +307,18 @@ IF (.NOT.(el_cons_qha_available.OR.el_consf_qha_available)) &
 !
 CALL set_elastic_constants_t()
 
+IF (ltherm_dos) THEN
+   CALL write_anhar_anis()
+   CALL write_anhar_anis_pt()
+   CALL write_anhar_anis_ptt()
+ENDIF
+
+IF (ltherm_freq) THEN
+   CALL write_ph_freq_anhar_anis()
+   CALL write_ph_freq_anhar_anis_pt()
+   CALL write_ph_freq_anhar_anis_ptt()
+ENDIF
+
 WRITE(stdout,'(/,2x,76("-"))')
 WRITE(stdout,'(5x,"Computing the anharmonic properties within ")')
 WRITE(stdout,'(5x,"the QHA approximation using Gruneisen parameters.")') 
@@ -325,18 +347,7 @@ CALL write_grun_anharmonic()
 !
 CALL manage_plot_anhar()
 
-IF (what=='mur_lc_t') THEN
-   CALL plot_elastic_t(0,.FALSE.)
-   CALL plot_elastic_t(1,.FALSE.)
-   CALL plot_elastic_pt(0,.FALSE.)
-   CALL plot_elastic_pt(1,.FALSE.)
-   CALL plot_elastic_ptt(0,.FALSE.)
-   CALL plot_elastic_ptt(1,.FALSE.)
-
-!   CALL plot_macro_el_t()
-!   CALL plot_macro_el_pt()
-!   CALL plot_macro_el_ptt()
-ENDIF
+CALL manage_plot_elastic()
 !
 !   summarize on output the main anharmonic quantities 
 !
@@ -350,7 +361,7 @@ SUBROUTINE manage_anhar_anis()
 !-------------------------------------------------------------------------
 !
 USE kinds,                 ONLY : DP
-USE thermo_mod,            ONLY : reduced_grid, what, tot_ngeo
+USE thermo_mod,            ONLY : reduced_grid, tot_ngeo
 USE temperature,           ONLY : ntemp, temp, ntemp_plot, itemp_plot
 USE control_thermo,        ONLY : ltherm_dos, ltherm_freq
 USE control_elastic_constants, ONLY : el_cons_qha_available, &
@@ -423,7 +434,9 @@ IF (ltherm_dos) THEN
    CALL quadratic_fit_t_noe_run()
 
    CALL compute_volume_t()
+   CALL compute_density_t()
    CALL compute_volume_noe_t()
+   CALL compute_density_noe_t()
 !
 !  Find celldm_t at pressure p+dp and p-dp
 !
@@ -435,6 +448,7 @@ IF (ltherm_dos) THEN
 !
    CALL quadratic_fit_pt()
    CALL compute_volume_pt()
+   CALL compute_density_pt()
 !
 !  Here compute the celldm_pt that minimize the Gibbs energy for 
 !  selected pressures +- delta p for computing the bulk modulus
@@ -447,6 +461,7 @@ IF (ltherm_dos) THEN
 !
    CALL quadratic_fit_ptt_run()
    CALL compute_volume_ptt()
+   CALL compute_density_ptt()
    CALL write_tp_anis_ptt()
 !
 !  Here compute the celldm_ptt_pm that minimize the Gibbs energy for 
@@ -509,7 +524,9 @@ IF (ltherm_freq) THEN
    CALL quadratic_fitf_t_noe_run()
 
    CALL compute_volumef_t()
+   CALL compute_densityf_t()
    CALL compute_volumef_noe_t()
+   CALL compute_densityf_noe_t()
 !
 !  Find celldmf_t at pressure p+dp and p-dp
 !
@@ -521,6 +538,7 @@ IF (ltherm_freq) THEN
 !
    CALL quadratic_fitf_pt()
    CALL compute_volumef_pt()
+   CALL compute_densityf_pt()
 !
 !  Here compute the celldm_pt that minimize the Gibbs energy for 
 !  selected pressures +- delta p for computing the bulk modulus
@@ -533,6 +551,7 @@ IF (ltherm_freq) THEN
 !
    CALL quadratic_fitf_ptt_run()
    CALL compute_volumef_ptt()
+   CALL compute_densityf_ptt()
    CALL write_ph_freq_tp_anis_ptt()
 !
 !  Here compute the celldm_ptt_pm that minimize the Gibbs energy for 
@@ -644,21 +663,7 @@ ENDIF
 !
 !  Plot elastic constants and compliances
 !
-IF (what=='mur_lc_t') THEN
-   CALL plot_elastic_t(0,.TRUE.)
-   CALL plot_elastic_t(1,.TRUE.)
-   CALL plot_elastic_pt(0,.TRUE.)
-   CALL plot_elastic_pt(1,.TRUE.)
-   CALL plot_elastic_ptt(0,.TRUE.)
-   CALL plot_elastic_ptt(1,.TRUE.)
-
-   CALL plot_macro_el_new_t()
-   CALL plot_sound_t()
-   CALL plot_macro_el_new_pt()
-   CALL plot_sound_pt()
-   CALL plot_macro_el_new_ptt()
-   CALL plot_sound_ptt()
-ENDIF
+CALL manage_plot_elastic()
 !
 !    calculate and plot the Gruneisen parameters along the given path.
 !
