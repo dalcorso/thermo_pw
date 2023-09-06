@@ -13,6 +13,8 @@ SUBROUTINE write_anhar_anis()
 !   related quantities for anisotropic solids. (from phdos)
 !
 USE kinds,          ONLY : DP
+USE thermo_mod,     ONLY : lcubic
+USE control_mur,    ONLY : lmurn
 USE temperature,    ONLY : ntemp, temp
 USE thermo_sym,     ONLY : laue
 USE anharmonic,     ONLY : alpha_anis_t, vmin_t, b0_t, celldm_t, beta_t, &
@@ -38,6 +40,8 @@ INTEGER :: itemp, iu_therm
 INTEGER :: find_free_unit
 
 REAL(DP) :: e0
+
+IF (lmurn.AND..NOT.lcubic) RETURN
 
 CALL compute_alpha_anis(celldm_t, alpha_anis_t, temp, ntemp, ibrav_save)
 
@@ -185,7 +189,7 @@ SUBROUTINE compute_volume_t()
 USE kinds,        ONLY : DP
 USE temperature,  ONLY : ntemp
 USE initial_conf, ONLY : ibrav_save
-USE anharmonic,   ONLY : vmin_t, celldm_t, density_t
+USE anharmonic,   ONLY : vmin_t, celldm_t
 
 IMPLICIT NONE
 INTEGER :: itemp
@@ -193,23 +197,43 @@ REAL(DP) :: compute_omega_geo
 
 DO itemp=1,ntemp
    vmin_t(itemp)=compute_omega_geo(ibrav_save, celldm_t(1,itemp))
-   CALL compute_density(vmin_t(itemp),density_t(itemp),.FALSE.)
 ENDDO
 
 RETURN
 END SUBROUTINE compute_volume_t
 !
 !--------------------------------------------------------------------------
+SUBROUTINE compute_density_t()
+!--------------------------------------------------------------------------
+!
+!  This routine computes the density as a function of temperature 
+!  starting from the volume vmin_t
+!
+USE kinds,        ONLY : DP
+USE temperature,  ONLY : ntemp
+USE anharmonic,   ONLY : vmin_t, density_t
+
+IMPLICIT NONE
+INTEGER :: itemp
+
+DO itemp=1,ntemp
+   CALL compute_density(vmin_t(itemp),density_t(itemp),.FALSE.)
+ENDDO
+
+RETURN
+END SUBROUTINE compute_density_t
+!
+!--------------------------------------------------------------------------
 SUBROUTINE compute_volume_noe_t()
 !--------------------------------------------------------------------------
 !
-!  This routine computes the volume and the density as a function of
+!  This routine computes the volume as a function of
 !  temperature starting from celldm_noe_t
 !
 USE kinds,        ONLY : DP
 USE temperature,  ONLY : ntemp
 USE initial_conf, ONLY : ibrav_save
-USE anharmonic,   ONLY : vmin_noe_t, celldm_noe_t, density_noe_t
+USE anharmonic,   ONLY : vmin_noe_t, celldm_noe_t
 USE control_eldos,  ONLY : lel_free_energy
 
 IMPLICIT NONE
@@ -220,23 +244,46 @@ IF (.NOT.lel_free_energy) RETURN
 
 DO itemp=1,ntemp
    vmin_noe_t(itemp)=compute_omega_geo(ibrav_save, celldm_noe_t(1,itemp))
-   CALL compute_density(vmin_noe_t(itemp),density_noe_t(itemp),.FALSE.)
 ENDDO
 
 RETURN
 END SUBROUTINE compute_volume_noe_t
 !
 !--------------------------------------------------------------------------
+SUBROUTINE compute_density_noe_t()
+!--------------------------------------------------------------------------
+!
+!  This routine computes the density as a function of temperature 
+!  starting from the volume vmin_noe_t
+!
+USE kinds,        ONLY : DP
+USE temperature,  ONLY : ntemp
+USE anharmonic,   ONLY : vmin_noe_t, density_noe_t
+USE control_eldos,  ONLY : lel_free_energy
+
+IMPLICIT NONE
+INTEGER :: itemp
+
+IF (.NOT.lel_free_energy) RETURN
+
+DO itemp=1,ntemp
+   CALL compute_density(vmin_noe_t(itemp),density_noe_t(itemp),.FALSE.)
+ENDDO
+
+RETURN
+END SUBROUTINE compute_density_noe_t
+!
+!--------------------------------------------------------------------------
 SUBROUTINE compute_volumef_t()
 !--------------------------------------------------------------------------
 !
-!  This routine computes the volume and the density as a function of
+!  This routine computes the volume as a function of
 !  temperature starting from celldmf_t
 !
 USE kinds,        ONLY : DP
 USE temperature,  ONLY : ntemp
 USE initial_conf, ONLY : ibrav_save
-USE ph_freq_anharmonic,  ONLY : vminf_t, celldmf_t, densityf_t
+USE ph_freq_anharmonic,  ONLY : vminf_t, celldmf_t
 
 IMPLICIT NONE
 INTEGER :: itemp
@@ -244,11 +291,31 @@ REAL(DP) :: compute_omega_geo
 
 DO itemp=1,ntemp
    vminf_t(itemp)=compute_omega_geo(ibrav_save, celldmf_t(1,itemp))
-   CALL compute_density(vminf_t(itemp),densityf_t(itemp),.FALSE.)
 ENDDO
 
 RETURN
 END SUBROUTINE compute_volumef_t
+!
+!--------------------------------------------------------------------------
+SUBROUTINE compute_densityf_t()
+!--------------------------------------------------------------------------
+!  This routine computes the densityf as a function of temperature 
+!  starting from the volume vminf_t
+!
+!
+USE kinds,        ONLY : DP
+USE temperature,  ONLY : ntemp
+USE ph_freq_anharmonic,  ONLY : vminf_t, densityf_t
+
+IMPLICIT NONE
+INTEGER :: itemp
+
+DO itemp=1,ntemp
+   CALL compute_density(vminf_t(itemp),densityf_t(itemp),.FALSE.)
+ENDDO
+
+RETURN
+END SUBROUTINE compute_densityf_t
 !
 !--------------------------------------------------------------------------
 SUBROUTINE compute_volumef_noe_t()
@@ -260,7 +327,7 @@ SUBROUTINE compute_volumef_noe_t()
 USE kinds,        ONLY : DP
 USE temperature,  ONLY : ntemp
 USE initial_conf, ONLY : ibrav_save
-USE ph_freq_anharmonic,   ONLY : vminf_noe_t, celldmf_noe_t, densityf_noe_t
+USE ph_freq_anharmonic,   ONLY : vminf_noe_t, celldmf_noe_t
 USE control_eldos,  ONLY : lel_free_energy
 
 IMPLICIT NONE
@@ -271,11 +338,31 @@ IF (.NOT.lel_free_energy) RETURN
 
 DO itemp=1,ntemp
    vminf_noe_t(itemp)=compute_omega_geo(ibrav_save, celldmf_noe_t(1,itemp))
-   CALL compute_density(vminf_noe_t(itemp),densityf_noe_t(itemp),.FALSE.)
 ENDDO
 
 RETURN
 END SUBROUTINE compute_volumef_noe_t
+!
+!--------------------------------------------------------------------------
+SUBROUTINE compute_densityf_noe_t()
+!--------------------------------------------------------------------------
+!
+USE kinds,        ONLY : DP
+USE temperature,  ONLY : ntemp
+USE ph_freq_anharmonic,   ONLY : vminf_noe_t, densityf_noe_t
+USE control_eldos,  ONLY : lel_free_energy
+
+IMPLICIT NONE
+INTEGER :: itemp
+
+IF (.NOT.lel_free_energy) RETURN
+
+DO itemp=1,ntemp
+   CALL compute_density(vminf_noe_t(itemp),densityf_noe_t(itemp),.FALSE.)
+ENDDO
+
+RETURN
+END SUBROUTINE compute_densityf_noe_t
 !
 !--------------------------------------------------------------------------
 SUBROUTINE compute_volume_pt()
@@ -283,14 +370,13 @@ SUBROUTINE compute_volume_pt()
 !
 !   This routine receives the celldm_pt at the minimum of the Gibbs energy
 !   and use them to compute the minimum volume vmin_pt as a function of 
-!   temperature for selected pressures. From volume, it computes also 
-!   the density.
+!   temperature for selected pressures.  
 !
 USE kinds,         ONLY : DP
 USE temperature,   ONLY : ntemp
 USE control_pressure, ONLY : npress_plot
 USE initial_conf,  ONLY : ibrav_save
-USE anharmonic_pt, ONLY : vmin_pt, celldm_pt, density_pt
+USE anharmonic_pt, ONLY : vmin_pt, celldm_pt
 
 IMPLICIT NONE
 INTEGER :: itemp, ipressp
@@ -300,8 +386,6 @@ DO ipressp=1, npress_plot
    DO itemp=1,ntemp
       vmin_pt(itemp,ipressp)=compute_omega_geo(ibrav_save, &
                                             celldm_pt(1,itemp,ipressp))
-      CALL compute_density(vmin_pt(itemp,ipressp), &
-                                            density_pt(itemp,ipressp),.FALSE.)
    ENDDO
 ENDDO
 
@@ -309,19 +393,43 @@ RETURN
 END SUBROUTINE compute_volume_pt
 !
 !--------------------------------------------------------------------------
+SUBROUTINE compute_density_pt()
+!--------------------------------------------------------------------------
+!
+!   This routine receives the vmin_pt and use it to compute the density_pt 
+!   as a function of temperature for selected pressures. 
+!
+USE kinds,         ONLY : DP
+USE temperature,   ONLY : ntemp
+USE control_pressure, ONLY : npress_plot
+USE anharmonic_pt, ONLY : vmin_pt, density_pt
+
+IMPLICIT NONE
+INTEGER :: itemp, ipressp
+
+DO ipressp=1, npress_plot
+   DO itemp=1,ntemp
+      CALL compute_density(vmin_pt(itemp,ipressp), &
+                                       density_pt(itemp,ipressp),.FALSE.)
+   ENDDO
+ENDDO
+
+RETURN
+END SUBROUTINE compute_density_pt
+!
+!--------------------------------------------------------------------------
 SUBROUTINE compute_volumef_pt()
 !--------------------------------------------------------------------------
 !
-!   This routine receives the celldmf_pt at the minimum of the Gibbs energy
-!   and use them to compute the minimum volume vminf_pt as a function of 
-!   temperature for selected pressures. It computes also the density from
-!   the volume.
+!   This routine receives the celldmf_pt and use it to compute the 
+!   minimum volume vminf_pt as a function of temperature for selected 
+!   pressures.
 !
 USE kinds,         ONLY : DP
 USE temperature,   ONLY : ntemp
 USE control_pressure, ONLY : npress_plot
 USE initial_conf,  ONLY : ibrav_save
-USE ph_freq_anharmonic_pt, ONLY : vminf_pt, celldmf_pt, densityf_pt
+USE ph_freq_anharmonic_pt, ONLY : vminf_pt, celldmf_pt
 
 IMPLICIT NONE
 INTEGER :: itemp, ipressp
@@ -331,8 +439,6 @@ DO ipressp=1, npress_plot
    DO itemp=1,ntemp
       vminf_pt(itemp,ipressp)=compute_omega_geo(ibrav_save, &
                                             celldmf_pt(1,itemp,ipressp))
-      CALL compute_density(vminf_pt(itemp,ipressp), &
-                                            densityf_pt(itemp,ipressp),.FALSE.)
    ENDDO
 ENDDO
 
@@ -340,19 +446,44 @@ RETURN
 END SUBROUTINE compute_volumef_pt
 !
 !--------------------------------------------------------------------------
+SUBROUTINE compute_densityf_pt()
+!--------------------------------------------------------------------------
+!
+!   This routine receives the vminf_pt at the minimum of the Gibbs energy
+!   and use them to compute the minimum volume vminf_pt as a function of 
+!   temperature for selected pressures. 
+!
+USE kinds,         ONLY : DP
+USE temperature,   ONLY : ntemp
+USE control_pressure, ONLY : npress_plot
+USE ph_freq_anharmonic_pt, ONLY : vminf_pt, densityf_pt
+
+IMPLICIT NONE
+INTEGER :: itemp, ipressp
+
+DO ipressp=1, npress_plot
+   DO itemp=1,ntemp
+      CALL compute_density(vminf_pt(itemp,ipressp), &
+                                   densityf_pt(itemp,ipressp),.FALSE.)
+   ENDDO
+ENDDO
+
+RETURN
+END SUBROUTINE compute_densityf_pt
+!
+!--------------------------------------------------------------------------
 SUBROUTINE compute_volume_ptt()
 !--------------------------------------------------------------------------
 !
 !   This routine receives the celldm_ptt at the minimum of the Gibbs energy
 !   and uses them to compute the minimum volume vmin_ptt as a function of 
-!   pressure for selected temperatures. It computes also the density as
-!   a function of pressure for selected temperatures.
+!   pressure for selected temperatures.
 !
 USE kinds,         ONLY : DP
 USE temperature,   ONLY : ntemp_plot
 USE control_pressure, ONLY : npress
 USE initial_conf,  ONLY : ibrav_save
-USE anharmonic_ptt, ONLY : vmin_ptt, celldm_ptt, density_ptt
+USE anharmonic_ptt, ONLY : vmin_ptt, celldm_ptt
 
 IMPLICIT NONE
 INTEGER :: itempp, ipress
@@ -362,13 +493,35 @@ DO itempp=1, ntemp_plot
    DO ipress=1,npress
       vmin_ptt(ipress,itempp)=compute_omega_geo(ibrav_save, &
                                                 celldm_ptt(1,ipress,itempp))
-      CALL compute_density(vmin_ptt(ipress,itempp), &
-                                            density_ptt(ipress,itempp),.FALSE.)
    ENDDO
 ENDDO
 
 RETURN
 END SUBROUTINE compute_volume_ptt
+!--------------------------------------------------------------------------
+SUBROUTINE compute_density_ptt()
+!--------------------------------------------------------------------------
+!
+!   This routine receives the vmin_ptt and uses it to compute the 
+!   density density_ptt as a function of pressure for selected temperatures. 
+!
+USE kinds,         ONLY : DP
+USE temperature,   ONLY : ntemp_plot
+USE control_pressure, ONLY : npress
+USE anharmonic_ptt, ONLY : vmin_ptt, density_ptt
+
+IMPLICIT NONE
+INTEGER :: itempp, ipress
+
+DO itempp=1, ntemp_plot
+   DO ipress=1,npress
+      CALL compute_density(vmin_ptt(ipress,itempp), &
+                                  density_ptt(ipress,itempp),.FALSE.)
+   ENDDO
+ENDDO
+
+RETURN
+END SUBROUTINE compute_density_ptt
 !
 !--------------------------------------------------------------------------
 SUBROUTINE compute_volumef_ptt()
@@ -376,14 +529,13 @@ SUBROUTINE compute_volumef_ptt()
 !
 !   This routine receives the celldmf_ptt at the minimum of the Gibbs energy
 !   and uses them to compute the minimum volume vminf_ptt as a function of 
-!   pressure for selected temperatures. It computes also the density as
-!   a function of pressure for selected temperatures.
+!   pressure for selected temperatures.
 !
 USE kinds,         ONLY : DP
 USE temperature,   ONLY : ntemp_plot
 USE control_pressure, ONLY : npress
 USE initial_conf,  ONLY : ibrav_save
-USE ph_freq_anharmonic_ptt, ONLY : vminf_ptt, celldmf_ptt, densityf_ptt
+USE ph_freq_anharmonic_ptt, ONLY : vminf_ptt, celldmf_ptt
 
 IMPLICIT NONE
 INTEGER :: itempp, ipress
@@ -393,13 +545,37 @@ DO itempp=1, ntemp_plot
    DO ipress=1,npress
       vminf_ptt(ipress,itempp)=compute_omega_geo(ibrav_save, &
                                                 celldmf_ptt(1,ipress,itempp))
-      CALL compute_density(vminf_ptt(ipress,itempp), &
-                                            densityf_ptt(ipress,itempp),.FALSE.)
    ENDDO
 ENDDO
 
 RETURN
 END SUBROUTINE compute_volumef_ptt
+!
+!--------------------------------------------------------------------------
+SUBROUTINE compute_densityf_ptt()
+!--------------------------------------------------------------------------
+!
+!   This routine receives the vminf_ptt and uses it to compute the 
+!   densityf_ptt as a function of pressure for selected temperatures. 
+!
+USE kinds,         ONLY : DP
+USE temperature,   ONLY : ntemp_plot
+USE control_pressure, ONLY : npress
+USE ph_freq_anharmonic_ptt, ONLY : vminf_ptt, densityf_ptt
+
+IMPLICIT NONE
+INTEGER :: itempp, ipress
+
+DO itempp=1, ntemp_plot
+   DO ipress=1,npress
+      CALL compute_density(vminf_ptt(ipress,itempp), &
+                                       densityf_ptt(ipress,itempp),.FALSE.)
+   ENDDO
+ENDDO
+
+RETURN
+END SUBROUTINE compute_densityf_ptt
+!
 !--------------------------------------------------------------------------
 SUBROUTINE compute_volume_ptt_pm()
 !--------------------------------------------------------------------------
@@ -478,6 +654,8 @@ SUBROUTINE write_ph_freq_anhar_anis()
 !   from direct integration of the phonon frequencies.
 !
 USE kinds,          ONLY : DP
+USE thermo_mod,     ONLY : lcubic
+USE control_mur,    ONLY : lmurn
 USE temperature,    ONLY : ntemp, temp
 USE thermo_mod,     ONLY : ibrav_geo
 USE thermo_sym,     ONLY : laue
@@ -508,6 +686,8 @@ INTEGER :: find_free_unit, ibrav
 REAL(DP) :: compute_omega_geo, el_con_t(6,6,ntemp)
 
 REAL(DP) :: e0
+
+IF (lmurn.AND..NOT.lcubic) RETURN
 
 CALL compute_alpha_anis(celldmf_t, alphaf_anis_t, temp, ntemp, ibrav_save)
 
@@ -564,13 +744,6 @@ IF (meta_ionode) THEN
 !   here auxiliary quantities calculated from the phonon dos
 !
    IF (lelasticf) THEN
-      !
-      !   here the bulk modulus and the gruneisen parameter
-      !
-      filename="anhar_files/"//TRIM(flanhar)//'.bulk_ph'
-      CALL add_pressure(filename)
-
-      CALL write_bulk_anharm(temp, b0f_t, b0f_s, ntemp, filename)
 !
 !   the heat capacities
 !
@@ -921,6 +1094,8 @@ SUBROUTINE write_anhar_anis_pt()
 !   for several pressures.
 !
 USE kinds,          ONLY : DP
+USE thermo_mod,     ONLY : lcubic
+USE control_mur,    ONLY : lmurn
 USE temperature,    ONLY : ntemp, temp, itemp300
 USE thermo_sym,     ONLY : laue
 USE thermodynamics, ONLY : ph_e0
@@ -952,25 +1127,13 @@ REAL(DP) :: compute_omega_geo, aux(ntemp)
 
 REAL(DP) :: e0
 
+IF (lmurn.AND..NOT.lcubic) RETURN
+
 DO ipressp=1, npress_plot
    ipress=ipress_plot(ipressp)
    CALL compute_alpha_anis(celldm_pt(:,:,ipressp), &
                      alpha_anis_pt(:,:,:,ipressp), temp, ntemp, ibrav_save)
-!
-!  compute the volume as a function of temperature
-!
-   DO itemp=1,ntemp
-      vmin_pt(itemp,ipressp)=compute_omega_geo(ibrav_save, &
-                             celldm_pt(1,itemp,ipressp))
-      CALL compute_density(vmin_pt(itemp,ipressp), density_pt(itemp,ipressp),&
-                                                                     .FALSE.)
-   ENDDO
    CALL interpolate_e0(vmin_pt(:,ipressp), celldm_pt(:,:,ipressp), ph_e0, e0)
-!
-!  compute the volume thermal expansion as the derivative of the volume
-!  with respect to temperature
-!
-   CALL compute_beta(vmin_pt(:,ipressp), beta_pt(:,ipressp), temp, ntemp)
 
    IF (lelastic_pt) THEN
       CALL isostress_heat_capacity(vmin_pt(:,ipressp), &
@@ -1151,6 +1314,8 @@ SUBROUTINE write_ph_freq_anhar_anis_pt()
 !   for several pressures.
 !
 USE kinds,          ONLY : DP
+USE thermo_mod,     ONLY : lcubic
+USE control_mur,    ONLY : lmurn
 USE temperature,    ONLY : ntemp, temp, itemp300
 USE thermo_sym,     ONLY : laue
 USE ph_freq_thermodynamics, ONLY : phf_e0
@@ -1182,6 +1347,8 @@ INTEGER :: find_free_unit
 REAL(DP) :: compute_omega_geo, aux(ntemp)
 
 REAL(DP) :: e0
+
+IF (lmurn.AND..NOT.lcubic) RETURN
 
 DO ipressp=1, npress_plot
    ipress=ipress_plot(ipressp)
@@ -1369,6 +1536,8 @@ SUBROUTINE write_anhar_anis_ptt()
 !   for selected pressures.
 !
 USE kinds,          ONLY : DP
+USE thermo_mod,     ONLY : lcubic
+USE control_mur,    ONLY : lmurn
 USE temperature,    ONLY : ntemp, temp, itemp300
 USE thermo_sym,     ONLY : laue
 USE thermodynamics, ONLY : ph_e0
@@ -1407,6 +1576,8 @@ REAL(DP) :: compute_omega_geo, aux(npress)
 INTEGER  :: itempp
 REAL(DP) :: e0_p(npress)
 LOGICAL  :: subtract_el
+
+IF (lmurn.AND..NOT.lcubic) RETURN
 
 DO itempp=1, ntemp_plot
    itemp=itemp_plot(itempp)
@@ -1597,6 +1768,8 @@ SUBROUTINE write_ph_freq_anhar_anis_ptt()
 !   for selected pressures.
 !
 USE kinds,          ONLY : DP
+USE thermo_mod,     ONLY : lcubic
+USE control_mur,    ONLY : lmurn
 USE temperature,    ONLY : ntemp, temp, itemp300
 USE thermo_sym,     ONLY : laue
 USE thermodynamics, ONLY : ph_e0
@@ -1636,6 +1809,8 @@ REAL(DP) :: compute_omega_geo, aux(npress)
 INTEGER  :: itempp
 REAL(DP) :: e0_p(npress)
 LOGICAL  :: subtract_el
+
+IF (lmurn.AND..NOT.lcubic) RETURN
 
 DO itempp=1, ntemp_plot
    itemp=itemp_plot(itempp)
