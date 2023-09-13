@@ -142,3 +142,41 @@ ENDIF
 
 RETURN
 END SUBROUTINE write_mur_start_line
+
+SUBROUTINE interpolate_p0(p00, omega)
+!
+!  This subroutine receive in input a volume omega and computes
+!  the pressure p00 at that volume, having as input p0 the pressure on
+!  a regular grid of volumes. We use a linear interpolation assuming that
+!  omega is in the range of the grid. If it is not the routine stops.
+!
+USE kinds, ONLY : DP
+USE control_vol, ONLY : vmin_input, deltav, nvol
+USE control_mur, ONLY : p0
+IMPLICIT NONE
+REAL(DP), INTENT(IN) :: omega
+REAL(DP), INTENT(OUT) :: p00
+
+REAL(DP), ALLOCATABLE :: v0(:)
+INTEGER :: i, ind1, ind2
+
+ALLOCATE(v0(nvol))
+
+DO i=1,nvol
+   v0(i)=vmin_input + deltav * (i-1)
+ENDDO
+
+IF ((omega < v0(1)).OR.(omega> v0(nvol))) &
+   CALL errore('interpolate_p0','omega out of range', 1)
+
+DO i=1,nvol
+   IF (omega > v0(i)) ind1=i
+ENDDO
+ind2=ind1+1  
+
+p00=p0(ind1)+(omega - v0(ind1))*(p0(ind2)-p0(ind1))/(v0(ind2)-v0(ind1))
+
+DEALLOCATE(v0)
+
+RETURN
+END SUBROUTINE interpolate_p0

@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2016 Andrea Dal Corso
+! Copyright (C) 2016-2023 Andrea Dal Corso
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -27,7 +27,7 @@ USE io_global,             ONLY : stdout
 
 IMPLICIT NONE
 
-INTEGER :: itemp, itempp, igeom, ivol, ivolp, m1
+INTEGER :: itemp, igeom
 CHARACTER(LEN=256) :: filedata, filerap, fileout, gnu_filename, filenameps
 LOGICAL :: all_geometry_done, all_el_free, ldummy
 
@@ -93,7 +93,6 @@ IF (ltherm_dos) THEN
    ENDIF
    CALL compute_density_t()
    CALL compute_density_noe_t()
-!   CALL summarize_anhar_param()
    CALL interpolate_harmonic()
    CALL interpolate_harmonic_noe_t()
 !
@@ -123,7 +122,11 @@ IF (ltherm_dos) THEN
 !  some quantities as a function of temperature are needed 
 !  at constant volume, they are computed here
 !
-   CALL anhar_ev_vt()
+   IF (ltherm_glob) THEN
+      CALL anhar_ev_glob_vt()
+   ELSE
+      CALL anhar_ev_vt()
+   ENDIF
 !
 !  calculate and writes several anharmonic quantities at the input pressure
 !  (beta, b0, cp, gamma)
@@ -148,10 +151,11 @@ IF (ltherm_dos) THEN
    CALL write_anhar_el_cont()
 !
 !   if requested in input writes on files the anharmonic quantities
-!   at several pressures
+!   at several pressures. No need here to use global routines, these
+!   routines do not depend on the representation of the free energy.
 !
-   CALL write_anhar_pt()
-   CALL write_anhar_mur_pt()
+    CALL write_anhar_pt()
+    CALL write_anhar_mur_pt()
 !
 !  if requested in input writes on files anharmonic quantities 
 !  at several temperatures
@@ -235,7 +239,11 @@ IF (ltherm_freq) THEN
 !  some quantities as a function of temperature are needed 
 !  at constant volume, they are computed here
 !
-   CALL ph_freq_anhar_ev_vt()
+   IF (ltherm_glob) THEN
+      CALL ph_freq_anhar_ev_glob_vt()
+   ELSE
+      CALL ph_freq_anhar_ev_vt()
+   ENDIF
 !
 !  calculate several anharmonic quantities 
 !
@@ -258,10 +266,11 @@ IF (ltherm_freq) THEN
    CALL write_ph_freq_anhar_el_cont()
 !
 !   if requested in input writes on files the anharmonic quantities
-!   at several pressures
+!   at several pressures. No need here to use global routines, these
+!   routines do not depend on the representation of the free energy.
 !
-   CALL write_ph_freq_anhar_pt()
-   CALL write_ph_freq_anhar_mur_pt()
+    CALL write_ph_freq_anhar_pt()
+    CALL write_ph_freq_anhar_mur_pt()
 !
 !  if requested in input writes on files anharmonic quantities 
 !  at several temperatures

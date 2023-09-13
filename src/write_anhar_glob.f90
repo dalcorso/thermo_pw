@@ -550,6 +550,108 @@ CALL mp_sum(celldmf_ptt, world_comm)
 RETURN
 END SUBROUTINE anhar_ev_glob_ph_ptt
 !
+!-----------------------------------------------------------------------
+SUBROUTINE anhar_ev_glob_vt()
+!-----------------------------------------------------------------------
+!
+!  This subroutine computes the thermal pressure as a function of 
+!  temperature for the nvol_plot volumes required in input.
+!  It requires p0, the pressure at T=0 K as a function of the volume
+!  and the parameters of the equation of state that interpolates the
+!  free energy at each temperature.
+!
+USE kinds,            ONLY : DP
+USE constants,        ONLY : ry_kbar
+USE thermo_mod,       ONLY : omega_geo
+USE anharmonic_vt,    ONLY : press_vtt
+USE control_mur,      ONLY : p0
+USE control_ev,       ONLY : ieos
+USE temperature,      ONLY : ntemp
+USE control_vol,      ONLY : nvol_plot, ivol_plot
+USE anharmonic,       ONLY : vmin_t, b0_t, b01_t, b02_t
+USE eos,              ONLY : eos_press
+USE io_global,        ONLY : meta_ionode_id
+USE mp,               ONLY : mp_sum, mp_bcast
+USE mp_world,         ONLY : world_comm
+
+IMPLICIT NONE
+REAL(DP) :: press, omega, p00
+INTEGER  :: itemp, ivolp, igeo, startt, lastt
+
+IF (nvol_plot==0) RETURN
+!
+!  p0 is known only to the meta_ionode that has written the file,
+!  we now need it in all nodes
+!
+CALL mp_bcast(p0, meta_ionode_id, world_comm)
+press_vtt=0.0_DP
+CALL divide(world_comm, ntemp, startt, lastt)
+DO ivolp=1,nvol_plot
+   igeo = ivol_plot(ivolp)
+   omega = omega_geo(igeo)
+   CALL interpolate_p0(p00,omega)
+   DO itemp=startt,lastt
+      CALL eos_press(ieos, omega, press, vmin_t(itemp), b0_t(itemp)/ry_kbar, &
+                     b01_t(itemp), b02_t(itemp)*ry_kbar)
+      press_vtt(itemp,ivolp) = press * ry_kbar - p00
+   ENDDO
+ENDDO
+CALL mp_sum(press_vtt, world_comm)
+
+RETURN
+END SUBROUTINE anhar_ev_glob_vt
+!
+!-----------------------------------------------------------------------
+SUBROUTINE ph_freq_anhar_ev_glob_vt()
+!-----------------------------------------------------------------------
+!
+!  This subroutine computes the thermal pressure as a function of 
+!  temperature for the nvol_plot volumes required in input.
+!  It requires p0, the pressure at T=0 K as a function of the volume
+!  and the parameters of the equation of state that interpolates the
+!  free energy at each temperature.
+!
+USE kinds,            ONLY : DP
+USE constants,        ONLY : ry_kbar
+USE thermo_mod,       ONLY : omega_geo
+USE ph_freq_anharmonic_vt, ONLY : pressf_vtt
+USE control_mur,      ONLY : p0
+USE control_ev,       ONLY : ieos
+USE temperature,      ONLY : ntemp
+USE control_vol,      ONLY : nvol_plot, ivol_plot
+USE ph_freq_anharmonic, ONLY : vminf_t, b0f_t, b01f_t, b02f_t
+USE eos,              ONLY : eos_press
+USE io_global,        ONLY : meta_ionode_id
+USE mp,               ONLY : mp_sum, mp_bcast
+USE mp_world,         ONLY : world_comm
+
+IMPLICIT NONE
+REAL(DP) :: press, omega, p00
+INTEGER  :: itemp, ivolp, igeo, startt, lastt
+
+IF (nvol_plot==0) RETURN
+!
+!  p0 is known only to the meta_ionode that has written the file,
+!  we now need it in all nodes
+!
+CALL mp_bcast(p0, meta_ionode_id, world_comm)
+pressf_vtt=0.0_DP
+CALL divide(world_comm, ntemp, startt, lastt)
+DO ivolp=1,nvol_plot
+   igeo = ivol_plot(ivolp)
+   omega = omega_geo(igeo)
+   CALL interpolate_p0(p00,omega)
+   DO itemp=startt,lastt
+      CALL eos_press(ieos, omega, press, vminf_t(itemp), b0f_t(itemp)/ry_kbar,&
+                     b01f_t(itemp), b02f_t(itemp)*ry_kbar)
+      pressf_vtt(itemp,ivolp) = press * ry_kbar - p00
+   ENDDO
+ENDDO
+CALL mp_sum(pressf_vtt, world_comm)
+
+RETURN
+END SUBROUTINE ph_freq_anhar_ev_glob_vt
+!
 !----------------------------------------------------------------------
 SUBROUTINE write_mur_pol_glob(omega0, b0, b01, b02, emin, itempp, filename)
 !----------------------------------------------------------------------
@@ -614,6 +716,7 @@ ENDIF
 
 RETURN
 END SUBROUTINE write_mur_pol_glob
+!
 !
 !-------------------------------------------------------------------------
 SUBROUTINE write_anhar_glob_ptt()
