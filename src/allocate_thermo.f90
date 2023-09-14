@@ -136,7 +136,7 @@ SUBROUTINE allocate_anharmonic()
                                   ener_noe_t, entropy_noe_t, celldm_noe_t,   &
                                   celldm_noe_t_p1, celldm_noe_t_m1,          &
                                   p1t_noe_t, p2t_noe_t, p3t_noe_t, p4t_noe_t, &
-                                  density_noe_t
+                                  density_noe_t, b0_ec_t, b0_ec_s
   USE anharmonic_pt,       ONLY : vmin_pt, b0_pt, b01_pt, b02_pt, emin_pt,   &
                                   ce_pt, cv_pt, cp_pt, beta_pt, b0_s_pt,     &
                                   gamma_pt, free_ener_pt, ener_pt, entr_pt,  &
@@ -145,7 +145,7 @@ SUBROUTINE allocate_anharmonic()
                                   csmct_pt, el_cons_pt, el_cons_s_pt,        &
                                   el_comp_pt, el_comp_s_pt,                  &
                                   macro_el_pt, macro_el_s_pt, v_pt,          &
-                                  v_s_pt, celldm_pt_p1, celldm_pt_m1
+                                  v_s_pt, celldm_pt_p1, celldm_pt_m1, b0_ec_pt
   USE anharmonic_ptt,      ONLY : vmin_ptt, b0_ptt, b01_ptt, b02_ptt,        &
                                   emin_ptt, ce_ptt, cv_ptt, cp_ptt,          &
                                   beta_ptt, b0_s_ptt, gamma_ptt, celldm_ptt, &
@@ -156,7 +156,7 @@ SUBROUTINE allocate_anharmonic()
                                   emin_ptt_p1, emin_ptt_m1, vmin_ptt_p1,     &
                                   vmin_ptt_m1, alpha_anis_ptt, density_ptt,  &
                                   cpmce_anis_ptt, bths_ptt, ggamma_ptt,      &
-                                  csmct_ptt, ener_ptt, entr_ptt
+                                  csmct_ptt, ener_ptt, entr_ptt, b0_ec_ptt
   USE ph_freq_anharmonic,  ONLY : vminf_t, b0f_t, b01f_t, b02f_t,            &
                                   free_e_minf_t, af_t,                       &
                                   enerf_t, free_enerf_t, entropyf_t,         &
@@ -177,7 +177,8 @@ SUBROUTINE allocate_anharmonic()
                                   free_enerf_noe_t, enerf_noe_t,             &
                                   entropyf_noe_t, cef_noe_t, cvf_noe_t,      &
                                   betaf_noe_t, cpf_noe_t, b0f_noe_s,         &
-                                  gammaf_noe_t, af_noe_t
+                                  gammaf_noe_t, af_noe_t, b0f_ec_t,          &
+                                  b0f_ec_s
   USE ph_freq_anharmonic_pt, ONLY : vminf_pt, b0f_pt, b01f_pt, b02f_pt,      &
                                   eminf_pt, densityf_pt, celldmf_pt,         &
                                   enerf_pt, free_enerf_pt, entrf_pt,         &
@@ -188,7 +189,7 @@ SUBROUTINE allocate_anharmonic()
                                   el_consf_s_pt, el_compf_s_pt,              &
                                   bthsf_pt, ggammaf_pt, csmctf_pt,           &
                                   macro_elf_pt, macro_elf_s_pt, vf_pt,       &
-                                  vf_s_pt
+                                  vf_s_pt, b0f_ec_pt
   USE ph_freq_anharmonic_ptt,  ONLY : vminf_ptt, b0f_ptt, b01f_ptt,          &
                                   b02f_ptt,eminf_ptt, celldmf_ptt,           & 
                                   celldmf_ptt_p1, celldmf_ptt_m1,            &
@@ -201,7 +202,7 @@ SUBROUTINE allocate_anharmonic()
                                   el_consf_s_ptt, el_compf_s_ptt,            &
                                   bthsf_ptt, ggammaf_ptt, csmctf_ptt,        &
                                   macro_elf_ptt, macro_elf_s_ptt, vf_ptt,    &
-                                  vf_s_ptt
+                                  vf_s_ptt, b0f_ec_ptt
   USE anharmonic_vt,       ONLY : press_vt, press_vtt
   USE ph_freq_anharmonic_vt,       ONLY : pressf_vt, pressf_vtt
   USE grun_anharmonic,     ONLY : betab, alpha_an_g, cp_grun_t, cv_grun_t,   &
@@ -235,6 +236,7 @@ SUBROUTINE allocate_anharmonic()
 
   IF (.NOT. ALLOCATED (vmin_t) )        ALLOCATE(vmin_t(ntemp)) 
   IF (.NOT. ALLOCATED (b0_t) )          ALLOCATE(b0_t(ntemp)) 
+  IF (.NOT. ALLOCATED (b0_ec_t) )       ALLOCATE(b0_ec_t(ntemp)) 
   IF (.NOT. ALLOCATED (b01_t) )         ALLOCATE(b01_t(ntemp)) 
   IF (.NOT. ALLOCATED (b02_t) )         ALLOCATE(b02_t(ntemp)) 
   IF (.NOT. ALLOCATED (free_e_min_t) )  ALLOCATE(free_e_min_t(ntemp)) 
@@ -252,6 +254,7 @@ SUBROUTINE allocate_anharmonic()
 
   IF (.NOT. ALLOCATED (cp_t) )          ALLOCATE(cp_t(ntemp)) 
   IF (.NOT. ALLOCATED (b0_s) )          ALLOCATE(b0_s(ntemp)) 
+  IF (.NOT. ALLOCATED (b0_ec_s) )       ALLOCATE(b0_ec_s(ntemp)) 
   IF (.NOT. ALLOCATED (alpha_t) )       ALLOCATE(alpha_t(ntemp)) 
   IF (.NOT. ALLOCATED (beta_t) )        ALLOCATE(beta_t(ntemp)) 
   IF (.NOT. ALLOCATED (gamma_t) )       ALLOCATE(gamma_t(ntemp)) 
@@ -311,6 +314,7 @@ SUBROUTINE allocate_anharmonic()
      IF (.NOT. ALLOCATED (vmin_ptt_m1) ) ALLOCATE(vmin_ptt_m1&
                                                          (npress,ntemp_plot))
      IF (.NOT. ALLOCATED (b0_ptt) )     ALLOCATE(b0_ptt(npress,ntemp_plot))
+     IF (.NOT. ALLOCATED (b0_ec_ptt) )  ALLOCATE(b0_ec_ptt(npress,ntemp_plot))
      IF (.NOT. ALLOCATED (b01_ptt) )    ALLOCATE(b01_ptt(npress,ntemp_plot))
      IF (.NOT. ALLOCATED (b02_ptt) )    ALLOCATE(b02_ptt(npress,ntemp_plot))
      IF (.NOT. ALLOCATED (emin_ptt) )   ALLOCATE(emin_ptt(npress,ntemp_plot)) 
@@ -343,6 +347,7 @@ SUBROUTINE allocate_anharmonic()
      IF (.NOT. ALLOCATED (vminf_ptt_m1) )  &
                                       ALLOCATE(vminf_ptt_m1(npress,ntemp_plot))
      IF (.NOT. ALLOCATED (b0f_ptt) )  ALLOCATE(b0f_ptt(npress,ntemp_plot))
+     IF (.NOT. ALLOCATED (b0f_ec_ptt) ) ALLOCATE(b0f_ec_ptt(npress,ntemp_plot))
      IF (.NOT. ALLOCATED (b01f_ptt) )  ALLOCATE(b01f_ptt(npress,ntemp_plot))
      IF (.NOT. ALLOCATED (b02f_ptt) )  ALLOCATE(b02f_ptt(npress,ntemp_plot))
      IF (.NOT. ALLOCATED (celldmf_ptt) ) ALLOCATE(celldmf_ptt(6,npress, &
@@ -371,6 +376,7 @@ SUBROUTINE allocate_anharmonic()
   IF (npress_plot>0) THEN
      IF (.NOT. ALLOCATED (vmin_pt) )    ALLOCATE(vmin_pt(ntemp,npress_plot)) 
      IF (.NOT. ALLOCATED (b0_pt) )      ALLOCATE(b0_pt(ntemp,npress_plot)) 
+     IF (.NOT. ALLOCATED (b0_ec_pt) )   ALLOCATE(b0_ec_pt(ntemp,npress_plot)) 
      IF (.NOT. ALLOCATED (b01_pt) )     ALLOCATE(b01_pt(ntemp,npress_plot)) 
      IF (.NOT. ALLOCATED (b02_pt) )     ALLOCATE(b02_pt(ntemp,npress_plot)) 
      IF (.NOT. ALLOCATED (emin_pt) )    ALLOCATE(emin_pt(ntemp,npress_plot)) 
@@ -392,6 +398,7 @@ SUBROUTINE allocate_anharmonic()
 
      IF (.NOT. ALLOCATED (vminf_pt) )   ALLOCATE(vminf_pt(ntemp,npress_plot)) 
      IF (.NOT. ALLOCATED (b0f_pt) )     ALLOCATE(b0f_pt(ntemp,npress_plot)) 
+     IF (.NOT. ALLOCATED (b0f_ec_pt) )  ALLOCATE(b0f_ec_pt(ntemp,npress_plot)) 
      IF (.NOT. ALLOCATED (b01f_pt) )    ALLOCATE(b01f_pt(ntemp,npress_plot)) 
      IF (.NOT. ALLOCATED (b02f_pt) )    ALLOCATE(b02f_pt(ntemp,npress_plot)) 
      IF (.NOT. ALLOCATED (celldmf_pt) ) &
@@ -422,6 +429,7 @@ SUBROUTINE allocate_anharmonic()
 
   IF (.NOT. ALLOCATED (vminf_t) )       ALLOCATE(vminf_t(ntemp)) 
   IF (.NOT. ALLOCATED (b0f_t) )         ALLOCATE(b0f_t(ntemp)) 
+  IF (.NOT. ALLOCATED (b0f_ec_t) )      ALLOCATE(b0f_ec_t(ntemp)) 
   IF (.NOT. ALLOCATED (b01f_t) )        ALLOCATE(b01f_t(ntemp)) 
   IF (.NOT. ALLOCATED (b02f_t) )        ALLOCATE(b02f_t(ntemp)) 
   IF (.NOT. ALLOCATED (free_e_minf_t) ) ALLOCATE(free_e_minf_t(ntemp)) 
@@ -439,6 +447,7 @@ SUBROUTINE allocate_anharmonic()
 
   IF (.NOT. ALLOCATED (cpf_t) )         ALLOCATE(cpf_t(ntemp)) 
   IF (.NOT. ALLOCATED (b0f_s) )         ALLOCATE(b0f_s(ntemp)) 
+  IF (.NOT. ALLOCATED (b0f_ec_s) )      ALLOCATE(b0f_ec_s(ntemp)) 
   IF (.NOT. ALLOCATED (alphaf_t) )      ALLOCATE(alphaf_t(ntemp)) 
   IF (.NOT. ALLOCATED (betaf_t) )       ALLOCATE(betaf_t(ntemp)) 
   IF (.NOT. ALLOCATED (gammaf_t) )      ALLOCATE(gammaf_t(ntemp)) 

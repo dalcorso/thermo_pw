@@ -397,7 +397,8 @@ MODULE anharmonic
 !  The parameters of the interpolation at each temperature
 !
   REAL(DP), ALLOCATABLE :: vmin_t(:)   ! minimum volume at each T
-  REAL(DP), ALLOCATABLE :: b0_t(:)     ! bulk modulus at each T
+  REAL(DP), ALLOCATABLE :: b0_t(:)     ! bulk modulus at each T from EOS
+  REAL(DP), ALLOCATABLE :: b0_ec_t(:)  ! bulk modulus at each T from EC
   REAL(DP), ALLOCATABLE :: b01_t(:)    ! pressure derivative of b0 at each T
   REAL(DP), ALLOCATABLE :: b02_t(:)    ! second pressure derivative of b0
                                        ! at each T
@@ -424,6 +425,7 @@ MODULE anharmonic
 !
   REAL(DP), ALLOCATABLE :: cp_t(:)     ! isobaric heat capacity 
   REAL(DP), ALLOCATABLE :: b0_s(:)     ! constant entropy bulk modulus
+  REAL(DP), ALLOCATABLE :: b0_ec_s(:)  ! constant entropy bulk modulus from ec
   REAL(DP), ALLOCATABLE :: alpha_t(:)  ! linear thermal expansion coefficient
   REAL(DP), ALLOCATABLE :: beta_t(:)   ! volume thermal expansion coefficient
   REAL(DP), ALLOCATABLE :: gamma_t(:)  ! average gruneisen parameter
@@ -535,7 +537,8 @@ MODULE anharmonic_pt
 !  Parameters of the interpolation
 !
   REAL(DP), ALLOCATABLE :: vmin_pt(:,:)  ! the volume at the minimum
-  REAL(DP), ALLOCATABLE :: b0_pt(:,:)    ! bulk modulus for all T
+  REAL(DP), ALLOCATABLE :: b0_pt(:,:)    ! bulk modulus for all T from EOS
+  REAL(DP), ALLOCATABLE :: b0_ec_pt(:,:) ! bulk modulus for all T from EC
   REAL(DP), ALLOCATABLE :: b01_pt(:,:)   ! pressure derivative of b0
   REAL(DP), ALLOCATABLE :: b02_pt(:,:)   ! second pressure derivative of b0
   REAL(DP), ALLOCATABLE :: emin_pt(:,:)  ! Gibbs energy at the minimum
@@ -603,7 +606,8 @@ MODULE ph_freq_anharmonic_pt
 !  Parameters of the interpolation
 !
   REAL(DP), ALLOCATABLE :: vminf_pt(:,:)  ! the volume at the minimum
-  REAL(DP), ALLOCATABLE :: b0f_pt(:,:)    ! bulk modulus for all T
+  REAL(DP), ALLOCATABLE :: b0f_pt(:,:)    ! bulk modulus for all T from EOS
+  REAL(DP), ALLOCATABLE :: b0f_ec_pt(:,:) ! bulk modulus for all T from EC
   REAL(DP), ALLOCATABLE :: b01f_pt(:,:)   ! pressure derivative of b0
   REAL(DP), ALLOCATABLE :: b02f_pt(:,:)   ! second pressure derivative of b0
   REAL(DP), ALLOCATABLE :: eminf_pt(:,:)  ! Gibbs energy at the minimum
@@ -676,7 +680,8 @@ MODULE anharmonic_ptt
                                           ! for all P at T+deltat
   REAL(DP), ALLOCATABLE :: vmin_ptt_m1(:,:) ! the volume at the minimum 
                                           ! for all P at T-deltat
-  REAL(DP), ALLOCATABLE :: b0_ptt(:,:)    ! the bulk modulus for all P
+  REAL(DP), ALLOCATABLE :: b0_ptt(:,:)    ! the bulk modulus for all P from EOS
+  REAL(DP), ALLOCATABLE :: b0_ec_ptt(:,:) ! the bulk modulus for all P from EC
   REAL(DP), ALLOCATABLE :: b01_ptt(:,:)   ! the pressure derivative of b0
   REAL(DP), ALLOCATABLE :: b02_ptt(:,:)   ! the second pressure derivative 
                                           ! of b0
@@ -746,7 +751,8 @@ MODULE ph_freq_anharmonic_ptt
                                           ! for all P at T+deltat
   REAL(DP), ALLOCATABLE :: vminf_ptt_m1(:,:) ! the volume at the minimum 
                                           ! for all P at T-deltat
-  REAL(DP), ALLOCATABLE :: b0f_ptt(:,:)    ! the bulk modulus for all P
+  REAL(DP), ALLOCATABLE :: b0f_ptt(:,:)    ! the bulk modulus for all P from EOS
+  REAL(DP), ALLOCATABLE :: b0f_ec_ptt(:,:) ! the bulk modulus for all P from EC
   REAL(DP), ALLOCATABLE :: b01f_ptt(:,:)   ! the pressure derivative of b0
   REAL(DP), ALLOCATABLE :: b02f_ptt(:,:)   ! the second pressure derivative 
                                           ! of b0
@@ -847,7 +853,8 @@ MODULE ph_freq_anharmonic
 !  The parameters of the interpolation at each temperature
 !
   REAL(DP), ALLOCATABLE :: vminf_t(:)  ! the minimum volume 
-  REAL(DP), ALLOCATABLE :: b0f_t(:)    ! the bulk modulus B
+  REAL(DP), ALLOCATABLE :: b0f_t(:)    ! the bulk modulus B from EOS
+  REAL(DP), ALLOCATABLE :: b0f_ec_t(:) ! the bulk modulus B from EC
   REAL(DP), ALLOCATABLE :: b01f_t(:)   ! pressure derivative of B
   REAL(DP), ALLOCATABLE :: b02f_t(:)   ! second pressure derivative of B
   REAL(DP), ALLOCATABLE :: free_e_minf_t(:) ! total free energy at the minimum
@@ -870,7 +877,8 @@ MODULE ph_freq_anharmonic
 !  The calculated anharmonic quantities
 !
   REAL(DP), ALLOCATABLE :: cpf_t(:)     ! isobaric heat capacity (T)
-  REAL(DP), ALLOCATABLE :: b0f_s(:)     ! constant entropy bulk modulus
+  REAL(DP), ALLOCATABLE :: b0f_s(:)     ! constant entropy bulk modulus from eos
+  REAL(DP), ALLOCATABLE :: b0f_ec_s(:)  ! constant entropy bulk modulus from ec
   REAL(DP), ALLOCATABLE :: alphaf_t(:)  ! linear thermal expansion coefficient
   REAL(DP), ALLOCATABLE :: betaf_t(:)   ! volume thermal expansion coefficient
   REAL(DP), ALLOCATABLE :: gammaf_t(:)  ! average gruneisen parameter

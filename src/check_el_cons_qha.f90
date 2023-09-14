@@ -27,8 +27,8 @@ SUBROUTINE check_el_cons_qha()
   USE temperature,       ONLY : ntemp, temp
   USE elastic_constants, ONLY : read_el_cons_from_file
   USE thermo_sym,        ONLY : laue
-  USE anharmonic,        ONLY : el_cons_t, el_comp_t, b0_t, el_con_geo_t
-  USE ph_freq_anharmonic,ONLY : el_consf_t, el_compf_t, b0f_t, el_conf_geo_t
+  USE anharmonic,        ONLY : el_cons_t, el_comp_t, b0_ec_t, el_con_geo_t
+  USE ph_freq_anharmonic,ONLY : el_consf_t, el_compf_t, b0f_ec_t, el_conf_geo_t
   USE control_elastic_constants, ONLY : el_cons_qha_available,     &
                                         el_consf_qha_available,    &
                                         el_cons_qha_geo_available, &
@@ -63,7 +63,7 @@ SUBROUTINE check_el_cons_qha()
         !The loop on temperatures is inside read_el_cons_from_file
         !
         CALL read_el_cons_from_file(temp, ntemp, ibrav, laue, &
-                  el_con_geo_t(:,:,:,igeo), b0_t(:), filelastic)
+                  el_con_geo_t(:,:,:,igeo), b0_ec_t(:), filelastic)
 
         found_dos_ec(igeo)=.TRUE.
         el_cons_t(:,:,:)=el_con_geo_t(:,:,:,igeo)
@@ -87,7 +87,7 @@ SUBROUTINE check_el_cons_qha()
         ! The loop on temperatures is inside read_el_cons_from_file
         !
         CALL read_el_cons_from_file(temp, ntemp, ibrav, laue, & 
-                el_conf_geo_t(:,:,:,igeo), b0f_t(:), filelastic_ph)
+                el_conf_geo_t(:,:,:,igeo), b0f_ec_t(:), filelastic_ph)
       
         found_ph_ec(igeo)=.TRUE.
         el_consf_t(:,:,:)=el_conf_geo_t(:,:,:,igeo)
@@ -111,13 +111,13 @@ SUBROUTINE check_el_cons_qha()
   IF (ltherm_dos) THEN
      IF (found_dos_ec(central_geo)) el_cons_t(:,:,:)=&
                                     el_con_geo_t(:,:,:,central_geo)
-     CALL compute_el_comp_t(el_cons_t,el_comp_t, b0_t)
+     CALL compute_el_comp_t(el_cons_t,el_comp_t, b0_ec_t)
   ENDIF
 
   IF (ltherm_freq) THEN
      IF (found_ph_ec(central_geo)) el_consf_t(:,:,:)= &
                                     el_conf_geo_t(:,:,:,central_geo)
-     CALL compute_el_comp_t(el_consf_t,el_compf_t, b0f_t)
+     CALL compute_el_comp_t(el_consf_t,el_compf_t, b0f_ec_t)
   ENDIF
 !
 !  If the code arrives here we check if we have the temperature

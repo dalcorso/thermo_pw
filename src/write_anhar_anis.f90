@@ -19,7 +19,8 @@ USE temperature,    ONLY : ntemp, temp
 USE thermo_sym,     ONLY : laue
 USE anharmonic,     ONLY : alpha_anis_t, vmin_t, b0_t, celldm_t, beta_t, &
                            gamma_t, cv_t, ce_t, cp_t, ener_t, free_ener_t, &
-                           entropy_t, b0_s, cpmce_anis, el_cons_t, el_comp_t, &
+                           entropy_t, b0_s, cpmce_anis, el_cons_t, &
+                           el_comp_t, b0_ec_s, &
                            bths_t, ggamma_t, el_cons_s, el_comp_s, &
                            macro_el_t, macro_el_s, v_t, v_s, density_t, csmct_t
 USE initial_conf,   ONLY : ibrav_save
@@ -81,6 +82,7 @@ IF (lelastic) THEN
       CALL print_sound_velocities(ibrav_save, el_cons_t(:,:,itemp), &
            el_comp_t(:,:,itemp), density_t(itemp), v_t(1,itemp), v_t(2,itemp),&
                                                    v_t(3,itemp),.FALSE.)
+      b0_ec_s(itemp)=(macro_el_s(1,itemp) + macro_el_s(5,itemp)) * 0.5_DP
    ENDDO
 ENDIF
 
@@ -142,14 +144,14 @@ IF (lelastic) THEN
    filename='anhar_files/'//TRIM(flanhar)//'.el_cons_s'
    CALL add_pressure(filename)
    CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue, el_cons_s, &
-                                                  b0_s, filename, 0)
+                                                  b0_ec_s, filename, 0)
 !
 !  and here the elastic compliances
 !
    filename='anhar_files/'//TRIM(flanhar)//'.el_comp_s'
    CALL add_pressure(filename)
    CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue, el_comp_s, &
-                                                     b0_s, filename, 1)
+                                                     b0_ec_s, filename, 1)
 !
 !   Isothermal macro-elasticity variables
 !
@@ -667,7 +669,7 @@ USE ph_freq_anharmonic, ONLY : alphaf_anis_t, vminf_t, b0f_t, celldmf_t, &
                                b0f_s, cpmcef_anis, el_consf_t, el_compf_t, &
                                bthsf_t, ggammaf_t, el_consf_s, el_compf_s, &
                                macro_elf_t, macro_elf_s, vf_s, vf_t, &
-                               densityf_t, csmctf_t
+                               densityf_t, csmctf_t, b0f_ec_s
 USE control_elastic_constants, ONLY : lelasticf
 USE elastic_constants, ONLY : compute_elastic_compliances, &
                               write_el_cons_on_file, print_macro_elasticity, &
@@ -726,6 +728,7 @@ IF (lelasticf) THEN
            el_compf_t(:,:,itemp), densityf_t(itemp), vf_t(1,itemp),    &
            vf_t(2,itemp), vf_t(3,itemp), .FALSE.)
 
+      b0f_ec_s(itemp) = ( macro_elf_s(1,itemp) + macro_elf_s(5,itemp)) * 0.5_DP
    ENDDO
 ENDIF
 
@@ -788,14 +791,14 @@ IF (lelasticf) THEN
 !
    filename='anhar_files/'//TRIM(flanhar)//'.el_cons_s_ph'
    CALL add_pressure(filename)
-   CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, el_consf_s, b0f_s, &
+   CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, el_consf_s, b0f_ec_s, &
                                                               filename, 0)
 !
 !   and here the elastic compliances at constant entropy
 !
    filename='anhar_files/'//TRIM(flanhar)//'.el_comp_s_ph'
    CALL add_pressure(filename)
-   CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, el_compf_s, b0f_s, &
+   CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, el_compf_s, b0f_ec_s, &
                                                               filename, 1)
 !
 !   Isothermal macro-elasticity variables
