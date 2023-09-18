@@ -571,7 +571,7 @@ MODULE anharmonic_pt
 !
   REAL(DP), ALLOCATABLE :: celldm_pt(:,:,:)      ! crystal parameters
   REAL(DP), ALLOCATABLE :: density_pt(:,:)       ! the density
-  REAL(DP), ALLOCATABLE :: alpha_anis_pt(:,:,:,:) ! the thermal expansion
+  REAL(DP), ALLOCATABLE :: alpha_anis_pt(:,:,:)  ! the thermal expansion
   REAL(DP), ALLOCATABLE :: cpmce_anis_pt(:,:)    ! the difference cp-ce
   REAL(DP), ALLOCATABLE :: bths_pt(:,:,:,:)      ! the thermal stress
   REAL(DP), ALLOCATABLE :: ggamma_pt(:,:,:,:)    ! the generalized Gruneisen
@@ -640,7 +640,7 @@ MODULE ph_freq_anharmonic_pt
 !
   REAL(DP), ALLOCATABLE :: celldmf_pt(:,:,:)      ! crystal parameters
   REAL(DP), ALLOCATABLE :: densityf_pt(:,:)       ! the density
-  REAL(DP), ALLOCATABLE :: alphaf_anis_pt(:,:,:,:) ! the thermal expansion
+  REAL(DP), ALLOCATABLE :: alphaf_anis_pt(:,:,:)  ! the thermal expansion
   REAL(DP), ALLOCATABLE :: cpmcef_anis_pt(:,:)    ! the difference cp-ce
   REAL(DP), ALLOCATABLE :: bthsf_pt(:,:,:,:)      ! the thermal stress
   REAL(DP), ALLOCATABLE :: ggammaf_pt(:,:,:,:)    ! the generalized Gruneisen
@@ -713,7 +713,7 @@ MODULE anharmonic_ptt
                                                   ! T+deltat
   REAL(DP), ALLOCATABLE :: celldm_ptt_m1(:,:,:)   ! the crystal parameters at
                                                   ! T-deltat
-  REAL(DP), ALLOCATABLE :: alpha_anis_ptt(:,:,:,:)! the thermal expansion 
+  REAL(DP), ALLOCATABLE :: alpha_anis_ptt(:,:,:)  ! the thermal expansion 
                                                   ! tensor
   REAL(DP), ALLOCATABLE :: density_ptt(:,:)       ! the density
   REAL(DP), ALLOCATABLE :: cpmce_anis_ptt(:,:)    ! the difference cp-ce
@@ -784,7 +784,7 @@ MODULE ph_freq_anharmonic_ptt
                                                   ! T+deltat
   REAL(DP), ALLOCATABLE :: celldmf_ptt_m1(:,:,:)   ! the crystal parameters at
                                                   ! T-deltat
-  REAL(DP), ALLOCATABLE :: alphaf_anis_ptt(:,:,:,:)! the thermal expansion 
+  REAL(DP), ALLOCATABLE :: alphaf_anis_ptt(:,:,:) ! the thermal expansion 
                                                   ! tensor
   REAL(DP), ALLOCATABLE :: densityf_ptt(:,:)       ! the density
   REAL(DP), ALLOCATABLE :: cpmcef_anis_ptt(:,:)    ! the difference cp-ce

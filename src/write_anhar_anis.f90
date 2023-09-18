@@ -1135,12 +1135,12 @@ IF (lmurn.AND..NOT.lcubic) RETURN
 DO ipressp=1, npress_plot
    ipress=ipress_plot(ipressp)
    CALL compute_alpha_anis(celldm_pt(:,:,ipressp), &
-                     alpha_anis_pt(:,:,:,ipressp), temp, ntemp, ibrav_save)
+                     alpha_anis_pt(:,:,ipressp), temp, ntemp, ibrav_save)
    CALL interpolate_e0(vmin_pt(:,ipressp), celldm_pt(:,:,ipressp), ph_e0, e0)
 
    IF (lelastic_pt) THEN
       CALL isostress_heat_capacity(vmin_pt(:,ipressp), &
-            el_cons_pt(:,:,:,ipressp), alpha_anis_pt(:,:,:,ipressp), &
+            el_cons_pt(:,:,:,ipressp), alpha_anis_pt(:,:,ipressp), &
             temp, cpmce_anis_pt(:,ipressp),ntemp)
       cp_pt(:,ipressp)=ce_pt(:,ipressp)+cpmce_anis_pt(:,ipressp)
       CALL compute_cv_bs_g(beta_pt(:,ipressp), vmin_pt(:,ipressp), &
@@ -1148,7 +1148,7 @@ DO ipressp=1, npress_plot
           b0_s_pt(:,ipressp), gamma_pt(:,ipressp))
 
       CALL thermal_stress(el_cons_pt(:,:,:,ipressp),&
-                   alpha_anis_pt(:,:,:,ipressp), bths_pt(:,:,:,ipressp),ntemp)
+                   alpha_anis_pt(:,:,ipressp), bths_pt(:,:,:,ipressp),ntemp)
       CALL gen_average_gruneisen(vmin_pt(:,ipressp),bths_pt(:,:,:,ipressp), &
                          cv_pt(:,ipressp),ggamma_pt(:,:,:,ipressp),ntemp)
       CALL isoentropic_elastic_constants(vmin_pt(:,ipressp), &
@@ -1205,7 +1205,7 @@ DO ipressp=1, npress_plot
       CALL add_value(filename,press(ipress))
 
       CALL write_alpha_anis(ibrav_save, celldm_pt(:,:,ipressp), &
-                 alpha_anis_pt(:,:,:,ipressp), temp, ntemp, filename, 0 )
+                 alpha_anis_pt(:,:,ipressp), temp, ntemp, filename, 0 )
 
 !
 !   here auxiliary quantities calculated from the phonon dos
@@ -1356,11 +1356,11 @@ IF (lmurn.AND..NOT.lcubic) RETURN
 DO ipressp=1, npress_plot
    ipress=ipress_plot(ipressp)
    CALL compute_alpha_anis(celldmf_pt(:,:,ipressp), &
-                     alphaf_anis_pt(:,:,:,ipressp), temp, ntemp, ibrav_save)
+                     alphaf_anis_pt(:,:,ipressp), temp, ntemp, ibrav_save)
 
    IF (lelasticf_pt) THEN
       CALL isostress_heat_capacity(vminf_pt(:,ipressp), &
-            el_consf_pt(:,:,:,ipressp), alphaf_anis_pt(:,:,:,ipressp), &
+            el_consf_pt(:,:,:,ipressp), alphaf_anis_pt(:,:,ipressp), &
             temp, cpmcef_anis_pt(:,ipressp),ntemp)
       cpf_pt(:,ipressp)=cef_pt(:,ipressp)+cpmcef_anis_pt(:,ipressp)
       CALL compute_cv_bs_g(betaf_pt(:,ipressp), vminf_pt(:,ipressp), &
@@ -1368,7 +1368,7 @@ DO ipressp=1, npress_plot
           b0f_s_pt(:,ipressp), gammaf_pt(:,ipressp))
 
       CALL thermal_stress(el_consf_pt(:,:,:,ipressp),&
-                   alphaf_anis_pt(:,:,:,ipressp), bthsf_pt(:,:,:,ipressp), &
+                   alphaf_anis_pt(:,:,ipressp), bthsf_pt(:,:,:,ipressp), &
                    ntemp)
       CALL gen_average_gruneisen(vminf_pt(:,ipressp),bthsf_pt(:,:,:,ipressp), &
                          cvf_pt(:,ipressp),ggammaf_pt(:,:,:,ipressp),ntemp)
@@ -1426,7 +1426,7 @@ DO ipressp=1, npress_plot
       CALL add_value(filename,press(ipress))
 
       CALL write_alpha_anis(ibrav_save, celldmf_pt(:,:,ipressp), &
-                 alphaf_anis_pt(:,:,:,ipressp), temp, ntemp, filename, 0 )
+                 alphaf_anis_pt(:,:,ipressp), temp, ntemp, filename, 0 )
 
 !
 !   here auxiliary quantities calculated from the phonon dos
@@ -1576,7 +1576,7 @@ INTEGER :: itemp, ipress, ipressp, iu_therm
 INTEGER :: find_free_unit
 REAL(DP) :: compute_omega_geo, aux(npress)
 
-INTEGER  :: itempp
+INTEGER  :: itempp, ipol
 REAL(DP) :: e0_p(npress)
 LOGICAL  :: subtract_el
 
@@ -1584,13 +1584,19 @@ IF (lmurn.AND..NOT.lcubic) RETURN
 
 DO itempp=1, ntemp_plot
    itemp=itemp_plot(itempp)
-   CALL compute_alpha_anis_p(celldm_ptt(:,:,itempp), &
+   IF (lmurn.AND.lcubic) THEN
+      alpha_anis_ptt(:,:,itempp)=0.0_DP
+      DO ipol=1,3
+         alpha_anis_ptt(ipol,:,itempp)=beta_ptt(:,itempp) / 3.0_DP
+      ENDDO
+   ELSE
+      CALL compute_alpha_anis_p(celldm_ptt(:,:,itempp), &
                      celldm_ptt_p1(:,:,itempp), celldm_ptt_m1(:,:,itempp), &
-                     alpha_anis_ptt(:,:,:,itempp), press, npress, ibrav_save)
-
+                     alpha_anis_ptt(:,:,itempp), press, npress, ibrav_save)
+   ENDIF
    IF (lelastic_ptt) THEN
       CALL isostress_heat_capacity(vmin_ptt(:,itempp),               &
-            el_cons_ptt(:,:,:,itempp), alpha_anis_ptt(:,:,:,itempp), &
+            el_cons_ptt(:,:,:,itempp), alpha_anis_ptt(:,:,itempp), &
             temp, cpmce_anis_ptt(:,itempp),npress)
       cp_ptt(:,itempp)=ce_ptt(:,itempp)+cpmce_anis_ptt(:,itempp)
       subtract_el=(lel_free_energy.AND.noelcvg)
@@ -1600,12 +1606,12 @@ DO itempp=1, ntemp_plot
           subtract_el)
 
       CALL thermal_stress_p(el_cons_ptt(:,:,:,itempp),                &
-                   alpha_anis_ptt(:,:,:,itempp), bths_ptt(:,:,:,itempp),npress)
+                   alpha_anis_ptt(:,:,itempp), bths_ptt(:,:,:,itempp),npress)
       CALL gen_average_gruneisen_p(vmin_ptt(:,itempp),bths_ptt(:,:,:,itempp), &
                        cv_ptt(:,itempp),ggamma_ptt(:,:,:,itempp),npress)
       CALL isoentropic_elastic_constants_p(vmin_ptt(:,itempp),        &
             bths_ptt(:,:,:,itempp),cv_ptt(:,itempp),temp,             &
-                            csmct_ptt(:,:,:,itempp),ntemp, npress,itemp)
+                            csmct_ptt(:,:,:,itempp),ntemp,npress,itemp)
       el_cons_s_ptt(:,:,:,itempp)=el_cons_ptt(:,:,:,itempp) + &
                             csmct_ptt(:,:,:,itempp)
       DO ipress=1,npress
@@ -1657,7 +1663,7 @@ DO itempp=1, ntemp_plot
       CALL add_value(filename,temp(itemp))
 
       CALL write_alpha_anis(ibrav_save, celldm_ptt(:,:,itempp), &
-                 alpha_anis_ptt(:,:,:,itempp), press, npress, filename, 1)
+                 alpha_anis_ptt(:,:,itempp), press, npress, filename, 1)
 
 !
 !   here auxiliary quantities calculated from the phonon dos
@@ -1809,7 +1815,7 @@ INTEGER :: itemp, ipress, ipressp, iu_therm
 INTEGER :: find_free_unit
 REAL(DP) :: compute_omega_geo, aux(npress)
 
-INTEGER  :: itempp
+INTEGER  :: itempp, ipol
 REAL(DP) :: e0_p(npress)
 LOGICAL  :: subtract_el
 
@@ -1817,13 +1823,19 @@ IF (lmurn.AND..NOT.lcubic) RETURN
 
 DO itempp=1, ntemp_plot
    itemp=itemp_plot(itempp)
-   CALL compute_alpha_anis_p(celldmf_ptt(:,:,itempp), &
+   IF (lmurn.AND.lcubic) THEN
+      alphaf_anis_ptt(:,:,itempp)=0.0_DP
+      DO ipol=1,3
+         alphaf_anis_ptt(ipol,:,itempp)=betaf_ptt(:,itempp) / 3.0_DP
+      ENDDO
+   ELSE
+      CALL compute_alpha_anis_p(celldmf_ptt(:,:,itempp), &
                      celldmf_ptt_p1(:,:,itempp), celldmf_ptt_m1(:,:,itempp), &
-                     alphaf_anis_ptt(:,:,:,itempp), press, npress, ibrav_save)
-
+                     alphaf_anis_ptt(:,:,itempp), press, npress, ibrav_save)
+   ENDIF
    IF (lelasticf_ptt) THEN
       CALL isostress_heat_capacity(vminf_ptt(:,itempp),                &
-            el_consf_ptt(:,:,:,itempp), alphaf_anis_ptt(:,:,:,itempp), &
+            el_consf_ptt(:,:,:,itempp), alphaf_anis_ptt(:,:,itempp), &
             temp, cpmcef_anis_ptt(:,itempp),npress)
       cpf_ptt(:,itempp)=cef_ptt(:,itempp)+cpmcef_anis_ptt(:,itempp)
       subtract_el=(lel_free_energy.AND.noelcvg)
@@ -1833,7 +1845,7 @@ DO itempp=1, ntemp_plot
           subtract_el)
 
       CALL thermal_stress_p(el_consf_ptt(:,:,:,itempp),                    &
-                   alphaf_anis_ptt(:,:,:,itempp), bthsf_ptt(:,:,:,itempp), &
+                   alphaf_anis_ptt(:,:,itempp), bthsf_ptt(:,:,:,itempp), &
                    npress)
       CALL gen_average_gruneisen_p(vminf_ptt(:,itempp), &
             bthsf_ptt(:,:,:,itempp), cvf_ptt(:,itempp), &
@@ -1892,7 +1904,7 @@ DO itempp=1, ntemp_plot
       CALL add_value(filename,temp(itemp))
 
       CALL write_alpha_anis(ibrav_save, celldmf_ptt(:,:,itempp), &
-                 alphaf_anis_ptt(:,:,:,itempp), press, npress, filename, 1)
+                 alphaf_anis_ptt(:,:,itempp), press, npress, filename, 1)
 
 !
 !   here auxiliary quantities calculated from the phonon dos

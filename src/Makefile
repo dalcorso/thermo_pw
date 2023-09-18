@@ -130,7 +130,6 @@ print_thermo_clocks.o \
 proj_band_structure.o \
 q2r_sub.o \
 quadratic_fit.o \
-read_elastic_qha.o \
 read_minimal_info.o \
 read_state_densities.o \
 readmodes.o \

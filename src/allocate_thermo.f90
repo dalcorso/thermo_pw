@@ -534,7 +534,7 @@ SUBROUTINE allocate_anharmonic()
      IF (.NOT. ALLOCATED (emp_ce_pt) )  ALLOCATE(emp_ce_pt(ntemp,npress_plot))
 
      IF (.NOT. ALLOCATED (alpha_anis_pt) ) &
-                                ALLOCATE(alpha_anis_pt(3,3,ntemp,npress_plot))
+                                ALLOCATE(alpha_anis_pt(6,ntemp,npress_plot))
      IF (.NOT. ALLOCATED (density_pt) ) ALLOCATE(density_pt(ntemp,npress_plot))
 
      IF (.NOT. ALLOCATED (cpmce_anis_pt) ) &
@@ -573,7 +573,7 @@ SUBROUTINE allocate_anharmonic()
      IF (.NOT. ALLOCATED (emp_cef_pt) ) ALLOCATE(emp_cef_pt(ntemp,npress_plot))
 
      IF (.NOT. ALLOCATED (alphaf_anis_pt) ) &
-                                ALLOCATE(alphaf_anis_pt(3,3,ntemp,npress_plot))
+                                ALLOCATE(alphaf_anis_pt(6,ntemp,npress_plot))
      IF (.NOT. ALLOCATED (cpmcef_anis_pt) ) &
                                 ALLOCATE(cpmcef_anis_pt(ntemp,npress_plot))
      IF (.NOT. ALLOCATED (bthsf_pt) ) &
@@ -600,7 +600,7 @@ SUBROUTINE allocate_anharmonic()
   ENDIF
   IF (ntemp_plot>0) THEN
      IF (.NOT. ALLOCATED (alpha_anis_ptt) ) ALLOCATE(alpha_anis_ptt&
-                                                    (3,3,npress,ntemp_plot)) 
+                                                    (6,npress,ntemp_plot)) 
      IF (.NOT. ALLOCATED (density_ptt) )  ALLOCATE(density_ptt&
                                                           (npress,ntemp_plot))
      IF (.NOT. ALLOCATED (cpmce_anis_ptt) )  ALLOCATE(cpmce_anis_ptt&
@@ -632,7 +632,7 @@ SUBROUTINE allocate_anharmonic()
      IF (.NOT. ALLOCATED (v_s_ptt) ) &
                           ALLOCATE(v_s_ptt(3,npress,ntemp_plot))
      IF (.NOT. ALLOCATED (alphaf_anis_ptt) ) ALLOCATE(alphaf_anis_ptt&
-                                                    (3,3,npress,ntemp_plot)) 
+                                                    (6,npress,ntemp_plot)) 
      IF (.NOT. ALLOCATED (densityf_ptt) )  ALLOCATE(densityf_ptt&
                                                           (npress,ntemp_plot))
      IF (.NOT. ALLOCATED (cpmcef_anis_ptt) )  ALLOCATE(cpmcef_anis_ptt&

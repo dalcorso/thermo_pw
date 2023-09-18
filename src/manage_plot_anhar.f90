@@ -68,8 +68,10 @@ IF (what=='mur_lc_t') THEN
    CALL plot_elastic_t(1,.TRUE.)
    CALL plot_elastic_pt(0,.TRUE.)
    CALL plot_elastic_pt(1,.TRUE.)
-   CALL plot_elastic_ptt(0,.TRUE.)
-   CALL plot_elastic_ptt(1,.TRUE.)
+   CALL plot_elastic_ptt(0,.TRUE., .FALSE.)
+   CALL plot_elastic_ptt(1,.TRUE., .FALSE.)
+   CALL plot_elastic_ptt(0,.FALSE., .TRUE.)
+   CALL plot_elastic_ptt(1,.FALSE., .TRUE.)
 
    CALL plot_macro_el_new_t()
    CALL plot_sound_t()
