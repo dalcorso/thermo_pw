@@ -22,11 +22,7 @@ USE temperature,    ONLY : ntemp, temp
 USE anharmonic,     ONLY : alpha_t, beta_t, gamma_t, cp_t, cv_t,         &
                            ener_t, free_ener_t, entropy_t, b0_s, vmin_t, &
                            free_e_min_t, b0_t, b01_t, b02_t, bfact_t,    &
-                           e0_t, beta_noe_t, vmin_noe_t, b0_noe_s,       &
-                           b0_noe_t, cp_noe_t, cv_noe_t, gamma_noe_t,    &
-                           noelcvg
-USE el_anharmonic,  ONLY : el_b0_t, el_beta_t, el_gamma_t, el_cp_t,      &
-                           el_b0_t
+                           e0_t, noelcvg, density_t
 USE control_eldos,  ONLY : lel_free_energy
 USE control_thermo, ONLY : with_eigen
 USE data_files,     ONLY : flanhar
@@ -54,6 +50,13 @@ filename="anhar_files/"//TRIM(flanhar)
 CALL add_pressure(filename)
 
 CALL write_ener_beta(temp, vmin_t, free_e_min_t, beta_t, ntemp, filename)
+!
+!   here the density
+!
+filename="anhar_files/"//TRIM(flanhar)//'.density'
+CALL add_pressure(filename)
+
+CALL write_density(temp, density_t, ntemp, filename)
 !
 !   here the bulk modulus 
 !
@@ -313,7 +316,7 @@ USE temperature,    ONLY : ntemp, temp
 USE anharmonic,     ONLY : e0_noe_t, beta_noe_t, vmin_noe_t, b0_noe_s,   &
                            b0_noe_t, cp_noe_t, cv_noe_t, gamma_noe_t,    &
                            free_e_min_noe_t, ener_noe_t, free_ener_noe_t, &
-                           entropy_noe_t
+                           entropy_noe_t, density_noe_t
 USE control_eldos,  ONLY : lel_free_energy
 USE data_files,     ONLY : flanhar
 
@@ -335,6 +338,13 @@ IF (lel_free_energy) THEN
 
    CALL write_ener_beta(temp, vmin_noe_t, free_e_min_noe_t, beta_noe_t, &
                                                            ntemp, filename)
+!
+!   here the density
+!
+   filename="anhar_files/"//TRIM(flanhar)//'.density_noe'
+   CALL add_pressure(filename)
+
+   CALL write_density(temp, density_noe_t, ntemp, filename)
 !
 !   here the bulk modulus 
 !
@@ -388,7 +398,7 @@ USE temperature,    ONLY : ntemp, temp
 USE ph_freq_anharmonic, ONLY : e0f_noe_t, betaf_noe_t, vminf_noe_t, b0f_noe_s,&
                            b0f_noe_t, cpf_noe_t, cvf_noe_t, gammaf_noe_t,    &
                            free_e_minf_noe_t, enerf_noe_t, free_enerf_noe_t, &
-                           entropyf_noe_t
+                           entropyf_noe_t, densityf_noe_t
 USE control_eldos,  ONLY : lel_free_energy
 USE data_files,     ONLY : flanhar
 
@@ -411,6 +421,13 @@ IF (lel_free_energy) THEN
 
    CALL write_ener_beta(temp, vminf_noe_t, free_e_minf_noe_t, betaf_noe_t, &
                                                            ntemp, filename)
+!
+!   here the density
+!
+   filename="anhar_files/"//TRIM(flanhar)//'.density_ph_noe'
+   CALL add_pressure(filename)
+
+   CALL write_density(temp, densityf_noe_t, ntemp, filename)
 !
 !   here the bulk modulus 
 !
@@ -549,7 +566,7 @@ USE anharmonic,     ONLY : noelcvg
 USE ph_freq_anharmonic, ONLY : alphaf_t, betaf_t, gammaf_t, cpf_t, cvf_t,   &
                            enerf_t, free_enerf_t, entropyf_t, b0f_s,        &
                            free_e_minf_t, vminf_t, b0f_t, b01f_t, b02f_t,   &
-                           bfactf_t, e0f_t
+                           bfactf_t, e0f_t, densityf_t
 USE control_eldos,  ONLY : lel_free_energy
 USE control_thermo, ONLY : with_eigen
 USE data_files,     ONLY : flanhar
@@ -574,6 +591,13 @@ filename="anhar_files/"//TRIM(flanhar)//'_ph'
 CALL add_pressure(filename)
 
 CALL write_ener_beta(temp, vminf_t, free_e_minf_t, betaf_t, ntemp, filename)
+!
+!   here the density
+!
+filename="anhar_files/"//TRIM(flanhar)//'.density_ph'
+CALL add_pressure(filename)
+
+CALL write_density(temp, densityf_t, ntemp, filename)
 !
 !   here the bulk modulus 
 !
@@ -1334,6 +1358,72 @@ RETURN
 END SUBROUTINE write_el_anhar
 !
 !------------------------------------------------------------------------
+SUBROUTINE write_density(temp, density, ntemp, filename)
+!------------------------------------------------------------------------
+!
+!  This routine writes on file the density, as a function of temperature. 
+!
+USE kinds,     ONLY : DP
+USE io_global, ONLY : meta_ionode
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ntemp
+REAL(DP), INTENT(IN) :: temp(ntemp), density(ntemp)
+CHARACTER(LEN=*) :: filename
+
+INTEGER :: itemp, iu_therm
+INTEGER :: find_free_unit
+
+IF (meta_ionode) THEN
+   iu_therm=find_free_unit()
+   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
+
+   WRITE(iu_therm,'("# density is in kg/m^3 ")')
+   WRITE(iu_therm,'("#   T (K)      density(T) kg/m^3 ")' )
+
+   DO itemp = 2, ntemp-1
+      WRITE(iu_therm, '(e12.5,e23.13)') temp(itemp), density(itemp)
+   END DO
+  
+   CLOSE(iu_therm)
+ENDIF
+
+RETURN
+END SUBROUTINE write_density
+!
+!------------------------------------------------------------------------
+SUBROUTINE write_density_p(press, density, npress, filename)
+!------------------------------------------------------------------------
+!
+!  This routine writes on file the density, as a function of pressure. 
+!
+USE kinds,     ONLY : DP
+USE io_global, ONLY : meta_ionode
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: npress
+REAL(DP), INTENT(IN) :: press(npress), density(npress)
+CHARACTER(LEN=*) :: filename
+
+INTEGER :: ipress, iu_press
+INTEGER :: find_free_unit
+
+IF (meta_ionode) THEN
+   iu_press=find_free_unit()
+   OPEN(UNIT=iu_press, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
+
+   WRITE(iu_press,'("# density is in kg/m^3 ")')
+   WRITE(iu_press,'("#   p (kbar)      density(p) kg/m^3 ")' )
+
+   DO ipress = 1, npress
+      WRITE(iu_press, '(e12.5,e23.13)') press(ipress), density(ipress)
+   END DO
+  
+   CLOSE(iu_press)
+ENDIF
+
+RETURN
+END SUBROUTINE write_density_p
+!
+!------------------------------------------------------------------------
 SUBROUTINE write_aux_grun(temp, betab, cp_grun_t, cv_grun_t, b0_grun_s, b0_t, &
                                                            ntemp, filename) 
 !------------------------------------------------------------------------
@@ -2010,7 +2100,7 @@ USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp, itemp300
 USE anharmonic_pt,  ONLY : vmin_pt, emin_pt, beta_pt, b0_pt, b01_pt, &
                            b02_pt, cv_pt, ce_pt, cp_pt, gamma_pt, b0_s_pt,  &
-                           free_ener_pt, ener_pt, entr_pt
+                           free_ener_pt, ener_pt, entr_pt, density_pt
 USE anharmonic,     ONLY : noelcvg, e0_t  
 USE control_eldos,  ONLY : lel_free_energy
 USE data_files,     ONLY : flanhar
@@ -2053,6 +2143,12 @@ DO ipressp=1,npress_plot
    CALL add_value(filename, press(ipress))
    CALL write_ener_beta_vol(temp, vmin_pt(:,ipressp), aux(:), &
                   emin_pt(:,ipressp), beta_pt(:,ipressp), ntemp, filename)
+!
+!  write on output the density
+!
+   filename="anhar_files/"//TRIM(flanhar)//'.density_press'
+   CALL add_value(filename, press(ipress))
+   CALL write_density(temp, density_pt(:,ipressp), ntemp, filename)
 !
 !  The bulk modulus as a function of temperature at several pressures
 !
@@ -2105,7 +2201,7 @@ USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp, itemp300
 USE ph_freq_anharmonic_pt,  ONLY : vminf_pt, eminf_pt, betaf_pt, b0f_pt,  &
                            cvf_pt, cef_pt, cpf_pt, gammaf_pt, b0f_s_pt,  &
-                           free_enerf_pt, enerf_pt, entrf_pt
+                           free_enerf_pt, enerf_pt, entrf_pt, densityf_pt
 USE anharmonic,     ONLY : noelcvg, e0_t  
 USE control_eldos,  ONLY : lel_free_energy
 USE data_files,     ONLY : flanhar
@@ -2148,6 +2244,12 @@ DO ipressp=1,npress_plot
    CALL add_value(filename, press(ipress))
    CALL write_ener_beta_vol(temp, vminf_pt(:,ipressp), aux(:), &
                   eminf_pt(:,ipressp), betaf_pt(:,ipressp), ntemp, filename)
+!
+!  write on output density
+!
+   filename="anhar_files/"//TRIM(flanhar)//'.density_ph_press'
+   CALL add_value(filename, press(ipress))
+   CALL write_density(temp, densityf_pt(:,ipressp), ntemp, filename)
 !
 !  The bulk modulus as a function of temperature at several pressures
 !
@@ -2202,7 +2304,7 @@ USE control_eldos,  ONLY : lel_free_energy
 USE anharmonic,     ONLY : vmin_t, a_t, noelcvg
 USE anharmonic_ptt, ONLY : beta_ptt, vmin_ptt, b0_ptt, b01_ptt, b02_ptt, &
                            gamma_ptt, ce_ptt, cp_ptt, b0_s_ptt, emin_ptt, &
-                           vmin_ptt_p1, vmin_ptt_m1
+                           vmin_ptt_p1, vmin_ptt_m1, density_ptt
 USE el_anharmonic,  ONLY : el_ce_ptt
 USE control_quartic_energy, ONLY : poly_degree_ph
 USE control_pressure,  ONLY : press, npress
@@ -2267,6 +2369,12 @@ IF (meta_ionode) THEN
       CALL write_ener_beta_ptt(press, vmin_ptt(:,itempp), aux(:,itempp), & 
              emin_ptt(:,itempp), beta_ptt(:,itempp), npress, itemp, filename)
 !
+!   density
+!
+      filename="anhar_files/"//TRIM(flanhar)//'.density_temp'
+      CALL add_value(filename, temp(itemp))
+      CALL write_density_p(press, density_ptt(:,itempp), npress, filename)
+!
 !   bulk modulus
 !
       filename="anhar_files/"//TRIM(flanhar)//'.bulk_temp'
@@ -2297,6 +2405,7 @@ DEALLOCATE(aux)
 
 RETURN
 END SUBROUTINE write_anhar_ptt
+!
 !-------------------------------------------------------------------------
 SUBROUTINE write_ph_freq_anhar_ptt()
 !-------------------------------------------------------------------------
@@ -2314,7 +2423,8 @@ USE anharmonic,     ONLY : noelcvg
 USE ph_freq_anharmonic,  ONLY : vminf_t 
 USE ph_freq_anharmonic_ptt, ONLY : betaf_ptt, vminf_ptt, b0f_ptt, &
                            gammaf_ptt, cef_ptt, cpf_ptt, b0f_s_ptt, &
-                           eminf_ptt, vminf_ptt_p1, vminf_ptt_m1
+                           eminf_ptt, vminf_ptt_p1, vminf_ptt_m1,   &
+                           densityf_ptt
 USE el_anharmonic,  ONLY : el_cef_ptt
 USE control_quartic_energy, ONLY : poly_degree_ph
 USE control_pressure,  ONLY : press, npress
@@ -2378,6 +2488,12 @@ IF (meta_ionode) THEN
       CALL add_value(filename, temp(itemp))
       CALL write_ener_beta_ptt(press, vminf_ptt(:,itempp), aux(:,itempp), & 
              eminf_ptt(:,itempp), betaf_ptt(:,itempp), npress, itemp, filename)
+!
+!   density
+!
+      filename="anhar_files/"//TRIM(flanhar)//'.density_ph_temp'
+      CALL add_value(filename, temp(itemp))
+      CALL write_density_p(press, densityf_ptt(:,itempp), npress, filename)
 !
 !   bulk modulus
 !

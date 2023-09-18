@@ -476,6 +476,165 @@ RETURN
 END SUBROUTINE plot_anhar_volume
 !
 !-----------------------------------------------------------------------
+SUBROUTINE plot_anhar_density()
+!-----------------------------------------------------------------------
+!
+!  This routine plots the density in the anharmonic case in
+!  several forms 
+!
+USE kinds,            ONLY : DP
+USE constants,        ONLY : ry_kbar
+USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
+USE control_thermo,   ONLY : ltherm_dos, ltherm_freq
+USE control_mur,      ONLY : lmurn
+USE postscript_files, ONLY : flpsanhar
+USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,  &
+                             gnuplot_write_header,        &
+                             gnuplot_ylabel,              &
+                             gnuplot_xlabel,              &
+                             gnuplot_write_file_mul_data, &
+                             gnuplot_write_command,       &
+                             gnuplot_set_fact
+USE data_files,       ONLY : flanhar
+USE temperature,      ONLY : temp, tmin, tmax, ntemp_plot, itemp_plot
+USE control_pressure, ONLY : press, pmin, pmax, pressure_kb, &
+                             ipress_plot, npress_plot
+USE control_eldos,    ONLY : lel_free_energy
+USE control_vol,      ONLY : vmin_input, vmax_input
+USE color_mod,        ONLY : color
+USE mp_images,        ONLY : my_image_id, root_image
+USE io_global,        ONLY : ionode
+
+IMPLICIT NONE
+
+CHARACTER(LEN=256) :: gnu_filename, filename, filename1, filename2, &
+                      filename3, filename3_ph, filename_ph,         &
+                      filename_aux_grun, label
+
+INTEGER :: ierr, system, istep, ipress, ipressp, itemp, itempp
+LOGICAL :: first_step, last_step
+
+IF ( my_image_id /= root_image ) RETURN
+!
+!   gnuplot script
+!
+gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//'_anhar_density'
+CALL add_pressure(gnu_filename)
+!
+!  name of the postcript file
+!
+filename=TRIM(flpsanhar)//'.density'
+CALL add_pressure(filename)
+filename=TRIM(filename)//TRIM(flext)
+!
+!  Files with the data
+!
+filename1="anhar_files/"//TRIM(flanhar)//'.density'
+CALL add_pressure(filename1)
+filename2="anhar_files/"//TRIM(flanhar)//'.density_ph'
+CALL add_pressure(filename2)
+!
+!  open the script
+!
+CALL gnuplot_start(gnu_filename)
+!
+!  set the ranges and axis
+!
+IF (tmin /= 1.0_DP) THEN
+   CALL gnuplot_write_header(filename, tmin, tmax, 0.0_DP, 0.0_DP, 1.0_DP, &
+                                                                   flext ) 
+ELSE
+   CALL gnuplot_write_header(filename, 0.0_DP, tmax, 0.0_DP, 0.0_DP, 1.0_DP, &
+                                                                   flext ) 
+ENDIF
+!
+CALL gnuplot_xlabel('T (K)',.FALSE.) 
+
+CALL gnuplot_set_fact(1.0_DP,.FALSE.)
+!
+!  Density at the input pressure as a function of temperature.
+!
+CALL gnuplot_set_fact(1.D-3,.FALSE.)
+CALL gnuplot_ylabel('Density (g/cm^3)',.FALSE.)
+IF (ltherm_dos) &
+   CALL gnuplot_write_file_mul_data(filename1,1,2,'color_red',.TRUE.,&
+                   .NOT.(lmurn.OR.ltherm_freq),.FALSE.)
+IF (ltherm_freq) &
+   CALL gnuplot_write_file_mul_data(filename2,1,2,'color_blue',&
+                     .NOT.ltherm_dos,.TRUE.,.FALSE.)
+!
+! Density as a function of temperature, at several pressures.
+!
+istep=0
+DO ipressp=1,npress_plot
+   first_step=(ipressp==1)
+   last_step=(ipressp==npress_plot)
+   ipress=ipress_plot(ipressp)
+   istep=MOD(istep,8)+1
+
+   filename="anhar_files/"//TRIM(flanhar)//'.density_press'
+   CALL add_value(filename,press(ipress))
+
+   filename_ph="anhar_files/"//TRIM(flanhar)//'.density_ph_press'
+   CALL add_value(filename_ph,press(ipress))
+
+   IF (first_step) THEN
+      CALL gnuplot_xlabel('T (K)',.FALSE.)
+      CALL gnuplot_set_fact(1.D-3,.FALSE.)
+      CALL gnuplot_ylabel('Density (g/cm^3) &
+                                                       &(K^{-1})',.FALSE.)
+
+   ENDIF
+   IF (ltherm_dos) &
+      CALL gnuplot_write_file_mul_data(filename,1,2,color(istep),first_step, &
+                                (last_step.AND..NOT.ltherm_freq),.FALSE.)
+   IF (ltherm_freq) &
+      CALL gnuplot_write_file_mul_data(filename_ph,1,2,color(istep),         &
+                      (first_step.AND..NOT.ltherm_dos), last_step,.FALSE.)
+ENDDO
+!
+!  Density as a function of pressure, at several temperatures.
+!
+istep=0
+DO itempp=1,ntemp_plot
+   first_step=(itempp==1)
+   last_step=(itempp==ntemp_plot)
+   itemp=itemp_plot(itempp)
+   istep=MOD(istep,8)+1
+   filename="anhar_files/"//TRIM(flanhar)//'.density_temp'
+   CALL add_value(filename,temp(itemp))
+   filename_ph="anhar_files/"//TRIM(flanhar)//'.density_ph_temp'
+   CALL add_value(filename_ph,temp(itemp))
+   IF (first_step) THEN
+      CALL gnuplot_xlabel('pressure (kbar)',.FALSE.) 
+      WRITE(label,'("set xrange [",f12.5,":",f12.5,"]")') pmin*ry_kbar, &
+                                                          pmax*ry_kbar
+      CALL gnuplot_set_fact(1.D-3,.FALSE.)
+      CALL gnuplot_write_command(TRIM(label),.FALSE.)
+
+      CALL gnuplot_ylabel('Density (g/cm^3)',.FALSE.)
+   ENDIF
+   IF (ltherm_dos) &
+      CALL gnuplot_write_file_mul_data(filename,1,2,color(istep),first_step, &
+                                   (last_step.AND..NOT.ltherm_freq),.FALSE.)
+   IF (ltherm_freq) &
+      CALL gnuplot_write_file_mul_data(filename_ph,1,2,color(istep),         &
+                      (first_step.AND..NOT.ltherm_dos), last_step,.FALSE.)
+ENDDO
+
+CALL gnuplot_end()
+
+IF (lgnuplot.AND.ionode) &
+   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+
+!IF (lgnuplot.AND.ionode) &
+!   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+!                                       //TRIM(gnu_filename), WAIT=.FALSE.)
+
+RETURN
+END SUBROUTINE plot_anhar_density
+!
+!-----------------------------------------------------------------------
 SUBROUTINE plot_anhar_bulk()
 !-----------------------------------------------------------------------
 !

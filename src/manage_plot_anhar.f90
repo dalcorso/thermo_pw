@@ -17,6 +17,7 @@ IMPLICIT NONE
 
 CALL plot_anhar_energy()
 CALL plot_anhar_volume() 
+CALL plot_anhar_density() 
 CALL plot_anhar_press()
 CALL plot_anhar_bulk() 
 CALL plot_anhar_dbulk()
