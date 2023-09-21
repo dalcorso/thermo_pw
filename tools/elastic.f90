@@ -71,6 +71,7 @@ CALL environment_start ( code )
 stdin=5
 WRITE(stdout,'(5x,"Bravais lattice index")') 
 READ(stdin,*) ibrav
+WRITE(stdout,'(5x,"Input elastic constants in kbar")')
 
 el_con=0.0_DP
 IF (ibrav==1.OR.ibrav==2.OR.ibrav==3) THEN
@@ -384,7 +385,7 @@ IF (density > 0.0_DP) THEN
    WRITE(stdout,'(5x,"Number of atoms per cell?")')
    READ(stdin,*) nat
    IF (nat>0) THEN
-      WRITE(stdout,'(5x,"Volume per cell?")')
+      WRITE(stdout,'(5x,"Volume per cell (a.u.)^3?")')
       READ(stdin,*) omega
    END IF
 END IF
