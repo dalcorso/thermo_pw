@@ -3225,6 +3225,31 @@ by:
 K_T - K_S =  {T V \beta^2 \over C_P}.
 \end{equation}
 
+\newpage
+{\color{dark-blue}\chapter{Sound velocities}}
+\color{black}
+The equation of sound waves in a solid can be written in terms of the
+adiabatic elastic constants:
+\begin{equation}
+\rho {\partial^2 {\bf u}_i \over \partial t^2} = \sum_{jkl=1}^3 C^S_{ij,kl} 
+{\partial^2 {\bf u}_k \over \partial X_j \partial X_l},
+\end{equation}
+where ${\bf u}({\bf X})$ is the displacement of each point introduced
+in the section on strain and $\rho$ is the density.
+Searching the solution in the form of a plane wave:
+\begin{equation}
+{\bf u}_k = A {\bf e}_k e^{i ({\bf k} {\bf X} - \omega t)},
+\end{equation}
+one obtains the Christoffel equation
+\begin{equation}
+\rho v_s^2 {\bf e}_i = \sum_k \left( \sum_{jl} C^S_{ij,kl} {\bf n}_j {\bf n}_l
+\right) {\bf e}_k
+\end{equation}
+where we introduced the versor of ${\bf k}=k {\bf n}$ and the speed of sound
+$v_s = {\omega \over k}$. The eigenvelues and eigenvectors of the 
+Christoffel equation give the square of the speeds of sound multiplied
+by the density $\rho v_s^2$ and the displacement directions ${\bf e}$
+for sound propagating in the direction ${\bf n}$.
 
 \newpage
 
@@ -3393,13 +3418,14 @@ velocities:
 V_P = \left[{B + {4 G \over 3} \over \rho}\right]^{1/2},
 \end{equation}
 \begin{equation}
+V_S = \left[{G \over \rho}\right]^{1/2},
+\end{equation}
+where $V_P$ and $V_S$ are the compressional and shear sound velocities 
+and $\rho$ is the density.
+Sometimes it is useful to define the bulk sound velocity as:
+\begin{equation}
 V_B = \left[{B \over \rho}\right]^{1/2},
 \end{equation}
-\begin{equation}
-V_G = \left[{G \over \rho}\right]^{1/2},
-\end{equation}
-where $V_P$, $V_B$, and $V_S$ are the compressional, bulk, and
-shear sound velocities and $\rho$ is the density.
 
 {\color{dark-blue}\chapter{Bibliography}}
 \color{black}
