@@ -63,6 +63,8 @@ ELSE
    CALL write_quadratic()
    CALL plot_multi_energy()
    CALL write_e_omega()
+   CALL compute_celldm_pm()
+   CALL compute_bulk_modulus()
    CALL plot_mur()
    CALL plot_geo_p()
 ENDIF
@@ -109,11 +111,11 @@ CALL cryst_to_cart(nat, tau0_crys, bg, -1)
 !
 !  recompute the density at the minimum volume
 !
-     CALL compute_density(omega,density,.TRUE.)
+CALL compute_density(omega,density,.TRUE.)
 !
 !  compute the xrdp at the minimum volume if required by the user
 !
-     IF (lxrdp) CALL manage_xrdp(' ')
+IF (lxrdp) CALL manage_xrdp(' ')
 
 RETURN
 END SUBROUTINE manage_energy_minimum

@@ -63,6 +63,7 @@ SUBROUTINE write_minimum_energy_data()
   ELSE
      WRITE(stdout,'(5x,"The equilibrium celldm is:")')
      WRITE(stdout,'(5x,6f12.5)') celldm0(:)
+     WRITE(stdout,'(5x, "The bulk modulus is:",24x,f12.3,"  kbar")') b0
   ENDIF
  
   WRITE(stdout,'(5x,"The ",a," at the minimum is:   ",6x,f20.9," Ry")') &

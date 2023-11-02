@@ -497,3 +497,34 @@ IF (lquartic) DEALLOCATE(x_min_4)
 
 RETURN
 END SUBROUTINE compute_celldm_pm
+!
+!-----------------------------------------------------------------------
+SUBROUTINE compute_bulk_modulus()
+!-----------------------------------------------------------------------
+!
+!   This routine computes the bulk modulus at the pressure given in input.
+!   As input it receives the celldm_p1 and celldm_m1 that are the crystal 
+!   parameters as a function of temperature for the pressure pressure+dp 
+!   and pressure-dp. It assumes that vmin has been already computed.
+!   On output the bulk modulus is in kbar and is saved in b0.
+!   The routine is used only when lmurn=.FALSE. and b0 is not available
+!   from the equation of state
+!
+USE kinds,          ONLY : DP
+USE constants,      ONLY : ry_kbar
+USE control_pressure, ONLY : deltap
+USE initial_conf,   ONLY : ibrav_save
+USE thermo_mod,     ONLY : celldm_p1, celldm_m1
+USE control_mur,    ONLY : vmin, b0
+
+IMPLICIT NONE
+INTEGER :: itemp
+REAL(DP) :: compute_omega_geo
+REAL(DP) :: vmin_p1, vmin_m1
+
+vmin_p1=compute_omega_geo(ibrav_save, celldm_p1)
+vmin_m1=compute_omega_geo(ibrav_save, celldm_m1)
+b0 = vmin * deltap * 2.0_DP * ry_kbar / ( vmin_m1 - vmin_p1 )
+
+RETURN
+END SUBROUTINE compute_bulk_modulus
