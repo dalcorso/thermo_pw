@@ -61,10 +61,10 @@ ELSE
    CALL write_gnuplot_energy(nwork)
    CALL quadratic_fit()
    CALL write_quadratic()
-   CALL plot_multi_energy()
    CALL write_e_omega()
    CALL compute_celldm_pm()
    CALL compute_bulk_modulus()
+   CALL plot_multi_energy()
    CALL plot_mur()
    CALL plot_geo_p()
 ENDIF

@@ -5,14 +5,17 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !  This module provides the routines to read and write 
-!  a file that contains a certain number of strained
-!  configurations of a solid. The format of the file is
+!  a file that contains ngeo strained configurations of a solid 
+!  at some pressures. The format of the file is
 !  
 !  ngeo           ! the number of configurations
-!  celldm(.,1)    ! the 6 celldm of the first configuration
-!  celldm(.,2)    ! the 6 celldm of the second configuration
+!  press(1), celldm(.,1)  ! the pressure and the 6 celldm of the 
+!                 ! first configuration
+!  press(2), celldm(.,2)    ! the pressure and the 6 celldm of the 
+!                 ! second configuration
 !  ...
-!  celldm(.,ngeo) ! the 6 celldm of the ngeo configuration
+!  press(ngeo), celldm(.,ngeo) ! the pressure and the 6 celldm of the 
+!                 ! ngeo configuration
 !
 !  Atomic coordinates are not saved. They are obtained by 
 !  straining uniformly those read from the input file.
@@ -26,12 +29,14 @@ SAVE
 PRIVATE
 
 REAL(DP), ALLOCATABLE :: celldm_geo_file(:,:)
+REAL(DP), ALLOCATABLE :: energy_geo_file(:,:)
 REAL(DP), ALLOCATABLE :: press_file(:)
 INTEGER :: ngeo_file
 
 PUBLIC read_geometry_file, write_geometry_file, set_celldm_geo_from_file, &
        ngeo_file, celldm_geo_file, deallocate_geometry_file, &
-       write_geometry_output, compute_celldm_geo_file, press_file
+       write_geometry_output, compute_celldm_geo_file, energy_geo_file, &
+       press_file
 
 CONTAINS
 !
@@ -150,7 +155,9 @@ SUBROUTINE deallocate_geometry_file()
 IMPLICIT NONE
 
 IF (ALLOCATED(celldm_geo_file)) DEALLOCATE(celldm_geo_file)
+IF (ALLOCATED(press_file)) DEALLOCATE(press_file)
   
+RETURN
 END SUBROUTINE deallocate_geometry_file
 !
 !-----------------------------------------------------------------------
@@ -158,9 +165,10 @@ SUBROUTINE write_geometry_output(npress,press,celldmp)
 !-----------------------------------------------------------------------
 !
 !   The geometries written on output have the same celldm(1) of the
-!   grid points and the other celldm(2-6) optimized to minimize the
-!   energy. Note that in output we put the points of the mesh only if
-!   their pressure is within the range of the probed pressures.
+!   grid points and the other celldm(2-6) optimized so that in the
+!   solid there is a uniform pressure. Note that in output we put 
+!   the points of the mesh only if their pressure is within the range 
+!   of the probed pressures.
 !
 USE thermo_mod, ONLY : ngeo, celldm_geo
 IMPLICIT NONE
@@ -168,7 +176,15 @@ INTEGER, INTENT(IN) :: npress
 REAL(DP), INTENT(IN) :: press(npress), celldmp(6,npress)
 
 INTEGER :: ipress, igeo, i, ip1, ip2
-REAL(DP) :: mind
+REAL(DP) :: mind, celldm1_max, celldm1_min, distance
+
+
+celldm1_max=0.0_DP
+celldm1_min=1.0D10
+DO ipress=1, npress
+   IF (celldmp(1,ipress)>celldm1_max) celldm1_max=celldmp(1,ipress) 
+   IF (celldmp(1,ipress)<celldm1_min) celldm1_min=celldmp(1,ipress) 
+ENDDO
 
 ngeo_file=ngeo(1)
 ALLOCATE(celldm_geo_file(6,ngeo_file))
@@ -176,48 +192,65 @@ ALLOCATE(press_file(ngeo_file))
 ngeo_file=0
 DO igeo=1, ngeo(1)
 !
-!  find the two points of the mesh with the celldmp(1) closer to
+!   Check that celldm_geo(1,igeo) is within the limits of celldm1
+!
+    IF (celldm_geo(1,igeo)< celldm1_min.OR.celldm_geo(1,igeo)>celldm1_max) &
+       CYCLE
+!
+!  find the point of the mesh with the celldmp(1) closer to
 !  celldm_geo(1,igeo)
 !
    ip1=0
    mind=1.D8
    DO ipress=1,npress
-      IF ((celldmp(1,ipress)<celldm_geo(1,igeo)).AND. &
-          ABS(celldmp(1,ipress)-celldm_geo(1,igeo))<mind) THEN
+      distance=ABS(celldmp(1,ipress)-celldm_geo(1,igeo))
+      IF (distance<mind) THEN
           ip1=ipress 
-          mind=ABS(celldmp(1,ipress)-celldm_geo(1,igeo))
+          mind=distance
       ENDIF
    ENDDO
 !
+!  find the second point on the mesh. Here we assume that celldmp(1) 
+!  decreases with pressure
+!
    IF (celldm_geo(1,igeo) > celldmp(1,ip1)) THEN
-      IF (ip1==npress) THEN
-         ip2=npress-1
-      ELSE
-         ip2=ip1+1
-      ENDIF
-   ELSE
       IF (ip1==1) THEN
          ip2=2
       ELSE
          ip2=ip1-1
       ENDIF
+   ELSE
+      IF (ip1==npress) THEN
+         ip2=npress-1
+      ELSE
+         ip2=ip1+1
+      ENDIF
    ENDIF
+!   WRITE(6,*) 'found indices ', ip1, ip2
+!   WRITE(6,*) 'celldm_geo igeo', igeo, celldm_geo(1, igeo)
+!   WRITE(6,*) 'celldmp(ip1), celldmp(ip2) ', celldmp(1,ip1), celldmp(1,ip2)
 !
-!  If they exist set celldm_geo_file(1) equal to celldm_geo(1,igeo),
-!  and interpolate linearly celldm_geo_file(2-6) and the pressure
+!  Now set celldm_geo_file(1) equal to celldm_geo(1,igeo),
+!  and interpolate linearly the pressure
 !
    ngeo_file=ngeo_file+1
    celldm_geo_file(1,ngeo_file)=celldm_geo(1,igeo)
-   DO i=2,6
-      celldm_geo_file(i,ngeo_file)= celldmp(i,ip1) +       &
-                 (celldmp(i,ip2)-celldmp(i,ip1)) *            & 
-                 (celldm_geo(1,igeo) - celldmp(1,ip1)) /      &
-                 (celldmp(1,ip2) - celldmp(1,ip1)) 
-   ENDDO
+!   DO i=2,6
+!      celldm_geo_file(i,ngeo_file)= celldmp(i,ip1) +       &
+!                 (celldmp(i,ip2)-celldmp(i,ip1)) *            & 
+!                 (celldm_geo(1,igeo) - celldmp(1,ip1)) /      &
+!                 (celldmp(1,ip2) - celldmp(1,ip1)) 
+!   ENDDO
    press_file(ngeo_file)=press(ip1) +                      &
                  (press(ip2)-press(ip1)) *                    &
                  (celldm_geo(1,igeo) - celldmp(1,ip1)) /      &
                  (celldmp(1,ip2) - celldmp(1,ip1))
+   DO i=2,6
+      celldm_geo_file(i,ngeo_file)= celldmp(i,ip1) +       &
+                 (celldmp(i,ip2)-celldmp(i,ip1)) *         & 
+                 (press_file(ngeo_file) - press(ip1)) /    &
+                  (press(ip2)- press(ip1))
+   ENDDO
 ENDDO
 
 CALL write_geometry_file()

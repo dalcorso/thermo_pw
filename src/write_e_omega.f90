@@ -40,7 +40,7 @@ USE thermodynamics_mod, ONLY : b_from_v
 USE control_quartic_energy, ONLY : lquartic, lsolve
 USE geometry_file,      ONLY : write_geometry_output
 USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_quadratic_extremum, &
-                             print_chisq_quadratic
+                             print_chisq_quadratic, print_quadratic_polynomial
 USE quartic_surfaces, ONLY : fit_multi_quartic, find_quartic_extremum, &
                              print_quartic_polynomial, print_chisq_quartic
 USE polynomial,       ONLY : poly2, poly4, init_poly, clean_poly
@@ -101,15 +101,19 @@ DO ipress=1, npress
    DO idata=1, ndata
      f(idata)=energy_geo(idata) + press(ipress) * omega_geo(idata) / ry_kbar
    END DO
-   CALL fit_multi_quadratic(ndata,nvar,lsolve,x,f,p2_p(ipress))
+   IF (ipress==1.OR..NOT.lquartic) THEN
+      CALL fit_multi_quadratic(ndata,nvar,lsolve,x,f,p2_p(ipress))
 !   CALL print_chisq_quadratic(ndata, nvar, x, f, p2_p(ipress))
-   CALL find_quadratic_extremum(nvar,x_pos_min,ymin,p2_p(ipress))
+      CALL find_quadratic_extremum(nvar,x_pos_min,ymin,p2_p(ipress))
+!      WRITE(stdout,'(5x, "pressure: ",f20.7)') press(ipress), x_pos_min(1:nvar)
+!      CALL print_quadratic_polynomial(nvar,p2_p(ipress))
+   ENDIF
    IF (lquartic) THEN
 !
 !   fit the enthalpy with a quartic polynomial and find the minimum
 !
       CALL fit_multi_quartic(ndata,nvar,lsolve,x,f,p4_p(ipress))
-!      CALL print_quartic_polynomial(nvar,p4_(ipress))
+!      CALL print_quartic_polynomial(nvar,p4_p(ipress))
 !      CALL print_chisq_quartic(ndata, nvar, x, f, p4_p(ipress))
       x_min_4=x_pos_min
       CALL find_quartic_extremum(nvar,x_min_4,ymin4,p4_p(ipress))
@@ -119,6 +123,11 @@ DO ipress=1, npress
 !
       omega_p(ipress)=compute_omega_geo(ibrav,celldm_p(1,ipress))
       e(ipress)=ymin4 - press(ipress) * omega_p(ipress) / ry_kbar
+!
+!  use the current volume as a starting point for the minimization at the
+!  next pressure
+!
+      x_pos_min=x_min_4
    ELSE
       CALL expand_celldm(celldm_p(1,ipress), x_pos_min, nvar, ibrav)
       omega_p(ipress)=compute_omega_geo(ibrav,celldm_p(1,ipress))
