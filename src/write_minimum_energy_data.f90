@@ -17,6 +17,7 @@ SUBROUTINE write_minimum_energy_data()
   USE control_ev,       ONLY : ieos
   USE control_mur,      ONLY : b0, b01, b02, emin, lmurn
   USE equilibrium_conf, ONLY : celldm0
+  USE control_quartic_energy, ONLY : lquartic
   USE lattices,         ONLY : celldm_name, needed_celldm
   USE initial_conf,     ONLY : ibrav_save
   USE control_pressure, ONLY : pressure_kb
@@ -28,14 +29,22 @@ SUBROUTINE write_minimum_energy_data()
   INTEGER :: i
   !
   WRITE(stdout,'(/,2x,76("-"))')
-  IF (ieos==1) THEN
-     WRITE(stdout,'(/,5x,"Birch-Murnaghan 3 order equation of state")')
-  ELSEIF (ieos==2) THEN
-     WRITE(stdout,'(/,5x,"Birch-Murnaghan 4 order equation of state")')
-  ELSEIF (ieos==4) THEN
-     WRITE(stdout,'(/,5x,"Murnaghan equation of state")')
+  IF (lmurn) THEN
+     IF (ieos==1) THEN
+        WRITE(stdout,'(/,5x,"Birch-Murnaghan 3 order equation of state")')
+     ELSEIF (ieos==2) THEN
+        WRITE(stdout,'(/,5x,"Birch-Murnaghan 4 order equation of state")')
+     ELSEIF (ieos==4) THEN
+        WRITE(stdout,'(/,5x,"Murnaghan equation of state")')
+     ELSE
+        CALL errore("write_minimum_energy_data","wrong ieos",1)
+     ENDIF
   ELSE
-     CALL errore("write_minimum_energy_data","wrong ieos",1)
+     IF (lquartic) THEN
+        WRITE(stdout,'(/,5x,"Energy interpolated by a 4th order polynomial")')
+     ELSE 
+        WRITE(stdout,'(/,5x,"Energy interpolated by a 2th order polynomial")')
+     ENDIF
   ENDIF
   IF (pressure_kb /= 0.0_DP) THEN
      WRITE(stdout,'(5x,"At pressure ",f15.6," kbar")') pressure_kb
