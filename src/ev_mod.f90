@@ -24,7 +24,7 @@ MODULE ev_mod
    REAL(DP) :: emin           ! the minimum energy
    REAL(DP) :: v0(nmaxpt), efit(nmaxpt), etot(nmaxpt)
 
-   PUBLIC v0, etot, emin, npt, eosdiff, eqstate, &
+   PUBLIC v0, etot, emin, efit, npt, eosdiff, eqstate, &
           find_minimum, initialize_data_ev
 
 CONTAINS

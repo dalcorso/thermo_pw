@@ -54,7 +54,7 @@ SUBROUTINE ev_sub(vmin,b0,b01,b02,emin_out,inputfile)
    USE kinds, ONLY: DP
    USE constants, ONLY: bohr_radius_angs
    USE ev_xml,    ONLY : write_evdata_xml
-   USE ev_mod,    ONLY : initialize_data_ev, find_minimum, emin
+   USE ev_mod,    ONLY : initialize_data_ev, find_minimum, emin, efit
    USE control_pressure, ONLY : pressure_kb
    USE mp,        ONLY : mp_bcast
    USE io_global, ONLY : ionode, ionode_id, stdout
@@ -67,7 +67,7 @@ SUBROUTINE ev_sub(vmin,b0,b01,b02,emin_out,inputfile)
    INTEGER :: npar,npt,ieos, ierr
    CHARACTER(LEN=3) :: bravais, au_unit
    REAL(DP) :: par(nmaxpar), v0(nmaxpt), etot(nmaxpt), &
-               efit(nmaxpt), fac, chisq, a
+               fac, chisq, a
    LOGICAL :: in_angstrom
    INTEGER :: iu_ev
    INTEGER :: find_free_unit
