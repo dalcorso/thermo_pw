@@ -9,13 +9,13 @@
 !  at some pressures. The format of the file is
 !  
 !  ngeo           ! the number of configurations
-!  press(1), celldm(.,1)  ! the pressure and the 6 celldm of the 
-!                 ! first configuration
-!  press(2), celldm(.,2)    ! the pressure and the 6 celldm of the 
-!                 ! second configuration
+!  press(1), energy(1), celldm(.,1), omega(1)  ! the pressure, the energy, 
+!                 ! the 6 celldm and the volume of the first configuration
+!  press(2), energy(2), celldm(.,2), omega(2)  ! the pressure, the energy, 
+!                 ! the 6 celldm and the volume of the second configuration
 !  ...
-!  press(ngeo), celldm(.,ngeo) ! the pressure and the 6 celldm of the 
-!                 ! ngeo configuration
+!  press(ngeo), energy(ngeo), celldm(.,ngeo) ! the pressure, the energy, 
+!                 ! the 6 celldm and the volume of the ngeo configuration
 !
 !  Atomic coordinates are not saved. They are obtained by 
 !  straining uniformly those read from the input file.
@@ -30,13 +30,22 @@ PRIVATE
 
 REAL(DP), ALLOCATABLE :: celldm_geo_file(:,:)
 REAL(DP), ALLOCATABLE :: energy_geo_file(:,:)
+REAL(DP), ALLOCATABLE :: omega_file(:)
 REAL(DP), ALLOCATABLE :: press_file(:)
+REAL(DP), ALLOCATABLE :: energy_file(:)
 INTEGER :: ngeo_file
 
+REAL(DP) :: vmin_file
+REAL(DP) :: b0_file
+REAL(DP) :: b01_file
+REAL(DP) :: b02_file
+REAL(DP) :: emin_file
+
 PUBLIC read_geometry_file, write_geometry_file, set_celldm_geo_from_file, &
-       ngeo_file, celldm_geo_file, deallocate_geometry_file, &
-       write_geometry_output, compute_celldm_geo_file, energy_geo_file, &
-       press_file
+       ngeo_file, celldm_geo_file, deallocate_geometry_file,              &
+       write_geometry_output, compute_celldm_geo_file, energy_geo_file,   &
+       press_file, energy_file, vmin_file, b0_file, b01_file, b02_file,   &
+       emin_file, omega_file, do_ev_geometry
 
 CONTAINS
 !
@@ -45,6 +54,7 @@ SUBROUTINE read_geometry_file(ngeo)
 !-----------------------------------------------------------------------
 !
 USE data_files, ONLY : flgeom
+USE initial_conf, ONLY : ibrav_save
 USE mp_world,   ONLY : world_comm
 USE mp,         ONLY : mp_bcast
 USE io_global,  ONLY : meta_ionode, meta_ionode_id
@@ -52,6 +62,7 @@ IMPLICIT NONE
 INTEGER, INTENT(OUT) :: ngeo(6)
 CHARACTER(LEN=256) :: filename
 REAL(DP) :: rdum
+REAL(DP) :: compute_omega_geo
 INTEGER :: iu_geom, igeo, ios
 INTEGER :: find_free_unit
 
@@ -66,13 +77,18 @@ IF (meta_ionode) THEN
    READ(iu_geom,*) ngeo_file
    ALLOCATE(celldm_geo_file(6,ngeo_file))
    ALLOCATE(press_file(ngeo_file))
+   ALLOCATE(energy_file(ngeo_file))
+   ALLOCATE(omega_file(ngeo_file))
    DO igeo=1,ngeo_file
-      READ(iu_geom,*) press_file(igeo), celldm_geo_file(:,igeo)
+      READ(iu_geom,*) press_file(igeo), energy_file(igeo), &
+                      celldm_geo_file(:,igeo), omega_file(igeo)
    ENDDO
    CLOSE(UNIT=iu_geom, STATUS='KEEP')
    CALL mp_bcast(ngeo_file,meta_ionode_id,world_comm)
    CALL mp_bcast(celldm_geo_file,meta_ionode_id,world_comm)
    CALL mp_bcast(press_file,meta_ionode_id,world_comm)
+   CALL mp_bcast(energy_file,meta_ionode_id,world_comm)
+   CALL mp_bcast(omega_file,meta_ionode_id,world_comm)
 ELSE
 !
 !  the other processors receive the data
@@ -80,8 +96,12 @@ ELSE
    CALL mp_bcast(ngeo_file,meta_ionode_id,world_comm)
    ALLOCATE(celldm_geo_file(6,ngeo_file))
    ALLOCATE(press_file(ngeo_file))
+   ALLOCATE(energy_file(ngeo_file))
+   ALLOCATE(omega_file(ngeo_file))
    CALL mp_bcast(celldm_geo_file,meta_ionode_id,world_comm)
    CALL mp_bcast(press_file,meta_ionode_id,world_comm)
+   CALL mp_bcast(energy_file,meta_ionode_id,world_comm)
+   CALL mp_bcast(omega_file,meta_ionode_id,world_comm)
 ENDIF
 100 CALL mp_bcast(ios,meta_ionode_id,world_comm)
 CALL errore('read_geometry_file','Problem with the geometry file',ios)
@@ -92,6 +112,9 @@ CALL errore('read_geometry_file','Problem with the geometry file',ios)
 !
 ngeo=1
 ngeo(1)=ngeo_file
+DO igeo=1,ngeo_file
+   omega_file(igeo)=compute_omega_geo(ibrav_save,celldm_geo_file(1,igeo))
+ENDDO
 
 RETURN
 END SUBROUTINE read_geometry_file
@@ -119,7 +142,8 @@ IF (meta_ionode) THEN
                                                      FORM='formatted')
    WRITE(iu_geom,'(i8)') ngeo_file
    DO igeo=1,ngeo_file
-      WRITE(iu_geom,'(7f13.8)') press_file(igeo), celldm_geo_file(:,igeo)
+      WRITE(iu_geom,'(9f13.8)') press_file(igeo), energy_file(igeo), &
+                                celldm_geo_file(:,igeo), omega_file(igeo)
    ENDDO
    CLOSE(UNIT=iu_geom, STATUS='KEEP')
 ENDIF
@@ -156,12 +180,14 @@ IMPLICIT NONE
 
 IF (ALLOCATED(celldm_geo_file)) DEALLOCATE(celldm_geo_file)
 IF (ALLOCATED(press_file)) DEALLOCATE(press_file)
+IF (ALLOCATED(omega_file)) DEALLOCATE(omega_file)
+IF (ALLOCATED(energy_file)) DEALLOCATE(energy_file)
   
 RETURN
 END SUBROUTINE deallocate_geometry_file
 !
 !-----------------------------------------------------------------------
-SUBROUTINE write_geometry_output(npress,press,celldmp)
+SUBROUTINE write_geometry_output(npress,press,celldmp,energyp)
 !-----------------------------------------------------------------------
 !
 !   The geometries written on output have the same celldm(1) of the
@@ -171,13 +197,14 @@ SUBROUTINE write_geometry_output(npress,press,celldmp)
 !   of the probed pressures.
 !
 USE thermo_mod, ONLY : ngeo, celldm_geo
+USE initial_conf, ONLY : ibrav_save
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: npress
-REAL(DP), INTENT(IN) :: press(npress), celldmp(6,npress)
+REAL(DP), INTENT(IN) :: press(npress), celldmp(6,npress), energyp(npress)
 
 INTEGER :: ipress, igeo, i, ip1, ip2
 REAL(DP) :: mind, celldm1_max, celldm1_min, distance
-
+REAL(DP) :: compute_omega_geo
 
 celldm1_max=0.0_DP
 celldm1_min=1.0D10
@@ -188,7 +215,9 @@ ENDDO
 
 ngeo_file=ngeo(1)
 ALLOCATE(celldm_geo_file(6,ngeo_file))
+ALLOCATE(omega_file(ngeo_file))
 ALLOCATE(press_file(ngeo_file))
+ALLOCATE(energy_file(ngeo_file))
 ngeo_file=0
 DO igeo=1, ngeo(1)
 !
@@ -235,12 +264,6 @@ DO igeo=1, ngeo(1)
 !
    ngeo_file=ngeo_file+1
    celldm_geo_file(1,ngeo_file)=celldm_geo(1,igeo)
-!   DO i=2,6
-!      celldm_geo_file(i,ngeo_file)= celldmp(i,ip1) +       &
-!                 (celldmp(i,ip2)-celldmp(i,ip1)) *            & 
-!                 (celldm_geo(1,igeo) - celldmp(1,ip1)) /      &
-!                 (celldmp(1,ip2) - celldmp(1,ip1)) 
-!   ENDDO
    press_file(ngeo_file)=press(ip1) +                      &
                  (press(ip2)-press(ip1)) *                    &
                  (celldm_geo(1,igeo) - celldmp(1,ip1)) /      &
@@ -251,11 +274,17 @@ DO igeo=1, ngeo(1)
                  (press_file(ngeo_file) - press(ip1)) /    &
                   (press(ip2)- press(ip1))
    ENDDO
+   energy_file(ngeo_file)= energyp(ip1) +       &
+                 (energyp(ip2)-energyp(ip1)) *         & 
+                 (press_file(ngeo_file) - press(ip1)) /    &
+                  (press(ip2)- press(ip1))
+   omega_file(ngeo_file)=compute_omega_geo(ibrav_save,&
+                                         celldm_geo_file(1,ngeo_file))
 ENDDO
 
+CALL do_ev_geometry()
 CALL write_geometry_file()
-DEALLOCATE(press_file)
-DEALLOCATE(celldm_geo_file)
+CALL deallocate_geometry_file()
 
 RETURN
 END SUBROUTINE write_geometry_output
@@ -314,5 +343,55 @@ celldm0(1)=(vmin/volume)**(1.0_DP/3.0_DP)
 
 RETURN
 END SUBROUTINE compute_celldm_geo_file
+
+!------------------------------------------------------------------------
+SUBROUTINE do_ev_geometry()
+!------------------------------------------------------------------------
+
+USE kinds,  ONLY : DP
+USE control_ev,  ONLY : npt, v0, e0, ieos
+USE io_global, ONLY : stdout, meta_ionode_id
+USE mp,        ONLY : mp_bcast
+USE mp_world,  ONLY : world_comm
+
+IMPLICIT NONE
+INTEGER :: ipt
+CHARACTER(LEN=80) :: eos_label(4)
+
+npt=ngeo_file
+ALLOCATE(v0(npt))
+ALLOCATE(e0(npt))
+DO ipt=1, npt
+   v0(ipt)=omega_file(ipt)
+   e0(ipt)=energy_file(ipt) 
+ENDDO
+CALL ev_sub_nodisk(vmin_file, b0_file, b01_file, b02_file, emin_file )
+DEALLOCATE(e0)
+DEALLOCATE(v0)
+
+CALL mp_bcast(vmin_file, meta_ionode_id, world_comm)
+CALL mp_bcast(b0_file, meta_ionode_id, world_comm)
+CALL mp_bcast(b01_file, meta_ionode_id, world_comm)
+CALL mp_bcast(b02_file, meta_ionode_id, world_comm)
+CALL mp_bcast(emin_file, meta_ionode_id, world_comm)
+
+eos_label(1)="Birch-Murnaghan third-order interpolation"
+eos_label(2)="Birch-Murnaghan fourth-order interpolation"
+eos_label(4)="Murnaghan interpolation"
+
+WRITE(stdout, '(/,1x, 76("-"))') 
+WRITE(stdout, '(/,5x, a," of geometry_file data:")') TRIM(eos_label(ieos))
+
+WRITE(stdout, '(/,5x," Equilibrium Volume: ", f13.4, " (a.u.)^3")') vmin_file
+WRITE(stdout, '(5x, " Bulk modulus: ", 6x, f13.4, " kbar")') b0_file
+WRITE(stdout, '(5x, " dB_0/dp: ", 11x, f13.4)') b01_file
+IF (ieos==2) WRITE(stdout, '(5x, " d^2B_0/dp^2: ", 7x, f13.4, " kbar^-1")') &
+                                           b02_file
+WRITE(stdout, '(5x, " E_min: ", 17x, f13.8," Ry")') emin_file
+
+WRITE(stdout, '(1x, 76("-"))') 
+
+RETURN
+END SUBROUTINE do_ev_geometry
 
 END MODULE geometry_file

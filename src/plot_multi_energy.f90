@@ -200,7 +200,7 @@ SUBROUTINE plot_multi_energy()
 !   this set with points in the energy contour plot.
 !
            filename2='./'//TRIM(flgeom)//'.dat'
-           CALL gnuplot_write_file_mul_line_point(filename2, 2, 4, &
+           CALL gnuplot_write_file_mul_line_point(filename2, 3, 5, &
                            'color_orange', .FALSE., .TRUE., .TRUE., .FALSE.)
 
         ENDIF   
