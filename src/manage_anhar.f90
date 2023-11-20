@@ -420,11 +420,6 @@ ENDIF
 !    of temperature.
 !
 ndata= compute_nwork()
-!
-!  For the bulk modulus we need the celldm at pressure p-dp and p+dp
-!  Here fit the static component
-!
-CALL compute_celldm_pm()
 
 ALLOCATE(phf(ndata))
 CALL divide(world_comm, ntemp, startt, lastt)
