@@ -426,12 +426,19 @@ SUBROUTINE deallocate_thermo()
   IF (ALLOCATED(omega_p)) DEALLOCATE(omega_p)
   IF (ALLOCATED(density_p)) DEALLOCATE(density_p)
   IF (ALLOCATED(celldm_p)) DEALLOCATE(celldm_p)
-  DO ipress=1,npress
-     CALL clean_poly(p2_p(ipress))
-     IF (lquartic) CALL clean_poly(p4_p(ipress))
-  ENDDO
-  IF (ALLOCATED(p2_p)) DEALLOCATE(p2_p)
-  IF (ALLOCATED(p4_p)) DEALLOCATE(p4_p)
+
+  IF (ALLOCATED(p2_p)) THEN
+     DO ipress=1,npress
+        CALL clean_poly(p2_p(ipress))
+     ENDDO
+     DEALLOCATE(p2_p)
+  ENDIF
+  IF (ALLOCATED(p4_p)) THEN
+     DO ipress=1,npress
+        IF (lquartic) CALL clean_poly(p4_p(ipress))
+     ENDDO
+     DEALLOCATE(p4_p)
+  ENDIF
 
   IF ( ALLOCATED (vmin_p) )           DEALLOCATE(vmin_p) 
   IF ( ALLOCATED (p0) )               DEALLOCATE(p0) 
