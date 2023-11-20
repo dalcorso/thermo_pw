@@ -131,7 +131,8 @@ USE control_elastic_constants, ONLY : lelastic, lelasticf
 USE control_gnuplot,     ONLY : gnuplot_command, flgnuplot, lgnuplot, flext
 USE gnuplot,             ONLY : gnuplot_start, gnuplot_end,           &
                                 gnuplot_write_header, gnuplot_xlabel, &
-                                gnuplot_ylabel, gnuplot_write_file_mul_data
+                                gnuplot_ylabel, gnuplot_write_file_mul_data, &
+                                gnuplot_write_file_mul_data_div
 USE io_global,        ONLY : ionode
 USE mp_images,        ONLY : root_image, my_image_id
 
@@ -232,6 +233,21 @@ IF (lelasticf) THEN
                                  .FALSE., .TRUE.,.FALSE.)
 ENDIF
 
+CALL gnuplot_ylabel('Pugh ratio',.FALSE.)
+
+IF (lelastic) THEN
+   CALL gnuplot_write_file_mul_data_div(filelastic,1,4,2,'color_red',&
+                                        .TRUE.,.FALSE.,.FALSE.)
+   CALL gnuplot_write_file_mul_data_div(filelastic_s,1,4,2,'color_green',&
+                                 .FALSE.,.NOT.lelasticf,.FALSE.)
+ENDIF
+IF (lelasticf) THEN
+   CALL gnuplot_write_file_mul_data_div(filelastic_ph,1,4,2,'color_blue', &
+                     .NOT.lelastic,.FALSE.,.FALSE.)
+   CALL gnuplot_write_file_mul_data_div(filelastic_s_ph,1,4,2,'color_orange',&
+                                 .FALSE., .TRUE.,.FALSE.)
+ENDIF
+
 CALL gnuplot_end()
 
 IF (lgnuplot.AND.ionode) &
@@ -255,6 +271,7 @@ USE control_gnuplot,     ONLY : gnuplot_command, flgnuplot, lgnuplot, flext
 USE gnuplot,             ONLY : gnuplot_start, gnuplot_end,           &
                                 gnuplot_write_header, gnuplot_xlabel, &
                                 gnuplot_ylabel, gnuplot_write_file_mul_data, &
+                                gnuplot_write_file_mul_data_div, &
                                 gnuplot_set_fact
 USE color_mod,           ONLY : color
 USE io_global,           ONLY : ionode
@@ -433,6 +450,44 @@ DO ipressp=1, npress_plot
                               first_step.AND..NOT.lelastic,.FALSE.,.FALSE.)
 
       CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,5,color(istep),&
+                                               .FALSE.,last_step,.FALSE.)
+   ENDIF
+ENDDO
+
+istep=0
+DO ipressp=1, npress_plot
+   first_step=(ipressp==1)
+   last_step=(ipressp==npress_plot)
+   ipress=ipress_plot(ipressp)
+   istep=MOD(istep,8)+1
+   filelastic="anhar_files/"//TRIM(flanhar)//'.macro_el_press'
+   CALL add_value(filelastic,press(ipress))
+   filelastic=TRIM(filelastic)//'_aver'
+   filelastic_s="anhar_files/"//TRIM(flanhar)//'.macro_el_s_press'
+   CALL add_value(filelastic_s,press(ipress))
+   filelastic_s=TRIM(filelastic_s)//'_aver'
+   filelastic_ph="anhar_files/"//TRIM(flanhar)//'.macro_el_ph_press'
+   CALL add_value(filelastic_ph,press(ipress))
+   filelastic_ph=TRIM(filelastic_ph)//'_aver'
+   filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.macro_el_s_ph_press'
+   CALL add_value(filelastic_s_ph,press(ipress))
+   filelastic_s_ph=TRIM(filelastic_s_ph)//'_aver'
+   IF (first_step) THEN
+      CALL gnuplot_set_fact(1.0_DP, .FALSE.)
+      CALL gnuplot_ylabel('Pugh ratio',.FALSE.)
+   ENDIF
+   IF (lelastic) THEN
+      CALL gnuplot_write_file_mul_data_div(filelastic,1,4,2,color(istep),&
+                           first_step,.FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data_div(filelastic_s,1,4,2,color(istep),&
+                          .FALSE., last_step.AND..NOT.lelasticf,.FALSE.)
+   ENDIF
+   IF (lelasticf) THEN
+      CALL gnuplot_write_file_mul_data_div(filelastic_ph,1,4,2,color(istep),&
+                              first_step.AND..NOT.lelastic,.FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data_div(filelastic_s_ph,1,4,2,color(istep),&
                                                .FALSE.,last_step,.FALSE.)
    ENDIF
 ENDDO
@@ -616,6 +671,7 @@ USE control_gnuplot,     ONLY : gnuplot_command, flgnuplot, lgnuplot, flext
 USE gnuplot,             ONLY : gnuplot_start, gnuplot_end,           &
                                 gnuplot_write_header, gnuplot_xlabel, &
                                 gnuplot_ylabel, gnuplot_write_file_mul_data, &
+                                gnuplot_write_file_mul_data_div, &
                                 gnuplot_set_fact
 USE color_mod,           ONLY : color
 USE io_global,           ONLY : ionode
@@ -788,6 +844,44 @@ DO itempp=1, ntemp_plot
                               first_step.AND..NOT.lelastic,.FALSE.,.FALSE.)
 
       CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,5,color(istep),&
+                                               .FALSE.,last_step,.FALSE.)
+   ENDIF
+ENDDO
+
+istep=0
+DO itempp=1, ntemp_plot
+   first_step=(itempp==1)
+   last_step=(itempp==ntemp_plot)
+   itemp=itemp_plot(itempp)
+   istep=MOD(istep,8)+1
+   filelastic="anhar_files/"//TRIM(flanhar)//'.macro_el_temp'
+   CALL add_value(filelastic,temp(itemp))
+   filelastic=TRIM(filelastic)//'_aver'
+   filelastic_s="anhar_files/"//TRIM(flanhar)//'.macro_el_s_temp'
+   CALL add_value(filelastic_s,temp(itemp))
+   filelastic_s=TRIM(filelastic_s)//'_aver'
+   filelastic_ph="anhar_files/"//TRIM(flanhar)//'.macro_el_ph_temp'
+   CALL add_value(filelastic_ph,temp(itemp))
+   filelastic_ph=TRIM(filelastic_ph)//'_aver'
+   filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.macro_el_s_ph_temp'
+   CALL add_value(filelastic_s_ph,temp(itemp))
+   filelastic_s_ph=TRIM(filelastic_s_ph)//'_aver'
+   IF (first_step) THEN
+      CALL gnuplot_set_fact(1.0_DP, .FALSE.)
+      CALL gnuplot_ylabel('Pugh ratio',.FALSE.)
+   ENDIF
+   IF (lelastic) THEN
+      CALL gnuplot_write_file_mul_data_div(filelastic,1,4,2,color(istep), & 
+                               first_step,.FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data_div(filelastic_s,1,4,2,color(istep), &
+                              .FALSE.,last_step.AND..NOT.lelasticf,.FALSE.)
+   ENDIF
+   IF (lelasticf) THEN
+      CALL gnuplot_write_file_mul_data_div(filelastic_ph,1,4,2,color(istep),&
+                              first_step.AND..NOT.lelastic,.FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data_div(filelastic_s_ph,1,4,2,color(istep),&
                                                .FALSE.,last_step,.FALSE.)
    ENDIF
 ENDDO
