@@ -2628,7 +2628,9 @@ geometry to a set of energy files inside the \texttt{restart} directory.
 
 \item \texttt{change\_tel\_name.x} A simple tool to change the number of the 
 geometry to the electronic thermodynamic files inside the \texttt{therm\_file} 
-directory. 
+directory. It can be used also to change the names of the elastic constant
+files, both those in \texttt{elastic\_constants} and in \texttt{anhar\_files}
+directories.
 
 \item \texttt{crystal\_point\_group.x} is a crystal point group calculator.
 It can give several information about the crystallographic point groups,
@@ -2651,6 +2653,10 @@ a function of temperature computed using the Debye model. When the
 system has only one atomic type it writes the atomic $B$ factor
 as a function of temperature computed using the Debye model.
 For an example of its use see \texttt{tools\_input/debye.in}.
+
+\item \texttt{density.x} reads the volume of a unit cell of a solid
+and its mass (in a.m.u.) and computes the density, or reads the density 
+of a solid and the mass (in a.m.u.) of a unit cell and computes the volume.
 
 \item \texttt{elastic.x} reads the elastic constants of a
 solid and computes the elastic compliances, the bulk modulus, and a few

@@ -36,7 +36,7 @@ all : space_groups.x crystal_point_group.x mag_point_group.x units.x \
       gener_nanowire.x debye.x rotate_tensors.x test_colors.x epsilon_tpw.x \
       pdec.x optical.x change_e_name.x change_tel_name.x \
       change_dynmat_name.x merge_interp.x template.x test_eos.x emp_f.x \
-      emp_g.x average_grun.x
+      emp_g.x average_grun.x density.x
       
 
 space_groups.x : space_groups.o $(MODULES)
@@ -156,6 +156,10 @@ average_grun.x : average_grun.o $(MODULES)
 	$(LD) $(LDFLAGS) -o $@ average_grun.o $(MODULES) $(QELIBS)
 	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/average_grun.x . )
 
+density.x : density.o $(MODULES)
+	$(LD) $(LDFLAGS) -o $@ density.o $(MODULES) $(QELIBS)
+	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/density.x . )
+
 clean :
 	- /bin/rm -f *.x *.o *.a *~ *_tmp.f90 *.d *.mod *.i *.L
 	- /bin/rm -rf ../../bin/space_groups.x 
@@ -186,6 +190,7 @@ clean :
 	- /bin/rm -rf ../../bin/emp_g.x 
 	- /bin/rm -rf ../../bin/average_grun.x 
 	- /bin/rm -rf ../../bin/merge_interp.x 
+	- /bin/rm -rf ../../bin/density.x 
 	- /bin/rm -rf ../../bin/template.x 
 
 include make.depend
