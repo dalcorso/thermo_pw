@@ -1,7 +1,16 @@
 New in version 1.9.0
 
+Plot of the longitudinal modulus (in collaboration with X. Gong).
+
+Plot of the Pugh ratio (in collaboration with X. Gong and B. Thakur).
+
+Plot of the density as a function of temperature or pressure.
+
 Plot of pressure dependent quantities is now available also
 for ltherm_freq.
+
+Added a tool to convert density into unit cell volume and 
+unit cell volume into density.
 
 Interpolation of elastic constants is made also when lmurn=.TRUE.
 (In collaboration with X. Gong).
