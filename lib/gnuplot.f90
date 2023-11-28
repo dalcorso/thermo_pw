@@ -37,6 +37,7 @@ MODULE gnuplot
            gnuplot_write_file_mul_data_sum,   &
            gnuplot_write_file_mul_data_diff,   &
            gnuplot_write_file_mul_data_div,   &
+           gnuplot_write_file_mul_data_linear,   &
            gnuplot_write_file_mul_point_sum, gnuplot_write_command, &
            gnuplot_end, gnuplot_do_2dplot, gnuplot_start_2dplot, &
            gnuplot_set_contour, gnuplot_rectangle, gnuplot_polygon, &
@@ -640,6 +641,48 @@ IF (ionode) &
 
 RETURN
 END SUBROUTINE gnuplot_write_file_mul_data_diff
+!
+!--------------------------------------------------------------------------
+SUBROUTINE gnuplot_write_file_mul_data_linear(data_file, col1, col2, col3,&
+                     alpha, beta, color, start, last, comment)
+!--------------------------------------------------------------------------
+!
+!   This subroutine plots the data contained in a file. The plot is
+!   alpha*col2+beta*col3 versus col1
+!
+IMPLICIT NONE
+
+CHARACTER(LEN=*), INTENT(IN) :: data_file
+INTEGER, INTENT(IN) :: col1, col2, col3
+REAL(DP), INTENT(IN) :: alpha, beta
+CHARACTER(LEN=*), INTENT(IN) :: color
+LOGICAL, INTENT(IN) :: start, last
+
+CHARACTER(LEN=256) :: string, alphas, betas
+CHARACTER(LEN=6) :: int_to_char
+LOGICAL :: comment
+
+WRITE(alphas,'(f20.7)') alpha
+WRITE(betas,'(f20.7)') beta
+string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))&
+            //"*xscale-xshift):(($"//TRIM(int_to_char(col2))//"*"&
+            //TRIM(alphas)//" +"//TRIM(betas)//"*$"&
+            //TRIM(int_to_char(col3))//")*fact-eref)*gfact w l lw &
+            &3 lc rgb "//TRIM(color)
+
+IF (start) string="plot "//TRIM(string)
+IF (lbackspace) THEN
+   IF (.NOT.last) string=TRIM(string)//", \ "
+ELSE
+   IF (.NOT.last) string=TRIM(string)//", \\"
+ENDIF
+IF (comment) string = '# ' // TRIM(string)
+
+IF (ionode) &
+   WRITE(iun_gnuplot,'(a)') TRIM(string)
+
+RETURN
+END SUBROUTINE gnuplot_write_file_mul_data_linear
 !
 !--------------------------------------------------------------------------
 SUBROUTINE gnuplot_write_file_mul_data_div(data_file, col1, col2, col3,&
