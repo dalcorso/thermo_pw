@@ -49,7 +49,8 @@ USE elastic_constants, ONLY : print_elastic_constants,     &
                               print_sound_velocities
 USE debye_module, ONLY : compute_debye_temperature, debye_cv, &
                          debye_vib_energy, debye_free_energy, debye_entropy, &
-                         compute_debye_temperature_poisson, debye_e0
+                         compute_debye_temperature_poisson, debye_e0, &
+                         compute_debye_temperature_macro_el
 USE io_global, ONLY : stdout, ionode
 
 IMPLICIT NONE
@@ -58,7 +59,7 @@ INTEGER :: ibrav, laue, nat
 REAL(DP) :: el_con(6,6)          ! the elastic constants
 REAL(DP) :: el_compliances(6,6)  ! the elastic constants
 REAL(DP) :: density, omega, debye_t, approx_debye_t, poisson, bulkm, deltat
-REAL(DP) :: macro_el(8), vp, vb, vg, deb_e0
+REAL(DP) :: macro_el(8), vp, vb, vg, deb_e0, debye_macro_el
 INTEGER :: i, ntemp, iundeb, ios
 INTEGER :: find_free_unit, stdin
 REAL(DP), ALLOCATABLE :: temp(:), deb_cv(:), deb_energy(:), &
@@ -418,6 +419,14 @@ IF (density > 0.0_DP) THEN
       bulkm=(macro_el(1) + macro_el(5)) * 0.5_DP
       CALL compute_debye_temperature_poisson(poisson, bulkm, &
                                density, nat, omega, approx_debye_t)
+!
+!   the debye temperature with macro elasticity
+!
+      CALL compute_debye_temperature_macro_el(vp, vg, density, nat, &
+                                                      omega, debye_macro_el)
+
+      WRITE(stdout,'(/,5x,"Debye temperature from speed of sound",f15.7,&
+                           " K")') debye_macro_el
 !
 !  then the real one
 !

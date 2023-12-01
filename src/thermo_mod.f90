@@ -464,6 +464,10 @@ MODULE anharmonic
                                            ! macro_el_s: vp, vb, vg
   REAL(DP), ALLOCATABLE :: v_t(:,:)        ! the sound velocities from
                                            ! macro_el_t: vp, vb, vg
+  REAL(DP), ALLOCATABLE :: debye_macro_el_t(:) ! debye temperature from
+                                           ! macro elasticity (isothermal)
+  REAL(DP), ALLOCATABLE :: debye_macro_el_s(:) ! debye temperature from
+                                           ! macro elasticity (isoentropic)
   REAL(DP), ALLOCATABLE :: el_con_geo_t(:,:,:,:) ! the temperature dependent
                                          ! elastic constants at all geometries
 !
@@ -584,6 +588,8 @@ MODULE anharmonic_pt
   REAL(DP), ALLOCATABLE :: el_comp_s_pt(:,:,:,:) ! isoentropic elast. comp.
   REAL(DP), ALLOCATABLE :: macro_el_pt(:,:,:)    ! macroscopic elasticity
   REAL(DP), ALLOCATABLE :: macro_el_s_pt(:,:,:)  ! isoentropic macroscopic ela.
+  REAL(DP), ALLOCATABLE :: debye_macro_el_pt(:,:)  ! isothermal debye temper.
+  REAL(DP), ALLOCATABLE :: debye_macro_el_s_pt(:,:)  ! adiabatic debye temper.
   REAL(DP), ALLOCATABLE :: v_pt(:,:,:)           ! isothermal sound speed
   REAL(DP), ALLOCATABLE :: v_s_pt(:,:,:)         ! isoentropic sound speed
 
@@ -655,6 +661,8 @@ MODULE ph_freq_anharmonic_pt
   REAL(DP), ALLOCATABLE :: macro_elf_s_pt(:,:,:)  ! isoentropic macroscopic ela.
   REAL(DP), ALLOCATABLE :: vf_pt(:,:,:)           ! isothermal sound speed
   REAL(DP), ALLOCATABLE :: vf_s_pt(:,:,:)         ! isoentropic sound speed
+  REAL(DP), ALLOCATABLE :: debye_macro_elf_pt(:,:)  ! isothermal debye temper.
+  REAL(DP), ALLOCATABLE :: debye_macro_elf_s_pt(:,:)  ! adiabatic debye temper.
 
   REAL(DP), ALLOCATABLE :: celldmf_pt_p1(:,:,:)   ! crystal parameters at p+dp
   REAL(DP), ALLOCATABLE :: celldmf_pt_m1(:,:,:)   ! crystal parameters at p-dp
@@ -728,6 +736,8 @@ MODULE anharmonic_ptt
   REAL(DP), ALLOCATABLE :: el_comp_s_ptt(:,:,:,:)  ! isoentropic elast. comp.
   REAL(DP), ALLOCATABLE :: macro_el_ptt(:,:,:)     ! macroscopic elasticity
   REAL(DP), ALLOCATABLE :: macro_el_s_ptt(:,:,:)   ! isoentropic macros. ela.
+  REAL(DP), ALLOCATABLE :: debye_macro_el_ptt(:,:) ! isothermal debye temp.
+  REAL(DP), ALLOCATABLE :: debye_macro_el_s_ptt(:,:) ! isoentropic debye temp.
   REAL(DP), ALLOCATABLE :: v_ptt(:,:,:)            ! isothermal sound speed
   REAL(DP), ALLOCATABLE :: v_s_ptt(:,:,:)          ! isoentropic sound speed
 
@@ -801,6 +811,8 @@ MODULE ph_freq_anharmonic_ptt
   REAL(DP), ALLOCATABLE :: macro_elf_s_ptt(:,:,:)   ! isoentropic macros. ela.
   REAL(DP), ALLOCATABLE :: vf_ptt(:,:,:)            ! isothermal sound speed
   REAL(DP), ALLOCATABLE :: vf_s_ptt(:,:,:)          ! isoentropic sound speed
+  REAL(DP), ALLOCATABLE :: debye_macro_elf_ptt(:,:)  ! isothermal debye temper.
+  REAL(DP), ALLOCATABLE :: debye_macro_elf_s_ptt(:,:)  ! adiabatic debye temper.
 
 END MODULE ph_freq_anharmonic_ptt
 !
@@ -960,6 +972,10 @@ MODULE ph_freq_anharmonic
                                             ! macro_elf_s: vp, vb, vg
   REAL(DP), ALLOCATABLE :: vf_t(:,:)        ! the sound velocities from
                                             ! macro_elf_t: vp, vb, vg
+  REAL(DP), ALLOCATABLE :: debye_macro_elf_t(:) ! debye temperature from
+                                           ! macro elasticity (isothermal)
+  REAL(DP), ALLOCATABLE :: debye_macro_elf_s(:) ! debye temperature from
+                                           ! macro elasticity (isoentropic)
   REAL(DP), ALLOCATABLE :: el_conf_geo_t(:,:,:,:) ! the temperature dependent
                                             ! elastic constants at all 
                                             ! geometries

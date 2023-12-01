@@ -15,6 +15,7 @@ SUBROUTINE write_anhar_anis()
 USE kinds,          ONLY : DP
 USE thermo_mod,     ONLY : lcubic
 USE control_mur,    ONLY : lmurn
+USE ions_base,      ONLY : nat
 USE temperature,    ONLY : ntemp, temp
 USE thermo_sym,     ONLY : laue
 USE anharmonic,     ONLY : alpha_anis_t, vmin_t, b0_t, celldm_t, beta_t, &
@@ -22,7 +23,8 @@ USE anharmonic,     ONLY : alpha_anis_t, vmin_t, b0_t, celldm_t, beta_t, &
                            entropy_t, b0_s, cpmce_anis, el_cons_t, &
                            el_comp_t, b0_ec_s, &
                            bths_t, ggamma_t, el_cons_s, el_comp_s, &
-                           macro_el_t, macro_el_s, v_t, v_s, density_t, csmct_t
+                           macro_el_t, macro_el_s, v_t, v_s, density_t, &
+                           csmct_t, debye_macro_el_t, debye_macro_el_s
 USE initial_conf,   ONLY : ibrav_save
 USE control_eldos,  ONLY : lel_free_energy
 USE control_elastic_constants, ONLY : lelastic
@@ -30,6 +32,8 @@ USE elastic_constants, ONLY : compute_elastic_compliances, &
                               write_el_cons_on_file, print_macro_elasticity, &
                               write_macro_el_on_file, print_sound_velocities,& 
                               write_sound_on_file
+USE debye_module,   ONLY : compute_debye_temperature_macro_el, &
+                           write_debye_on_file
 USE isoentropic,    ONLY : isostress_heat_capacity, thermal_stress,      &
                            gen_average_gruneisen, isoentropic_elastic_constants
 USE data_files,     ONLY : flanhar
@@ -70,6 +74,8 @@ IF (lelastic) THEN
       CALL print_sound_velocities(ibrav_save, el_cons_s(:,:,itemp), &
            el_comp_s(:,:,itemp), density_t(itemp), v_s(1,itemp), v_s(2,itemp),&
                                                       v_s(3,itemp),.FALSE.)
+      CALL compute_debye_temperature_macro_el(v_s(1,itemp), v_s(3,itemp), &
+              density_t(itemp), nat, vmin_t(itemp), debye_macro_el_s(itemp))
       !
       ! Compute macro-elasticity variables and sound velocities using 
       ! isothermal 
@@ -82,9 +88,12 @@ IF (lelastic) THEN
       CALL print_sound_velocities(ibrav_save, el_cons_t(:,:,itemp), &
            el_comp_t(:,:,itemp), density_t(itemp), v_t(1,itemp), v_t(2,itemp),&
                                                    v_t(3,itemp),.FALSE.)
+      CALL compute_debye_temperature_macro_el(v_t(1,itemp), v_t(3,itemp), & 
+              density_t(itemp), nat, vmin_t(itemp), debye_macro_el_t(itemp))
       b0_ec_s(itemp)=(macro_el_s(1,itemp) + macro_el_s(5,itemp)) * 0.5_DP
    ENDDO
 ENDIF
+
 
 IF (meta_ionode) THEN
 !
@@ -176,6 +185,13 @@ IF (lelastic) THEN
    filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_s'
    CALL add_pressure(filename)
    CALL write_sound_on_file(temp, ntemp, v_s, filename, 0)
+!
+!   debye temperatures derived from sound velocities
+!
+   filename='anhar_files/'//TRIM(flanhar)//'.macro_el_debye'
+   CALL add_pressure(filename)
+   CALL write_debye_on_file(temp, ntemp, debye_macro_el_t, debye_macro_el_s, &
+                                                              filename, 0)
 ENDIF
 
 RETURN
@@ -656,6 +672,7 @@ SUBROUTINE write_ph_freq_anhar_anis()
 !   from direct integration of the phonon frequencies.
 !
 USE kinds,          ONLY : DP
+USE ions_base,      ONLY : nat
 USE thermo_mod,     ONLY : lcubic
 USE control_mur,    ONLY : lmurn
 USE temperature,    ONLY : ntemp, temp
@@ -669,12 +686,15 @@ USE ph_freq_anharmonic, ONLY : alphaf_anis_t, vminf_t, b0f_t, celldmf_t, &
                                b0f_s, cpmcef_anis, el_consf_t, el_compf_t, &
                                bthsf_t, ggammaf_t, el_consf_s, el_compf_s, &
                                macro_elf_t, macro_elf_s, vf_s, vf_t, &
-                               densityf_t, csmctf_t, b0f_ec_s
+                               densityf_t, csmctf_t, b0f_ec_s, &
+                               debye_macro_elf_t, debye_macro_elf_s 
 USE control_elastic_constants, ONLY : lelasticf
 USE elastic_constants, ONLY : compute_elastic_compliances, &
                               write_el_cons_on_file, print_macro_elasticity, &
                               write_macro_el_on_file, print_sound_velocities,& 
                               write_sound_on_file
+USE debye_module,   ONLY : compute_debye_temperature_macro_el, &
+                           write_debye_on_file
 USE initial_conf,   ONLY : ibrav_save
 USE isoentropic,    ONLY : isostress_heat_capacity, thermal_stress,      &
                            gen_average_gruneisen, isoentropic_elastic_constants
@@ -717,6 +737,8 @@ IF (lelasticf) THEN
            el_compf_s(:,:,itemp), densityf_t(itemp), vf_s(1,itemp),    &
            vf_s(2,itemp), vf_s(3,itemp), .FALSE.)
 
+      CALL compute_debye_temperature_macro_el(vf_s(1,itemp), vf_s(3,itemp), & 
+              densityf_t(itemp), nat, vminf_t(itemp), debye_macro_elf_s(itemp))
 
       ! Compute macro-elasticity variables and sound velocities using isothermal 
       ! elastic constants and elastic compliances vs. temperature computed in previous 
@@ -727,7 +749,8 @@ IF (lelasticf) THEN
       CALL print_sound_velocities(ibrav_save, el_consf_t(:,:,itemp), &
            el_compf_t(:,:,itemp), densityf_t(itemp), vf_t(1,itemp),    &
            vf_t(2,itemp), vf_t(3,itemp), .FALSE.)
-
+      CALL compute_debye_temperature_macro_el(vf_t(1,itemp), vf_t(3,itemp), & 
+              densityf_t(itemp), nat, vminf_t(itemp), debye_macro_elf_t(itemp))
       b0f_ec_s(itemp) = ( macro_elf_s(1,itemp) + macro_elf_s(5,itemp)) * 0.5_DP
    ENDDO
 ENDIF
@@ -824,6 +847,13 @@ IF (lelasticf) THEN
    filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_s_ph'
    CALL add_pressure(filename)
    CALL write_sound_on_file(temp, ntemp, vf_s, filename, 0)
+!
+!   debye temperatures derived from sound velocities
+!
+   filename='anhar_files/'//TRIM(flanhar)//'.macro_el_debye_ph'
+   CALL add_pressure(filename)
+   CALL write_debye_on_file(temp, ntemp, debye_macro_elf_t, &
+                                         debye_macro_elf_s, filename, 0)
 ENDIF
 
 RETURN
@@ -1097,6 +1127,7 @@ SUBROUTINE write_anhar_anis_pt()
 !   for several pressures.
 !
 USE kinds,          ONLY : DP
+USE ions_base,      ONLY : nat
 USE thermo_mod,     ONLY : lcubic
 USE control_mur,    ONLY : lmurn
 USE temperature,    ONLY : ntemp, temp, itemp300
@@ -1109,7 +1140,8 @@ USE anharmonic_pt,  ONLY : alpha_anis_pt, vmin_pt, b0_pt, celldm_pt, beta_pt, &
                            emin_pt, bths_pt, ggamma_pt, &
                            el_cons_pt, el_cons_s_pt, el_comp_pt, &
                            el_comp_s_pt, macro_el_pt, macro_el_s_pt, &
-                           v_pt, v_s_pt, density_pt, csmct_pt
+                           v_pt, v_s_pt, density_pt, csmct_pt, &
+                           debye_macro_el_pt, debye_macro_el_s_pt
 USE initial_conf,   ONLY : ibrav_save
 USE control_elastic_constants, ONLY : lelastic_pt
 USE control_pressure, ONLY : press, npress_plot, ipress_plot
@@ -1117,6 +1149,8 @@ USE elastic_constants, ONLY : compute_elastic_compliances, &
                               write_el_cons_on_file, print_macro_elasticity, &
                               write_macro_el_on_file, print_sound_velocities,& 
                               write_sound_on_file
+USE debye_module,   ONLY : compute_debye_temperature_macro_el, &
+                           write_debye_on_file
 USE isoentropic,    ONLY : isostress_heat_capacity, thermal_stress,      &
                            gen_average_gruneisen, isoentropic_elastic_constants
 USE data_files,     ONLY : flanhar
@@ -1172,6 +1206,10 @@ DO ipressp=1, npress_plot
               el_comp_s_pt(:,:,itemp,ipressp), density_pt(itemp,ipressp), &
               v_s_pt(1,itemp,ipressp), v_s_pt(2,itemp,ipressp), &
                                            v_s_pt(3,itemp,ipressp),.FALSE.)
+         CALL compute_debye_temperature_macro_el(v_s_pt(1,itemp,ipressp), &
+              v_s_pt(3,itemp,ipressp), density_pt(itemp,ipressp), nat,  & 
+              vmin_pt(itemp,ipressp), debye_macro_el_s_pt(itemp,ipressp))
+
       !
       ! Compute macro-elasticity variables and sound velocities using 
       ! isothermal 
@@ -1187,6 +1225,9 @@ DO ipressp=1, npress_plot
            density_pt(itemp,ipressp),                    &
            v_pt(1,itemp,ipressp), v_pt(2,itemp,ipressp), &
            v_pt(3,itemp,ipressp), .FALSE.)
+         CALL compute_debye_temperature_macro_el(v_pt(1,itemp,ipressp), &
+              v_pt(3,itemp,ipressp), density_pt(itemp,ipressp), nat,  &
+              vmin_pt(itemp,ipressp), debye_macro_el_pt(itemp,ipressp))
       ENDDO
    ENDIF
 
@@ -1302,6 +1343,13 @@ DO ipressp=1, npress_plot
       filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_s_press'
       CALL add_value(filename,press(ipress))
       CALL write_sound_on_file(temp, ntemp, v_s_pt(:,:,ipressp), filename, 0)
+!
+!   debye temperatures derived from sound velocities
+!
+      filename='anhar_files/'//TRIM(flanhar)//'.macro_el_debye_press'
+      CALL add_value(filename,press(ipress))
+      CALL write_debye_on_file(temp, ntemp, debye_macro_el_pt(:,ipressp), &
+                              debye_macro_el_s_pt(:,ipressp), filename, 0)
    ENDIF
 ENDDO
 
@@ -1317,6 +1365,7 @@ SUBROUTINE write_ph_freq_anhar_anis_pt()
 !   for several pressures.
 !
 USE kinds,          ONLY : DP
+USE ions_base,      ONLY : nat
 USE thermo_mod,     ONLY : lcubic
 USE control_mur,    ONLY : lmurn
 USE temperature,    ONLY : ntemp, temp, itemp300
@@ -1330,7 +1379,10 @@ USE ph_freq_anharmonic_pt,  ONLY : alphaf_anis_pt, vminf_pt, b0f_pt,    &
                            eminf_pt, bthsf_pt, ggammaf_pt, &
                            el_consf_pt, el_consf_s_pt, el_compf_pt, &
                            el_compf_s_pt, macro_elf_pt, macro_elf_s_pt, &
-                           vf_pt, vf_s_pt, densityf_pt, csmctf_pt
+                           vf_pt, vf_s_pt, densityf_pt, csmctf_pt, &
+                           debye_macro_elf_pt, debye_macro_elf_s_pt
+USE debye_module,   ONLY : compute_debye_temperature_macro_el, &
+                           write_debye_on_file
 USE initial_conf,   ONLY : ibrav_save
 USE control_elastic_constants, ONLY : lelasticf_pt
 USE control_pressure, ONLY : press, npress_plot, ipress_plot
@@ -1393,6 +1445,9 @@ DO ipressp=1, npress_plot
               el_compf_s_pt(:,:,itemp,ipressp), densityf_pt(itemp,ipressp), &
               vf_s_pt(1,itemp,ipressp), vf_s_pt(2,itemp,ipressp), &
                                            vf_s_pt(3,itemp,ipressp),.FALSE.)
+         CALL compute_debye_temperature_macro_el(vf_s_pt(1,itemp,ipressp), &
+              vf_s_pt(3,itemp,ipressp), densityf_pt(itemp,ipressp), nat,    &
+              vminf_pt(itemp,ipressp), debye_macro_elf_s_pt(itemp,ipressp))
       !
       ! Compute macro-elasticity variables and sound velocities using 
       ! isothermal 
@@ -1408,6 +1463,10 @@ DO ipressp=1, npress_plot
            densityf_pt(itemp,ipressp),                    &
            vf_pt(1,itemp,ipressp), vf_pt(2,itemp,ipressp), &
            vf_pt(3,itemp,ipressp), .FALSE.)
+
+         CALL compute_debye_temperature_macro_el(vf_pt(1,itemp,ipressp), &
+              vf_pt(3,itemp,ipressp), densityf_pt(itemp,ipressp), nat,    &
+              vminf_pt(itemp,ipressp), debye_macro_elf_pt(itemp,ipressp))
       ENDDO
    ENDIF
 
@@ -1524,6 +1583,13 @@ DO ipressp=1, npress_plot
       filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_s_ph_press'
       CALL add_value(filename,press(ipress))
       CALL write_sound_on_file(temp, ntemp, vf_s_pt(:,:,ipressp), filename, 0)
+!
+!   debye temperatures derived from sound velocities
+!
+      filename='anhar_files/'//TRIM(flanhar)//'.macro_el_debye_ph_press'
+      CALL add_value(filename,press(ipress))
+      CALL write_debye_on_file(temp, ntemp, debye_macro_elf_pt(:,ipressp), &
+                            debye_macro_elf_s_pt(:,ipressp), filename, 0)
    ENDIF
 ENDDO
 
@@ -1539,6 +1605,7 @@ SUBROUTINE write_anhar_anis_ptt()
 !   for selected pressures.
 !
 USE kinds,          ONLY : DP
+USE ions_base,      ONLY : nat
 USE thermo_mod,     ONLY : lcubic
 USE control_mur,    ONLY : lmurn
 USE temperature,    ONLY : ntemp, temp, itemp300
@@ -1549,11 +1616,12 @@ USE anharmonic_ptt, ONLY : vmin_ptt, vmin_ptt_p1, vmin_ptt_m1, &
                            alpha_anis_ptt, celldm_ptt, celldm_ptt_p1, & 
                            celldm_ptt_m1, beta_ptt, el_cons_ptt,      &
                            cpmce_anis_ptt, cp_ptt, ce_ptt, cv_ptt, b0_ptt, &
-                           b0_s_ptt, gamma_ptt, bths_ptt, ggamma_ptt, &
+                           b0_s_ptt, gamma_ptt, bths_ptt, ggamma_ptt,    &
                            el_cons_s_ptt, el_comp_s_ptt, macro_el_s_ptt, &
                            el_cons_ptt, el_comp_ptt, macro_el_ptt, emin_ptt, &
-                           v_ptt, v_s_ptt, density_ptt, ener_ptt, &
-                           entr_ptt, csmct_ptt
+                           v_ptt, v_s_ptt, density_ptt, ener_ptt,   &
+                           entr_ptt, csmct_ptt, debye_macro_el_ptt, &
+                           debye_macro_el_s_ptt
 USE el_anharmonic,  ONLY : el_ce_ptt
 USE initial_conf,   ONLY : ibrav_save
 USE control_eldos,  ONLY : lel_free_energy
@@ -1564,6 +1632,8 @@ USE elastic_constants, ONLY : compute_elastic_compliances, &
                               write_el_cons_on_file, print_macro_elasticity, &
                               write_macro_el_on_file, print_sound_velocities,& 
                               write_sound_on_file
+USE debye_module,   ONLY : compute_debye_temperature_macro_el, &
+                           write_debye_on_file
 USE isoentropic,    ONLY : isostress_heat_capacity, thermal_stress_p,      &
                            gen_average_gruneisen_p,                        &
                            isoentropic_elastic_constants_p
@@ -1630,6 +1700,9 @@ DO itempp=1, ntemp_plot
               el_comp_s_ptt(:,:,ipress,itempp), density_ptt(ipress,itempp), &
               v_s_ptt(1,ipress,itempp), v_s_ptt(2,ipress,itempp), &
                                            v_s_ptt(3,ipress,itempp),.FALSE.)
+         CALL compute_debye_temperature_macro_el(v_s_ptt(1,ipress,itempp), &
+              v_s_ptt(3,ipress,itempp), density_ptt(ipress,itempp), nat,   &
+              vmin_ptt(ipress,itempp), debye_macro_el_s_ptt(ipress,itempp))
      !
      ! Compute macro-elasticity variables and sound velocities using 
      ! isothermal 
@@ -1645,6 +1718,9 @@ DO itempp=1, ntemp_plot
            density_ptt(ipress,itempp),                    &
            v_ptt(1,ipress,itempp), v_ptt(2,ipress,itempp), &
            v_ptt(3,ipress,itempp), .FALSE.)
+         CALL compute_debye_temperature_macro_el(v_ptt(1,ipress,itempp), &
+              v_ptt(3,ipress,itempp), density_ptt(ipress,itempp), nat,   &
+              vmin_ptt(ipress,itempp), debye_macro_el_ptt(ipress,itempp))
       ENDDO
    ENDIF
 
@@ -1762,6 +1838,13 @@ DO itempp=1, ntemp_plot
       filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_s_temp'
       CALL add_value(filename,temp(itemp))
       CALL write_sound_on_file(press, npress, v_s_ptt(:,:,itempp), filename, 1)
+!
+!   debye temperatures derived from sound velocities
+!
+      filename='anhar_files/'//TRIM(flanhar)//'.macro_el_debye_temp'
+      CALL add_value(filename,temp(itemp))
+      CALL write_debye_on_file(press, npress, debye_macro_el_ptt(:,itempp), &
+                               debye_macro_el_s_ptt(:,itempp), filename, 1)
    ENDIF
 ENDDO
 
@@ -1777,6 +1860,7 @@ SUBROUTINE write_ph_freq_anhar_anis_ptt()
 !   for selected pressures.
 !
 USE kinds,          ONLY : DP
+USE ions_base,      ONLY : nat
 USE thermo_mod,     ONLY : lcubic
 USE control_mur,    ONLY : lmurn
 USE temperature,    ONLY : ntemp, temp, itemp300
@@ -1792,7 +1876,8 @@ USE ph_freq_anharmonic_ptt, ONLY : vminf_ptt, vminf_ptt_p1, vminf_ptt_m1, &
                            ggammaf_ptt, el_consf_s_ptt, el_compf_s_ptt,   &
                            macro_elf_s_ptt, el_consf_ptt, el_compf_ptt,   &
                            macro_elf_ptt, eminf_ptt, vf_ptt, vf_s_ptt,    &
-                           densityf_ptt, csmctf_ptt
+                           densityf_ptt, csmctf_ptt,                      &
+                           debye_macro_elf_ptt, debye_macro_elf_s_ptt
 USE el_anharmonic,  ONLY : el_cef_ptt
 USE control_eldos,  ONLY : lel_free_energy
 USE initial_conf,   ONLY : ibrav_save
@@ -1803,6 +1888,8 @@ USE elastic_constants, ONLY : compute_elastic_compliances, &
                               write_el_cons_on_file, print_macro_elasticity, &
                               write_macro_el_on_file, print_sound_velocities,& 
                               write_sound_on_file
+USE debye_module,   ONLY : compute_debye_temperature_macro_el, &
+                           write_debye_on_file
 USE isoentropic,    ONLY : isostress_heat_capacity, thermal_stress_p,      &
                            gen_average_gruneisen_p,                        &
                            isoentropic_elastic_constants_p
@@ -1871,6 +1958,10 @@ DO itempp=1, ntemp_plot
               el_compf_s_ptt(:,:,ipress,itempp), densityf_ptt(ipress,itempp), &
               vf_s_ptt(1,ipress,itempp), vf_s_ptt(2,ipress,itempp), &
                                          vf_s_ptt(3,ipress,itempp),.FALSE.)
+
+         CALL compute_debye_temperature_macro_el(vf_s_ptt(1,ipress,itempp), &
+              vf_s_ptt(3,ipress,itempp), densityf_ptt(ipress,itempp), nat,   &
+              vminf_ptt(ipress,itempp), debye_macro_elf_s_ptt(ipress,itempp))
      !
      ! Compute macro-elasticity variables and sound velocities using 
      ! isothermal 
@@ -1886,6 +1977,10 @@ DO itempp=1, ntemp_plot
            densityf_ptt(ipress,itempp),                    &
            vf_ptt(1,ipress,itempp), vf_ptt(2,ipress,itempp), &
            vf_ptt(3,ipress,itempp), .FALSE.)
+
+         CALL compute_debye_temperature_macro_el(vf_ptt(1,ipress,itempp), &
+              vf_ptt(3,ipress,itempp), densityf_ptt(ipress,itempp), nat,   &
+              vminf_ptt(ipress,itempp), debye_macro_elf_ptt(ipress,itempp))
       ENDDO
    ENDIF
 
@@ -2003,6 +2098,13 @@ DO itempp=1, ntemp_plot
       filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_s_ph_temp'
       CALL add_value(filename,temp(itemp))
       CALL write_sound_on_file(press, npress, vf_s_ptt(:,:,itempp), filename, 1)
+!
+!   debye temperatures derived from sound velocities
+!
+      filename='anhar_files/'//TRIM(flanhar)//'.macro_el_debye_ph_temp'
+      CALL add_value(filename,temp(itemp))
+      CALL write_debye_on_file(press, npress, debye_macro_elf_ptt(:,itempp), &
+                            debye_macro_elf_s_ptt(:,itempp), filename, 1)
    ENDIF
 ENDDO
 

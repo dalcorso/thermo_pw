@@ -24,7 +24,8 @@ USE mp_images,        ONLY : root_image, my_image_id
 IMPLICIT NONE
 
 CHARACTER(LEN=256) :: filelastic, filelastic_s, &
-                      filelastic_ph, filelastic_s_ph, gnu_filename, filenameps
+                      filelastic_ph, filelastic_s_ph, gnu_filename, &
+                      filenameps, filedebye_ph, filedebye
 INTEGER :: ierr, system
 
 IF (.NOT.(lelastic.OR.lelasticf)) RETURN
@@ -36,11 +37,13 @@ filenameps=TRIM(filenameps)
 IF (lelasticf) THEN
    filelastic_ph="anhar_files/"//TRIM(flanhar)//".sound_vel_ph"
    filelastic_s_ph="anhar_files/"//TRIM(flanhar)//".sound_vel_s_ph"
+   filedebye_ph="anhar_files/"//TRIM(flanhar)//".macro_el_debye_ph"
 END IF
 
 IF (lelastic) THEN
    filelastic="anhar_files/"//TRIM(flanhar)//".sound_vel"
    filelastic_s="anhar_files/"//TRIM(flanhar)//".sound_vel_s"
+   filedebye="anhar_files/"//TRIM(flanhar)//".macro_el_debye"
 END IF
 
 gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_sound_vel"
@@ -100,6 +103,21 @@ IF (lelasticf) THEN
    CALL gnuplot_write_file_mul_data(filelastic_ph,1,4,'color_blue', &
                      .NOT.lelastic,.FALSE.,.FALSE.)
    CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,4,'color_orange',&
+                                 .FALSE., .TRUE.,.FALSE.)
+ENDIF
+
+CALL gnuplot_ylabel('{/Symbol Q}_D (K)',.FALSE.)
+
+IF (lelastic) THEN
+   CALL gnuplot_write_file_mul_data(filedebye,1,2,'color_red',.TRUE., &
+                                                             .FALSE.,.FALSE.)
+   CALL gnuplot_write_file_mul_data(filedebye,1,3,'color_green',.FALSE., &
+                                                     .NOT.lelasticf,.FALSE.)
+ENDIF
+IF (lelasticf) THEN
+   CALL gnuplot_write_file_mul_data(filedebye_ph,1,2,'color_blue', &
+                     .NOT.lelastic,.FALSE.,.FALSE.)
+   CALL gnuplot_write_file_mul_data(filedebye_ph,1,3,'color_orange',&
                                  .FALSE., .TRUE.,.FALSE.)
 ENDIF
 
@@ -580,8 +598,9 @@ USE mp_images,           ONLY : root_image, my_image_id
 
 IMPLICIT NONE
 
-CHARACTER(LEN=256) :: filelastic, filelastic_s, &
-                      filelastic_ph, filelastic_s_ph, gnu_filename, filenameps
+CHARACTER(LEN=256) :: filelastic, filelastic_s, filelastic_ph, &
+                      filelastic_s_ph, filedebye, filedebye_ph, &
+                      gnu_filename, filenameps
 LOGICAL :: first_step, last_step
 INTEGER :: istep, ipressp, ipress, ierr, system
 
@@ -701,6 +720,36 @@ DO ipressp=1, npress_plot
                               first_step.AND..NOT.lelastic,.FALSE.,.FALSE.)
 
       CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,4,color(istep),&
+                                               .FALSE.,last_step,.FALSE.)
+   ENDIF
+ENDDO
+
+istep=0
+DO ipressp=1, npress_plot
+   first_step=(ipressp==1)
+   last_step=(ipressp==npress_plot)
+   ipress=ipress_plot(ipressp)
+   istep=MOD(istep,8)+1
+   filedebye="anhar_files/"//TRIM(flanhar)//'.macro_el_debye_press'
+   CALL add_value(filedebye,press(ipress))
+   filedebye_ph="anhar_files/"//TRIM(flanhar)//'.macro_el_debye_ph_press'
+   CALL add_value(filedebye_ph,press(ipress))
+   IF (first_step) THEN
+      CALL gnuplot_set_fact(1.0_DP, .FALSE.)
+      CALL gnuplot_ylabel('{/Symbol Q}_D (K)',.FALSE.)
+   ENDIF
+   IF (lelastic) THEN
+      CALL gnuplot_write_file_mul_data(filedebye,1,2,color(istep),first_step,&
+                                                             .FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filedebye,1,3,color(istep),.FALSE., &
+                                       last_step.AND..NOT.lelasticf,.FALSE.)
+   ENDIF
+   IF (lelasticf) THEN
+      CALL gnuplot_write_file_mul_data(filedebye_ph,1,2,color(istep),&
+                              first_step.AND..NOT.lelastic,.FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filedebye_ph,1,3,color(istep),&
                                                .FALSE.,last_step,.FALSE.)
    ENDIF
 ENDDO
@@ -1014,8 +1063,9 @@ USE mp_images,           ONLY : root_image, my_image_id
 
 IMPLICIT NONE
 
-CHARACTER(LEN=256) :: filelastic, filelastic_s, &
-                      filelastic_ph, filelastic_s_ph, gnu_filename, filenameps
+CHARACTER(LEN=256) :: filelastic, filelastic_s, filelastic_ph, &
+                      filelastic_s_ph, filedebye, filedebye_ph, &
+                      gnu_filename, filenameps
 LOGICAL :: first_step, last_step
 INTEGER :: istep, itempp, itemp, ierr, system
 
@@ -1129,6 +1179,36 @@ DO itempp=1, ntemp_plot
                               first_step.AND..NOT.lelastic,.FALSE.,.FALSE.)
 
       CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,4,color(istep),&
+                                               .FALSE.,last_step,.FALSE.)
+   ENDIF
+ENDDO
+
+istep=0
+DO itempp=1, ntemp_plot
+   first_step=(itempp==1)
+   last_step=(itempp==ntemp_plot)
+   itemp=itemp_plot(itempp)
+   istep=MOD(istep,8)+1
+   filedebye="anhar_files/"//TRIM(flanhar)//'.macro_el_debye_temp'
+   CALL add_value(filedebye,temp(itemp))
+   filedebye_ph="anhar_files/"//TRIM(flanhar)//'.macro_el_debye_ph_temp'
+   CALL add_value(filedebye_ph,temp(itemp))
+   IF (first_step) THEN
+      CALL gnuplot_set_fact(1.0_DP, .FALSE.)
+      CALL gnuplot_ylabel('{/Symbol Q}_{D} (K)',.FALSE.)
+   ENDIF
+   IF (lelastic) THEN
+      CALL gnuplot_write_file_mul_data(filedebye,1,2,color(istep),first_step,&
+                                                             .FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filedebye,1,3,color(istep),.FALSE., &
+                                       last_step.AND..NOT.lelasticf,.FALSE.)
+   ENDIF
+   IF (lelasticf) THEN
+      CALL gnuplot_write_file_mul_data(filedebye_ph,1,2,color(istep),&
+                              first_step.AND..NOT.lelastic,.FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filedebye_ph,1,3,color(istep),&
                                                .FALSE.,last_step,.FALSE.)
    ENDIF
 ENDDO
