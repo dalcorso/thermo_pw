@@ -32,9 +32,11 @@ INTEGER, PARAMETER :: npt=1000  ! the number of points used to make
                                 ! the Debye integral
 
 PUBLIC  compute_debye_temperature, compute_average_sound, debye_vib_energy, &
+        compute_debye_temperature_macro_el,                   &
         debye_free_energy, debye_entropy, debye_cv, debye_e0, &
         compute_debye_temperature_poisson, debye_b_factor, &
-        debye_free_energy_0d, debye_cv_0d, debye_energy_0d
+        debye_free_energy_0d, debye_cv_0d, debye_energy_0d, &
+        write_debye_on_file
 
 CONTAINS
 
@@ -109,7 +111,7 @@ SUBROUTINE compute_debye_temperature(el_con, density, nat, omega, debye_t)
 !-------------------------------------------------------------------------
 !
 !  This routine receives as input: the elastic constants in Voigt form
-!  and in kbar units, the density in kg/m^3, omega in (a.u.)^2, the
+!  and in kbar units, the density in kg/m^3, omega in (a.u.)^3, the
 !  number of atoms per cell and gives as output the Debye temperature
 !  in K. The Debye temperature is also written in output.
 !
@@ -136,6 +138,43 @@ WRITE(stdout,'(/,5x,"Debye temperature = ", f12.3, " K")') debye_t
 
 RETURN
 END SUBROUTINE compute_debye_temperature
+
+!-------------------------------------------------------------------------
+SUBROUTINE compute_debye_temperature_macro_el(vp, vs, density, nat, &
+                                              omega, debye_t)
+!-------------------------------------------------------------------------
+!
+!  This routine receives as input: the compressional and the shear
+!  sound velocities in m/s units, the density in kg/m^3, omega in (a.u.)^3, 
+!  the number of atoms per cell and gives as output the Debye temperature
+!  in K. The Debye temperature is also written in output.
+!
+IMPLICIT NONE
+
+INTEGER, INTENT(IN) :: nat
+REAL(DP), INTENT(IN) :: vp, vs
+REAL(DP), INTENT(IN) :: density
+REAL(DP), INTENT(IN) :: omega
+REAL(DP), INTENT(OUT) :: debye_t
+
+REAL(DP) :: fact
+REAL(DP) :: average_sound_speed
+!
+!  first compute the average sound speed
+!
+average_sound_speed = (( 1.0_DP / vp **3 + 2.0_DP / vs**3)&
+                                                  /3.0_DP)**(-1.0_DP/3.0_DP)
+!
+!  then the debye temperature
+!
+fact = h_planck_si / k_boltzmann_si / bohr_radius_si
+debye_t = average_sound_speed * fact *    &
+                       (3.0_DP / pi /4.0_DP * nat / omega)**(1.0_DP/3.0_DP)
+
+!WRITE(stdout,'(/,5x,"Debye temperature = ", f12.3, " K")') debye_t
+
+RETURN
+END SUBROUTINE compute_debye_temperature_macro_el
 
 !-------------------------------------------------------------------------
 SUBROUTINE debye_vib_energy(debye_t, temp, ntemp, nat, deb_energy)
@@ -523,6 +562,58 @@ WRITE(stdout, '(/,5x,"The approximate Debye temperature is ",f12.3," K" )') &
 
 RETURN
 END SUBROUTINE compute_debye_temperature_poisson
+
+!-------------------------------------------------------------------------
+SUBROUTINE write_debye_on_file(temp, ntemp, debye_t, debye_s, filename, &
+                               iflag)
+!-------------------------------------------------------------------------
+!
+! This routine creates a file with sound velocities as a function 
+! of temperature or of pressure.
+! flag=0 temp contains the temperature
+! flag=1 temp contains the pressure
+!
+USE kinds,      ONLY : DP
+USE io_global,  ONLY : meta_ionode, meta_ionode_id, stdout
+USE mp_world,   ONLY : world_comm
+USE mp,         ONLY : mp_bcast
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ntemp, iflag
+REAL(DP), INTENT(IN) :: temp(ntemp), debye_t(ntemp), debye_s(ntemp)
+CHARACTER(LEN=*), INTENT(IN) :: filename
+
+INTEGER :: itemp, iu_debye, ios
+INTEGER :: find_free_unit
+CHARACTER(LEN=7) :: label
+
+iu_debye=find_free_unit()
+IF (meta_ionode) &
+   OPEN(UNIT=iu_debye, FILE=TRIM(filename), FORM='formatted', &
+                                       STATUS='UNKNOWN', ERR=30, IOSTAT=ios)
+30 CALL mp_bcast(ios, meta_ionode_id, world_comm)
+   CALL errore('write_debye_on_file','opening debye file',ABS(ios))
+
+IF (iflag==0) THEN
+   label='T (K)  '
+ELSE
+   label='p(kbar)'
+ENDIF
+
+IF (meta_ionode) THEN
+   WRITE(iu_debye,'("#",2x,"debye_t: computed with isothermal speeds,&
+                      & debye_s: computed with adiabatic speeds")')
+   WRITE(iu_debye,'("#",2x,a7, 11x, "debye_t (K) ", 6x, "debye_s (K)")') label
+   DO itemp=2,ntemp-1
+      WRITE(iu_debye,'(e16.8, 8e18.10)') temp(itemp), debye_t(itemp), &
+                                                debye_s(itemp)
+   ENDDO
+
+   CLOSE(iu_debye)
+ENDIF
+
+RETURN
+END SUBROUTINE write_debye_on_file
+
 !
 ! Copyright (C) 2018 Cristiano Malica
 !
@@ -579,5 +670,7 @@ deb_int_bfact = integral * deltax / y**2
 
 RETURN
 END FUNCTION deb_int_bfact
+
+
 
 END MODULE debye_module
