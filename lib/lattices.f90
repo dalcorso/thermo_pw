@@ -613,11 +613,13 @@ CONTAINS
 !
         DO isym=1,nsym
            ts=tipo_sym(sr(1,1,isym))
-           IF (ts==3 .AND. ABS(angle_rot(sr(1,1,isym))-90.0_DP)<eps1 ) THEN
-              CALL versor(sr(1,1,isym), ax(1,3))
-              IF (.NOT.bravais_dir(at, ax(1,3), enne, e(1,3), emod(3) )) &
-                 CALL errore('find_ibrav_code','problem with tetragonal dir',1)
-              EXIT
+           IF (ts==3) THEN
+              IF (ABS(angle_rot(sr(1,1,isym))-90.0_DP)<eps1 ) THEN
+                 CALL versor(sr(1,1,isym), ax(1,3))
+                 IF (.NOT.bravais_dir(at, ax(1,3), enne, e(1,3), emod(3) )) &
+                    CALL errore('find_ibrav_code','problem with tetragonal dir',1)
+                 EXIT
+              ENDIF
            ENDIF
         ENDDO
 !
@@ -660,8 +662,10 @@ CONTAINS
         IF (ABS(tmod(1)-tmod(2))>eps1.OR.ABS(tmod(1)-tmod(3))>eps1) THEN
            DO isym=1,nsym
               ts=tipo_sym(sr(1,1,isym))
-              IF (ts==3 .AND. ABS(angle_rot(sr(1,1,isym))-60.0_DP)<eps1 ) THEN
-                 CALL versor(sr(1,1,isym), ax(1,3))
+              IF (ts==3) THEN
+                 IF (ABS(angle_rot(sr(1,1,isym))-60.0_DP)<eps1 ) THEN
+                    CALL versor(sr(1,1,isym), ax(1,3))
+                 ENDIF
               ENDIF
            ENDDO
 !
