@@ -85,6 +85,9 @@ SUBROUTINE phq_init_tpw()
   USE control_lr,           ONLY : nbnd_occ, lgamma
   USE ldaU,                 ONLY : lda_plus_u
   USE uspp_init,            ONLY : init_us_2
+  USE control_qe,           ONLY : many_k
+  USE many_k_ph_mod,        ONLY : copy_alphap_becp_device_all, becp1k_d, &
+                                   alphak_d, becptk_d, alphatk_d
 #if defined(__CUDA)
   USE becmod_subs_gpum,     ONLY : calbec_gpu, synchronize_bec_type_gpu
 #endif
@@ -103,7 +106,7 @@ SUBROUTINE phq_init_tpw()
     ! counter on atoms
     ! counter on G vectors
   INTEGER :: ikqg         !for the case elph_mat=.true.
-  INTEGER :: npw, npwq, itmp
+  INTEGER :: npw, npwq, itmp, nsolv
   REAL(DP) :: arg
     ! the argument of the phase
   COMPLEX(DP), ALLOCATABLE :: aux1(:,:), tevc(:,:)
@@ -369,6 +372,19 @@ SUBROUTINE phq_init_tpw()
      !
   END DO
   !$acc end data
+  !
+  IF (many_k)  THEN
+     nsolv=1
+     IF (noncolin.AND.domag) nsolv=2
+     ALLOCATE(becp1k_d(nkb,npol,nbnd,nksq))
+     ALLOCATE(alphak_d(nkb,npol,nbnd,3,nksq))
+     IF (nsolv==2) THEN
+        ALLOCATE(becptk_d(nkb,npol,nbnd,nksq))
+        ALLOCATE(alphatk_d(nkb,npol,nbnd,3,nksq))
+     ENDIF
+     CALL copy_alphap_becp_device_all(nsolv)
+ ENDIF
+ 
   !
   IF (noncolin.AND.domag) THEN
           !$acc exit data delete(tevc)

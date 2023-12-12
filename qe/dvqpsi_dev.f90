@@ -759,23 +759,27 @@ DO nt = 1, ntyp
                                  ps1k_nc_d(ikb,is,ibnd,id)=                 &
                                       ps1k_nc_d(ikb,is,ibnd,id) +           &
                                       deff_nc_d(ih,jh,na,ijs,st_+ibnd) *    &
-                                      alphak_d(jkb,js,ibnd,ipol,ik1)*       &
+!                                      alphak_d(jkb,js,ibnd,ipol,ik1)*       &
+                                      alphak_d(jkb,js,ibnd,ipol,ik)*       &
                                        uact(mu + ipol)
                                  ps2k_nc_d(ikb,is,ibnd,ipol,id)=            &
                                       ps2k_nc_d(ikb,is,ibnd,ipol,id)+       &
                                          deff_nc_d(ih,jh,na,ijs,st_+ibnd) * &
-                                          becp1k_d(jkb,js,ibnd,ik1) *       &
+!                                          becp1k_d(jkb,js,ibnd,ik1) *       &
+                                          becp1k_d(jkb,js,ibnd,ik) *       &
                                        (0.d0,-1.d0) * uact(mu+ipol) * tpiba
                               ELSE
                                  ps1k_nc_d(ikb,is,ibnd,id)=                 &
                                       ps1k_nc_d(ikb,is,ibnd,id) +           &
                                       deff_nc_d(ih,jh,na,ijs,st_+ibnd) *    &
-                                      alphatk_d(jkb,js,ibnd,ipol,ik1)*       &
+!                                      alphatk_d(jkb,js,ibnd,ipol,ik1)*       &
+                                      alphatk_d(jkb,js,ibnd,ipol,ik)*       &
                                        uact(mu + ipol)
                                  ps2k_nc_d(ikb,is,ibnd,ipol,id)=            &
                                       ps2k_nc_d(ikb,is,ibnd,ipol,id)+       &
                                          deff_nc_d(ih,jh,na,ijs,st_+ibnd) * &
-                                          becptk_d(jkb,js,ibnd,ik1) *       &
+!                                          becptk_d(jkb,js,ibnd,ik1) *       &
+                                          becptk_d(jkb,js,ibnd,ik) *       &
                                        (0.d0,-1.d0) * uact(mu+ipol) * tpiba
                               ENDIF
                            END DO
@@ -783,10 +787,12 @@ DO nt = 1, ntyp
                      ELSE
                         ps1k_d (ikb, ibnd, id) = ps1k_d (ikb, ibnd, id) +    &
                                 deff_d(ih, jh, na, st_+ibnd) *               &
-                           alphak_d(jkb, 1, ibnd, ipol, ik1) * uact (mu + ipol)
+!                           alphak_d(jkb, 1, ibnd, ipol, ik1) * uact (mu + ipol)
+                           alphak_d(jkb, 1, ibnd, ipol, ik) * uact (mu + ipol)
                         ps2k_d (ikb, ibnd, ipol, id) =                       &
                              ps2k_d (ikb, ibnd, ipol, id) +                  &
-                         deff_d(ih,jh,na,st_+ibnd)*becp1k_d(jkb,1,ibnd,ik1)* &
+!                         deff_d(ih,jh,na,st_+ibnd)*becp1k_d(jkb,1,ibnd,ik1)* &
+                         deff_d(ih,jh,na,st_+ibnd)*becp1k_d(jkb,1,ibnd,ik)* &
                         (0.0_DP,-1.0_DP) * uact (mu + ipol) * tpiba
                      ENDIF
                      IF (okvan) THEN
@@ -800,20 +806,23 @@ DO nt = 1, ntyp
                                        ps1k_nc_d(ikb,is,ibnd,id)=         &
                                          ps1k_nc_d(ikb,is,ibnd,id)+       &
                                       int1_nc_save_d(ih,jh,ipol,na,ijs,isolv)*&
-                                          becp1k_d(jkb,js,ibnd,ik1)*      &
+!                                          becp1k_d(jkb,js,ibnd,ik1)*      &
+                                          becp1k_d(jkb,js,ibnd,ik)*      &
                                           uact(mu+ipol)
                                     ELSE
                                        ps1k_nc_d(ikb,is,ibnd,id)=            &
                                        ps1k_nc_d(ikb,is,ibnd,id)+            &
                                   int1_nc_save_d(ih,jh,ipol,na,ijs,isolv) *  &
-                                      becptk_d(jkb,js,ibnd,ik1)*             &
+!                                      becptk_d(jkb,js,ibnd,ik1)*             &
+                                      becptk_d(jkb,js,ibnd,ik)*             &
                                       uact(mu+ipol)
                                     ENDIF
                                  ELSE
                                     ps1k_nc_d(ikb,is,ibnd,id)=         &
                                       ps1k_nc_d(ikb,is,ibnd,id)+       &
                                    int1_nc(ih,jh,ipol,na,ijs) *  &
-                                       becp1k_d(jkb,js,ibnd,ik1)*      &
+!                                       becp1k_d(jkb,js,ibnd,ik1)*      &
+                                       becp1k_d(jkb,js,ibnd,ik)*      &
                                        uact(mu+ipol)
                                  ENDIF
                               END DO
@@ -821,7 +830,8 @@ DO nt = 1, ntyp
                         ELSE
                            ps1k_d (ikb, ibnd, id) = ps1k_d(ikb, ibnd, id) +  &
                              (int1_d (ih, jh, ipol, na, current_spin) *      &
-                             becp1k_d(jkb, 1, ibnd, ik1) ) * uact (mu +ipol)
+!                             becp1k_d(jkb, 1, ibnd, ik1) ) * uact (mu +ipol)
+                             becp1k_d(jkb, 1, ibnd, ik) ) * uact (mu +ipol)
                         ENDIF
                      ENDIF
                   END IF  ! uact>0
@@ -838,12 +848,14 @@ DO nt = 1, ntyp
                                        ps1k_nc_d(ikb,is,ibnd,id)=            &
                                        ps1k_nc_d(ikb,is,ibnd,id)+            &
                                        int2_so_d(ih,jh,ipol,nb,na,ijs)*      &
-                                       becp1k_d(jkb,js,ibnd,ik1)*uact(nu+ipol)
+!                                       becp1k_d(jkb,js,ibnd,ik1)*uact(nu+ipol)
+                                       becp1k_d(jkb,js,ibnd,ik)*uact(nu+ipol)
                                     ELSE
                                        ps1k_nc_d(ikb,is,ibnd,id)=            &
                                        ps1k_nc_d(ikb,is,ibnd,id)+            &
                                        int2_so_d(ih,jh,ipol,nb,na,ijs)*      &
-                                       becptk_d(jkb,js,ibnd,ik1)*uact(nu+ipol)
+!                                       becptk_d(jkb,js,ibnd,ik1)*uact(nu+ipol)
+                                       becptk_d(jkb,js,ibnd,ik)*uact(nu+ipol)
                                     ENDIF
                                  END DO
                               END DO
@@ -853,19 +865,22 @@ DO nt = 1, ntyp
                                     ps1k_nc_d(ikb,is,ibnd,id)=              &
                                     ps1k_nc_d(ikb,is,ibnd,id)+              &
                                     int2_d(ih,jh,ipol,nb,na) *              &
-                                    becp1k_d(jkb,is,ibnd,ik1)*uact(nu+ipol)
+!                                    becp1k_d(jkb,is,ibnd,ik1)*uact(nu+ipol)
+                                    becp1k_d(jkb,is,ibnd,ik)*uact(nu+ipol)
                                  ELSE
                                     ps1k_nc_d(ikb,is,ibnd,id)=              &
                                     ps1k_nc_d(ikb,is,ibnd,id)+              &
                                     int2_d(ih,jh,ipol,nb,na) *              &
-                                    becptk_d(jkb,is,ibnd,ik1)*uact(nu+ipol)
+!                                    becptk_d(jkb,is,ibnd,ik1)*uact(nu+ipol)
+                                    becptk_d(jkb,is,ibnd,ik)*uact(nu+ipol)
                                  ENDIF
                               END DO
                            END IF
                         ELSE
                            ps1k_d (ikb, ibnd, id) = ps1k_d (ikb, ibnd, id) + &
                              (int2_d (ih, jh, ipol, nb, na) *                &
-                              becp1k_d(jkb, 1, ibnd, ik1) ) * uact (nu + ipol)
+!                              becp1k_d(jkb, 1, ibnd, ik1) ) * uact (nu + ipol)
+                              becp1k_d(jkb, 1, ibnd, ik) ) * uact (nu + ipol)
                         ENDIF
                      ENDDO
                   ENDIF  ! okvan

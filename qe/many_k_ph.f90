@@ -120,7 +120,7 @@ PUBLIC deff_d, deff_nc_d, int1_d, int2_d, int1_nc_d, int2_so_d, dbecsum_d, &
 !  Routines of this module
 !
 PUBLIC allocate_many_k_ph, deallocate_many_k_ph, init_k_blocks_ph, &
-       prepare_ph_device, copy_alphap_becp_device
+       prepare_ph_device, copy_alphap_becp_device_all
 
 CONTAINS
 !
@@ -294,12 +294,6 @@ INTEGER, INTENT(IN) :: npe, nsolv
  ALLOCATE(startkb_ph_d(nkblocks_ph))
 
  ALLOCATE(dbecq_d(nkb,nbnd,nksbx_ph*npe*nsolv))
- ALLOCATE(becp1k_d(nkb,npol,nbnd,nksbx_ph))
- ALLOCATE(alphak_d(nkb,npol,nbnd,3,nksbx_ph))
- IF (nsolv==2) THEN
-    ALLOCATE(becptk_d(nkb,npol,nbnd,nksbx_ph))
-    ALLOCATE(alphatk_d(nkb,npol,nbnd,3,nksbx_ph))
- ENDIF
  ALLOCATE(ps1k_d(nkb,nbnd,nksbx_ph*npe*nsolv))
  ALLOCATE(ps2k_d(nkb,nbnd,3,nksbx_ph*npe*nsolv))
  ALLOCATE(ps1k_nc_d(nkb,npol,nbnd,nksbx_ph*npe*nsolv))
@@ -347,10 +341,6 @@ IF (ALLOCATED(evqk_d)) DEALLOCATE(evqk_d)
 IF (ALLOCATED(h_diagk_ph_d)) DEALLOCATE(h_diagk_ph_d)
 
 IF (ALLOCATED(dbecq_d)) DEALLOCATE(dbecq_d)
-IF (ALLOCATED(becp1k_d)) DEALLOCATE(becp1k_d)
-IF (ALLOCATED(alphak_d)) DEALLOCATE(alphak_d)
-IF (ALLOCATED(becptk_d)) DEALLOCATE(becptk_d)
-IF (ALLOCATED(alphatk_d)) DEALLOCATE(alphatk_d)
 IF (ALLOCATED(ps1k)) DEALLOCATE(ps1k)
 IF (ALLOCATED(ps1k_d)) DEALLOCATE(ps1k_d)
 IF (ALLOCATED(ps2k)) DEALLOCATE(ps2k)
@@ -378,45 +368,50 @@ RETURN
 END SUBROUTINE deallocate_many_k_ph
 !
 !------------------------------------------------------------------
-SUBROUTINE copy_alphap_becp_device(ikb, nsolv)
+SUBROUTINE copy_alphap_becp_device_all(nsolv)
 !------------------------------------------------------------------
 USE phus,          ONLY : alphap
 USE lrus,          ONLY : becp1
 USE qpoint_aux,    ONLY : becpt, alphapt
+USE qpoint,        ONLY : nksq
 USE uspp,          ONLY : nkb
 USE wvfct,         ONLY : nbnd
 USE noncollin_module, ONLY : noncolin, npol
 IMPLICIT NONE
 INTEGER :: ikb
 
-INTEGER :: ik, ik1, ipol, nsolv
+INTEGER :: ik, ipol, nsolv
 !
 #if defined(__CUDA)
-DO ik=startkb_ph(ikb)+1, startkb_ph(ikb)+nksb_ph(ikb)
-   ik1=ik-startkb_ph(ikb)
-   IF (noncolin) THEN
-      becp1k_d(1:nkb,1:npol,1:nbnd,ik1)=becp1(ik)%nc(1:nkb,1:npol,1:nbnd)
+IF (noncolin) THEN
+   DO ik=1, nksq
+      becp1k_d(1:nkb,1:npol,1:nbnd,ik)=becp1(ik)%nc(1:nkb,1:npol,1:nbnd)
       DO ipol=1,3
-         alphak_d(1:nkb,1:npol,1:nbnd,ipol,ik1)=&
+         alphak_d(1:nkb,1:npol,1:nbnd,ipol,ik)=&
                              alphap(ipol,ik)%nc(1:nkb,1:npol,1:nbnd)
       ENDDO
       IF (nsolv==2) THEN
-         becptk_d(1:nkb,1:npol,1:nbnd,ik1)=becpt(ik)%nc(1:nkb,1:npol,1:nbnd)
+         becptk_d(1:nkb,1:npol,1:nbnd,ik)=becpt(ik)%nc(1:nkb,1:npol,1:nbnd)
          DO ipol=1,3
-            alphatk_d(1:nkb,1:npol,1:nbnd,ipol,ik1)=&
+            alphatk_d(1:nkb,1:npol,1:nbnd,ipol,ik)=&
                              alphapt(ipol,ik)%nc(1:nkb,1:npol,1:nbnd)
          ENDDO
       ENDIF
-   ELSE
-      becp1k_d(1:nkb,1,1:nbnd,ik1)=becp1(ik)%k(1:nkb,1:nbnd)
+   ENDDO
+ELSE
+   CALL start_clock('pall')
+   DO ik=1, nksq
+      becp1k_d(1:nkb,1,1:nbnd,ik)=becp1(ik)%k(1:nkb,1:nbnd)
       DO ipol=1,3
-         alphak_d(1:nkb,1,1:nbnd,ipol,ik1)=alphap(ipol,ik)%k(1:nkb,1:nbnd)
+         alphak_d(1:nkb,1,1:nbnd,ipol,ik)=alphap(ipol,ik)%k(1:nkb,1:nbnd)
       ENDDO
-   ENDIF
-ENDDO
+   ENDDO
+   CALL print_clock('pall')
+ENDIF
 #endif
 
 RETURN
-END SUBROUTINE copy_alphap_becp_device
+END SUBROUTINE copy_alphap_becp_device_all
+
 !
 END MODULE many_k_ph_mod

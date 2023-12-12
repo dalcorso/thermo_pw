@@ -462,14 +462,14 @@ END SUBROUTINE incdrho_calbec
                 ijh=ijtoh(ih,ih,nt)
                 dbecsum_d (ijh, na, 1, st_+ibnd) = &
                    dbecsum_d(ijh, na, 1, st_+ibnd) + wgt * &
-                       (CONJG(becp1k_d(ikb,1,ibnd,ik1))*dbecq_d(ikb,ibnd,id))
+                       (CONJG(becp1k_d(ikb,1,ibnd,ik))*dbecq_d(ikb,ibnd,id))
                 DO jh = ih + 1, nh (nt)
                    ijh=ijtoh(ih,jh,nt)
                    jkb = ijkb0 + jh
                    dbecsum_d (ijh, na, 1, st_+ibnd) =                        &
                            dbecsum_d (ijh, na, 1, st_+ibnd) +                &
-                    wgt*(CONJG(becp1k_d(ikb,1,ibnd,ik1))*dbecq_d(jkb,ibnd,id)+&
-                         CONJG(becp1k_d(jkb,1,ibnd,ik1))*dbecq_d(ikb,ibnd,id) )
+                    wgt*(CONJG(becp1k_d(ikb,1,ibnd,ik))*dbecq_d(jkb,ibnd,id)+&
+                         CONJG(becp1k_d(jkb,1,ibnd,ik))*dbecq_d(ikb,ibnd,id) )
                 ENDDO
                 ijh = ijh + 1
              ENDDO

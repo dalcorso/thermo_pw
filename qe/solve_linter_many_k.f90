@@ -72,7 +72,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
                             init_k_blocks_ph, current_ikb_ph, nkblocks_ph, &
                             startkb_ph, nksb_ph, nksbx_ph,  &
                             prepare_ph_device, &
-                            copy_alphap_becp_device, ps2k_d, ps2k, ps1k_d, &
+                            ps2k_d, ps2k, ps1k_d, &
                             ps1k
   USE many_k_mod,   ONLY : evck_d, vkbk_d, g2kink_d, initialize_fft_factors, &
                            deallocate_fft_factors, allocate_becps_many_k, &
@@ -335,7 +335,6 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
         ALLOCATE(outk_d(nksb_ph(ikb)*npe*nsolv))
         ALLOCATE(nbndk_d(nksb_ph(ikb)*npe*nsolv))
         ALLOCATE(npwk_d(nksb_ph(ikb)*npe*nsolv))
-        CALL copy_alphap_becp_device(ikb, nsolv)
 #endif
         current_ikb_ph=ikb
 !

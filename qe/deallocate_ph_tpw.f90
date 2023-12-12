@@ -32,8 +32,15 @@ SUBROUTINE deallocate_ph_tpw
 
 USE optical, ONLY : fru
 USE images_omega, ONLY : comp_f
+USE many_k_ph_mod, ONLY : becp1k_d, alphak_d, becptk_d, alphatk_d
 IMPLICIT NONE
-    IF (ALLOCATED(fru)) DEALLOCATE(fru)
-    IF (ALLOCATED(comp_f)) DEALLOCATE(comp_f)
+
+IF (ALLOCATED(fru)) DEALLOCATE(fru)
+IF (ALLOCATED(comp_f)) DEALLOCATE(comp_f)
+IF (ALLOCATED(becp1k_d)) DEALLOCATE(becp1k_d)
+IF (ALLOCATED(alphak_d)) DEALLOCATE(alphak_d)
+IF (ALLOCATED(becptk_d)) DEALLOCATE(becptk_d)
+IF (ALLOCATED(alphatk_d)) DEALLOCATE(alphatk_d)
+
 RETURN
 END SUBROUTINE deallocate_ph_tpw
