@@ -8,7 +8,7 @@
 590        ! C44
 2650       ! density in kg/m^3
 0          ! number of atom (not given)
-1          ! plane of the plot xy
+3          ! plane of the plot xy
 
 !
 ! This example shows the use of the code elastic.x to compute the
