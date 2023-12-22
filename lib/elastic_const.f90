@@ -2089,12 +2089,14 @@ IF (flag) THEN
    WRITE(stdout, '(5x, "Young modulus E = ",f12.5," kbar")') e0v
    WRITE(stdout, '(5x, "Shear modulus G = ",f12.5," kbar")') g0v
    WRITE(stdout, '(5x,"Poisson Ratio n = ",f12.5)') nuv
+   WRITE(stdout, '(5x,"Pugh Ratio r = ",f15.5)') g0v/b0v
 
    WRITE(stdout, '(/,5x, "Reuss approximation:")') 
    WRITE(stdout, '(5x, "Bulk modulus  B = ",f12.5," kbar")') b0r
    WRITE(stdout, '(5x, "Young modulus E = ",f12.5," kbar")') e0r
    WRITE(stdout, '(5x, "Shear modulus G = ",f12.5," kbar")') g0r
    WRITE(stdout, '(5x,"Poisson Ratio n = ",f12.5)') nur
+   WRITE(stdout, '(5x,"Pugh Ratio r = ",f15.5)') g0r/b0r
 
    WRITE(stdout, '(/,5x, "Voigt-Reuss-Hill average of the two &
                                                          &approximations:")') 
@@ -2103,6 +2105,8 @@ IF (flag) THEN
    WRITE(stdout, '(5x, "Shear modulus G = ",f12.5," kbar")') (g0v+g0r)*0.5_DP
    WRITE(stdout, '(5x,"Poisson Ratio n = ",f12.5)') (e0v+e0r)/    &
                                                  (2.d0*(g0v+g0r))-1.0_DP
+   WRITE(stdout, '(5x,"Pugh Ratio r = ",f15.5)') (g0v+g0r)/(b0v+b0r)
+                                                 
 END IF
 
 macro_el(1)=b0v
