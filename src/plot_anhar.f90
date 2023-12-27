@@ -413,10 +413,10 @@ DO itempp=1,ntemp_plot
    last_step=(itempp==ntemp_plot)
    itemp=itemp_plot(itempp)
    istep=MOD(istep,8)+1
-   filename="anhar_files/"//TRIM(flanhar)//'.mur_temp'
+   filename="anhar_files/"//TRIM(flanhar)//'.temp'
    CALL add_value(filename,temp(itemp))
    CALL add_pressure(filename)
-   filename_ph="anhar_files/"//TRIM(flanhar)//'.mur_ph_temp'
+   filename_ph="anhar_files/"//TRIM(flanhar)//'.ph_temp'
    CALL add_value(filename_ph,temp(itemp))
    CALL add_pressure(filename_ph)
    IF (first_step) THEN
@@ -428,10 +428,10 @@ DO itempp=1,ntemp_plot
 
    ENDIF
    IF (ltherm_dos) &
-      CALL gnuplot_write_file_mul_data(filename,4,1,color(istep),first_step, &
+      CALL gnuplot_write_file_mul_data(filename,1,2,color(istep),first_step, &
                  (last_step.AND..NOT.ltherm_freq), .FALSE.)
    IF (ltherm_freq) &
-      CALL gnuplot_write_file_mul_data(filename_ph,4,1,color(istep), &
+      CALL gnuplot_write_file_mul_data(filename_ph,1,2,color(istep), &
                  (first_step.AND..NOT.ltherm_dos), last_step, .FALSE.)
 ENDDO
 

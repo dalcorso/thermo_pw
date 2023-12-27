@@ -822,37 +822,40 @@ SUBROUTINE quadratic_fit_pt()
   DO ipressp=1, npress_plot
      ipress=ipress_plot(ipressp)
      DO itemp=1, ntemp
-        CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
+
+        IF (itemp==1.OR..NOT.lquartic) THEN
+           CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
                                      p2_p(ipress), p2t_t(itemp))
+        ENDIF
 !        WRITE(stdout,'(/,5x,"Extremum of the quadratic found at:")')
 !        CALL write_vector(nvar,x_pos_min)
 !        CALL print_genergy(ymin)
 
         IF (lquartic) THEN
            IF (poly_degree_ph==4) THEN
-!              WRITE(stdout,'(/,5x, "Fit improved with a fourth &
-!                                                   &order polynomial")') 
+!           WRITE(stdout,'(/,5x, "Fit improved with a fourth &
+!                                                &order polynomial")') 
               CALL find_two_quartic_extremum(nvar, x_pos_min, ymin, &
-                                             p4_p(ipress), p4t_t(itemp)) 
-!              WRITE(stdout,'(/,5x,"Extremum of the quartic found at:")')
+                                          p4_p(ipress), p4t_t(itemp)) 
+!           WRITE(stdout,'(/,5x,"Extremum of the quartic found at:")')
            ELSEIF (poly_degree_ph==3) THEN
-!              WRITE(stdout,'(/,5x, "Fit improved with a third order &
-!                                                         &polynomial")') 
+!           WRITE(stdout,'(/,5x, "Fit improved with a third order &
+!                                                      &polynomial")') 
               CALL find_quartic_cubic_extremum(nvar, x_pos_min, ymin, &
-                       p4_p(ipress), p3t_t(itemp))
-!              WRITE(stdout,'(/,5x,"Extremum of the quartic+cubic found at:")')
+                    p4_p(ipress), p3t_t(itemp))
+!           WRITE(stdout,'(/,5x,"Extremum of the quartic+cubic found at:")')
            ELSEIF (poly_degree_ph==1) THEN
-!              WRITE(stdout,'(/,5x, "Fit with a fist order polynomial")') 
+!           WRITE(stdout,'(/,5x, "Fit with a fist order polynomial")') 
               CALL find_quartic_linear_extremum(nvar, x_pos_min, ymin, &
-                                      p4_p(ipress), p1t_t(itemp))
-!              WRITE(stdout,'(/,5x,"Extremum of the quartic+linear found at:")')
+                                   p4_p(ipress), p1t_t(itemp))
+!           WRITE(stdout,'(/,5x,"Extremum of the quartic+linear found at:")')
            ELSE
-!              WRITE(stdout,'(/,5x,"Quartic fit used only a T=0:")')
-              CALL find_quartic_quadratic_extremum(nvar, x_pos_min, ymin, &
+!           WRITE(stdout,'(/,5x,"Quartic fit used only a T=0:")')
+             CALL find_quartic_quadratic_extremum(nvar, x_pos_min, ymin, &
                         p4_p(ipress), p2t_t(itemp))
            ENDIF
-!           CALL write_vector(nvar,x_pos_min)
-!           CALL print_genergy(ymin)
+!          CALL write_vector(nvar,x_pos_min)
+!          CALL print_genergy(ymin)
         ENDIF
 
         emin_pt(itemp,ipressp)=ymin
@@ -912,12 +915,15 @@ SUBROUTINE quadratic_fitf_pt()
   DO ipressp=1, npress_plot
      ipress=ipress_plot(ipressp)
      DO itemp=1, ntemp
-        CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
+
+        IF (itemp==1.OR..NOT.lquartic) THEN
+           CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
                                      p2_p(ipress), p2tf_t(itemp))
 !        WRITE(stdout,'(/,5x,"Extremum of the quadratic found at:")')
 !        CALL write_vector(nvar,x_pos_min)
 !        CALL print_genergy(ymin)
 
+        ENDIF
         IF (lquartic) THEN
            IF (poly_degree_ph==4) THEN
 !              WRITE(stdout,'(/,5x, "Fit improved with a fourth &
@@ -1205,44 +1211,8 @@ SUBROUTINE quadratic_fitf_pt_pm()
   !
 END SUBROUTINE quadratic_fitf_pt_pm
 !
-!-------------------------------------------------------------------
-SUBROUTINE quadratic_fit_ptt_run
-!-------------------------------------------------------------------
-USE kinds, ONLY : DP
-USE temperature, ONLY : ntemp_plot, itemp_plot
-USE anharmonic_ptt, ONLY : celldm_ptt, emin_ptt
-
-IMPLICIT NONE
-INTEGER :: itempp, itemp
-
-DO itempp=1,ntemp_plot
-   itemp=itemp_plot(itempp)
-   CALL quadratic_fit_ptt(celldm_ptt(:,:,itempp), emin_ptt(:,itempp), itemp)
-ENDDO
-
-RETURN
-END SUBROUTINE quadratic_fit_ptt_run
-!
-!-------------------------------------------------------------------
-SUBROUTINE quadratic_fitf_ptt_run
-!-------------------------------------------------------------------
-USE kinds, ONLY : DP
-USE temperature, ONLY : ntemp_plot, itemp_plot
-USE ph_freq_anharmonic_ptt, ONLY : celldmf_ptt, eminf_ptt
-
-IMPLICIT NONE
-INTEGER :: itempp, itemp
-
-DO itempp=1,ntemp_plot
-   itemp=itemp_plot(itempp)
-   CALL quadratic_fitf_ptt(celldmf_ptt(:,:,itempp), eminf_ptt(:,itempp), itemp)
-ENDDO
-
-RETURN
-END SUBROUTINE quadratic_fitf_ptt_run
-!
 !-----------------------------------------------------------------------
-SUBROUTINE quadratic_fit_ptt(celldm_ptt, emin_ptt, itemp)
+SUBROUTINE quadratic_fit_ptt()
   !-----------------------------------------------------------------------
   !
   !   This uses the polynomial interpolation of the vibrational 
@@ -1261,8 +1231,11 @@ SUBROUTINE quadratic_fit_ptt(celldm_ptt, emin_ptt, itemp)
   USE control_quartic_energy, ONLY :  lquartic, poly_degree_ph
   USE lattices,    ONLY : expand_celldm, crystal_parameters
   USE io_global,   ONLY : stdout
+  USE temperature, ONLY : ntemp_plot, itemp_plot
   USE control_pressure, ONLY : npress
   USE anharmonic,  ONLY : p1t_t, p2t_t, p3t_t, p4t_t
+  USE anharmonic_ptt,  ONLY : celldm_ptt, emin_ptt, celldm_ptt_p1, &
+                              celldm_ptt_m1, emin_ptt_p1, emin_ptt_m1
   USE uniform_pressure, ONLY : p2_p, p4_p
 
   USE linear_surfaces,  ONLY : fit_multi_linear, print_chisq_linear
@@ -1273,61 +1246,92 @@ SUBROUTINE quadratic_fit_ptt(celldm_ptt, emin_ptt, itemp)
   USE vector_mod, ONLY : write_vector
 
   IMPLICIT NONE
-  REAL(DP), INTENT(INOUT) :: celldm_ptt(6,npress), emin_ptt(npress)
-  INTEGER, INTENT(IN) :: itemp
-  REAL(DP), ALLOCATABLE :: x_pos_min(:)
-  REAL(DP) :: ymin
-  INTEGER  :: ipress
+  REAL(DP), ALLOCATABLE :: x_pos_min(:), x_pos_min_p1(:), x_pos_min_m1(:)
+  REAL(DP) :: ymin, ymin_p1, ymin_m1
+  INTEGER  :: ipress, itempp, itemp
   INTEGER  :: compute_nwork, compute_nwork_ph
   !
   nvar=crystal_parameters(ibrav)
   !
   ALLOCATE(x_pos_min(nvar))
+  ALLOCATE(x_pos_min_p1(nvar))
+  ALLOCATE(x_pos_min_m1(nvar))
 
-  DO ipress=1, npress
-     CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
+  DO itempp=1,ntemp_plot
+     itemp=itemp_plot(itempp)
+     DO ipress=1, npress
+        IF (ipress==1.OR..NOT.lquartic) THEN
+           CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
                                      p2_p(ipress), p2t_t(itemp))
-!     WRITE(stdout,'(/,5x,"Extremum of the quadratic found at:")')
-!     CALL write_vector(nvar,x_pos_min)
-!     CALL print_genergy(ymin)
-
-     IF (lquartic) THEN
-        IF (poly_degree_ph==4) THEN
-!           WRITE(stdout,'(/,5x, "Fit improved with a fourth &
-!                                                &order polynomial")') 
-           CALL find_two_quartic_extremum(nvar, x_pos_min, ymin, &
-                                          p4_p(ipress), p4t_t(itemp)) 
-!           WRITE(stdout,'(/,5x,"Extremum of the quartic found at:")')
-        ELSEIF (poly_degree_ph==3) THEN
-!           WRITE(stdout,'(/,5x, "Fit improved with a third order &
-!                                                      &polynomial")') 
-           CALL find_quartic_cubic_extremum(nvar, x_pos_min, ymin, &
-                    p4_p(ipress), p3t_t(itemp))
-!           WRITE(stdout,'(/,5x,"Extremum of the quartic+cubic found at:")')
-        ELSEIF (poly_degree_ph==1) THEN
-!           WRITE(stdout,'(/,5x, "Fit with a fist order polynomial")') 
-           CALL find_quartic_linear_extremum(nvar, x_pos_min, ymin, &
-                                   p4_p(ipress), p1t_t(itemp))
-!           WRITE(stdout,'(/,5x,"Extremum of the quartic+linear found at:")')
-        ELSE
-!           WRITE(stdout,'(/,5x,"Quartic fit used only a T=0:")')
-           CALL find_quartic_quadratic_extremum(nvar, x_pos_min, ymin, &
-                     p4_p(ipress), p2t_t(itemp))
-        ENDIF
+           CALL find_two_quadratic_extremum(nvar, x_pos_min_p1, ymin_p1, &
+                                     p2_p(ipress), p2t_t(itemp+1))
+           CALL find_two_quadratic_extremum(nvar, x_pos_min_m1, ymin_m1, &
+                                     p2_p(ipress), p2t_t(itemp-1))
+!        WRITE(stdout,'(/,5x,"Extremum of the quadratic found at:")')
 !        CALL write_vector(nvar,x_pos_min)
 !        CALL print_genergy(ymin)
-     ENDIF
+        ENDIF
 
-     emin_ptt(ipress)=ymin
-     CALL expand_celldm(celldm_ptt(:,ipress), x_pos_min, nvar, ibrav)
-
+        IF (lquartic) THEN
+           IF (poly_degree_ph==4) THEN
+!             WRITE(stdout,'(/,5x, "Fit improved with a fourth &
+!                                                &order polynomial")') 
+              CALL find_two_quartic_extremum(nvar, x_pos_min, ymin, &
+                                             p4_p(ipress), p4t_t(itemp)) 
+              CALL find_two_quartic_extremum(nvar, x_pos_min_p1, ymin_p1, &
+                                             p4_p(ipress), p4t_t(itemp+1)) 
+              CALL find_two_quartic_extremum(nvar, x_pos_min_m1, ymin_m1, &
+                                             p4_p(ipress), p4t_t(itemp-1)) 
+!             WRITE(stdout,'(/,5x,"Extremum of the quartic found at:")')
+           ELSEIF (poly_degree_ph==3) THEN
+!             WRITE(stdout,'(/,5x, "Fit improved with a third order &
+!                                                      &polynomial")') 
+              CALL find_quartic_cubic_extremum(nvar, x_pos_min, ymin, &
+                    p4_p(ipress), p3t_t(itemp))
+              CALL find_quartic_cubic_extremum(nvar, x_pos_min_p1, ymin_p1, &
+                    p4_p(ipress), p3t_t(itemp+1))
+              CALL find_quartic_cubic_extremum(nvar, x_pos_min_m1, ymin_m1, &
+                    p4_p(ipress), p3t_t(itemp-1))
+!             WRITE(stdout,'(/,5x,"Extremum of the quartic+cubic found at:")')
+           ELSEIF (poly_degree_ph==1) THEN
+!             WRITE(stdout,'(/,5x, "Fit with a fist order polynomial")') 
+              CALL find_quartic_linear_extremum(nvar, x_pos_min, ymin, &
+                                   p4_p(ipress), p1t_t(itemp))
+              CALL find_quartic_linear_extremum(nvar, x_pos_min_p1, ymin_p1, &
+                                   p4_p(ipress), p1t_t(itemp+1))
+              CALL find_quartic_linear_extremum(nvar, x_pos_min_m1, ymin_m1, &
+                                   p4_p(ipress), p1t_t(itemp-1))
+!              WRITE(stdout,'(/,5x,"Extremum of the quartic+linear found at:")')
+           ELSE
+!             WRITE(stdout,'(/,5x,"Quartic fit used only a T=0:")')
+              CALL find_quartic_quadratic_extremum(nvar, x_pos_min, ymin, &
+                     p4_p(ipress), p2t_t(itemp))
+              CALL find_quartic_quadratic_extremum(nvar, x_pos_min_p1, &
+                     ymin_p1, p4_p(ipress), p2t_t(itemp+1))
+              CALL find_quartic_quadratic_extremum(nvar, x_pos_min_m1, &
+                     ymin_m1, p4_p(ipress), p2t_t(itemp-1))
+           ENDIF
+!          CALL write_vector(nvar,x_pos_min)
+!          CALL print_genergy(ymin)
+        ENDIF
+        emin_ptt(ipress,itempp)=ymin
+        CALL expand_celldm(celldm_ptt(:,ipress,itempp), x_pos_min, nvar, ibrav)
+        emin_ptt_p1(ipress,itempp)=ymin_p1
+        CALL expand_celldm(celldm_ptt_p1(:,ipress,itempp), x_pos_min_p1, &
+                                                           nvar, ibrav)
+        emin_ptt_m1(ipress,itempp)=ymin_m1
+        CALL expand_celldm(celldm_ptt_m1(:,ipress,itempp), x_pos_min_m1, &
+                                                           nvar, ibrav)
+     ENDDO
   ENDDO
   DEALLOCATE(x_pos_min)
+  DEALLOCATE(x_pos_min_p1)
+  DEALLOCATE(x_pos_min_m1)
   !
   RETURN
 END SUBROUTINE quadratic_fit_ptt
 !-----------------------------------------------------------------------
-SUBROUTINE quadratic_fitf_ptt(celldmf_ptt, eminf_ptt, itemp)
+SUBROUTINE quadratic_fitf_ptt()
   !-----------------------------------------------------------------------
   !
   !   This uses the polynomial interpolation of the vibrational 
@@ -1346,8 +1350,12 @@ SUBROUTINE quadratic_fitf_ptt(celldmf_ptt, eminf_ptt, itemp)
   USE control_quartic_energy, ONLY :  lquartic, poly_degree_ph
   USE lattices,    ONLY : expand_celldm, crystal_parameters
   USE io_global,   ONLY : stdout
+  USE temperature, ONLY : ntemp_plot, itemp_plot
   USE control_pressure, ONLY : npress
   USE ph_freq_anharmonic,  ONLY : p1tf_t, p2tf_t, p3tf_t, p4tf_t
+  USE ph_freq_anharmonic_ptt, ONLY : celldmf_ptt, eminf_ptt, celldmf_ptt_p1, &
+                                     eminf_ptt_p1, celldmf_ptt_m1,           &
+                                     eminf_ptt_m1
   USE uniform_pressure, ONLY : p2_p, p4_p
 
   USE linear_surfaces,  ONLY : fit_multi_linear, print_chisq_linear
@@ -1358,114 +1366,93 @@ SUBROUTINE quadratic_fitf_ptt(celldmf_ptt, eminf_ptt, itemp)
   USE vector_mod, ONLY : write_vector
 
   IMPLICIT NONE
-  REAL(DP), INTENT(INOUT) :: celldmf_ptt(6,npress), eminf_ptt(npress)
-  INTEGER, INTENT(IN) :: itemp
-  REAL(DP), ALLOCATABLE :: x_pos_min(:)
-  REAL(DP) :: ymin
-  INTEGER  :: ipress
+  REAL(DP), ALLOCATABLE :: x_pos_min(:), x_pos_min_p1(:), x_pos_min_m1(:)
+  REAL(DP) :: ymin, ymin_p1, ymin_m1
+  INTEGER  :: ipress, itempp, itemp
   INTEGER  :: compute_nwork, compute_nwork_ph
   !
   nvar=crystal_parameters(ibrav)
   !
   ALLOCATE(x_pos_min(nvar))
+  ALLOCATE(x_pos_min_p1(nvar))
+  ALLOCATE(x_pos_min_m1(nvar))
 
-  DO ipress=1, npress
-     CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
-                                     p2_p(ipress), p2tf_t(itemp))
-!     WRITE(stdout,'(/,5x,"Extremum of the quadratic found at:")')
-!     CALL write_vector(nvar,x_pos_min)
-!     CALL print_genergy(ymin)
+  DO itempp=1, ntemp_plot
+     itemp=itemp_plot(itempp)
+     DO ipress=1, npress
+        IF (ipress==1.OR..NOT.lquartic) THEN
+           CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
+                                        p2_p(ipress), p2tf_t(itemp))
+           CALL find_two_quadratic_extremum(nvar, x_pos_min_p1, ymin_p1, &
+                                        p2_p(ipress), p2tf_t(itemp+1))
+           CALL find_two_quadratic_extremum(nvar, x_pos_min_m1, ymin_m1, &
+                                        p2_p(ipress), p2tf_t(itemp-1))
+!          WRITE(stdout,'(/,5x,"Extremum of the quadratic found at:")')
+!          CALL write_vector(nvar,x_pos_min)
+!          CALL print_genergy(ymin)
+        ENDIF
 
-     IF (lquartic) THEN
-        IF (poly_degree_ph==4) THEN
+        IF (lquartic) THEN
+           IF (poly_degree_ph==4) THEN
 !           WRITE(stdout,'(/,5x, "Fit improved with a fourth &
 !                                                &order polynomial")') 
-           CALL find_two_quartic_extremum(nvar, x_pos_min, ymin, &
+              CALL find_two_quartic_extremum(nvar, x_pos_min, ymin, &
                                           p4_p(ipress), p4tf_t(itemp)) 
+              CALL find_two_quartic_extremum(nvar, x_pos_min_p1, ymin_p1, &
+                                          p4_p(ipress), p4tf_t(itemp+1)) 
+              CALL find_two_quartic_extremum(nvar, x_pos_min_m1, ymin_m1, &
+                                          p4_p(ipress), p4tf_t(itemp-1)) 
 !           WRITE(stdout,'(/,5x,"Extremum of the quartic found at:")')
-        ELSEIF (poly_degree_ph==3) THEN
+           ELSEIF (poly_degree_ph==3) THEN
 !           WRITE(stdout,'(/,5x, "Fit improved with a third order &
 !                                                      &polynomial")') 
-           CALL find_quartic_cubic_extremum(nvar, x_pos_min, ymin, &
+              CALL find_quartic_cubic_extremum(nvar, x_pos_min, ymin, &
                     p4_p(ipress), p3tf_t(itemp))
+              CALL find_quartic_cubic_extremum(nvar, x_pos_min_p1, ymin_p1, &
+                    p4_p(ipress), p3tf_t(itemp+1))
+              CALL find_quartic_cubic_extremum(nvar, x_pos_min_m1, ymin_m1, &
+                    p4_p(ipress), p3tf_t(itemp-1))
 !           WRITE(stdout,'(/,5x,"Extremum of the quartic+cubic found at:")')
-        ELSEIF (poly_degree_ph==1) THEN
+           ELSEIF (poly_degree_ph==1) THEN
 !           WRITE(stdout,'(/,5x, "Fit with a fist order polynomial")') 
-           CALL find_quartic_linear_extremum(nvar, x_pos_min, ymin, &
+              CALL find_quartic_linear_extremum(nvar, x_pos_min, ymin, &
                                    p4_p(ipress), p1tf_t(itemp))
+              CALL find_quartic_linear_extremum(nvar, x_pos_min_p1, ymin_p1, &
+                                   p4_p(ipress), p1tf_t(itemp+1))
+              CALL find_quartic_linear_extremum(nvar, x_pos_min_m1, ymin_m1, &
+                                   p4_p(ipress), p1tf_t(itemp-1))
 !           WRITE(stdout,'(/,5x,"Extremum of the quartic+linear found at:")')
-        ELSE
+           ELSE
 !           WRITE(stdout,'(/,5x,"Quartic fit used only a T=0:")')
-           CALL find_quartic_quadratic_extremum(nvar, x_pos_min, ymin, &
+              CALL find_quartic_quadratic_extremum(nvar, x_pos_min, ymin, &
                      p4_p(ipress), p2tf_t(itemp))
+              CALL find_quartic_quadratic_extremum(nvar, x_pos_min_p1, &
+                                   ymin_p1, p4_p(ipress), p2tf_t(itemp+1))
+              CALL find_quartic_quadratic_extremum(nvar, x_pos_min_m1, &
+                                   ymin_m1, p4_p(ipress), p2tf_t(itemp-1))
+           ENDIF
+!           CALL write_vector(nvar,x_pos_min)
+!           CALL print_genergy(ymin)
         ENDIF
-!        CALL write_vector(nvar,x_pos_min)
-!        CALL print_genergy(ymin)
-     ENDIF
 
-     eminf_ptt(ipress)=ymin
-     CALL expand_celldm(celldmf_ptt(:,ipress), x_pos_min, nvar, ibrav)
+        eminf_ptt(ipress,itempp)=ymin
+        CALL expand_celldm(celldmf_ptt(:,ipress,itempp), x_pos_min, nvar, ibrav)
 
+        eminf_ptt_p1(ipress,itempp)=ymin_p1
+        CALL expand_celldm(celldmf_ptt_p1(:,ipress,itempp), x_pos_min_p1, &
+                                                                 nvar, ibrav)
+        eminf_ptt_m1(ipress,itempp)=ymin_m1
+        CALL expand_celldm(celldmf_ptt_m1(:,ipress,itempp), x_pos_min_m1, &
+                                                                 nvar, ibrav)
+     ENDDO
   ENDDO
   DEALLOCATE(x_pos_min)
+  DEALLOCATE(x_pos_min_p1)
+  DEALLOCATE(x_pos_min_m1)
   !
   RETURN
 END SUBROUTINE quadratic_fitf_ptt
 !
-!-------------------------------------------------------------------------
-SUBROUTINE quadratic_fit_ptt_pm
-!-------------------------------------------------------------------------
-!
-USE kinds, ONLY : DP
-USE temperature, ONLY : ntemp_plot, itemp_plot
-USE anharmonic_ptt, ONLY : celldm_ptt_p1, emin_ptt_p1, celldm_ptt_m1, &
-                           emin_ptt_m1
-
-IMPLICIT NONE
-INTEGER :: itempp, itemp
-
-DO itempp=1,ntemp_plot
-!
-!  to obtain the thermal expansion we need the equilibrium celldm at
-!  temperature itemp, itemp+1, and itemp-1
-!
-   itemp=itemp_plot(itempp)
-   CALL quadratic_fit_ptt(celldm_ptt_p1(:,:,itempp), &
-                             emin_ptt_p1(:,itempp), itemp+1)
-   CALL quadratic_fit_ptt(celldm_ptt_m1(:,:,itempp), &
-                             emin_ptt_m1(:,itempp), itemp-1)
-ENDDO
-
-RETURN
-END SUBROUTINE quadratic_fit_ptt_pm
-
-!-------------------------------------------------------------------------
-SUBROUTINE quadratic_fitf_ptt_pm
-!-------------------------------------------------------------------------
-!
-USE kinds, ONLY : DP
-USE temperature, ONLY : ntemp_plot, itemp_plot
-USE ph_freq_anharmonic_ptt, ONLY : celldmf_ptt_p1, eminf_ptt_p1, &
-                        celldmf_ptt_m1, eminf_ptt_m1
-
-IMPLICIT NONE
-INTEGER :: itempp, itemp
-
-DO itempp=1,ntemp_plot
-!
-!  to obtain the thermal expansion we need the equilibrium celldm at
-!  temperature itemp, itemp+1, and itemp-1
-!
-   itemp=itemp_plot(itempp)
-   CALL quadratic_fitf_ptt(celldmf_ptt_p1(:,:,itempp), &
-                             eminf_ptt_p1(:,itempp), itemp+1)
-   CALL quadratic_fitf_ptt(celldmf_ptt_m1(:,:,itempp), &
-                             eminf_ptt_m1(:,itempp), itemp-1)
-ENDDO
-
-RETURN
-END SUBROUTINE quadratic_fitf_ptt_pm
-
 !-------------------------------------------------------------------
 SUBROUTINE set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
 !-------------------------------------------------------------------

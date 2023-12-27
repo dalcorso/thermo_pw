@@ -101,8 +101,8 @@ DO ipress=1, npress
    DO idata=1, ndata
      f(idata)=energy_geo(idata) + press(ipress) * omega_geo(idata) / ry_kbar
    END DO
+   CALL fit_multi_quadratic(ndata,nvar,lsolve,x,f,p2_p(ipress))
    IF (ipress==1.OR..NOT.lquartic) THEN
-      CALL fit_multi_quadratic(ndata,nvar,lsolve,x,f,p2_p(ipress))
 !   CALL print_chisq_quadratic(ndata, nvar, x, f, p2_p(ipress))
       CALL find_quadratic_extremum(nvar,x_pos_min,ymin,p2_p(ipress))
 !      WRITE(stdout,'(5x, "pressure: ",f20.7)') press(ipress), x_pos_min(1:nvar)
@@ -282,7 +282,11 @@ ALLOCATE(omega(npress))
 ALLOCATE(celldmp(6,npress))
 CALL init_poly(nvar,p2)
 
-IF (lquartic) ALLOCATE(x_min_4(nvar))
+IF (lquartic) THEN
+   ALLOCATE(x_min_4(nvar))
+   CALL init_poly(nvar,p4)
+ENDIF
+
 ndata=0
 DO idata=1,ndatatot
    IF (no_ph(idata)) CYCLE
@@ -299,14 +303,15 @@ DO ipress=1, npress
    DO idata=1, ndata
      f(idata)=f1(idata) + press(ipress) * ome(idata)/ry_kbar
    END DO
-   CALL fit_multi_quadratic(ndata,nvar,lsolve,x,f,p2)
-!   CALL print_chisq_quadratic(ndata, nvar, x, f, p2)
-   CALL find_quadratic_extremum(nvar,x_pos_min,ymin,p2)
+   IF (ipress==1.OR..NOT.lquartic) THEN
+      CALL fit_multi_quadratic(ndata,nvar,lsolve,x,f,p2)
+!     CALL print_chisq_quadratic(ndata, nvar, x, f, p2)
+      CALL find_quadratic_extremum(nvar,x_pos_min,ymin,p2)
+   ENDIF
    IF (lquartic) THEN
 !
 !   fit the enthalpy with a quartic polynomial and find the minimum
 !
-      CALL init_poly(nvar,p4)
       CALL fit_multi_quartic(ndata,nvar,lsolve,x,f,p4)
 !      CALL print_quartic_polynomial(nvar,p4)
 !      CALL print_chisq_quartic(ndata, nvar, x, f, p4)
@@ -318,7 +323,7 @@ DO ipress=1, npress
 !
       omega(ipress)=compute_omega_geo(ibrav,celldmp(1,ipress))
       e(ipress)=ymin4 - press(ipress) * omega(ipress)/ry_kbar
-      CALL clean_poly(p4)
+      x_pos_min=x_min_4
    ELSE
       CALL expand_celldm(celldmp(1,ipress), x_pos_min, nvar, ibrav)
       omega(ipress)=compute_omega_geo(ibrav,celldmp(1,ipress))
@@ -368,7 +373,10 @@ DEALLOCATE(ome)
 DEALLOCATE(celldmp)
 CALL clean_poly(p2)
 
-IF (lquartic) DEALLOCATE(x_min_4)
+IF (lquartic) THEN
+   DEALLOCATE(x_min_4)
+   CALL clean_poly(p4)
+ENDIF
 
 RETURN
 END SUBROUTINE write_e_omega_t
