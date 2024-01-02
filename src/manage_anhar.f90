@@ -662,7 +662,7 @@ IF (ltherm_freq) THEN
    CALL write_ph_freq_anhar_el_pt()
 ENDIF
 !
-!  Plot elastic constants and compliances
+!  Plot elastic constants and compliances when what='mur_lc_t'
 !
 CALL manage_plot_elastic()
 !

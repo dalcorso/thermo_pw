@@ -466,7 +466,7 @@ LOGICAL, INTENT(IN) :: lelastic, lelasticf, with_s
 CHARACTER(LEN=*) :: label
 CHARACTER(LEN=256), INTENT(IN) :: filelastic, filelastic_s
 
-INTEGER :: igeom, last_ngeom
+INTEGER :: igeom, first_ngeom, last_ngeom
 CHARACTER(LEN=256) :: filename, filename_s, filename_ph, filename_s_ph
 CHARACTER(LEN=6) :: int_to_char
 
@@ -481,7 +481,9 @@ filename_ph=TRIM(filelastic)//'_ph'
 filename_s_ph=TRIM(filelastic_s)//'_ph'
 
 last_ngeom=1
+first_ngeom=0
 DO igeom=1,ngeom
+   IF (all_geometry_done_geo(igeom).AND.first_ngeom==0) first_ngeom=igeom
    IF (all_geometry_done_geo(igeom)) last_ngeom=igeom
 ENDDO
 
@@ -496,7 +498,8 @@ IF (lelastic) THEN
          filename=TRIM(filelastic)//".g"//TRIM(int_to_char(igeom))
          ic=MOD(igeom-1,8)+1
          CALL gnuplot_write_file_mul_data(filename,i,j,color(ic),&
-                   (igeom==1), (igeom==last_ngeom).AND..NOT.lelasticf,.FALSE.)
+                   (igeom==first_ngeom), (igeom==last_ngeom).AND. &
+                                             .NOT.lelasticf,.FALSE.)
       END DO
    ENDIF
    IF (with_s) &
@@ -513,10 +516,11 @@ IF (lelasticf) THEN
 !
       DO igeom=1, ngeom
          IF (.NOT.all_geometry_done_geo(igeom)) CYCLE
-         filename=TRIM(filelastic)//".g"//TRIM(int_to_char(igeom))//"_ph"
+         filename_ph=TRIM(filelastic)//".g"//TRIM(int_to_char(igeom))//"_ph"
          ic=MOD(igeom-1,8)+1
          CALL gnuplot_write_file_mul_data(filename_ph,i,j,color(ic), &
-             .NOT.lelastic.AND.(igeom==1), (igeom==last_ngeom),.FALSE.)
+             .NOT.lelastic.AND.(igeom==first_ngeom), (igeom==last_ngeom),&
+             .FALSE.)
       ENDDO
    ENDIF
    IF (with_s) &
