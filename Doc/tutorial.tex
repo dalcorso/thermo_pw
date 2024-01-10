@@ -477,7 +477,7 @@ minimizes the Helmholtz (or Gibbs at finite pressure) free energy at
 temperature $T$. \\
 The second method uses the ``quasi-harmonic'' approximation and
 requires many phonon calculations at many geometries.
-First use \texttt{what='elastic\_} \texttt{constants\_geo'} and set
+First use \texttt{what=} \texttt{'elastic\_constants\_geo'} and set
 \texttt{use\_free\_energy=} \texttt{.TRUE.}. This option computes the 
 temperature dependent elastic constants taking as unperturbed geometries 
 those used by \texttt{what='mur\_lc\_t'} and saves them in the directory 
@@ -539,18 +539,19 @@ accounting for the free energy due to the electronic excitations?}}
 This is a four step calculation. First use \texttt{what='mur\_lc'} and
 the flag \texttt{lel\_} \texttt{free\_energy=.TRUE.} as in the previous point
 in order to get the electronic thermodynamic properties for all the 
-unperturbed geometries. Then use \texttt{what=} \texttt{'elastic\_constant\_t'}
-with the flag \texttt{lel\_free\_energy=.TRUE.} and the flag
+unperturbed geometries. Then use \texttt{what=} \texttt{'elastic\_constants\_geo'}
+with the flag \texttt{lel\_free} \texttt{\_energy=.TRUE.} and the flag
 \texttt{use\_free\_energy=.FALSE.} to write on file the electronic
 thermodynamic properties for all strained geometries. Then use
-\texttt{what='elastic\_constant\_t'} with \texttt{lel\_free\_energy=.TRUE.}
+\texttt{what='elastic\_constants\_geo'} with \texttt{lel\_free}
+\texttt{\_energy=.TRUE.}
 and \texttt{use\_free\_energy=.TRUE.} after copying the electronic
 thermodynamic properties obtained at previous point in the 
 \texttt{therm\_files} directory, so the 
 free energy derived in this step to obtain the elastic constants 
 has also the electronic contribution. 
 Finally use \texttt{what='mur\_lc\_t'} with \texttt{lel\_free\_energy=.TRUE.}
-and \texttt{use\_free\_energy=} \texttt{.TRUE.} after copying the elastic
+and \texttt{use\_free\_ene} \texttt{rgy=.TRUE.} after copying the elastic
 constants obtained at previous step in the \texttt{anhar\_files} directory
 and the electronic thermodynamic properties obtained in the first 
 step in the \texttt{therm\_files} directory.
