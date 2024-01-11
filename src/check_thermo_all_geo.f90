@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2017 Andrea Dal Corso
+! Copyright (C) 2017-2024 Andrea Dal Corso
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -17,7 +17,7 @@ SUBROUTINE check_thermo_all_geo()
 USE thermo_mod,            ONLY : tot_ngeo, ibrav_geo, celldm_geo, no_ph, &
                                   start_geometry, last_geometry
 USE control_elastic_constants, ONLY : start_geometry_qha, last_geometry_qha, &
-                                  ngeom
+                                  ngeom, all_geometry_done_geo
 USE cell_base,             ONLY : ibrav, celldm
 USE control_thermo,        ONLY : set_internal_path, lq2r
 USE control_phrun,         ONLY : auxdyn
@@ -29,7 +29,8 @@ INTEGER :: igeom, igeom_qha, iwork, work_base
 CHARACTER(LEN=80)  :: message
 
 work_base=tot_ngeo/ngeom
-DO igeom_qha=start_geometry_qha, last_geometry_qha
+DO igeom_qha=1, ngeom
+   IF (.NOT.all_geometry_done_geo(igeom_qha)) CYCLE
    DO iwork=1,work_base
       igeom=(igeom_qha-1)*work_base+iwork
       IF (no_ph(igeom)) CYCLE
