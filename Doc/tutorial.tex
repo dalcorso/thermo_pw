@@ -502,6 +502,10 @@ The main approximation of the present implementation is that the atomic
 coordinates are relaxed only at $T=0$ K minimizing the energy and
 the free energy is 
 not calculated as a function of the atomic positions.
+Please be careful to use the same \texttt{tmin}, \texttt{tmax}, and
+\texttt{deltat} in these calculations. Only a \texttt{tmax} larger in the
+\texttt{what='elastic\_constants\_geo'} calculation than in 
+\texttt{what='mur\_lc\_t'} is allowed.
 
 \newpage
 {\color{coral}\section{How do I calculate the electronic heat capacity
