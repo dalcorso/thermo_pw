@@ -773,6 +773,7 @@ add_custom_target(tpw_tools
         qe_tpw_change_e_name_exe
         qe_tpw_change_tel_name_exe
         qe_tpw_crystal_point_group_exe
+        qe_tpw_density_exe
         qe_tpw_debye_exe
         qe_tpw_elastic_exe
         qe_tpw_emp_f_exe
@@ -788,7 +789,7 @@ add_custom_target(tpw_tools
         qe_tpw_optical_exe
         qe_tpw_pdec_exe
         qe_tpw_plot_sur_states_exe
-        qe_tpw_rotate_tensor_exe
+        qe_tpw_rotate_tensors_exe
         qe_tpw_space_groups_exe
         qe_tpw_supercell_exe
         qe_tpw_test_colors_exe

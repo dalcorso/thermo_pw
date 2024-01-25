@@ -482,7 +482,6 @@ set(src_tpw
     src/proj_band_structure.f90
     src/q2r_sub.f90
     src/quadratic_fit.f90
-    src/read_elastic_qha.f90
     src/read_minimal_info.f90
     src/readmodes.f90
     src/read_state_densities.f90
@@ -818,16 +817,31 @@ target_link_libraries(qe_tpw_debye_exe
         qe_modules)
 
 ###########################################################
+# density.x
+###########################################################
+
+set(src_density_x tools/density.f90)
+qe_enable_cuda_fortran("${src_density_x}")
+qe_add_executable(qe_tpw_density_exe ${src_density_x})
+set_target_properties(qe_tpw_density_exe 
+    PROPERTIES 
+        OUTPUT_NAME density.x)
+target_link_libraries(qe_tpw_density_exe
+    PRIVATE
+        qe_tpw_lib
+        qe_modules)
+
+###########################################################
 # rotate_tensor.x
 ###########################################################
 
-set(src_rotate_tensor_x tools/rotate_tensor.f90)
-qe_enable_cuda_fortran("${src_debye_x}")
-qe_add_executable(qe_tpw_rotate_tensor_exe ${src_debye_x})
-set_target_properties(qe_tpw_rotate_tensor_exe 
+set(src_rotate_tensors_x tools/rotate_tensors.f90)
+qe_enable_cuda_fortran("${src_rotate_tensors_x}")
+qe_add_executable(qe_tpw_rotate_tensors_exe ${src_rotate_tensors_x})
+set_target_properties(qe_tpw_rotate_tensors_exe 
     PROPERTIES 
-        OUTPUT_NAME rotate_tensor.x)
-target_link_libraries(qe_tpw_rotate_tensor_exe
+        OUTPUT_NAME rotate_tensors.x)
+target_link_libraries(qe_tpw_rotate_tensors_exe
     PRIVATE
         qe_tpw_lib
         qe_modules)
@@ -1011,6 +1025,7 @@ qe_install_targets(
     qe_tpw_change_tel_name_exe
     qe_tpw_crystal_point_group_exe
     qe_tpw_debye_exe
+    qe_tpw_density_exe
     qe_tpw_elastic_exe
     qe_tpw_emp_f_exe
     qe_tpw_emp_g_exe
@@ -1026,7 +1041,7 @@ qe_install_targets(
     qe_tpw_optical_exe
     qe_tpw_pdec_exe
     qe_tpw_plot_sur_states_exe
-    qe_tpw_rotate_tensor_exe
+    qe_tpw_rotate_tensors_exe
     qe_tpw_supercell_exe
     qe_tpw_space_groups_exe
     qe_tpw_test_colors_exe
