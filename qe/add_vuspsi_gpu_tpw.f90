@@ -22,8 +22,7 @@ SUBROUTINE add_vuspsik_gpu( lda, n, m, hpsi_d, ik )
   USE noncollin_module
   USE uspp,            ONLY: ofsbeta, nkb, vkb, deeq, deeq_nc
   USE uspp_param,      ONLY: nh, nhm
-  USE becmod_gpum,     ONLY: bec_type_d, becp_d, using_becp_r_d, &
-                             using_becp_k_d, using_becp_nc_d
+                             
   IMPLICIT NONE
   !
   ! ... I/O variables
@@ -50,7 +49,7 @@ SUBROUTINE add_vuspsik_gpu( lda, n, m, hpsi_d, ik )
   !
   IF ( gamma_only ) THEN
      !
-     CALL add_vuspsik_gamma_gpu()
+     CALL errore('add_vuspsik_gpu','many_k and gamma incompatible',1)
      !
   ELSE IF ( noncolin) THEN
      !
@@ -67,138 +66,6 @@ SUBROUTINE add_vuspsik_gpu( lda, n, m, hpsi_d, ik )
   RETURN
   !
   CONTAINS
-     !
-     !-----------------------------------------------------------------------
-     SUBROUTINE add_vuspsik_gamma_gpu()
-       !-----------------------------------------------------------------------
-       !! See comments inside
-       !
-       USE mp, ONLY: mp_get_comm_null, mp_circular_shift_left
-       USE device_fbuff_m, ONLY : dev_buf
-       !
-#if defined(__CUDA)
-       USE cudafor
-       USE cublas
-#endif
-       !
-       IMPLICIT NONE
-       INTEGER, EXTERNAL :: ldim_block, gind_block
-       REAL(DP), POINTER :: ps_d (:,:)
-       INTEGER :: ierr
-       INTEGER :: nproc, mype, m_loc, m_begin, ibnd_loc, icyc, icur_blk, m_max
-       ! counters
-       INTEGER :: jkb, ikb, ih, jh, na, nt, ibnd
-       !
-#if defined(__CUDA)
-       attributes(device) :: ps_d
-#endif
-       !
-       IF ( nkb == 0 ) RETURN
-       !
-       CALL using_becp_r_d(0)
-       !
-       IF( becp_d%comm == mp_get_comm_null() ) THEN
-          nproc   = 1
-          mype    = 0
-          m_loc   = m
-          m_begin = 1
-          m_max   = m
-       ELSE
-          !
-          ! becp(l,i) = <beta_l|psi_i>, with vkb(n,l)=|beta_l>
-          ! in this case becp(l,i) are distributed (index i is)
-          !
-          nproc   = becp_d%nproc
-          mype    = becp_d%mype
-          m_loc   = becp_d%nbnd_loc
-          m_begin = becp_d%ibnd_begin
-          m_max   = SIZE( becp_d%r_d, 2 )
-          IF( ( m_begin + m_loc - 1 ) > m ) m_loc = m - m_begin + 1
-       END IF
-       !
-       CALL dev_buf%lock_buffer(ps_d, (/ nkb, m_max /), ierr ) !ALLOCATE (ps_d (nkb,m_max), STAT=ierr )
-       !
-       IF( ierr /= 0 ) &
-          CALL errore( ' add_vuspsi_gamma ', ' cannot allocate ps_d ', ABS(ierr) )
-       !
-       ps_d(:,:) = 0.D0
-       !
-       !   In becp=<vkb_i|psi_j> terms corresponding to atom na of type nt
-       !   run from index i=ofsbeta(na)+1 to i=ofsbeta(na)+nh(nt)
-       !
-       DO nt = 1, ntyp
-          !
-          IF ( nh(nt) == 0 ) CYCLE
-          DO na = 1, nat
-             !
-             IF ( ityp(na) == nt ) THEN
-                !
-                ! Next operation computes ps(l',i) = \sum_m deeq(l,m) becp(m',i)
-                ! (l'=l+ijkb0, m'=m+ijkb0, indices run from 1 to nh(nt))
-                !
-                IF ( m_loc > 0 ) THEN
-                  !$acc host_data use_device(deeq)
-                  CALL DGEMM('N', 'N', nh(nt), m_loc, nh(nt), 1.0_dp, &
-                           deeq(1,1,na,current_spin), nhm, &
-                           becp_d%r_d(ofsbeta(na)+1,1), nkb, 0.0_dp, &
-                               ps_d(ofsbeta(na)+1,1), nkb )
-                  !$acc end host_data
-                END IF
-                !
-             END IF
-             !
-          END DO
-          !
-       END DO
-       !
-       IF( becp_d%comm == mp_get_comm_null() ) THEN
-          !
-          ! Normal case: hpsi(n,i) = \sum_l beta(n,l) ps(l,i) 
-          ! (l runs from 1 to nkb)
-          !
-!$acc data present(vkb(:,:))
-!$acc host_data use_device(vkb)
-          CALL DGEMM( 'N', 'N', ( 2 * n ), m, nkb, 1.D0, vkb, &
-                   ( 2 * lda ), ps_d, nkb, 1.D0, hpsi_d, ( 2 * lda ) )
-!$acc end host_data
-!$acc end data
-       ELSE
-          !
-          ! parallel block multiplication of vkb and ps
-          !
-          icur_blk = mype
-          !
-          DO icyc = 0, nproc - 1
-
-             m_loc   = ldim_block( becp_d%nbnd , nproc, icur_blk )
-             m_begin = gind_block( 1,  becp_d%nbnd, nproc, icur_blk )
-
-             IF( ( m_begin + m_loc - 1 ) > m ) m_loc = m - m_begin + 1
-
-             IF( m_loc > 0 ) THEN
-!$acc data present(vkb(:,:))
-!$acc host_data use_device(vkb)
-                CALL DGEMM( 'N', 'N', ( 2 * n ), m_loc, nkb, 1.D0, vkb, &
-                   ( 2 * lda ), ps_d, nkb, 1.D0, hpsi_d( 1, m_begin ), ( 2 * lda ) )
-!$acc end host_data
-!$acc end data
-             ENDIF
-
-             ! block rotation
-             !
-             CALL mp_circular_shift_left( ps_d, icyc, becp_d%comm )
-
-             icur_blk = icur_blk + 1
-             IF( icur_blk == nproc ) icur_blk = 0
-
-          ENDDO
-       ENDIF
-       !
-       CALL dev_buf%release_buffer(ps_d, ierr) ! DEALLOCATE (ps_d)
-       !
-       RETURN
-       !
-     END SUBROUTINE add_vuspsik_gamma_gpu
      !
      !-----------------------------------------------------------------------
      SUBROUTINE add_vuspsik_k_gpu()
@@ -294,7 +161,6 @@ SUBROUTINE add_vuspsik_gpu( lda, n, m, hpsi_d, ik )
        USE cublas
 #endif
        USE device_fbuff_m,      ONLY : dev_buf
-       USE becmod_gpum,   ONLY : becp_d
        IMPLICIT NONE
        COMPLEX(DP), POINTER :: ps_d (:,:,:)
        INTEGER :: ierr
@@ -306,8 +172,6 @@ SUBROUTINE add_vuspsik_gpu( lda, n, m, hpsi_d, ik )
 #endif
        !
        IF ( nkb == 0 ) RETURN
-       !
-       CALL using_becp_nc_d(0)
        !
        ! ALLOCATE (ps_d( nkb, npol, m), STAT=ierr )
        CALL dev_buf%lock_buffer(ps_d, (/ nkb, npol, m /), ierr )
@@ -326,21 +190,21 @@ SUBROUTINE add_vuspsik_gpu( lda, n, m, hpsi_d, ik )
                 !
                 !$acc host_data use_device(deeq_nc)
                 CALL ZGEMM('N','N', nh(nt), m, nh(nt), (1.0_dp,0.0_dp), &
-                           deeq_nc(1,1,na,1), nhm, becp_d%nc_d(ofsbeta(na)+1,1,1), 2*nkb, &
+                           deeq_nc(1,1,na,1), nhm, becpk_d(ofsbeta(na)+1,1,1,ik), 2*nkb, &
                           (0.0_dp, 0.0_dp), ps_d(ofsbeta(na)+1,1,1), 2*nkb )
 
                 CALL ZGEMM('N','N', nh(nt), m, nh(nt), (1.0_dp,0.0_dp), &
-                           deeq_nc(1,1,na,2), nhm, becp_d%nc_d(ofsbeta(na)+1,2,1), 2*nkb, &
+                           deeq_nc(1,1,na,2), nhm, becpk_d(ofsbeta(na)+1,2,1,ik), 2*nkb, &
                           (1.0_dp, 0.0_dp), ps_d(ofsbeta(na)+1,1,1), 2*nkb )
 
 
                 CALL ZGEMM('N','N', nh(nt), m, nh(nt), (1.0_dp,0.0_dp), &
-                           deeq_nc(1,1,na,3), nhm, becp_d%nc_d(ofsbeta(na)+1,1,1), 2*nkb, &
+                           deeq_nc(1,1,na,3), nhm, becpk_d(ofsbeta(na)+1,1,1,ik), 2*nkb, &
                           (0.0_dp, 0.0_dp), ps_d(ofsbeta(na)+1,2,1), 2*nkb )
 
 
                 CALL ZGEMM('N','N', nh(nt), m, nh(nt), (1.0_dp,0.0_dp), &
-                           deeq_nc(1,1,na,4), nhm, becp_d%nc_d(ofsbeta(na)+1,2,1), 2*nkb, &
+                           deeq_nc(1,1,na,4), nhm, becpk_d(ofsbeta(na)+1,2,1,ik), 2*nkb, &
                           (1.0_dp, 0.0_dp), ps_d(ofsbeta(na)+1,2,1), 2*nkb )
                 !$acc end host_data
                 !

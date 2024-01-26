@@ -42,8 +42,6 @@ USE lsda_mod,         ONLY : lsda, current_spin, isk
 USE mp,               ONLY : mp_sum
 USE mp_pools,         ONLY : inter_pool_comm
 USE mp_bands,         ONLY : intra_bgrp_comm
-USE becmod_subs_gpum, ONLY : using_becp_auto, using_becp_d_auto
-USE wavefunctions_gpum,   ONLY : using_evc
 
 IMPLICIT NONE
 #if defined(__CUDA)
@@ -105,11 +103,9 @@ DO ikb=1,nkblocks
            !
            IF ( nkb > 0 ) CALL init_us_2( ngk(ik), igk_k(1,ik), &
                                                     xk(1,ik), vkb, .true.)
-           IF (.NOT.use_gpu) CALL init_wfc ( ik )
-           IF (use_gpu) THEN
-              CALL init_wfc_gpu ( ik )
-              evc=evc_d
-           ENDIF
+           CALL init_wfc ( ik )
+           IF (use_gpu) evc=evc_d
+
            evck(1:npwx*npol,nbnd*(ik1-1)+1:nbnd*ik1)=evc(1:npwx*npol,1:nbnd)
            !
          ELSEIF (nks==1) THEN
@@ -176,13 +172,11 @@ DO ikb=1,nkblocks
 #endif
       ELSE
          CALL allocate_bec_type( nkb, nbnd, becp, intra_bgrp_comm )
-         CALL using_becp_auto(2)
          CALL cegterg_vk ( h_psii, s_psii, okvan, g_psii, &
               ngk(startkb(ikb)+1), npwx, nbnd, nbndx, npol, evck_d, ethr, &
               et(:,startkb(ikb)+1), btype(:,startkb(ikb)+1), notcnv, lrot, &
               dav_iter, nhpsi, nksb(ikb), nkb)
          CALL deallocate_bec_type( becp )
-         CALL using_becp_auto(2)
       ENDIF
       ntry = ntry + 1
       !
@@ -233,13 +227,13 @@ CALL stop_clock( 'c_bands' ); !write (*,*) 'stop c_bands' ; FLUSH(6)
 !  error in the forces. They do not work on the device if becp_d is
 !  not already allocated.
 !
-IF (use_gpu) THEN
-   CALL allocate_bec_type( nkb, nbnd, becp, intra_bgrp_comm )
-   CALL using_becp_auto(2)
-   CALL using_becp_d_auto(0)
-   CALL deallocate_bec_type( becp )
-   CALL using_becp_auto(2)
-ENDIF
+!IF (use_gpu) THEN
+!   CALL allocate_bec_type( nkb, nbnd, becp, intra_bgrp_comm )
+!   CALL using_becp_auto(2)
+!   CALL using_becp_d_auto(0)
+!   CALL deallocate_bec_type( becp )
+!   CALL using_becp_auto(2)
+!ENDIF
 CALL deallocate_fft_factors()
 CALL deallocate_becps_many_k()
 

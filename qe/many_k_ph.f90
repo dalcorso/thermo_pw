@@ -120,7 +120,7 @@ PUBLIC deff_d, deff_nc_d, int1_d, int2_d, int1_nc_d, int2_so_d, dbecsum_d, &
 !  Routines of this module
 !
 PUBLIC allocate_many_k_ph, deallocate_many_k_ph, init_k_blocks_ph, &
-       prepare_ph_device, copy_alphap_becp_device_all
+       prepare_ph_device, becupdate_tpw
 
 CONTAINS
 !
@@ -147,7 +147,7 @@ REAL(DP) :: totmem, fftmem, fixmem
 INTEGER :: fact, i, rest
 
 fact=npe*nsolv*3+1
-fftmem=DBLE(nnrs) * DBLE(nbnd) * DBLE(nksq) * DBLE (npe) *DBLE(nsolv) * 
+fftmem=DBLE(nnrs) * DBLE(nbnd) * DBLE(nksq) * DBLE (npe) *DBLE(nsolv) * &
        DBLE(npol) * 16
 
 fixmem= DBLE(nnrs) * DBLE(nbnd) * DBLE(npol) * 16 +   & ! psic
@@ -155,7 +155,7 @@ fixmem= DBLE(nnrs) * DBLE(nbnd) * DBLE(npol) * 16 +   & ! psic
         DBLE(npwx) * DBLE(npol) * DBLE (nbnd) * 16 * 2 +  & ! dpsi + dvpsi
         DBLE(npwx) * DBLE(nkb) * 16 +  &  ! vkb
         DBLE(npwx) * 16  +             &  ! g2kin
-        DBLE(10 * ngm) * 8                ! g, gg, eigts
+        DBLE(10 * ngm) * 8                ! g, gg, mill, igtongl ...
 IF (npol==2) THEN
    fixmem=fixmem + DBLE(nhm) * DBLE(nhm) * DBLE(nspin) * DBLE(nat+ntyp) * 16
                                                ! deeq_nc and qq_so
@@ -171,16 +171,19 @@ fixmem=fixmem + DBLE(nhm) * DBLE(nhm) * DBLE(nspin+nat) * DBLE(nat) * 3 *16
 totmem=DBLE(npwx*npol) * DBLE(nbnd) * DBLE(nksq) * fact * 16      &
                           ! dvpsik_d, dpsik_d, h_diagk_ph_d, evqk_d
        + DBLE(nkb) * DBLE(nbnd) * DBLE(nksq) * (npe*nsolv + 4*npol + &
-                          4 * npol * npe * nsolv ) * 16 &
+                          4 * npol * npe * nsolv )&
                           ! dbecq_d, beco1k_d, alphak_d, ps1k_nc_d, ps2k_nc_d
        + DBLE(nhm) * DBLE(nhm) * DBLE(nat) * DBLE(nbnd)  * DBLE(nksq) *       &
-         DBLE(nspin) * 16 & !  deff_d  of deff_nc_d         
+         DBLE(nspin) & !  deff_d  of deff_nc_d         
        + DBLE((nhm*(nhm+1))/2) * DBLE(nat)* DBLE(nspin_mag)* &
-         DBLE(nbnd*nksq*npe*nsolv) * 16 & ! dbecsum_d
-       + DBLE(npwx*npol) * DBLE(nbnd) * DBLE(nksq) * DBLE(npe*nsolv)*16*7 &
+         DBLE(nbnd*nksq*npe*nsolv) & ! dbecsum_d
+       + DBLE(npwx*npol) * DBLE(nbnd) * DBLE(nksq) * DBLE(npe*nsolv)*16*7 + &
             ! dpsi, hpsi, spsi, g, t, h, hold
+         DBLE(npwx*npol)*DBLE(nbnd)*DBLE(nksq)*DBLE(nsolv)*16*2  &! evck, evck_d
        + 2.0_DP*fftmem    ! psicmr + dpsicrm
-WRITE(stdout,'(5x,"Estimated memory in cgsolve_all",f10.1," MB")') totmem/1.D6 
+WRITE(stdout,'(5x,"Estimated gpu memory in cgsolve_all",f10.1," GB")') &
+                                                        (totmem+fixmem)/1.D9 
+WRITE(stdout,'(5x,"Indivisibe gpu memory",f10.1," GB")') fixmem/1.D9 
 IF (fixmem > (memgpu * 1.D9)) THEN
    WRITE(stdout,'(5x,"memgpu must be greater than ",f8.2," to use many_k")') &
                5.0_DP * fixmem/1.D9
@@ -189,7 +192,7 @@ IF (fixmem > (memgpu * 1.D9)) THEN
 !
    nkblocks_ph=nksq
 ELSE
-   nkblocks_ph=MIN(FLOOR(totmem / (memgpu * 1.D9-fixmem)) + 1, nksq) 
+   nkblocks_ph=MIN(FLOOR((totmem)/(memgpu * 1.D9-fixmem)) + 1, nksq) 
 ENDIF
 
 ALLOCATE(nksb_ph(nkblocks_ph))
@@ -413,6 +416,36 @@ ENDIF
 
 RETURN
 END SUBROUTINE copy_alphap_becp_device_all
-
+!
+!------------------------------------------------------------------
+SUBROUTINE becupdate_tpw(becp, bectmp)
+!------------------------------------------------------------------
+!
+USE kinds, ONLY : DP
+USE uspp,  ONLY : nkb
+USE wvfct, ONLY : nbnd
+USE noncollin_module, ONLY : npol
+USE becmod, ONLY : bec_type
+IMPLICIT NONE
+COMPLEX(DP) :: becp(nkb, npol, nbnd)
+TYPE(bec_type), INTENT(IN)  :: bectmp
+#if defined(__CUDA)
+ATTRIBUTES, DEVICE :: becp
+#endif
+!
+!$acc data present(bectmp)
+!
+  IF(ALLOCATED(bectmp%k)) then
+    !$acc kernels 
+    becp(:,1,:) = bectmp%k(:,:)
+    !$acc end kernels
+  ELSEIF(ALLOCATED(bectmp%nc)) then
+    !$acc kernels 
+    becp(:,:,:) = bectmp%nc(:,:,:)
+    !$acc end kernels
+  ENDIF
+!$acc end data
+RETURN
+END SUBROUTINE becupdate_tpw
 !
 END MODULE many_k_ph_mod

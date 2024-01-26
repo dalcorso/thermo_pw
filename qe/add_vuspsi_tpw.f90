@@ -23,7 +23,6 @@ SUBROUTINE add_vuspsik( lda, n, m, hpsi, ik )
   USE many_k_mod,       ONLY: vkbk_d
   USE uspp_param,       ONLY: nh, nhm
   USE becmod,           ONLY: bec_type, becp
-  USE becmod_subs_gpum, ONLY: using_becp_auto
   !
   IMPLICIT NONE
   !
@@ -48,7 +47,6 @@ SUBROUTINE add_vuspsik( lda, n, m, hpsi, ik )
   !
   !
   CALL start_clock( 'add_vuspsi' )  
-  CALL using_becp_auto(0)
   !
   IF ( gamma_only ) THEN
      !

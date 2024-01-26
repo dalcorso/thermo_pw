@@ -38,9 +38,6 @@ SUBROUTINE ch_psi_all_many_k (n, h, ah, hpsi, spsi, ps, e, ik, m, id, isolv)
   USE units_lr,             ONLY : iuatswfc
   USE many_k_mod,           ONLY : vkbk_d, evck_d, g2kink_d, becpk_d
   USE many_k_ph_mod,        ONLY : evqk_d, current_ikb_ph, startkb_ph, nksb_ph
-#if defined(__CUDA)
-  USE becmod_gpum,          ONLY : becp_d
-#endif
 
   IMPLICIT NONE
 
@@ -203,8 +200,6 @@ CONTAINS
     !
     USE becmod, ONLY : becp, calbec
 #if defined(__CUDA)
-    USE becmod_gpum, ONLY : becp_d
-    USE becmod_subs_gpum, ONLY : calbec_gpu,  using_becp_d_auto
     USE cublas
 #endif
     
@@ -269,14 +264,12 @@ CONTAINS
     !
 !#if defined(__CUDA)
 !       if (m_end >= m_start) then
-!          CALL using_becp_d_auto(2)
 !          !$acc host_data use_device(hpsi(:,m_start:m_end),vkb)
 !          CALL calbec_gpu (n, vkbk_d(:,nkb*(ik1-1)+1:nkb*ik1), &
 !                  hpsi(:,m_start:m_end), becpk_d(:,:,id), m_end- m_start + 1) !
 !          !$acc end host_data
 !       endif
 !    else
-!       CALL using_becp_d_auto(2)
 !       !$acc host_data use_device(hpsi)
 !       CALL calbec_gpu (n, vkbk_d(:,nkb*(ik1-1)+1:nkb*ik1), hpsi, &
 !                                           becpk_d(:,:,id), m)

@@ -109,7 +109,6 @@ SUBROUTINE h_psii_( lda, n, m, psi, hpsi, ik )
   USE fft_helper_subroutines
   !
   USE scf_gpum,                ONLY: using_vrs
-  USE becmod_subs_gpum,        ONLY: using_becp_auto
   !
   IMPLICIT NONE
   !
@@ -158,7 +157,6 @@ SUBROUTINE h_psii_( lda, n, m, psi, hpsi, ik )
      ! 
      CALL errore('h_psii_', 'multiple k and gamma_only not available',1)
      IF ( real_space .AND. nkb > 0  ) THEN
-        CALL using_becp_auto(1)
         !
         ! ... real-space algorithm
         ! ... fixme: real_space without beta functions does not make sense
@@ -199,8 +197,6 @@ SUBROUTINE h_psii_( lda, n, m, psi, hpsi, ik )
         ! ... real-space algorithm
         ! ... fixme: real_space without beta functions does not make sense
         !
-        CALL using_becp_auto(1)  ! WHY IS THIS HERE?
-
         IF ( dffts%has_task_groups ) &
              CALL errore( 'h_psi', 'task_groups not implemented with real_space', 1 )
         !
@@ -233,7 +229,6 @@ SUBROUTINE h_psii_( lda, n, m, psi, hpsi, ik )
   !
   IF ( nkb > 0 .AND. .NOT. real_space) THEN
      !
-     CALL using_becp_auto(1)
      !
      CALL start_clock( 'h_psi:calbec' )
      CALL calbec( n, vkbk_d(:,nkb*(ik-1)+1:nkb*ik), psi, becp, m )
@@ -277,7 +272,6 @@ SUBROUTINE h_psii_( lda, n, m, psi, hpsi, ik )
            CALL vexxace_k( lda, m, psi, ee, hpsi )
         ENDIF
      ELSE
-        CALL using_becp_auto(0)
         CALL vexx( lda, n, m, psi, hpsi, becp )
      ENDIF
   ENDIF

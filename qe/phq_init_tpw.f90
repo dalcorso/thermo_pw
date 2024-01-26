@@ -14,9 +14,7 @@ SUBROUTINE phq_init_tpw()
   !! local and nonlocal pseudopotential in the phononq program.
   !! In detail it computes:  
   !! 0)  initialize the structure factors;  
-  !! a0) compute rhocore for each atomic-type if needed for nlcc;  
-  !! a)  the local potential at G-G'. Needed for the part of the dynamic
-  !!     matrix independent of deltapsi;  
+  !! a)  compute rhocore for each atomic-type if needed for nlcc;  
   !! b)  the local potential at q+G-G'. Needed for the second
   !!     second part of the dynamical matrix;  
   !! c)  the D coefficients for the US pseudopotential or the E_l parame
@@ -32,10 +30,11 @@ SUBROUTINE phq_init_tpw()
   !
   !
   USE kinds,                ONLY : DP
-  USE cell_base,            ONLY : bg, tpiba, tpiba2, omega
-  USE ions_base,            ONLY : nat, ntyp => nsp, ityp, tau
-  USE becmod,               ONLY : calbec, becp, allocate_bec_type, &
-                                   deallocate_bec_type
+  USE cell_base,            ONLY : bg, tpiba
+  USE ions_base,            ONLY : nat, ityp, tau
+  USE becmod,               ONLY : calbec, becp, becupdate, bec_type, &
+                                   allocate_bec_type_acc, &
+                                   deallocate_bec_type_acc 
   USE constants,            ONLY : eps8, tpi
   USE gvect,                ONLY : g, ngm
   USE klist,                ONLY : xk, ngk, igk_k
@@ -46,6 +45,7 @@ SUBROUTINE phq_init_tpw()
   USE vlocal,               ONLY : strf
   USE wvfct,                ONLY : npwx, nbnd
   USE gvecw,                ONLY : gcutw
+  USE control_flags,        ONLY : offload_type
   USE wavefunctions,        ONLY : evc
 #if defined(__CUDA)
   USE wavefunctions_gpum,   ONLY : evc_d
@@ -53,11 +53,7 @@ SUBROUTINE phq_init_tpw()
   USE noncollin_module,     ONLY : noncolin, domag, npol, lspinorb
   USE uspp,                 ONLY : okvan, vkb, nlcc_any, nkb
   USE uspp_param,           ONLY : upf
-  USE m_gth,                ONLY : setlocq_gth
   USE phus,                 ONLY : alphap
-#if defined(__CUDA)
-  USE phus,                 ONLY : alphap_d
-#endif
   USE nlcc_ph,              ONLY : drc
   USE control_ph,           ONLY : trans, zue, zeu, epsil, all_done
   USE units_lr,             ONLY : lrwfc, iuwfc
@@ -72,25 +68,16 @@ SUBROUTINE phq_init_tpw()
   USE Coul_cut_2D,          ONLY : do_cutoff_2D     
   USE Coul_cut_2D_ph,       ONLY : cutoff_lr_Vlocq , cutoff_fact_qg 
   USE lrus,                 ONLY : becp1, dpqq, dpqq_so
-#if defined(__CUDA)
-  USE lrus,                 ONLY : becp1_d
-#endif
 
   USE qpoint,               ONLY : xq, nksq, eigqts, ikks, ikqs
   USE qpoint_aux,           ONLY : becpt, alphapt, ikmks
-#if defined(__CUDA)
-  USE  qpoint_aux,          ONLY : becpt_d, alphapt_d
-#endif
   USE eqv,                  ONLY : vlocq, evq
   USE control_lr,           ONLY : nbnd_occ, lgamma
   USE ldaU,                 ONLY : lda_plus_u
   USE uspp_init,            ONLY : init_us_2
   USE control_qe,           ONLY : many_k
-  USE many_k_ph_mod,        ONLY : copy_alphap_becp_device_all, becp1k_d, &
+  USE many_k_ph_mod,        ONLY : becupdate_tpw, becp1k_d, &
                                    alphak_d, becptk_d, alphatk_d
-#if defined(__CUDA)
-  USE becmod_subs_gpum,     ONLY : calbec_gpu, synchronize_bec_type_gpu
-#endif
   !
   IMPLICIT NONE
   !
@@ -112,12 +99,31 @@ SUBROUTINE phq_init_tpw()
   COMPLEX(DP), ALLOCATABLE :: aux1(:,:), tevc(:,:)
     ! used to compute alphap
   INTEGER :: icar, jcar
+#if defined(__CUDA)
+  TYPE(bec_type) :: bectmp
+    ! temporary buffer to work with offload of arrays of derived types
+#endif
   !
   !
   IF (all_done) RETURN
   !
   CALL start_clock( 'phq_init' )
   !
+#if defined(__CUDA)
+  Call allocate_bec_type_acc ( nkb, nbnd, bectmp )
+#endif
+  IF (many_k)  THEN
+     nsolv=1
+     IF (noncolin.AND.domag) nsolv=2
+     ALLOCATE(becp1k_d(nkb,npol,nbnd,nksq))
+     ALLOCATE(alphak_d(nkb,npol,nbnd,3,nksq))
+     IF (nsolv==2) THEN
+        ALLOCATE(becptk_d(nkb,npol,nbnd,nksq))
+        ALLOCATE(alphatk_d(nkb,npol,nbnd,3,nksq))
+     ENDIF
+  ENDIF
+  CALL start_clock( 'phq_init' )
+
   DO na = 1, nat
      !
      arg = ( xq(1) * tau(1,na) + &
@@ -134,31 +140,7 @@ SUBROUTINE phq_init_tpw()
   !
   ! ... b) the fourier components of the local potential at q+G
   !
-  vlocq(:,:) = 0.D0
-  !
-  DO nt = 1, ntyp
-     !
-     IF (upf(nt)%tcoulombp) then
-        CALL setlocq_coul ( xq, upf(nt)%zp, tpiba2, ngm, g, omega, vlocq(1,nt) )
-     ELSE IF (upf(nt)%is_gth) then
-        CALL setlocq_gth ( nt, xq, upf(nt)%zp, tpiba2, ngm, g, omega, vlocq(1,nt) )
-     ELSE
-        CALL setlocq( xq, rgrid(nt)%mesh, msh(nt), rgrid(nt)%rab, rgrid(nt)%r,&
-                   upf(nt)%vloc(1), upf(nt)%zp, tpiba2, ngm, g, omega, &
-                   vlocq(1,nt) )
-     END IF
-     !
-  END DO
-  ! for 2d calculations, we need to initialize the fact for the q+G 
-  ! component of the cutoff of the COulomb interaction
-  IF (do_cutoff_2D) call cutoff_fact_qg() 
-  !  in 2D calculations the long range part of vlocq(g) (erf/r part)
-  ! was not re-added in g-space because everything is calculated in
-  ! radial coordinates, which is not compatible with 2D cutoff. 
-  ! It will be re-added each time vlocq(g) is used in the code. 
-  ! Here, this cutoff long-range part of vlocq(g) is computed only once
-  ! by the routine below and stored
-  IF (do_cutoff_2D) call cutoff_lr_Vlocq() 
+  CALL init_vlocq ( xq )
   !
   ! only for electron-phonon coupling with wannier functions
   ! 
@@ -214,7 +196,6 @@ SUBROUTINE phq_init_tpw()
      ! ... d) The functions vkb(k+G)
      !
      CALL init_us_2( npw, igk_k(1,ikk), xk(1,ikk), vkb, .true. )
-
      !
      ! ... read the wavefunctions at k
      !
@@ -225,14 +206,13 @@ SUBROUTINE phq_init_tpw()
         CALL get_buffer( evc, lrwfc, iuwfc, ikk )
         IF (noncolin.AND.domag) THEN
            CALL get_buffer( tevc, lrwfc, iuwfc, ikmks(ik) )
-           !$acc update device(tevc)
 #if defined(__CUDA)
-           !$acc host_data use_device(vkb, tevc)
-           CALL calbec_gpu (npw, vkb(:,:), tevc, becpt_d(ik) )
-           !$acc end host_data
-           CALL synchronize_bec_type_gpu( becpt_d(ik), becpt(ik), 'h')
+           !$acc update device(tevc)
+           CALL calbec ( offload_type, npw, vkb, tevc, bectmp )
+           IF (many_k) CALL becupdate_tpw(becptk_d(:,:,:,ik), bectmp)
+           CALL becupdate( offload_type, becpt, ik, nksq, bectmp )
 #else
-           CALL calbec (npw, vkb, tevc, becpt(ik) )
+           CALL calbec ( offload_type, npw, vkb, tevc, becpt(ik) )
 #endif
         ENDIF
      endif
@@ -242,12 +222,13 @@ SUBROUTINE phq_init_tpw()
      !
 #if defined(__CUDA)
      evc_d = evc
-     !$acc host_data use_device(vkb)
-     CALL calbec_gpu (npw, vkb(:,:), evc_d, becp1_d(ik) )
-     !$acc end host_data
-     CALL synchronize_bec_type_gpu( becp1_d(ik), becp1(ik), 'h')
+     !$acc data present_or_copyin(evc)
+     CALL calbec( offload_type, npw, vkb, evc, bectmp )
+     !$acc end data
+     IF (many_k) CALL becupdate_tpw(becp1k_d(:,:,:,ik), bectmp )
+     CALL becupdate( offload_type, becp1, ik, nksq, bectmp )
 #else
-     CALL calbec (npw, vkb, evc, becp1(ik) )
+     CALL calbec( offload_type, npw, vkb, evc, becp1(ik) )
 #endif
      !
      ! ... e') we compute the derivative of the becp term with respect to an
@@ -293,12 +274,11 @@ SUBROUTINE phq_init_tpw()
            END DO
         END IF
 #if defined(__CUDA)
-        !$acc host_data use_device(vkb,aux1)
-        CALL calbec_gpu (npw, vkb(:,:), aux1, alphap_d(ipol,ik) )
-        !$acc end host_data
-        CALL synchronize_bec_type_gpu( alphap_d(ipol,ik), alphap(ipol,ik), 'h')
+        CALL calbec ( offload_type, npw, vkb, aux1, bectmp )
+        IF (many_k) CALL becupdate_tpw( alphak_d(:,:,:,ipol,ik), bectmp )
+        CALL becupdate( offload_type, alphap, ipol, 3, ik, nksq, bectmp )
 #else
-        CALL calbec (npw, vkb, aux1, alphap(ipol,ik) )
+        CALL calbec ( offload_type, npw, vkb, aux1, alphap(ipol,ik) )
 #endif
      END DO
      !
@@ -332,13 +312,12 @@ SUBROUTINE phq_init_tpw()
                  END DO
               END DO
            END IF
-#if defined(__CUDA)
-           !$acc host_data use_device(vkb, aux1)
-           CALL calbec_gpu (npw, vkb(:,:), aux1, alphapt_d(ipol,ik) )
-           !$acc end host_data
-           CALL synchronize_bec_type_gpu( alphapt_d(ipol,ik), alphapt(ipol,ik), 'h')
+#if defined(__CUDA) 
+           CALL calbec( offload_type, npw, vkb, aux1, bectmp )
+           IF (many_k) CALL becupdate_tpw( alphatk_d(:,:,:,ipol,ik), bectmp )
+           CALL becupdate( offload_type, alphapt, ipol, 3, ik, nksq, bectmp )
 #else
-           CALL calbec (npw, vkb, aux1, alphapt(ipol,ik) )
+           CALL calbec( offload_type, npw, vkb, aux1, alphapt(ipol,ik) )
 #endif
          END DO
       ENDIF
@@ -373,18 +352,6 @@ SUBROUTINE phq_init_tpw()
   END DO
   !$acc end data
   !
-  IF (many_k)  THEN
-     nsolv=1
-     IF (noncolin.AND.domag) nsolv=2
-     ALLOCATE(becp1k_d(nkb,npol,nbnd,nksq))
-     ALLOCATE(alphak_d(nkb,npol,nbnd,3,nksq))
-     IF (nsolv==2) THEN
-        ALLOCATE(becptk_d(nkb,npol,nbnd,nksq))
-        ALLOCATE(alphatk_d(nkb,npol,nbnd,3,nksq))
-     ENDIF
-     CALL copy_alphap_becp_device_all(nsolv)
- ENDIF
- 
   !
   IF (noncolin.AND.domag) THEN
           !$acc exit data delete(tevc)
@@ -409,9 +376,9 @@ SUBROUTINE phq_init_tpw()
      ! Note: the array becp will be temporarily used
      ! in the routine lr_orthoUwfc.
      !
-     CALL deallocate_bec_type(becp)
+     CALL deallocate_bec_type_acc(becp)
      CALL lr_orthoUwfc (.TRUE.)
-     CALL allocate_bec_type(nkb,nbnd,becp)
+     CALL allocate_bec_type_acc(nkb,nbnd,becp)
      !
      ! Calculate dnsbare, i.e. the bare variation of ns, 
      ! for all cartesian coordinates
@@ -435,8 +402,12 @@ SUBROUTINE phq_init_tpw()
 
   IF ( trans ) CALL dynmat0_new()
   !
+#if defined(__CUDA)
+  Call deallocate_bec_type_acc ( bectmp )
+#endif
   CALL stop_clock( 'phq_init' )
   !
   RETURN
   !
 END SUBROUTINE phq_init_tpw
+

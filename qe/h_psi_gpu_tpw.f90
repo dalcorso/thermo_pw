@@ -99,7 +99,6 @@ SUBROUTINE h_psii__gpu( lda, n, m, psi_d, hpsi_d, ik )
   USE kinds,                   ONLY: DP
   USE bp,                      ONLY: lelfield, l3dstring, gdir, efield, efield_cry
   USE becmod,                  ONLY: bec_type, becp, calbec
-  USE becmod_gpum,             ONLY: becp_d
   USE lsda_mod,                ONLY: current_spin, isk
   USE scf_gpum,                ONLY: vrs_d, using_vrs_d
   USE uspp,                    ONLY: nkb, vkb
@@ -119,7 +118,6 @@ SUBROUTINE h_psii__gpu( lda, n, m, psi_d, hpsi_d, ik )
   USE device_memcpy_m,         ONLY: dev_memcpy, dev_memset
   !
   USE many_k_mod,              ONLY: g2kink_d, becpk_d
-  USE becmod_subs_gpum,        ONLY: calbec_gpu, using_becp_auto, using_becp_d_auto
 #if defined(__OSCDFT)
   USE plugin_flags,            ONLY : use_oscdft
   USE oscdft_base,             ONLY : oscdft_ctx
@@ -199,13 +197,13 @@ SUBROUTINE h_psii__gpu( lda, n, m, psi_d, hpsi_d, ik )
         IF ( dffts%has_task_groups ) &
              CALL errore( 'h_psi', 'task_groups not implemented with real_space', 1 )
 
-        CALL using_becp_auto(1)
         DO ibnd = 1, m, 2
            ! ... transform psi to real space -> psic 
            CALL invfft_orbital_gamma(psi_host, ibnd, m )
            ! ... compute becp%r = < beta|psi> from psic in real space
      CALL start_clock_gpu( 'h_psi:calbec' ) 
            CALL calbec_rs_gamma( ibnd, m, becp%r )
+           !$acc update device(becp%r)
      CALL stop_clock_gpu( 'h_psi:calbec' )
            ! ... psic -> vrs * psic (psic overwritten will become hpsi)
            CALL v_loc_psir_inplace( ibnd, m ) 
@@ -272,33 +270,6 @@ CALL stop_clock( 'cegt:vloc' )
   !
   IF ( nkb > 0 .AND. .NOT. real_space) THEN
      !
-     CALL start_clock_gpu( 'h_psi:calbec' )
-     CALL using_becp_d_auto(2)
-!ATTENTION HERE: calling without (:,:) causes segfaults
-!!$acc data present(vkbk_d(:,:))
-!!$acc host_data use_device(vkbk_d)
-!     CALL calbec_gpu ( n, vkbk_d(:,nkb*(ik-1)+1:nkb*ik), psi_d, becp_d, m )
-!!$acc end host_data
-!!$acc end data
- 
-!     IF (ik==1) THEN
-!        aux=becp_d%k_d
-!        aux=becpk_d(1:nkb,1:m,1)
-!        adata=0.0_DP
-!        DO lm=1, nkb
-!           DO ll=1,m
-!              adata=adata+ABS(aux(lm,ll))
-!           ENDDO
-!        ENDDO
-!        DO lm=1, nkb
-!           DO ll=1,m
-!           WRITE(6,*) lm, ll, ABS(aux(lm,ll))
-!           ENDDO
-!        ENDDO
-!        WRITE(6,*) ik, ABS(adata)
-!     ENDIF
-!
-     CALL stop_clock_gpu( 'h_psi:calbec' )
 !     CALL add_vuspsik_gpu( lda, n, m, hpsi_d, ik )
      !
   END IF
@@ -344,7 +315,6 @@ CALL stop_clock( 'cegt:vloc' )
            CALL vexxace_k(lda,m,psi_host,ee,hpsi_host) 
         END IF
      ELSE
-        CALL using_becp_auto(0)
         CALL vexx( lda, n, m, psi_host, hpsi_host, becp )
      END IF
      CALL dev_memcpy(hpsi_d, hpsi_host) ! hpsi_d = hpsi_host

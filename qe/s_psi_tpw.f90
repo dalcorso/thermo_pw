@@ -172,8 +172,6 @@ SUBROUTINE s_psii_( lda, n, m, psi, spsi, ik )
        !-----------------------------------------------------------------------
        !! k-points version of \(\textrm{s_psi}\) routine.
        !
-       USE becmod_gpum, ONLY : using_becp_k
-       !
        IMPLICIT NONE
        !
        ! ... local variables
@@ -185,7 +183,6 @@ SUBROUTINE s_psii_( lda, n, m, psi, spsi, ik )
        !
        ALLOCATE( ps( nkb, m ), STAT=ierr )
        !
-       CALL using_becp_k(0)
        !
        IF( ierr /= 0 ) &
           CALL errore( ' s_psi_k ', ' cannot allocate memory (ps) ', ABS(ierr) )
@@ -246,8 +243,6 @@ SUBROUTINE s_psii_( lda, n, m, psi, spsi, ik )
        !-----------------------------------------------------------------------
        !! k-points noncolinear/spinorbit version of \(\textrm{s_psi}\) routine.
        !
-       USE becmod_gpum,  ONLY : using_becp_nc
-       !
        IMPLICIT NONE
        !
        ! ... local variables
@@ -257,7 +252,6 @@ SUBROUTINE s_psii_( lda, n, m, psi, spsi, ik )
        COMPLEX (DP), ALLOCATABLE :: ps(:,:,:)
        ! the product vkb and psi
        !
-       CALL using_becp_nc(0)
        !
        ALLOCATE( ps(nkb,npol,m), STAT=ierr )
        IF( ierr /= 0 ) &
