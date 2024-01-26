@@ -63,7 +63,7 @@ IMPLICIT NONE
 
 LOGICAL, INTENT(IN) :: close_ph
 
-CALL clean_pw(.TRUE.)
+CALL clean_pw_tpw(.TRUE.)
 IF (close_ph) CALL close_phq(.FALSE.)
 CALL clean_input_variables()
 CALL destroy_status_run()

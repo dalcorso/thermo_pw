@@ -43,6 +43,7 @@ ch_psi_all_tpw.o \
 ch_psi_all_many_k.o \
 ch_psi_all_dev.o \
 clean_all_pw.o \
+clean_pw_tpw.o \
 collect_grid_files.o \
 compute_dvloc_tpw.o \
 compute_intq.o \

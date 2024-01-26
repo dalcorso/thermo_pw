@@ -42,7 +42,7 @@ SUBROUTINE dos_sub()
   !
   IF ( my_image_id /= root_image ) RETURN
   !
-  CALL clean_pw(.TRUE.)
+  CALL clean_pw_tpw(.TRUE.)
   CALL read_xml_file( wfc_is_collected )
   !
   message1="     Computing the electron dos"

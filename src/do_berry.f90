@@ -85,7 +85,7 @@ SUBROUTINE do_berry ( exit_status, polar, nppl )
      !
      CALL close_files(.TRUE.)
      !
-     CALL clean_pw( .FALSE. )
+     CALL clean_pw_tpw( .FALSE. )
      !
   END DO 
 !

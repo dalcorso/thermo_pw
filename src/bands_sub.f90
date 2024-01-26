@@ -23,7 +23,7 @@ SUBROUTINE bands_sub()
   IF (q2d) lsym=.FALSE.
 
   CALL start_clock('bands')
-  CALL clean_pw(.TRUE.)
+  CALL clean_pw_tpw(.TRUE.)
   CALL read_file()
   !
   IF (gamma_only) CALL errore('bands_sub','gamma_only case not implemented',1)
@@ -44,7 +44,7 @@ SUBROUTINE bands_sub()
   IF (identify_sur) CALL manage_surface_states()
 
   CALL close_files(.TRUE.)
-  CALL clean_pw(.FALSE.)
+  CALL clean_pw_tpw(.FALSE.)
 
   CALL print_clock('bands')
   CALL stop_clock('bands')

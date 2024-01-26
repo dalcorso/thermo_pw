@@ -70,7 +70,7 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   IF (done_bands(iq)) THEN
      WRITE (stdout,'(/,5x,"Bands found: reading from ",a)') TRIM(tmp_dir_phq)
      IF (many_k) CALL deallocate_many_k()
-     CALL clean_pw( .TRUE. )
+     CALL clean_pw_tpw( .TRUE. )
      CALL close_files(.true.)
      wfc_dir=tmp_dir_phq
      tmp_dir=tmp_dir_phq
@@ -106,7 +106,7 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   ENDIF
   !
   IF (many_k) CALL deallocate_many_k()
-  CALL clean_pw( .FALSE. )
+  CALL clean_pw_tpw( .FALSE. )
   !
   CALL close_files(.true.)
   !

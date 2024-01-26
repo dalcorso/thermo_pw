@@ -178,7 +178,7 @@ SUBROUTINE check_initial_status_tpw(auxdyn, iflag)
         current_iq=1
         current_iu=1
         CALL ph_writefile('status_ph',current_iq,0,ierr)
-        CALL clean_pw(.FALSE.)
+        CALL clean_pw_tpw(.FALSE.)
         CALL close_files(.FALSE.)
         CALL mp_global_end()
         STOP

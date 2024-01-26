@@ -210,6 +210,7 @@ set(src_tpw_qe
     qe/cegterg_vk_dev.f90
     qe/cgsolve_all_dev.f90
     qe/clean_all_pw.f90
+    qe/clean_pw_tpw.f90
     qe/collect_grid_files.f90
     qe/compute_deff_dev.f90
     qe/compute_dvloc_tpw.f90

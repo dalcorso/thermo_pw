@@ -380,7 +380,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   ELSE
      CALL stop_clock('tpw_nscf_pw')
   ENDIF
-  CALL clean_pw( .FALSE. )
+  CALL clean_pw_tpw( .FALSE. )
   !
   RETURN
   !
