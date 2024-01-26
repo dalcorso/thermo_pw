@@ -163,8 +163,7 @@ SUBROUTINE c_bands_nscf_tpw( )
            !
         ELSE
            !
-           IF (.NOT.use_gpu) CALL init_wfc ( ik )
-           IF (use_gpu) CALL init_wfc_gpu ( ik )
+           CALL init_wfc ( ik )
            !
         ENDIF
         !
