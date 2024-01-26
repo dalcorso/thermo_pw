@@ -15,11 +15,16 @@ can be found <a href="https://people.sissa.it/dalcorso/thermo_pw/user_guide/inde
 <p align="justify">The following papers describe new
 features implemented in <code>thermo_pw</code>:</p>
 
+13. B. Thakur, X. Gong and A. Dal Corso,
+Ab initio thermodynamic properties of Iridium: A high-pressure and high-temperature study,
+<a href="https://doi.org/10.1016/j.commatsci.2024.112797">
+Comp. Materials Science <B>234</B>, 112797 (2024).</a>
+
 12. C. Malica and A. Dal Corso,
 Quasi-harmonic thermoelasticity of palladium, platinum, copper and gold
 from first principles,
 <a href="https://iopscience.iop.org/article/10.1088/1361-648X/ac2041">
-J. of Phys.: Condens. Matter <B>33</B>, 475901 (2021)</a>
+J. of Phys.: Condens. Matter <B>33</B>, 475901 (2021).</a>
 
 11. O. Motornyi, N. Vast, I. Timrov, O. Baseggio, S. Baroni, and A. Dal Corso,
 Electron energy loss spectroscopy of bulk gold with ultrasoft pseudopotentials and the Liouville-Lanczos method,
@@ -169,6 +174,10 @@ You can also find help in the QE user guide, at the
 in the examples directories.</p>
 
 **Thermo_pw downloads**:
+<br>
+<br>
+- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.9.0.tar.gz">
+thermo_pw.1.9.0.tar.gz</a>  (released 26-01-2024) compatible with QE-7.2.
 <br>
 <br>
 - <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.8.1.tar.gz">
