@@ -1,0 +1,15 @@
+Why we need to change these QE routines:
+
+clocks_handler.f90 we increase the defaults number of clocks.
+                   At line 45 maxclocks=2048
+
+parameters.f90  we increase the maximum number of k points
+                At line 16 npk=120000
+
+lmdif.f90 we use at line 95 epsdiff=1.d-6 instead of zero.
+
+rhoat_mod.f90 we need to call deallocate_tab_rhoat so we make this routine
+              public at line 25
+
+vloc_mod.f90 we deallocate tab_vloc only if it has been allocated.
+             See at line 238.

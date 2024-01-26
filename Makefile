@@ -38,6 +38,10 @@ join_qe:
            ./QESUB/lmdif.f90_qe ; mv ./QESUB/lmdif.f90 ../Modules ; fi
 	if test -f ./QESUB/parameters.f90 ; then mv ../Modules/parameters.f90 \
           ./QESUB/parameters.f90_qe ; mv ./QESUB/parameters.f90 ../Modules ; fi
+	if test -f ./QESUB/vloc_mod.f90 ; then mv ../upflib/vloc_mod.f90 \
+          ./QESUB/vloc_mod.f90_qe ; mv ./QESUB/vloc_mod.f90 ../upflib ; fi
+	if test -f ./QESUB/rhoat_mod.f90 ; then mv ../upflib/rhoat_mod.f90 \
+          ./QESUB/rhoat_mod.f90_qe ; mv ./QESUB/rhoat_mod.f90 ../upflib ; fi
 	if test -f ./QESUB/clocks_handler.f90 ; then mv ../UtilXlib/clocks_handler.f90 \
           ./QESUB/clocks_handler.f90_qe ; mv ./QESUB/clocks_handler.f90 ../UtilXlib ; fi
 leave_qe:
@@ -57,6 +61,12 @@ leave_qe:
 	if test -f ./QESUB/parameters.f90_qe ; then mv ../Modules/parameters.f90 \
            ./QESUB/parameters.f90 ; \
            mv ./QESUB/parameters.f90_qe ../Modules/parameters.f90 ; fi
+	if test -f ./QESUB/vloc_mod.f90_qe ; then mv ../upflib/vloc_mod.f90 \
+           ./QESUB/vloc_mod.f90 ; \
+           mv ./QESUB/vloc_mod.f90_qe ../upflib/vloc_mod.f90 ; fi
+	if test -f ./QESUB/rhoat_mod.f90_qe ; then mv ../upflib/rhoat_mod.f90 \
+           ./QESUB/rhoat_mod.f90 ; \
+           mv ./QESUB/rhoat_mod.f90_qe ../upflib/rhoat_mod.f90 ; fi
 	if test -f ./QESUB/clocks_handler.f90_qe ; then mv ../UtilXlib/clocks_handler.f90 \
            ./QESUB/clocks_handler.f90 ; \
 	   mv ./QESUB/clocks_handler.f90_qe ../UtilXlib/clocks_handler.f90 ; fi
