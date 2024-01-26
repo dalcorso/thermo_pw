@@ -1,12 +1,12 @@
 %!
-%! Copyright (C) 2014-2023 Andrea Dal Corso 
+%! Copyright (C) 2014-2024 Andrea Dal Corso 
 %! This file is distributed under the terms of the
 %! GNU General Public License. See the file `License'
 %! in the root directory of the present distribution,
 %! or http://www.gnu.org/copyleft/gpl.txt .
 %!
 \documentclass[12pt,a4paper,twoside]{report}
-\def\version{1.9.0}
+\def\version{1.9.1}
 
 \usepackage[T1]{fontenc}
 \usepackage{tcolorbox}
@@ -240,6 +240,7 @@ X. Gong, and B. Thakur.
 \hline
 \thermo\ & \qe & release date \\
 \hline
+1.9.1 & 7.3 &  \\
 1.9.0 & 7.2 & 26/05/2023 \\
 1.8.1 & 7.2 & 05/05/2023 \\
 1.8.0 & 7.1 & 26/04/2023 \\
@@ -1108,45 +1109,6 @@ npx         : used only in the monoclinic cell, this parameter
               stops with an error asking to increase npx, double 
               it until the error disappears.
               Default: integer 8
-\end{verbatim}
-%\end{tcolorbox}
-
-
-Starting from version \texttt{1.5.0} \thermo\ writes also a script to
-plot the BZ using the \texttt{freeCAD} software. In order to plot
-the BZ you need to download the code (from the site
-\texttt{https://www.freecadweb.org/}, version \texttt{0.18} or higher)
-and, after opening it, choose 
-\texttt{Macro/Macros} to execute the \texttt{freeCAD} macro
-that you find in the working directory (the default name is 
-\texttt{tpw\_freecad.} \texttt{FCMacro}). 
-In the \texttt{Doc} directory there is a file called \texttt{tpw\_bz.svg} 
-that contains the template for the PDF file with the BZ plot. This file
-should be copied in the directory where you run the \texttt{freeCAD} 
-executable before running the script.
-In the same directory there is a file called \texttt{brillouin\_view.cam} 
-in the \texttt{Doc} directory that can be used with the option 
-\texttt{View/Freeze Display} to obtain the standard view of the Brillouin zone.
-This feature is still experimental.\\
-The following variables control the plot:
-
-%\begin{tcolorbox}
-\begin{verbatim}
-fcfact      : factor used to convert from the 2\pi/a units used 
-              for the Brillouin zone plot to the millimeters 
-              units needed to make a plot in freecad. 
-              Default: real 100.0
-fc_red,     
-fc_green,
-fc_blue     : color of the BZ in the rgb format (between 0.0 
-              and 1.0). By default the BZ will be yellow.
-              Default: real 1.0, 1.0, 0.0
-fc_transparency : transparency of the BZ between 0 (opaque) 
-              and 100 (transparent).
-              Default: integer 15.
-freecadfile : name of the file that contains the freecad 
-              script to plot the Brillouin zone.
-              Default: character(len=*) 'tpw_freecad'
 \end{verbatim}
 %\end{tcolorbox}
 
