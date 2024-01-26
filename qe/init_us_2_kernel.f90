@@ -23,9 +23,9 @@
     USE many_k_mod,   ONLY : nat=>nat_d, ityp=>ityp_d, tau=>tau_d, &
                              tpiba=>tpiba_d, ntyp=>ntyp_d, nh=> nh_d, &
                              nqx=>nqx_d, dq=>dq_d, &
-                             xk=>xk_d, nbeta=>nbeta_d
-    USE gvect,        ONLY : eigts1=>eigts1_d, eigts2=>eigts2_d, &
-                             eigts3=>eigts3_d, mill=>mill_d, g=>g_d
+                             xk=>xk_d, nbeta=>nbeta_d, &
+                             eigts1=>eigts1_d, eigts2=>eigts2_d, &
+                             eigts3=>eigts3_d, mill=>mill_d, g=>g_d 
     USE klist,        ONLY : igk=>igk_k_d, ngk=>ngk_d
     USE uspp_data,    ONLY : tab_d
     USE uspp,         ONLY : nhtol=>nhtol_d, nhtolm=>nhtolm_d, indv=>indv_d

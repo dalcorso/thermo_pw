@@ -13,9 +13,8 @@
   !----------------------------------------------------------------------
   !
     USE kinds,        ONLY : DP
-    USE many_k_mod,   ONLY : xk=>xk_d
+    USE many_k_mod,   ONLY : xk=>xk_d, g=>g_d
     USE klist,        ONLY : igk=>igk_k_d, ngk=>ngk_d
-    USE gvect,        ONLY : g=>g_d
 
     !
     IMPLICIT NONE

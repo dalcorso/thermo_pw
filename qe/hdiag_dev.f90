@@ -25,8 +25,7 @@
                              lsda => lsda_d, noncolin => noncolin_d,    &
                              lspinorb => lspinorb_d, deeq_nc => deeq_nc_d, &
                              qq_so => qq_so_d, ecfixed => ecfixed_d, &
-                             q2sigma => q2sigma_d, qcutz => qcutz_d
-    USE gvect,        ONLY : g=>g_d
+                             q2sigma => q2sigma_d, qcutz => qcutz_d, g=>g_d
     USE klist,        ONLY : igk=>igk_k_d, ngk=>ngk_d
     USE uspp,         ONLY : ofsbeta=>ofsbeta_d
     !

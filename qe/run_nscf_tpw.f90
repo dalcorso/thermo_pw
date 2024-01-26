@@ -25,7 +25,8 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   USE cell_base, ONLY: at, bg, tpiba
   USE gvect,     ONLY: gcutm
   USE gvecs,     ONLY: gcutms
-  USE gvect,     ONLY: eigts1, eigts1_d, eigts2, eigts2_d, eigts3, eigts3_d
+  USE gvect,     ONLY: eigts1, eigts2, eigts3
+  USE many_k_mod, ONLY: eigts1_d, eigts2_d, eigts3_d
   USE klist,     ONLY: qnorm, nelec, nks
   USE wvfct,     ONLY: nbnd, nbndx, npwx
   !!!

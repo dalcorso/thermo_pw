@@ -73,6 +73,8 @@ LOGICAL,     ALLOCATABLE :: type1ps_d(:)
 LOGICAL,     ALLOCATABLE :: tvanp(:)
 LOGICAL,     ALLOCATABLE :: tvanp_d(:)
 INTEGER,     ALLOCATABLE :: nbeta_d(:) 
+INTEGER,     ALLOCATABLE :: mill_d(:,:)
+REAL(DP),    ALLOCATABLE :: g_d(:,:)
 REAL(DP),    ALLOCATABLE :: xk_d(:,:)
 REAL(DP),    ALLOCATABLE :: wk_d(:)
 INTEGER,     ALLOCATABLE :: isk_d(:) 
@@ -80,6 +82,9 @@ REAL(DP),    ALLOCATABLE :: qq_at_d(:,:,:)
 COMPLEX(DP), ALLOCATABLE :: qq_so_d(:,:,:,:)
 REAL(DP),    ALLOCATABLE :: deeq_d(:,:,:,:)
 COMPLEX(DP), ALLOCATABLE :: deeq_nc_d(:,:,:,:)
+COMPLEX(DP), ALLOCATABLE :: eigts1_d(:,:)
+COMPLEX(DP), ALLOCATABLE :: eigts2_d(:,:)
+COMPLEX(DP), ALLOCATABLE :: eigts3_d(:,:)
 
 INTEGER :: nat_d
 INTEGER :: ntyp_d
@@ -124,6 +129,8 @@ LOGICAL :: domag_d
    ATTRIBUTES(DEVICE) :: type1ps_d
    ATTRIBUTES(DEVICE) :: tvanp_d
    ATTRIBUTES(DEVICE) :: nbeta_d
+   ATTRIBUTES(DEVICE) :: g_d
+   ATTRIBUTES(DEVICE) :: mill_d
    ATTRIBUTES(DEVICE) :: xk_d
    ATTRIBUTES(DEVICE) :: wk_d
    ATTRIBUTES(DEVICE) :: isk_d
@@ -131,6 +138,10 @@ LOGICAL :: domag_d
    ATTRIBUTES(DEVICE) :: qq_so_d
    ATTRIBUTES(DEVICE) :: deeq_d
    ATTRIBUTES(DEVICE) :: deeq_nc_d
+   ATTRIBUTES(DEVICE) :: eigts1_d
+   ATTRIBUTES(DEVICE) :: eigts2_d
+   ATTRIBUTES(DEVICE) :: eigts3_d
+
    ATTRIBUTES(DEVICE) :: nat_d
    ATTRIBUTES(DEVICE) :: ntyp_d
    ATTRIBUTES(DEVICE) :: lmaxkb_d
@@ -170,8 +181,8 @@ PUBLIC nl_d, work_d, wsave_d, lenwrk, lensav, isindex_d, iplane_d, lenwrk_d, &
 PUBLIC nat_d, ntyp_d, ityp_d, nh_d, isk_d, qq_at_d, deeq_d, lmaxkb_d,      &
        nhm_d, tpiba_d, xk_d, wk_d, nbeta_d, dq_d, qq_so_d, deeq_nc_d,      &
        tau_d, nqx_d, npwx_d, type1ps_d, noncolin_d, lspinorb_d, lsda_d,    &
-       domag_d, tvanp_d, qcutz_d, ecfixed_d, q2sigma_d, nkb_d, okvan_d
-       
+       domag_d, tvanp_d, qcutz_d, ecfixed_d, q2sigma_d, nkb_d, okvan_d,    &
+       eigts1_d, eigts2_d, eigts3_d, g_d, mill_d
 !
 ! subroutines of the module
 !
@@ -220,7 +231,7 @@ fixmem= DBLE(nnrs) * DBLE(nbnd) * DBLE(npol) * 16 +   & ! psic
         DBLE(npwx) * DBLE(npol) * DBLE (nbnd) * 16 +  & ! evc
         DBLE(npwx) * DBLE(nkb) * 16 +  &  ! vkb
         DBLE(npwx) * 16  +             &  ! g2kin
-        DBLE(10 * ngm) * 8                ! g, gg, eigts
+        DBLE(10 * ngm) * 8                ! g, gg, mills, ...
 IF (npol==2) THEN
    fixmem=fixmem + DBLE(nhm) * DBLE(nhm) * DBLE(nspin) * DBLE(nat+ntyp) * 16 
                                                ! deeq_nc and qq_so
@@ -231,9 +242,11 @@ ENDIF
 fftmem=DBLE(nnrs) * DBLE(nbnd) * DBLE(nks) * DBLE(npol) * 16  ! psicmr
 totmem=DBLE(npwx*npol*nbndx*nks)*16*fact +   &  ! psi, hpsi, (spsi) 
        DBLE(nbndx*nbndx*nks)*16*3 +          &  ! hc, sc, vc
+       DBLE(npwx*npol)*DBLE(nbnd)*DBLE(nks)*16 * 2+ &! evck, evck_d
        fftmem 
-WRITE(stdout,'(5x,"Estimated memory in cegterg",f10.1," MB")') &
-                                                 (totmem+fixmem)/1.D6 
+WRITE(stdout,'(5x,"Estimated memory in cegterg",f10.1," GB")') &
+                                                 (totmem+fixmem)/1.D9 
+WRITE(stdout,'(5x,"Fixed memory in cegterg",f10.1," GB")')  fixmem/1.D9 
 IF (fixmem > (memgpu * 1.D9)) THEN
    WRITE(stdout,'(5x,"memgpu must be greater than ",f8.2," to use many_k")') &
                5.0_DP * fixmem/1.D9
@@ -293,7 +306,9 @@ USE noncollin_module, ONLY : npol, noncolin
 USE uspp_param,       ONLY : nhm
 USE ions_base,        ONLY : nat, ntyp=>nsp
 USE lsda_mod,         ONLY : nspin
+USE gvect,            ONLY : ngm
 USE klist,            ONLY : nks
+USE fft_base,         ONLY : dfftp
 
 IMPLICIT NONE
 
@@ -322,6 +337,11 @@ ELSE
    ALLOCATE(deeq_d(nhm,nhm,nat,nspin))
    ALLOCATE(qq_at_d(nhm,nhm,nat))
 ENDIF
+ALLOCATE(mill_d(3,ngm) )
+ALLOCATE(g_d(3,ngm) )
+ALLOCATE(eigts1_d(-dfftp%nr1:dfftp%nr1,nat) )
+ALLOCATE(eigts2_d(-dfftp%nr2:dfftp%nr2,nat) )
+ALLOCATE(eigts3_d(-dfftp%nr3:dfftp%nr3,nat) )
 ALLOCATE(evck(npwx*npol,nbnd*nksbx*nsolv))
 ALLOCATE(evck_d(npwx*npol,nbnd*nksbx*nsolv))
 
@@ -359,6 +379,11 @@ IF (ALLOCATED(qq_at_d)) DEALLOCATE(qq_at_d)
 IF (ALLOCATED(qq_so_d)) DEALLOCATE(qq_so_d)
 IF (ALLOCATED(evck_d))  DEALLOCATE(evck_d)
 IF (ALLOCATED(evck))    DEALLOCATE(evck)
+IF (ALLOCATED(g_d))      DEALLOCATE(g_d)
+IF (ALLOCATED(mill_d))   DEALLOCATE(mill_d)
+IF (ALLOCATED(eigts1_d)) DEALLOCATE(eigts1_d)
+IF (ALLOCATED(eigts2_d)) DEALLOCATE(eigts2_d)
+IF (ALLOCATED(eigts3_d)) DEALLOCATE(eigts3_d)
 
 RETURN
 END SUBROUTINE deallocate_many_k
@@ -372,6 +397,7 @@ USE ions_base,  ONLY : nat, ntyp=>nsp, ityp, tau
 USE cell_base,  ONLY : tpiba
 USE uspp,       ONLY : nkb, qq_at, deeq, qq_so, deeq_nc, okvan
 USE gvecw,      ONLY : ecfixed, qcutz, q2sigma
+USE gvect,      ONLY : g, mill, eigts1, eigts2, eigts3
 USE uspp_data,  ONLY : dq, nqx
 USE uspp_param, ONLY : upf, nh, nhm, lmaxkb
 USE klist,      ONLY : xk
@@ -421,6 +447,11 @@ DO nt=1,ntyp
    type1ps(nt)=upf(nt)%tvanp .OR.upf(nt)%is_multiproj
    tvanp(nt)=upf(nt)%tvanp
 ENDDO
+mill_d=mill
+g_d=g
+eigts1_d=eigts1
+eigts2_d=eigts2
+eigts3_d=eigts3
 nbeta_d=nbeta_cpu
 type1ps_d=type1ps
 tvanp_d=tvanp

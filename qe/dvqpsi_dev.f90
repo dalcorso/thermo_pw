@@ -976,9 +976,8 @@ ATTRIBUTES(GLOBAL) SUBROUTINE dvqpsi_us_dev2(ndmx, st, ikt, dvpsi, npol, &
 USE cudafor
 USE kinds, ONLY : DP
 USE many_k_ph_mod, ONLY : ps2k_d, ps2k_nc_d
-USE many_k_mod, ONLY : vkbk_d, xk => xk_d, noncolin => noncolin_d
+USE many_k_mod, ONLY : vkbk_d, xk => xk_d, noncolin => noncolin_d, g => g_d
 USE klist, ONLY : igk_k => igk_k_d, ngk => ngk_d
-USE gvect, ONLY : g => g_d
 
 IMPLICIT NONE
 
