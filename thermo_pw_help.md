@@ -527,12 +527,14 @@ continue the calculation, otherwise simplify your cell.
 <br><br>
 28. Is <code>thermo_pw</code> compatible with the GPU version of QE?
 <br>
-Presently there is no support for GPU in <code>thermo\_pw</code> routines,
-but with QE6.7 and with version 1.5.0 
+In part it is. With QE6.7 and with version 1.5.0 
 you can give the command <code>make tpw_gpu</code>
 to obtain a version of the code that can be compiled with 
 <code>q-e-gpu.6.7</code>. Version 1.5.1 and QE6.8 or later versions
-can be compiled with CUDA enabled. 
+can be compiled with CUDA enabled with the same commands used to
+enable CUDA in QE. You need to run configure with the CUDA options.
+Version 1.9.0 has been tested on Leonardo at CINECA with the nvidia
+fortran compiler. 
 <br><br>
 29. The band or phonon symmetry is not indicated. There are many
 question marks instead of the names of the irreducible representations.
