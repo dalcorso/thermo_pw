@@ -147,7 +147,8 @@ REAL(DP) :: totmem, fftmem, fixmem
 INTEGER :: fact, i, rest
 
 fact=npe*nsolv*3+1
-fftmem=DBLE(nnrs) * DBLE(nbnd) * DBLE(nksq) * DBLE (npe) *DBLE(nsolv) * 16
+fftmem=DBLE(nnrs) * DBLE(nbnd) * DBLE(nksq) * DBLE (npe) *DBLE(nsolv) * 
+       DBLE(npol) * 16
 
 fixmem= DBLE(nnrs) * DBLE(nbnd) * DBLE(npol) * 16 +   & ! psic
         DBLE(npwx) * DBLE(npol) * DBLE (nbnd) * 16 * 2 +  & ! evc + evq
@@ -170,12 +171,12 @@ fixmem=fixmem + DBLE(nhm) * DBLE(nhm) * DBLE(nspin+nat) * DBLE(nat) * 3 *16
 totmem=DBLE(npwx*npol) * DBLE(nbnd) * DBLE(nksq) * fact * 16      &
                           ! dvpsik_d, dpsik_d, h_diagk_ph_d, evqk_d
        + DBLE(nkb) * DBLE(nbnd) * DBLE(nksq) * (npe*nsolv + 4*npol + &
-                          4 * npol * npe * nsolv )&
+                          4 * npol * npe * nsolv ) * 16 &
                           ! dbecq_d, beco1k_d, alphak_d, ps1k_nc_d, ps2k_nc_d
        + DBLE(nhm) * DBLE(nhm) * DBLE(nat) * DBLE(nbnd)  * DBLE(nksq) *       &
-         DBLE(nspin) & !  deff_d  of deff_nc_d         
+         DBLE(nspin) * 16 & !  deff_d  of deff_nc_d         
        + DBLE((nhm*(nhm+1))/2) * DBLE(nat)* DBLE(nspin_mag)* &
-         DBLE(nbnd*nksq*npe*nsolv) & ! dbecsum_d
+         DBLE(nbnd*nksq*npe*nsolv) * 16 & ! dbecsum_d
        + DBLE(npwx*npol) * DBLE(nbnd) * DBLE(nksq) * DBLE(npe*nsolv)*16*7 &
             ! dpsi, hpsi, spsi, g, t, h, hold
        + 2.0_DP*fftmem    ! psicmr + dpsicrm

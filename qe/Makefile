@@ -185,5 +185,6 @@ thermo_qe.a: $(MODULES)
 
 clean :
 	- /bin/rm -f *.o *.a *.d *.i *~ *_tmp.f90 *.mod *.L 
+	- /bin/rm -f ./make.depend 
 
 include make.depend
