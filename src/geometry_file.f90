@@ -142,8 +142,8 @@ IF (meta_ionode) THEN
                                                      FORM='formatted')
    WRITE(iu_geom,'(i8)') ngeo_file
    DO igeo=1,ngeo_file
-      WRITE(iu_geom,'(9f13.8)') press_file(igeo), energy_file(igeo), &
-                                celldm_geo_file(:,igeo), omega_file(igeo)
+      WRITE(iu_geom,'(f13.8,f16.8,7f13.8)') press_file(igeo), &
+                energy_file(igeo), celldm_geo_file(:,igeo), omega_file(igeo)
    ENDDO
    CLOSE(UNIT=iu_geom, STATUS='KEEP')
 ENDIF
