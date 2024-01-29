@@ -430,7 +430,7 @@ IMPLICIT NONE
 COMPLEX(DP) :: becp(nkb, npol, nbnd)
 TYPE(bec_type), INTENT(IN)  :: bectmp
 #if defined(__CUDA)
-ATTRIBUTES, DEVICE :: becp
+ATTRIBUTES(DEVICE) :: becp
 #endif
 !
 !$acc data present(bectmp)
