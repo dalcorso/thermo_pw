@@ -387,7 +387,7 @@ WRITE(stdout, '(5x, " Bulk modulus: ", 6x, f13.4, " kbar")') b0_file
 WRITE(stdout, '(5x, " dB_0/dp: ", 11x, f13.4)') b01_file
 IF (ieos==2) WRITE(stdout, '(5x, " d^2B_0/dp^2: ", 7x, f13.4, " kbar^-1")') &
                                            b02_file
-WRITE(stdout, '(5x, " E_min: ", 17x, f13.8," Ry")') emin_file
+WRITE(stdout, '(5x, " E_min: ", 17x, f18.8," Ry")') emin_file
 
 WRITE(stdout, '(1x, 76("-"))') 
 
