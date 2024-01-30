@@ -1144,8 +1144,13 @@ IF (ionode) THEN
    DO iplot=1, contour_counter
       filename1=TRIM(tablefile)//'_'//TRIM(int_to_char(iplot))//'.dat'
       IF (iplot==1.AND.contour_counter>1) THEN
-         WRITE(iun_gnuplot,'("plot """,a,""" u 1:2 w l lw 4 lc rgb ",a,",\")') & 
+         IF (lbackspace) THEN
+            WRITE(iun_gnuplot,'("plot """,a,""" u 1:2 w l lw 4 lc rgb ",a,",\")') & 
                   TRIM(filename1), TRIM(contour_color(iplot))
+         ELSE
+            WRITE(iun_gnuplot,'("plot """,a,""" u 1:2 w l lw 4 lc rgb ",a,",\\")') & 
+                  TRIM(filename1), TRIM(contour_color(iplot))
+         ENDIF
       ELSEIF (iplot==contour_counter.AND.contour_counter>1) THEN
          WRITE(iun_gnuplot,'("""",a,""" u 1:2 w l lw 4 lc rgb ",a)') & 
                   TRIM(filename1), TRIM(contour_color(iplot))
@@ -1153,8 +1158,13 @@ IF (ionode) THEN
          WRITE(iun_gnuplot,'("plot """,a,""" u 1:2 w l lw 4 lc rgb ",a)') & 
                   TRIM(filename1), TRIM(contour_color(iplot))
       ELSE
-         WRITE(iun_gnuplot,'("""",a,""" u 1:2 w l lw 4 lc rgb ",a,",\")') & 
+         IF (lbackspace) THEN
+            WRITE(iun_gnuplot,'("""",a,""" u 1:2 w l lw 4 lc rgb ",a,",\")') & 
                   TRIM(filename1), TRIM(contour_color(iplot))
+         ELSE
+            WRITE(iun_gnuplot,'("""",a,""" u 1:2 w l lw 4 lc rgb ",a,",\\")')& 
+                  TRIM(filename1), TRIM(contour_color(iplot))
+         ENDIF
       ENDIF
    ENDDO
 ENDIF
