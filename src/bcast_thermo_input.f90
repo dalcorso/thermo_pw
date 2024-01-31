@@ -44,8 +44,6 @@ SUBROUTINE bcast_thermo_input()
                               k1_d, k2_d, k3_d, sigmae, legauss,  &
                               lel_free_energy, hot_electrons
   USE control_asy,     ONLY : flasy, lasymptote, asymptote_command
-  USE control_freecad, ONLY : freecadfile, fcfact, fc_red, fc_green, fc_blue, &
-                              fc_transparency
   USE control_xrdp,    ONLY : lambda, flxrdp, flpsxrdp, lformf, smin, smax,   &
                               nspoint, flformf, flpsformf, lcm, lxrdp, &
                               lambda_elem
@@ -193,13 +191,6 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( flasy, meta_ionode_id, world_comm )
   CALL mp_bcast( asymptote_command, meta_ionode_id, world_comm )
   CALL mp_bcast( npx, meta_ionode_id, world_comm )
-!
-  CALL mp_bcast( freecadfile, meta_ionode_id, world_comm )
-  CALL mp_bcast( fcfact, meta_ionode_id, world_comm )
-  CALL mp_bcast( fc_red, meta_ionode_id, world_comm )
-  CALL mp_bcast( fc_green, meta_ionode_id, world_comm )
-  CALL mp_bcast( fc_blue, meta_ionode_id, world_comm )
-  CALL mp_bcast( fc_transparency, meta_ionode_id, world_comm )
 !
 !  xrdp
 !

@@ -67,8 +67,6 @@ SUBROUTINE thermo_readin()
                                    force_bands, only_bands_plot, dump_states, &
                                    subtract_vacuum
   USE control_asy,          ONLY : flasy, lasymptote, asymptote_command
-  USE control_freecad,      ONLY : freecadfile, fcfact, fc_red, fc_green, &
-                                   fc_blue, fc_transparency
   USE control_bands,        ONLY : emin_input, emax_input, nbnd_bands, lsym, &
                                    enhance_plot
   USE control_eldos,        ONLY : deltae, ndose, nk1_d, nk2_d, nk3_d, &
@@ -213,10 +211,6 @@ SUBROUTINE thermo_readin()
                             lasymptote,                     &
                             flasy, asymptote_command,       &
                             npx,                            &
-                            freecadfile,                    &
-                            fcfact,                         &
-                            fc_red, fc_green, fc_blue,      &
-                            fc_transparency,                &
                             lambda, lambda_elem,            &
                             flxrdp, flpsxrdp,               &          
                             lxrdp, lformf,                  &
@@ -429,12 +423,6 @@ SUBROUTINE thermo_readin()
   lasymptote=.FALSE.
   asymptote_command='asy -f pdf -noprc'
   npx=8
-  freecadfile='tpw_freecad'
-  fcfact=100.0_DP
-  fc_red=1.0_DP
-  fc_green=1.0_DP
-  fc_blue=0.5_DP
-  fc_transparency=15
 
   lambda=0.0_DP
   lambda_elem=' '

@@ -2028,23 +2028,6 @@ MODULE control_asy
 END MODULE control_asy
 
 !----------------------------------------------------------------------------
-MODULE control_freecad
-!----------------------------------------------------------------------------
-  USE kinds,  ONLY : DP
-  !
-  ! ... The variables needed to control the brillouin zone plot with freecad
-  !
-  SAVE
-
-  CHARACTER(LEN=256) :: freecadfile    ! name of the file where the freecad
-                                       ! script is written
-  REAL(DP) :: fcfact                   ! size of the BZ in the freecad plot
-  REAL(DP) :: fc_red, fc_green, fc_blue ! color of the BZ in the freecad plot
-  INTEGER  :: fc_transparency          ! transparency of the BZ 
-
-END MODULE control_freecad
-
-!----------------------------------------------------------------------------
 MODULE thermo_sym
 !----------------------------------------------------------------------------
   USE kinds,  ONLY : DP
