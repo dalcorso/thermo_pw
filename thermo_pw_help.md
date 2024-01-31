@@ -60,8 +60,16 @@ main <code>thermo_pw</code> page.</p>
 patches given below.</p>
 
 **Patches for thermo_pw.1.9.0**:
-
+<br>
+A problem with calculation of EELS spectrum with 
+Sternheimer method.
+See bug fix of Jan. 31, 2024
+<br>
 **Patches for thermo_pw.1.8.1**:
+<br>
+A problem with calculation of EELS spectrum with 
+Sternheimer method.
+See bug fix of Jan. 31, 2024
 <br>
 A problem with calculation of electronic free energy 
 See bug fix aeedce4 of Jul. 3, 2023.

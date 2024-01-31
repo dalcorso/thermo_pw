@@ -320,7 +320,7 @@ subroutine solve_eq(iu, flag)
               ! calculates dvscf_q*psi_k in G_space, for all bands, k=kpoint
               ! dvscf_q from previous iteration (mix_potential)
               !
-              CALL apply_dpot_bands(ik, nbnd_occ(ik), &
+              CALL apply_dpot_bands(ik, nbnd_occ(ikk), &
                                 dvscfins(:, :, ipol), evc, aux2)
               dvpsi=dvpsi+aux2
               !
@@ -408,7 +408,6 @@ subroutine solve_eq(iu, flag)
            !
            ! calculates dvscf, sum over k => dvscf_q_ipert
            !
-           
            weight=wk(ikk)
            IF (ldpsi1) THEN
 !
