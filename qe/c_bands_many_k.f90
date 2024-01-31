@@ -4,7 +4,6 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-#define DIMS2D(arr) lbound(arr,1),ubound(arr,1),lbound(arr,2),ubound(arr,2)
 !--------------------------------------------------------------------------
 SUBROUTINE c_bands_many_k(iter)
 !--------------------------------------------------------------------------
@@ -156,7 +155,7 @@ DO ikb=1,nkblocks
    ntry=0
 
    IF (use_gpu) THEN
-       CALL using_et_d(1)
+      CALL using_et_d(1)
    ELSE
       CALL using_et(1)
    ENDIF
@@ -189,10 +188,6 @@ DO ikb=1,nkblocks
    evck(1:npwx*npol,1:nbnd*nksb(ikb))=evck_d(1:npwx*npol,1:nbnd*nksb(ikb))
    DO ik = startkb(ikb)+1, startkb(ikb)+nksb(ikb)
       ik1=ik-startkb(ikb)
-!      !$acc parallel loop copyout(evc)
-!      DO i=1,ngk(ik)
-!         evc(i,1:nbnd)=evck_d(i,nbnd*(ik1-1)+1:nbnd*ik1)
-!      ENDDO
       IF ( nks > 1 ) THEN
          CALL save_buffer (evck(1,nbnd*(ik1-1)+1), nwordwfc, iunwfc, ik )
       ELSE
