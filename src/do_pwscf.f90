@@ -374,7 +374,6 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   !
   IF (many_k) CALL deallocate_many_k()
   !
-  CALL laxlib_end()
   IF (lscf_) THEN
      CALL stop_clock('tpw_scf_pw')
   ELSE

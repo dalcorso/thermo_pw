@@ -41,6 +41,8 @@ CHARACTER(LEN=*), INTENT(IN) :: code
    !
    CALL print_thermo_clocks()
    !
+   CALL laxlib_end()
+   !
    CALL deallocate_thermo()
    !
    CALL environment_end( code )

@@ -5,8 +5,10 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!------------------------------------------------------------------------
 SUBROUTINE select_c_bands(iter)
-
+!------------------------------------------------------------------------
+!
 USE control_qe, ONLY : many_k
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: iter
