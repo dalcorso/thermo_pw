@@ -13,3 +13,7 @@ rhoat_mod.f90 we need to call deallocate_tab_rhoat so we make this routine
 
 vloc_mod.f90 we deallocate tab_vloc only if it has been allocated.
              See at line 238.
+
+uspp_data.f90 tab_at deallocated from the acc system only if allocated.
+
+pwcom.f90 igk_k deallocated from the acc system only if allocated.
