@@ -114,7 +114,8 @@ SUBROUTINE thermo_readin()
   USE control_ph,           ONLY : xmldyn
   USE ifc,                  ONLY : zasr
   USE output,               ONLY : fildyn
-  USE mp_world,             ONLY : world_comm
+  USE mp_world,             ONLY : world_comm, nproc, nnode
+  USE mp_pools,             ONLY : npool
   USE mp_images,            ONLY : nimage, my_image_id, root_image
   USE parser,               ONLY : read_line, parse_unit
   USE read_input,           ONLY : read_input_file
@@ -122,12 +123,15 @@ SUBROUTINE thermo_readin()
   USE check_stop,           ONLY : max_seconds_ => max_seconds
   USE io_global,            ONLY : ionode, meta_ionode, meta_ionode_id, stdout
   USE mp,                   ONLY : mp_bcast
+#if defined(__CUDA)
+  USE cudafor
+#endif
   !
   IMPLICIT NONE
   REAL(DP) :: wq0, save_max_seconds
   INTEGER, ALLOCATABLE :: iun_image(:)
   INTEGER :: image, iq, icont, iun_thermo, parse_unit_save, &
-             nch, nrp, i, j, k, ios
+             nch, nrp, i, j, k, ios, ierr, ndev
   INTEGER :: iun_input
   INTEGER :: find_free_unit
   INTEGER, PARAMETER :: max_opt=20, max_sigma=1000
@@ -638,6 +642,15 @@ SUBROUTINE thermo_readin()
      ALLOCATE(ivol_plot_(nvol_plot))
      ivol_plot_(1:nvol_plot)=ivol_plot(1:nvol_plot)
   ENDIF
+
+  IF (many_k.AND.(nproc/=npool*nimage)) &
+     CALL errore('thermo_readin','many_k requires nproc=npool',1)
+#if defined(__CUDA)
+  ierr = cudaGetDeviceCount( ndev )
+  IF (ierr /= 0) CALL errore('thermo_readin', 'cannot get device count', ierr)
+  IF (many_k .AND. nproc /= ndev * nnode) &
+     CALL errore('thermo_readin','many_k requires as many GPU as CPU',1)
+#endif
 
   IF ((ieos /= 1) .AND. (ieos /= 2) .AND. (ieos /= 4) ) &
      CALL errore('thermo_readin','wrong equation of state (ieos)',1)
