@@ -39,8 +39,8 @@ SUBROUTINE thermo_summary()
                                    flformf, smin, smax, nspoint, lcm
   USE xrdp_module,          ONLY : write_form_factor, compute_xrdp
   USE control_2d_bands,     ONLY : lprojpbs
-  USE control_thermo,       ONLY : with_eigen
-
+  USE control_thermo,       ONLY : with_eigen, ltherm_dos, ltherm_freq, &
+                                   ltherm_glob
 !
 !  variables set by this routine
 !
@@ -382,6 +382,18 @@ SUBROUTINE thermo_summary()
           WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
              6*ngeo_strain 
        ENDIF
+    ENDIF
+ ENDIF
+
+ IF (what=='mur_lc_t'.AND.(ltherm_dos.OR.ltherm_freq)) THEN
+    IF (ltherm_glob) THEN
+       WRITE(stdout,'(/,5x,"Anharmonic properties from global interpolation &
+                            &of the")') 
+       WRITE(stdout,'(5x,"total free energy")') 
+    ELSE
+       WRITE(stdout,'(/,5x,"Anharmonic properties from separate interpolation &
+                            &of the")')
+       WRITE(stdout,'(5x,"total energy and of the free energy")') 
     ENDIF
  ENDIF
 !
