@@ -75,6 +75,8 @@ CALL allocate_becps_many_k(1,1)
 CALL initialize_fft_factors(1,1)
 CALL initialize_device_variables()
 
+
+
 lrot=(iter==1)
 avg_iter=0.0_DP
 DO ikb=1,nkblocks
@@ -217,18 +219,6 @@ WRITE( stdout, &
 !
 CALL stop_clock( 'c_bands' ); !write (*,*) 'stop c_bands' ; FLUSH(6)
 
-!
-!  We do not use becp, but we allocate a fake becp due to an
-!  error in the forces. They do not work on the device if becp_d is
-!  not already allocated.
-!
-!IF (use_gpu) THEN
-!   CALL allocate_bec_type( nkb, nbnd, becp, intra_bgrp_comm )
-!   CALL using_becp_auto(2)
-!   CALL using_becp_d_auto(0)
-!   CALL deallocate_bec_type( becp )
-!   CALL using_becp_auto(2)
-!ENDIF
 CALL deallocate_fft_factors()
 CALL deallocate_becps_many_k()
 

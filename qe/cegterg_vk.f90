@@ -1,19 +1,13 @@
 !
 ! Copyright (C) 2001-2022 Quantum ESPRESSO group
 ! Copyright (C) Dic. 2022- Andrea Dal Corso (extension to many k with GPU
-!                                            mixed mode: uses acc variables 
-!                                            already present and declare
-!                                            new one in CUDA fortran).
+!                          mainly in CUDA fortran but some acc commands 
+!                          (from I. Carmineo) still used to parallelize loops).
+!
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
-!
-! NOTE (Ivan Carnimeo, May, 05th, 2022): 
-!   cegterg and regterg have been ported to GPU with OpenACC, 
-!   the previous CUF versions (cegterg_gpu and regterg_gpu) have been removed, 
-!   and now cegterg and regterg are used for both CPU and GPU execution.
-!   If you want to see the previous code checkout to commit: df3080b231c5daf52295c23501fbcaa9bfc4bfcc (on Thu Apr 21 06:18:02 2022 +0000)
 !
 #define ZERO ( 0.D0, 0.D0 )
 #define ONE  ( 1.D0, 0.D0 )
@@ -113,15 +107,12 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
     ! defines a column section for communication
   INTEGER :: ierr
   COMPLEX(DP), ALLOCATABLE :: hc(:,:,:), sc(:,:,:), vc(:,:,:)
-  !$acc declare device_resident(hc, sc, vc)
     ! Hamiltonians on the reduced basis
     ! S matrices on the reduced basis
     ! the eigenvectors of the Hamiltonians
   REAL(DP), ALLOCATABLE :: ew(:,:)
-  !$acc declare device_resident(ew)
     ! eigenvalues of the reduced Hamiltonians
   COMPLEX(DP), ALLOCATABLE :: psi(:,:), hpsi(:,:), spsi(:,:)
-  !$acc declare device_resident(psi, hpsi, spsi)
     ! work space, contains psi
     ! the product of H and psi
     ! the product of S and psi
@@ -158,6 +149,7 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
   !  declaration of device variables
   !
 #if defined(__CUDA)
+
   !
   !   Several arrays of dimensions needed to pass the information
   !   to the global routines. See above for their use.
@@ -189,6 +181,8 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
 !  work space for the fft. We allocate a smooth grid for each k point.
 !
   REAL(DP), ALLOCATABLE, DEVICE :: psicmr(:,:,:,:)
+
+  ATTRIBUTES(DEVICE) :: psi, hpsi, spsi, vc, hc, sc, ew
 #endif
   !
   EXTERNAL  h_psii,    s_psii,    g_psii
@@ -202,6 +196,7 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
     !    the first stx(ik)+nvec columns contain the trial eigenvectors
   !
   CALL start_clock( 'cegterg' )!; write(*,*) 'start cegterg' ; FLUSH(6)
+
   !$acc data deviceptr(evc, e )
   nhpsi = 0
   !
@@ -319,6 +314,8 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
      start(ib)=start(ib-1)+times(ib-1)
   ENDDO
 #endif
+WRITE(6,*) 'Allocated memory in cegter_vk'
+CALL print_gpu_memory()
   !
   DO ik = 1, nk 
      nbasek(ik)  = nvec
@@ -352,11 +349,9 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
 #endif
   !
 #if defined(__CUDA)  
-  !$acc host_data use_device(psi)
   CALL copy_psi_gpu<<<dim3((npwx*npol)/4+1,nvec/4+1,nk/32+1),dim3(4,4,32)>>> &
        ( npwx, outk_d, enter_d, kdimk_d, stx_d, st_d, npol, psi, evc,  &
                                                        nvec, nvecx, nk )
-  !$acc end host_data
 #else
   DO ik=1, nk
      stx_=stx(ik)
@@ -369,7 +364,6 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
   !
 #if defined(__CUDA)
 
-  !$acc host_data use_device(psi,hpsi,spsi)
   IF (uspp) THEN
      CALL h_s_psik_dev(npwx, outk_d, kdimk_d, npw_d, notcnvk_d, nb1k_d, &
              st_d, stx_d, ikt_d, ikblk_d, npol, psi, hpsi, spsi, psicmr, &
@@ -379,7 +373,6 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
           stx_d, ikt_d, ikblk_d, npol, psi, hpsi, psicmr, nvec, nvecx, &
           nnrs, nk, .FALSE.)
   ENDIF
-  !$acc end host_data
 #endif
 
 #if ! defined (__CUDA)
@@ -405,7 +398,6 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
   ! ... space vc contains the eigenvectors of hc
   !
 #if defined (__CUDA)
-  !$acc host_data use_device(psi, hpsi, spsi, hc, sc)
   IF (uspp) THEN
      CALL cegterg_init_us<<<dim3(nvec/4+1,nvecx/4+1,nk/32+1),       &
        dim3(4,4,32)>>>(outk_d, nbasek_d, kdimk_d, stx_d, hpsi,      &
@@ -416,7 +408,6 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
                        hc, sc, kdmx, nvecx, nk)
   ENDIF
   ierr=cudaDeviceSynchronize()
-  !$acc end host_data
 #else
   DO ik = 1, nk
      nbase=nbasek(ik)
@@ -462,7 +453,6 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
 #endif
 
 #if defined (__CUDA)
-  !$acc host_data use_device(hc, sc)
   DO ik = 1, nk
      nbase=nbasek(ik)
      n_start=1
@@ -476,7 +466,6 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
          CALL mp_sum( sc(:,:,ik), 1, nbase, n_start, n_end, intra_bgrp_comm)
  
   ENDDO 
-  !$acc end host_data
 #endif
   !
   
@@ -510,13 +499,11 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
   !
   IF ( lrot ) THEN
      !
-     !$acc host_data use_device(vc)
      DO ik = 1, nk
         nbase=nbasek(ik)
         CALL dev_memset(vc(:,:,ik), ZERO, (/1, nbase/), 1, &
                                           (/1, nbase/), 1)
      ENDDO
-     !$acc end host_data
      !
      DO ik = 1, nk
         !
@@ -542,7 +529,7 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
      !
      CALL start_clock( 'cegterg:diag' )
 #if defined(__CUDA)
-     !$acc host_data use_device(hc, sc, vc, ew)
+     
      DO ib=1, nblock
         CALL diago_dev<<<times(ib),1>>>(times(ib),nvecx,              &
             nbasek_d(start(ib)),nvec,outk_d(start(ib)),hc(1,1,start(ib)),  &
@@ -553,7 +540,6 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
             ifail_d(1,start(ib)), m_d(start(ib)) )
         ierr=cudaDeviceSynchronize()
      ENDDO
-     !$acc end host_data
 #else
      IF ( my_bgrp_id == root_bgrp_id ) THEN
         DO ik=1, nk
@@ -563,7 +549,6 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
         ENDDO
      END IF
 #endif
-     !$acc host_data use_device(vc, ew)
      IF( nbgrp > 1 ) THEN
         CALL mp_bcast( vc, root_bgrp_id, inter_bgrp_comm )
         CALL mp_bcast( ew, root_bgrp_id, inter_bgrp_comm )
@@ -574,7 +559,6 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
         st_=st(ik)
         CALL dev_memcpy (e(st_+1:), ew(:,ik), (/ 1, nvec /), 1 )
      ENDDO
-     !$acc end host_data
      !
   END IF
   !
@@ -587,11 +571,9 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
 #if defined (__CUDA)
      conv_d=conv
      e_d=e
-     !$acc host_data use_device(vc,ew)
      CALL cegterg_upd0<<<nk,1>>>(outk_d, nbasek_d, st_d, dav_iter_d, conv_d, &
                            nb1k_d, vc, ew, e_d, nvecx, nvec, kter, nk)
      ierr=cudaDeviceSynchronize()
-     !$acc end host_data
 
      nb1k=nb1k_d
      dav_iter=dav_iter_d
@@ -640,7 +622,6 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
      ! ... expand the basis set with new basis vectors ( H - e*S )|psi> ...
      !
   !
-     !$acc host_data use_device(psi, spsi, vc)
      DO ik = 1, nk
         !
         IF (outk(ik)) CYCLE
@@ -671,7 +652,6 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
         END IF
         !
      END DO
-     !$acc end host_data
      
 ! NB: must not call mp_sum over inter_bgrp_comm here because it is done later to the full correction
      !
@@ -717,11 +697,9 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
 #endif
      !
 #if defined(__CUDA)
-     !$acc host_data use_device(psi, hpsi, vc)
      CALL cegterg_upd3<<<dim3(kdmx/32+1,nvec/32+1,nk),dim3(32,32,1)>>>&
          (outk_d, nbasek_d, kdimk_d, notcnvk_d, nb1k_d, stx_d, hpsi, &
           psi, vc, kdmx, nvecx, nk)
-     !$acc end host_data
      ierr=cudaDeviceSynchronize()
 #else
      DO ik=1, nk
@@ -745,7 +723,6 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
         !
         ! clean up garbage if there is any
         !
-     !$acc host_data use_device(psi, ew)
      DO ik=1,nk
         IF (outk(ik)) CYCLE
         nbase=nbasek(ik)
@@ -774,7 +751,6 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
                      ew(nb1,ik), ik )
      ENDDO
 #endif
-     !$acc end host_data
      !
      !
      ! ... "normalize" correction vectors psi(:,nb1:nbase+notcnv) in
@@ -784,11 +760,9 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
      ! ...         ew = <psi_i|psi_i>,  i = nbase + 1, nbase + notcnv
      !
 #if defined(__CUDA)
-     !$acc host_data use_device(psi, ew)
      CALL compute_dot_ew<<<dim3(nk,nvec,1),dim3(1,1,1)>>>(outk_d, npw_d, &
                 nbasek_d, notcnvk_d, stx_d, psi, ew, npol, npwx, nvecx, nk)
      ierr=cudaDeviceSynchronize()
-     !$acc end host_data
 #else
      DO ik=1, nk
         !
@@ -831,13 +805,11 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
      END IF 
 #endif
      !
-     !$acc host_data use_device(ew)
      DO ik=1, nk
         IF (outk(ik)) CYCLE
         notcnv=notcnvk(ik)
         CALL mp_sum( ew( 1:notcnv, ik ), intra_bgrp_comm )
      ENDDO
-     !$acc end host_data
      !
 #if defined(__CUDA)
      !$acc parallel loop gang 
@@ -884,7 +856,6 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
      ! ... here compute the hpsi and spsi of the new functions
      !
 #if defined (__CUDA)
-     !$acc host_data use_device(psi,hpsi,spsi)
      IF (uspp) THEN
         CALL h_s_psik_dev(npwx, outk_d, kdimk_d, npw_d, notcnvk_d, nb1k_d, &
              st_d, stx_d, ikt_d, ikblk_d, npol, psi, hpsi, spsi, psicmr,   &
@@ -894,7 +865,6 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
              st_d, stx_d, ikt_d, ikblk_d, npol, psi, hpsi, psicmr, nvec, &
              nvecx, nnrs, nk, .FALSE.)
      ENDIF
-     !$acc end host_data
 #else
      DO ik=1, nk
         !
@@ -917,7 +887,6 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
         nhpsi(ik) = nhpsi(ik) + notcnvk(ik)
      ENDDO
 #if defined(__CUDA)
-     !$acc host_data use_device(psi, hpsi, spsi, hc, sc)
      IF (uspp) THEN
         CALL cegterg_overlap_us<<<dim3(nvec/4+1,nvecx/4+1,nk/32+1),     &
           dim3(4,4,32)>>>(outk_d, nbasek_d, kdimk_d, notcnvk_d, nb1k_d, &
@@ -928,7 +897,6 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
           stx_d, hpsi, psi, hc, sc, kdmx, nvecx, nk)
      ENDIF
      ierr=cudaDeviceSynchronize()
-     !$acc end host_data
 #else
      DO ik=1, nk
         !
@@ -983,7 +951,6 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
     END DO
 #endif
 #if defined(__CUDA)
-     !$acc host_data use_device(hc, sc)
      DO ik=1, 0
         IF (outk(ik)) CYCLE
         nbase=nbasek(ik)
@@ -999,7 +966,6 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
            CALL mp_sum( sc(:,:,ik), nb1, nbase+notcnv, n_start, &
                 n_end, intra_bgrp_comm )
      ENDDO
-     !$acc end host_data
 #endif
      !
      DO ik=1,nk
@@ -1009,10 +975,8 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
      !
 #if defined(__CUDA)
      nbasek_d=nbasek
-     !$acc host_data use_device(hc, sc)
      CALL cegterg_herm<<<dim3(nvecx,1,nk),dim3(1,1,1)>>>(outk_d, nbasek_d, &
                        nb1k_d, hc, sc, nvecx, nk)
-     !$acc end host_data
      ierr=cudaDeviceSynchronize()
 #else
      DO ik = 1, nk
@@ -1049,7 +1013,6 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
      ! ... diagonalize the reduced hamiltonian
      !
      CALL start_clock( 'cegterg:diag' )
-     !$acc host_data use_device(hc, sc, vc, ew)
 #if defined(__CUDA)     
      DO ib=1, nblock
         CALL diago_dev<<<times(ib),1>>>(times(ib),nvecx,              &   
@@ -1086,7 +1049,6 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
         CALL mp_bcast( vc, root_bgrp_id, inter_bgrp_comm )
         CALL mp_bcast( ew, root_bgrp_id, inter_bgrp_comm )
      ENDIF
-     !$acc end host_data
      CALL stop_clock( 'cegterg:diag' )
      !
      ! ... test for convergence
@@ -1116,14 +1078,12 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
      notcnvk_d=notcnvk
 #endif
      !
-     !$acc host_data use_device(ew)
      DO ik=1, nk
         IF (outk(ik)) CYCLE
         st_=st(ik)
         CALL dev_memcpy (e(st_+1:st_+nvec), ew(1:nvec,ik), &
                                                 (/ 1, nvec /), 1 )
      END DO
-     !$acc end host_data
      !
      ! ... if overall convergence has been achieved, or the dimension of
      ! ... the reduced basis set is becoming too large, or in any case if
@@ -1146,7 +1106,6 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
      outk_d=outk
      enter_d=enter
 #endif
-     !$acc host_data use_device(psi, vc)
      DO ik=1, nk
         IF (.NOT.enter(ik)) CYCLE
         nbase=nbasek(ik)
@@ -1162,9 +1121,7 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
 
         IF (nbgrp>1) CALL mp_sum( evc(:,st_+1:st_+nvec), inter_bgrp_comm )
      ENDDO
-     !$acc end host_data
 
-     !$acc host_data use_device(psi, hpsi, spsi, vc)
 #if defined(__CUDA)
      CALL copy_psi_gpu<<<dim3(kdmx,nvec,nk/32+1),dim3(1,1,32)>>>  &
           ( npwx, outk_d, enter_d, kdimk_d, stx_d, st_d, npol, psi, evc,  &
@@ -1214,7 +1171,6 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
         CALL mp_sum( hpsi(:,stx_+1:stx_+nvec), inter_bgrp_comm )
         !
      END DO
-     !$acc end host_data
      !
      ! ... refresh the reduced hamiltonian 
      !
