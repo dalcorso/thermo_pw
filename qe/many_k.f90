@@ -5,12 +5,14 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-------------------------------------------------------------------------
 MODULE many_k_mod
+!-------------------------------------------------------------------------
 !
 !   This module declares the device quantities needed to compute
 !   simultaneously many k points on the GPU. Moreover, it copies on device
 !   variables of the pw.x code that are not already there. Finally it
-!   allocate the variable needed to make the fft on device.
+!   allocates the variable needed to make the fft on device.
 !   It has also variables to divide the k points in blocks so that
 !   the amount of memory used in the GPU do not exceeds its actual
 !   capacity.
@@ -64,7 +66,6 @@ REAL(DP),    ALLOCATABLE :: s_diagk_d(:,:,:)
 !
 !  device variables to copy pw.x variables
 !
-
 REAL(DP),    ALLOCATABLE :: tau_d(:,:)
 INTEGER,     ALLOCATABLE :: ityp_d(:) 
 INTEGER,     ALLOCATABLE :: nh_d(:) 
@@ -184,7 +185,7 @@ PUBLIC nat_d, ntyp_d, ityp_d, nh_d, isk_d, qq_at_d, deeq_d, lmaxkb_d,      &
        domag_d, tvanp_d, qcutz_d, ecfixed_d, q2sigma_d, nkb_d, okvan_d,    &
        eigts1_d, eigts2_d, eigts3_d, g_d, mill_d
 !
-! subroutines of the module
+! host subroutines of the module
 !
 PUBLIC init_k_blocks, allocate_many_k, deallocate_many_k,                  &
        initialize_fft_factors, deallocate_fft_factors,                     &
@@ -200,7 +201,7 @@ PUBLIC prepare_phase_factors
 CONTAINS
 !
 !------------------------------------------------------------------
-SUBROUTINE init_k_blocks(npwx,npol,nbndx,nks,nbnd,nnrs,okvan)
+SUBROUTINE init_k_blocks(npwx,npol,nbndx,nks,nkstot,nbnd,nnr,nnrs,okvan)
 !------------------------------------------------------------------
 !
 USE uspp,       ONLY : nkb
@@ -208,6 +209,8 @@ USE uspp_param, ONLY : nhm
 USE lsda_mod,   ONLY : nspin
 USE gvect,      ONLY : ngm
 USE ions_base,  ONLY : nat, ntyp => nsp
+USE noncollin_module, ONLY : lspinorb
+!
 !   This routine receives the maximum number of G vectors, the number
 !   of bands, the number of k points and the maximum available memory
 !   and divide the k points in blocks so that cegterg does not run
@@ -216,7 +219,7 @@ USE ions_base,  ONLY : nat, ntyp => nsp
 !   memgpu is supposed to be in Gbytes
 !
 IMPLICIT NONE
-INTEGER :: npwx, npol, nbndx, nks, nbnd, nnrs
+INTEGER :: npwx, npol, nbndx, nks, nkstot, nbnd, nnr, nnrs
 LOGICAL :: okvan
 REAL(DP) :: totmem, fftmem, fixmem
 
@@ -225,24 +228,46 @@ INTEGER :: fact, i, rest
 fact=2
 IF (okvan) fact=3
 !
-!  This is an estimate of the memory not due to many_k already allocated.
+!  This is an estimate of the memory not due to many_k already allocated,
+!  either by cuda fortran or from the acc directives.
 !
-fixmem= DBLE(nnrs) * DBLE(nbnd) * DBLE(npol) * 16 +   & ! psic
+fixmem= DBLE(nnr) * DBLE(nbnd) * 16 +    & ! psic
+        DBLE(nnr) * DBLE(nspin) * 16 +   & ! vrs
         DBLE(npwx) * DBLE(npol) * DBLE (nbnd) * 16 +  & ! evc
+        DBLE(npwx) * DBLE(nks) * 8 * 2  +  &  ! igk_k (on acc), igk_k_d (CUDA)
         DBLE(npwx) * DBLE(nkb) * 16 +  &  ! vkb
         DBLE(npwx) * 16  +             &  ! g2kin
-        DBLE(10 * ngm) * 8                ! g, gg, mills, ...
+        DBLE(3*nbnd*nkstot) * 8 +      &  ! et, wg, btype
+        DBLE(8 * ngm) * 8                 ! g, gg, mills, igtongl
 IF (npol==2) THEN
-   fixmem=fixmem + DBLE(nhm) * DBLE(nhm) * DBLE(nspin) * DBLE(nat+ntyp) * 16 
-                                               ! deeq_nc and qq_so
+   fixmem=fixmem + DBLE(nnr) * DBLE(nbnd) * DBLE(npol) * 16 !psic_nc
+   fixmem=fixmem + DBLE(nhm) * DBLE(nhm) * DBLE(nspin+1) * nat * 16 
+                                               ! deeq_nc + qq_at 
+   fixmem=fixmem + DBLE(nhm) * DBLE(nhm) * DBLE(nspin)*DBLE(ntyp) * 16 
+                                               ! dvan_so_d
+   IF (lspinorb) &
+      fixmem=fixmem + DBLE(nhm) * DBLE(nhm) * DBLE(ntyp) * 16 * 4
+                                               ! fcoeff
 ELSE
    fixmem=fixmem + DBLE(nhm) * DBLE(nhm) * DBLE(nspin+1) * DBLE(nat) * 8
                                                ! deeq and qq_at
 ENDIF
+fixmem=fixmem + DBLE(nhm) * DBLE(nhm+1) * DBLE(nspin) * DBLE(nat) * 8 !becsum_d
+!
+!  This is an estimate of the memory allocated by many_k in any case
+!
+fixmem=fixmem + DBLE(8 * ngm) * 8     ! g_d, gg_d, mills_d (another CUDA copy)
+!
+!  This is instead an estimate of the memory allocated by this modulus
+!  or by c_bands or by cegterg if all k points where computed 
+!  together
+!
 fftmem=DBLE(nnrs) * DBLE(nbnd) * DBLE(nks) * DBLE(npol) * 16  ! psicmr
 totmem=DBLE(npwx*npol*nbndx*nks)*16*fact +   &  ! psi, hpsi, (spsi) 
        DBLE(nbndx*nbndx*nks)*16*3 +          &  ! hc, sc, vc
-       DBLE(npwx*npol)*DBLE(nbnd)*DBLE(nks)*16 * 2+ &! evck, evck_d
+       DBLE(npwx*npol)*DBLE(nbnd)*DBLE(nks)*16 + &! evck_d
+       DBLE(20*nbndx*nks)*8 + & ! work_d, rwork_d, hdiago_d, sdiago_d, ifail_d
+       DBLE(nkb*npol)*DBLE(nbnd)*DBLE(nks)*16 * 3 + & ! becpk_d, psk_d, pssk_d
        fftmem 
 WRITE(stdout,'(5x,"Estimated memory in cegterg",f10.1," GB")') &
                                                  (totmem+fixmem)/1.D9 

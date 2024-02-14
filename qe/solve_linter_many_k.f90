@@ -193,8 +193,10 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
      nsolv=2
      ALLOCATE (drhoscf_aux(dfftp%nnr, nspin_mag, npe))
   ENDIF
+  nnr = dfftp%nnr
   nnrs=dffts%nnr
-  CALL init_k_blocks_ph(npwx,npol,nksq,nbnd,nspin,nhm,nkb,nat,nnrs,npe,nsolv)
+  CALL init_k_blocks_ph(npwx,npol,nksq,nbnd,nspin,nhm,nkb,nat,nnr,&
+                                                              nnrs,npe,nsolv)
   CALL allocate_many_k_ph(npe,nsolv)
   CALL allocate_becps_many_k(npe,nsolv)
   CALL initialize_fft_factors(npe,nsolv)
@@ -202,7 +204,6 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
   CALL prepare_ph_device(nsolv)
 
   ALLOCATE (dvscfin ( dfftp%nnr , nspin_mag , npe))
-  nnr = dfftp%nnr
   dvscfin=(0.0_DP,0.0_DP)
   IF (doublegrid) THEN
      allocate (dvscfins (dffts%nnr , nspin_mag , npe))

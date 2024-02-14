@@ -27,7 +27,7 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   USE gvecs,     ONLY: gcutms
   USE gvect,     ONLY: eigts1, eigts2, eigts3
   USE many_k_mod, ONLY: eigts1_d, eigts2_d, eigts3_d
-  USE klist,     ONLY: qnorm, nelec, nks
+  USE klist,     ONLY: qnorm, nelec, nks, nkstot
   USE wvfct,     ONLY: nbnd, nbndx, npwx
   !!!
   USE disp,            ONLY : lgamma_iq
@@ -88,7 +88,8 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
      CALL read_file()
      CALL set_small_group_of_q(nsymq,invsymq,minus_q)
      IF (many_k) THEN
-        CALL init_k_blocks(npwx,npol,nbndx,nks,nbnd,dffts%nnr,okvan)
+        CALL init_k_blocks(npwx,npol,nbndx,nks,nkstot,nbnd,dfftp%nnr,&
+                                                      dffts%nnr,okvan)
         nsolv=1
         IF (noncolin.AND.domag) nsolv=2
         CALL allocate_many_k(nsolv)

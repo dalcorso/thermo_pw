@@ -125,8 +125,8 @@ PUBLIC allocate_many_k_ph, deallocate_many_k_ph, init_k_blocks_ph, &
 CONTAINS
 !
 !------------------------------------------------------------------
-SUBROUTINE init_k_blocks_ph(npwx,npol,nksq,nbnd,nspin,nhm,nkb,nat,nnrs,&
-                            npe,nsolv)
+SUBROUTINE init_k_blocks_ph(npwx,npol,nksq,nbnd,nspin,nhm,nkb,nat,nnr, &
+                            nnrs,npe,nsolv)
 !------------------------------------------------------------------
 !
 !   This routine receives the maximum number of k+q+G vectors, the number
@@ -137,53 +137,79 @@ SUBROUTINE init_k_blocks_ph(npwx,npol,nksq,nbnd,nspin,nhm,nkb,nat,nnrs,&
 !
 USE many_k_mod, ONLY : memgpu
 USE gvect,      ONLY : ngm
+USE klist,      ONLY : nks, nkstot
 USE ions_base,  ONLY : ntyp => nsp
-USE noncollin_module, ONLY : nspin_mag
+USE noncollin_module, ONLY : nspin_mag, lspinorb
 
 IMPLICIT NONE
-INTEGER :: npwx, npol, nksq, nbnd, nnrs, nspin, nhm, nkb, nat, npe, nsolv
+INTEGER :: npwx, npol, nksq, nbnd, nnr, nnrs, nspin, nhm, nkb, nat, npe, nsolv
 REAL(DP) :: totmem, fftmem, fixmem
 
 INTEGER :: fact, i, rest
 
 fact=npe*nsolv*3+1
-fftmem=DBLE(nnrs) * DBLE(nbnd) * DBLE(nksq) * DBLE (npe) *DBLE(nsolv) * &
-       DBLE(npol) * 16
 
-fixmem= DBLE(nnrs) * DBLE(nbnd) * DBLE(npol) * 16 +   & ! psic
-        DBLE(npwx) * DBLE(npol) * DBLE (nbnd) * 16 * 2 +  & ! evc + evq
-        DBLE(npwx) * DBLE(npol) * DBLE (nbnd) * 16 * 2 +  & ! dpsi + dvpsi
+fixmem= DBLE(nnr) * DBLE(nbnd) * 16 +    & ! psic
+        DBLE(nnr) * DBLE(nspin) * 16 +   & ! vrs
+        DBLE(npwx) * DBLE(npol) * DBLE (nbnd) * 16 +  & ! evc
+        DBLE(npwx) * DBLE(nks) * 8 * 2  +  &  ! igk_k (on acc), igk_k_d (CUDA)
         DBLE(npwx) * DBLE(nkb) * 16 +  &  ! vkb
         DBLE(npwx) * 16  +             &  ! g2kin
-        DBLE(10 * ngm) * 8                ! g, gg, mill, igtongl ...
+        DBLE(3*nbnd*nkstot) * 8 +      &  ! et, wg, btype
+        DBLE(8 * ngm) * 8                 ! g, gg, mills, igtongl
 IF (npol==2) THEN
-   fixmem=fixmem + DBLE(nhm) * DBLE(nhm) * DBLE(nspin) * DBLE(nat+ntyp) * 16
-                                               ! deeq_nc and qq_so
-   fixmem=fixmem + DBLE(nhm) * DBLE(nhm) * DBLE(nspin)*DBLE(nat+1) &
-                 * DBLE(nat) * 3 *16 ! int1_nc_d + int2_so_d
+   fixmem=fixmem + DBLE(nnr) * DBLE(nbnd) * DBLE(npol) * 16 !psic_nc
+   fixmem=fixmem + DBLE(nhm) * DBLE(nhm) * DBLE(nspin+1) * nat * 16
+                                               ! deeq_nc + qq_at 
+   fixmem=fixmem + DBLE(nhm) * DBLE(nhm) * DBLE(nspin)*DBLE(ntyp) * 16
+                                               ! dvan_so_d
+   IF (lspinorb) &
+      fixmem=fixmem + DBLE(nhm) * DBLE(nhm) * DBLE(ntyp) * 16 * 4
+                                               ! fcoeff
 ELSE
    fixmem=fixmem + DBLE(nhm) * DBLE(nhm) * DBLE(nspin+1) * DBLE(nat) * 8
                                                ! deeq and qq_at
 ENDIF
 fixmem=fixmem + DBLE(nhm) * DBLE(nhm) * DBLE(nspin+nat) * DBLE(nat) * 3 *16
                                                ! int1_d + int2_d
+fixmem=fixmem + DBLE(nhm) * DBLE(nhm+1) * DBLE(nspin) * DBLE(nat) * 8 !becsum_d
+!
+!  This is an estimate of the memory allocated by many_k in any case
+!
+fixmem=fixmem + DBLE(8 * ngm) * 8     ! g_d, gg_d, mills_d (another CUDA copy)
+!
+!  These quantities are allocated in phq_init_tpw and have a constant number of
+!  k points and not divided.
+!
+fixmem=fixmem + DBLE(nkb*npol)*DBLE(nbnd)*DBLE(nksq)*4*16 ! becp1k_d, alphak_d
+IF (nsolv==2) THEN
+   fixmem = fixmem &
+          + DBLE(nkb*npol)*DBLE(nbnd)*DBLE(nksq)*4*16 ! becptk_d, alphatk_d
+ENDIF
+!
+!  This is instead an estimate of the memory allocated by this modulus
+!  by solve_linter or by cgsolve_all_many_k if all k points where computed 
+!  together
+!
+fftmem=DBLE(nnrs) * DBLE(nbnd) * DBLE(nksq) * DBLE (npe) *DBLE(nsolv) * &
+       DBLE(npol) * 16
 
 totmem=DBLE(npwx*npol) * DBLE(nbnd) * DBLE(nksq) * fact * 16      &
                           ! dvpsik_d, dpsik_d, h_diagk_ph_d, evqk_d
        + DBLE(nkb) * DBLE(nbnd) * DBLE(nksq) * (npe*nsolv + 4*npol + &
-                          4 * npol * npe * nsolv )&
+                          4 * npol * npe * nsolv ) * 16&
                           ! dbecq_d, beco1k_d, alphak_d, ps1k_nc_d, ps2k_nc_d
        + DBLE(nhm) * DBLE(nhm) * DBLE(nat) * DBLE(nbnd)  * DBLE(nksq) *       &
-         DBLE(nspin) & !  deff_d  of deff_nc_d         
+         DBLE(nspin) * 16 & !  deff_d  of deff_nc_d         
        + DBLE((nhm*(nhm+1))/2) * DBLE(nat)* DBLE(nspin_mag)* &
-         DBLE(nbnd*nksq*npe*nsolv) & ! dbecsum_d
+         DBLE(nbnd*nksq*npe*nsolv)*16 & ! dbecsum_d
        + DBLE(npwx*npol) * DBLE(nbnd) * DBLE(nksq) * DBLE(npe*nsolv)*16*7 + &
             ! dpsi, hpsi, spsi, g, t, h, hold
-         DBLE(npwx*npol)*DBLE(nbnd)*DBLE(nksq)*DBLE(nsolv)*16*2  &! evck, evck_d
+         DBLE(npwx*npol)*DBLE(nbnd)*DBLE(nksq)*DBLE(nsolv)*16  &! evck_d
        + 2.0_DP*fftmem    ! psicmr + dpsicrm
 WRITE(stdout,'(5x,"Estimated gpu memory in cgsolve_all",f10.1," GB")') &
                                                         (totmem+fixmem)/1.D9 
-WRITE(stdout,'(5x,"Indivisibe gpu memory",f10.1," GB")') fixmem/1.D9 
+WRITE(stdout,'(5x,"Indivisibe gpu memory",f10.1," MB")') fixmem/1.D6 
 IF (fixmem > (memgpu * 1.D9)) THEN
    WRITE(stdout,'(5x,"memgpu must be greater than ",f8.2," to use many_k")') &
                5.0_DP * fixmem/1.D9
