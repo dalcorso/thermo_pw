@@ -797,7 +797,7 @@ END SUBROUTINE gnuplot_write_file_mul_data_times
 
 !--------------------------------------------------------------------------
 SUBROUTINE gnuplot_write_file_mul_data(data_file, col1, col2, color, start, &
-                                       last, comment)
+                                       last, comment, continu)
 !--------------------------------------------------------------------------
 !
 !   This subroutine plots the data contained in a file. The plot is
@@ -809,16 +809,25 @@ CHARACTER(LEN=*), INTENT(IN) :: data_file
 INTEGER, INTENT(IN) :: col1, col2
 CHARACTER(LEN=*), INTENT(IN) :: color
 LOGICAL, INTENT(IN) :: start, last
+LOGICAL, INTENT(IN), OPTIONAL :: continu
 
 CHARACTER(LEN=256) :: string
 CHARACTER(LEN=6) :: int_to_char
-LOGICAL :: comment
+LOGICAL :: comment, cont
 
 string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//&
                      "*xscale-xshift):($"//TRIM(int_to_char(col2)) &
             //"*fact-eref)*gfact w l lw 3 lc rgb "//TRIM(color)
 
-IF (start) string="plot "//TRIM(string)
+cont=.FALSE.
+IF (PRESENT(continu)) cont=continu
+IF (start) THEN
+   IF (cont) THEN
+      string="replot "//TRIM(string)
+   ELSE
+      string="plot "//TRIM(string)
+   ENDIF
+ENDIF
 IF (lbackspace) THEN
    IF (.NOT.last) string=TRIM(string)//", \ "
 ELSE
