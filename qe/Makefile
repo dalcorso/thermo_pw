@@ -124,6 +124,7 @@ phqscf_tpw.o \
 polarizc.o \
 prepare_q_tpw.o \
 prepare_sym_analysis.o \
+print_gpu_memory.o \
 print_symmetries.o \
 psh_lanczos_step.o \
 q_points_tpw.o \
