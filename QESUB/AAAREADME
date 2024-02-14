@@ -17,3 +17,7 @@ vloc_mod.f90 we deallocate tab_vloc only if it has been allocated.
 uspp_data.f90 tab_at deallocated from the acc system only if allocated.
 
 pwcom.f90 igk_k deallocated from the acc system only if allocated.
+
+bfgs_module.f90  If the bfgs routine exceedes the maximum number of 
+            allowed iterations there is no way to change the 
+            bfgs_file in a different pw.x run. Added line 1121.

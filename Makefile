@@ -44,6 +44,8 @@ join_qe:
           ./QESUB/rhoat_mod.f90_qe ; mv ./QESUB/rhoat_mod.f90 ../upflib ; fi
 	if test -f ./QESUB/pwcom.f90 ; then mv ../PW/src/pwcom.f90 \
           ./QESUB/pwcom.f90_qe ; mv ./QESUB/pwcom.f90 ../PW/src ; fi
+	if test -f ./QESUB/bfgs_modules.f90 ; then mv ../Modules/bfgs_module.f90 \
+          ./QESUB/bfgs_module.f90_qe ; mv ./QESUB/bfgs_module.f90 ../Modules ; fi
 	if test -f ./QESUB/uspp_data.f90 ; then mv ../upflib/uspp_data.f90 \
           ./QESUB/uspp_data.f90_qe ; mv ./QESUB/uspp_data.f90 ../upflib ; fi
 	if test -f ./QESUB/clocks_handler.f90 ; then mv ../UtilXlib/clocks_handler.f90 \
@@ -77,6 +79,9 @@ leave_qe:
 	if test -f ./QESUB/uspp_data.f90_qe ; then mv ../upflib/uspp_data.f90 \
            ./QESUB/uspp_data.f90 ; \
            mv ./QESUB/uspp_data.f90_qe ../upflib/uspp_data.f90 ; fi
+	if test -f ./QESUB/bfgs_module.f90_qe ; then mv ../Modules/bfgs_module.f90 \
+           ./QESUB/bfgs_module.f90 ; \
+           mv ./QESUB/bfgs_module.f90_qe ../Modules/bfgs_module.f90 ; fi
 	if test -f ./QESUB/clocks_handler.f90_qe ; then mv ../UtilXlib/clocks_handler.f90 \
            ./QESUB/clocks_handler.f90 ; \
 	   mv ./QESUB/clocks_handler.f90_qe ../UtilXlib/clocks_handler.f90 ; fi
