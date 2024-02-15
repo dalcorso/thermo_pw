@@ -403,7 +403,7 @@ USE cubic_surfaces, ONLY : fit_multi_cubic
 USE quartic_surfaces, ONLY : fit_multi_quartic
 
 USE elastic_constants, ONLY : write_el_cons_on_file
-USE control_elastic_constants, ONLY : el_con_geo, lelastic_pt
+USE control_elastic_constants, ONLY : el_con_geo, lelastic_pt, lelasticf_pt
 USE lattices,       ONLY : crystal_parameters
 USE control_pressure, ONLY : npress_plot, ipress_plot, press
 USE control_thermo, ONLY : ltherm_dos, ltherm_freq
@@ -502,7 +502,7 @@ IF (ltherm_freq) THEN
       CALL interpolate_el_cons(celldmf_pt(:,:,ipressp), nvar, ibrav, ec_p1,  &
            ec_p2, ec_p3, ec_p4, poly_degree_elc, el_consf_pt(:,:,:,ipressp), &
            el_compf_pt(:,:,:,ipressp), b0f_pt(:,ipressp))
-      lelastic_pt=.TRUE.
+      lelasticf_pt=.TRUE.
       filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_ph_press'
       CALL add_value(filelastic, press(ipress))
       CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, &
