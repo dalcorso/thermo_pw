@@ -63,6 +63,9 @@ patches given below.</p>
 <br>
 **Patches for thermo_pw.1.9.0**:
 <br>
+At line 150 of <code>qe/many_k_ph.f90</code> continuation line
+'&' is missing.
+<br>
 Thermo_pw was not working with scalapak.
 See bug fix of Feb. 1, 2024
 <br>
