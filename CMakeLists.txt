@@ -291,6 +291,7 @@ set(src_tpw_qe
     qe/polarizc.f90
     qe/prepare_q_tpw.f90
     qe/prepare_sym_analysis.f90
+    qe/print_gpu_memory.f90
     qe/print_symmetries.f90
     qe/psh_lanczos_step.f90
     qe/q2qstar_ph.f90
