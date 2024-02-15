@@ -643,7 +643,6 @@ IF (ltherm_dos) THEN
 !
    CALL write_anhar_el()
    CALL write_anhar_el_pt()
-   IF (lgeo_to_file) CALL write_geometry_output(npress, press, celldm_ptt, e)
 ENDIF
 IF (ltherm_freq) THEN
    CALL write_ph_freq_anhar()
