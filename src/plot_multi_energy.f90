@@ -306,7 +306,8 @@ SUBROUTINE plot_multi_energy_t()
   USE control_quadratic_energy, ONLY : x_pos_min, hessian_v, nvar, show_fit
   USE control_quartic_energy, ONLY : x_min_4, hessian4_v, lquartic
   USE control_vol,          ONLY : nvol
-  USE control_pressure,     ONLY : pressure, pressure_kb
+  USE control_pressure,     ONLY : pressure, pressure_kb, press, npress_plot, &
+                                   ipress_plot
   USE temperature,          ONLY : ntemp_plot, itemp_plot, temp
   USE mp_images,            ONLY : my_image_id, root_image
   USE io_global,            ONLY : ionode, stdout
@@ -333,6 +334,7 @@ SUBROUTINE plot_multi_energy_t()
   REAL(DP) :: xmin, xmax, ymin, ymax, x2
   LOGICAL :: first_step, last_step
   INTEGER :: nx, ny, icont, ifile, tot_n, iwork, itempp, itemp, istep
+  INTEGER :: ipressp, ipress
   INTEGER :: compute_nwork
   INTEGER :: ierr, system
 
@@ -481,7 +483,7 @@ SUBROUTINE plot_multi_energy_t()
         IF (ntemp_plot>0) THEN
 !
 !   In this case for each temp_plot there is file with the celldm. Here we plot
-!   this set with points in the energy contour plot.
+!   this set with lines in the energy contour plot.
 !
            istep=0
            DO itempp=1, ntemp_plot
@@ -491,6 +493,23 @@ SUBROUTINE plot_multi_energy_t()
               istep=MOD(istep,8)+1
               filename2='anhar_files/'//TRIM(flanhar)//'.celldm_temp'
               CALL add_value(filename2,temp(itemp))
+              CALL gnuplot_write_file_mul_data(filename2, 2, 3, &
+                        color(istep),first_step, last_step, .FALSE., .TRUE.)
+           ENDDO
+        ENDIF   
+        IF (npress_plot>0) THEN
+!
+!   In this case for each press_plot there is file with the celldm. 
+!   Here we plot this set with lines in the energy contour plot.
+!
+           istep=0
+           DO ipressp=1, npress_plot
+              first_step=(ipressp==1)
+              last_step=(ipressp==npress_plot)
+              ipress=ipress_plot(ipressp)
+              istep=MOD(istep,8)+1
+              filename2='anhar_files/'//TRIM(flanhar)//'.celldm_press'
+              CALL add_value(filename2,press(ipress))
               CALL gnuplot_write_file_mul_data(filename2, 2, 3, &
                         color(istep),first_step, last_step, .FALSE., .TRUE.)
            ENDDO

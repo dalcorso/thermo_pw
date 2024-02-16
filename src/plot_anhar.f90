@@ -13,6 +13,8 @@ SUBROUTINE plot_anhar_energy()
 !
 USE kinds,            ONLY : DP
 USE constants,        ONLY : ry_kbar, rytoev
+USE thermo_mod,       ONLY : lcubic
+USE control_mur,      ONLY : lmurn
 USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
 USE control_thermo,   ONLY : ltherm_dos, ltherm_freq
 USE postscript_files, ONLY : flpsanhar
@@ -42,7 +44,7 @@ CHARACTER(LEN=256) :: gnu_filename, filename, filename_ph, filename1, &
 CHARACTER(LEN=8) :: float_to_char
 
 INTEGER :: ierr, system, istep, itemp, itempp
-LOGICAL :: first_step, last_step
+LOGICAL :: first_step, last_step, plot_points
 
 IF ( my_image_id /= root_image ) RETURN
 !
@@ -100,6 +102,7 @@ IF (ltherm_freq) &
 !  Helmholtz or Gibbs free energy as a function of the volume for several 
 !  temperatures
 !
+plot_points=(lmurn.OR.lcubic)
 istep=0
 DO itempp=1,ntemp_plot
    first_step=(itempp==1)
@@ -133,13 +136,16 @@ DO itempp=1,ntemp_plot
    ENDIF
    IF (ltherm_dos) THEN
       CALL gnuplot_write_file_mul_data(filename1,1,2,color(istep),first_step, &
-                                                        .FALSE., .FALSE.)
+              (last_step.AND..NOT.ltherm_freq.AND..NOT.plot_points), .FALSE.)
+      IF (plot_points) &
       CALL gnuplot_write_file_mul_point_sum(filename,1,2,3,color(istep), &
                         .FALSE., (last_step.AND..NOT.ltherm_freq), .FALSE.)
    ENDIF
    IF (ltherm_freq) THEN
       CALL gnuplot_write_file_mul_data(filename1_ph,1,2,color(istep), &
-                        (first_step.AND..NOT.ltherm_dos), .FALSE., .FALSE.)
+           (first_step.AND..NOT.ltherm_dos),last_step.AND..NOT.plot_points, &
+                                                                   .FALSE.)
+      IF (plot_points) &
       CALL gnuplot_write_file_mul_point_sum(filename_ph,1,2,3,color(istep), &
                         .FALSE., last_step, .FALSE.)
    ENDIF
@@ -207,32 +213,40 @@ DO itempp=1,ntemp_plot
       ENDIF
    ENDIF
    IF (ltherm_dos) THEN
-      IF (lel_free_energy) THEN
-         CALL gnuplot_write_file_mul_point_sum(filename,1,3,4,color(istep), &
+      IF (plot_points) THEN
+         IF (lel_free_energy) THEN
+            CALL gnuplot_write_file_mul_point_sum(filename,1,3,4, &
+                                        color(istep), &
                                         first_step, .FALSE., .FALSE.)
-      ELSE
-         CALL gnuplot_write_file_mul_point(filename,1,3,color(istep), &
+         ELSE
+            CALL gnuplot_write_file_mul_point(filename,1,3,color(istep), &
                                         first_step, .FALSE., .FALSE.)
+         ENDIF
       ENDIF
-      CALL gnuplot_write_file_mul_data(filename1,1,2,color(istep), .FALSE., &
+      CALL gnuplot_write_file_mul_data(filename1,1,2,color(istep), &
+              (first_step.AND..NOT.plot_points), &
                            (last_step.AND..NOT.ltherm_freq), .FALSE.)
    ENDIF
    IF (ltherm_freq) THEN
-      IF (lel_free_energy) THEN
-         CALL gnuplot_write_file_mul_point_sum(filename_ph,1,3,4,color(istep),&
+      IF (plot_points) THEN
+         IF (lel_free_energy) THEN
+            CALL gnuplot_write_file_mul_point_sum(filename_ph,1,3,4,&
+                   color(istep),&
                    (first_step.AND..NOT.ltherm_dos), .FALSE., .FALSE.)
-      ELSE
-         CALL gnuplot_write_file_mul_point(filename_ph,1,3,color(istep), &
+         ELSE
+            CALL gnuplot_write_file_mul_point(filename_ph,1,3,color(istep), &
                    (first_step.AND..NOT.ltherm_dos), .FALSE., .FALSE.)
+         ENDIF
       ENDIF
-      CALL gnuplot_write_file_mul_data(filename1_ph,1,2,color(istep), .FALSE.,&
-                           last_step, .FALSE.)
+      CALL gnuplot_write_file_mul_data(filename1_ph,1,2,color(istep), &
+           (first_step.AND..NOT.ltherm_dos.AND..NOT.plot_points), &
+           last_step, .FALSE.)
    ENDIF
 ENDDO
 !
 !   Electronic free energy as a function of the volume when computed
 !
-IF (lel_free_energy) THEN
+IF (lel_free_energy.AND.plot_points) THEN
    istep=0
    CALL gnuplot_set_fact(rytoev, .FALSE.)
    DO itempp=1,ntemp_plot
