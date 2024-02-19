@@ -434,6 +434,10 @@ IF (MOD(iflag,2)==0) THEN
    CALL gnuplot_set_fact(1.0_DP, .FALSE.)
    CALL plot_one_elastic_constant(1, 2, 'Bulk modulus B (kbar)', lelastic,  & 
         lelasticf, filelastic, filelastic_s, with_s)
+   IF (laue==32.OR.laue==29) THEN
+      CALL plot_one_elastic_constant(1, 6, 'Shear anisotropy A', lelastic,  & 
+        lelasticf, filelastic, filelastic_s, with_s)
+   ENDIF
 ELSE
    CALL gnuplot_set_fact(1.D3, .FALSE.)
    CALL plot_one_elastic_constant(1, 2, 'Compressibility K (Mbar^{-1})', &
@@ -647,6 +651,10 @@ IF (MOD(iflag,2)==0) THEN
    CALL gnuplot_set_fact(1.0_DP, .FALSE.)
    CALL plot_one_elastic_constant(1, 2, 'Bulk modulus B (kbar)', lelastic,  &
         lelasticf, filelastic, filelastic_s, with_s)
+   IF (laue==32.OR.laue==29) THEN
+      CALL plot_one_elastic_constant(1, 6, 'Shear anisotropy A', lelastic,  &
+        lelasticf, filelastic, filelastic_s, with_s)
+   ENDIF
 ELSE
    CALL gnuplot_set_fact(1.D3, .FALSE.)
    CALL plot_one_elastic_constant(1, 2, 'Compressibility K (Mbar^{-1})', &
@@ -892,6 +900,32 @@ ELSE
    ENDDO
 ENDIF
 
+istep=0
+IF (MOD(iflag,2)==0.AND.(laue==32.OR.laue==29)) THEN
+   DO ipressp=1, npress_plot
+      first_step=(ipressp==1)
+      last_step=(ipressp==npress_plot)
+      ipress=ipress_plot(ipressp)
+      istep=MOD(istep,8)+1
+      filelastic="anhar_files/"//TRIM(flanhar)//'.el_cons_press'
+      CALL add_value(filelastic,press(ipress))
+      filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_ph_press'
+      CALL add_value(filelastic_ph,press(ipress))
+      IF (first_step) THEN
+         CALL gnuplot_set_fact(1.0_DP, .FALSE.) 
+         WRITE(label,'("Shear anisotropy A")') 
+         CALL gnuplot_ylabel(TRIM(label),.FALSE.)
+      ENDIF
+      IF (ltherm_dos) THEN
+         CALL gnuplot_write_file_mul_data(filelastic,1,6,color(istep), &
+                          first_step,(last_step.AND..NOT.ltherm_freq),.FALSE.)
+      ENDIF
+      IF (ltherm_freq) THEN
+         CALL gnuplot_write_file_mul_data(filelastic_ph,1,6,color(istep), &
+                           (first_step.AND..NOT.ltherm_dos),last_step,.FALSE.)
+      ENDIF
+   ENDDO
+ENDIF
 CALL gnuplot_end()
 
 IF (lgnuplot.AND.ionode) &
@@ -1157,6 +1191,49 @@ ELSE
          IF (with_s) &
             CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,2,color(istep), &
                 (first_step.AND..NOT.ltherm_dos.AND..NOT.with_t),&
+                 last_step,.FALSE.)
+      ENDIF
+   ENDDO
+ENDIF
+
+istep=0
+IF (MOD(iflag,2)==0.AND.(laue==32.OR.laue==29)) THEN
+   DO itempp=1, ntemp_plot
+      first_step=(itempp==1)
+      last_step=(itempp==ntemp_plot)
+      itemp=itemp_plot(itempp)
+      istep=MOD(istep,8)+1
+      filelastic="anhar_files/"//TRIM(flanhar)//'.el_cons_temp'
+      CALL add_value(filelastic,temp(itemp))
+      filelastic_s="anhar_files/"//TRIM(flanhar)//'.el_cons_s_temp'
+      CALL add_value(filelastic_s,temp(itemp))
+      filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_ph_temp'
+      CALL add_value(filelastic_ph,temp(itemp))
+      filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_s_ph_temp'
+      CALL add_value(filelastic_s_ph,temp(itemp))
+      IF (first_step) THEN
+         CALL gnuplot_set_fact(1.0_DP, .FALSE.) 
+         WRITE(label,'("Shear anisotropy A")') 
+         CALL gnuplot_ylabel(TRIM(label),.FALSE.)
+      ENDIF
+      IF (ltherm_dos) THEN
+         IF (with_t) &
+            CALL gnuplot_write_file_mul_data(filelastic,1,6,color(istep), &
+                          first_step,(last_step.AND..NOT.ltherm_freq      &
+                          .AND..NOT.with_s),.FALSE.)
+         IF (with_s) &
+            CALL gnuplot_write_file_mul_data(filelastic_s,1,6,color(istep), &
+                    (first_step.AND..NOT.with_t),                           &
+                    (last_step.AND..NOT.ltherm_freq),.FALSE.)
+      ENDIF
+      IF (ltherm_freq) THEN
+         IF (with_t) &
+            CALL gnuplot_write_file_mul_data(filelastic_ph,1,6,color(istep), &
+                (first_step.AND..NOT.ltherm_dos),(last_step.AND..NOT.with_s),&
+                .FALSE.)
+         IF (with_s) &
+            CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,6,color(istep), &
+                (first_step.AND..NOT.ltherm_dos.AND..NOT.with_s),&
                  last_step,.FALSE.)
       ENDIF
    ENDDO

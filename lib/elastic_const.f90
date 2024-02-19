@@ -2501,16 +2501,22 @@ IF (meta_ionode) THEN
       CASE(29,32)
          IF (MOD(iflag,2)==0) THEN
             WRITE(iu_el_cons,'("#",5x, a7, 9x, " B ", 13x, " C_11 ", &
-                  & 13x, "     C_12 ", 13x, "     C_44 ")') label
+                  & 13x, "     C_12 ", 13x, "     C_44 ", 13x, "    A")') label
+            DO itemp=2,ntemp-1
+               WRITE(iu_el_cons,'(e16.8,5e20.12)') temp(itemp), b0_t(itemp), &
+                   el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
+                   el_cons_t(4,4,itemp), 2.0_DP * el_cons_t(4,4,itemp) / &
+                   (el_cons_t(1,1,itemp) - el_cons_t(1,2,itemp))
+            ENDDO
          ELSE
             WRITE(iu_el_cons,'("#",5x, a7, 9x, " K ", 13x, " S_11 ", &
                   & 13x, "     S_12 ", 13x, "     S_44 ")') label
+            DO itemp=2,ntemp-1
+               WRITE(iu_el_cons,'(e16.8,4e20.12)') temp(itemp), b0_t(itemp), &
+                   el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
+                   el_cons_t(4,4,itemp)
+            ENDDO
          ENDIF
-         DO itemp=2,ntemp-1
-            WRITE(iu_el_cons,'(e16.8,4e20.12)') temp(itemp), b0_t(itemp), &
-                 el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
-                 el_cons_t(4,4,itemp)
-         ENDDO
       CASE(25)
 !
 !     D_3d
