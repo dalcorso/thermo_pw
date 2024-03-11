@@ -16,6 +16,7 @@ PROGRAM change_e_name
 ! orig2  new2 
 ! ...    ...
 ! orign  newn   ! original and new number of the n change
+! has_ph        ! a logical variable .TRUE. change also the _ph files
 !
 ! Note that all changes are simultaneous, so orig# must be all different
 ! and the order of the changes is not relevant.
