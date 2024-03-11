@@ -116,7 +116,7 @@ IF (meta_ionode) THEN
    xmax=-1.D50
    xmin=1.D50
    DO i=1,nline1
-      IF (field1(i,nx1)< xmax) xmin=field1(i,nx1)
+      IF (field1(i,nx1)< xmin) xmin=field1(i,nx1)
       IF (field1(i,nx1)> xmax) xmax=field1(i,nx1)
    ENDDO
 
