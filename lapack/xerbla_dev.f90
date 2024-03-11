@@ -113,14 +113,14 @@
 !9 ---- ZUNMQL
 !0 ---- ZSTEIN
 !! ---- ZHEGVX
-!@ ---- ZHEEVX
-!# ---- DSTEBZ
-!$ ---- DLAGTS
-!% ---- DLAGTF
-!^ ---- ZUNMTR
-!& ---- DLAGTF
-!* ---- DLAGTF
-!( ---- DLAGTF
+!!@ ---- ZHEEVX
+!!# ---- DSTEBZ
+!!$ ---- DLAGTS
+!!% ---- DLAGTF
+!!^ ---- ZUNMTR
+!!& ---- DLAGTF
+!!* ---- DLAGTF
+!!( ---- DLAGTF
 !
 !     .. Scalar Arguments ..
 !     CHARACTER*(*)      SRNAME
