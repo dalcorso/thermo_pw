@@ -44,7 +44,7 @@ join_qe:
           ./QESUB/rhoat_mod.f90_qe ; mv ./QESUB/rhoat_mod.f90 ../upflib ; fi
 	if test -f ./QESUB/pwcom.f90 ; then mv ../PW/src/pwcom.f90 \
           ./QESUB/pwcom.f90_qe ; mv ./QESUB/pwcom.f90 ../PW/src ; fi
-	if test -f ./QESUB/bfgs_modules.f90 ; then mv ../Modules/bfgs_module.f90 \
+	if test -f ./QESUB/bfgs_module.f90 ; then mv ../Modules/bfgs_module.f90 \
           ./QESUB/bfgs_module.f90_qe ; mv ./QESUB/bfgs_module.f90 ../Modules ; fi
 	if test -f ./QESUB/uspp_data.f90 ; then mv ../upflib/uspp_data.f90 \
           ./QESUB/uspp_data.f90_qe ; mv ./QESUB/uspp_data.f90 ../upflib ; fi
