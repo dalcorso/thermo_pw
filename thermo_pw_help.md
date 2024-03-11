@@ -60,6 +60,9 @@ main <code>thermo_pw</code> page.</p>
 patches given below.</p>
 
 **Patches for thermo_pw.1.9.1**:
+The code hangs when using start_q and last_q
+with <code>what='elastic_constants_geo'</code>. Correct
+as in commit <code>48b77cc</code> of Mar. 11, 2024.
 <br>
 **Patches for thermo_pw.1.9.0**:
 <br>
@@ -67,7 +70,7 @@ At line 150 of <code>qe/many_k_ph.f90</code> continuation line
 '&' is missing.
 <br>
 Thermo_pw was not working with scalapak.
-See bug fix of Feb. 1, 2024
+See bug fix of Feb. 1, 2024.
 <br>
 A problem with calculation of EELS spectrum with 
 Sternheimer method.
