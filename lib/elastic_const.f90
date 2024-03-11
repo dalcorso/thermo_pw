@@ -2075,7 +2075,7 @@ REAL(DP), INTENT(IN) :: cmn(6,6), smn(6,6)
 REAL(DP), INTENT(INOUT) :: macro_el(8)
 INTEGER, INTENT(IN) :: ibrav
 LOGICAL, INTENT(IN) :: flag
-REAL(DP) :: b0v, e0v, g0v, nuv, b0r, e0r, g0r, nur
+REAL(DP) :: b0v, e0v, g0v, nuv, b0r, e0r, g0r, nur, b, g
 
 CALL macro_elasticity( ibrav, cmn, smn, b0v, &
                              e0v, g0v, nuv, b0r, e0r, g0r, nur )
@@ -2103,6 +2103,10 @@ IF (flag) THEN
    WRITE(stdout, '(5x, "Bulk modulus  B = ",f12.5," kbar")') (b0v+b0r)*0.5_DP
    WRITE(stdout, '(5x, "Young modulus E = ",f12.5," kbar")') (e0v+e0r)*0.5_DP
    WRITE(stdout, '(5x, "Shear modulus G = ",f12.5," kbar")') (g0v+g0r)*0.5_DP
+   b=(b0v+b0r)*0.5_DP
+   g=(g0v+g0r)*0.5_DP
+   WRITE(stdout, '(5x, "Longitudinal modulus L = ",f12.5," kbar")') &
+                                                 b+4.0_DP*g/3.0_DP
    WRITE(stdout, '(5x,"Poisson Ratio n = ",f12.5)') (e0v+e0r)/    &
                                                  (2.d0*(g0v+g0r))-1.0_DP
    WRITE(stdout, '(5x,"Pugh Ratio r = ",f15.5)') (g0v+g0r)/(b0v+b0r)
