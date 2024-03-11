@@ -32,7 +32,9 @@ INTEGER :: igeom, igeom_qha, iwork, work_base
 LOGICAL  :: check_dyn_file_exists
 
 all_geometry_done=.FALSE.
+all_geometry_done_geo=.FALSE.
 work_base=tot_ngeo/ngeom
+
 IF ((start_geometry/=((start_geometry_qha-1)*work_base+1)) &
    .OR.(last_geometry/=(last_geometry_qha*work_base))) RETURN
 
