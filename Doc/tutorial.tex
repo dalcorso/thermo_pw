@@ -641,4 +641,34 @@ is important not to write the weights too close to the labels.
 Gr\"uneisen parameters are not analytic at the $\Gamma$ 
 point so to obtain a correct plot, the $\Gamma$ label in the middle of a 
 plot must be repeated twice, as in the example.
+
+\newpage
+{\color{coral}\section{How do I specify the plane of {\bf k}-points 
+when I set the flag \texttt{q2d=.TRUE.}?}}
+\color{black}
+In this case you must give three {\bf k} points: ${\bf k}_1$, 
+${\bf k}_2$, and ${\bf k}_3$ after the \texttt{INPUT\_THERMO} 
+namelist.
+${\bf k}_1$ is the origin and the
+two vectors ${\bf a}_1={\bf k}_2 - {\bf k}_1$ and ${\bf a}_2=
+{\bf k}_3 - {\bf k}_1$ determine the plane
+\begin{equation}
+{\bf k} = {\bf k}_1 + \lambda {\bf a}_1 + \mu {\bf a}_2,
+\end{equation}
+where $0\le \lambda  \le 1$, $0\le \mu  \le 1$. The interval
+of $\lambda$ is divided into $n_1$ points, while $\mu$ is divided
+$n_2$ points, where $n_1$ and $n_2$ are the weights of the points
+${\bf k}_2$ and ${\bf k}_3$.
+An example of the input for determining the plane is:
+\begin{verbatim}
+3
+k_{x,1}  k_{y,1}  k_{z,1}  n0
+k_{x,2}  k_{y,2}  k_{z,2}  n1
+k_{x,3}  k_{y,3}  k_{z,3}  n2
+\end{verbatim}
+where the {\bf k} points are given in cartesian coordinates in
+units of $2\pi \over a$ ($a$ is the lattice constant \texttt{celldm(1)} 
+or in crystal coordinates using \texttt{q\_in\_cryst\_coord=.TRUE.}
+in the \texttt{INPUT\_THERMO} namelist.
+$n_0$ is not used and can be set to any integer value.
 \end{document}
