@@ -15,6 +15,17 @@ can be found <a href="https://people.sissa.it/dalcorso/thermo_pw/user_guide/inde
 <p align="justify">The following papers describe new
 features implemented in <code>thermo_pw</code>:</p>
 
+15. B. Thakur, X. Gong, and A. Dal Corso,
+Thermodynamic properties of Rhodium: A first principles study,
+<a href="https://doi.org/10.1063/5.0203098"> AIP Advances <b>14</b>, 
+045229 (2024).</a>
+
+14. X. Gong and A. Dal Corso,
+Pressure and temperature dependent ab-initio
+quasi-harmonic thermoelastic properties of tungsten,
+<a href="https://iopscience.iop.org/article/10.1088/1361-648X/ad3ac3">
+Jour. of Phys.: Condens. Matter <b>36</b>, 285702 (2024).</a>
+
 13. B. Thakur, X. Gong and A. Dal Corso,
 Ab initio thermodynamic properties of Iridium: A high-pressure and high-temperature study,
 <a href="https://doi.org/10.1016/j.commatsci.2024.112797">
