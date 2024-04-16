@@ -102,11 +102,12 @@ Clean Ir(111) and Pt(111) electronic surface states: a first-principle fully rel
 <a href="http://www.sciencedirect.com/science/article/pii/S0039602815000734"> Surf. Sci. <B>637-638</B>, 106 (2015)</a>.
 <br>
 <br>
-<p>Refs.2,4 describe how <code>thermo_pw</code> computes temperature
-dependent elastic constants, Ref.12 elastic constants at T=0 K,
-Ref.13,9 surface band structures, Refs.3,8 eels and optical properties,
-Ref.5 DFPT with fully relativistic pseudopotentials, and Ref.10,11 
-thermodynamic anharmonic properties. Ref.1 has examples of pressure and
+<p>Refs.4,6 describe how <code>thermo_pw</code> computes temperature
+dependent elastic constants, Ref.2 pressure and temperature dependent
+elastic constants, Ref.14 elastic constants at T=0 K,
+Ref.15,11 surface band structures, Refs.5,10 eels and optical properties,
+Ref.7 DFPT with fully relativistic pseudopotentials, and Ref.12,13 
+thermodynamic anharmonic properties. Refs.1,2,3 have examples of pressure and
 temperature parameterized plots.</p>
 
 <p align="justify">The following works contain some calculations made by <code>thermo_pw</code>:</p>
