@@ -50,16 +50,19 @@ ENDDO
 !  Find the temperature closest to room temperature (300 K)
 !  Some quantities are normalized to the value at 300 K.
 !
-itemp300=ntemp
-dtmin=1.D10
-DO itemp=1, ntemp
-   dt=ABS(temp(itemp) - 300.D0)
-   IF (dt<dtmin) THEN
-      itemp300=itemp
-      dtmin=dt
-   ENDIF
-ENDDO
-IF (itemp300==ntemp) itemp300=0
+IF (temp(ntemp)< 300.D0) THEN
+   itemp300=0
+ELSE
+   itemp300=ntemp
+   dtmin=1.D10
+   DO itemp=1, ntemp
+      dt=ABS(temp(itemp) - 300.D0)
+      IF (dt<dtmin) THEN
+         itemp300=itemp
+         dtmin=dt
+      ENDIF
+   ENDDO
+ENDIF
 
 RETURN
 END SUBROUTINE set_temperature
