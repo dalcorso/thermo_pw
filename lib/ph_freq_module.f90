@@ -276,7 +276,8 @@ DO iq=1,nq_eff
       ENDIF
    ENDDO
 ENDDO
-IF (counter > 3) WRITE(stdout,'(5x,"WARNING: Too many acoustic modes")')
+IF (counter > 3) WRITE(stdout,'(5x,"WARNING: Too many acoustic modes ",i8)') &
+                 counter-3
 
 RETURN
 END SUBROUTINE free_energy_ph
@@ -501,7 +502,8 @@ DO iq=1,nq_eff
       ENDIF
    ENDDO
 ENDDO
-IF (counter > 3) WRITE(stdout,'(5x,"WARNING: Too many acoustic modes")')
+IF (counter > 3) WRITE(stdout,'(5x,"WARNING: Too many acoustic modes",i8)') &
+                 counter-3
 
 free_ener=free_ener*kb
 ener = ener / ry_to_cmm1
