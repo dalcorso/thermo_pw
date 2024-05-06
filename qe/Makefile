@@ -39,7 +39,6 @@ cgsolve_all_dev.o \
 check_bands.o \
 check_initial_geometry.o \
 check_initial_status_tpw.o \
-ch_psi_all_tpw.o \
 ch_psi_all_many_k.o \
 ch_psi_all_dev.o \
 clean_all_pw.o \
