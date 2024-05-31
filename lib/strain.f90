@@ -256,6 +256,7 @@ celldm_strain=0.0_DP
 
 rotcr(1,1)=1.0_DP/sqrt2
 rotcr(1,2)=1.0_DP/sqrt2
+rotcr(1,3)=0.0_DP
 rotcr(2,1)=-1.0_DP/sqrt6
 rotcr(2,2)=1.0_DP/sqrt6
 rotcr(2,3)=-2.0_DP/sqrt6
