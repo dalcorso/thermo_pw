@@ -9,7 +9,7 @@
 INTERFACE ch_psi_all_interf
  !
  !--------------------------------------------------------------------------
- ATTRIBUTES(GLOBAL) SUBROUTINE cgsolve_computeps(ndmx, outk, kdimk, st, &
+ ATTRIBUTES(GLOBAL) SUBROUTINE ch_psi_computeps(ndmx, outk, kdimk, st, &
          nbndk, evqk, spsi, ps, current_ikb_ph, npol, nk,        &
          npe, nsolv, nbnd, my_nbnd, alpha_pv)
  !--------------------------------------------------------------------------
@@ -30,10 +30,10 @@ INTERFACE ch_psi_all_interf
  COMPLEX(DP), DEVICE :: spsi(ndmx*npol,my_nbnd*nk*npe*nsolv)
  COMPLEX(DP), DEVICE :: ps(nbnd,my_nbnd*nk*npe*nsolv)
 
- END SUBROUTINE cgsolve_computeps
+ END SUBROUTINE ch_psi_computeps
  !
  !--------------------------------------------------------------------------
- ATTRIBUTES(GLOBAL) SUBROUTINE cgsolve_ah(ndmx, outk, st, &
+ ATTRIBUTES(GLOBAL) SUBROUTINE ch_psi_ah(ndmx, outk, st, &
          nbndk, ah, hpsi, spsi, eu, current_ikb_ph, npol, nk, &
          npe, nsolv, nbnd, my_nbnd)
  !--------------------------------------------------------------------------
@@ -53,10 +53,10 @@ INTERFACE ch_psi_all_interf
  COMPLEX(DP), DEVICE :: hpsi(ndmx*npol,my_nbnd*nk*npe*nsolv)
  COMPLEX(DP), DEVICE :: spsi(ndmx*npol,my_nbnd*nk*npe*nsolv)
 
- END SUBROUTINE cgsolve_ah
+ END SUBROUTINE ch_psi_ah
  !
  !--------------------------------------------------------------------------
- ATTRIBUTES(GLOBAL) SUBROUTINE cgsolve_sqdpsi(lda, outk, npw, st,  &
+ ATTRIBUTES(GLOBAL) SUBROUTINE ch_psi_sqdpsi(lda, outk, npw, st,  &
          nbndk, hpsi, ah, current_ikb_ph, npol, nk, npe, nsolv, nkb, &
          nbnd, my_nbnd)
  !--------------------------------------------------------------------------
@@ -76,10 +76,10 @@ INTERFACE ch_psi_all_interf
  COMPLEX(DP), DEVICE :: ah(lda*npol,my_nbnd*nk*npe*nsolv)
  COMPLEX(DP), DEVICE :: hpsi(lda*npol,my_nbnd*nk*npe*nsolv)
 
- END SUBROUTINE cgsolve_sqdpsi
+ END SUBROUTINE ch_psi_sqdpsi
  !
  !--------------------------------------------------------------------------
- ATTRIBUTES(GLOBAL) SUBROUTINE cgsolve_sdpsi(lda, outk, st, nbndk, hpsi, &
+ ATTRIBUTES(GLOBAL) SUBROUTINE ch_psi_sdpsi(lda, outk, st, nbndk, hpsi, &
          ah, current_ikb_ph, npol, nk, npe, nsolv, nkb, nbnd, my_nbnd)
  !--------------------------------------------------------------------------
  USE cudafor
@@ -97,10 +97,10 @@ INTERFACE ch_psi_all_interf
  COMPLEX(DP), DEVICE :: ah(lda*npol,my_nbnd*nk*npe*nsolv)
  COMPLEX(DP), DEVICE :: hpsi(lda*npol,my_nbnd*nk*npe*nsolv)
 
- END SUBROUTINE cgsolve_sdpsi
+ END SUBROUTINE ch_psi_sdpsi
  !
  !--------------------------------------------------------------------------
- ATTRIBUTES(GLOBAL) SUBROUTINE cgsolve_chp_lo2(ndmx, outk, st, &
+ ATTRIBUTES(GLOBAL) SUBROUTINE ch_psi_lo2(ndmx, outk, st, &
          nbndk, evqk, hpsi, ps, current_ikb_ph, npol, nk,      &
          npe, nsolv, nbnd, my_nbnd)
  !--------------------------------------------------------------------------
@@ -119,10 +119,10 @@ INTERFACE ch_psi_all_interf
  COMPLEX(DP), DEVICE :: hpsi(ndmx*npol,my_nbnd*nk*npe*nsolv)
  COMPLEX(DP), DEVICE :: ps(nbnd,my_nbnd*nk*npe*nsolv)
 
- END SUBROUTINE cgsolve_chp_lo2
+ END SUBROUTINE ch_psi_lo2
  !
  !--------------------------------------------------------------------------
- ATTRIBUTES(GLOBAL) SUBROUTINE cgsolve_calbec(ndmx, outk, st,  &
+ ATTRIBUTES(GLOBAL) SUBROUTINE ch_psi_calbec(ndmx, outk, st,  &
          nbndk, npw, hpsi, current_ikb_ph, npol, nk,   &
          npe, nsolv, nkb, nbnd, my_nbnd)
  !--------------------------------------------------------------------------
@@ -140,10 +140,10 @@ INTERFACE ch_psi_all_interf
  INTEGER, DEVICE :: npw(nk*npe*nsolv)
 
  COMPLEX(DP), DEVICE :: hpsi(ndmx*npol,my_nbnd*nk*npe*nsolv)
- END SUBROUTINE cgsolve_calbec
+ END SUBROUTINE ch_psi_calbec
 !
 !-----------------------------------------------------------------------
-ATTRIBUTES(GLOBAL) SUBROUTINE cgsolve_qqps( outk, nbndk, nkb, nk, npe, &
+ATTRIBUTES(GLOBAL) SUBROUTINE ch_psi_qqps( outk, nbndk, nkb, nk, npe, &
                                             nsolv, npol )
   !-----------------------------------------------------------------------
   !
@@ -155,6 +155,6 @@ ATTRIBUTES(GLOBAL) SUBROUTINE cgsolve_qqps( outk, nbndk, nkb, nk, npe, &
   LOGICAL, INTENT(IN), DEVICE :: outk(nk*npe*nsolv)
   INTEGER, INTENT(IN), DEVICE :: nbndk(nk*npe*nsolv)
   !
-  END SUBROUTINE cgsolve_qqps
+  END SUBROUTINE ch_psi_qqps
 END INTERFACE ch_psi_all_interf
 #endif

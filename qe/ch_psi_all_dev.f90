@@ -46,33 +46,33 @@ INTEGER :: ierr
 !$acc kernels present(ps)
 ps (:,:) = (0.d0, 0.d0)
 !$acc end kernels
-CALL cgsolve_computeps<<<dim3(nk*npe*nsolv,nbnd,nbnd),dim3(1,1,1)>>>(ndmx, &
+CALL ch_psi_computeps<<<dim3(nk*npe*nsolv,nbnd,nbnd),dim3(1,1,1)>>>(ndmx, &
      outk_d, kdimk_d, st_d, nbndk_d, evqk_d, spsi, ps, current_ikb_ph, &
      npol, nk, npe, nsolv, nbnd, my_nbnd, alpha_pv)
 ierr=cudaDeviceSynchronize()
 CALL mp_sum ( ps, intra_bgrp_comm )
-CALL cgsolve_ah<<<dim3(nk,npe*nsolv,nbnd),dim3(1,1,1)>>>(ndmx, &
+CALL ch_psi_ah<<<dim3(nk,npe*nsolv,nbnd),dim3(1,1,1)>>>(ndmx, &
               outk_d, st_d, nbndk_d, ah, hpsi, spsi, eu, current_ikb_ph, &
               npol, nk, npe, nsolv, nbnd, my_nbnd)
 ierr=cudaDeviceSynchronize()
-CALL cgsolve_chp_lo2<<<dim3(nk,npe*nsolv,nbnd),dim3(1,1,1)>>>&
+CALL ch_psi_lo2<<<dim3(nk,npe*nsolv,nbnd),dim3(1,1,1)>>>&
             (ndmx, outk_d, st_d, nbndk_d, evqk_d, hpsi, ps, current_ikb_ph, &
              npol, nk, npe, nsolv, nbnd, my_nbnd)
 ierr=cudaDeviceSynchronize()
-CALL cgsolve_calbec<<<dim3(nk*npe*nsolv,nkb,nbnd),dim3(1,1,1)>>>(ndmx,  &
+CALL ch_psi_calbec<<<dim3(nk*npe*nsolv,nkb,nbnd),dim3(1,1,1)>>>(ndmx,  &
     outk_d, st_d, nbndk_d, npwk_d, hpsi, current_ikb_ph, npol, nk, &
     npe, nsolv, nkb, nbnd, my_nbnd)
 ierr=cudaDeviceSynchronize()
 IF (okvan) THEN
-   CALL cgsolve_qqps<<<dim3(nk*npe*nsolv,nbnd,1),dim3(1,1,1)>>>(outk_d, &
+   CALL ch_psi_qqps<<<dim3(nk*npe*nsolv,nbnd,1),dim3(1,1,1)>>>(outk_d, &
          nbndk_d, nkb, nk, npe, nsolv, npol )
    ierr=cudaDeviceSynchronize()
-   CALL cgsolve_sqdpsi<<<dim3(nk*npe*nsolv,ndmx,nbnd),dim3(1,1,1)>>>(ndmx, &
+   CALL ch_psi_sqdpsi<<<dim3(nk*npe*nsolv,ndmx,nbnd),dim3(1,1,1)>>>(ndmx, &
         outk_d, npwk_d, st_d, nbndk_d, hpsi, ah, current_ikb_ph, npol, nk, &
         npe, nsolv, nkb, nbnd, my_nbnd)
    ierr=cudaDeviceSynchronize()
 ELSE
-   CALL cgsolve_sdpsi<<<dim3(nk*npe*nsolv,ndmx,nbnd),dim3(1,1,1)>>>(ndmx, &
+   CALL ch_psi_sdpsi<<<dim3(nk*npe*nsolv,ndmx,nbnd),dim3(1,1,1)>>>(ndmx, &
         outk_d, st_d, nbndk_d, hpsi, ah, current_ikb_ph, npol, nk, &
         npe, nsolv, nkb, nbnd, my_nbnd)
    ierr=cudaDeviceSynchronize()
@@ -82,7 +82,7 @@ RETURN
 END SUBROUTINE ch_psi_dev
 
  !--------------------------------------------------------------------------
- ATTRIBUTES(GLOBAL) SUBROUTINE cgsolve_computeps(ndmx, outk, kdimk, st, &
+ ATTRIBUTES(GLOBAL) SUBROUTINE ch_psi_computeps(ndmx, outk, kdimk, st, &
          nbndk, evqk, spsi, ps, current_ikb_ph, npol, nk, &
          npe, nsolv, nbnd, my_nbnd, alpha_pv)
  !--------------------------------------------------------------------------
@@ -141,9 +141,9 @@ END SUBROUTINE ch_psi_dev
 
  RETURN
 
- END SUBROUTINE cgsolve_computeps
+ END SUBROUTINE ch_psi_computeps
  !--------------------------------------------------------------------------
- ATTRIBUTES(GLOBAL) SUBROUTINE cgsolve_ah(ndmx, outk, st, &
+ ATTRIBUTES(GLOBAL) SUBROUTINE ch_psi_ah(ndmx, outk, st, &
          nbndk, ah, hpsi, spsi, eu, current_ikb_ph, npol, nk, &
          npe, nsolv, nbnd, my_nbnd)
  !--------------------------------------------------------------------------
@@ -192,9 +192,9 @@ END SUBROUTINE ch_psi_dev
 
  RETURN
 
- END SUBROUTINE cgsolve_ah
+ END SUBROUTINE ch_psi_ah
  !--------------------------------------------------------------------------
- ATTRIBUTES(GLOBAL) SUBROUTINE cgsolve_chp_lo2(ndmx, outk, st, &
+ ATTRIBUTES(GLOBAL) SUBROUTINE ch_psi_lo2(ndmx, outk, st, &
          nbndk, evqk, hpsi, ps, current_ikb_ph, npol, nk,      &
          npe, nsolv, nbnd, my_nbnd)
  !--------------------------------------------------------------------------
@@ -251,9 +251,9 @@ END SUBROUTINE ch_psi_dev
 
  RETURN
 
- END SUBROUTINE cgsolve_chp_lo2
+ END SUBROUTINE ch_psi_lo2
  !--------------------------------------------------------------------------
- ATTRIBUTES(GLOBAL) SUBROUTINE cgsolve_calbec(ndmx, outk, st,  &
+ ATTRIBUTES(GLOBAL) SUBROUTINE ch_psi_calbec(ndmx, outk, st,  &
          nbndk, npw, hpsi, current_ikb_ph, npol, nk,   &
          npe, nsolv, nkb, nbnd, my_nbnd)
  !--------------------------------------------------------------------------
@@ -313,10 +313,10 @@ END SUBROUTINE ch_psi_dev
 
  RETURN
 
- END SUBROUTINE cgsolve_calbec
+ END SUBROUTINE ch_psi_calbec
  !
  !--------------------------------------------------------------------------
- ATTRIBUTES(GLOBAL) SUBROUTINE cgsolve_sqdpsi(lda, outk, npw, st,  &
+ ATTRIBUTES(GLOBAL) SUBROUTINE ch_psi_sqdpsi(lda, outk, npw, st,  &
          nbndk, hpsi, ah, current_ikb_ph, npol, nk,   &
          npe, nsolv, nkb, nbnd, my_nbnd)
  !--------------------------------------------------------------------------
@@ -378,9 +378,9 @@ END SUBROUTINE ch_psi_dev
 
  RETURN
 
- END SUBROUTINE cgsolve_sqdpsi
+ END SUBROUTINE ch_psi_sqdpsi
  !--------------------------------------------------------------------------
- ATTRIBUTES(GLOBAL) SUBROUTINE cgsolve_sdpsi(lda, outk, st,     &
+ ATTRIBUTES(GLOBAL) SUBROUTINE ch_psi_sdpsi(lda, outk, st,     &
          nbndk, hpsi, ah, current_ikb_ph, npol, nk, npe, nsolv, &
          nkb, nbnd, my_nbnd)
  !--------------------------------------------------------------------------
@@ -427,10 +427,10 @@ END SUBROUTINE ch_psi_dev
 
  RETURN
 
- END SUBROUTINE cgsolve_sdpsi
+ END SUBROUTINE ch_psi_sdpsi
 
 !-----------------------------------------------------------------------
-ATTRIBUTES(GLOBAL) SUBROUTINE cgsolve_qqps( outk, nbndk, nkb, nk, npe, &
+ATTRIBUTES(GLOBAL) SUBROUTINE ch_psi_qqps( outk, nbndk, nkb, nk, npe, &
                                             nsolv, npol )
   !-----------------------------------------------------------------------
   !
@@ -555,6 +555,6 @@ ATTRIBUTES(GLOBAL) SUBROUTINE cgsolve_qqps( outk, nbndk, nkb, nk, npe, &
      !
   RETURN
   !
-END SUBROUTINE cgsolve_qqps
+END SUBROUTINE ch_psi_qqps
 #endif
 !
