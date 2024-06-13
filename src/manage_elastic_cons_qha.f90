@@ -68,7 +68,7 @@ ENDIF
 filename='anhar_files/'//TRIM(flanhar)//'.celldm'
 exst=check_file_exists(filename)
 
-IF (exst) THEN
+IF (exst.AND..NOT.ANY(stype)) THEN
    CALL manage_elastic_cons_qha_2()
 ELSE
 !
