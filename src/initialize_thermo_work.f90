@@ -40,7 +40,9 @@ SUBROUTINE initialize_thermo_work(nwork, part)
                                    last_geometry_qha, elastic_algorithm,   &
                                    el_con_omega_geo, el_con_geo,           &
                                    all_geometry_done_geo, found_dos_ec,    &
-                                   found_ph_ec
+                                   found_ph_ec, min_y_t, dyde, ngeo_strain, &
+                                   stype
+  USE temperature,   ONLY : ntemp
   USE control_eldos, ONLY : lel_free_energy
   USE gvecw,          ONLY : ecutwfc
   USE gvect,          ONLY : ecutrho
@@ -305,6 +307,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            nvar=crystal_parameters(ibrav_save)
            CALL allocate_thermodynamics()
            CALL allocate_anharmonic()
+           IF (ANY(stype)) ALLOCATE(dyde(21,tot_ngeo,ntemp))
            IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'anhar_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
@@ -346,6 +349,8 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            IF (use_free_energy.OR.lel_free_energy) THEN
               CALL allocate_thermodynamics()
               CALL allocate_anharmonic()
+              ALLOCATE(min_y_t(ngeo_strain,21,ngeom,ntemp))
+              ALLOCATE(dyde(21,ngeom,ntemp))
            ELSE
               no_ph=.TRUE.
            ENDIF

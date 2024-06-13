@@ -31,16 +31,21 @@ USE control_elastic_constants, ONLY : el_cons_available,                 &
                                   el_cons_qha_geo_available,             &
                                   el_consf_qha_available,                &
                                   el_consf_qha_geo_available, lelastic,  &
-                                  lelasticf
+                                  lelasticf, stype
 IMPLICIT NONE
 
-INTEGER :: itemp
+INTEGER :: itemp, istep
 
 IF (lb0_t) THEN
    IF (el_cons_qha_geo_available.OR.el_consf_qha_geo_available) THEN
       CALL write_elastic_t_qha()
       CALL write_elastic_pt_qha()
       CALL write_elastic_ptt_qha()
+      DO istep=1,21
+         IF (stype(istep)) THEN
+            CALL write_dyde_t_qha(istep)
+         ENDIF
+      ENDDO
    ELSEIF (el_cons_geo_available) THEN
       CALL write_elastic_t()
       CALL write_elastic_pt()

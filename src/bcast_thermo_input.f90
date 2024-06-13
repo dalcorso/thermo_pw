@@ -52,7 +52,8 @@ SUBROUTINE bcast_thermo_input()
   USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, epsilon_0,&
                               frozen_ions, elastic_algorithm, poly_degree, &
                               use_free_energy, start_geometry_qha, &
-                              last_geometry_qha
+                              last_geometry_qha, nmove, atom_dir, atom_step, &
+                              stype, move_at, lcm_ec, lzsisa, lfp
   USE piezoelectric_tensor, ONLY : nppl
   USE control_qe,       ONLY : force_band_calculation, use_ph_images, many_k
   USE many_k_mod,       ONLY : memgpu
@@ -251,6 +252,14 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( epsilon_0, meta_ionode_id, world_comm )
   CALL mp_bcast( poly_degree, meta_ionode_id, world_comm )
   CALL mp_bcast( fl_el_cons, meta_ionode_id, world_comm )
+  CALL mp_bcast( nmove, meta_ionode_id, world_comm )
+  CALL mp_bcast( move_at, meta_ionode_id, world_comm )
+  CALL mp_bcast( atom_dir, meta_ionode_id, world_comm )
+  CALL mp_bcast( atom_step, meta_ionode_id, world_comm )
+  CALL mp_bcast( stype, meta_ionode_id, world_comm )
+  CALL mp_bcast( lcm_ec, meta_ionode_id, world_comm )
+  CALL mp_bcast( lzsisa, meta_ionode_id, world_comm )
+  CALL mp_bcast( lfp, meta_ionode_id, world_comm )
 !
 !  scf_polarization
 !

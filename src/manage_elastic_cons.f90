@@ -25,7 +25,8 @@ USE thermo_mod,        ONLY : energy_geo, density
 USE control_elastic_constants, ONLY : ngeo_strain, frozen_ions,            &
                               elastic_algorithm, rot_mat, elcpvar,         &
                               el_con_omega_geo, elalgen, start_geometry_qha, &
-                              last_geometry_qha
+                              last_geometry_qha, stype, min_y, nstep_ec, &
+                              lcm_ec, atom_dir, move_at, epsil_y, epsil_geo
 USE initial_conf,      ONLY : ibrav_save
 USE thermo_sym,        ONLY : laue
 USE elastic_constants, ONLY : print_elastic_constants,                     &
@@ -44,6 +45,7 @@ USE control_debye,     ONLY : debye_t
 USE data_files,        ONLY : fl_el_cons
 USE ions_base,         ONLY : nat
 USE cell_base,         ONLY : omega
+USE io_global,         ONLY : stdout
 USE mp,                ONLY : mp_sum
 USE mp_images,         ONLY : my_image_id, root_image, nproc_image
 USE mp_world,          ONLY : world_comm
@@ -52,8 +54,9 @@ IMPLICIT NONE
 INTEGER, INTENT(IN) :: nwork, ngeom
 
 REAL(DP) :: poisson, bulkm
-REAL(DP), ALLOCATABLE :: sigma_geo_aux(:,:,:)
-INTEGER :: iwork, work_base, igeom, base_ind
+REAL(DP), ALLOCATABLE :: sigma_geo_aux(:,:,:), epsilon_geo_eff(:,:,:), &
+                                               energy_geo_eff(:)
+INTEGER :: iwork, work_base, igeom, base_ind, nwork_eff, istep, igeo
 CHARACTER(LEN=6)    :: int_to_char
 CHARACTER(LEN=256)  :: filelastic
 !
@@ -63,6 +66,12 @@ CHARACTER(LEN=256)  :: filelastic
 !
 CALL mp_sum(energy_geo, world_comm)
 energy_geo=energy_geo / nproc_image
+
+ALLOCATE(energy_geo_eff(nwork))
+ALLOCATE(epsilon_geo_eff(3,3,nwork))
+
+CALL redefine_energies_qua(energy_geo, epsilon_geo, epsil_geo, nwork,  &
+                       energy_geo_eff, epsilon_geo_eff, nwork_eff)
 !
 !  Then collect the stress if it has been calculated
 !
@@ -73,7 +82,7 @@ ENDIF
 !
 !  work_base is the nwork to compute the elastic constants of one geometry
 !
-work_base=nwork/ngeom
+work_base=nwork_eff/ngeom
 ALLOCATE(sigma_geo_aux(3,3,work_base))
 DO igeom=start_geometry_qha, last_geometry_qha
    base_ind=(igeom-1)*work_base
@@ -92,9 +101,9 @@ DO igeom=start_geometry_qha, last_geometry_qha
                        epsilon_geo(1,1,base_ind+1), &
                        work_base, ngeo_strain, ibrav_save, laue, elcpvar)
    ELSE
-      CALL compute_elastic_constants_ene(energy_geo(base_ind+1), &
-           epsilon_geo(1,1,base_ind+1), work_base, ngeo_strain, ibrav_save, &
-                            laue, el_con_omega_geo(igeom), elcpvar)
+      CALL compute_elastic_constants_ene(energy_geo_eff(base_ind+1), &
+           epsilon_geo_eff(1,1,base_ind+1), work_base, ngeo_strain,  &
+                            ibrav_save, laue, el_con_omega_geo(igeom), elcpvar)
    END IF
    CALL print_elastic_constants(el_con, frozen_ions)
 !
@@ -132,9 +141,27 @@ DO igeom=start_geometry_qha, last_geometry_qha
                                                      TRIM(int_to_char(igeom))
    IF (my_image_id==root_image) CALL write_elastic(filelastic)
 
+   IF (ANY(stype)) THEN
+      WRITE(stdout,'(/,5x,"Calculated internal relaxations (a.u.) &
+                                           &for geometry",i5)') igeom 
+      DO istep=1, nstep_ec
+         IF (stype(istep)) THEN
+            WRITE(stdout,'(5x,"Strain step number ",i5)') istep
+            WRITE(stdout,'(5x,"Atom that moves",i5)') move_at(istep)
+            WRITE(stdout,'(5x,"Movement direction",3f12.5)') atom_dir(:,istep)
+            IF (lcm_ec) WRITE(stdout,'(5x,"Conserving the center of mass")')
+            DO igeo=1,ngeo_strain
+               WRITE(stdout,'(2f20.8)') epsil_y(igeo,istep,igeom), &
+                                          min_y(igeo,istep,igeom)  
+            ENDDO
+         ENDIF
+      ENDDO
+   ENDIF
 ENDDO
 
 DEALLOCATE(sigma_geo_aux)
+DEALLOCATE(energy_geo_eff)
+DEALLOCATE(epsilon_geo_eff)
 
 RETURN
 END SUBROUTINE manage_elastic_cons

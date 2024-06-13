@@ -65,6 +65,7 @@ SUBROUTINE check_el_cons_qha()
         CALL read_el_cons_from_file(temp, ntemp, ibrav, laue, &
                   el_con_geo_t(:,:,:,igeo), b0_ec_t(:), filelastic)
 
+        CALL read_dyde(igeo)
         found_dos_ec(igeo)=.TRUE.
         el_cons_t(:,:,:)=el_con_geo_t(:,:,:,igeo)
 
@@ -89,6 +90,7 @@ SUBROUTINE check_el_cons_qha()
         CALL read_el_cons_from_file(temp, ntemp, ibrav, laue, & 
                 el_conf_geo_t(:,:,:,igeo), b0f_ec_t(:), filelastic_ph)
       
+!        CALL read_dyde()
         found_ph_ec(igeo)=.TRUE.
         el_consf_t(:,:,:)=el_conf_geo_t(:,:,:,igeo)
 

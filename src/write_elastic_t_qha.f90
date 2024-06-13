@@ -751,3 +751,207 @@ DEALLOCATE(x)
 
 RETURN
 END SUBROUTINE write_elastic_ptt_qha
+!
+!---------------------------------------------------------------------------
+SUBROUTINE write_dyde_t_qha(istep)
+!---------------------------------------------------------------------------
+!
+!  This routine interpolates the temperature dependent derivative of
+!  the crystal parameters with respect to strain at the crystal parameters 
+!  that minimize the Helmholtz (or Gibbs) free energy at temperature T.
+!
+USE kinds,      ONLY : DP
+USE io_global,  ONLY : stdout
+USE thermo_mod, ONLY : ibrav_geo, celldm_geo
+USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
+USE linear_surfaces,    ONLY : fit_multi_linear, evaluate_fit_linear
+USE quadratic_surfaces, ONLY : fit_multi_quadratic, evaluate_fit_quadratic
+USE cubic_surfaces,   ONLY : fit_multi_cubic, evaluate_fit_cubic
+USE quartic_surfaces, ONLY : fit_multi_quartic, evaluate_fit_quartic
+USE control_elastic_constants, ONLY : el_cons_qha_geo_available, &
+                             el_consf_qha_geo_available, lelastic, lelasticf, &
+                             found_ph_ec, found_dos_ec, fnph_ec, fndos_ec, &
+                             f_geodos_ec, f_geoph_ec, dyde
+USE lattices,       ONLY : compress_celldm, crystal_parameters
+USE control_thermo, ONLY : ltherm_dos, ltherm_freq
+USE anharmonic,     ONLY : celldm_t, dyde_t, vmin_t
+USE ph_freq_anharmonic, ONLY : celldmf_t, dydef_t, vminf_t
+USE polynomial, ONLY : poly1, poly2, poly3, poly4, init_poly, clean_poly
+USE data_files, ONLY : flanhar
+USE temperature, ONLY : ntemp, temp
+USE mp,          ONLY : mp_sum
+USE mp_world,    ONLY : world_comm
+
+IMPLICIT NONE
+INTEGER :: istep
+CHARACTER(LEN=256) :: filelastic
+INTEGER :: igeo, ibrav, nvar, ndata, jdata
+REAL(DP), ALLOCATABLE :: x(:,:), f(:), xfit(:), x1(:,:)
+CHARACTER(LEN=6) :: int_to_char
+TYPE(poly1) :: ec_p1
+TYPE(poly2) :: ec_p2
+TYPE(poly3) :: ec_p3
+TYPE(poly4) :: ec_p4
+
+INTEGER :: i, j, idata, itemp, startt, lastt, pdelc_dos, pdelc_ph
+INTEGER :: compute_nwork 
+
+ibrav=ibrav_geo(1)
+nvar=crystal_parameters(ibrav)
+ndata=compute_nwork()
+
+ALLOCATE(x(nvar,ndata))
+ALLOCATE(f(ndata))
+ALLOCATE(x1(nvar,ndata))
+!
+!  Part 1 evaluation of the polynomial coefficients
+!
+ALLOCATE(xfit(nvar))
+CALL divide(world_comm, ntemp, startt, lastt)
+
+CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
+
+dyde_t(istep,:)=0.0_DP
+dydef_t(istep,:)=0.0_DP
+pdelc_dos=MIN(poly_degree_elc,fndos_ec-1)
+pdelc_ph=MIN(poly_degree_elc,fnph_ec-1)
+IF (pdelc_dos/=poly_degree_elc) &
+   WRITE(stdout,'(5x,"Poly_degree_elc decreased to ",i3," for dos")') pdelc_dos
+IF (pdelc_ph/=poly_degree_elc) &
+   WRITE(stdout,'(5x,"Poly_degree_elc decreased to ",i3," for ph")') pdelc_ph
+
+DO itemp=startt,lastt
+   IF (itemp==1.OR.itemp==ntemp) CYCLE
+   
+   IF (el_cons_qha_geo_available.AND.ltherm_dos) THEN
+      CALL compress_celldm(celldm_t(:,itemp),xfit,nvar,ibrav)
+      f=0.0_DP
+      WRITE(stdout,'(/,5x,"Fitting dos dyde for step", i5)') istep
+      WRITE(stdout,'(/,5x,"at Temperature",f15.5," K")') temp(itemp)
+      jdata=0
+      DO idata=1,ndata
+         IF (found_dos_ec(idata)) THEN
+            jdata=jdata+1
+            x1(:,jdata)=x(:,idata)
+            f(jdata)=dyde(istep,idata,itemp)
+            IF (itemp==5) WRITE(stdout,*) idata, jdata, x1(:,jdata), &
+                                          dyde(istep,idata,itemp)
+         ENDIF
+      END DO
+
+      IF (pdelc_dos==4) THEN
+         CALL init_poly(nvar,ec_p4)
+         CALL fit_multi_quartic(jdata,nvar,lsolve,x1,f,ec_p4) 
+         CALL evaluate_fit_quartic(nvar, xfit, dyde_t(istep,itemp),ec_p4)
+         CALL clean_poly(ec_p4)
+      ELSEIF (pdelc_dos==3) THEN
+         CALL init_poly(nvar,ec_p3)
+         CALL fit_multi_cubic(jdata,nvar,lsolve,x1,f,ec_p3)
+         CALL evaluate_fit_cubic(nvar,xfit, dyde_t(istep,itemp),ec_p3)
+         CALL clean_poly(ec_p3)
+      ELSEIF (pdelc_dos==2) THEN
+         CALL init_poly(nvar,ec_p2)
+         CALL fit_multi_quadratic(jdata,nvar,lsolve,x1,f,ec_p2)
+         CALL evaluate_fit_quadratic(nvar,xfit,dyde_t(istep,itemp),ec_p2)
+         CALL clean_poly(ec_p2)
+      ELSEIF (pdelc_dos==1) THEN
+         CALL init_poly(nvar,ec_p1)
+         CALL fit_multi_linear(jdata,nvar,lsolve,x1,f,ec_p1)
+         CALL evaluate_fit_linear(nvar,xfit,dyde_t(istep,itemp),ec_p1)
+         CALL clean_poly(ec_p1)
+      ELSE
+         CALL errore('write_elastic_t_qha','wrong poly_degree_elc',1)
+      ENDIF
+   ENDIF
+
+   IF (el_consf_qha_geo_available.AND.ltherm_freq) THEN
+      CALL compress_celldm(celldmf_t(:,itemp),xfit,nvar,ibrav)
+      f=0.0_DP
+      WRITE(stdout,'(/,5x,"Fitting freq dyde for step",i5)') istep
+      WRITE(stdout,'(/,5x,"at Temperature",f15.5," K")') temp(itemp)
+      jdata=0
+      DO idata=1,ndata
+         IF (found_ph_ec(idata)) THEN
+            jdata=jdata+1
+            x1(:,jdata)=x(:,idata)
+            f(jdata)=dyde(istep,idata,itemp)
+         ENDIF
+      ENDDO
+
+      IF (pdelc_ph==4) THEN
+         CALL init_poly(nvar,ec_p4)
+         CALL fit_multi_quartic(jdata, nvar, lsolve, x1, f, ec_p4)
+         CALL evaluate_fit_quartic(nvar,xfit,dydef_t(istep,itemp), ec_p4) 
+         CALL clean_poly(ec_p4)
+      ELSEIF (pdelc_ph==3) THEN
+         CALL init_poly(nvar,ec_p3)
+         CALL fit_multi_cubic(jdata,nvar,lsolve,x1,f,ec_p3)
+         CALL evaluate_fit_cubic(nvar,xfit, dydef_t(istep,itemp), ec_p3)
+         CALL clean_poly(ec_p3)
+      ELSEIF (pdelc_ph==2) THEN
+         CALL init_poly(nvar,ec_p2)
+         CALL fit_multi_quadratic(jdata, nvar, lsolve, x1, f, ec_p2)
+         CALL evaluate_fit_quadratic(nvar,xfit, dydef_t(istep,itemp), ec_p2)
+         CALL clean_poly(ec_p2)
+      ELSEIF (pdelc_ph==1) THEN
+         CALL init_poly(nvar,ec_p1)
+         CALL fit_multi_linear(jdata,nvar,lsolve,x1,f,ec_p1)
+         CALL evaluate_fit_linear(nvar,xfit,dydef_t(istep,itemp), ec_p1)
+         CALL clean_poly(ec_p1)
+      ELSE
+         CALL errore('write_elastic_t_qha','wrong poly_degree_elc',1)
+      ENDIF
+   ENDIF
+ENDDO
+!
+IF (ltherm_dos) THEN
+   CALL mp_sum(dyde_t(istep,:), world_comm)
+   lelastic=.TRUE.
+   filelastic='anhar_files/'//TRIM(flanhar)//'.int_rel.'//int_to_char(istep)
+   CALL write_dyde_on_file(temp, ntemp, dyde_t, vmin_t, istep, filelastic)
+ENDIF
+!
+IF (ltherm_freq) THEN
+   CALL mp_sum(dydef_t(istep,:), world_comm)
+   lelasticf=.TRUE.
+   filelastic='anhar_files/'//TRIM(flanhar)//'.int_relf.'//int_to_char(istep)
+   CALL write_dyde_on_file(temp, ntemp, dydef_t, vminf_t, istep, filelastic)
+ENDIF
+
+DEALLOCATE(f)
+DEALLOCATE(x)
+DEALLOCATE(x1)
+
+RETURN
+END SUBROUTINE write_dyde_t_qha
+!
+!-------------------------------------------------------------------------
+SUBROUTINE write_dyde_on_file(temp, ntemp, dyde, omega, istep, filename)
+!-------------------------------------------------------------------------
+!
+USE kinds, ONLY : DP
+USE io_global,      ONLY : meta_ionode
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ntemp, istep
+REAL(DP), INTENT(IN) :: temp(ntemp), dyde(21,ntemp), omega(ntemp)
+CHARACTER(LEN=256), INTENT(IN) :: filename
+
+INTEGER :: iu_therm, itemp
+INTEGER :: find_free_unit
+
+IF (meta_ionode) THEN
+   iu_therm=find_free_unit()
+   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
+
+   WRITE(iu_therm,'("# Temp (K)        dyde (a.u.)      volume (a.u.)**3")')
+   DO itemp = 2, ntemp-1
+      WRITE(iu_therm, '(e12.5,2e22.13)') temp(itemp), dyde(istep,itemp), &
+                                         omega(itemp)
+   ENDDO
+   CLOSE(iu_therm, STATUS='KEEP')
+ENDIF
+
+RETURN
+END SUBROUTINE write_dyde_on_file
+!

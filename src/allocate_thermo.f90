@@ -137,7 +137,8 @@ SUBROUTINE allocate_anharmonic()
                                   celldm_noe_t_p1, celldm_noe_t_m1,          &
                                   p1t_noe_t, p2t_noe_t, p3t_noe_t, p4t_noe_t, &
                                   density_noe_t, b0_ec_t, b0_ec_s, &
-                                  debye_macro_el_t, debye_macro_el_s
+                                  debye_macro_el_t, debye_macro_el_s, &
+                                  dyde_t
   USE anharmonic_pt,       ONLY : vmin_pt, b0_pt, b01_pt, b02_pt, emin_pt,   &
                                   ce_pt, cv_pt, cp_pt, beta_pt, b0_s_pt,     &
                                   gamma_pt, free_ener_pt, ener_pt, entr_pt,  &
@@ -183,7 +184,7 @@ SUBROUTINE allocate_anharmonic()
                                   betaf_noe_t, cpf_noe_t, b0f_noe_s,         &
                                   gammaf_noe_t, af_noe_t, b0f_ec_t,          &
                                   b0f_ec_s, debye_macro_elf_t,               &
-                                  debye_macro_elf_s
+                                  debye_macro_elf_s, dydef_t
   USE ph_freq_anharmonic_pt, ONLY : vminf_pt, b0f_pt, b01f_pt, b02f_pt,      &
                                   eminf_pt, densityf_pt, celldmf_pt,         &
                                   enerf_pt, free_enerf_pt, entrf_pt,         &
@@ -287,6 +288,7 @@ SUBROUTINE allocate_anharmonic()
   IF (.NOT. ALLOCATED (v_t) )           ALLOCATE(v_t(3,ntemp))
   IF (.NOT. ALLOCATED (el_con_geo_t) )  ALLOCATE(el_con_geo_t(6,6,ntemp,&
                                                                    tot_ngeo)) 
+  IF (.NOT. ALLOCATED (dyde_t) )        ALLOCATE(dyde_t(21,ntemp)) 
   IF (.NOT. ALLOCATED (celldm_t_p1) )   ALLOCATE(celldm_t_p1(6,ntemp)) 
   IF (.NOT. ALLOCATED (celldm_t_m1) )   ALLOCATE(celldm_t_m1(6,ntemp)) 
   IF (.NOT. ALLOCATED (celldm_noe_t_p1) ) ALLOCATE(celldm_noe_t_p1(6,ntemp)) 
@@ -482,6 +484,7 @@ SUBROUTINE allocate_anharmonic()
   IF (.NOT. ALLOCATED (debye_macro_elf_s) ) ALLOCATE(debye_macro_elf_s(ntemp)) 
   IF (.NOT. ALLOCATED (el_conf_geo_t) ) ALLOCATE(el_conf_geo_t(6,6,&
                                                            ntemp,tot_ngeo)) 
+  IF (.NOT. ALLOCATED (dydef_t) )        ALLOCATE(dydef_t(21,ntemp)) 
 
   IF (.NOT. ALLOCATED (vminf_noe_t) )       ALLOCATE(vminf_noe_t(ntemp)) 
   IF (.NOT. ALLOCATED (densityf_noe_t) )    ALLOCATE(densityf_noe_t(ntemp)) 

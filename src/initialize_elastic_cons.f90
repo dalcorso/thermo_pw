@@ -26,9 +26,11 @@ USE thermo_mod,        ONLY : ibrav_geo, celldm_geo
 USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, rot_mat, &
                                elastic_algorithm, epsilon_0,               &
                                el_con_ibrav_geo, el_con_celldm_geo,        &
-                               work_base, elalgen, epsil_geo
+                               work_base, elalgen, epsil_geo, tau_acc,     &
+                               nmove, atom_step, atom_dir, move_at, stype, &
+                               nstep_ec, min_y, lcm_ec, epsil_y
 USE initial_conf,      ONLY : ibrav_save
-USE equilibrium_conf,  ONLY : celldm0
+USE equilibrium_conf,  ONLY : celldm0, bg0
 USE thermo_sym,        ONLY : laue
 !
 !  library helper modules
@@ -36,11 +38,14 @@ USE thermo_sym,        ONLY : laue
 USE elastic_constants, ONLY : epsilon_voigt, sigma_geo, epsilon_geo
 USE strain_mod,        ONLY : set_strain_adv, trans_epsilon
 
+USE ions_base,         ONLY : nat, ityp, amass
+
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ngeom
 INTEGER, INTENT(OUT) :: nwork
-REAL(DP) :: epsilon_min, epsil
-INTEGER  :: igeo, iwork, igeom, base_ind, istep, nstep
+REAL(DP) :: epsilon_min, epsil, tot_mass, sumdisp
+INTEGER  :: igeo, iwork, igeom, istep, nstep, iwork_base, imove, &
+            nstep_tot, na, ipol
 CHARACTER(LEN=2) :: strain_list(21)
 LOGICAL :: flag
 
@@ -283,8 +288,19 @@ IF (nstep<1.AND.elastic_algorithm=='energy') &
 IF (nstep<1) &
    CALL errore('initialize_elastic_cons', 'Incorrect nstep, &
                                              &check elastic_algorithm',1)
-nwork = nstep * ngeo_strain * ngeom
-work_base = nstep * ngeo_strain
+
+nstep_tot=0
+DO istep=1,nstep
+   IF (stype(istep)) THEN
+      nstep_tot=nstep_tot+nmove
+   ELSE
+      nstep_tot=nstep_tot+1
+   ENDIF
+ENDDO
+
+nwork = nstep_tot * ngeo_strain * ngeom
+work_base = nstep_tot * ngeo_strain
+nstep_ec=nstep
 
 ALLOCATE( epsilon_voigt(6, nwork) )
 ALLOCATE( epsilon_geo(3, 3, nwork) )
@@ -293,6 +309,9 @@ ALLOCATE( sigma_geo(3, 3, nwork) )
 ALLOCATE( ibrav_geo(nwork) )
 ALLOCATE( celldm_geo(6,nwork) )
 ALLOCATE( rot_mat(3,3,nwork) )
+ALLOCATE( tau_acc(3,nat,nwork) )
+ALLOCATE( min_y(ngeo_strain,21,ngeom))
+ALLOCATE( epsil_y(ngeo_strain,21,ngeom))
 
 IF (ngeom==1) THEN
    IF (.NOT. ALLOCATED(el_con_ibrav_geo)) ALLOCATE(el_con_ibrav_geo(1))
@@ -301,9 +320,9 @@ IF (ngeom==1) THEN
    el_con_celldm_geo(:,1)=celldm0(:)
 ENDIF
 flag=(elastic_algorithm=='standard'.OR.elastic_algorithm=='energy_std')
-base_ind=0
 epsilon_min= - delta_epsilon * (ngeo_strain - 1 ) / 2.0_DP - epsilon_0
 iwork=0
+tau_acc=0.0_DP
 DO igeom=1, ngeom
    DO istep=1,nstep
       DO igeo=1,ngeo_strain
@@ -316,12 +335,52 @@ DO igeom=1, ngeom
 
          CALL set_strain_adv(strain_list(istep), el_con_ibrav_geo(igeom),  &
               el_con_celldm_geo(1,igeom), epsil, &
-              epsilon_voigt(1,base_ind+igeo), ibrav_geo(base_ind+igeo), &
-              celldm_geo(1,base_ind+igeo), rot_mat(1,1,base_ind+igeo), flag )
+              epsilon_voigt(1,iwork), ibrav_geo(iwork), &
+              celldm_geo(1,iwork), rot_mat(1,1,iwork), flag )
+         IF (stype(istep)) THEN
+            iwork_base=iwork
+            tau_acc(:,move_at(istep),iwork)=(1.0_DP-(nmove+1.0_DP)/2.0_DP)* &
+                                         atom_step(istep)*atom_dir(:,istep)
+            DO imove=2, nmove
+               iwork=iwork+1
+               epsil_geo(iwork)=epsil_geo(iwork_base)
+               epsilon_voigt(:,iwork)=epsilon_voigt(:,iwork_base)
+               ibrav_geo(iwork)=ibrav_geo(iwork_base)
+               celldm_geo(:,iwork)=celldm_geo(:,iwork_base)
+               rot_mat(:,:,iwork)=rot_mat(:,:,iwork_base)
+               tau_acc(:,move_at(istep),iwork)=(imove-(nmove+1.0_DP)/2.0_DP)* &
+                                         atom_step(istep)*atom_dir(:,istep)
+            ENDDO
+        ENDIF
       ENDDO
-      base_ind = base_ind + ngeo_strain
    ENDDO
 ENDDO
+
+!
+!  Correct the displacement so that it does not change the center of mass
+!  of the system
+!
+tot_mass=0.0_DP
+DO na=1,nat
+   tot_mass=tot_mass+amass(ityp(na))
+ENDDO
+IF ((tot_mass>0.0_DP).AND.lcm_ec) THEN
+   DO iwork=1,nwork
+      DO ipol=1,3
+         sumdisp=0.0_DP
+         DO na=1,nat
+            sumdisp=sumdisp+tau_acc(ipol,na,iwork) * amass(ityp(na))
+         ENDDO
+         DO na=1,nat
+            tau_acc(ipol,na,iwork)=tau_acc(ipol,na,iwork)-sumdisp/tot_mass
+         ENDDO
+      ENDDO
+   ENDDO
+ENDIF
+!
+!  tau_acc in units of celldm0(1)
+!
+tau_acc=tau_acc/celldm0(1)
 
 sigma_geo=0.0_DP
 epsilon_geo=0.0_DP

@@ -1527,6 +1527,16 @@ Note that elastic constant calculations with \texttt{frozen}
 might require smaller force convergence threshold than standard calculations. 
 The default value of \texttt{forc\_conv\_thr} must be changed in the 
 \texttt{pw.x} input.
+
+If you know in which direction the atoms relax and if there is only one
+atom that moves in each strain type, one can use \texttt{frozen\_ions=.TRUE.},
+and compute the energy at several atomic positions choosing the one
+that minimizes the energy. This approach computes more energy configurations 
+but does not relax them and should provide results identical to 
+\texttt{frozen\_ions=.FALSE.}. It can be used only with \texttt{energy}
+and \texttt{energy\_std} algorithms, but should work also with the
+free energy in \texttt{what=`elastic\_constants\_geo'}.
+
 At finite pressure all methods give the elastic constants that
 relate linearly stress and strain. \\
 The input variables that control this option are:
@@ -1564,6 +1574,31 @@ poly_degree: degree of the polynomial used to interpolate
              Default: 3 ('standard', 'advanced', 2 
              if ngeo_strain < 6), 4 ('energy', 3 if 
              ngeo_strain < 6).
+stype(1:strain_types): For each strain type for which this 
+             variable is .TRUE. it is possible to compute 
+             the energy by moving one atom in one direction 
+             and minimizing the energy with respect to the
+             ionic position. This option requires frozen_ions
+             =.TRUE. and should give the same result of 
+             frozen_ions=.FALSE. if the atom that moves and 
+             its direction is chosen correctly.
+             Default: logical .FALSE..
+move_at(1:strain_types): The atom that moves in each strain type.
+             Default: integer none (it must be set 
+             if stype(istrain)=.TRUE.).
+atom_dir(3,1:strain_types): The versor of the atomic movement in
+             Cartesian coordinates (the vector can be given with 
+             any module. It is normalized by the code).
+             Default: real none (it must be set if 
+             stype(istrain)=.TRUE.).
+atom_step(1:strain_types): the step for each atomic displacement.
+             Default : real 0.01 a.u..
+nmove        Number of atomic positions sampled for minimizing 
+             the energy at each strain type.
+             Default: integer 5.
+lcm_ec       If .TRUE. the center of mass of the cell is conserved 
+             in the displacement introduced with previous variables.
+             Default: logical .TRUE.
 fl_el_cons:  the name of the file that contains the elastic 
              constants.
              Default: character(len=*) 'output_el_con.dat'

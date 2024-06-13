@@ -470,6 +470,9 @@ MODULE anharmonic
                                            ! macro elasticity (isoentropic)
   REAL(DP), ALLOCATABLE :: el_con_geo_t(:,:,:,:) ! the temperature dependent
                                          ! elastic constants at all geometries
+  REAL(DP), ALLOCATABLE :: dyde_t(:,:) !(nstep,ntemp) the derivative of the
+                                       ! internal parameter with respect to 
+                                       ! strain
 !
 !  The parameters of the interpolation neglecting the electronic exitation
 !  contribution
@@ -972,6 +975,9 @@ MODULE ph_freq_anharmonic
                                             ! macro_elf_s: vp, vb, vg
   REAL(DP), ALLOCATABLE :: vf_t(:,:)        ! the sound velocities from
                                             ! macro_elf_t: vp, vb, vg
+  REAL(DP), ALLOCATABLE :: dydef_t(:,:) !(nstep,ntemp) the derivative of the
+                                       ! internal parameter with respect to 
+                                       ! strain
   REAL(DP), ALLOCATABLE :: debye_macro_elf_t(:) ! debye temperature from
                                            ! macro elasticity (isothermal)
   REAL(DP), ALLOCATABLE :: debye_macro_elf_s(:) ! debye temperature from
@@ -1310,7 +1316,7 @@ MODULE control_elastic_constants
                                           ! cartesian coordinates of the
                                           ! strained and unstrained cell  
   INTEGER :: ngeo_strain        ! number of strain configurations
-
+                                !
   LOGICAL :: frozen_ions        ! if .true. compute the elastic constant 
                                 ! keeping the ions frozen at the strained
                                 ! positions
@@ -1411,6 +1417,44 @@ MODULE control_elastic_constants
                                 ! qha elastic constant have been found
   LOGICAL, ALLOCATABLE :: found_ph_ec(:) ! for each geometry it is true if
                                 ! qha elastic constant have been found
+
+  INTEGER :: nstep_ec           ! number of strain_types
+                                !
+  INTEGER :: nmove              ! number of atomic positions to study
+                                !
+  LOGICAL :: stype(21)          ! if .TRUE. this strain type needs also
+                                ! atomic relaxations
+  INTEGER :: move_at(21)        ! The atoms that move in any strain type
+
+  REAL(DP) :: atom_dir(3,21)    ! The versor of the atomic displacement
+  REAL(DP) :: atom_step(21)     ! The amount of displacement for each 
+                                ! strain type
+
+  REAL(DP), ALLOCATABLE :: tau_acc(:,:,:) ! a possible displacement of
+                                ! the atoms with respect to the uniformely
+                                ! strained configuration
+                                !
+  REAL(DP), ALLOCATABLE :: min_y(:,:,:) ! the minimum value of the internal
+                                ! coordinate (ngeo_strain,21,ngeom)
+  REAL(DP), ALLOCATABLE :: epsil_y(:,:,:) ! the strain amplitude
+                                ! that has min_y internal coordinate 
+                                ! as a minimum
+  REAL(DP), ALLOCATABLE :: min_y_t(:,:,:,:) ! the minimum value of the internal
+                                ! coordinate (ngeo_strain,21,ngeom,ntemp) at 
+                                ! each temperature
+  LOGICAL :: lcm_ec             ! if .true. the code moves the other atoms
+                                ! so as to keep the center of mass of the
+                                ! cell fixed.
+  LOGICAL :: lzsisa             ! when .TRUE. and the previous calculations
+                                ! have been executed makes the zsiza 
+                                ! approximation. Only min_y is used at
+                                ! each temperature
+                                ! Default : .FALSE.
+  LOGICAL :: lfp                ! when .TRUE. and the previous calculations
+                                ! have been executed makes the frozen phonon
+                                ! approximation, taking the min_y=0.0
+
+  REAL(DP), ALLOCATABLE :: dyde(:,:,:) ! (21,ngeom,ntemp)
 
 END MODULE control_elastic_constants
   !

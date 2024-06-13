@@ -133,6 +133,7 @@ quadratic_fit.o \
 read_minimal_info.o \
 read_state_densities.o \
 readmodes.o \
+redefine_energies.o \
 run_iwork.o \
 run_thermo_asyncronously.o \
 save_ph_variables.o \

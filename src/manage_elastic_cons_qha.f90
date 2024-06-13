@@ -17,7 +17,8 @@ USE thermo_mod,        ONLY : energy_geo, tot_ngeo
 USE control_elastic_constants, ONLY : ngeo_strain, elcpvar, ngeom, &
                               work_base, el_con_omega_geo,         &
                               start_geometry_qha, last_geometry_qha, &
-                              lelastic, lelasticf, all_geometry_done_geo
+                              lelastic, lelasticf, all_geometry_done_geo, &
+                              epsil_geo, min_y_t, stype
 USE initial_conf,      ONLY : ibrav_save
 USE thermo_sym,        ONLY : laue
 USE elastic_constants, ONLY : epsilon_geo, el_con, el_compliances,         &
@@ -39,8 +40,9 @@ USE mp,                ONLY : mp_sum
 
 IMPLICIT NONE
 
-REAL(DP), ALLOCATABLE :: free_energy_geo(:), epsilon_geo_loc(:,:,:)
-INTEGER :: itemp, startt, lastt, igeom, base_ind, iwork
+REAL(DP), ALLOCATABLE :: free_energy_geo(:), epsilon_geo_loc(:,:,:), &
+                         free_energy_geo_eff(:), epsilon_geo_eff(:,:,:)
+INTEGER :: itemp, startt, lastt, igeom, base_ind, iwork, work_base_eff
 CHARACTER(LEN=256)  :: filelastic, filename, filedata
 CHARACTER(LEN=6) :: int_to_char
 LOGICAL :: all_geometry_done, all_el_free, exst, ldummy, check_file_exists, &
@@ -76,8 +78,11 @@ ELSE
 CALL divide(world_comm, ntemp, startt, lastt)
 ALLOCATE(free_energy_geo(work_base))
 ALLOCATE(epsilon_geo_loc(3,3,work_base))
+ALLOCATE(free_energy_geo_eff(work_base))
+ALLOCATE(epsilon_geo_eff(3,3,work_base))
 ALLOCATE(lstress(work_base*ngeom))
 lstress=.FALSE.
+min_y_t=0.0_DP
 
 DO igeom=1, ngeom
    base_ind=(igeom-1)*work_base
@@ -108,9 +113,12 @@ DO igeom=1, ngeom
          IF (lel_free_energy) free_energy_geo(:)=free_energy_geo(:) + &
                            el_free_ener(itemp,base_ind+1:base_ind+work_base)
          epsilon_geo_loc(:,:,:)=epsilon_geo(:,:,base_ind+1:base_ind+work_base)
-         CALL compute_elastic_constants_ene(free_energy_geo, epsilon_geo_loc, &
-                            work_base, ngeo_strain, ibrav_save, laue,         &
-                            el_con_omega_geo(igeom), elcpvar)
+         CALL redefine_energies_qua_t(free_energy_geo, epsilon_geo_loc, &
+                       epsil_geo(base_ind+1), work_base, free_energy_geo_eff, &
+                       epsilon_geo_eff, work_base_eff, igeom, itemp)
+         CALL compute_elastic_constants_ene(free_energy_geo_eff,  &
+                            epsilon_geo_eff, work_base_eff, ngeo_strain, &
+                            ibrav_save, laue, el_con_omega_geo(igeom), elcpvar)
          el_cons_t(:,:,itemp) = el_con(:,:)
       ENDIF
       IF (ltherm_freq) THEN
@@ -120,9 +128,12 @@ DO igeom=1, ngeom
          IF (lel_free_energy) free_energy_geo(:)=free_energy_geo(:) + &
                            el_free_ener(itemp,base_ind+1:base_ind+work_base)
          epsilon_geo_loc(:,:,:)=epsilon_geo(:,:,base_ind+1:base_ind+work_base)
-         CALL compute_elastic_constants_ene(free_energy_geo, epsilon_geo_loc, &
-                         work_base, ngeo_strain, ibrav_save, laue,       &
-                         el_con_omega_geo(igeom), elcpvar)
+         CALL redefine_energies_qua_t(free_energy_geo, epsilon_geo_loc, &
+                       epsil_geo(base_ind+1), work_base, free_energy_geo_eff, &
+                       epsilon_geo_eff, work_base_eff, igeom, itemp)
+         CALL compute_elastic_constants_ene(free_energy_geo_eff, &
+                         epsilon_geo_eff, work_base_eff, ngeo_strain, & 
+                         ibrav_save, laue, el_con_omega_geo(igeom), elcpvar)
          el_consf_t(:,:,itemp) = el_con(:,:)
       ENDIF 
    ENDDO
@@ -160,9 +171,15 @@ DO igeom=1, ngeom
       lelasticf=.TRUE.
    ENDIF
 ENDDO
+IF (ANY(stype)) THEN
+   CALL mp_sum(min_y_t, world_comm)
+   CALL write_min_y()
+ENDIF
 
 DEALLOCATE(free_energy_geo)
 DEALLOCATE(epsilon_geo_loc)
+DEALLOCATE(free_energy_geo_eff)
+DEALLOCATE(epsilon_geo_eff)
 DEALLOCATE(lstress)
 
 CALL plot_elastic_t(0,.FALSE.)

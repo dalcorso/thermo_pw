@@ -16,7 +16,7 @@ USE control_thermo,   ONLY : outdir_thermo
 USE equilibrium_conf, ONLY : celldm0, at0, tau0_crys
 USE thermo_mod,       ONLY : celldm_geo, ibrav_geo
 USE control_elastic_constants, ONLY : frozen_ions, elastic_algorithm,  &
-                             rot_mat, ngeom
+                             rot_mat, ngeom, tau_acc
 !
 !  library routines
 !
@@ -33,7 +33,7 @@ USE io_global,        ONLY : stdout
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: iwork
 
-INTEGER  :: ivec, na, ipol, jpol, ibrav
+INTEGER  :: ivec, na, ipol, jpol, ibrav, irot
 REAL(DP), ALLOCATABLE :: tau_ocoord(:,:)
 REAL(DP) :: rd_ht(3,3), zero, celldm_(6)
 LOGICAL  :: trd_ht
@@ -50,8 +50,8 @@ IF (ngeom>1) CALL set_geometry_el_cons(iwork)
 !  
 !  at0 that contains the unstrained at vectors in units of celldm0(1)
 !
-!  tau0_crys that contains the crystal coordinates of the atoms. In 
-!  a uniform strain these coordinates do not change.
+!  tau0_crys that contains the crystal coordinates of the atoms in the
+!  basis of the at0. In a uniform strain these coordinates do not change.
 !
 !  first strain the at0. 
 !
@@ -63,6 +63,7 @@ ENDDO
 !
 tau=tau0_crys
 CALL cryst_to_cart( nat, tau, at, 1 )
+tau(:,:)=tau(:,:)+tau_acc(:,:,iwork)
 !
 zero=0.0_DP
 IF (elastic_algorithm=='standard'.OR.elastic_algorithm=='energy_std') THEN
@@ -93,7 +94,6 @@ ELSEIF (elastic_algorithm=='advanced' .OR. &
 !
    ALLOCATE(tau_ocoord(3,nat))
    tau_ocoord=tau
-
    CALL rotate_vect(rot_mat(1,1,iwork), nat, tau_ocoord, tau, 1)
    DEALLOCATE(tau_ocoord)
 !

@@ -37,7 +37,8 @@ SUBROUTINE deallocate_thermo()
                              p3t_noe_t, p4t_noe_t, density_noe_t,           &
                              celldm_t_p1, celldm_t_m1,                      &
                              celldm_noe_t_p1, celldm_noe_t_m1, b0_ec_t,     &
-                             b0_ec_s, debye_macro_el_t, debye_macro_el_s
+                             b0_ec_s, debye_macro_el_t, debye_macro_el_s,   &
+                             dyde_t
   USE anharmonic_pt,  ONLY : vmin_pt, b0_pt, b01_pt, b02_pt, emin_pt,       &
                              ce_pt, cv_pt, cp_pt, b0_s_pt, beta_pt,         &
                              gamma_pt, free_ener_pt, ener_pt, entr_pt,      &
@@ -100,7 +101,7 @@ SUBROUTINE deallocate_thermo()
                              b01f_noe_t, b02f_noe_t,                        &
                              free_enerf_noe_t, enerf_noe_t, entropyf_noe_t, &
                              cef_noe_t, cvf_noe_t, b0f_ec_t, b0f_ec_s,      &
-                             debye_macro_elf_t, debye_macro_elf_s
+                             debye_macro_elf_t, debye_macro_elf_s, dydef_t
   USE grun_anharmonic,  ONLY : betab, alpha_an_g, cp_grun_t, cv_grun_t,     &
                              ce_grun_t, b0_grun_s,                          &
                              grun_gamma_t, poly_grun, poly_grun_red,        &
@@ -126,7 +127,8 @@ SUBROUTINE deallocate_thermo()
                              el_con_ibrav_geo, el_con_celldm_geo, &
                              el_con_tau_crys_geo, el_con_omega_geo, &
                              epsil_geo, all_geometry_done_geo,     &
-                             found_dos_ec, found_ph_ec
+                             found_dos_ec, found_ph_ec, tau_acc, min_y, &
+                             epsil_y, min_y_t, dyde
   USE control_pressure, ONLY : press_plot, ipress_plot
   USE uniform_pressure, ONLY : omega_p, density_p, celldm_p, p2_p, p4_p
   USE control_vol,      ONLY : ivol_plot
@@ -243,6 +245,7 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (v_t) )             DEALLOCATE(v_t)
   IF ( ALLOCATED (v_s) )             DEALLOCATE(v_s)
   IF ( ALLOCATED (el_con_geo_t) )    DEALLOCATE(el_con_geo_t) 
+  IF ( ALLOCATED (dyde_t) )          DEALLOCATE(dyde_t)
 
   IF ( ALLOCATED (vmin_noe_t) )       DEALLOCATE(vmin_noe_t) 
   IF ( ALLOCATED (density_noe_t) )    DEALLOCATE(density_noe_t) 
@@ -512,6 +515,7 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (debye_macro_elf_t) ) DEALLOCATE(debye_macro_elf_t)
   IF ( ALLOCATED (debye_macro_elf_s) ) DEALLOCATE(debye_macro_elf_s)
   IF ( ALLOCATED (el_conf_geo_t) )    DEALLOCATE(el_conf_geo_t) 
+  IF ( ALLOCATED (dydef_t) )          DEALLOCATE(dydef_t)
 
   IF ( ALLOCATED (vminf_noe_t) )      DEALLOCATE(vminf_noe_t) 
   IF ( ALLOCATED (b0f_noe_t) )        DEALLOCATE(b0f_noe_t) 
@@ -617,6 +621,11 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (epsil_geo) )       DEALLOCATE(epsil_geo)
   IF ( ALLOCATED (sigma_geo) )       DEALLOCATE(sigma_geo)
   IF ( ALLOCATED (rot_mat) )         DEALLOCATE(rot_mat)
+  IF ( ALLOCATED (tau_acc) )         DEALLOCATE(tau_acc)
+  IF ( ALLOCATED (min_y) )           DEALLOCATE(min_y)
+  IF ( ALLOCATED (min_y_t) )         DEALLOCATE(min_y_t)
+  IF ( ALLOCATED (dyde) )            DEALLOCATE(dyde)
+  IF ( ALLOCATED (epsil_y) )         DEALLOCATE(epsil_y)
   IF ( ALLOCATED (el_con_geo) )      DEALLOCATE(el_con_geo)
 
   IF ( ALLOCATED (tau_save) )        DEALLOCATE(tau_save)

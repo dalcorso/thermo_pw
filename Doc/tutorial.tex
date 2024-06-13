@@ -558,6 +558,21 @@ and the electronic thermodynamic properties obtained in the first
 step in the \texttt{therm\_files} directory.
 
 \newpage
+{\color{coral}\section{How do I calculate the temperature dependent
+elastic constants of a solid relaxing the internal degree of freedom?}}
+\color{black}
+This is possible only within the ZSISA approximation. This
+means that for each value of the crystal parameters the ions are
+relaxed (with \texttt{frozen\_ions=.FALSE.}) to their $T=0$ K equilibrium
+positions. The phonons (and the free energy) are computed only in this
+configuration.
+For solids in which internal relaxations are described by one degree of 
+freedom, it is possible to compute the phonons (and the free energy) for
+several values of this parameter. The free energy as a function of this
+parameter is then minimized at each strain and each temperature 
+(See the parameter \texttt{stype} in \texttt{what='scf\_elastic\_constants'}).
+
+\newpage
 {\color{coral}\section{How do I calculate the frequency dependent dielectric
 constant of a material?}}
 \color{black}

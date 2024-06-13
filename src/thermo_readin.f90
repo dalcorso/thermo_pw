@@ -85,7 +85,9 @@ SUBROUTINE thermo_readin()
   USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, &
                                    frozen_ions, elastic_algorithm, &
                                    poly_degree, epsilon_0, use_free_energy, &
-                                   start_geometry_qha, last_geometry_qha
+                                   start_geometry_qha, last_geometry_qha,   &
+                                   nmove, move_at, atom_dir, atom_step,     &
+                                   stype, lcm_ec, lzsisa, lfp
   USE control_xrdp,         ONLY : lambda, flxrdp, flpsxrdp, lformf, smin, &
                                    smax, nspoint, flformf, flpsformf, lcm, &
                                    lxrdp, lambda_elem
@@ -254,6 +256,14 @@ SUBROUTINE thermo_readin()
                             delta_epsilon, epsilon_0,       &
                             poly_degree,                    &
                             fl_el_cons,                     &
+                            lcm_ec,                         &
+                            lzsisa,                         &
+                            lfp,                            &
+                            stype,                          &
+                            nmove,                          &
+                            move_at,                        &
+                            atom_step,                      &
+                            atom_dir,                       &
 !
 !   scf_polarization
 !
@@ -486,6 +496,14 @@ SUBROUTINE thermo_readin()
   epsilon_0=0.0_DP
   poly_degree=0
   fl_el_cons='output_el_cons.dat'
+  nmove=5
+  move_at=0
+  atom_dir=0.0_DP
+  atom_step=0.02_DP
+  stype=.FALSE.
+  lcm_ec=.TRUE.
+  lzsisa=.FALSE.
+  lfp=.FALSE.
 
   ltherm_glob=.FALSE.
   lhugoniot=.FALSE.
@@ -675,6 +693,21 @@ SUBROUTINE thermo_readin()
       .AND.elastic_algorithm/='energy'.AND.use_free_energy) &
      CALL errore('thermo_readin','Only the energy algorithms are available &
                                           &in this case',1)
+
+  IF (ANY(stype).AND.(what=='elastic_constants_geo'.OR.  &
+                      what=='scf_elastic_constants'.OR.  &
+                      what=='mur_lc_elastic_constants').AND.&
+                      (elastic_algorithm/='energy'.AND.  &
+                      elastic_algorithm/='energy_std'))  &
+     CALL errore('thermo_readin','stype requires an energy algorithm',1)
+
+  IF (lzsisa.AND.lfp) &
+     CALL errore('thermo_readin','lzsisa and lfp are mutually exclusive',1)
+
+  IF (ANY(stype).AND.(what=='elastic_constants_geo' &
+            .OR.what=='scf_elastic_constants'.OR.   &
+                what=='mur_lc_elastic_constants').AND.(.NOT.frozen_ions))  &
+     CALL errore('thermo_reading','stype requires frozen_ions=.TRUE.',1)
 
   read_paths=( what=='scf_bands'.OR.what=='scf_disp'.OR.what=='plot_bz'.OR. &
                what=='mur_lc_bands' .OR. what=='mur_lc_disp' .OR. &
