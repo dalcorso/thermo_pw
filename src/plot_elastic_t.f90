@@ -18,13 +18,13 @@ SUBROUTINE plot_elastic_t(iflag, with_s)
 !
 USE kinds,            ONLY : DP
 USE constants,        ONLY : ry_kbar
-USE thermo_mod,       ONLY : ibrav_geo
 USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
 USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,           &
                              gnuplot_write_header, gnuplot_xlabel, &
                              gnuplot_set_fact
 USE data_files,       ONLY : flanhar, fl_el_cons
 USE postscript_files, ONLY : flpsanhar
+USE initial_conf,     ONLY : ibrav_save
 USE control_elastic_constants,  ONLY : lelastic, lelasticf, lelastic_p
 USE control_grun,     ONLY : lb0_t
 USE control_pressure, ONLY : pmin, pmax
@@ -44,7 +44,7 @@ IF ( my_image_id /= root_image ) RETURN
 
 IF (.NOT.(lelastic.OR.lelasticf.OR.lelastic_p).OR..NOT.lb0_t) RETURN
 
-ibrav=ibrav_geo(1)
+ibrav=ibrav_save
 
 IF (MOD(iflag,2)==0) THEN
    IF (iflag==0) THEN
@@ -460,6 +460,7 @@ END SUBROUTINE plot_elastic_t
 SUBROUTINE plot_one_elastic_constant(i, j, label, lelastic, lelasticf, &
                                            filelastic, filelastic_s, with_s)
 !---------------------------------------------------------------------
+USE thermo_mod, ONLY : what
 USE gnuplot, ONLY : gnuplot_ylabel, &
                     gnuplot_write_file_mul_data
 USE color_mod, ONLY : color
@@ -493,7 +494,7 @@ ENDDO
 
 CALL gnuplot_ylabel(TRIM(label),.FALSE.) 
 IF (lelastic) THEN
-   IF (ngeom==1) THEN
+   IF (what/='elastic_constants_geo') THEN
       CALL gnuplot_write_file_mul_data(filename,i,j,'color_red', .TRUE.,&
                           .NOT.with_s.AND..NOT.lelasticf,.FALSE.)
    ELSE
@@ -511,7 +512,7 @@ IF (lelastic) THEN
                                                      .NOT.lelasticf,.FALSE.)
 ENDIF
 IF (lelasticf) THEN
-   IF (ngeom==1) THEN
+   IF (what/='elastic_constants_geo') THEN
       CALL gnuplot_write_file_mul_data(filename_ph,i,j,'color_blue', &
                                         .NOT.lelastic,.NOT.with_s,.FALSE.)
    ELSE
