@@ -28,6 +28,7 @@ USE elastic_constants, ONLY : write_el_cons_on_file
 USE control_elastic_constants, ONLY : el_con_geo, lelastic, lelasticf
 USE lattices,       ONLY : crystal_parameters
 USE control_thermo, ONLY : ltherm_dos, ltherm_freq
+USE control_mur,    ONLY : lmurn
 USE control_macro_elasticity, ONLY: macro_el
 USE anharmonic,     ONLY : celldm_t, el_cons_t, el_comp_t, b0_t
 USE ph_freq_anharmonic, ONLY : celldmf_t, el_consf_t, el_compf_t, b0f_t
@@ -47,8 +48,10 @@ INTEGER :: compute_nwork
 
 ibrav=ibrav_geo(1)
 nvar=crystal_parameters(ibrav)
+IF (lmurn) nvar=1
 
 ndata=compute_nwork()
+
 ALLOCATE(x(nvar,ndata))
 ALLOCATE(f(ndata))
 ALLOCATE(ec_p1(6,6))
@@ -67,8 +70,13 @@ ENDDO
 !
 !  Part 1 evaluation of the polynomial coefficients
 !
-CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
-
+IF (lmurn) THEN
+   DO idata=1,ndata
+      x(1,idata)=celldm_geo(1,idata)
+   ENDDO
+ELSE
+   CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
+ENDIF
 DO i=1,6
    DO j=i,6
       IF (el_con_geo(i,j,1)>0.1_DP) THEN
@@ -324,10 +332,11 @@ USE geometry_file,      ONLY : press_file
 USE control_thermo,     ONLY : lgeo_from_file
 USE data_files,         ONLY : fl_el_cons
 USE uniform_pressure,   ONLY : celldm_p, el_cons_p, el_comp_p, b0ec_p, &
-                               macro_el_p, density_p, v_p
+                               macro_el_p, v_p
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filelastic
+REAL(DP), ALLOCATABLE :: density_p(:)
 INTEGER :: igeo, ibrav, nvar, ndata
 INTEGER :: i, j, idata, itemp, ipress
 
@@ -405,6 +414,7 @@ USE quartic_surfaces, ONLY : fit_multi_quartic
 USE elastic_constants, ONLY : write_el_cons_on_file
 USE control_elastic_constants, ONLY : el_con_geo, lelastic_pt, lelasticf_pt
 USE lattices,       ONLY : crystal_parameters
+USE control_mur,    ONLY : lmurn
 USE control_pressure, ONLY : npress_plot, ipress_plot, press
 USE control_thermo, ONLY : ltherm_dos, ltherm_freq
 USE anharmonic_pt,     ONLY : celldm_pt, el_cons_pt, el_comp_pt, b0_pt
@@ -427,7 +437,11 @@ INTEGER :: compute_nwork
 IF (npress_plot==0) RETURN
 
 ibrav=ibrav_geo(1)
-nvar=crystal_parameters(ibrav)
+IF (lmurn) THEN
+   nvar=1
+ELSE
+   nvar=crystal_parameters(ibrav)
+ENDIF
 
 ndata=compute_nwork()
 ALLOCATE(x(nvar,ndata))
@@ -448,7 +462,13 @@ ENDDO
 !
 !  Part 1 evaluation of the polynomial coefficients
 !
-CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
+IF (lmurn) THEN
+   DO idata=1, ndata
+      x(1,idata)=celldm_geo(1,idata)
+   ENDDO
+ELSE
+   CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
+ENDIF
 
 DO i=1,6
    DO j=i,6
@@ -562,6 +582,7 @@ USE anharmonic_ptt,    ONLY : celldm_ptt, el_cons_ptt, el_comp_ptt, b0_ptt, &
                                macro_el_ptt
 USE ph_freq_anharmonic_ptt,  ONLY : celldmf_ptt, el_consf_ptt, el_compf_ptt, &
                                b0f_ptt, macro_elf_ptt
+USE control_mur, ONLY : lmurn
 USE polynomial, ONLY : poly1, poly2, poly3, poly4, init_poly, clean_poly
 USE data_files, ONLY : flanhar
 USE temperature, ONLY : ntemp, temp
@@ -579,7 +600,11 @@ INTEGER :: compute_nwork
 IF (ntemp_plot==0) RETURN
 
 ibrav=ibrav_geo(1)
-nvar=crystal_parameters(ibrav)
+IF (lmurn) THEN
+   nvar=1
+ELSE
+   nvar=crystal_parameters(ibrav)
+ENDIF
 
 ndata=compute_nwork()
 ALLOCATE(x(nvar,ndata))
@@ -600,7 +625,13 @@ ENDDO
 !
 !  Part 1 evaluation of the polynomial coefficients
 !
-CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
+IF (lmurn) THEN
+   DO idata=1, ndata
+      x(1,idata)=celldm_geo(1,idata)
+   ENDDO
+ELSE
+   CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
+ENDIF
 
 DO i=1,6
    DO j=i,6
