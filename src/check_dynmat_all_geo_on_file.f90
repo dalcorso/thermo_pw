@@ -50,6 +50,7 @@ SUBROUTINE check_dynmat_on_file_1g(igeom)
 USE thermo_mod,     ONLY : dynmat_on_file
 USE control_thermo, ONLY : after_disp
 USE output,         ONLY : fildyn
+USE io_global,      ONLY : stdout
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: igeom
@@ -57,8 +58,10 @@ CHARACTER(LEN=6)    :: int_to_char
 LOGICAL             :: check_dyn_file_exists
 
 IF (check_dyn_file_exists(fildyn)) dynmat_on_file(igeom)=.TRUE.
-IF (after_disp.AND..NOT.dynmat_on_file(igeom)) &
+IF (after_disp.AND..NOT.dynmat_on_file(igeom)) THEN
+   WRITE(stdout,'(/,5x,"The first missing matrix is: ",a)') TRIM(fildyn)
    CALL errore('check_dynmat_on_file_1g','after_disp but dynamical matrix &
                       &files not found', 1)
+ENDIF
 RETURN
 END SUBROUTINE check_dynmat_on_file_1g
