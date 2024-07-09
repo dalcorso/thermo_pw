@@ -18,7 +18,7 @@ features implemented in <code>thermo_pw</code>:</p>
 16. X. Gong and A. Dal Corso,
 Ab-initio quasi-harmonic thermoelasticity of molybdenum at 
 high temperature and pressure,
-<a href=https://pubs.aip.org/aip/jcp/article/160/24/244703/3299207/Ab-initio-quasi-harmonic-thermoelasticity-of>
+<a href="https://pubs.aip.org/aip/jcp/article/160/24/244703/3299207/Ab-initio-quasi-harmonic-thermoelasticity-of">
 Jour. Chem. Phys. <b>160</b>, 244703 (2024).</a>
 
 15. B. Thakur, X. Gong, and A. Dal Corso,
