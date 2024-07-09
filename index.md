@@ -15,6 +15,12 @@ can be found <a href="https://people.sissa.it/dalcorso/thermo_pw/user_guide/inde
 <p align="justify">The following papers describe new
 features implemented in <code>thermo_pw</code>:</p>
 
+16. X. Gong and A. Dal Corso,
+Ab-initio quasi-harmonic thermoelasticity of molybdenum at 
+high temperature and pressure,
+<a href=https://pubs.aip.org/aip/jcp/article/160/24/244703/3299207/Ab-initio-quasi-harmonic-thermoelasticity-of>
+Jour. Chem. Phys. <b>160</b>, 244703 (2024).</a>
+
 15. B. Thakur, X. Gong, and A. Dal Corso,
 Thermodynamic properties of Rhodium: A first principles study,
 <a href="https://doi.org/10.1063/5.0203098"> AIP Advances <b>14</b>, 
@@ -102,12 +108,12 @@ Clean Ir(111) and Pt(111) electronic surface states: a first-principle fully rel
 <a href="http://www.sciencedirect.com/science/article/pii/S0039602815000734"> Surf. Sci. <B>637-638</B>, 106 (2015)</a>.
 <br>
 <br>
-<p>Refs.4,6 describe how <code>thermo_pw</code> computes temperature
-dependent elastic constants, Ref.2 pressure and temperature dependent
-elastic constants, Ref.14 elastic constants at T=0 K,
-Ref.15,11 surface band structures, Refs.5,10 eels and optical properties,
-Ref.7 DFPT with fully relativistic pseudopotentials, and Ref.12,13 
-thermodynamic anharmonic properties. Refs.1,2,3 have examples of pressure and
+<p>Refs.5,7 describe how <code>thermo_pw</code> computes temperature
+dependent elastic constants, Ref.1,3 pressure and temperature dependent
+elastic constants, Ref.15 elastic constants at T=0 K,
+Ref.16,12 surface band structures, Refs.6,11 eels and optical properties,
+Ref.8 DFPT with fully relativistic pseudopotentials, and Ref.13,14 
+thermodynamic anharmonic properties. Refs.1,2,3,4 have examples of pressure and
 temperature parameterized plots.</p>
 
 <p align="justify">The following works contain some calculations made by <code>thermo_pw</code>:</p>
