@@ -2838,7 +2838,45 @@ B_{ij,kk} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{ij}
 \epsilon_{kk} }\Bigg|_{\epsilon=0} - \sigma^{(0)}_{ij}. 
 \end{eqnarray}
 
+{\color{web-blue} \subsection{Lagrangian elastic constants}}
+\color{black}
+
+In some papers, instead of $B_{ij,kl}$, one finds the elastic calculated
+deriving with respect to the Lagrangian strains:
+\begin{equation}
+C_{ij,kl} = {1\over V} { \partial^2 U \over \partial \eta_{ij} \partial 
+\eta_{kl}}\Bigg|_{\eta=0}.
+\end{equation}
+When the stress of the system is $\sigma^{(0)}_{ij}$, these elastic 
+constants are related to the second derivatives of the
+energy with respect to the strain $\epsilon_{ij}$ by the relationship:
+\begin{equation}
+C_{ij,kl} = {1\over V} { \partial^2 U \over \partial \epsilon_{ij} \partial 
+\epsilon_{kl}}\Bigg|_{\epsilon=0} - {1\over 4} \left( \sigma^{(0)}_{ik} \delta_{jl} +
+\sigma^{(0)}_{il} \delta_{jk}+ \sigma^{(0)}_{jl} \delta_{ik}
++\sigma^{(0)}_{jk} \delta_{il} \right).
+\end{equation}
+That, when the stress is a uniform pressure ($\sigma^{(0)}_{ij}=-p 
+\delta_{ij}$), becomes:
+\begin{equation}
+C_{ij,kl} = {1\over V} { \partial^2 U \over \partial \epsilon_{ij} \partial 
+\epsilon_{kl}}\Bigg|_{\epsilon=0} + {p\over 2} \left( \delta_{ik} \delta_{jl} +
+\delta_{il} \delta_{jk}\right).
+\end{equation}
+It is also possible to recalculate the $B_{ij,kl}$ from $C_{ij,kl}$:
+\begin{equation}
+B_{ij,kl} = C_{ij,kl} -{1\over 2} \left (2 \sigma^{(0)}_{ij} \delta_{kl}
+- \sigma^{(0)}_{ik} \delta_{jl} - \sigma^{(0)}_{il} \delta_{jk}
+- \sigma^{(0)}_{jl} \delta_{ik} - \sigma^{(0)}_{jk} \delta_{il} \right),
+\end{equation}
+that, when the stress is a uniform pressure becomes:
+\begin{equation}
+B_{ij,kl} = C_{ij,kl} +p \left (\delta_{ij} \delta_{kl}
+- \delta_{ik} \delta_{jl} - \delta_{il} \delta_{jk} \right).
+\end{equation}
+
 \newpage
+
 {\color{dark-blue}\chapter{Temperature dependent elastic constants}}
 \color{black}
 
@@ -3224,6 +3262,24 @@ by:
 \begin{equation}
 K_T - K_S =  {T V \beta^2 \over C_P}.
 \end{equation}
+
+%\newpage
+%{\color{dark-blue}\chapter{Internal thermal expansion}}
+%\color{black}
+%In some solids the position of the atoms inside the unit cell is completely
+%determined by symmetry, but in the largest part it is not. 
+%In crystallography one can specify the positions of the atoms inside the
+%unit cell giving the coordinates of nonequivalent atoms. Some of them depend
+%on some parameters, lets call them $u_\rho$. Here $\rho$ can go from $0$ 
+%in high symmetry solids to $3 N_{at} - 3$ where $N_{at}$ is the number 
+%of atoms inside the unit cell. Internal thermal expansion can be defined
+%in general as 
+%\begin{equation}
+%\alpha_\rho = { d u_\rho \over d T},
+%\end{equation}
+%and can be calculated by computing the free energy as a function
+%of crystal parameters and of $u_{\rho}$. Minimizing it one obtains
+%$u_\rho(T)$ and from this $\alpha_\rho$.
 
 \newpage
 {\color{dark-blue}\chapter{Sound velocities}}
