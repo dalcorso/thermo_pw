@@ -1453,6 +1453,8 @@ MODULE control_elastic_constants
   LOGICAL :: lfp                ! when .TRUE. and the previous calculations
                                 ! have been executed makes the frozen phonon
                                 ! approximation, taking the min_y=0.0
+  LOGICAL :: old_ec=.TRUE.      ! when .TRUE. hexagonal elastic constant
+                                ! are computed with the old algoritm 
 
   REAL(DP), ALLOCATABLE :: dyde(:,:,:) ! (21,ngeom,ntemp)
 

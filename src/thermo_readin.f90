@@ -87,7 +87,7 @@ SUBROUTINE thermo_readin()
                                    poly_degree, epsilon_0, use_free_energy, &
                                    start_geometry_qha, last_geometry_qha,   &
                                    nmove, move_at, atom_dir, atom_step,     &
-                                   stype, lcm_ec, lzsisa, lfp
+                                   stype, lcm_ec, lzsisa, lfp, old_ec
   USE control_xrdp,         ONLY : lambda, flxrdp, flpsxrdp, lformf, smin, &
                                    smax, nspoint, flformf, flpsformf, lcm, &
                                    lxrdp, lambda_elem
@@ -259,6 +259,7 @@ SUBROUTINE thermo_readin()
                             lcm_ec,                         &
                             lzsisa,                         &
                             lfp,                            &
+                            old_ec,                         &
                             stype,                          &
                             nmove,                          &
                             move_at,                        &
@@ -504,6 +505,7 @@ SUBROUTINE thermo_readin()
   lcm_ec=.TRUE.
   lzsisa=.FALSE.
   lfp=.FALSE.
+  old_ec=.TRUE.
 
   ltherm_glob=.FALSE.
   lhugoniot=.FALSE.

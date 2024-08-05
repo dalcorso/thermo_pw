@@ -100,7 +100,7 @@ IF (.NOT.lmurn) THEN
          fact_ngeo_aux(5)=fact_ngeo(5)
    CASE DEFAULT
 
-!  If the Bravais lattice is unkown, 14 or 0 we let the user choose
+!  If the Bravais lattice is unknown, 14 or 0 we let the user choose
 !
          ngeo_aux=ngeo
          DO i=2,6

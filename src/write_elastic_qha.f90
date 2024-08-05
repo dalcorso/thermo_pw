@@ -12,7 +12,7 @@ SUBROUTINE write_elastic_qha()
 USE kinds,             ONLY : DP
 USE thermo_mod,        ONLY : energy_geo, tot_ngeo
 USE control_elastic_constants, ONLY : ngeo_strain, frozen_ions, elcpvar, &
-                               lelastic, lelasticf
+                               lelastic, lelasticf, old_ec
 USE initial_conf,      ONLY : ibrav_save
 USE thermo_sym,        ONLY : laue
 USE elastic_constants, ONLY : print_elastic_constants, epsilon_geo,        &
@@ -62,7 +62,7 @@ DO itemp = startt, lastt
       free_energy_geo(:)=energy_geo(:)+ph_free_ener(itemp,:)
       CALL compute_elastic_constants_ene(free_energy_geo, epsilon_geo, &
                          tot_ngeo, ngeo_strain, ibrav_save, laue,         &
-                         omega0, elcpvar)
+                         omega0, elcpvar, old_ec)
       CALL compute_elastic_compliances(el_con,el_compliances)
       CALL print_macro_elasticity(ibrav_save,el_con, el_compliances,&
                                                 macro_el,.FALSE.)
@@ -76,7 +76,7 @@ DO itemp = startt, lastt
       free_energy_geo(:)=energy_geo(:)+phf_free_ener(itemp,:)
       CALL compute_elastic_constants_ene(free_energy_geo, epsilon_geo, &
                          tot_ngeo, ngeo_strain, ibrav_save, laue,         &
-                         omega0, elcpvar)
+                         omega0, elcpvar, old_ec)
       CALL compute_elastic_compliances(el_con,el_compliances)
       CALL print_macro_elasticity(ibrav_save,el_con, el_compliances,&
                                                 macro_el,.FALSE.)

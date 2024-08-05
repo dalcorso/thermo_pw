@@ -17,7 +17,8 @@ USE elastic_constants, ONLY : epsilon_geo, el_con,           &
                               compute_elastic_constants_ene, &
                               write_el_cons_on_file
 USE control_elastic_constants, ONLY : ngeo_strain, elcpvar, ngeom, &
-                           work_base, el_con_omega_geo, epsil_geo, lelastic
+                           work_base, el_con_omega_geo, epsil_geo, lelastic,&
+                           old_ec
 USE anharmonic,        ONLY : el_cons_t, el_comp_t, b0_t
 USE control_quartic_energy, ONLY : poly_degree_elc
 USE linear_surfaces,   ONLY : evaluate_fit_linear
@@ -111,7 +112,7 @@ DO itemp = startt, lastt
 
    CALL compute_elastic_constants_ene(free_ener, epsilon_geo_loc,  &
                                work_base, ngeo_strain, ibrav_save, laue,  &
-                               vmin_t(itemp), elcpvar)
+                               vmin_t(itemp), elcpvar, old_ec)
 
    el_cons_t(:,:,itemp) = el_con(:,:)
 ENDDO  

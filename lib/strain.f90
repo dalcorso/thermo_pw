@@ -379,6 +379,10 @@ ELSEIF (ibrav==4) THEN
       ibrav_strain=4
       celldm_strain(1) = celldm(1) * (1.0_DP + epsil)
       celldm_strain(3) = celldm(3)
+   ELSEIF (strain_code=='B ') THEN
+      ibrav_strain=4
+      celldm_strain(1) = celldm(1) * (1.0_DP + epsil)
+      celldm_strain(3) = celldm(3) / (1.0_DP + epsil)
    ELSEIF (strain_code=='C ') THEN
       ibrav_strain=9
       celldm_strain(1) = celldm(1) * (1.0_DP + epsil)

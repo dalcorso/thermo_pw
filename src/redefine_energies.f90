@@ -43,13 +43,11 @@ ALLOCATE(y(nmove))
 iwork=0     ! run on current energy index
 jwork=0     ! run on previous energy index
 DO igeom=1, ngeom  
-   WRITE(6,*) 'compressing geometry', igeom
    DO istep=1, nstep_ec
       DO igeo=1, ngeo_strain
          IF (stype(istep)) THEN
             DO imov=1, nmove
                jwork=jwork+1
-               WRITE(6,*) 'imov, jwork', imov, jwork
                ene(imov)=energy_geo(jwork)
 !
 !  y is the displacement (in a.u.) of the atom with respect to the uniformely
@@ -72,7 +70,6 @@ DO igeom=1, ngeom
             ENDIF
             CALL compute_poly(xmin, 2, a, emin)
             iwork=iwork+1
-            WRITE(6,'("igeom, istep, igeo, iwork, jwork",5i7)') igeom, istep, igeo, iwork, jwork
             energy_geo_eff(iwork)= emin
             epsilon_geo_eff(:,:,iwork)=epsilon_geo(:,:,jwork)   
             min_y(igeo,istep,igeom)=xmin
@@ -80,7 +77,6 @@ DO igeom=1, ngeom
          ELSE
             jwork=jwork+1
             iwork=iwork+1
-            WRITE(6,'("igeom, istep, igeo, iwork, jwork",5i7)') igeom, istep, igeo, iwork, jwork
             energy_geo_eff(iwork)=energy_geo(jwork)
             epsilon_geo_eff(:,:,iwork)=epsilon_geo(:,:,jwork)
          ENDIF
@@ -134,13 +130,11 @@ ALLOCATE(y(nmove))
 
 iwork=0     ! run on current energy index
 jwork=0     ! run on previous energy index
-WRITE(6,*) 'compressing geometry', igeom
 DO istep=1, nstep_ec
    DO igeo=1, ngeo_strain
       IF (stype(istep)) THEN
          DO imov=1, nmove
             jwork=jwork+1
-            WRITE(6,*) 'imov, jwork', imov, jwork
             ene(imov)=energy_geo(jwork)
 !
 !  y is the displacement (in a.u.) of the atom with respect to the uniformely
@@ -279,19 +273,15 @@ IF (meta_ionode) THEN
    CALL add_geometry_number('anhar_files/', TRIM(flanhar)//'.int_rel', &
                                 filename, igeom)
    DO istep=1,21
-      WRITE(6,*) 'check for istep', istep, igeom, TRIM(filename)
       IF (stype(istep)) THEN
          filename=TRIM(filename)//'.'//int_to_char(istep)
          INQUIRE(FILE=TRIM(filename),EXIST=exst)
-         WRITE(6,*) 'check for istep ', istep, TRIM(filename), exst
          IF (exst) THEN
             OPEN (UNIT=iu_rel, FILE=TRIM(filename), STATUS='old', &
                                                  FORM='formatted')
             READ(iu_rel,*)
             DO itemp=1, ntemp
                READ(iu_rel,'(15f15.7)') temp(itemp), dyde(istep,igeom,itemp)
-               IF (itemp==5) WRITE(6,'(15f15.7)') temp(itemp), &
-                                               dyde(istep,igeom,itemp)
             ENDDO
             CLOSE(UNIT=iu_rel, STATUS='KEEP')
          ENDIF    
@@ -363,7 +353,6 @@ DO igeom=1, ngeom
 !  strained position
 !
                y(imov)=(imov-(nmove+1.0_DP)/2.0_DP)*atom_step(istep)
-               WRITE(6,*) y(imov), ene(imov)
             ENDDO
 !          
 !           Fit the data with a parabola find the minimum,
@@ -452,20 +441,17 @@ CALL init_poly(nvar,p4)
 
 iwork=0     ! run on current energy index
 jwork=0     ! run on previous energy index
-WRITE(6,*) 'compressing geometry', igeom
 DO istep=1, nstep_ec
    DO igeo=1, ngeo_strain
       IF (stype(istep)) THEN
          DO imov=1, nmove
             jwork=jwork+1
-            WRITE(6,*) 'imov, jwork', imov, jwork
             ene(imov)=energy_geo(jwork)
 !
 !  y is the displacement (in a.u.) of the atom with respect to the uniformely
 !  strained position
 !
             y(imov)=(imov-(nmove+1.0_DP)/2.0_DP)*atom_step(istep)
-            WRITE(6,*) y(imov), ene(imov)
          ENDDO
 !          
 !           Fit the data with a quartic and put the minimum free energy
@@ -487,15 +473,11 @@ DO istep=1, nstep_ec
          iwork=iwork+1
          energy_geo_eff(iwork)= emin
          epsilon_geo_eff(:,:,iwork)=epsilon_geo(:,:,jwork)   
-         WRITE(6,'("igeom, istep, igeo, iwork, jwork",5i7)') igeom, istep, &
-                                                          igeo, iwork, jwork
          min_y_t(igeo,istep,igeom,itemp)=xmin(1)
          epsil_y(igeo,istep,igeom)=epsil_geo(jwork)
       ELSE
          jwork=jwork+1
          iwork=iwork+1
-         WRITE(6,'("igeom, istep, igeo, iwork, jwork",5i7)') igeom, istep, &
-                                                       igeo, iwork, jwork
          energy_geo_eff(iwork)=energy_geo(jwork)
          epsilon_geo_eff(:,:,iwork)=epsilon_geo(:,:,jwork)
       ENDIF

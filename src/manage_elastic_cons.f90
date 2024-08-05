@@ -26,7 +26,8 @@ USE control_elastic_constants, ONLY : ngeo_strain, frozen_ions,            &
                               elastic_algorithm, rot_mat, elcpvar,         &
                               el_con_omega_geo, elalgen, start_geometry_qha, &
                               last_geometry_qha, stype, min_y, nstep_ec, &
-                              lcm_ec, atom_dir, move_at, epsil_y, epsil_geo
+                              lcm_ec, atom_dir, move_at, epsil_y, epsil_geo, &
+                              old_ec
 USE initial_conf,      ONLY : ibrav_save
 USE thermo_sym,        ONLY : laue
 USE elastic_constants, ONLY : print_elastic_constants,                     &
@@ -103,7 +104,7 @@ DO igeom=start_geometry_qha, last_geometry_qha
    ELSE
       CALL compute_elastic_constants_ene(energy_geo_eff(base_ind+1), &
            epsilon_geo_eff(1,1,base_ind+1), work_base, ngeo_strain,  &
-                            ibrav_save, laue, el_con_omega_geo(igeom), elcpvar)
+                    ibrav_save, laue, el_con_omega_geo(igeom), elcpvar, old_ec)
    END IF
    CALL print_elastic_constants(el_con, frozen_ions)
 !

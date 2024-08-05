@@ -28,7 +28,7 @@ USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, rot_mat, &
                                el_con_ibrav_geo, el_con_celldm_geo,        &
                                work_base, elalgen, epsil_geo, tau_acc,     &
                                nmove, atom_step, atom_dir, move_at, stype, &
-                               nstep_ec, min_y, lcm_ec, epsil_y
+                               nstep_ec, min_y, lcm_ec, epsil_y, old_ec
 USE initial_conf,      ONLY : ibrav_save
 USE equilibrium_conf,  ONLY : celldm0, bg0
 USE thermo_sym,        ONLY : laue
@@ -50,6 +50,7 @@ CHARACTER(LEN=2) :: strain_list(21)
 LOGICAL :: flag
 
 nstep=0
+WRITE(6,*) 'laue', laue
 SELECT CASE (laue) 
    CASE(29,32)
 !
@@ -87,7 +88,11 @@ SELECT CASE (laue)
             strain_list(1) = 'C '
             strain_list(2) = 'E '
             strain_list(3) = 'B1'
-            strain_list(4) = 'A '
+            IF (old_ec) THEN
+               strain_list(4) = 'A '
+            ELSE
+               strain_list(4) = 'B '
+            ENDIF
             strain_list(5) = 'H '
          ENDIF
       ELSE

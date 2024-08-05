@@ -914,7 +914,7 @@ END SUBROUTINE compute_elastic_constants
 
 !-------------------------------------------------------------------------
 SUBROUTINE compute_elastic_constants_ene(energy_geo, epsil_geo, nwork, &
-                                        ngeo_strain, ibrav, laue, omega, m1)
+                              ngeo_strain, ibrav, laue, omega, m1, old_ec)
 !-------------------------------------------------------------------------
 !
 !  This routine computes the elastic constants by fitting the total
@@ -958,8 +958,9 @@ IMPLICIT NONE
 REAL(DP), INTENT(IN) :: epsil_geo(3,3,nwork), omega
 REAL(DP), INTENT(IN) :: energy_geo(nwork)
 INTEGER,  INTENT(IN) :: nwork, ngeo_strain, ibrav, laue, m1
+LOGICAL,  INTENT(IN) :: old_ec
 REAL(DP) :: alpha(m1)
-REAL(DP) :: b0, a0, s11, s22, s33, s12, s13, s23, bmat(6,6)
+REAL(DP) :: b0, a0, s11, s22, s33, s12, s13, s23, bmat(6,6), aux
 INTEGER  :: base_data
 CHARACTER(LEN=41), PARAMETER :: FRMT='(/,5x,"Estimated pressure",f12.5," kbar")'
 
@@ -1054,9 +1055,9 @@ SELECT CASE (laue)
       CALL el_cons_ij_ene(1, 1, 'C_13', ngeo_strain, &
              epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
 
-      press=- alpha(2) / omega / 2.0_DP
-      WRITE(stdout,'("-(S11+S33)/2",f15.8," kbar",f15.8," kbar")') &
-                                 press*ry_kbar, -(s11+s33)*0.5_DP*ry_kbar
+      aux=alpha(2) / omega / 2.0_DP
+      WRITE(stdout,'("(S11+S33)/2",f15.8," kbar",f15.8," kbar")') &
+                                 aux*ry_kbar, (s11+s33)*0.5_DP*ry_kbar
 
       el_con(1,3) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(1,1) &
                                                      - el_con(3,3)) * 0.5_DP 
@@ -1069,13 +1070,22 @@ SELECT CASE (laue)
       base_data=3*ngeo_strain+1
       CALL el_cons_ij_ene(1, 1, 'C_12', ngeo_strain, &
              epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
-      press=- alpha(2) / omega / 3.0_DP
-      WRITE(stdout,'("-(2*S11+S33)/3", f15.8," kbar", f15.8, " kbar")') &
+
+      IF (old_ec) THEN
+         press=- alpha(2) / omega / 3.0_DP
+         WRITE(stdout,'("-(2*S11+S33)/3", f15.8," kbar", f15.8, " kbar")') &
                             press*ry_kbar, -(2.0_DP*s11+s33)/3.0_DP*ry_kbar
 
-      el_con(1,2) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) &
-                             - 2.0_DP * el_con(1,1) - el_con(3,3) &
-                             - 4.0_DP * el_con(1,3) ) * 0.5_DP 
+         el_con(1,2) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) &
+                                - 2.0_DP * el_con(1,1) - el_con(3,3) &
+                                - 4.0_DP * el_con(1,3) ) * 0.5_DP 
+      ELSE
+         aux= alpha(2) / omega / 2.0_DP
+         WRITE(stdout,'("S11", f15.8," kbar", f15.8, " kbar")') &
+                                                aux*ry_kbar, s11*ry_kbar
+
+         el_con(1,2) = (1.0_DP / omega *  alpha(3)  -  el_con(1,1)) 
+      ENDIF
       el_con(2,1) = el_con(1,2)
 
 !
