@@ -18,7 +18,7 @@ USE control_elastic_constants, ONLY : ngeo_strain, elcpvar, ngeom, &
                               work_base, el_con_omega_geo,         &
                               start_geometry_qha, last_geometry_qha, &
                               lelastic, lelasticf, all_geometry_done_geo, &
-                              epsil_geo, min_y_t, stype
+                              epsil_geo, min_y_t, stype, old_ec
 USE initial_conf,      ONLY : ibrav_save
 USE thermo_sym,        ONLY : laue
 USE elastic_constants, ONLY : epsilon_geo, el_con, el_compliances,         &
@@ -118,7 +118,8 @@ DO igeom=1, ngeom
                        epsilon_geo_eff, work_base_eff, igeom, itemp)
          CALL compute_elastic_constants_ene(free_energy_geo_eff,  &
                             epsilon_geo_eff, work_base_eff, ngeo_strain, &
-                            ibrav_save, laue, el_con_omega_geo(igeom), elcpvar)
+                            ibrav_save, laue, el_con_omega_geo(igeom), &
+                            elcpvar, old_ec)
          el_cons_t(:,:,itemp) = el_con(:,:)
       ENDIF
       IF (ltherm_freq) THEN
@@ -133,7 +134,8 @@ DO igeom=1, ngeom
                        epsilon_geo_eff, work_base_eff, igeom, itemp)
          CALL compute_elastic_constants_ene(free_energy_geo_eff, &
                          epsilon_geo_eff, work_base_eff, ngeo_strain, & 
-                         ibrav_save, laue, el_con_omega_geo(igeom), elcpvar)
+                         ibrav_save, laue, el_con_omega_geo(igeom), &
+                         elcpvar, old_ec)
          el_consf_t(:,:,itemp) = el_con(:,:)
       ENDIF 
    ENDDO

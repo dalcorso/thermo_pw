@@ -327,9 +327,9 @@ SUBROUTINE thermo_summary()
     WRITE(stdout,'(/,5x,"ibrav=0 or Bravais lattice not compatible with &
                                     &the point group.")')
     WRITE(stdout,'(/,5x,"The code will not use symmetry.")')
-    WRITE(stdout,'(/,5x,"Cannot use the Laue class with ibrav=0, &
-                                                &using laue=0")')
-    laue=0
+    WRITE(stdout,'(/,5x,"ibrav=0 use Laue class 2")')
+
+    laue=2
 
     IF ( what=='polarization'.OR. what=='mur_lc_polarization'&
                              .OR. what=='plot_bz') THEN
