@@ -2650,7 +2650,7 @@ the energy with respect to the strain:
 \Bigg|_{\epsilon=0},
 \end{equation}
 do not coincide neither with the elastic constants
-$C_{ij,kl}={1 \over V}{\partial^2 U \over \partial \eta_{ij} \partial 
+$\overset{\circ}{C}_{ij,kl}={1 \over V}{\partial^2 U \over \partial \eta_{ij} \partial 
 \eta_{kl}}\big|_{\eta=0}$ nor with $B_{ij,kl}$. Actually there is a simple 
 relationship between $B_{ij,kl}$ and the 
 second derivatives of the energy with respect to the strains
@@ -2676,7 +2676,7 @@ B_{ij,kl} = {1 \over V}{\partial^2 U \over \partial \epsilon_{ij}
 \end{equation}
 Since experiments usually measure the stress-strain elastic constants,
 it is common to give the numerical values of $B_{ij,kl}$ and to call them 
-the elastic constants of a solid under pressure. 
+elastic constants of a solid under pressure. 
 
 We can write out the relationship for each component: 
 \begin{eqnarray}
@@ -2697,7 +2697,9 @@ while for all the other components $B_{ij,kj}=
 \partial \epsilon_{kl}}\big|_{\epsilon=0}$.
 
 For a generic stress, as opposed to an isotropic pressure, the $B_{ij,kl}$ 
-have not the same symmetry properties of $C_{ij,kl}$. In general, for a 
+have not the same symmetry properties of ${1 \over V}{\partial^2 U \over 
+\partial \epsilon_{ij} 
+\partial \epsilon_{kl}}\big|_{\epsilon=0}$. In general, for a 
 symmetric $\sigma^{(0)}_{ij}$ we have $B_{ij,kl}=B_{ji,kl}=B_{ij,lk}$,
 but $B_{ij,kl}$ could be different from $B_{kl,ij}$, so we can use
 the Voigt notation but in some cases $B_{i,j}$ could be a non symmetric
@@ -2743,6 +2745,9 @@ B_{12,12} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{12}^2 }\Bigg|_{\
 B_{13,13} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{13}^2}\Bigg|_{\epsilon=0} + {1\over 4} (\sigma^{(0)}_{11}+\sigma^{(0)}_{33}), \\
 B_{23,23} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{23}^2 }\Bigg|_{\epsilon=0} + {1\over 4} (\sigma^{(0)}_{11}+\sigma^{(0)}_{33}).
 \end{eqnarray}
+So in this case we might have $B_{11,33} \ne B_{33,11}$ while the other
+components are symmetric. Only when $\sigma^{(0)}_{ij}=-p\delta_{ij}$
+is a uniform pressure the symmetry is recovered.
 
 {\color{web-blue}\subsection{Orthorhombic system}}
 \color{black}
@@ -2768,6 +2773,10 @@ B_{12,12} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{12}^2 }\Bigg|_{\
 B_{13,13} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{13}^2}\Bigg|_{\epsilon=0} + {1\over 4} (\sigma^{(0)}_{11}+\sigma^{(0)}_{33}), \\
 B_{23,23} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{23}^2 }\Bigg|_{\epsilon=0} + {1\over 4} (\sigma^{(0)}_{22}+\sigma^{(0)}_{33}).
 \end{eqnarray}
+So in this case we might have $B_{11,22} \ne B_{22,11}$, 
+$B_{11,33} \ne B_{33,11}$ $B_{22,33} \ne B_{33,22}$. 
+Only when $\sigma^{(0)}_{ij}=-p\delta_{ij}$
+is a uniform pressure the symmetry is recovered.
 
 {\color{web-blue}\subsection{Monoclinic system}}
 \color{black}
@@ -2796,7 +2805,14 @@ B_{21,23} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{21}
 B_{23,21} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{23}
 \partial \epsilon_{21}}\Bigg|_{\epsilon=0} +{1\over 4}\sigma^{(0)}_{13}. 
 \end{eqnarray}
-while for the $c$-unique case:
+So in this case we might have $B_{11,22} \ne B_{22,11}$, 
+$B_{11,33} \ne B_{33,11}$, $B_{22,33} \ne B_{33,22}$, 
+$B_{13,11} \ne B_{11,13}$, $B_{13,22} \ne B_{13,22}$,
+and $B_{13,33} \ne B_{13,33}$.
+Only when $\sigma^{(0)}_{ij}=-p\delta_{ij}$
+is a uniform pressure the symmetry is recovered.
+
+For the $c$-unique case we have:
 \begin{eqnarray}
 B_{11,12} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{11}
 \partial \epsilon_{12}}\Bigg|_{\epsilon=0} +{1\over 2}\sigma^{(0)}_{12}, \\
@@ -2813,6 +2829,11 @@ B_{31,32} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{31}
 B_{32,31} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{32}
 \partial \epsilon_{31}}\Bigg|_{\epsilon=0} +{1\over 4}\sigma^{(0)}_{12}. 
 \end{eqnarray}
+So in this case we might have $B_{11,22} \ne B_{22,11}$,
+$B_{11,33} \ne B_{33,11}$, $B_{22,33} \ne B_{33,22}$,
+$B_{12,11} \ne B_{11,12}$, $B_{12,22} \ne B_{12,22}$,
+and $B_{12,33} \ne B_{12,33}$. Only when $\sigma^{(0)}_{ij}=
+-p\delta_{ij}$ is a uniform pressure the symmetry is recovered.
 
 {\color{web-blue}\subsection{Triclinic system}}
 \color{black}
@@ -2828,8 +2849,6 @@ B_{ij,ij} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{ij}^2
 + \sigma^{(0)}_{jj}\right), \\
 B_{ij,ik} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{ij} 
 \partial \epsilon_{ik}}\Bigg|_{\epsilon=0} +{1\over 4}\sigma^{(0)}_{jk}, \\
-B_{ij,kj} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{ij} 
-\partial \epsilon_{kj}}\Bigg|_{\epsilon=0} +{1\over 4} \sigma^{(0)}_{ik}, \\
 B_{ii,ik} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{ii} 
 \partial \epsilon_{ik}}\Bigg|_{\epsilon=0} +{1\over 2} \sigma^{(0)}_{ik}, \\
 B_{ik,ii} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{ik} 
@@ -2837,6 +2856,15 @@ B_{ik,ii} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{ik}
 B_{ij,kk} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{ij}
 \epsilon_{kk} }\Bigg|_{\epsilon=0} - \sigma^{(0)}_{ij}. 
 \end{eqnarray}
+So in this case we might have $B_{11,22} \ne B_{22,11}$,
+$B_{11,33} \ne B_{33,11}$, $B_{22,33} \ne B_{33,22}$,
+$B_{12,11} \ne B_{11,12}$, $B_{12,22} \ne B_{22,12}$,
+$B_{12,33} \ne B_{33,12}$, $B_{13,11} \ne B_{11,13}$, 
+$B_{13,22} \ne B_{22,13}$, $B_{13,33} \ne B_{33,13}$,
+$B_{23,11} \ne B_{11,23}$, $B_{23,22} \ne B_{22,23}$,
+and $B_{23,33} \ne B_{33,23}$. Only when $\sigma^{(0)}_{ij}=
+-p\delta_{ij}$ is a uniform pressure the symmetry is recovered.
+
 
 {\color{web-blue} \subsection{Lagrangian elastic constants}}
 \color{black}
@@ -2844,14 +2872,15 @@ B_{ij,kk} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{ij}
 In some papers, instead of $B_{ij,kl}$, one finds the elastic calculated
 deriving with respect to the Lagrangian strains:
 \begin{equation}
-C_{ij,kl} = {1\over V} { \partial^2 U \over \partial \eta_{ij} \partial 
+\overset{\circ}{C}_{ij,kl} = {1\over V} { \partial^2 U \over 
+\partial \eta_{ij} \partial 
 \eta_{kl}}\Bigg|_{\eta=0}.
 \end{equation}
 When the stress of the system is $\sigma^{(0)}_{ij}$, these elastic 
 constants are related to the second derivatives of the
 energy with respect to the strain $\epsilon_{ij}$ by the relationship:
 \begin{equation}
-C_{ij,kl} = {1\over V} { \partial^2 U \over \partial \epsilon_{ij} \partial 
+\overset{\circ}{C}_{ij,kl} = {1\over V} { \partial^2 U \over \partial \epsilon_{ij} \partial 
 \epsilon_{kl}}\Bigg|_{\epsilon=0} - {1\over 4} \left( \sigma^{(0)}_{ik} \delta_{jl} +
 \sigma^{(0)}_{il} \delta_{jk}+ \sigma^{(0)}_{jl} \delta_{ik}
 +\sigma^{(0)}_{jk} \delta_{il} \right).
@@ -2859,19 +2888,21 @@ C_{ij,kl} = {1\over V} { \partial^2 U \over \partial \epsilon_{ij} \partial
 That, when the stress is a uniform pressure ($\sigma^{(0)}_{ij}=-p 
 \delta_{ij}$), becomes:
 \begin{equation}
-C_{ij,kl} = {1\over V} { \partial^2 U \over \partial \epsilon_{ij} \partial 
+\overset{\circ}{C}_{ij,kl} = {1\over V} { \partial^2 U \over \partial \epsilon_{ij} \partial 
 \epsilon_{kl}}\Bigg|_{\epsilon=0} + {p\over 2} \left( \delta_{ik} \delta_{jl} +
 \delta_{il} \delta_{jk}\right).
 \end{equation}
-It is also possible to recalculate the $B_{ij,kl}$ from $C_{ij,kl}$:
+It is also possible to recalculate the $B_{ij,kl}$ from 
+$\overset{\circ}{C}_{ij,kl}$:
 \begin{equation}
-B_{ij,kl} = C_{ij,kl} -{1\over 2} \left (2 \sigma^{(0)}_{ij} \delta_{kl}
+B_{ij,kl} = \overset{\circ}{C}_{ij,kl} -{1\over 2} \left (2 
+\sigma^{(0)}_{ij} \delta_{kl}
 - \sigma^{(0)}_{ik} \delta_{jl} - \sigma^{(0)}_{il} \delta_{jk}
 - \sigma^{(0)}_{jl} \delta_{ik} - \sigma^{(0)}_{jk} \delta_{il} \right),
 \end{equation}
 that, when the stress is a uniform pressure becomes:
 \begin{equation}
-B_{ij,kl} = C_{ij,kl} +p \left (\delta_{ij} \delta_{kl}
+B_{ij,kl} = \overset{\circ}{C}_{ij,kl} +p \left (\delta_{ij} \delta_{kl}
 - \delta_{ik} \delta_{jl} - \delta_{il} \delta_{jk} \right).
 \end{equation}
 
@@ -2917,29 +2948,6 @@ energies for a regular grid of unstrained geometries and interpolating at
 each temperature at the geometry that minimizes the Helmholtz free energy.
 We call this ``quasi-harmonic'' approximation.
 
-%\newpage
-%{\color{dark-blue}\chapter{Pressure and temperature dependent elastic 
-%constants}
-%
-%Under pressure instead of using the Helmholtz free energy we can minimize 
-%the Gibbs free energy. It is possible to prove that the second derivatives 
-%of the Gibbs free energy are the stress-strain elastic constants:
-%\begin{equation}
-%B_{ij,kl}^T= {1 \over V(T)}{\partial^2 G \over \partial 
-%\epsilon_{ij} \partial \epsilon_{kl}}
-%\Bigg|_{\epsilon=0,T}.
-%\end{equation}
-%This equation is sufficient to calculate the elastic constants at a
-%given pressure and temperature. 
-%In general if we compute these stress-strain elastic constants on a
-%grid of crystal parameters and then interpolate them at the geometry
-%that minimize the Gibbs free energy, we can calculate the 
-%pressure and temperature dependent elastic constants for a 
-%certain range of pressures without additional energy or phonon
-%calculations.
-%The range of pressures for which this approach works has to be tested changing
-%the size and thickness of the grid of equilibrium configurations.
-%
 \newpage
 {\color{dark-blue}\chapter{The elastic compliances}}
 \color{black}
