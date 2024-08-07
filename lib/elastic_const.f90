@@ -2538,17 +2538,20 @@ IF (meta_ionode) THEN
          IF (MOD(iflag,2)==0) THEN
             WRITE(iu_el_cons,'("#",5x, a7, 9x, " B ", 13x, " C_11 ",  &
                   & 13x, " C_12 ", 13x, " C_13 ", 13x, " C_33 ", 13x, &
-                       &" C_44 ", 13x, " C_14")') label
+                       &" C_44 ", 13x, " C_14", 13x, " C_31", 13x,    &
+                        " C_41")') label
          ELSE
             WRITE(iu_el_cons,'("#",5x, a7, 9x, " K ", 13x, " S_11 ",  &
                   & 13x, " S_12 ", 13x, " S_13 ", 13x, " S_33 ", 13x, &
-                       &" S_44 ", 13x, " S_14")') label
+                       &" S_44 ", 13x, " S_14", 13x, " S_31", 13x,    &
+                        " S_41")') label
          ENDIF
          DO itemp=2,ntemp-1
-            WRITE(iu_el_cons,'(e16.8,7e20.12)') temp(itemp), b0_t(itemp), &
+            WRITE(iu_el_cons,'(e16.8,9e20.12)') temp(itemp), b0_t(itemp), &
                   el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
                   el_cons_t(1,3,itemp), el_cons_t(3,3,itemp), &
-                  el_cons_t(4,4,itemp), el_cons_t(1,4,itemp)
+                  el_cons_t(4,4,itemp), el_cons_t(1,4,itemp), &
+                  el_cons_t(3,1,itemp), el_cons_t(4,1,itemp)
          ENDDO
       CASE(27)
 !
@@ -2557,86 +2560,112 @@ IF (meta_ionode) THEN
          IF (MOD(iflag,2)==0) THEN
             WRITE(iu_el_cons,'("#",5x, a7, 9x, " B ", " C_11 ", 13x, &
                   &" C_12 ", 13x, " C_13 ", 13x, " C_33 ", 13x, "C_44", 13x, &
-                  &" C_14", 13x, "C_25" )') label
+                  &" C_14", 13x, " C_25", 13x, " C_31", 13x, " C_41", &
+                  & 13x, " C_52" )') label
          ELSE
             WRITE(iu_el_cons,'("#",5x, a7, 9x, " K ", " S_11 ", 13x, &
                   &" S_12 ", 13x, " S_13 ", 13x, " S_33 ", 13x, "S_44", 13x, &
-                  &" S_14", 13x, "S_25" )') label
+                  &" S_14", 13x, "S_25", 13x, " S_31", 13x, " S_41", &
+                  &13x, " S_52"  )') label
          ENDIF
          DO itemp=2,ntemp-1
-            WRITE(iu_el_cons,'(e16.8,8e20.12)')  temp(itemp), b0_t(itemp), &
+            WRITE(iu_el_cons,'(e16.8,11e20.12)')  temp(itemp), b0_t(itemp), &
                   el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
                   el_cons_t(1,3,itemp), el_cons_t(3,3,itemp), &
                   el_cons_t(4,4,itemp), el_cons_t(1,4,itemp), &
-                  el_cons_t(2,5,itemp)
+                  el_cons_t(2,5,itemp), el_cons_t(3,1,itemp), &
+                  el_cons_t(4,1,itemp), el_cons_t(5,2,itemp)
          ENDDO
       CASE(19,23)
+!
+!    C_6h, D_6h
+!
          IF (MOD(iflag,2)==0) THEN
             WRITE(iu_el_cons,'("#",5x, a7, 9x, " B ", 13x, " C_11 ", 13x,&
-             &" C_12 ", 13x, " C_13 ", 13x, " C_33 ", 13x, "C_44" )') label
+             &" C_12 ", 13x, " C_13 ", 13x, " C_33 ", 13x, "C_44", 13x, &
+             &"C_31" )') label
          ELSE
             WRITE(iu_el_cons,'("#",5x, a7, 9x, " K ", 13x, " S_11 ", 13x,&
-             &" S_12 ", 13x, " S_13 ", 13x, " S_33 ", 13x, "S_44" )') label
+             &" S_12 ", 13x, " S_13 ", 13x, " S_33 ", 13x, "S_44", 13x, &
+             &"S_31" )') label
          ENDIF
          DO itemp=2,ntemp-1
-            WRITE(iu_el_cons,'(e16.8,6e20.12)') temp(itemp),  b0_t(itemp), &
+            WRITE(iu_el_cons,'(e16.8,7e20.12)') temp(itemp),  b0_t(itemp), &
                   el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
                   el_cons_t(1,3,itemp), el_cons_t(3,3,itemp), &
-                  el_cons_t(4,4,itemp)
+                  el_cons_t(4,4,itemp), el_cons_t(3,1,itemp)
          ENDDO
       CASE(22)
+!
+!  D_4h
+!
          IF (MOD(iflag,2)==0) THEN
             WRITE(iu_el_cons,'("#",5x, a7, 9x, " B ", 13x, " C_11 ", 13x,&
-                  &" C_12 ", 13x, " C_13 ", 13x, " C_33 ", 13x, "C_44", 13x, & 
-                  &" C_66 " )') label
+                  &" C_12 ", 13x, " C_13", 13x, " C_33 ", 13x, "C_44", 13x, & 
+                  &" C_66 ", 13x, " C_31" )') label
          ELSE
             WRITE(iu_el_cons,'("#",5x, a7, 9x, " K ", 13x, " S_11 ", 13x,&
                   &" S_12 ", 13x, " S_13 ", 13x, " S_33 ", 13x, "S_44", 13x, & 
-                  &" S_66 " )') label
-         ENDIF
-
-         DO itemp=2,ntemp-1
-            WRITE(iu_el_cons,'(e16.8,7e20.12)') temp(itemp), b0_t(itemp), &
-                  el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
-                  el_cons_t(1,3,itemp), el_cons_t(3,3,itemp), &
-                  el_cons_t(4,4,itemp), el_cons_t(6,6,itemp)
-         ENDDO
-      CASE(20)
-         IF (MOD(iflag,2)==0) THEN
-            WRITE(iu_el_cons,'("#",5x, a7, 9x, " B", 13x, " C_11 ", 13x,&
-             &" C_12 ", 13x, " C_13 ", 13x, " C_22 ", 13x, " C_23 ", 13x,&
-             &" C_33 ", 13x, " C_44 ", 13x, " C_55 ", 13x, " C_66 ")') label
-         ELSE
-            WRITE(iu_el_cons,'("#",5x, a7, 9x, " K", 13x, " S_11 ", 13x,&
-             &" S_12 ", 13x, " S_13 ", 13x, " S_22 ", 13x, " S_23 ", 13x,&
-             &" S_33 ", 13x, " S_44 ", 13x, " S_55 ", 13x, " S_66 ")') label
-         ENDIF
-         DO itemp=2,ntemp-1
-            WRITE(iu_el_cons,'(e16.8,10e20.12)') temp(itemp), b0_t(itemp), &
-                  el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
-                  el_cons_t(1,3,itemp), el_cons_t(2,2,itemp), &
-                  el_cons_t(2,3,itemp), el_cons_t(3,3,itemp), &
-                  el_cons_t(4,4,itemp), el_cons_t(5,5,itemp), &
-                  el_cons_t(6,6,itemp)
-         ENDDO
-      CASE(18)
-         IF (MOD(iflag,2)==0) THEN
-            WRITE(iu_el_cons,'("#",5x, a7, 9x, " B ", 13x, " C_11 ", &
-                  & 13x, " C_12 ", 13x, " C_13 ", 13x, " C_33 ", 13x, "C_44", &
-                  & 13x, " C_66 ", 13x, " C_16 ")') label
-         ELSE
-            WRITE(iu_el_cons,'("#",5x, a7, 9x, " K ", 13x, " S_11 ", &
-                  & 13x, " S_12 ", 13x, " S_13 ", 13x, " S_33 ", 13x, "S_44", &
-                  & 13x, " S_66 ", 13x, " S_16 ")') label
+                  &" S_66 ", 13x, " S_31 " )') label
          ENDIF
          DO itemp=2,ntemp-1
             WRITE(iu_el_cons,'(e16.8,8e20.12)') temp(itemp), b0_t(itemp), &
                   el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
                   el_cons_t(1,3,itemp), el_cons_t(3,3,itemp), &
                   el_cons_t(4,4,itemp), el_cons_t(6,6,itemp), &
-                  el_cons_t(1,6,itemp)
+                  el_cons_t(3,1,itemp)
+         ENDDO
+      CASE(20)
+!
+!  D_2h
+!
+         IF (MOD(iflag,2)==0) THEN
+            WRITE(iu_el_cons,'("#",5x, a7, 9x, " B", 13x, " C_11 ", 13x,&
+             &" C_12 ", 13x, " C_13 ", 13x, " C_22 ", 13x, " C_23 ", 13x,&
+             &" C_33 ", 13x, " C_44 ", 13x, " C_55 ", 13x, " C_66 ", 13x &
+             &" C_21 ", 13x, " C_31 ", 13x, " C_32 ")') label
+         ELSE
+            WRITE(iu_el_cons,'("#",5x, a7, 9x, " K", 13x, " S_11 ", 13x,&
+             &" S_12 ", 13x, " S_13 ", 13x, " S_22 ", 13x, " S_23 ", 13x,&
+             &" S_33 ", 13x, " S_44 ", 13x, " S_55 ", 13x, " S_66 ", 13x,&
+             &" S_21 ", 13x, " S_31 ", 13x, " S_32 ")') label
+         ENDIF
+         DO itemp=2,ntemp-1
+            WRITE(iu_el_cons,'(e16.8,13e20.12)') temp(itemp), b0_t(itemp), &
+                  el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
+                  el_cons_t(1,3,itemp), el_cons_t(2,2,itemp), &
+                  el_cons_t(2,3,itemp), el_cons_t(3,3,itemp), &
+                  el_cons_t(4,4,itemp), el_cons_t(5,5,itemp), &
+                  el_cons_t(6,6,itemp), el_cons_t(2,1,itemp), &
+                  el_cons_t(3,1,itemp), el_cons_t(3,2,itemp)
+         ENDDO
+      CASE(18)
+!
+!   C_4h
+!
+         IF (MOD(iflag,2)==0) THEN
+            WRITE(iu_el_cons,'("#",5x, a7, 9x, " B ", 13x, " C_11 ", &
+                  & 13x, " C_12 ", 13x, " C_13 ", 13x, " C_33 ", 13x, "C_44", &
+                  & 13x, " C_66 ", 13x, " C_16 ", 13x, " C_31 ", 13x, &
+                  & " C_61 ")') label
+         ELSE
+            WRITE(iu_el_cons,'("#",5x, a7, 9x, " K ", 13x, " S_11 ", &
+                  & 13x, " S_12 ", 13x, " S_13 ", 13x, " S_33 ", 13x, "S_44", &
+                  & 13x, " S_66 ", 13x, " S_16 ", 13x, " S_31 ", 13x, &
+                  & " S_61 ")') label
+         ENDIF
+         DO itemp=2,ntemp-1
+            WRITE(iu_el_cons,'(e16.8,10e20.12)') temp(itemp), b0_t(itemp), &
+                  el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
+                  el_cons_t(1,3,itemp), el_cons_t(3,3,itemp), &
+                  el_cons_t(4,4,itemp), el_cons_t(6,6,itemp), &
+                  el_cons_t(1,6,itemp), el_cons_t(3,1,itemp), &
+                  el_cons_t(6,1,itemp)
          ENDDO
       CASE(16)
+!
+!   C_2h
+!
          IF (ibrav < 0) THEN
             !
             !  b unique
@@ -2645,24 +2674,30 @@ IF (meta_ionode) THEN
                WRITE(iu_el_cons,'("#",5x, a7, 9x, " B ", 13x, " C_11 ", &
              & 13x, " C_12 ", 13x, " C_13 ", 13x, " C_22 ", 13x, " C_23 ", &
              & 13x, " C_33 ", 13x, " C_44 ", 13x, " C_55 ", 13x, " C_66 ", &
-             & 13x, " C_15 ", 13x, " C_25 ", 13x, " C_35 ", 13x, " C_46 ")')&
+             & 13x, " C_15 ", 13x, " C_25 ", 13x, " C_35 ", 13x, " C_46 ", &
+             & 13x, " C_21 ", 13x, " C_31 ", 13x, " C_32 ", 13x, " C_51 ", &
+             & 13x, " C_52 ", 13x, " C_53 ", 13x, " C_64 " )')&
                label
             ELSE
                WRITE(iu_el_cons,'("#",5x, a7, 9x, " K ", 13x, " S_11 ", &
                & 13x, " S_12 ", 13x, " S_13 ", 13x, " S_22 ", 13x, " S_23 ", &
              & 13x, " S_33 ", 13x, " S_44 ", 13x, " S_55 ", 13x, " S_66 ", &
-             & 13x, " S_15 ", 13x, " S_25 ", 13x, " S_35 ", 13x, " S_46 ")')& 
-               label
+             & 13x, " S_15 ", 13x, " S_25 ", 13x, " S_35 ", 13x, " S_46 ", &
+             & 13x, " S_21 ", 13x, " S_31 ", 13x, " S_32 ", 13x, " S_51 ", &
+             & 13x, " S_52 ", 13x, " S_53 ", 13x, " S_64 ")') label
             ENDIF
             DO itemp=2,ntemp-1
-               WRITE(iu_el_cons,'(e16.8,14e20.12)') temp(itemp), b0_t(itemp),&
+               WRITE(iu_el_cons,'(e16.8,21e20.12)') temp(itemp), b0_t(itemp),&
                      el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
                      el_cons_t(1,3,itemp), el_cons_t(2,2,itemp), &
                      el_cons_t(2,3,itemp), el_cons_t(3,3,itemp), &
                      el_cons_t(4,4,itemp), el_cons_t(5,5,itemp), &
                      el_cons_t(6,6,itemp), el_cons_t(1,5,itemp), &
                      el_cons_t(2,5,itemp), el_cons_t(3,5,itemp), &
-                     el_cons_t(4,6,itemp)
+                     el_cons_t(4,6,itemp), el_cons_t(2,1,itemp), &
+                     el_cons_t(3,1,itemp), el_cons_t(3,2,itemp), &
+                     el_cons_t(5,1,itemp), el_cons_t(5,2,itemp), &
+                     el_cons_t(5,3,itemp), el_cons_t(6,4,itemp)
             ENDDO
          ELSE
             !
@@ -2672,34 +2707,47 @@ IF (meta_ionode) THEN
                WRITE(iu_el_cons,'("#",5x, a7, 9x, " B ",13x," C_11 ",  &
              & 13x, " C_12 ", 13x, " C_13 ", 13x, " C_22 ", 13x, " C_23 ", &
              & 13x, " C_33 ", 13x, " C_44 ", 13x, " C_55 ", 13x, " C_66 ", &
-             & 13x, " C_16 ", 13x, " C_26 ", 13x, " C_36 ", 13x, " C_45 ")') &
+             & 13x, " C_16 ", 13x, " C_26 ", 13x, " C_36 ", 13x, " C_45 ", &
+             & 13x, " C_21 ", 13x, " C_31 ", 13x, " C_32 ", 13x, " C_61 ", &
+             & 13x, " C_62 ", 13x, " C_63 ", 13x, " C_54 ")') &
                label
             ELSE
                WRITE(iu_el_cons,'("#",5x, a7, 9x, " K ",13x," S_11 ",  &
              & 13x, " S_12 ", 13x, " S_13 ", 13x, " S_22 ", 13x, " S_23 ", &
              & 13x, " S_33 ", 13x, " S_44 ", 13x, " S_55 ", 13x, " S_66 ", &
-             & 13x, " S_16 ", 13x, " S_26 ", 13x, " S_36 ", 13x, " S_45 ")') &
-               label
+             & 13x, " S_16 ", 13x, " S_26 ", 13x, " S_36 ", 13x, " S_45 ", &
+             & 13x, " S_21 ", 13x, " S_31 ", 13x, " S_32 ", 13x, " S_61 ", &
+             & 13x, " S_62 ", 13x, " S_63 ", 13x, " S_54 ")') label
             ENDIF
             DO itemp=2,ntemp-1
-               WRITE(iu_el_cons,'(e16.8,14e20.12)') temp(itemp), b0_t(itemp),&
+               WRITE(iu_el_cons,'(e16.8,21e20.12)') temp(itemp), b0_t(itemp),&
                      el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
                      el_cons_t(1,3,itemp), el_cons_t(2,2,itemp), &
                      el_cons_t(2,3,itemp), el_cons_t(3,3,itemp), &
                      el_cons_t(4,4,itemp), el_cons_t(5,5,itemp), &
                      el_cons_t(6,6,itemp), el_cons_t(1,6,itemp), &
                      el_cons_t(2,6,itemp), el_cons_t(3,6,itemp), &
-                     el_cons_t(4,5,itemp)
+                     el_cons_t(4,5,itemp), el_cons_t(2,1,itemp), &
+                     el_cons_t(3,1,itemp), el_cons_t(3,2,itemp), &
+                     el_cons_t(6,1,itemp), el_cons_t(6,2,itemp), &
+                     el_cons_t(6,3,itemp), el_cons_t(5,4,itemp)
             ENDDO
          ENDIF
       CASE(2)
+!
+!   C_i
+!
          IF (MOD(iflag,2)==0) THEN
             WRITE(iu_el_cons,'("#",5x, a7, 9x, " B ", 13x, " C_11 ", &
              & 13x, " C_12 ", 13x, " C_13 ", 13x, " C_22 ", 13x, " C_23 ", &
              & 13x, " C_33 ", 13x, " C_44 ", 13x, " C_55 ", 13x, " C_66 ", &
              & 13x, " C_14 ", 13x, " C_15 ", 13x, " C_16 ", 13x, " C_24 ", &
              & 13x, " C_25 ", 13x, " C_26 ", 13x, " C_34 ", 13x, " C_35 ", &
-             & 13x, " C_36 ", 13x, " C_45 ", 13x, " C_46 ", 13x, " C_56 ")')&
+             & 13x, " C_36 ", 13x, " C_45 ", 13x, " C_46 ", 13x, " C_56 ", &
+             & 13x, " C_21 ", 13x, " C_31 ", 13x, " C_32 ", 13x, " C_41 ", &
+             & 13x, " C_51 ", 13x, " C_61 ", 13x, " C_42 ", 13x, " C_52 ", &
+             & 13x, " C_62 ", 13x, " C_43 ", 13x, " C_53 ", 13x, " C_63 ", &
+             & 13x, " C_54 ", 13x, " C_64 ", 13x, " C_65 ")')&
              label
          ELSE
             WRITE(iu_el_cons,'("#",5x, a7, 9x, " K ", 13x, " S_11 ", &
@@ -2707,11 +2755,15 @@ IF (meta_ionode) THEN
              & 13x, " S_33 ", 13x, " S_44 ", 13x, " S_55 ", 13x, " S_66 ", &
              & 13x, " S_14 ", 13x, " S_15 ", 13x, " S_16 ", 13x, " S_24 ", &
              & 13x, " S_25 ", 13x, " S_26 ", 13x, " S_34 ", 13x, " S_35 ", &
-             & 13x, " S_36 ", 13x, " S_45 ", 13x, " S_46 ", 13x, " S_56 ")')&
+             & 13x, " S_36 ", 13x, " S_45 ", 13x, " S_46 ", 13x, " S_56 ", &
+             & 13x, " S_21 ", 13x, " S_31 ", 13x, " S_32 ", 13x, " S_41 ", &
+             & 13x, " S_51 ", 13x, " S_61 ", 13x, " S_42 ", 13x, " S_52 ", &
+             & 13x, " S_62 ", 13x, " S_43 ", 13x, " S_53 ", 13x, " S_63 ", &
+             & 13x, " S_54 ", 13x, " S_64 ", 13x, " S_65 ")')&
                label
          ENDIF
          DO itemp=2,ntemp-1
-            WRITE(iu_el_cons,'(e16.8,24e20.12)') temp(itemp), b0_t(itemp), &
+            WRITE(iu_el_cons,'(e16.8,39e20.12)') temp(itemp), b0_t(itemp), &
                   el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
                   el_cons_t(1,3,itemp), el_cons_t(2,2,itemp), &
                   el_cons_t(2,3,itemp), el_cons_t(3,3,itemp), &
@@ -2722,7 +2774,14 @@ IF (meta_ionode) THEN
                   el_cons_t(2,6,itemp), el_cons_t(3,4,itemp), &
                   el_cons_t(3,5,itemp), el_cons_t(3,6,itemp), &
                   el_cons_t(4,5,itemp), el_cons_t(4,6,itemp), &
-                  el_cons_t(5,6,itemp)
+                  el_cons_t(5,6,itemp), el_cons_t(2,1,itemp), &
+                  el_cons_t(3,1,itemp), el_cons_t(3,2,itemp), &
+                  el_cons_t(4,1,itemp), el_cons_t(5,1,itemp), &
+                  el_cons_t(6,1,itemp), el_cons_t(4,2,itemp), &
+                  el_cons_t(5,2,itemp), el_cons_t(6,2,itemp), &
+                  el_cons_t(4,3,itemp), el_cons_t(5,3,itemp), &
+                  el_cons_t(6,3,itemp), el_cons_t(5,4,itemp), &
+                  el_cons_t(6,4,itemp), el_cons_t(6,5,itemp)
          ENDDO
    END SELECT
    CLOSE(iu_el_cons)
@@ -2768,6 +2827,9 @@ el_cons_t=0.0_DP
 IF (meta_ionode) THEN
    SELECT CASE (laue)
       CASE(29,32)
+!
+!   T_h, O_h
+!
          READ(iu_el_cons,*) 
          DO itemp=2,ntemp-1
             READ(iu_el_cons,'(e16.8,4e20.12)') rdum, b0_t(itemp), &
@@ -2782,10 +2844,11 @@ IF (meta_ionode) THEN
 !            
          READ(iu_el_cons,*) 
          DO itemp=2,ntemp-1
-            READ(iu_el_cons,'(e16.8,7e20.12)') rdum, b0_t(itemp), &
+            READ(iu_el_cons,'(e16.8,9e20.12)') rdum, b0_t(itemp), &
                   el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
                   el_cons_t(1,3,itemp), el_cons_t(3,3,itemp), &
-                  el_cons_t(4,4,itemp), el_cons_t(1,4,itemp)
+                  el_cons_t(4,4,itemp), el_cons_t(1,4,itemp), &
+                  el_cons_t(3,1,itemp), el_cons_t(4,1,itemp)
             IF (ABS(rdum-temp(itemp))>1D-5) &
                CALL errore('read_el_cons_on_file','incorrect temperature', 1) 
          ENDDO
@@ -2795,72 +2858,97 @@ IF (meta_ionode) THEN
 !            
          READ(iu_el_cons,*) 
          DO itemp=2,ntemp-1
-            READ(iu_el_cons,'(e16.8,8e20.12)') rdum, b0_t(itemp), &
+            READ(iu_el_cons,'(e16.8,11e20.12)') rdum, b0_t(itemp), &
                   el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
                   el_cons_t(1,3,itemp), el_cons_t(3,3,itemp), &
                   el_cons_t(4,4,itemp), el_cons_t(1,4,itemp), &
-                  el_cons_t(2,5,itemp)
+                  el_cons_t(2,5,itemp), el_cons_t(3,1,itemp), &
+                  el_cons_t(4,1,itemp), el_cons_t(5,2,itemp)
+
             IF (ABS(rdum-temp(itemp))>1D-5) &
                CALL errore('read_el_cons_on_file','incorrect temperature', 1) 
          ENDDO
       CASE(19,23)
+!
+!  C_6h, D_6h
+!
          READ(iu_el_cons,*) 
          DO itemp=2,ntemp-1
-            READ(iu_el_cons,'(e16.8,6e20.12)') rdum,  b0_t(itemp), &
+            READ(iu_el_cons,'(e16.8,7e20.12)') rdum,  b0_t(itemp), &
                   el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
                   el_cons_t(1,3,itemp), el_cons_t(3,3,itemp), &
-                  el_cons_t(4,4,itemp)
+                  el_cons_t(4,4,itemp), el_cons_t(3,1,itemp)
             IF (ABS(rdum-temp(itemp))>1D-5) &
                CALL errore('read_el_cons_on_file','incorrect temperature', 1) 
          ENDDO
       CASE(22)
-         READ(iu_el_cons,*) 
-         DO itemp=2,ntemp-1
-            READ(iu_el_cons,'(e16.8,7e20.12)') rdum, b0_t(itemp), &
-                  el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
-                  el_cons_t(1,3,itemp), el_cons_t(3,3,itemp), &
-                  el_cons_t(4,4,itemp), el_cons_t(6,6,itemp)
-            IF (ABS(rdum-temp(itemp))>1D-5) &
-               CALL errore('read_el_cons_on_file','incorrect temperature', 1) 
-         ENDDO
-      CASE(20)
-         READ(iu_el_cons,*) 
-         DO itemp=2,ntemp-1
-            READ(iu_el_cons,'(e16.8,10e20.12)') rdum, b0_t(itemp), &
-                  el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
-                  el_cons_t(1,3,itemp), el_cons_t(2,2,itemp), &
-                  el_cons_t(2,3,itemp), el_cons_t(3,3,itemp), &
-                  el_cons_t(4,4,itemp), el_cons_t(5,5,itemp), &
-                  el_cons_t(6,6,itemp)
-            IF (ABS(rdum-temp(itemp))>1D-5) &
-               CALL errore('read_el_cons_on_file','incorrect temperature', 1) 
-         ENDDO
-      CASE(18)
+!
+!   D_4h
+!
          READ(iu_el_cons,*) 
          DO itemp=2,ntemp-1
             READ(iu_el_cons,'(e16.8,8e20.12)') rdum, b0_t(itemp), &
                   el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
                   el_cons_t(1,3,itemp), el_cons_t(3,3,itemp), &
                   el_cons_t(4,4,itemp), el_cons_t(6,6,itemp), &
-                  el_cons_t(1,6,itemp)
+                  el_cons_t(3,1,itemp)
+            IF (ABS(rdum-temp(itemp))>1D-5) &
+               CALL errore('read_el_cons_on_file','incorrect temperature', 1) 
+         ENDDO
+      CASE(20)
+!
+!   D_2h
+!
+         READ(iu_el_cons,*) 
+         DO itemp=2,ntemp-1
+            READ(iu_el_cons,'(e16.8,13e20.12)') rdum, b0_t(itemp), &
+                  el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
+                  el_cons_t(1,3,itemp), el_cons_t(2,2,itemp), &
+                  el_cons_t(2,3,itemp), el_cons_t(3,3,itemp), &
+                  el_cons_t(4,4,itemp), el_cons_t(5,5,itemp), &
+                  el_cons_t(6,6,itemp), el_cons_t(2,1,itemp), &
+                  el_cons_t(3,1,itemp), el_cons_t(3,2,itemp)
+
+            IF (ABS(rdum-temp(itemp))>1D-5) &
+               CALL errore('read_el_cons_on_file','incorrect temperature', 1) 
+         ENDDO
+      CASE(18)
+!
+!   C_4h
+!
+         READ(iu_el_cons,*) 
+         DO itemp=2,ntemp-1
+            READ(iu_el_cons,'(e16.8,10e20.12)') rdum, b0_t(itemp), &
+                  el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
+                  el_cons_t(1,3,itemp), el_cons_t(3,3,itemp), &
+                  el_cons_t(4,4,itemp), el_cons_t(6,6,itemp), &
+                  el_cons_t(1,6,itemp), el_cons_t(3,1,itemp), &
+                  el_cons_t(6,1,itemp)
             IF (ABS(rdum-temp(itemp))>1D-5) &
                CALL errore('read_el_cons_on_file','incorrect temperature', 1) 
          ENDDO
       CASE(16)
+!
+!  C_2h
+!
          IF (ibrav < 0) THEN
             !
             !  b unique
             !
             READ(iu_el_cons,*) 
             DO itemp=2,ntemp-1
-               READ(iu_el_cons,'(e16.8,14e20.12)') rdum, b0_t(itemp),&
+               READ(iu_el_cons,'(e16.8,21e20.12)') rdum, b0_t(itemp),&
                      el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
                      el_cons_t(1,3,itemp), el_cons_t(2,2,itemp), &
                      el_cons_t(2,3,itemp), el_cons_t(3,3,itemp), &
                      el_cons_t(4,4,itemp), el_cons_t(5,5,itemp), &
                      el_cons_t(6,6,itemp), el_cons_t(1,5,itemp), &
                      el_cons_t(2,5,itemp), el_cons_t(3,5,itemp), &
-                     el_cons_t(4,6,itemp)
+                     el_cons_t(4,6,itemp), el_cons_t(2,1,itemp), &
+                     el_cons_t(3,1,itemp), el_cons_t(3,2,itemp), &
+                     el_cons_t(5,1,itemp), el_cons_t(5,2,itemp), &
+                     el_cons_t(5,3,itemp), el_cons_t(6,4,itemp)
+
                IF (ABS(rdum-temp(itemp))>1D-5) &
                   CALL errore('read_el_cons_on_file','incorrect temperature',&
                                                                          1) 
@@ -2871,23 +2959,29 @@ IF (meta_ionode) THEN
             !
             READ(iu_el_cons,*) 
             DO itemp=2,ntemp-1
-               READ(iu_el_cons,'(e16.8,14e20.12)') rdum, b0_t(itemp),&
+               READ(iu_el_cons,'(e16.8,21e20.12)') rdum, b0_t(itemp),&
                      el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
                      el_cons_t(1,3,itemp), el_cons_t(2,2,itemp), &
                      el_cons_t(2,3,itemp), el_cons_t(3,3,itemp), &
                      el_cons_t(4,4,itemp), el_cons_t(5,5,itemp), &
                      el_cons_t(6,6,itemp), el_cons_t(1,6,itemp), &
                      el_cons_t(2,6,itemp), el_cons_t(3,6,itemp), &
-                     el_cons_t(4,5,itemp)
+                     el_cons_t(4,5,itemp), el_cons_t(2,1,itemp), &
+                     el_cons_t(3,1,itemp), el_cons_t(3,2,itemp), &
+                     el_cons_t(6,1,itemp), el_cons_t(6,2,itemp), &
+                     el_cons_t(6,3,itemp), el_cons_t(5,4,itemp)
                IF (ABS(rdum-temp(itemp))>1D-5) &
                   CALL errore('read_el_cons_on_file','incorrect temperature',&
                                                                          1) 
             ENDDO
          ENDIF
       CASE(2)
+!
+!   C_i
+!
          READ(iu_el_cons,*) 
          DO itemp=2,ntemp-1
-            READ(iu_el_cons,'(e16.8,24e20.12)') rdum, b0_t(itemp), &
+            READ(iu_el_cons,'(e16.8,39e20.12)') rdum, b0_t(itemp), &
                   el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
                   el_cons_t(1,3,itemp), el_cons_t(2,2,itemp), &
                   el_cons_t(2,3,itemp), el_cons_t(3,3,itemp), &
@@ -2898,7 +2992,15 @@ IF (meta_ionode) THEN
                   el_cons_t(2,6,itemp), el_cons_t(3,4,itemp), &
                   el_cons_t(3,5,itemp), el_cons_t(3,6,itemp), &
                   el_cons_t(4,5,itemp), el_cons_t(4,6,itemp), &
-                  el_cons_t(5,6,itemp)
+                  el_cons_t(5,6,itemp), el_cons_t(2,1,itemp), &
+                  el_cons_t(3,1,itemp), el_cons_t(3,2,itemp), &
+                  el_cons_t(4,1,itemp), el_cons_t(5,1,itemp), &
+                  el_cons_t(6,1,itemp), el_cons_t(4,2,itemp), &
+                  el_cons_t(5,2,itemp), el_cons_t(6,2,itemp), &
+                  el_cons_t(4,3,itemp), el_cons_t(5,3,itemp), &
+                  el_cons_t(6,3,itemp), el_cons_t(5,4,itemp), &
+                  el_cons_t(6,4,itemp), el_cons_t(6,5,itemp)
+
             IF (ABS(rdum-temp(itemp))>1D-5) &
                CALL errore('read_el_cons_on_file','incorrect temperature',1) 
          ENDDO
@@ -2934,10 +3036,17 @@ SELECT CASE (laue)
          el_cons_t(3,3,itemp)=el_cons_t(1,1,itemp)
          el_cons_t(1,3,itemp)=el_cons_t(1,2,itemp)
          el_cons_t(2,3,itemp)=el_cons_t(1,2,itemp)
+         el_cons_t(2,1,itemp)=el_cons_t(1,2,itemp)
+         el_cons_t(3,1,itemp)=el_cons_t(1,3,itemp)
+         el_cons_t(3,2,itemp)=el_cons_t(2,3,itemp)
          el_cons_t(5,5,itemp)=el_cons_t(4,4,itemp)
          el_cons_t(6,6,itemp)=el_cons_t(4,4,itemp) 
       END DO
-
+      DO itemp=2,ntemp-1
+         el_cons_t(2,1,itemp)=el_cons_t(1,2,itemp)
+         el_cons_t(3,1,itemp)=el_cons_t(1,3,itemp)
+         el_cons_t(3,2,itemp)=el_cons_t(2,3,itemp)
+      ENDDO
    CASE(25) 
 !
 !  trigonal D_3d (-3m)
@@ -2951,6 +3060,13 @@ SELECT CASE (laue)
          el_cons_t(6,6,itemp)=(el_cons_t(1,1,itemp)-&
                          el_cons_t(1,2,itemp))/2.0_DP
       END DO
+      DO itemp=2,ntemp-1
+         el_cons_t(2,1,itemp)=el_cons_t(1,2,itemp)
+         el_cons_t(3,1,itemp)=el_cons_t(1,3,itemp)
+         el_cons_t(3,2,itemp)=el_cons_t(2,3,itemp)
+         el_cons_t(4,2,itemp)=-el_cons_t(4,1,itemp)
+         el_cons_t(6,5,itemp)=el_cons_t(4,1,itemp)
+      ENDDO
 
    CASE (27)
 !
@@ -2962,10 +3078,20 @@ SELECT CASE (laue)
          el_cons_t(2,3,itemp)=el_cons_t(1,3,itemp)
          el_cons_t(2,4,itemp)=-el_cons_t(1,4,itemp)
          el_cons_t(5,5,itemp)=el_cons_t(4,4,itemp)
+         el_cons_t(4,6,itemp)=el_cons_t(2,5,itemp)
          el_cons_t(5,6,itemp)=el_cons_t(1,4,itemp)
          el_cons_t(6,6,itemp)=(el_cons_t(1,1,itemp)-&
                          el_cons_t(1,2,itemp))/2.0_DP
       END DO
+      DO itemp=2,ntemp-1
+         el_cons_t(2,1,itemp)=el_cons_t(1,2,itemp)
+         el_cons_t(3,1,itemp)=el_cons_t(1,3,itemp)
+         el_cons_t(3,2,itemp)=el_cons_t(2,3,itemp)
+         el_cons_t(4,2,itemp)=-el_cons_t(4,1,itemp)
+         el_cons_t(6,5,itemp)=el_cons_t(4,1,itemp)
+         el_cons_t(5,1,itemp)=-el_cons_t(5,2,itemp)
+         el_cons_t(6,4,itemp)=el_cons_t(5,2,itemp)
+      ENDDO
 
    CASE (19,23)
 !
@@ -2978,7 +3104,10 @@ SELECT CASE (laue)
          el_cons_t(6,6,itemp)=(el_cons_t(1,1,itemp)-&
                          el_cons_t(1,2,itemp))/2.0_DP
       END DO
-
+      DO itemp=2,ntemp-1
+         el_cons_t(2,1,itemp)=el_cons_t(1,2,itemp)
+         el_cons_t(3,2,itemp)=el_cons_t(3,1,itemp)
+      ENDDO
    CASE(22)
 !
 !  tetragonal D_4h (4/mmm)
@@ -2988,7 +3117,10 @@ SELECT CASE (laue)
          el_cons_t(2,3,itemp)=el_cons_t(1,3,itemp)
          el_cons_t(5,5,itemp)=el_cons_t(4,4,itemp)
       END DO
-
+      DO itemp=2,ntemp-1
+         el_cons_t(2,1,itemp)=el_cons_t(1,2,itemp)
+         el_cons_t(3,2,itemp)=el_cons_t(3,1,itemp)
+      ENDDO
    CASE(20)
 !
 !  orthorhombic D_2h (mmm)
@@ -3006,7 +3138,11 @@ SELECT CASE (laue)
          el_cons_t(2,6,itemp)=-el_cons_t(1,6,itemp)
          el_cons_t(5,5,itemp)=el_cons_t(4,4,itemp)
       END DO
-
+      DO itemp=2,ntemp-1
+         el_cons_t(2,1,itemp)=el_cons_t(1,2,itemp)
+         el_cons_t(3,2,itemp)=el_cons_t(3,1,itemp)
+         el_cons_t(6,2,itemp)=-el_cons_t(6,1,itemp)
+      ENDDO
    CASE(16)
 !
 !    monoclinic case, class C_2h (2/m) 
@@ -3024,11 +3160,11 @@ SELECT CASE (laue)
 
 END SELECT 
 
-DO i=1, 6
-   DO j=i+1, 6
-      el_cons_t(j,i,:)=el_cons_t(i,j,:)
-   END DO
-END DO
+!DO i=1, 6
+!   DO j=i+1, 6
+!      el_cons_t(j,i,:)=el_cons_t(i,j,:)
+!   END DO
+!END DO
 
 RETURN
 END SUBROUTINE expand_el_cons

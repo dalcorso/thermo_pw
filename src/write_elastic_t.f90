@@ -60,7 +60,7 @@ ALLOCATE(ec_p3(6,6))
 ALLOCATE(ec_p4(6,6))
 
 DO i=1,6
-   DO j=i,6
+   DO j=1,6
       CALL init_poly(nvar,ec_p1(i,j))
       CALL init_poly(nvar,ec_p2(i,j))
       CALL init_poly(nvar,ec_p3(i,j))
@@ -78,7 +78,7 @@ ELSE
    CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
 ENDIF
 DO i=1,6
-   DO j=i,6
+   DO j=1,6
       IF (el_con_geo(i,j,1)>0.1_DP) THEN
          WRITE(stdout,'(/,5x,"Fitting elastic constants C(",i4,",",i4,")")')&
                        i, j
@@ -134,7 +134,7 @@ ENDIF
 DEALLOCATE(x)
 DEALLOCATE(f)
 DO i=1,6
-   DO j=i,6
+   DO j=1,6
       CALL clean_poly(ec_p1(i,j))
       CALL clean_poly(ec_p2(i,j))
       CALL clean_poly(ec_p3(i,j))
@@ -220,7 +220,7 @@ ALLOCATE(v_p(3,npress))
 ALLOCATE(b0ec_p(npress))
 
 DO i=1,6
-   DO j=i,6
+   DO j=1,6
       CALL init_poly(nvar,ec_p1(i,j))
       CALL init_poly(nvar,ec_p2(i,j))
       CALL init_poly(nvar,ec_p3(i,j))
@@ -233,7 +233,7 @@ ENDDO
 CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
 
 DO i=1,6
-   DO j=i,6
+   DO j=1,6
       IF (el_con_geo(i,j,1)>0.1_DP) THEN
          WRITE(stdout,'(/,5x,"Fitting elastic constants C(",i4,",",i4,")")')&
                        i, j
@@ -288,7 +288,7 @@ CALL write_sound_on_file(press, npress, v_p, filelastic, 1)
 DEALLOCATE(x)
 DEALLOCATE(f)
 DO i=1,6
-   DO j=i,6
+   DO j=1,6
       CALL clean_poly(ec_p1(i,j))
       CALL clean_poly(ec_p2(i,j))
       CALL clean_poly(ec_p3(i,j))
@@ -452,7 +452,7 @@ ALLOCATE(ec_p3(6,6))
 ALLOCATE(ec_p4(6,6))
 
 DO i=1,6
-   DO j=i,6
+   DO j=1,6
       CALL init_poly(nvar,ec_p1(i,j))
       CALL init_poly(nvar,ec_p2(i,j))
       CALL init_poly(nvar,ec_p3(i,j))
@@ -471,7 +471,7 @@ ELSE
 ENDIF
 
 DO i=1,6
-   DO j=i,6
+   DO j=1,6
       IF (el_con_geo(i,j,1)>0.1_DP) THEN
          WRITE(stdout,'(/,5x,"Fitting elastic constants C(",i4,",",i4,")")')&
                        i, j
@@ -537,7 +537,7 @@ ENDIF
 DEALLOCATE(x)
 DEALLOCATE(f)
 DO i=1,6
-   DO j=i,6
+   DO j=1,6
       CALL clean_poly(ec_p1(i,j))
       CALL clean_poly(ec_p2(i,j))
       CALL clean_poly(ec_p3(i,j))
@@ -615,7 +615,7 @@ ALLOCATE(ec_p3(6,6))
 ALLOCATE(ec_p4(6,6))
 
 DO i=1,6
-   DO j=i,6
+   DO j=1,6
       CALL init_poly(nvar,ec_p1(i,j))
       CALL init_poly(nvar,ec_p2(i,j))
       CALL init_poly(nvar,ec_p3(i,j))
@@ -634,7 +634,7 @@ ELSE
 ENDIF
 
 DO i=1,6
-   DO j=i,6
+   DO j=1,6
       IF (el_con_geo(i,j,1)>0.1_DP) THEN
          WRITE(stdout,'(/,5x,"Fitting elastic constants C(",i4,",",i4,")")')&
                        i, j
@@ -704,7 +704,7 @@ ENDIF
 DEALLOCATE(x)
 DEALLOCATE(f)
 DO i=1,6
-   DO j=i,6
+   DO j=1,6
       CALL clean_poly(ec_p1(i,j))
       CALL clean_poly(ec_p2(i,j))
       CALL clean_poly(ec_p3(i,j))

@@ -41,14 +41,36 @@ USE io_global,      ONLY : meta_ionode
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
-INTEGER :: itemp, iu_therm
+REAL(DP), ALLOCATABLE :: celldm_t_(:,:), temp_(:)
+INTEGER :: itemp, iu_therm, ierr
 INTEGER :: find_free_unit
 
 REAL(DP) :: e0
 
-IF (lmurn.AND..NOT.lcubic) RETURN
-
-CALL compute_alpha_anis(celldm_t, alpha_anis_t, temp, ntemp, ibrav_save)
+IF (lmurn.AND..NOT.lcubic) THEN
+!
+!  In this case we can use this routine, but a file with the thermal
+!  expansion tensor must be present on the disk. This should have been
+!  created with a two dimensional grid.
+!
+   filename='anhar_files/'//TRIM(flanhar)//'.celldm'
+   CALL add_pressure(filename)
+   ALLOCATE(celldm_t_(6,ntemp))
+   ALLOCATE(temp_(ntemp))
+   CALL read_alpha_anis_lmurn(ibrav_save, celldm_t_, alpha_anis_t, temp_, &
+                                  ntemp, filename, ierr)
+   IF (ierr==0) THEN
+      DO itemp=1, ntemp-1
+         IF (ABS(temp_(itemp)-temp(itemp))>0.001_DP) &
+            CALL errore('write_anhar_anis','problem with temperature',1)
+      ENDDO
+   ENDIF
+   DEALLOCATE(celldm_t_)
+   DEALLOCATE(temp_)
+   IF (ierr/=0) RETURN
+ELSE
+   CALL compute_alpha_anis(celldm_t, alpha_anis_t, temp, ntemp, ibrav_save)
+ENDIF
 
 IF (lelastic) THEN
    CALL isostress_heat_capacity(vmin_t,el_cons_t,alpha_anis_t,temp, &
@@ -1158,18 +1180,47 @@ USE io_global,      ONLY : meta_ionode
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
-INTEGER :: itemp, ipress, ipressp, iu_therm
+INTEGER :: itemp, ipress, ipressp, iu_therm, ierr
 INTEGER :: find_free_unit
 REAL(DP) :: compute_omega_geo, aux(ntemp)
+REAL(DP), ALLOCATABLE :: celldm_t_(:,:), temp_(:)
 
 REAL(DP) :: e0
 
-IF (lmurn.AND..NOT.lcubic) RETURN
+IF (lmurn.AND..NOT.lcubic) THEN
+!
+!  In this case we can use this routine, but a file with the thermal
+!  expansion tensor for any pressure requested must be on the disk. 
+!  This should have been created with a two dimensional grid.
+!
+   ALLOCATE(celldm_t_(6,ntemp))
+   ALLOCATE(temp_(ntemp))
+   ierr=0
+   DO ipressp=1, npress_plot
+      IF (ierr/=0) CYCLE
+      ipress=ipress_plot(ipressp)
+      filename='anhar_files/'//TRIM(flanhar)//'.celldm_press'
+      CALL add_value(filename,press(ipress))
+      CALL read_alpha_anis_lmurn(ibrav_save, celldm_t_, &
+                   alpha_anis_pt(:,:,ipressp), temp_, ntemp, filename, ierr)
+      IF (ierr==0) THEN
+         DO itemp=1, ntemp-1
+            IF (ABS(temp_(itemp)-temp(itemp))>0.001_DP) &
+               CALL errore('write_anhar_anis','problem with temperature',1)
+         ENDDO
+      ENDIF
+   ENDDO
+   DEALLOCATE(celldm_t_)
+   DEALLOCATE(temp_)
+   IF (ierr/=0) RETURN
+ENDIF
 
 DO ipressp=1, npress_plot
    ipress=ipress_plot(ipressp)
-   CALL compute_alpha_anis(celldm_pt(:,:,ipressp), &
+   IF (.NOT.(lmurn.AND..NOT.lcubic)) &
+      CALL compute_alpha_anis(celldm_pt(:,:,ipressp), &
                      alpha_anis_pt(:,:,ipressp), temp, ntemp, ibrav_save)
+
    CALL interpolate_e0(vmin_pt(:,ipressp), celldm_pt(:,:,ipressp), ph_e0, e0)
 
    IF (lelastic_pt) THEN
@@ -1646,11 +1697,39 @@ INTEGER :: itemp, ipress, ipressp, iu_therm
 INTEGER :: find_free_unit
 REAL(DP) :: compute_omega_geo, aux(npress)
 
-INTEGER  :: itempp, ipol
+INTEGER  :: itempp, ipol, ierr
 REAL(DP) :: e0_p(npress)
+REAL(DP), ALLOCATABLE :: press_(:), celldm_p_(:,:)
 LOGICAL  :: subtract_el
 
-IF (lmurn.AND..NOT.lcubic) RETURN
+IF (lmurn.AND..NOT.lcubic) THEN
+!
+!  In this case we can use this routine, but a file with the thermal
+!  expansion tensor for any pressure requested must be on the disk. 
+!  This should have been created with a two dimensional grid.
+!
+   ALLOCATE(celldm_p_(6,npress))
+   ALLOCATE(press_(npress))
+   ierr=0
+   DO itempp=1, ntemp_plot
+      IF (ierr/=0) CYCLE
+      itemp=itemp_plot(itempp)
+      filename='anhar_files/'//TRIM(flanhar)//'.celldm_temp'
+      CALL add_value(filename,temp(itemp))
+      CALL read_alpha_anis_lmurn(ibrav_save, celldm_p_, &
+                   alpha_anis_ptt(:,:,itempp), press_, npress, filename, ierr)
+
+      IF (ierr==0) THEN
+         DO ipress=1, npress-1
+            IF (ABS(press_(ipress)-press(ipress))>0.001_DP) &
+               CALL errore('read_anhar_anis_ptt','problem with pressure',1)
+         ENDDO
+      ENDIF
+   ENDDO
+   DEALLOCATE(celldm_p_)
+   DEALLOCATE(press_)
+   IF (ierr/=0) RETURN
+ENDIF
 
 DO itempp=1, ntemp_plot
    itemp=itemp_plot(itempp)
@@ -1659,7 +1738,7 @@ DO itempp=1, ntemp_plot
       DO ipol=1,3
          alpha_anis_ptt(ipol,:,itempp)=beta_ptt(:,itempp) / 3.0_DP
       ENDDO
-   ELSE
+   ELSEIF (.NOT.lmurn) THEN
       CALL compute_alpha_anis_p(celldm_ptt(:,:,itempp), &
                      celldm_ptt_p1(:,:,itempp), celldm_ptt_m1(:,:,itempp), &
                      alpha_anis_ptt(:,:,itempp), press, npress, ibrav_save)
@@ -2212,6 +2291,125 @@ CLOSE(iu_therm)
 
 RETURN
 END SUBROUTINE write_alpha_anis
+!
+!-----------------------------------------------------------------------
+SUBROUTINE read_alpha_anis_lmurn(ibrav, celldm_t, alpha_t, temp, ntemp, &
+                                                         filename, ierr)
+!-----------------------------------------------------------------------
+!
+!  This routine reads from file the thermal expansion tensor, as a function
+!  temperature or of pressure 
+!
+USE kinds, ONLY : DP
+USE mp_world, ONLY : world_comm
+USE mp,    ONLY : mp_bcast, mp_sum
+USE io_global, ONLY : meta_ionode, meta_ionode_id
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ibrav, ntemp
+INTEGER, INTENT(OUT) :: ierr
+REAL(DP), INTENT(INOUT) :: celldm_t(6,ntemp), alpha_t(6,ntemp), temp(ntemp)
+CHARACTER(LEN=*), INTENT(IN) :: filename
+CHARACTER(LEN=256) :: label
+INTEGER :: itemp, ios, iu_therm
+INTEGER :: find_free_unit
+
+alpha_t=0.0_DP
+celldm_t=0.0_DP
+temp=0.0_DP
+ierr=0
+IF (meta_ionode) THEN
+   iu_therm=find_free_unit()
+
+   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='OLD', FORM='FORMATTED',& 
+                                                  IOSTAT=ios, ERR=100)
+   IF (ibrav==1 .OR. ibrav==2 .OR. ibrav==3 ) THEN
+      READ(iu_therm,*) 
+      DO itemp = 1, ntemp-1
+         READ(iu_therm, '(e12.5,2e20.9)') temp(itemp), celldm_t(1,itemp), &
+                                            alpha_t(1,itemp)
+         alpha_t(1,itemp)=alpha_t(1,itemp)/1.D6
+         alpha_t(2,itemp)=alpha_t(1,itemp)
+         alpha_t(3,itemp)=alpha_t(1,itemp)
+      ENDDO
+   ELSEIF (ibrav==4 .OR. ibrav==6 .OR. ibrav==7 ) THEN
+      READ(iu_therm,*) 
+      DO itemp = 1, ntemp-1
+         READ(iu_therm, '(e12.5,4e20.9)') temp(itemp), celldm_t(1,itemp), &
+                                                     celldm_t(3,itemp), &
+                                                     alpha_t(1,itemp), &
+                                                     alpha_t(3,itemp)
+         alpha_t(1,itemp)=alpha_t(1,itemp)/1.D6
+         alpha_t(3,itemp)=alpha_t(3,itemp)/1.D6
+         alpha_t(2,itemp)=alpha_t(3,itemp)
+      END DO
+   ELSEIF ( ibrav==5 ) THEN
+      READ(iu_therm,*) 
+      DO itemp = 1, ntemp-1
+         READ(iu_therm, '(e12.5,4e20.9)') temp(itemp),  celldm_t(1,itemp), &
+                                                     celldm_t(4,itemp),    &
+                                                     alpha_t(1,itemp), &
+                                                     alpha_t(3,itemp)
+         alpha_t(1,itemp)=alpha_t(1,itemp)/1.D6
+         alpha_t(2,itemp)=alpha_t(1,itemp)
+         alpha_t(3,itemp)=alpha_t(3,itemp)/1.D6
+      END DO
+   ELSEIF (ibrav==8 .OR. ibrav==9 .OR. ibrav==10 .OR. ibrav==11) THEN
+      READ(iu_therm,*)
+      DO itemp = 1, ntemp-1
+         READ(iu_therm, '(e12.5,6e20.9)') temp(itemp), celldm_t(1,itemp), &
+                                                     celldm_t(2,itemp),   &
+                                                     celldm_t(3,itemp),   &
+                                                     alpha_t(1,itemp),     &
+                                                     alpha_t(2,itemp),     &
+                                                     alpha_t(3,itemp)  
+         alpha_t(1,itemp)=alpha_t(1,itemp)/1.D6
+         alpha_t(2,itemp)=alpha_t(2,itemp)/1.D6
+         alpha_t(3,itemp)=alpha_t(3,itemp)/1.D6
+      ENDDO
+   ELSEIF (ibrav==12 .OR. ibrav==13) THEN
+      READ(iu_therm,*) 
+      DO itemp = 1, ntemp
+         READ(iu_therm, '(e12.5,4e17.9)') temp(itemp), celldm_t(1,itemp), &
+                                                       celldm_t(2,itemp), &
+                                                       celldm_t(3,itemp), &
+                                                       celldm_t(4,itemp)
+      END DO
+   ELSEIF (ibrav==-12 .OR. ibrav==-13) THEN
+      READ(iu_therm,*) 
+      DO itemp = 1, ntemp
+         READ(iu_therm, '(e12.5,4e17.9)') temp(itemp), celldm_t(1,itemp), &
+                                                       celldm_t(2,itemp), &
+                                                       celldm_t(3,itemp), &
+                                                       celldm_t(5,itemp)
+      END DO
+   ELSEIF (ibrav==14) THEN
+      READ(iu_therm, *)
+      DO itemp = 1, ntemp
+         READ(iu_therm, '(e12.5,6e15.7)') temp(itemp), celldm_t(1,itemp), &
+                                                       celldm_t(2,itemp), &
+                                                       celldm_t(3,itemp), &
+                                                       celldm_t(4,itemp), &
+                                                       celldm_t(5,itemp), &
+                                                       celldm_t(6,itemp)
+      ENDDO
+   ELSE IF (ibrav==0) THEN
+   !
+   !  In this case we read nothing but do not stop
+   !
+   ELSE
+      CALL errore('read_alpha_anis','ibrav not programmed',1)
+   END IF
+   CLOSE(iu_therm)
+   100 CONTINUE
+END IF
+CALL mp_bcast(ios, meta_ionode_id, world_comm)
+IF (ios /= 0) ierr=1
+CALL mp_sum(celldm_t, world_comm)
+CALL mp_sum(alpha_t, world_comm)
+CALL mp_sum(temp, world_comm)
+
+RETURN
+END SUBROUTINE read_alpha_anis_lmurn
 !
 !-----------------------------------------------------------------------
 SUBROUTINE compute_alpha_anis(celldm_t, alpha_anis_t, temp, ntemp, ibrav)

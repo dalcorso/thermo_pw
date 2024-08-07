@@ -53,7 +53,7 @@ b0_t=0.0_DP
 DO itemp=startt,lastt
    CALL compress_celldm(celldm_t(:,itemp),xfit,nvar,ibrav)
    DO i=1,6
-      DO j=i,6
+      DO j=1,6
          IF (el_con_geo(i,j,1)>0.1_DP) THEN
             IF (poly_degree_elc==4) THEN
                CALL evaluate_fit_quartic(nvar,xfit,aux,ec_p4(i,j)) 
@@ -67,7 +67,6 @@ DO itemp=startt,lastt
                CALL errore('interpolate_el_cons','wrong poly_degree_elc',1)
             ENDIF
             el_cons_t(i,j,itemp)=aux
-            el_cons_t(j,i,itemp)=aux
          ENDIF
       ENDDO
    ENDDO
@@ -133,7 +132,7 @@ macro_el_p=0.0_DP
 DO ipress=startp,lastp
    CALL compress_celldm(celldm_p(:,ipress),xfit,nvar,ibrav)
    DO i=1,6
-      DO j=i,6
+      DO j=1,6
          IF (el_con_geo(i,j,1)>0.1_DP) THEN
             IF (poly_degree_elc==4) THEN
                CALL evaluate_fit_quartic(nvar,xfit,aux,ec_p4(i,j)) 
@@ -147,7 +146,6 @@ DO ipress=startp,lastp
                CALL errore('interpolate_el_cons','wrong poly_degree_elc',1)
             ENDIF
             el_cons_p(i,j,ipress)=aux
-            el_cons_p(j,i,ipress)=aux
          ENDIF
       ENDDO
    ENDDO

@@ -18,6 +18,7 @@ USE kinds,      ONLY : DP
 USE io_global,  ONLY : stdout
 USE thermo_mod, ONLY : ibrav_geo, celldm_geo
 USE thermo_sym, ONLY : laue
+USE control_mur, ONLY : lmurn
 USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
 USE linear_surfaces,    ONLY : fit_multi_linear, evaluate_fit_linear
 USE quadratic_surfaces, ONLY : fit_multi_quadratic, evaluate_fit_quadratic
@@ -55,7 +56,12 @@ INTEGER :: i, j, idata, itemp, startt, lastt, pdelc_dos, pdelc_ph
 INTEGER :: compute_nwork 
 
 ibrav=ibrav_geo(1)
-nvar=crystal_parameters(ibrav)
+IF (lmurn) THEN
+   nvar=1
+ELSE
+   nvar=crystal_parameters(ibrav)
+ENDIF
+
 ndata=compute_nwork()
 
 ALLOCATE(x(nvar,ndata))
@@ -67,7 +73,13 @@ ALLOCATE(x1(nvar,ndata))
 ALLOCATE(xfit(nvar))
 CALL divide(world_comm, ntemp, startt, lastt)
 
-CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
+IF (lmurn) THEN
+   DO idata=1,ndata
+      x(1,idata)=celldm_geo(1,idata)
+   ENDDO
+ELSE
+   CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
+ENDIF
 
 el_cons_t=0.0_DP
 el_consf_t=0.0_DP
@@ -91,7 +103,7 @@ DO itemp=startt,lastt
       CALL compress_celldm(celldm_t(:,itemp),xfit,nvar,ibrav)
       f=0.0_DP
       DO i=1,6
-         DO j=i,6
+         DO j=1,6
             IF (el_con_geo_t(i,j,itemp,f_geodos_ec)>0.1_DP) THEN
                WRITE(stdout,'(/,5x,"Fitting elastic constants C(",i4,",",i4,")")') i,j
                WRITE(stdout,'(/,5x,"at Temperature",f15.5,"K")') temp(itemp)
@@ -133,7 +145,7 @@ DO itemp=startt,lastt
                   CALL errore('write_elastic_t_qha','wrong poly_degree_elc',1)
                ENDIF
             ENDIF
-            IF (i/=j) el_cons_t(j,i,itemp)=el_cons_t(i,j,itemp)
+!            IF (i/=j) el_cons_t(j,i,itemp)=el_cons_t(i,j,itemp)
          ENDDO
       ENDDO
       CALL compute_elastic_compliances(el_cons_t(:,:,itemp), &
@@ -147,7 +159,7 @@ DO itemp=startt,lastt
       CALL compress_celldm(celldmf_t(:,itemp),xfit,nvar,ibrav)
       f=0.0_DP
       DO i=1,6
-         DO j=i,6
+         DO j=1,6
             IF (el_conf_geo_t(i,j,itemp,f_geoph_ec)>0.1_DP) THEN
                WRITE(stdout,'(/,5x,"Fitting elastic constants C(",i4,",",i4,")")') i,j
                WRITE(stdout,'(/,5x,"at Temperature",f15.5,"K")') temp(itemp)
@@ -189,7 +201,7 @@ DO itemp=startt,lastt
                   CALL errore('write_elastic_t_qha','wrong poly_degree_elc',1)
                ENDIF
             ENDIF
-            IF (i/=j) el_consf_t(j,i,itemp)=el_consf_t(i,j,itemp)
+!            IF (i/=j) el_consf_t(j,i,itemp)=el_consf_t(i,j,itemp)
          ENDDO
       ENDDO
       CALL compute_elastic_compliances(el_consf_t(:,:,itemp), &
@@ -258,6 +270,7 @@ USE thermo_mod, ONLY : ibrav_geo, celldm_geo
 USE thermo_sym, ONLY : laue
 USE control_pressure, ONLY : npress_plot, ipress_plot, press
 USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
+USE control_mur, ONLY : lmurn
 USE linear_surfaces,    ONLY : fit_multi_linear, evaluate_fit_linear
 USE quadratic_surfaces, ONLY : fit_multi_quadratic, evaluate_fit_quadratic
 USE cubic_surfaces,   ONLY : fit_multi_cubic, evaluate_fit_cubic
@@ -300,9 +313,13 @@ INTEGER :: compute_nwork
 
 IF (npress_plot==0) RETURN
 
-
 ibrav=ibrav_geo(1)
-nvar=crystal_parameters(ibrav)
+IF (lmurn) THEN
+   nvar=1
+ELSE
+   nvar=crystal_parameters(ibrav)
+ENDIF
+
 ndata=compute_nwork()
 
 ALLOCATE(x(nvar,ndata))
@@ -314,7 +331,13 @@ ALLOCATE(x1(nvar,ndata))
 ALLOCATE(xfit(nvar))
 CALL divide(world_comm, ntemp, startt, lastt)
 
-CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
+IF (lmurn) THEN
+   DO idata=1,ndata
+      x(1,idata)=celldm_geo(1,idata)
+   ENDDO
+ELSE
+   CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
+ENDIF
 
 el_cons_pt=0.0_DP
 el_comp_pt=0.0_DP
@@ -343,7 +366,7 @@ DO ipressp=1,npress_plot
             CALL compress_celldm(celldm_pt(:,itemp,ipressp),xfit,nvar,ibrav)
             f=0.0_DP
             DO i=1,6
-               DO j=i,6
+               DO j=1,6
                   IF (el_con_geo_t(i,j,itemp,f_geodos_ec)>0.1_DP) THEN
                      WRITE(stdout,'(/,5x,"Fitting elastic constants C(",i4,",",i4,")")') i,j
                      WRITE(stdout,'(/,5x,"at Temperature",f15.5,"K")') temp(itemp)
@@ -387,8 +410,8 @@ DO ipressp=1,npress_plot
                                                  'wrong poly_degree_elc',1)
                      ENDIF
                   ENDIF
-                  IF (i/=j) el_cons_pt(j,i,itemp,ipressp)=&
-                                               el_cons_pt(i,j,itemp,ipressp)
+!                  IF (i/=j) el_cons_pt(j,i,itemp,ipressp)=&
+!                                               el_cons_pt(i,j,itemp,ipressp)
                ENDDO
             ENDDO
          ENDIF
@@ -424,7 +447,7 @@ DO ipressp=1,npress_plot
             CALL compress_celldm(celldmf_pt(:,itemp,ipressp),xfit,nvar,ibrav)
             f=0.0_DP
             DO i=1,6
-               DO j=i,6
+               DO j=1,6
                   IF (el_conf_geo_t(i,j,itemp,f_geoph_ec)>0.1_DP) THEN
                      WRITE(stdout,'(/,5x,"Fitting elastic constants C(",i4,",",i4,")")') i,j
                      WRITE(stdout,'(/,5x,"at Temperature",f15.5,"K")') temp(itemp)
@@ -468,8 +491,8 @@ DO ipressp=1,npress_plot
                                                  'wrong poly_degree_elc',1)
                      ENDIF
                   ENDIF
-                  IF (i/=j) el_consf_pt(j,i,itemp,ipressp)=&
-                                               el_consf_pt(i,j,itemp,ipressp)
+!                  IF (i/=j) el_consf_pt(j,i,itemp,ipressp)=&
+!                                               el_consf_pt(i,j,itemp,ipressp)
                ENDDO
             ENDDO
          ENDIF
@@ -517,6 +540,7 @@ USE kinds,      ONLY : DP
 USE io_global,  ONLY : stdout
 USE thermo_mod, ONLY : ibrav_geo, celldm_geo
 USE thermo_sym, ONLY : laue
+USE control_mur, ONLY : lmurn
 USE control_pressure, ONLY : npress, press
 USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
 USE linear_surfaces,    ONLY : fit_multi_linear, evaluate_fit_linear
@@ -562,7 +586,11 @@ INTEGER :: compute_nwork
 IF (ntemp_plot==0) RETURN
 
 ibrav=ibrav_geo(1)
-nvar=crystal_parameters(ibrav)
+IF (lmurn) THEN
+   nvar=1
+ELSE
+   nvar=crystal_parameters(ibrav)
+ENDIF
 ndata=compute_nwork()
 
 ALLOCATE(x(nvar,ndata))
@@ -572,7 +600,13 @@ ALLOCATE(x1(nvar,ndata))
 ALLOCATE(xfit(nvar))
 CALL divide(world_comm, npress, startp, lastp)
 
-CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
+IF (lmurn) THEN
+   DO idata=1,ndata
+      x(1,idata)=celldm_geo(1,idata)
+   ENDDO
+ELSE
+   CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
+ENDIF
 
 el_cons_ptt=0.0_DP
 el_comp_ptt=0.0_DP
@@ -599,7 +633,7 @@ DO itempp=1,ntemp_plot
             CALL compress_celldm(celldm_ptt(:,ipress,itempp),xfit,nvar,ibrav)
             f=0.0_DP
             DO i=1,6
-               DO j=i,6
+               DO j=1,6
                   IF (el_con_geo_t(i,j,itemp,f_geodos_ec)>0.1_DP) THEN
                      jdata=0
                      DO idata=1,ndata
@@ -639,8 +673,8 @@ DO itempp=1,ntemp_plot
                                                  'wrong poly_degree_elc',1)
                      ENDIF
                   ENDIF
-                  IF (i/=j) el_cons_ptt(j,i,ipress,itempp)=&
-                                           el_cons_ptt(i,j,ipress,itempp)
+!                  IF (i/=j) el_cons_ptt(j,i,ipress,itempp)=&
+!                                           el_cons_ptt(i,j,ipress,itempp)
                ENDDO
             ENDDO
          ENDIF
@@ -674,7 +708,7 @@ DO itempp=1,ntemp_plot
             CALL compress_celldm(celldmf_ptt(:,ipress,itempp),xfit,nvar,ibrav)
             f=0.0_DP
             DO i=1,6
-               DO j=i,6
+               DO j=1,6
                   IF (el_conf_geo_t(i,j,itemp,f_geoph_ec)>0.1_DP) THEN
                      jdata=0
                      DO idata=1,ndata
@@ -714,8 +748,8 @@ DO itempp=1,ntemp_plot
                                                  'wrong poly_degree_elc',1)
                      ENDIF
                   ENDIF
-                  IF (i/=j) el_consf_ptt(j,i,ipress,itempp)=&
-                                           el_consf_ptt(i,j,ipress,itempp)
+!                  IF (i/=j) el_consf_ptt(j,i,ipress,itempp)=&
+!                                           el_consf_ptt(i,j,ipress,itempp)
                ENDDO
             ENDDO
          ENDIF
