@@ -275,16 +275,21 @@ IF (okvan) THEN
    IF (noncolin) THEN
       IF (nsolv==2) THEN
          int1_nc_save_d=int1_nc_save
-         deeq_nc_save_d=deeq_nc_save
       ELSE
          int1_nc_d=int1_nc
-         deeq_nc_d=deeq_nc
       ENDIF
       int2_so_d=int2_so
       int2_d=int2
    ELSE
       int1_d=int1
       int2_d=int2
+   ENDIF
+ENDIF
+IF (noncolin) THEN
+   IF (nsolv==2) THEN
+      deeq_nc_save_d=deeq_nc_save
+   ELSE
+      deeq_nc_d=deeq_nc
    ENDIF
 ENDIF
 u_d=u
