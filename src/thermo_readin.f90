@@ -114,6 +114,7 @@ SUBROUTINE thermo_readin()
   USE input_parameters,     ONLY : outdir, forc_conv_thr, max_seconds, &
                                    calculation
   USE control_ph,           ONLY : xmldyn
+  USE lsda_mod,             ONLY : lsda
   USE ifc,                  ONLY : zasr
   USE output,               ONLY : fildyn
   USE mp_world,             ONLY : world_comm, nproc, nnode
@@ -982,6 +983,9 @@ SUBROUTINE thermo_readin()
      IF (calculation/='scf'.AND.calculation/='relax') &
         CALL errore('thermo_readin','thermo_pw requires scf or relax in &
                                                &pw input',1)
+  IF (what=='scf_2d_bands'.AND.lsda) &
+     CALL errore('thermo_readin','scf_2d_bands not available with lsda',1)
+
   ENDIF
 
   DEALLOCATE(input)
