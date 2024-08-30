@@ -46,7 +46,7 @@ INTEGER :: ierr
 !$acc kernels present(ps)
 ps (:,:) = (0.d0, 0.d0)
 !$acc end kernels
-CALL ch_psi_computeps<<<dim3(nk*npe*nsolv,nbnd,nbnd),dim3(1,1,1)>>>(ndmx, &
+CALL ch_psi_computeps<<<dim3(nk*npe*nsolv,nbnd,nbnd/4+1),dim3(1,1,4)>>>(ndmx, &
      outk_d, kdimk_d, st_d, nbndk_d, evqk_d, spsi, ps, current_ikb_ph, &
      npol, nk, npe, nsolv, nbnd, my_nbnd, alpha_pv)
 ierr=cudaDeviceSynchronize()
@@ -55,11 +55,11 @@ CALL ch_psi_ah<<<dim3(nk,npe*nsolv,nbnd),dim3(1,1,1)>>>(ndmx, &
               outk_d, st_d, nbndk_d, ah, hpsi, spsi, eu, current_ikb_ph, &
               npol, nk, npe, nsolv, nbnd, my_nbnd)
 ierr=cudaDeviceSynchronize()
-CALL ch_psi_lo2<<<dim3(nk,npe*nsolv,nbnd),dim3(1,1,1)>>>&
+CALL ch_psi_lo2<<<dim3(nk,npe*nsolv,nbnd/4+1),dim3(1,1,4)>>>&
             (ndmx, outk_d, st_d, nbndk_d, evqk_d, hpsi, ps, current_ikb_ph, &
              npol, nk, npe, nsolv, nbnd, my_nbnd)
 ierr=cudaDeviceSynchronize()
-CALL ch_psi_calbec<<<dim3(nk*npe*nsolv,nkb,nbnd),dim3(1,1,1)>>>(ndmx,  &
+CALL ch_psi_calbec<<<dim3(nk*npe*nsolv,nkb,nbnd/4+1),dim3(1,1,4)>>>(ndmx,  &
     outk_d, st_d, nbndk_d, npwk_d, hpsi, current_ikb_ph, npol, nk, &
     npe, nsolv, nkb, nbnd, my_nbnd)
 ierr=cudaDeviceSynchronize()

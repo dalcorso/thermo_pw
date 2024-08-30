@@ -50,7 +50,6 @@ CHARACTER(LEN=2) :: strain_list(21)
 LOGICAL :: flag
 
 nstep=0
-WRITE(6,*) 'laue', laue
 SELECT CASE (laue) 
    CASE(29,32)
 !

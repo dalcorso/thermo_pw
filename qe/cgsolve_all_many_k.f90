@@ -419,7 +419,7 @@ iterate:  do iter = 1, maxter
      ENDDO
      conv_d=conv
      lbndk_d=lbndk
-     CALL cgsolve_all_loop2<<<dim3(nk,npe*nsolv,nbnd),dim3(1,1,1)>>>  &
+     CALL cgsolve_all_loop2<<<dim3(nk,npe*nsolv,nbnd/4+1),dim3(1,1,4)>>>  &
              (ndmx, outk_d, st_d, conv_d, lbndk_d, h, g, h_diag, rho, &
               current_ikb_ph, npol, nk, npe, nsolv, nbnd, my_nbnd)
      ierr=cudaDeviceSynchronize() 
@@ -654,7 +654,7 @@ iterate:  do iter = 1, maxter
      conv_d=conv
      lbndk_d=lbndk
      !$acc host_data use_device(a,c)
-     CALL cgsolve_all_loop5<<<dim3(nk,npe*nsolv,nbnd),dim3(1,1,1)>>>&
+     CALL cgsolve_all_loop5<<<dim3(nk,npe*nsolv,nbnd/4+1),dim3(1,1,4)>>>&
              (ndmx, outk_d, st_d, conv_d, lbndk_d, g, h, t, a, c, &
              current_ikb_ph, npol, nk, npe, nsolv, nbnd, my_nbnd)
      ierr=cudaDeviceSynchronize()
