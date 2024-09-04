@@ -82,6 +82,7 @@
  RETURN
 
  END SUBROUTINE cgsolve_all_loop2
+
  !--------------------------------------------------------------------------
  ATTRIBUTES(GLOBAL) SUBROUTINE cgsolve_all_loop4(ndmx, outk, st, conv, &
          lbndk, h, hold, dcgammak, eu, e, current_ikb_ph, npol, nk, &
@@ -156,7 +157,6 @@
  RETURN
 
  END SUBROUTINE cgsolve_all_loop4
-
  !--------------------------------------------------------------------------
  ATTRIBUTES(GLOBAL) SUBROUTINE cgsolve_all_loop5(ndmx, outk, st, conv, &
          lbndk, g, h, t, a, c, current_ikb_ph, npol, nk, &
@@ -257,40 +257,41 @@
 
  COMPLEX(DP) :: dclambda
 
- ik1=(BlockIdx%x-1)*BlockDim%x + ThreadIdx%x
- IF (ik1>nk) RETURN
+ id=(BlockIdx%x-1)*BlockDim%x + ThreadIdx%x
+ IF (id>nk*npe*nsolv) RETURN
+ isp=(id-1)/nk+1
+ isolv=(isp-1)/npe+1
+ ipert=MOD(isp-1,npe)+1
+ ik1=MOD(id-1,nk)+1
 
  ik=ik1+startkb_ph(current_ikb_ph)
  ikk=ikks(ik)
  ikq=ikqs(ik)
 
- isp=(BlockIdx%y-1)*BlockDim%y + ThreadIdx%y
- IF (isp>npe*nsolv) RETURN
- isolv=(isp-1)/npe+1
- ipert=MOD(isp-1,npe)+1
-
- id=ik1+(ipert-1)*nk + (isolv-1)*nk*npe
  IF (outk(id)) RETURN
  st_=st(id)
 
- ibnd=(BlockIdx%z-1)*BlockDim%z + ThreadIdx%z
+ ibnd=(BlockIdx%y-1)*BlockDim%y + ThreadIdx%y
  IF (ibnd>nbnd_occ(ikk)) RETURN
- if (conv (st_+ibnd)==1) RETURN
+ IF (conv (st_+ibnd)==1) RETURN
+
+ ig=(BlockIdx%z-1)*BlockDim%z + ThreadIdx%z
+ IF (ig > ndmx * npol) RETURN
 
  lbnd=lbndk(st_+ibnd)
  dclambda=dclambdak(st_+lbnd)
 
- DO ig=1, ndmx*npol
+! DO ig=1, ndmx*npol
     dpsi(ig,st_+ibnd)=dpsi(ig,st_+ibnd) + dclambda * h(ig,st_+ibnd)
- ENDDO
+! ENDDO
 
- DO ig=1, ndmx*npol
+! DO ig=1, ndmx*npol
     g(ig,st_+ibnd) = g(ig,st_+ibnd) + dclambda * t(ig,st_+lbnd)
- ENDDO
+! ENDDO
 
- DO ig=1,ndmx*npol
+! DO ig=1,ndmx*npol
     hold(ig,st_+ibnd) = h(ig,st_+ibnd) 
- ENDDO
+! ENDDO
 
  RETURN
  END SUBROUTINE cgsolve_all_loop6

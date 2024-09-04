@@ -722,7 +722,8 @@ iterate:  do iter = 1, maxter
  dclambdak_d=dclambdak
  conv_d=conv
  lbndk_d=lbndk
- CALL cgsolve_all_loop6<<<dim3(nk,npe*nsolv,nbnd),dim3(1,1,1)>>> &
+ CALL cgsolve_all_loop6<<<dim3(nk*npe*nsolv,nbnd,(ndmx*npol)/32+1),&
+             dim3(1,1,32)>>> &
             (ndmx, outk_d, st_d, conv_d, lbndk_d, dpsi, g, h, hold, t, &
             dclambdak_d, current_ikb_ph, npol, nk, npe, nsolv, nbnd, my_nbnd)
  ierr=cudaDeviceSynchronize()
