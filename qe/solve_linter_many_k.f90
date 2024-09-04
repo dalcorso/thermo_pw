@@ -806,9 +806,9 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
         DEALLOCATE (npwk_d)
 #endif
         current_ikb_ph=ikb
+        CALL stop_clock('second_part')
         ! on k points blocks
      ENDDO
-     CALL stop_clock('second_part')
      CALL start_clock('the_rest')
      !
      !  The calculation of dbecsum is distributed across processors (see addusdbec)
