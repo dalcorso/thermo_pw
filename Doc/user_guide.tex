@@ -335,6 +335,31 @@ inside the \texttt{thermo\_pw}\ directory, produces the executable
 \qe\ \texttt{bin/} directory. A few other tool codes are produced as well
 and linked in the \qe\ \texttt{bin/} directory.
 
+With the some versions of QE the sequence of commands which is
+known to compile \texttt{thermo\_pw} is the following:
+\begin{verbatim}
+Untar qe (with the version you want to run)
+tar -xzvf qe.tgz
+cd main qe directory
+tar -xzvf thermo\_pw.tzg
+cd thermo_pw
+make join_qe
+cd ..
+./configure
+make thermo_pw
+\end{verbatim}
+Running \texttt{./configure} before \texttt{make join\_qe} might not 
+work properly. To run \texttt{thermo\_pw} with \texttt{GPU} you need
+a \texttt{pgi} fortran compiler and should run \texttt{configure} with
+a command similar to:
+\begin{verbatim}
+./configure --with-cuda=$CUDA_ROOT --with-cuda-runtime=11.8 
+--with-cuda-cc=80 --with-scalapack=no --with-cuda-mpi=yes
+\end{verbatim}
+Please check on your system which is the correct version of 
+\texttt{cuda-runtime} and of \texttt{cuda-cc}. The numbers given here
+are indicative.
+
 Starting from version 1.5.1 \texttt{thermo\_pw}\ can be compiled also
 with \texttt{cmake}. The command \texttt{make join\_qe} substitutes
 the \texttt{CMakeLists.txt} file of QE with the one contained
@@ -342,6 +367,7 @@ in \texttt{thermo\_pw}. After writing \texttt{make join\_qe} follow the
 QE instructions to compile using \texttt{cmake}. Two new commands are
 available: \texttt{make thermo\_pw} produces \texttt{thermo\_pw.x}  
 and \texttt{make tpw\_tools} produces the tools codes.
+
 
 \thermo\ has been written on a PC with the Linux operating system using a
 \texttt{gfortran} compiler and \texttt{openMPI} parallelization. It has
