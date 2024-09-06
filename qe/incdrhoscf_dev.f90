@@ -8,7 +8,7 @@
 #if defined(__CUDA)
 !----------------------------------------------------------------------
 SUBROUTINE incdrhoscf_dev(outk_d, npwk_d, nbndk_d, nbndk, st_d, st, npol, &
-           drhoscf, dbecsum, dpsik, psicrm, dpsicrm, nbnd, nksb_ph, npe,  &
+           drhoscf_d, dbecsum, dpsik, psicrm, dpsicrm, nbnd, nksb_ph, npe,  &
            nnrs, nnr)
 !----------------------------------------------------------------------
 !
@@ -60,7 +60,7 @@ INTEGER, DEVICE :: st_d(nksb_ph * npe)
 ! on host and on device
 COMPLEX(DP) :: dbecsum((nhm*(nhm+1))/2, nat, nspin_mag, npe)
 ! inp/out: the dbecsum to accumulate (on host)
-COMPLEX(DP) :: drhoscf (nnr, nspin_mag, npe)
+COMPLEX(DP), DEVICE :: drhoscf_d (nnr, nspin_mag, npe)
 ! inp/out: the induced charge density to accumulate (on host)
 COMPLEX(DP), DEVICE :: dpsik(npwx*npol,nbnd*nksbx_ph*npe)
 ! input: the change of wavefunctions
@@ -111,14 +111,10 @@ ierr=cudaDeviceSynchronize()
 !
 !  final addition of this block of wavefunctions to the drho
 !
-!$acc enter data copyin(drhoscf(1:nnr,1:nspin_mag,1:npe))
-!$acc host_data use_device(drhoscf)
 CALL incdrho_dev<<<dim3(1,npe,nnrs/64+1),dim3(1,1,64)>>>(nbndk_d, st_d,    &
-         npol, drhoscf, psicrm, dpsicrm, nnrs, nnr, nksb_ph,               &
+         npol, drhoscf_d, psicrm, dpsicrm, nnrs, nnr, nksb_ph,               &
          npe, nbnd, current_ikb_ph, nspin_mag, omega)
 ierr=cudaDeviceSynchronize()
-!$acc end host_data 
-!$acc exit data copyout(drhoscf)
 IF (okvan) THEN
    CALL incdrho_calbec<<<dim3(nksb_ph*npe,nkb,nbnd),dim3(1,1,1)>>>(npwx,  &
         st_d, nbndk_d, npwk_d, dpsik, current_ikb_ph, npol, nksb_ph, npe, &

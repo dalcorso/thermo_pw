@@ -8,7 +8,7 @@
 #if defined(__CUDA)
 SUBROUTINE orthogonalize_dev(st_d, outk_d, kdimk_d, npwk_d, nveck_d, &
                    nb1k_d, ikblk_d, nbndk_d, ikb, nk, npe, nsolv,    &
-                   dvpsik_d, evqk_d, sevqk_d, ortho_ps, npol, npwx,  &
+                   dvpsik_d, evqk_d, sevqk_d, ortho_ps_d, npol, npwx,  &
                    nbnd, nksbx_ph)
 
 USE cudafor
@@ -28,11 +28,11 @@ INTEGER, INTENT(IN), DEVICE :: st_d(nk*npe*nsolv)
 !! input: start of each set of functions
 LOGICAL, INTENT(IN), DEVICE :: outk_d(nk*npe*nsolv)
 !! input: when .TRUE. the set is not calculated
-INTEGER, INTENT(IN), DEVICE :: kdimk_d(nk*npe*nsolv), npwk_d(nk*npe*nsolv)
+INTEGER, INTENT(IN), DEVICE :: kdimk_d(nk*nsolv), npwk_d(nk*nsolv)
 !! input: kdim is npwx*npol in the noncollinear case, or equal to npwk_d
 !!        in the collinear case
 !! input: the number of plane waves for each set
-INTEGER, INTENT(IN), DEVICE :: ikblk_d(nk*npe*nsolv)
+INTEGER, INTENT(IN), DEVICE :: ikblk_d(nk*nsolv)
 !! input: index of k in the current block of k points
 INTEGER, INTENT(IN), DEVICE :: nveck_d(nk*npe*nsolv)
 !! input: the number of vectors to compute.
@@ -46,7 +46,7 @@ COMPLEX(DP), INTENT(INOUT), DEVICE :: sevqk_d(npwx*npol, nbnd*nk*nsolv)
 !! out: the spsi vector
 COMPLEX(DP), INTENT(INOUT), DEVICE :: dvpsik_d(npwx*npol, nbnd*nk*npe*nsolv)
 !! the functions to orthogonalize
-COMPLEX(DP), INTENT(INOUT), DEVICE :: ortho_ps(nksbx_ph*nbnd*nsolv, &
+COMPLEX(DP), INTENT(INOUT), DEVICE :: ortho_ps_d(nksbx_ph*nbnd*nsolv, &
                                                nbnd*nksbx_ph*npe*nsolv)
 !
 !  Local variables
@@ -56,20 +56,19 @@ INTEGER :: ierr
 CALL start_clock('ortho_dev')
 CALL orthog_ps<<<dim3(nk*npe*nsolv,nbnd,nbnd),&
         dim3(1,1,1)>>>( st_d, nbndk_d, ikb, nk, npe, nsolv, &
-                   dvpsik_d, evqk_d, ortho_ps, npol, npwx, nbnd, nksbx_ph )
+                   dvpsik_d, evqk_d, ortho_ps_d, npol, npwx, nbnd, nksbx_ph )
 ierr=cudaDeviceSynchronize()
 CALL stop_clock('ortho_dev')
 CALL start_clock('ortho_spsi')
 CALL s_psik_dev(npwx, outk_d, kdimk_d, npwk_d, nveck_d, nb1k_d, &
         st_d, st_d, ikblk_d, npol, evqk_d, sevqk_d,  &
-        nbnd, nbnd, npe*nk*nsolv)
+        nbnd, nbnd, nk*nsolv)
 ierr=cudaDeviceSynchronize()
 CALL stop_clock('ortho_spsi')
-
 CALL start_clock('ortho_last')
 CALL orthog_last<<<dim3(nk*npe*nsolv,nbnd,npwx/32+1),&
      dim3(1,1,32)>>>( st_d, nbndk_d, ikb, nk, npe, nsolv, &
-              dvpsik_d, sevqk_d, ortho_ps, npol, npwx, nbnd, nksbx_ph )
+              dvpsik_d, sevqk_d, ortho_ps_d, npol, npwx, nbnd, nksbx_ph )
 ierr=cudaDeviceSynchronize()
 CALL stop_clock('ortho_last')
 
@@ -78,7 +77,7 @@ END SUBROUTINE orthogonalize_dev
 
 !-----------------------------------------------------------------------
 ATTRIBUTES(GLOBAL) SUBROUTINE orthog_ps( st, nbndk, ikb, nk, npe, nsolv, &
-                      dvpsik_d, evqk_d, ortho_ps, npol, npwx, nbnd, nksbx_ph )
+                     dvpsik_d, evqk_d, ortho_ps_d, npol, npwx, nbnd, nksbx_ph )
 !-----------------------------------------------------------------------
   !
   !  This routine computes the scalar product of the vector evqk_d and
@@ -114,7 +113,7 @@ ATTRIBUTES(GLOBAL) SUBROUTINE orthog_ps( st, nbndk, ikb, nk, npe, nsolv, &
   !! inp/out: the bloch wavefunctions
   COMPLEX(DP), DEVICE, INTENT(IN) :: dvpsik_d(npwx*npol, nbnd*nk*npe*nsolv)
   !! the functions to orthogonalize
-  COMPLEX(DP), DEVICE, INTENT(INOUT) :: ortho_ps(nksbx_ph*nbnd*nsolv, &
+  COMPLEX(DP), DEVICE, INTENT(INOUT) :: ortho_ps_d(nksbx_ph*nbnd*nsolv, &
                                                  nbnd*nksbx_ph*npe*nsolv)
   !! the scalar products
 
@@ -195,14 +194,14 @@ ATTRIBUTES(GLOBAL) SUBROUTINE orthog_ps( st, nbndk, ikb, nk, npe, nsolv, &
         aux= aux + CONJG(evqk_d(ig+npwx,k1)) * dvpsik_d(ig+npwx,k2)
      ENDDO
   ENDIF
-  ortho_ps(k1, k2) = wwg*aux
+  ortho_ps_d(k1, k2) = wwg*aux
 
 RETURN
 END SUBROUTINE orthog_ps
 
 !-----------------------------------------------------------------------
 ATTRIBUTES(GLOBAL) SUBROUTINE orthog_last( st, nbndk, ikb, nk, npe, nsolv, &
-                      dvpsik_d, sevqk_d, ortho_ps, npol, npwx, nbnd, nksbx_ph )
+                   dvpsik_d, sevqk_d, ortho_ps_d, npol, npwx, nbnd, nksbx_ph )
 !-----------------------------------------------------------------------
   !
   !  Each thread computes one k point, one perturbation, and one band
@@ -235,7 +234,7 @@ ATTRIBUTES(GLOBAL) SUBROUTINE orthog_last( st, nbndk, ikb, nk, npe, nsolv, &
   !! inp/out: the bloch wavefunctions multiplied by S
   COMPLEX(DP), DEVICE, INTENT(INOUT) :: dvpsik_d(npwx*npol, nbnd*nk*npe*nsolv)
   !! the functions to orthogonalize
-  COMPLEX(DP), DEVICE, INTENT(IN) :: ortho_ps(nksbx_ph*nbnd*nsolv, &
+  COMPLEX(DP), DEVICE, INTENT(IN) :: ortho_ps_d(nksbx_ph*nbnd*nsolv, &
                                                  nbnd*nksbx_ph*npe*nsolv)
   !
   !  Local variables
@@ -296,12 +295,12 @@ ATTRIBUTES(GLOBAL) SUBROUTINE orthog_last( st, nbndk, ikb, nk, npe, nsolv, &
   DO jbnd=1, nbnd_eff
      k1 = nbnd*(ikwf-1) + jbnd
 !     DO ig = 1, npwq
-        dvpsik_d(ig,k2)=dvpsik_d(ig,k2) + sevqk_d(ig,k1) * ortho_ps(k1, k2)
+        dvpsik_d(ig,k2)=dvpsik_d(ig,k2) + sevqk_d(ig,k1) * ortho_ps_d(k1, k2)
 !     ENDDO
      IF (npol==2) THEN
 !        DO ig = 1, npwq
            dvpsik_d(ig+npwx,k2)=dvpsik_d(ig+npwx,k2) + sevqk_d(ig+npwx,k1) &
-                                                     * ortho_ps(k1, k2)
+                                                     * ortho_ps_d(k1, k2)
 !        ENDDO
      ENDIF
   ENDDO

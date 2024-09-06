@@ -130,8 +130,8 @@
 !
 !    ... set to zero the auxiliary space psic
 !
- CALL vlocpsi_gpu_setpsi_zero<<<dim3(nset,nvec/32+1,nnr/32+1),&
-                  dim3(1,32,32)>>>( outk_d, nveck_d, st_d, npol, &
+ CALL vlocpsi_gpu_setpsi_zero<<<dim3(nset,nvec,nnr/64+1),&
+                  dim3(1,1,64)>>>( outk_d, nveck_d, st_d, npol, &
                   psicmr, nvec, nnr, nset)
  ierr=cudaDeviceSynchronize()
  !
@@ -166,7 +166,7 @@
 !
 !   ... apply potential to psi
 !
- CALL vlocpsi_gpu_vp<<<dim3(nset,nvec,nnr/32+1),dim3(1,1,32)>>> &
+ CALL vlocpsi_gpu_vp<<<dim3(nset,nvec,nnr/64+1),dim3(1,1,64)>>> &
       (outk_d, nveck_d, st_d, ikt_d, npol, psicmr, nvec, nnr, nset, minus_b)
  ierr=cudaDeviceSynchronize()
 !
@@ -201,7 +201,7 @@
 !  Add the contribution of the nonlocal pseudopotential to hpsi and the
 !  contribution of qq to spsi
 !
- CALL add_vnlpsi_us_gpu<<<dim3(npwx/4+1,nvec/4+1,nset/32+1),dim3(4,4,32)>>> &
+ CALL add_vnlpsi_us_gpu<<<dim3(npwx/32+1,nvec,nset),dim3(32,1,1)>>> &
        ( npwx, outk_d, npw_d, nveck_d, nb1k_d, stx_d, ikblk_d, npol, &
                  hpsi, spsi, nvecx, nset )
  ierr=cudaDeviceSynchronize()
@@ -322,8 +322,8 @@ END SUBROUTINE h_s_psik_dev
 !
 !    ... set to zero the auxiliary space psic
 !
- CALL vlocpsi_gpu_setpsi_zero<<<dim3(nset,nvec/32+1,nnr/32+1),    &
-                  dim3(1,32,32)>>>( outk_d, nveck_d, st_d, npol,  &
+ CALL vlocpsi_gpu_setpsi_zero<<<dim3(nset/32+1,nvec,nnr/32+1),    &
+                  dim3(32,1,32)>>>( outk_d, nveck_d, st_d, npol,  &
                   psicmr, nvec, nnr, nset)
  ierr=cudaDeviceSynchronize()
  !
@@ -357,7 +357,7 @@ END SUBROUTINE h_s_psik_dev
 !
 !   ... apply potential to psi
 !
- CALL vlocpsi_gpu_vp<<<dim3(nset,nvec,nnr/32+1),dim3(1,1,32)>>> &
+ CALL vlocpsi_gpu_vp<<<dim3(nset/32+1,nvec,nnr/32+1),dim3(32,1,32)>>> &
       (outk_d, nveck_d, st_d, ikt_d, npol, psicmr, nvec, nnr, nset, minus_b)
  ierr=cudaDeviceSynchronize()
 !
@@ -399,6 +399,101 @@ END SUBROUTINE h_s_psik_dev
  CALL stop_clock('h_psi_dev')
  RETURN
 END SUBROUTINE h_psik_dev
+!
+!-------------------------------------------------------------------------
+  SUBROUTINE s_psik_dev(npwx, outk_d, kdimk_d, npw_d, nveck_d, nb1k_d, &
+             st_d, stx_d, ikblk_d, npol, psi, spsi, nvec, nvecx, nset)
+!-------------------------------------------------------------------------
+!
+!  This subroutine applies S to a set of wavefunctions contained in
+!  psi. The array psi whose leading dimension is npwx*npol, contains
+!  nvecx*nset wavefunctions. For each set the number of psi to calculate
+!  is given by nveck_d, while the results is saved in spsi. The 
+!  psi to calculate start at the nb1k_d position and
+!  are saved in the same positions in spsi.
+!  while ikblk_d is the index of the k point in 
+!  the currently calculated block of k points. nset is the number of
+!  k points to compute pw.x, but it is the number of k points multiplied
+!  the number of perturbations in the phonon.
+!  The array outk allows to skip entirely all calculations for some set.
+!
+  USE cudafor
+  USE kinds,       ONLY : DP
+  USE uspp,        ONLY : nkb, okvan
+  IMPLICIT NONE
+
+#include<h_psi_interf.f90>
+
+  INTEGER, INTENT(IN) :: npwx
+  !! input: the leading dimension of psi
+  INTEGER, INTENT(IN) :: nset, nvec, nvecx, npol
+  !! input: the number of sets
+  !! input: the number of vectors in each set for psicmr
+  !! input: the number of vectors in each set for psi, hpsi, and spsi.
+  !! input: the number of components of each wavefunction.
+  LOGICAL, INTENT(IN), DEVICE :: outk_d(nset)
+  !! input: when .TRUE. the set is not calculated
+  INTEGER, INTENT(IN), DEVICE :: kdimk_d(nset), npw_d(nset)
+  !! input: kdim is npwx*npol in the noncollinear case, or equal to npw_d
+  !!        in the collinear case
+  !! input: the number of plane waves for each set
+  INTEGER, INTENT(IN), DEVICE :: ikblk_d(nset)
+  !! input: index of k in the current block of k points
+  INTEGER, INTENT(IN), DEVICE :: nveck_d(nset)
+  !! input: the number of vectors to compute. 
+  INTEGER, INTENT(IN), DEVICE :: nb1k_d(nset)
+  !! input: where to start computing for each set (referred to the start of
+  !!                                               the set) 
+  INTEGER, INTENT(IN), DEVICE :: stx_d(nset) 
+  !! input: start of each set in psi, hpsi, and spsi
+  INTEGER, INTENT(IN), DEVICE :: st_d(nset)
+  !! input: start of each set in psicmr
+  COMPLEX(DP), DEVICE :: psi(npwx*npol, nvecx * nset)
+  !! inp: the psi vector
+  COMPLEX(DP), DEVICE :: spsi(npwx*npol, nvecx * nset)
+  !! out: the spsi vector
+
+  INTEGER :: ierr
+
+  CALL start_clock('s_psi_dev')
+!
+!  initialize s
+!
+  CALL copy_s_gpu<<<dim3((npwx*npol)/4+1,nvec/4+1,nset/32+1),dim3(4,4,32)>>>  &
+       ( npwx, outk_d, kdimk_d, nveck_d, nb1k_d, stx_d, npol, psi, spsi, &
+                                                        nvecx, nset )
+ ierr=cudaDeviceSynchronize()
+ IF (.NOT.okvan) THEN
+    CALL stop_clock('s_psi_dev')
+    RETURN
+ ENDIF
+!
+!  compute calbec
+!
+  CALL h_psi_calbec<<<dim3(nkb/4+1,nvec/4+1,nset/32+1),dim3(4,4,32)>>>&
+       ( npwx, outk_d, npw_d, nveck_d, nb1k_d, stx_d, ikblk_d, npol, psi, &
+         nvecx, nset )
+  ierr=cudaDeviceSynchronize()
+!
+!  compute the products of beta and the coefficients of the nonlocal PP
+!
+  IF (npol==1) THEN
+     CALL compute_ps_s_gpu<<<dim3(nset,nvec,1),dim3(1,1,1)>>>(outk_d, &
+                                          nveck_d, nset)
+     ierr=cudaDeviceSynchronize()
+  ELSE
+     CALL compute_ps_s_nc_gpu<<<dim3(nset,nvec,1),dim3(1,1,1)>>>(outk_d, &
+                                nveck_d, nset)
+     ierr=cudaDeviceSynchronize()
+  ENDIF
+ !
+ CALL add_spsi_gpu<<<dim3(npwx/4+1,nvec/4+1,nset/32+1),dim3(4,4,32)>>> &
+       ( npwx, outk_d, npw_d, nveck_d, nb1k_d, stx_d, ikblk_d, npol, &
+                 spsi, nvecx, nset )
+ ierr=cudaDeviceSynchronize()
+ CALL stop_clock('s_psi_dev')
+ RETURN
+END SUBROUTINE s_psik_dev
 !
 !-----------------------------------------------------------------------
 ATTRIBUTES(GLOBAL) SUBROUTINE h_psi_ke( lda, outk, npw, nveck, nb1k, stx, &
@@ -789,6 +884,86 @@ ATTRIBUTES(GLOBAL) SUBROUTINE add_vnlpsi_gpu( lda, outk, npw, nveck, &
 END SUBROUTINE add_vnlpsi_gpu
 !
 !-----------------------------------------------------------------------
+ATTRIBUTES(GLOBAL) SUBROUTINE add_spsi_gpu( lda, outk, npw, nveck, &
+                     nb1k, stx, ikblk, npol, spsi_d, nvecx, nset )
+  !-----------------------------------------------------------------------
+  !
+  ! This routine adds the contribution of the non local part to  
+  ! spsi. It assumes that pssk_d is already filled with the
+  ! sum_n becp(n,ibnd) * q_mn.
+  !
+  USE cudafor
+  USE util_param,     ONLY : DP
+  USE many_k_mod,     ONLY : pssk_d, vkbk_d, nkb => nkb_d
+  !
+  IMPLICIT NONE
+  !
+  INTEGER, INTENT(IN), VALUE :: lda
+  !! input: the leading dimension of spsi_d
+  INTEGER, INTENT(IN), VALUE :: nset, nvecx
+  !! input: the number of sets
+  !! input: the number of vectors in each set for psi
+  LOGICAL, INTENT(IN), DEVICE :: outk(nset)
+  !! input: if .TRUE. this set is not calculated
+  INTEGER, INTENT(IN), DEVICE :: ikblk(nset)
+  !! input: the index of the k point of this set in the block
+  INTEGER, INTENT(IN), DEVICE :: npw(nset)
+  !! input: the number of plane waves for each set
+  INTEGER, INTENT(IN), DEVICE :: nveck(nset)
+  !! input: the number of vectors to compute. 
+  INTEGER, INTENT(IN), DEVICE :: nb1k(nset)
+  !! input: where to start computing for each set (referred to the start of
+  !!                                               the set) 
+  INTEGER, INTENT(IN), DEVICE :: stx(nset)
+  !! input: start of each set in hpsi_d and spsi_d
+  INTEGER, INTENT(IN), VALUE :: npol
+  !! input: number of components of each psi
+  COMPLEX(DP), DEVICE :: spsi_d(lda*npol, nvecx*nset)
+  !! in/out: the spsi vector
+  !
+  !  ... local variables
+  !
+  INTEGER :: k0, ik, ik1, i, j, j1, k, n, mb, nb1, stx_, sh
+  !
+  COMPLEX(DP) :: asum
+  !
+  ik=(BlockIdx%z-1)*BlockDim%z + ThreadIdx%z
+  IF (ik>nset) RETURN
+  IF (outk(ik)) RETURN
+  ik1=ikblk(ik)
+  n = npw(ik)
+  stx_=stx(ik)
+  nb1=nb1k(ik)
+  mb=nveck(ik) 
+
+  i=(BlockIdx%x-1)*BlockDim%x + ThreadIdx%x
+  IF (i>n) RETURN
+  k0=(BlockIdx%y-1)*BlockDim%y + ThreadIdx%y
+  IF (k0>mb) RETURN
+  k = k0 + stx_ + nb1 - 1
+  sh= nkb*(ik1-1)
+
+  asum=(0.0_DP,0.0_DP)
+  DO j=1, nkb
+     j1=j+sh
+     asum=asum+vkbk_d(i,j1)*pssk_d(j,1,k0,ik)
+  ENDDO
+  spsi_d(i,k)=spsi_d(i,k) + asum
+  !
+  IF (npol==2) THEN
+     asum=(0.0_DP,0.0_DP)
+     DO j=1, nkb
+        j1=j+sh
+        asum=asum+vkbk_d(i,j1)*pssk_d(j,2,k0,ik)
+     ENDDO
+     spsi_d(lda+i,k)=spsi_d(lda+i,k) + asum
+  ENDIF
+  !
+  RETURN
+  !
+END SUBROUTINE add_spsi_gpu
+!
+!-----------------------------------------------------------------------
 ATTRIBUTES(GLOBAL) SUBROUTINE compute_ps_gpu( outk, nveck, ikt, nset)
   !-----------------------------------------------------------------------
   !
@@ -1009,6 +1184,176 @@ ATTRIBUTES(GLOBAL) SUBROUTINE compute_ps_nc_gpu(outk, nveck, nset, minus_b)
   RETURN
   !
 END SUBROUTINE compute_ps_nc_gpu
+!
+!-----------------------------------------------------------------------
+ATTRIBUTES(GLOBAL) SUBROUTINE compute_ps_s_gpu( outk, nveck, nset)
+  !-----------------------------------------------------------------------
+  !
+  ! This routines fills pssk_d with sum_n becp(n,ibnd) * q_mn 
+  ! respectively.
+  ! This routine is called only in the collinear case.
+  !
+  USE cudafor
+  USE util_param,     ONLY : DP
+  USE many_k_mod,     ONLY : pssk_d, becpk_d, isk_d, nat=>nat_d, &
+                             ntyp=>ntyp_d, ityp=>ityp_d, nh=>nh_d,      &
+                             qq_at=>qq_at_d, deeq=>deeq_d, lsda => lsda_d, &
+                             nkb => nkb_d, okvan => okvan_d
+
+  USE uspp, ONLY : ofsbeta=>ofsbeta_d
+  IMPLICIT NONE
+  !
+  INTEGER, INTENT(IN), VALUE :: nset
+  !! input: the number of sets
+  LOGICAL, INTENT(IN), DEVICE :: outk(nset)
+  !! input: if .TRUE. this set is not calculated
+  INTEGER, INTENT(IN), DEVICE :: nveck(nset)
+  !! input: the number of vectors to compute. 
+  !
+  !  ... local variables
+  !
+  INTEGER :: k0, ik, m, k, j, nt, na, nhnt
+  !
+  COMPLEX(DP) :: asum, bsum
+  !
+  ik=(BlockIdx%x-1)*BlockDim%x + ThreadIdx%x
+  IF (ik>nset) RETURN
+  IF (outk(ik)) RETURN
+  IF (nkb == 0) RETURN
+  m=nveck(ik) 
+
+  k0=(BlockIdx%y-1)*BlockDim%y + ThreadIdx%y
+  IF (k0>m) RETURN
+
+  pssk_d(:,1,k0,ik)=(0.0_DP,0.0_DP)
+
+  DO nt = 1, ntyp
+     !
+     IF ( nh(nt) == 0 ) CYCLE
+     !
+     nhnt = nh(nt)
+     !
+     DO na = 1, nat
+        !
+        IF ( ityp(na) == nt ) THEN
+           !
+           DO k=1, nhnt
+              bsum=(0.0_DP,0.0_DP)
+              DO j=1, nhnt
+                 bsum=bsum+qq_at(k,j,na)* &
+                                     becpk_d(ofsbeta(na)+j,1,k0,ik)
+              ENDDO
+              pssk_d(ofsbeta(na)+k,1,k0,ik)=&
+                        pssk_d(ofsbeta(na)+k,1,k0,ik)+bsum
+           ENDDO
+           !
+        ENDIF
+        !
+     ENDDO
+     !
+  ENDDO
+  !
+  RETURN
+  !
+END SUBROUTINE compute_ps_s_gpu
+!
+!-----------------------------------------------------------------------
+ATTRIBUTES(GLOBAL) SUBROUTINE compute_ps_s_nc_gpu(outk, nveck, nset)
+  !-----------------------------------------------------------------------
+  !
+  ! This routines fills psk_d and pssk_d with sum_n becp(n,ibnd) * D_mn 
+  ! and sum_n becp(n,ibnd) * q_mn respectively.
+  ! pssk_d is computed only when uspp is .TRUE..
+  ! This routine is called only in the noncollinear case.
+  !
+  !
+  USE cudafor
+  USE util_param,     ONLY : DP
+  USE many_k_mod,     ONLY : psk_d, pssk_d, becpk_d, nat=>nat_d,        &
+                             ntyp=>ntyp_d, ityp=>ityp_d, nh=>nh_d,      &
+                             qq_at=>qq_at_d, deeq_nc=>deeq_nc_d,        &
+                             qq_so=>qq_so_d, nkb => nkb_d,              &
+                             lspinorb => lspinorb_d, okvan => okvan_d
+  USE many_k_ph_mod,  ONLY:  deeq_nc_save=> deeq_nc_save_d
+  USE uspp, ONLY : ofsbeta=>ofsbeta_d
+  IMPLICIT NONE
+  !
+  INTEGER, INTENT(IN), VALUE :: nset
+  !! input: the number of sets
+  LOGICAL, INTENT(IN), DEVICE :: outk(nset)
+  !! input: if .TRUE. this set is not calculated
+  INTEGER, INTENT(IN), DEVICE :: nveck(nset)
+  !! input: the number of vectors to compute. 
+  !
+  !  ... local variables
+  !
+  INTEGER :: k0, ik, mb, k, j, nt, na, nhnt, iset
+  !
+  COMPLEX(DP) :: bsum
+  !
+  ik=(BlockIdx%x-1)*BlockDim%x + ThreadIdx%x
+  IF (ik>nset) RETURN
+  IF (outk(ik)) RETURN
+  IF (nkb == 0) RETURN
+  mb=nveck(ik) 
+
+  k0=(BlockIdx%y-1)*BlockDim%y + ThreadIdx%y
+  IF (k0>mb) RETURN
+
+  pssk_d(:,:,k0,ik)=(0.0_DP,0.0_DP)
+
+  DO nt = 1, ntyp
+     !
+     IF ( nh(nt) == 0 ) CYCLE
+     !
+     nhnt = nh(nt)
+     !
+     DO na = 1, nat
+        !
+        IF ( ityp(na) == nt ) THEN
+           !
+           DO k=1, nhnt
+              bsum=(0.0_DP,0.0_DP)
+              IF (lspinorb) THEN
+                 DO j=1, nhnt
+                    bsum = bsum                                           &
+                         + qq_so(k,j,1,nt)*becpk_d(ofsbeta(na)+j,1,k0,ik) &
+                         + qq_so(k,j,2,nt)*becpk_d(ofsbeta(na)+j,2,k0,ik)
+                 ENDDO
+              ELSE
+                 DO j=1, nhnt
+                    bsum=bsum+qq_at(k,j,na)*becpk_d(ofsbeta(na)+j,1,k0,ik) 
+                 ENDDO
+              ENDIF
+              pssk_d(ofsbeta(na)+k,1,k0,ik)=pssk_d(ofsbeta(na)+k,1,k0,ik)&
+                                               +bsum
+           ENDDO
+           DO k=1, nhnt
+              bsum=(0.0_DP,0.0_DP)
+              IF (lspinorb) THEN
+                 DO j=1, nhnt
+                    bsum=bsum                                             &
+                          +qq_so(k,j,3,nt)*becpk_d(ofsbeta(na)+j,1,k0,ik) &
+                          +qq_so(k,j,4,nt)*becpk_d(ofsbeta(na)+j,2,k0,ik)
+                 ENDDO
+              ELSE
+                 DO j=1, nhnt
+                    bsum=bsum+qq_at(k,j,na)*becpk_d(ofsbeta(na)+j,2,k0,ik) 
+                 ENDDO
+              ENDIF
+              pssk_d(ofsbeta(na)+k,2,k0,ik)=pssk_d(ofsbeta(na)+k,2,k0,ik)&
+                                            +bsum
+           ENDDO
+           !
+        ENDIF
+        !
+     ENDDO
+     !
+  ENDDO
+  !
+  RETURN
+  !
+END SUBROUTINE compute_ps_s_nc_gpu
 !
 !-----------------------------------------------------------------------
 ATTRIBUTES(GLOBAL) SUBROUTINE vlocpsi_gpu_vp(outk, nveck, st, ikt, npol, &

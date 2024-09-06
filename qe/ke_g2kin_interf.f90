@@ -45,8 +45,8 @@ IMPLICIT NONE
 !
 INTEGER, INTENT(IN), VALUE :: nk, npwx, npol, ikb, nbnd, nsolv
 REAL(DP), DEVICE, INTENT(IN) :: g2kink_d(npwx, nk)
-COMPLEX(DP), DEVICE, INTENT(IN) :: evqk_d(npwx*npol, nbnd*nk*nsolv)
-REAL(DP), DEVICE, INTENT(INOUT) :: eprec_d(nbnd*nk*nsolv)
+COMPLEX(DP), DEVICE, INTENT(IN) :: evqk_d(npwx*npol, nbnd*nk)
+REAL(DP), DEVICE, INTENT(INOUT) :: eprec_d(nbnd*nk)
 
 END SUBROUTINE ke_eprec
 
@@ -69,7 +69,7 @@ ATTRIBUTES(GLOBAL) SUBROUTINE ke_hprec( st, ikb, nk, g2kink_d, h_diag_ph_d, &
   REAL(DP), DEVICE, INTENT(IN) :: g2kink_d(npwx, nk)
   REAL(DP), DEVICE, INTENT(INOUT) :: h_diag_ph_d(npwx*npol, &
                                                      nbnd*nk*npe*nsolv)
-  REAL(DP), DEVICE, INTENT(IN) :: eprec_d(nbnd*nk*nsolv)
+  REAL(DP), DEVICE, INTENT(IN) :: eprec_d(nbnd*nk)
 END SUBROUTINE ke_hprec
 END INTERFACE ke_g2kin_interf
 #endif

@@ -56,7 +56,7 @@ COMPLEX(DP), ALLOCATABLE :: sumk_d(:,:,:)
 COMPLEX(DP), ALLOCATABLE :: sumk_nc_d(:,:,:,:)
 COMPLEX(DP), ALLOCATABLE :: ps1k_nc_d(:,:,:,:)
 COMPLEX(DP), ALLOCATABLE :: ps2k_nc_d(:,:,:,:,:)
-COMPLEX(DP), ALLOCATABLE :: ortho_ps(:,:)
+COMPLEX(DP), ALLOCATABLE :: ortho_ps_d(:,:)
 !
 !  Variables needed to put on device phonon variables on host
 !
@@ -103,7 +103,7 @@ ATTRIBUTES(DEVICE) :: sumk_d
 ATTRIBUTES(DEVICE) :: sumk_nc_d
 ATTRIBUTES(DEVICE) :: ps1k_nc_d
 ATTRIBUTES(DEVICE) :: ps2k_nc_d
-ATTRIBUTES(DEVICE) :: ortho_ps
+ATTRIBUTES(DEVICE) :: ortho_ps_d
 
 ATTRIBUTES(DEVICE) :: ef_d
 ATTRIBUTES(DEVICE) :: alpha_pv_d
@@ -137,7 +137,7 @@ PUBLIC nkblocks_ph, nksbx_ph, nksb_ph, startkb_ph, startkb_ph_d, &
 !
 PUBLIC dvpsik_d, dpsik_d, evqk_d, h_diagk_ph_d, becp1k_d, alphak_d, dbecq_d, &
        ps1k, ps1k_d, ps2k, ps2k_d, ps1k_nc_d, ps2k_nc_d, becptk_d, alphatk_d, &
-       sevqk_d, ortho_ps, eprec_d, sumk_d, sumk_nc_d, gammak_d, dyn_aux_d, &
+       sevqk_d, ortho_ps_d, eprec_d, sumk_d, sumk_nc_d, gammak_d, dyn_aux_d, &
        dyn_aux
 !
 !  Variables needed to copy on device the phonon variables
@@ -378,7 +378,7 @@ INTEGER, INTENT(IN) :: npe, nsolv, nnr
  ALLOCATE(ps2k_d(nkb,nbnd,3,nksbx_ph*npe*nsolv))
  ALLOCATE(ps1k_nc_d(nkb,npol,nbnd,nksbx_ph*npe*nsolv))
  ALLOCATE(ps2k_nc_d(nkb,npol,nbnd,3,nksbx_ph*npe*nsolv))
- ALLOCATE(ortho_ps(nbnd*nksbx_ph*nsolv,nbnd*nksbx_ph*npe*nsolv))
+ ALLOCATE(ortho_ps_d(nbnd*nksbx_ph*nsolv,nbnd*nksbx_ph*npe*nsolv))
 !
 !  variables needed to copy the phonon variables
 !
@@ -436,7 +436,7 @@ IF (ALLOCATED(ps2k_d)) DEALLOCATE(ps2k_d)
 IF (ALLOCATED(sumk_nc_d)) DEALLOCATE(sumk_nc_d)
 IF (ALLOCATED(ps1k_nc_d)) DEALLOCATE(ps1k_nc_d)
 IF (ALLOCATED(ps2k_nc_d)) DEALLOCATE(ps2k_nc_d)
-IF (ALLOCATED(ortho_ps)) DEALLOCATE(ortho_ps)
+IF (ALLOCATED(ortho_ps_d)) DEALLOCATE(ortho_ps_d)
 
 IF (ALLOCATED(deff_d)) DEALLOCATE(deff_d)
 IF (ALLOCATED(deff_nc_d)) DEALLOCATE(deff_nc_d)

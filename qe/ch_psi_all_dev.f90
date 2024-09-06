@@ -43,34 +43,46 @@ COMPLEX(DP), DEVICE :: ps(nbnd,my_nbnd*nk*npe*nsolv)
 
 INTEGER :: ierr
 
-!$acc kernels present(ps)
-ps (:,:) = (0.d0, 0.d0)
-!$acc end kernels
+!!$acc kernels present(ps)
+!ps (:,:) = (0.d0, 0.d0)
+!!$acc end kernels
+CALL start_clock('chp_ps')
 CALL ch_psi_computeps<<<dim3(nk*npe*nsolv,nbnd,nbnd/4+1),dim3(1,1,4)>>>(ndmx, &
      outk_d, kdimk_d, st_d, nbndk_d, evqk_d, spsi, ps, current_ikb_ph, &
      npol, nk, npe, nsolv, nbnd, my_nbnd, alpha_pv)
 ierr=cudaDeviceSynchronize()
-CALL mp_sum ( ps, intra_bgrp_comm )
+!CALL mp_sum ( ps, intra_bgrp_comm )
+CALL stop_clock('chp_ps')
+CALL start_clock('chp_ah')
 CALL ch_psi_ah<<<dim3(nk,npe*nsolv,nbnd),dim3(1,1,1)>>>(ndmx, &
               outk_d, st_d, nbndk_d, ah, hpsi, spsi, eu, current_ikb_ph, &
               npol, nk, npe, nsolv, nbnd, my_nbnd)
 ierr=cudaDeviceSynchronize()
+CALL stop_clock('chp_ah')
+CALL start_clock('chp_lo2')
 CALL ch_psi_lo2<<<dim3(nk,npe*nsolv,nbnd/4+1),dim3(1,1,4)>>>&
             (ndmx, outk_d, st_d, nbndk_d, evqk_d, hpsi, ps, current_ikb_ph, &
              npol, nk, npe, nsolv, nbnd, my_nbnd)
 ierr=cudaDeviceSynchronize()
+CALL stop_clock('chp_lo2')
+CALL start_clock('chp_calbec')
 CALL ch_psi_calbec<<<dim3(nk*npe*nsolv,nkb,nbnd/4+1),dim3(1,1,4)>>>(ndmx,  &
     outk_d, st_d, nbndk_d, npwk_d, hpsi, current_ikb_ph, npol, nk, &
     npe, nsolv, nkb, nbnd, my_nbnd)
 ierr=cudaDeviceSynchronize()
+CALL stop_clock('chp_calbec')
 IF (okvan) THEN
+   CALL start_clock('chp_qqps')
    CALL ch_psi_qqps<<<dim3(nk*npe*nsolv,nbnd,1),dim3(1,1,1)>>>(outk_d, &
          nbndk_d, nkb, nk, npe, nsolv, npol )
    ierr=cudaDeviceSynchronize()
-   CALL ch_psi_sqdpsi<<<dim3(nk*npe*nsolv,ndmx,nbnd),dim3(1,1,1)>>>(ndmx, &
+   CALL stop_clock('chp_qqps')
+   CALL start_clock('chp_sqdpsi')
+   CALL ch_psi_sqdpsi<<<dim3(nk*npe*nsolv,nbnd,ndmx/32+1),dim3(1,1,32)>>>(ndmx,&
         outk_d, npwk_d, st_d, nbndk_d, hpsi, ah, current_ikb_ph, npol, nk, &
         npe, nsolv, nkb, nbnd, my_nbnd)
    ierr=cudaDeviceSynchronize()
+   CALL stop_clock('chp_sqdpsi')
 ELSE
    CALL ch_psi_sdpsi<<<dim3(nk*npe*nsolv,ndmx,nbnd),dim3(1,1,1)>>>(ndmx, &
         outk_d, st_d, nbndk_d, hpsi, ah, current_ikb_ph, npol, nk, &
@@ -353,12 +365,13 @@ END SUBROUTINE ch_psi_dev
  kstart=nkb*(ik1-1)
  st_=st(id)
 
- ig=(BlockIdx%y-1)*BlockDim%y + ThreadIdx%y
- IF (ig>n) RETURN
 
- ibnd=(BlockIdx%z-1)*BlockDim%z + ThreadIdx%z
+ ibnd=(BlockIdx%y-1)*BlockDim%y + ThreadIdx%y
  IF (ibnd>nbndk(id)) RETURN
  k=st_+ibnd
+
+ ig=(BlockIdx%z-1)*BlockDim%z + ThreadIdx%z
+ IF (ig>n) RETURN
 
  asum=(0.0_DP,0.0_DP)
  DO j=1, nkb

@@ -70,8 +70,9 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
   USE many_k_ph_mod, ONLY : dvpsik_d, dpsik_d, evqk_d, h_diagk_ph_d,       &
                             allocate_many_k_ph, deallocate_many_k_ph,      &
                             init_k_blocks_ph, current_ikb_ph, nkblocks_ph, &
-                            startkb_ph, nksb_ph, nksbx_ph,  &
-                            prepare_ph_device, eprec_d
+                            startkb_ph, nksb_ph, nksbx_ph, drhoscf_d, &
+                            prepare_ph_device, eprec_d, sevqk_d, &
+                            ortho_ps_d
   USE many_k_mod,   ONLY : evck_d, vkbk_d, g2kink_d, initialize_fft_factors, &
                            deallocate_fft_factors, allocate_becps_many_k, &
                            deallocate_becps_many_k, initialize_device_variables
@@ -162,7 +163,8 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
              ierr,       & ! 
              mode          ! mode index
 
-  INTEGER, ALLOCATABLE :: lter(:), st(:), ikt(:), npwk(:), nbndk(:)
+  INTEGER, ALLOCATABLE :: lter(:), st(:), ikt(:), npwk(:), nbndk(:), &
+                          kdimk(:), nb1k(:), nveck(:), ikblk(:), npwkr(:)
   LOGICAL, ALLOCATABLE :: outk(:)
 
   INTEGER  :: iq_dummy, i, j, id, st_, ikwf
@@ -172,7 +174,12 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
   INTEGER, DEVICE, ALLOCATABLE :: ikt_d(:)
   INTEGER, DEVICE, ALLOCATABLE :: st_d(:)
   INTEGER, DEVICE, ALLOCATABLE :: nbndk_d(:)
+  INTEGER, DEVICE, ALLOCATABLE :: kdimk_d(:)
+  INTEGER, DEVICE, ALLOCATABLE :: nb1k_d(:)
+  INTEGER, DEVICE, ALLOCATABLE :: ikblk_d(:)
+  INTEGER, DEVICE, ALLOCATABLE :: nveck_d(:)
   INTEGER, DEVICE, ALLOCATABLE :: npwk_d(:)
+  INTEGER, DEVICE, ALLOCATABLE :: npwkr_d(:)
   LOGICAL, DEVICE, ALLOCATABLE :: outk_d(:)
   REAL(DP), DEVICE, ALLOCATABLE :: ylm_d(:,:,:)
   REAL(DP), DEVICE, ALLOCATABLE :: vkb1_d(:,:,:)
@@ -298,6 +305,9 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
 
      lintercall = 0
      drhoscf(:,:,:) = (0.d0, 0.d0)
+#if defined(__CUDA)
+     drhoscf_d=drhoscf
+#endif
      dbecsum(:,:,:,:) = (0.d0, 0.d0)
      IF (noncolin) dbecsum_nc = (0.d0, 0.d0)
      IF (iter>1) THEN
@@ -329,11 +339,21 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
         ALLOCATE(outk(nksb_ph(ikb)*npe*nsolv))
         ALLOCATE(nbndk(nksb_ph(ikb)*npe*nsolv))
         ALLOCATE(npwk(nksb_ph(ikb)*npe*nsolv))
+        ALLOCATE(npwkr(nksb_ph(ikb)*nsolv))
+        ALLOCATE(kdimk(nksb_ph(ikb)*nsolv))
+        ALLOCATE(nb1k(nksb_ph(ikb)*npe*nsolv))
+        ALLOCATE(nveck(nksb_ph(ikb)*npe*nsolv))
+        ALLOCATE(ikblk(nksb_ph(ikb)*nsolv))
 #if defined(__CUDA)       
         ALLOCATE(st_d(nksb_ph(ikb)*npe*nsolv))
         ALLOCATE(outk_d(nksb_ph(ikb)*npe*nsolv))
         ALLOCATE(nbndk_d(nksb_ph(ikb)*npe*nsolv))
         ALLOCATE(npwk_d(nksb_ph(ikb)*npe*nsolv))
+        ALLOCATE(npwkr_d(nksb_ph(ikb)*nsolv))
+        ALLOCATE(kdimk_d(nksb_ph(ikb)*nsolv))
+        ALLOCATE(nb1k_d(nksb_ph(ikb)*npe*nsolv))
+        ALLOCATE(nveck_d(nksb_ph(ikb)*npe*nsolv))
+        ALLOCATE(ikblk_d(nksb_ph(ikb)*nsolv))
 #endif
         current_ikb_ph=ikb
 !
@@ -342,14 +362,27 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
         DO ik=startkb_ph(ikb)+1, startkb_ph(ikb)+nksb_ph(ikb)
            ik1=ik-startkb_ph(ikb)
            ikt(ik1)=ikqs(ik)
-           ikk=ikks(ik)
-           ikq=ikqs(ik)
            DO isolv=1, nsolv
+              IF (isolv==2) THEN
+                 ikmk = ikmks(ik)
+                 ikmkmq = ikmkmqs(ik)
+              ELSE
+                 ikmk=ikks(ik)
+                 ikmkmq=ikqs(ik)
+              ENDIF
+              id=ik1+(isolv-1)*nksb_ph(ikb)
+              kdimk(id)= ngk(ikmkmq)
+              IF (npol==2) kdimk(id)=npwx*npol
+              ikblk(id) = ik1
+              npwkr(id) = ngk(ikmkmq)
               DO ipert=1,npe
                  id=ik1+(ipert-1)*nksb_ph(ikb)+(isolv-1)*npe*nksb_ph(ikb)
                  st(id)=nbnd * (id-1)
-                 nbndk(id) = nbnd_occ(ikk)
-                 npwk(id) = ngk(ikq)
+                 nbndk(id) = nbnd_occ(ikmk)
+                 npwk(id) = ngk(ikmkmq)
+                 nb1k(id) = 1
+                 nveck(id)= nbnd_occ(ikmkmq)
+                 IF (lgauss.OR.ltetra) nveck(id)=nbnd
                  outk(id)=.FALSE.
               ENDDO
            ENDDO
@@ -362,8 +395,13 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
         ikt_d=ikt
         st_d=st
         nbndk_d=nbndk
+        nveck_d=nveck
         npwk_d=npwk
+        npwkr_d=npwkr
         outk_d=outk
+        nb1k_d=nb1k
+        kdimk_d=kdimk
+        ikblk_d=ikblk
         ALLOCATE(ylm_d((lmaxkb + 1) **2, npwx, nksb_ph(ikb)))
         ALLOCATE(vkb1_d(nhm, npwx, nksb_ph(ikb)))
         IF ( nkb > 0) CALL ylm2_dev<<<dim3(nksb_ph(ikb),npwx,1),&
@@ -419,13 +457,13 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
            ! compute the kinetic energy for k-point ikq
            ! needed by h_psi, called by ch_psi_all, called by cgsolve_all
 
+#if !  defined(__CUDA)              
            !$acc parallel loop present(vkb)
            DO i=1,npwx
               vkb(i,1:nkb)=vkbk_d(i,nkb*(ik1-1)+1:nkb*ik1)
            ENDDO
            !$acc update host(vkb)
 
-#if !  defined(__CUDA)              
            CALL g2_kin (ikq) 
            !$acc parallel loop present(g2kin)
            DO i=1,npwx
@@ -666,8 +704,12 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
                  id=ik1 + (ipert-1)*nksb_ph(ikb)+ (isolv-1)*npe*nksb_ph(ikb)
                  ikwf=ik1 + (isolv-1)*nksb_ph(ikb)
                  st_=st(id)
-                 dvpsi(1:npwx*npol,1:nbnd)=dvpsik_d(1:npwx*npol,st_+1:st_+nbnd)
-                 IF (iter==1) CALL save_buffer (dvpsi, lrbar, iubar, nrec)
+                 IF (iter==1) THEN
+                    dvpsi(1:npwx*npol,1:nbnd)=&
+                              dvpsik_d(1:npwx*npol,st_+1:st_+nbnd)
+                    CALL save_buffer (dvpsi, lrbar, iubar, nrec)
+                 ENDIF    
+#if ! defined(__CUDA)
                  evq(:,1:nbnd)=evqk_d(:,nbnd*(ikwf-1)+1:nbnd*ikwf) 
                  !$acc parallel loop present(vkb)
                  DO i=1,npwx
@@ -681,10 +723,18 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
                  CALL orthogonalize_tpw(dvpsi, evq, ikmk, ikmkmq, dpsi, &
                                                               npwq, .false.)
                  dvpsik_d(1:npwx*npol,st_+1:st_+nbnd)=dvpsi(1:npwx*npol,1:nbnd)
+#endif
                  !
               ENDDO
            ENDDO
         ENDDO         !
+#if defined(__CUDA)
+        CALL orthogonalize_dev(st_d, outk_d, kdimk_d, npwkr_d, nveck_d,    &
+                   nb1k_d, ikblk_d, nbndk_d, ikb, nksb_ph(ikb), npe, nsolv,&
+                   dvpsik_d, evqk_d, sevqk_d, ortho_ps_d, npol, npwx,        &
+                   nbnd, nksbx_ph)
+#endif
+
         CALL stop_clock('first_part')
         ! iterative solution of the linear system (H-eS)*dpsi=dvpsi,
         ! dvpsi=-P_c^+ (dvbare+dvscf)*psi , dvscf fixed.
@@ -708,7 +758,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
        IF (.not.noncolin) THEN
           ALLOCATE(dpsicrm(2,nnrs,npol,nbnd*nksb_ph(ikb)*npe*nsolv))
           CALL incdrhoscf_dev(outk_d, npwk_d, nbndk_d, nbndk, st_d, st, &
-               npol, drhoscf, dbecsum, dpsik_d, psicrm, dpsicrm, nbnd,  &
+               npol, drhoscf_d, dbecsum, dpsik_d, psicrm, dpsicrm, nbnd,  &
                nksb_ph(ikb), npe, nnrs, nnr)
           DEALLOCATE(psicrm)
           DEALLOCATE(dpsicrm)
@@ -806,16 +856,28 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
         DEALLOCATE (outk)
         DEALLOCATE (nbndk)
         DEALLOCATE (npwk)
+        DEALLOCATE (npwkr)
+        DEALLOCATE (kdimk)
+        DEALLOCATE (nb1k)
+        DEALLOCATE (nveck)
+        DEALLOCATE (ikblk)
 #if defined(__CUDA)       
         DEALLOCATE (st_d)
         DEALLOCATE (outk_d)
+        DEALLOCATE (nbndk_d)
         DEALLOCATE (npwk_d)
+        DEALLOCATE (npwkr_d)
+        DEALLOCATE (kdimk_d)
+        DEALLOCATE (nb1k_d)
+        DEALLOCATE (nveck_d)
+        DEALLOCATE (ikblk_d)
 #endif
         current_ikb_ph=ikb
         CALL stop_clock('second_part')
         ! on k points blocks
      ENDDO
      CALL start_clock('the_rest')
+     drhoscf=drhoscf_d
      !
      !  The calculation of dbecsum is distributed across processors (see addusdbec)
      !  Sum over processors the contributions coming from each slice of bands

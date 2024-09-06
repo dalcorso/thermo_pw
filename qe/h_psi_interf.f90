@@ -347,6 +347,71 @@ ATTRIBUTES(GLOBAL) SUBROUTINE compute_ps_nc_gpu(outk, nveck, nset, minus_b)
   INTEGER, INTENT(IN), DEVICE :: nveck(nset)
 
 END SUBROUTINE compute_ps_nc_gpu
+!
+!-----------------------------------------------------------------------
+ATTRIBUTES(GLOBAL) SUBROUTINE compute_ps_s_gpu( outk, nveck, nset)
+  !-----------------------------------------------------------------------
+  !
+  USE cudafor
+  USE util_param,     ONLY : DP
+  USE many_k_mod,     ONLY : pssk_d, becpk_d, isk_d, nat=>nat_d, &
+                             ntyp=>ntyp_d, ityp=>ityp_d, nh=>nh_d,      &
+                             qq_at=>qq_at_d, deeq=>deeq_d, lsda => lsda_d, &
+                             nkb => nkb_d, okvan => okvan_d
+
+  USE uspp, ONLY : ofsbeta=>ofsbeta_d
+  IMPLICIT NONE
+  !
+  INTEGER, INTENT(IN), VALUE :: nset
+  LOGICAL, INTENT(IN), DEVICE :: outk(nset)
+  INTEGER, INTENT(IN), DEVICE :: nveck(nset)
+  !
+END SUBROUTINE compute_ps_s_gpu
+!
+!-----------------------------------------------------------------------
+ATTRIBUTES(GLOBAL) SUBROUTINE compute_ps_s_nc_gpu(outk, nveck, nset)
+  !-----------------------------------------------------------------------
+  !
+  USE cudafor
+  USE util_param,     ONLY : DP
+  USE many_k_mod,     ONLY : psk_d, pssk_d, becpk_d, nat=>nat_d,        &
+                             ntyp=>ntyp_d, ityp=>ityp_d, nh=>nh_d,      &
+                             qq_at=>qq_at_d, deeq_nc=>deeq_nc_d,        &
+                             qq_so=>qq_so_d, nkb => nkb_d,              &
+                             lspinorb => lspinorb_d, okvan => okvan_d
+  USE many_k_ph_mod,  ONLY:  deeq_nc_save=> deeq_nc_save_d
+  USE uspp, ONLY : ofsbeta=>ofsbeta_d
+  IMPLICIT NONE
+  !
+  INTEGER, INTENT(IN), VALUE :: nset
+  LOGICAL, INTENT(IN), DEVICE :: outk(nset)
+  INTEGER, INTENT(IN), DEVICE :: nveck(nset)
+  !
+END SUBROUTINE compute_ps_s_nc_gpu
+!
+!-----------------------------------------------------------------------
+ATTRIBUTES(GLOBAL) SUBROUTINE add_spsi_gpu( lda, outk, npw, nveck, &
+                     nb1k, stx, ikblk, npol, spsi_d, nvecx, nset )
+  !-----------------------------------------------------------------------
+  !
+  USE cudafor
+  USE util_param,     ONLY : DP
+  USE many_k_mod,     ONLY : pssk_d, vkbk_d, nkb => nkb_d
+  !
+  IMPLICIT NONE
+  !
+  INTEGER, INTENT(IN), VALUE :: lda
+  INTEGER, INTENT(IN), VALUE :: nset, nvecx
+  LOGICAL, INTENT(IN), DEVICE :: outk(nset)
+  INTEGER, INTENT(IN), DEVICE :: ikblk(nset)
+  INTEGER, INTENT(IN), DEVICE :: npw(nset)
+  INTEGER, INTENT(IN), DEVICE :: nveck(nset)
+  INTEGER, INTENT(IN), DEVICE :: nb1k(nset)
+  INTEGER, INTENT(IN), DEVICE :: stx(nset)
+  INTEGER, INTENT(IN), VALUE :: npol
+  COMPLEX(DP), DEVICE :: spsi_d(lda*npol, nvecx*nset)
+  !
+END SUBROUTINE add_spsi_gpu
 
 END INTERFACE h_psi_gpu_interf
 #endif
