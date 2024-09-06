@@ -19,6 +19,10 @@ USE paw_onecenter,    ONLY : paw_dpotential
 USE lrus,             ONLY : int3, int3_paw, int3_nc
 USE nc_mag_aux,       ONLY : int3_save
 
+#if defined(__CUDA) 
+USE many_k_ph_mod,    ONLY : int3_d, int3_nc_d
+#endif
+
 IMPLICIT NONE
 
 INTEGER :: npe
@@ -70,6 +74,15 @@ IF (noncolin.AND.domag) THEN
 !
    int3_nc(:,:,:,:,:)=int3_save(:,:,:,:,:,1)
 ENDIF
+#if defined(__CUDA)
+IF (noncolin.AND.domag) THEN
+   int3_nc_d=int3_save
+ELSEIF (noncolin) THEN
+   int3_nc_d(:,:,:,:,:,1)=int3_nc(:,:,:,:,:)
+ELSE
+   int3_d=int3
+ENDIF
+#endif
 
 RETURN
 END SUBROUTINE compute_int3_coeff

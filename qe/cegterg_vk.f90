@@ -314,7 +314,7 @@ SUBROUTINE cegterg_vk( h_psii, s_psii, uspp, g_psii, npw, npwx, nvec, &
      start(ib)=start(ib-1)+times(ib-1)
   ENDDO
 #endif
-WRITE(6,*) 'Allocated memory in cegter_vk'
+WRITE(6,*) 'Allocated memory in cegter_vk for block ', current_ikb
 CALL print_gpu_memory()
   !
   DO ik = 1, nk 

@@ -94,6 +94,7 @@ init_representations_tpw.o \
 init_run_tpw.o \
 init_us_2_kernel.o \
 irrek.o \
+ke_g2kin_dev.o \
 kpoint_grid.o \
 kpoint_grid_serial_tpw.o \
 lanczos_write_restart.o \
@@ -111,6 +112,7 @@ non_scf_tpw.o \
 openfilq_tpw.o \
 orthogonalize_omega.o \
 orthogonalize_tpw.o \
+orthog_dev.o \
 paw_add_onecenter.o \
 paw_add_symmetry.o \
 phq_init_tpw.o \

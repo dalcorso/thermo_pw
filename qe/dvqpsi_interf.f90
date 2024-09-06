@@ -178,6 +178,53 @@ INTEGER, DEVICE :: ikt(nk)
 
 COMPLEX(DP), DEVICE :: dvpsi(ndmx*npol,nbnd*nk*npe*nsolv)
 END SUBROUTINE dvqpsi_us_dev2
+
+!------------------------------------------------------------------------
+ATTRIBUTES(GLOBAL) SUBROUTINE dvqpsi_us_int3_dev0(ikt, st, npol, &
+                    current_ikb_ph, nbnd, nk, npe, nsolv)
+!------------------------------------------------------------------------
+
+!
+USE cudafor
+USE kinds, ONLY : DP
+USE many_k_ph_mod, ONLY : sumk_d, sumk_nc_d, ikks => ikks_d, &
+                 startkb_ph => startkb_ph_d, becp1k_d,       &
+                 int3_nc_d, int3_d, becptk_d
+USE many_k_mod, ONLY : nat => nat_d, ntyp => ntyp_d, &
+                ityp => ityp_d, nh => nh_d, isk => isk_d, nhm => nhm_d,   &
+                noncolin_d, lsda => lsda_d, nkb => nkb_d
+ 
+IMPLICIT NONE
+
+INTEGER, VALUE :: nk, npe, nsolv, nbnd, current_ikb_ph
+INTEGER, DEVICE :: ikt(nk)
+INTEGER, DEVICE :: st(nk*npe*nsolv)
+INTEGER, VALUE :: npol
+
+END SUBROUTINE dvqpsi_us_int3_dev0
+!
+!------------------------------------------------------------------------
+ATTRIBUTES(GLOBAL) SUBROUTINE dvqpsi_us_int3_dev1(ndmx, st, ikt, dvpsi, &
+                                   npol, nkb, nbnd, nk, npe, nsolv)
+!------------------------------------------------------------------------
+!
+USE cudafor
+USE kinds, ONLY : DP
+USE many_k_ph_mod, ONLY : sumk_d, sumk_nc_d
+USE many_k_mod, ONLY : vkbk_d, noncolin_d
+USE klist, ONLY : ngk => ngk_d
+
+IMPLICIT NONE
+
+INTEGER, VALUE :: ndmx, nk, npe, nsolv, npol, nbnd, nkb
+
+INTEGER, DEVICE :: st(nk*npe*nsolv)
+INTEGER, DEVICE :: ikt(nk)
+
+COMPLEX(DP), DEVICE :: dvpsi(ndmx*npol,nbnd*nk*npe*nsolv)
+
+END SUBROUTINE dvqpsi_us_int3_dev1
+
 !
 END INTERFACE dvqpsi_interf
 #endif

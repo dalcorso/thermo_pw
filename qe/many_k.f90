@@ -94,11 +94,16 @@ INTEGER :: nhm_d
 INTEGER :: nkb_d 
 INTEGER :: nqx_d
 INTEGER :: npwx_d
+INTEGER :: ngauss_d
 REAL(DP) :: tpiba_d
+REAL(DP) :: omega_d
 REAL(DP) :: dq_d
 REAL(DP) :: qcutz_d
 REAL(DP) :: q2sigma_d
 REAL(DP) :: ecfixed_d
+REAL(DP) :: degauss_d
+LOGICAL  :: ltetra_d
+LOGICAL  :: lgauss_d
 LOGICAL  :: okvan_d
 LOGICAL :: noncolin_d
 LOGICAL :: lspinorb_d
@@ -150,11 +155,16 @@ LOGICAL :: domag_d
    ATTRIBUTES(DEVICE) :: nkb_d
    ATTRIBUTES(DEVICE) :: nqx_d
    ATTRIBUTES(DEVICE) :: npwx_d
+   ATTRIBUTES(DEVICE) :: ngauss_d
    ATTRIBUTES(DEVICE) :: tpiba_d
+   ATTRIBUTES(DEVICE) :: omega_d
    ATTRIBUTES(DEVICE) :: dq_d
    ATTRIBUTES(DEVICE) :: qcutz_d
    ATTRIBUTES(DEVICE) :: q2sigma_d
    ATTRIBUTES(DEVICE) :: ecfixed_d
+   ATTRIBUTES(DEVICE) :: degauss_d
+   ATTRIBUTES(DEVICE) :: ltetra_d
+   ATTRIBUTES(DEVICE) :: lgauss_d
    ATTRIBUTES(DEVICE) :: okvan_d
    ATTRIBUTES(DEVICE) :: noncolin_d
    ATTRIBUTES(DEVICE) :: lspinorb_d
@@ -183,14 +193,15 @@ PUBLIC nat_d, ntyp_d, ityp_d, nh_d, isk_d, qq_at_d, deeq_d, lmaxkb_d,      &
        nhm_d, tpiba_d, xk_d, wk_d, nbeta_d, dq_d, qq_so_d, deeq_nc_d,      &
        tau_d, nqx_d, npwx_d, type1ps_d, noncolin_d, lspinorb_d, lsda_d,    &
        domag_d, tvanp_d, qcutz_d, ecfixed_d, q2sigma_d, nkb_d, okvan_d,    &
-       eigts1_d, eigts2_d, eigts3_d, g_d, mill_d
+       eigts1_d, eigts2_d, eigts3_d, g_d, mill_d, lgauss_d, ltetra_d,      &
+       ngauss_d, degauss_d, omega_d
 !
 ! host subroutines of the module
 !
 PUBLIC init_k_blocks, allocate_many_k, deallocate_many_k,                  &
        initialize_fft_factors, deallocate_fft_factors,                     &
        initialize_device_variables, allocate_becps_many_k,                 & 
-       deallocate_becps_many_k 
+       deallocate_becps_many_k, recalculate_k_blocks
 !
 ! global subroutines of the module
 !
@@ -322,6 +333,48 @@ RETURN
 END SUBROUTINE init_k_blocks
 
 !------------------------------------------------------------------
+SUBROUTINE recalculate_k_blocks(nks)
+!------------------------------------------------------------------
+!
+!   This routine recalculates the size of each block if the number
+!   of k points changes. It recalculate nksb and startkb, while 
+!   the size of the blocks remain the same as well as the number of 
+!   blocks
+!
+IMPLICIT NONE
+INTEGER :: nks
+
+INTEGER :: i, rest
+
+rest=MOD(nks,nkblocks)
+nksb=nks/nkblocks
+DO i=1,rest
+   nksb(i)=nksb(i)+1
+ENDDO
+startkb(1)=0
+DO i=2,nkblocks
+   startkb(i)=startkb(i-1)+nksb(i-1)
+ENDDO
+
+#if defined(__CUDA)
+startkb_d=startkb
+#endif
+
+WRITE(stdout,'(/,5x,"Many-k recalculation")')
+WRITE(stdout,'(5x,i8," k-points divided into ",i5," blocks")') nks, nkblocks
+WRITE(stdout,'(5x,"Maximum size of the blocks",i10)') nksbx
+
+WRITE(stdout,'(5x,"Block number",7x,"size",7x,"start",8x,"end")') 
+DO i=1,nkblocks-1
+   WRITE(stdout,'(5x,i7,8x,i7,5x,i7,5x,i7)') i, nksb(i), startkb(i)+1, &
+                                             startkb(i+1)
+ENDDO
+WRITE(stdout,'(5x,i7,8x,i7,5x,i7,5x,i7,/)') i, nksb(nkblocks), &
+                                             startkb(nkblocks)+1, nks
+RETURN
+END SUBROUTINE recalculate_k_blocks
+
+!------------------------------------------------------------------
 SUBROUTINE allocate_many_k(nsolv)
 !------------------------------------------------------------------
 USE wvfct,            ONLY : nbnd, npwx
@@ -330,7 +383,6 @@ USE lsda_mod,         ONLY : nspin
 USE noncollin_module, ONLY : npol, noncolin
 USE uspp_param,       ONLY : nhm
 USE ions_base,        ONLY : nat, ntyp=>nsp
-USE lsda_mod,         ONLY : nspin
 USE gvect,            ONLY : ngm
 USE klist,            ONLY : nks
 USE fft_base,         ONLY : dfftp
@@ -417,9 +469,10 @@ END SUBROUTINE deallocate_many_k
 SUBROUTINE initialize_device_variables()
 !------------------------------------------------------------------
 USE scf_gpum,   ONLY : using_vrs_d
-USE klist,      ONLY : nks, xk, wk, igk_k, igk_k_d
+USE klist,      ONLY : nks, xk, wk, igk_k, igk_k_d, lgauss, ltetra, &
+                       ngauss, degauss
 USE ions_base,  ONLY : nat, ntyp=>nsp, ityp, tau
-USE cell_base,  ONLY : tpiba
+USE cell_base,  ONLY : tpiba, omega
 USE uspp,       ONLY : nkb, qq_at, deeq, qq_so, deeq_nc, okvan
 USE gvecw,      ONLY : ecfixed, qcutz, q2sigma
 USE gvect,      ONLY : g, mill, eigts1, eigts2, eigts3
@@ -454,12 +507,17 @@ lmaxkb_d=lmaxkb
 nhm_d=nhm
 nqx_d=nqx
 npwx_d=npwx
+ngauss_d=ngauss
 tpiba_d=tpiba
+omega_d=omega
 dq_d=dq
 qcutz_d=qcutz
 q2sigma_d=q2sigma
 ecfixed_d=ecfixed
+degauss_d=degauss
 nkb_d=nkb
+ltetra_d=ltetra
+lgauss_d=lgauss
 okvan_d=okvan
 noncolin_d=noncolin
 lspinorb_d=lspinorb

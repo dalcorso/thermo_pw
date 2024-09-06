@@ -71,9 +71,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
                             allocate_many_k_ph, deallocate_many_k_ph,      &
                             init_k_blocks_ph, current_ikb_ph, nkblocks_ph, &
                             startkb_ph, nksb_ph, nksbx_ph,  &
-                            prepare_ph_device, &
-                            ps2k_d, ps2k, ps1k_d, &
-                            ps1k
+                            prepare_ph_device, eprec_d
   USE many_k_mod,   ONLY : evck_d, vkbk_d, g2kink_d, initialize_fft_factors, &
                            deallocate_fft_factors, allocate_becps_many_k, &
                            deallocate_becps_many_k, initialize_device_variables
@@ -197,7 +195,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
   nnrs=dffts%nnr
   CALL init_k_blocks_ph(npwx,npol,nksq,nbnd,nspin,nhm,nkb,nat,nnr,&
                                                               nnrs,npe,nsolv)
-  CALL allocate_many_k_ph(npe,nsolv)
+  CALL allocate_many_k_ph(npe,nsolv,nnr)
   CALL allocate_becps_many_k(npe,nsolv)
   CALL initialize_fft_factors(npe,nsolv)
   CALL initialize_device_variables()
@@ -427,11 +425,13 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
            ENDDO
            !$acc update host(vkb)
 
+#if !  defined(__CUDA)              
            CALL g2_kin (ikq) 
            !$acc parallel loop present(g2kin)
            DO i=1,npwx
               g2kink_d(i,ik1)=g2kin(i)
            ENDDO
+#endif           
            !
            ! Start the loop on the two linear systems, one at B and one at
            ! -B
@@ -481,8 +481,9 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
               !
               ! compute preconditioning matrix h_diag used by cgsolve_all
               !
+#if ! defined(__CUDA)              
               CALL h_prec (ik, evq, h_diag)
-
+#endif
               !
               DO ipert = 1, npe
                  mode = imode0 + ipert
@@ -490,7 +491,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
                  id=ik1 + (ipert - 1) * nksb_ph(ikb) + (isolv-1) * npe * &
                                                             nksb_ph(ikb)
                  st_=st(id)
-                 h_diagk_ph_d(:,st_+1:st_+nbnd)=h_diag(:,1:nbnd)
+!                 h_diagk_ph_d(:,st_+1:st_+nbnd)=h_diag(:,1:nbnd)
                  !
                  !  and now adds the contribution of the self consistent term
                  !
@@ -519,6 +520,11 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
               ENDDO
            ENDDO
         ENDDO         !
+#if defined(__CUDA)
+        CALL set_hprec_dev( st_d, ikb, nksb_ph(ikb), g2kink_d, evqk_d, &
+                        eprec_d, h_diagk_ph_d, nbnd, npe, nsolv, npol, npwx)
+#endif
+
 !
 !    Fourth loop over k: reads or computes the bare change of the
 !    wavefunction and adds the products of dV_Hxc/dmu psi
@@ -572,7 +578,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
                     !
 
 #if defined(__CUDA)
-                    CALL add_dvscf_rhs( dvscfins, isolv, ipert, ik, npe, .FALSE. )
+!                    CALL add_dvscf_rhs( dvscfins, isolv, ipert, ik, npe, .FALSE. )
 #else
                     CALL add_dvscf_rhs( dvscfins, isolv, ipert, ik, npe, .TRUE. )
 #endif

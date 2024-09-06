@@ -110,16 +110,16 @@ adim=MAX(nr1s, nr2s, nr3s)
       !
       ! at the first iteration apply dv_bare
       !
-      CALL dvlocpsi_dev<<<dim3(nksb_ph(ikb)*npe*nsolv,nbnd,nnrs/32+1),     &
-            dim3(1,1,32)>>> (nbndk_d, st_d, npol, psicrm, dpsicrm,         &
+      CALL dvlocpsi_dev<<<dim3(nksb_ph(ikb)*npe*nsolv,nbnd,nnrs/64+1),     &
+            dim3(1,1,64)>>> (nbndk_d, st_d, npol, psicrm, dpsicrm,         &
                              dvloc_d, nbnd, nnrs, nksb_ph(ikb), npe, nsolv)
       ierr=cudaDeviceSynchronize()
    ELSE
       !
       ! at the other iterations apply dvscfins
       !
-      CALL dvscfinpsi_gpu<<<dim3(nksb_ph(ikb)*npe*nsolv,nbnd,nnrs/32+1),   &
-           dim3(1,1,32)>>> (nbndk_d, st_d, npol, psicrm, dpsicrm,          &
+      CALL dvscfinpsi_gpu<<<dim3(nksb_ph(ikb)*npe*nsolv,nbnd,nnrs/64+1),   &
+           dim3(1,1,64)>>> (nbndk_d, st_d, npol, psicrm, dpsicrm,          &
            dvscfins, nspin_mag, nbnd, nnrs, nksb_ph(ikb), npe, nsolv, ikb)
       ierr=cudaDeviceSynchronize()
    ENDIF
@@ -165,12 +165,12 @@ adim=MAX(nr1s, nr2s, nr3s)
                (ikt_d, st_d, npol, ikb, nbnd, nksb_ph(ikb), npe, &
                 nsolv, imode0, nspin)
       ierr=cudaDeviceSynchronize()
-      CALL dvqpsi_us_dev1<<<dim3(nksb_ph(ikb)*npe*nsolv,npwx,nbnd),         &
-                dim3(1,1,1)>>>(npwx, st_d, ikt_d, dvpsik_d,                 &
+      CALL dvqpsi_us_dev1<<<dim3(nksb_ph(ikb)*npe*nsolv,npwx/32+1,nbnd),     &
+                dim3(1,32,1)>>>(npwx, st_d, ikt_d, dvpsik_d,                 &
                                npol, nkb, nbnd, nksb_ph(ikb), npe, nsolv)
       ierr=cudaDeviceSynchronize()
-      CALL dvqpsi_us_dev2<<<dim3(nksb_ph(ikb)*npe*nsolv,npwx,nbnd),         &
-                dim3(1,1,1)>>>(npwx, st_d, ikt_d, dvpsik_d, npol,           &
+      CALL dvqpsi_us_dev2<<<dim3(nksb_ph(ikb)*npe*nsolv,npwx/32+1,nbnd),     &
+                dim3(1,32,1)>>>(npwx, st_d, ikt_d, dvpsik_d, npol,           &
                 nkb, nbnd, nksb_ph(ikb), npe, nsolv)
       ierr=cudaDeviceSynchronize()
    ELSE
@@ -182,6 +182,25 @@ adim=MAX(nr1s, nr2s, nr3s)
           ( npwx, npwk_d, nbndk_d, st_d, ikt_d, npol, dvpsik_d, dpsicrm,    &
             nbnd, nnrs, nksb_ph(ikb), npe, nsolv)
       ierr=cudaDeviceSynchronize()
+!
+!   finally we must add the term due to the int3 integral
+!
+      IF (okvan) THEN
+         CALL start_clock('dvq_i3_dev0')
+         CALL dvqpsi_us_int3_dev0<<<dim3(nksb_ph(ikb)*npe*nsolv,1,nbnd),&
+                  dim3(1,1,1)>>> (ikt_d, st_d, npol, &
+                               ikb, nbnd, nksb_ph(ikb), npe, nsolv)
+         ierr=cudaDeviceSynchronize()
+         CALL stop_clock('dvq_i3_dev0')
+
+         CALL start_clock('dvq_i3_dev1')
+         CALL dvqpsi_us_int3_dev1 <<<dim3(nksb_ph(ikb)*npe*nsolv,&
+                    npwx/32+1,nbnd),dim3(1,32,1)>>> (npwx, st_d, ikt_d, &
+                     dvpsik_d, npol, nkb, nbnd, nksb_ph(ikb), npe, nsolv)
+         ierr=cudaDeviceSynchronize()
+         CALL stop_clock('dvq_i3_dev1')
+      ENDIF
+
    ENDIF   
 RETURN
 END SUBROUTINE dvqpsi_dev
@@ -1060,4 +1079,185 @@ ELSE
 ENDIF
 RETURN
 END SUBROUTINE dvqpsi_us_dev2
+
+!------------------------------------------------------------------------
+ATTRIBUTES(GLOBAL) SUBROUTINE dvqpsi_us_int3_dev0(ikt, st, npol, &
+                    current_ikb_ph, nbnd, nk, npe, nsolv)
+!------------------------------------------------------------------------
+
+!
+!  This routines computes the coefficients sumk_d (or sumk_nc_d)
+!  that are found in the routine adddvscf which deals with the term
+!  that contains the int3 integral.
+!
+USE cudafor
+USE kinds, ONLY : DP
+USE many_k_ph_mod, ONLY : sumk_d, sumk_nc_d, ikks => ikks_d, &
+                 startkb_ph => startkb_ph_d, becp1k_d,       &
+                 int3_nc_d, int3_d, becptk_d
+USE many_k_mod, ONLY : nat => nat_d, ntyp => ntyp_d, &
+                ityp => ityp_d, nh => nh_d, isk => isk_d, nhm => nhm_d,   &
+                noncolin_d, lsda => lsda_d, nkb => nkb_d
+ 
+IMPLICIT NONE
+
+INTEGER, VALUE :: nk, npe, nsolv, nbnd, current_ikb_ph
+!! input: the number of k points
+!! input: the number of perturbations
+!! input: the number of linear systems to solve
+!! input: the number of bands
+!! input: the number of the k points block
+!! input: the current starting mode
+INTEGER, DEVICE :: ikt(nk)
+!! input: the global k point index for each k point
+INTEGER, DEVICE :: st(nk*npe*nsolv)
+!! input: the starting point of the wavefunctions for each set in psicr
+INTEGER, VALUE :: npol
+!! input: the number of components of each wavefunction
+
+INTEGER  :: iv, ig, ik, ikk, ik1, id, ipert, ikq, ibnd
+INTEGER  :: ijkb0, nt, na, nb, ih, jh, ikb, jkb, ipol, st_, &
+            isp, isolv, current_spin
+INTEGER :: is, js, ijs
+COMPLEX(DP) :: asum
+
+id=(BlockIdx%x-1)*BlockDim%x + ThreadIdx%x
+IF (id>nk*npe*nsolv) RETURN
+isp=(id-1)/nk+1
+isolv=(isp-1)/npe+1
+ipert=MOD(isp-1,npe)+1
+
+ik1=MOD(id-1,nk)+1
+ik=ik1 + startkb_ph(current_ikb_ph)
+ikk=ikks(ik)
+current_spin=1
+IF (lsda) current_spin=isk(ikk)
+st_=st(id)
+
+ibnd=(BlockIdx%z-1)*BlockDim%z + ThreadIdx%z
+IF (ibnd>nbnd) RETURN
+
+IF (noncolin_d) THEN
+   sumk_nc_d(:,:,ibnd,id)=(0.0_DP, 0.0_DP)
+ELSE
+   sumk_d(:,ibnd,id)=(0.0_DP, 0.0_DP)
+ENDIF
+
+ijkb0 = 0
+DO nt = 1, ntyp
+   DO na = 1, nat
+      IF (ityp (na)==nt) THEN
+         DO ih = 1, nh (nt)
+            ikb = ijkb0 + ih
+            DO jh = 1, nh (nt)
+               jkb = ijkb0 + jh
+               IF (noncolin_d) THEN
+                  IF (isolv==1) THEN
+                     ijs=0
+                     DO is=1,npol
+                        DO js=1,npol
+                           ijs=ijs+1
+                           sumk_nc_d(ikb,is,ibnd,id)=                      &
+                                sumk_nc_d(ikb,is,ibnd,id) +                &
+                                     int3_nc_d(ih,jh,na,ijs,ipert,isolv) * &
+                                       becp1k_d(jkb,js,ibnd,ik)           
+                        END DO
+                     END DO
+                  ELSE
+                     ijs=0
+                     DO is=1,npol
+                        DO js=1,npol
+                           ijs=ijs+1
+                           sumk_nc_d(ikb,is,ibnd,id)=                      &
+                               sumk_nc_d(ikb,is,ibnd,id) +                &
+                                  int3_nc_d(ih,jh,na,ijs,ipert,isolv) * &
+                                    becptk_d(jkb,js,ibnd,ik)           
+                        END DO
+                     END DO
+                  ENDIF
+               ELSE
+                  sumk_d (ikb, ibnd, id) = sumk_d (ikb, ibnd, id) +     &
+                                int3_d(ih, jh, na, current_spin, ipert) *  &
+                                    becp1k_d(jkb,1,ibnd,ik)       
+               ENDIF
+            ENDDO ! jh
+         ENDDO ! ih
+         ijkb0 = ijkb0 + nh (nt)
+      ENDIF
+   ENDDO  ! na
+ENDDO ! nt
+
+RETURN
+END SUBROUTINE dvqpsi_us_int3_dev0
+!
+!------------------------------------------------------------------------
+ATTRIBUTES(GLOBAL) SUBROUTINE dvqpsi_us_int3_dev1(ndmx, st, ikt, dvpsi, &
+                                   npol, nkb, nbnd, nk, npe, nsolv)
+!------------------------------------------------------------------------
+!
+!  This routines add to dvpsi, the self consistent term with int3.
+!  It assumes that sumk_d (or sumk_nc_d) contains the product of
+!  int3 and the becp functions
+!
+USE cudafor
+USE kinds, ONLY : DP
+USE many_k_ph_mod, ONLY : sumk_d, sumk_nc_d
+USE many_k_mod, ONLY : vkbk_d,  noncolin_d
+USE klist, ONLY : ngk => ngk_d
+
+IMPLICIT NONE
+
+INTEGER, VALUE :: ndmx, nk, npe, nsolv, npol, nbnd, nkb
+
+INTEGER, DEVICE :: st(nk*npe*nsolv)
+INTEGER, DEVICE :: ikt(nk)
+
+COMPLEX(DP), DEVICE :: dvpsi(ndmx*npol,nbnd*nk*npe*nsolv)
+
+INTEGER  :: iv, ig, ik1, ikb, ipol, id, isolv, ipert, isp, kstart, st_, &
+            npwq, ikq, ibnd
+COMPLEX(DP) :: asum
+
+id=(BlockIdx%x-1)*BlockDim%x + ThreadIdx%x
+IF (id>nk*npe*nsolv) RETURN
+isp=(id-1)/nk+1
+isolv=(isp-1)/npe+1
+ipert=MOD(isp-1,npe)+1
+
+ik1=MOD(id-1,nk)+1
+ikq=ikt(ik1)
+npwq=ngk(ikq)
+
+kstart=nkb*(ik1-1)
+
+st_=st(id)
+
+ig=(BlockIdx%y-1)*BlockDim%y + ThreadIdx%y
+IF (ig>npwq) RETURN
+
+ibnd=(BlockIdx%z-1)*BlockDim%z + ThreadIdx%z
+IF (ibnd>nbnd) RETURN
+
+IF (noncolin_d) THEN
+   asum=(0.0_DP,0.0_DP)
+   DO ikb=1,nkb
+      asum=asum + sumk_nc_d(ikb,1,ibnd,id) * vkbk_d(ig,kstart+ikb) 
+   ENDDO
+   dvpsi(ig, st_+ibnd)=dvpsi(ig, st_+ibnd) + asum
+   asum=(0.0_DP,0.0_DP)
+   DO ikb=1,nkb
+      asum=asum + sumk_nc_d(ikb,2,ibnd,id) * vkbk_d(ig,kstart+ikb) 
+   ENDDO
+   dvpsi(ndmx+ig, st_+ibnd)=dvpsi(ndmx+ig, st_+ibnd) + asum
+ELSE
+   asum=(0.0_DP,0.0_DP)
+   DO ikb=1,nkb
+      asum=asum + sumk_d(ikb,ibnd,id) * vkbk_d(ig,kstart+ikb) 
+   ENDDO
+   dvpsi(ig, st_+ibnd)=dvpsi(ig, st_+ibnd) + asum
+ENDIF
+
+RETURN
+END SUBROUTINE dvqpsi_us_int3_dev1
+
 #endif

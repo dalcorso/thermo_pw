@@ -868,8 +868,6 @@ DO itemp=startt,lastt
             jdata=jdata+1
             x1(:,jdata)=x(:,idata)
             f(jdata)=dyde(istep,idata,itemp)
-            IF (itemp==5) WRITE(stdout,*) idata, jdata, x1(:,jdata), &
-                                          dyde(istep,idata,itemp)
          ENDIF
       END DO
 
