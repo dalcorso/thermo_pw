@@ -16,6 +16,7 @@ IMPLICIT NONE
   !
   WRITE(stdout,'(/,5x,"Times for scf pw.x")')
   CALL print_clock('tpw_scf_pw')
+  CALL start_clock( 'cegterg:diag' )
   WRITE(stdout,'(/,5x,"Times for non scf pw.x")')
   CALL print_clock('tpw_nscf_pw')
   WRITE(stdout,'(/,5x,"Times for ph.x ")')
@@ -24,6 +25,7 @@ IMPLICIT NONE
   CALL print_clock('tpw_init_ph')
   CALL print_clock('solve_linter')
   CALL print_clock('drhodv')
+  CALL print_clock('fft_h_psi')
   !
   RETURN
 END SUBROUTINE print_thermo_clocks

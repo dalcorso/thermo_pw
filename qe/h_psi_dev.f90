@@ -145,6 +145,7 @@
 !
 !   ... inverse fft in the direction z
 !
+ CALL start_clock('fft_h_psi')
  CALL fft1inv_dev<<<dim3(nset,nvec,nr1/32+1),dim3(1,1,32)>>>&
             (outk_d, nveck_d, st_d, npol, psicmr, nvec, nr1, nr2, &
             nr3, nr1x, nr2x, nnr, nset, adim)
@@ -163,6 +164,7 @@
             (outk_d, nveck_d, st_d, npol, psicmr, nvec, nr1, nr2, &
             nr3, nr1x, nr2x, nnr, nset, adim)
  ierr=cudaDeviceSynchronize()
+ CALL stop_clock('fft_h_psi')
 !
 !   ... apply potential to psi
 !
@@ -172,6 +174,7 @@
 !
 !   ... direct fft in the direction x
 !
+ CALL start_clock('fft_h_psi')
  CALL fft3fwd_dev<<<dim3(nset,nvec/32+1,1),dim3(1,32,1)>>>&
             (outk_d, nveck_d, st_d, npol, psicmr, nvec, nr1, nr2, &
             nr3, nr1x, nr2x, nnr, nset, adim)
@@ -190,6 +193,7 @@
              (outk_d, nveck_d, st_d, npol, psicmr, nvec, nr1, nr2, &
              nr3, nr1x, nr2x, nnr, nset, adim)
  ierr=cudaDeviceSynchronize()
+ CALL stop_clock('fft_h_psi')
 !
 !   ... copy of psicmr into h_psi 
 !
@@ -336,6 +340,7 @@ END SUBROUTINE h_s_psik_dev
 !
 !   ... inverse fft in the direction z
 !
+ CALL start_clock('fft_h_psi')
  CALL fft1inv_dev<<<dim3(nset,nvec,nr1/32+1),dim3(1,1,32)>>>        &
             (outk_d, nveck_d, st_d, npol, psicmr, nvec, nr1, nr2,   &
             nr3, nr1x, nr2x, nnr, nset, adim)
@@ -354,6 +359,7 @@ END SUBROUTINE h_s_psik_dev
             (outk_d, nveck_d, st_d, npol, psicmr, nvec, nr1, nr2,   &
             nr3, nr1x, nr2x, nnr, nset, adim)
  ierr=cudaDeviceSynchronize()
+ CALL stop_clock('fft_h_psi')
 !
 !   ... apply potential to psi
 !
@@ -363,6 +369,7 @@ END SUBROUTINE h_s_psik_dev
 !
 !   ... direct fft in the direction x
 !
+ CALL start_clock('fft_h_psi')
  CALL fft3fwd_dev<<<dim3(nset,nvec/32+1,1),dim3(1,32,1)>>>           &
             (outk_d, nveck_d, st_d, npol, psicmr, nvec, nr1, nr2,    &
             nr3, nr1x, nr2x, nnr, nset, adim)
@@ -381,6 +388,7 @@ END SUBROUTINE h_s_psik_dev
              (outk_d, nveck_d, st_d, npol, psicmr, nvec, nr1, nr2,   &
              nr3, nr1x, nr2x, nnr, nset, adim)
  ierr=cudaDeviceSynchronize()
+ CALL stop_clock('fft_h_psi')
 !
 !   ... copy of psicmr into h_psi 
 !

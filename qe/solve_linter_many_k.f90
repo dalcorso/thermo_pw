@@ -342,7 +342,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
         ALLOCATE(npwkr(nksb_ph(ikb)*nsolv))
         ALLOCATE(kdimk(nksb_ph(ikb)*nsolv))
         ALLOCATE(nb1k(nksb_ph(ikb)*npe*nsolv))
-        ALLOCATE(nveck(nksb_ph(ikb)*npe*nsolv))
+        ALLOCATE(nveck(nksb_ph(ikb)*nsolv))
         ALLOCATE(ikblk(nksb_ph(ikb)*nsolv))
 #if defined(__CUDA)       
         ALLOCATE(st_d(nksb_ph(ikb)*npe*nsolv))
@@ -352,7 +352,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
         ALLOCATE(npwkr_d(nksb_ph(ikb)*nsolv))
         ALLOCATE(kdimk_d(nksb_ph(ikb)*nsolv))
         ALLOCATE(nb1k_d(nksb_ph(ikb)*npe*nsolv))
-        ALLOCATE(nveck_d(nksb_ph(ikb)*npe*nsolv))
+        ALLOCATE(nveck_d(nksb_ph(ikb)*nsolv))
         ALLOCATE(ikblk_d(nksb_ph(ikb)*nsolv))
 #endif
         current_ikb_ph=ikb
@@ -375,14 +375,14 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
               IF (npol==2) kdimk(id)=npwx*npol
               ikblk(id) = ik1
               npwkr(id) = ngk(ikmkmq)
+              nveck(id)= nbnd_occ(ikmkmq)
+              IF (lgauss.OR.ltetra) nveck(id)=nbnd
               DO ipert=1,npe
                  id=ik1+(ipert-1)*nksb_ph(ikb)+(isolv-1)*npe*nksb_ph(ikb)
                  st(id)=nbnd * (id-1)
                  nbndk(id) = nbnd_occ(ikmk)
                  npwk(id) = ngk(ikmkmq)
                  nb1k(id) = 1
-                 nveck(id)= nbnd_occ(ikmkmq)
-                 IF (lgauss.OR.ltetra) nveck(id)=nbnd
                  outk(id)=.FALSE.
               ENDDO
            ENDDO

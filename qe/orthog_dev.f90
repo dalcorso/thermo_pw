@@ -34,7 +34,7 @@ INTEGER, INTENT(IN), DEVICE :: kdimk_d(nk*nsolv), npwk_d(nk*nsolv)
 !! input: the number of plane waves for each set
 INTEGER, INTENT(IN), DEVICE :: ikblk_d(nk*nsolv)
 !! input: index of k in the current block of k points
-INTEGER, INTENT(IN), DEVICE :: nveck_d(nk*npe*nsolv)
+INTEGER, INTENT(IN), DEVICE :: nveck_d(nk*nsolv)
 !! input: the number of vectors to compute.
 INTEGER, INTENT(IN), DEVICE :: nb1k_d(nk*npe*nsolv)
 !! input: the starting point of any set
