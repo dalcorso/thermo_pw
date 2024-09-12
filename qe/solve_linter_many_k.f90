@@ -877,7 +877,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
         ! on k points blocks
      ENDDO
      CALL start_clock('the_rest')
-     drhoscf=drhoscf_d
+     IF (.NOT.noncolin) drhoscf=drhoscf_d
      !
      !  The calculation of dbecsum is distributed across processors (see addusdbec)
      !  Sum over processors the contributions coming from each slice of bands
