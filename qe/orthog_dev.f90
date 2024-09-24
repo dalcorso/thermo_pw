@@ -6,7 +6,7 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 #if defined(__CUDA)
-SUBROUTINE orthogonalize_dev(st_d, outk_d, kdimk_d, npwk_d, nveck_d, &
+SUBROUTINE orthogonalize_dev(st_d, str_d, outk_d, kdimk_d, npwk_d, nveck_d, &
                    nb1k_d, ikblk_d, nbndk_d, ikb, nk, npe, nsolv,    &
                    dvpsik_d, evqk_d, sevqk_d, ortho_ps_d, npol, npwx,  &
                    nbnd, nksbx_ph)
@@ -25,7 +25,9 @@ INTEGER, INTENT(IN) :: npwx, npol, ikb, nk, npe, nsolv, nbnd, nksbx_ph
 !! input: the number of bands in each k
 !! input: the maximum number of k in each block
 INTEGER, INTENT(IN), DEVICE :: st_d(nk*npe*nsolv)
-!! input: start of each set of functions
+!! input: start of each set of functions on dvpsik_d
+INTEGER, INTENT(IN), DEVICE :: str_d(nk*nsolv)
+!! input: start of each set of functions on evck_d and sevqk_d
 LOGICAL, INTENT(IN), DEVICE :: outk_d(nk*npe*nsolv)
 !! input: when .TRUE. the set is not calculated
 INTEGER, INTENT(IN), DEVICE :: kdimk_d(nk*nsolv), npwk_d(nk*nsolv)
@@ -61,7 +63,7 @@ ierr=cudaDeviceSynchronize()
 CALL stop_clock('ortho_dev')
 CALL start_clock('ortho_spsi')
 CALL s_psik_dev(npwx, outk_d, kdimk_d, npwk_d, nveck_d, nb1k_d, &
-        st_d, st_d, ikblk_d, npol, evqk_d, sevqk_d,  &
+        str_d, str_d, ikblk_d, npol, evqk_d, sevqk_d,  &
         nbnd, nbnd, nk*nsolv)
 ierr=cudaDeviceSynchronize()
 CALL stop_clock('ortho_spsi')

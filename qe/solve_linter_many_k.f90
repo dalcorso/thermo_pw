@@ -164,7 +164,8 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
              mode          ! mode index
 
   INTEGER, ALLOCATABLE :: lter(:), st(:), ikt(:), npwk(:), nbndk(:), &
-                          kdimk(:), nb1k(:), nveck(:), ikblk(:), npwkr(:)
+                          kdimk(:), nb1k(:), nveck(:), ikblk(:), npwkr(:), &
+                          str(:)
   LOGICAL, ALLOCATABLE :: outk(:)
 
   INTEGER  :: iq_dummy, i, j, id, st_, ikwf
@@ -173,6 +174,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
 #if defined(__CUDA)
   INTEGER, DEVICE, ALLOCATABLE :: ikt_d(:)
   INTEGER, DEVICE, ALLOCATABLE :: st_d(:)
+  INTEGER, DEVICE, ALLOCATABLE :: str_d(:)
   INTEGER, DEVICE, ALLOCATABLE :: nbndk_d(:)
   INTEGER, DEVICE, ALLOCATABLE :: kdimk_d(:)
   INTEGER, DEVICE, ALLOCATABLE :: nb1k_d(:)
@@ -336,6 +338,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
         CALL start_clock('first_part')
         ALLOCATE(lter(nksb_ph(ikb)*npe*nsolv))
         ALLOCATE(st(nksb_ph(ikb)*npe*nsolv))
+        ALLOCATE(str(nksb_ph(ikb)*nsolv))
         ALLOCATE(outk(nksb_ph(ikb)*npe*nsolv))
         ALLOCATE(nbndk(nksb_ph(ikb)*npe*nsolv))
         ALLOCATE(npwk(nksb_ph(ikb)*npe*nsolv))
@@ -346,6 +349,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
         ALLOCATE(ikblk(nksb_ph(ikb)*nsolv))
 #if defined(__CUDA)       
         ALLOCATE(st_d(nksb_ph(ikb)*npe*nsolv))
+        ALLOCATE(str_d(nksb_ph(ikb)*nsolv))
         ALLOCATE(outk_d(nksb_ph(ikb)*npe*nsolv))
         ALLOCATE(nbndk_d(nksb_ph(ikb)*npe*nsolv))
         ALLOCATE(npwk_d(nksb_ph(ikb)*npe*nsolv))
@@ -377,6 +381,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
               npwkr(id) = ngk(ikmkmq)
               nveck(id)= nbnd_occ(ikmkmq)
               IF (lgauss.OR.ltetra) nveck(id)=nbnd
+              str(id)=nbnd * (id-1)
               DO ipert=1,npe
                  id=ik1+(ipert-1)*nksb_ph(ikb)+(isolv-1)*npe*nksb_ph(ikb)
                  st(id)=nbnd * (id-1)
@@ -394,6 +399,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
 #if defined(__CUDA)        
         ikt_d=ikt
         st_d=st
+        str_d=str
         nbndk_d=nbndk
         nveck_d=nveck
         npwk_d=npwk
@@ -729,7 +735,8 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
            ENDDO
         ENDDO         !
 #if defined(__CUDA)
-        CALL orthogonalize_dev(st_d, outk_d, kdimk_d, npwkr_d, nveck_d,    &
+        CALL orthogonalize_dev(st_d, str_d, outk_d, kdimk_d, npwkr_d, &
+                   nveck_d,    &
                    nb1k_d, ikblk_d, nbndk_d, ikb, nksb_ph(ikb), npe, nsolv,&
                    dvpsik_d, evqk_d, sevqk_d, ortho_ps_d, npol, npwx,        &
                    nbnd, nksbx_ph)
@@ -853,6 +860,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
         ENDDO  
         DEALLOCATE (lter)
         DEALLOCATE (st)
+        DEALLOCATE (str)
         DEALLOCATE (outk)
         DEALLOCATE (nbndk)
         DEALLOCATE (npwk)
@@ -863,6 +871,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
         DEALLOCATE (ikblk)
 #if defined(__CUDA)       
         DEALLOCATE (st_d)
+        DEALLOCATE (str_d)
         DEALLOCATE (outk_d)
         DEALLOCATE (nbndk_d)
         DEALLOCATE (npwk_d)

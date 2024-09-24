@@ -174,7 +174,7 @@ USE noncollin_module, ONLY : nspin_mag, lspinorb
 
 IMPLICIT NONE
 INTEGER :: npwx, npol, nksq, nbnd, nnr, nnrs, nspin, nhm, nkb, nat, npe, nsolv
-REAL(DP) :: totmem, fftmem, fixmem
+REAL(DP) :: totmem, fftmem, fixmem, memps, a, b, c
 
 INTEGER :: fact, i, rest
 
@@ -227,25 +227,26 @@ ENDIF
 fftmem=DBLE(nnrs) * DBLE(nbnd) * DBLE(nksq) * DBLE (npe) *DBLE(nsolv) * &
        DBLE(npol) * 16
 
-totmem=DBLE(npwx*npol) * DBLE(nbnd) * DBLE(nksq) * fact * 16      &
+totmem=DBLE(npwx*npol) * DBLE(nbnd) * DBLE(nksq) * fact * 16      
                           ! dvpsik_d, dpsik_d, h_diagk_ph_d, evqk_d, sevqk_d
-       + DBLE(nkb) * DBLE(nbnd) * DBLE(nksq) * (3*npe*nsolv + 4*npol + &
-                          4 * npol * npe * nsolv ) * 16&
-                          ! dbecq_d, beco1k_d, alphak_d, ps1k_nc_d, ps2k_nc_d,
+totmem=totmem+ DBLE(nkb) * DBLE(nbnd) * DBLE(nksq) * (3*npe*nsolv + 4*npol + &
+                          4 * npol * npe * nsolv ) * 16
+                          ! dbecq_d, becp1k_d, alphak_d, ps1k_nc_d, ps2k_nc_d,
                           ! sumk_d, sumk_nc_d
-       + DBLE(nhm) * DBLE(nhm) * DBLE(nat) * DBLE(nbnd)  * DBLE(nksq) *       &
+totmem=totmem + DBLE(nhm) * DBLE(nhm) * DBLE(nat) * DBLE(nbnd)  * DBLE(nksq) *       &
          DBLE(nspin) * 16 & !  deff_d  of deff_nc_d         
        + DBLE((nhm*(nhm+1))/2) * DBLE(nat)* DBLE(nspin_mag)* &
-         DBLE(nbnd*nksq*npe*nsolv)*16 & ! dbecsum_d
-       + DBLE(npwx*npol) * DBLE(nbnd) * DBLE(nksq) * DBLE(npe*nsolv)*16*7 + &
+         DBLE(nbnd*nksq*npe*nsolv)*16  ! dbecsum_d
+totmem=totmem + DBLE(npwx*npol) * DBLE(nbnd) * DBLE(nksq) * DBLE(npe*nsolv)*16*7 
             ! dpsi, hpsi, spsi, g, t, h, hold
-         DBLE(npwx*npol)*DBLE(nbnd)*DBLE(nksq)*DBLE(nsolv)*16  &! evck_d
-       + DBLE(nksq)*DBLE(nbnd)*DBLE(nsolv)*DBLE(nksq)*DBLE(nbnd)*&
-         DBLE(npe*nsolv)*16  &
-       + 2.0_DP*fftmem    ! psicmr + dpsicrm
+totmem=totmem+ DBLE(npwx*npol)*DBLE(nbnd)*DBLE(nksq)*DBLE(nsolv)*16  ! evck_d
+memps= DBLE(nksq)*DBLE(nbnd)*DBLE(nsolv)*DBLE(nksq)*DBLE(nbnd)* &
+         DBLE(npe*nsolv)*16
+totmem=totmem + 2.0_DP*fftmem    ! psicmr + dpsicrm
 WRITE(stdout,'(5x,"Estimated gpu memory in cgsolve_all",f10.1," GB")') &
-                                                        (totmem+fixmem)/1.D9 
-WRITE(stdout,'(5x,"Indivisibe gpu memory",f10.1," MB")') fixmem/1.D6 
+                                                  (totmem+fixmem+memps)/1.D9 
+WRITE(stdout,'(5x,"Indivisible gpu memory",f10.1," MB")') fixmem/1.D6 
+WRITE(stdout,'(5x,"Memory for ps",f10.1," GB")')  memps/1.D9
 IF (fixmem > (memgpu * 1.D9)) THEN
    WRITE(stdout,'(5x,"memgpu must be greater than ",f8.2," to use many_k")') &
                5.0_DP * fixmem/1.D9
@@ -254,7 +255,11 @@ IF (fixmem > (memgpu * 1.D9)) THEN
 !
    nkblocks_ph=nksq
 ELSE
-   nkblocks_ph=MIN(FLOOR((totmem)/(memgpu * 1.D9-fixmem)) + 1, nksq) 
+   a=memps
+   b=totmem
+   c=fixmem-memgpu * 1.D9
+   nkblocks_ph= MIN(FLOOR(2.0_DP * a / (-b+SQRT(b**2-4.0_DP*a*c)))+1, nksq)
+!   nkblocks_ph=MIN(FLOOR((totmem)/(memgpu * 1.D9-fixmem)) + 1, nksq) 
 ENDIF
 
 ALLOCATE(nksb_ph(nkblocks_ph))
