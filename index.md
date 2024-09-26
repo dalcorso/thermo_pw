@@ -15,10 +15,16 @@ can be found <a href="https://people.sissa.it/dalcorso/thermo_pw/user_guide/inde
 <p align="justify">The following papers describe new
 features implemented in <code>thermo_pw</code>:</p>
 
+17. X. Gong and A. Dal Corso,
+High temperature and pressure thermoelasticity of hcp metals from 
+ab initio quasi-harmonic free energy calculations: the beryllium case
+<a href=https://journals.aps.org/prb/abstract/10.1103/PhysRevB.110.094109>
+Phys. Rev. B <b>110</b>, 094109 (2024).</a>
+
 16. X. Gong and A. Dal Corso,
 Ab-initio quasi-harmonic thermoelasticity of molybdenum at 
 high temperature and pressure,
-<a href="https://pubs.aip.org/aip/jcp/article/160/24/244703/3299207/Ab-initio-quasi-harmonic-thermoelasticity-of">
+<a href=https://pubs.aip.org/aip/jcp/article/160/24/244703/3299207/Ab-initio-quasi-harmonic-thermoelasticity-of>
 Jour. Chem. Phys. <b>160</b>, 244703 (2024).</a>
 
 15. B. Thakur, X. Gong, and A. Dal Corso,
@@ -108,12 +114,13 @@ Clean Ir(111) and Pt(111) electronic surface states: a first-principle fully rel
 <a href="http://www.sciencedirect.com/science/article/pii/S0039602815000734"> Surf. Sci. <B>637-638</B>, 106 (2015)</a>.
 <br>
 <br>
-<p>Refs.5,7 describe how <code>thermo_pw</code> computes temperature
-dependent elastic constants, Ref.1,3 pressure and temperature dependent
-elastic constants, Ref.15 elastic constants at T=0 K,
-Ref.16,12 surface band structures, Refs.6,11 eels and optical properties,
-Ref.8 DFPT with fully relativistic pseudopotentials, and Ref.13,14 
-thermodynamic anharmonic properties. Refs.1,2,3,4 have examples of pressure and
+<p>Refs.6,8 describe how <code>thermo_pw</code> computes temperature
+dependent elastic constants, Ref.1,2,4 pressure and temperature dependent
+elastic constants, Ref.16 elastic constants at T=0 K,
+Ref.17,13 surface band structures, Refs.7,12 eels and optical properties,
+Ref.9 DFPT with fully relativistic pseudopotentials, and Ref.14,15 
+thermodynamic anharmonic properties. Refs.1,2,3,4,5 have examples of 
+pressure and
 temperature parameterized plots.</p>
 
 <p align="justify">The following works contain some calculations made by <code>thermo_pw</code>:</p>
