@@ -18,13 +18,13 @@ features implemented in <code>thermo_pw</code>:</p>
 17. X. Gong and A. Dal Corso,
 High temperature and pressure thermoelasticity of hcp metals from 
 ab initio quasi-harmonic free energy calculations: the beryllium case
-<a href=https://journals.aps.org/prb/abstract/10.1103/PhysRevB.110.094109>
+<a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.110.094109">
 Phys. Rev. B <b>110</b>, 094109 (2024).</a>
 
 16. X. Gong and A. Dal Corso,
 Ab-initio quasi-harmonic thermoelasticity of molybdenum at 
 high temperature and pressure,
-<a href=https://pubs.aip.org/aip/jcp/article/160/24/244703/3299207/Ab-initio-quasi-harmonic-thermoelasticity-of>
+<a href="https://pubs.aip.org/aip/jcp/article/160/24/244703/3299207/Ab-initio-quasi-harmonic-thermoelasticity-of">
 Jour. Chem. Phys. <b>160</b>, 244703 (2024).</a>
 
 15. B. Thakur, X. Gong, and A. Dal Corso,
