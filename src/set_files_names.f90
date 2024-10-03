@@ -179,7 +179,7 @@ END SUBROUTINE initialize_el_file_names
 
 !----------------------------------------------------------------
 SUBROUTINE set_files_for_plot(icode, file_disp, filedata, filerap, fileout, &
-                                     gnu_filename, filenameps)
+                                     gnu_filename, filenameps, filepbs)
 !----------------------------------------------------------------
 !
 !   This routine receives as input a code of what we want to plot
@@ -202,10 +202,11 @@ USE thermo_mod,       ONLY : central_geo
 USE control_thermo,   ONLY : spin_component
 USE lsda_mod,         ONLY : nspin
 
-USE data_files,       ONLY : flpgrun, flpband, filband, flfrq, flgrun
+USE data_files,       ONLY : flpgrun, flpband, filband, flfrq, flgrun, &
+                             flpbs
 USE postscript_files, ONLY : flpsband, flpsdisp, flpsgrun
 USE control_gnuplot,  ONLY : flgnuplot, flext
-
+USE control_2d_bands, ONLY : lprojpbs
 USE io_global,        ONLY : stdout
 
 IMPLICIT NONE
@@ -213,7 +214,7 @@ IMPLICIT NONE
 INTEGER, INTENT(IN) :: icode
 CHARACTER(LEN=256), INTENT(IN) :: file_disp
 CHARACTER(LEN=256), INTENT(OUT) :: filedata, filerap, fileout, gnu_filename, &
-                                   filenameps 
+                                   filenameps, filepbs 
 CHARACTER(LEN=6) :: int_to_char
 !
 !  first the file with the data 
@@ -247,10 +248,14 @@ CHARACTER(LEN=6) :: int_to_char
         fileout=' '
      ELSEIF (icode==1) THEN
         fileout="band_files/"//TRIM(flpband)
-        IF (nspin==2) &
+        IF (nspin==2) THEN
            fileout="band_files/"//TRIM(flpband)//"."//&
-                                  TRIM(int_to_char(spin_component))
-     ELSEIF (icode==2) THEN
+                   TRIM(int_to_char(spin_component))
+           IF (lprojpbs) &
+           filepbs =TRIM(flpbs)//"."//&
+                    TRIM(int_to_char(spin_component))
+        ENDIF
+   ELSEIF (icode==2) THEN
         fileout="phdisp_files/"//TRIM(flpband)
      ENDIF
   ELSEIF (icode==3) THEN

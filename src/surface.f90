@@ -241,6 +241,8 @@ ENDDO
 
 DEALLOCATE(plot)
 DEALLOCATE(sumna)
+DEALLOCATE(averag)
+DEALLOCATE(vacuum)
 
 RETURN
 END SUBROUTINE identify_surface_states

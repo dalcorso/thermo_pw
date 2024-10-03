@@ -9,7 +9,7 @@
 !
 !----------------------------------------------------------------------
 SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
-                                      gnu_filename, filenameps )
+                                      gnu_filename, filenameps, filepbs)
 !----------------------------------------------------------------------
   !
   ! reads data files produced by "bands_sub", produces
@@ -51,7 +51,7 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
   IMPLICIT NONE
   INTEGER, INTENT(IN) :: icode
   CHARACTER(LEN=256), INTENT(IN) :: filedata, filerap, fileout, &
-                                               gnu_filename, filenameps
+                                         gnu_filename, filenameps, filepbs
 !
 !  path variables
 !
@@ -832,7 +832,7 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
   IF (lprojpbs) CALL proj_band_structure(kx, e_eff, tot_points, nbnd, &
                     ymin, ymax, eref, e_rap, nrap, nbnd_rapk, start_rapk, &
                     nlines, start_point_eff, last_point_eff, &
-                    nrap_plot_eff, rap_plot_eff )
+                    nrap_plot_eff, rap_plot_eff, filepbs)
 
   IF (identify_sur) CALL plot_surface_states(nbnd, tot_points, nlines, kx, &
                            e_rap, ymin, ymax, eref, nrap, nbnd_rapk, &
@@ -901,7 +901,8 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
   IF (identify_sur) THEN
      DEALLOCATE (lsurface_state_eff)
      DEALLOCATE (lsurface_state_rap)
-  ENDIF
+     DEALLOCATE (lsurface_state)
+   ENDIF
 
 !
 !  last deallocate the variables that define the path read from file

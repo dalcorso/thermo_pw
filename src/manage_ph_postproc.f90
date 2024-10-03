@@ -21,7 +21,8 @@ USE control_phrun,    ONLY : auxdyn
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: igeom
 
-CHARACTER(LEN=256) :: filedata, filerap, fileout, gnu_filename, filenameps
+CHARACTER(LEN=256) :: filedata, filerap, fileout, gnu_filename, filenameps, &
+                      filepbs
 !
 !   Compute the interatomic force constants from the dynamical matrices
 !   written on file
@@ -33,9 +34,9 @@ CALL q2r_sub(auxdyn)
 IF (set_internal_path) CALL set_bz_path()
 CALL write_ph_dispersions()
 CALL set_files_for_plot(2, ' ', filedata, filerap, fileout, &
-                                                    gnu_filename, filenameps)
+                                            gnu_filename, filenameps, filepbs)
 IF (disp_nqs>0) CALL plotband_sub(2, filedata, filerap, fileout, &
-                                                    gnu_filename, filenameps)
+                                            gnu_filename, filenameps, filepbs)
 !
 !   Compute the harmonic thermodynamic quantities
 !

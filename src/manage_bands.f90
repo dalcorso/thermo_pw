@@ -27,7 +27,8 @@ USE mp_images,        ONLY : my_image_id, root_image
 IMPLICIT NONE
 
 INTEGER :: nspin0, exit_status, ierr
-CHARACTER(LEN=256) :: filedata, filerap, fileout, gnu_filename, filenameps
+CHARACTER(LEN=256) :: filedata, filerap, fileout, gnu_filename, filenameps, &
+                      filepbs
 CHARACTER(LEN=80)  :: message
  
 ierr=0
@@ -84,14 +85,14 @@ ELSEIF (my_image_id==root_image) THEN
    IF (is_a_path) THEN
       DO spin_component = 1, nspin0
          CALL set_files_for_plot(1, ' ', filedata, filerap, &
-                                           fileout, gnu_filename, filenameps)
+                                          fileout, gnu_filename, filenameps, filepbs)
          CALL plotband_sub(1,filedata, filerap, fileout, &
-                                           gnu_filename, filenameps)
+                                           gnu_filename, filenameps, filepbs)
       ENDDO
    ELSEIF (q2d) THEN
       spin_component=1
       CALL set_files_for_plot(1, ' ', filedata, filerap, &
-                                           fileout, gnu_filename, filenameps)
+                                           fileout, gnu_filename, filenameps, filepbs)
       CALL plot_ef(filedata, gnu_filename, filenameps)
    ENDIF
 ENDIF

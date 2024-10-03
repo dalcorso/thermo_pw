@@ -28,7 +28,8 @@ USE io_global,             ONLY : stdout
 IMPLICIT NONE
 
 INTEGER :: itemp, igeom
-CHARACTER(LEN=256) :: filedata, filerap, fileout, gnu_filename, filenameps
+CHARACTER(LEN=256) :: filedata, filerap, fileout, gnu_filename, filenameps, &
+                      filepbs
 LOGICAL :: all_geometry_done, all_el_free, ldummy
 
 CALL check_all_geometries_done(all_geometry_done)
@@ -337,11 +338,11 @@ WRITE(stdout,'(2x,76("-"),/)')
 !
 CALL write_gruneisen_band(flfrq_thermo,flvec_thermo)
 CALL set_files_for_plot(3, flfrq_thermo, filedata, filerap, &
-                                      fileout, gnu_filename, filenameps)
-CALL plotband_sub(3, filedata, filerap, fileout, gnu_filename, filenameps)
+                                      fileout, gnu_filename, filenameps, filepbs)
+CALL plotband_sub(3, filedata, filerap, fileout, gnu_filename, filenameps, filepbs)
 CALL set_files_for_plot(4, flfrq_thermo, filedata, filerap,  &
-                                       fileout, gnu_filename, filenameps)
-CALL plotband_sub(4, filedata, filerap, fileout, gnu_filename, filenameps)
+                                       fileout, gnu_filename, filenameps, filepbs)
+CALL plotband_sub(4, filedata, filerap, fileout, gnu_filename, filenameps, filepbs)
 !
 !    fit the frequencies of the dos mesh with a polynomial
 !
@@ -388,7 +389,8 @@ USE mp_world,              ONLY : world_comm
 
 IMPLICIT NONE
 INTEGER :: itemp, itempp, igeom, startt, lastt, idata, ndata
-CHARACTER(LEN=256) :: filedata, filerap, fileout, gnu_filename, filenameps
+CHARACTER(LEN=256) :: filedata, filerap, fileout, gnu_filename, filenameps, &
+                      filepbs
 REAL(DP), ALLOCATABLE :: phf(:)
 LOGICAL :: all_geometry_done, all_el_free, ldummy
 INTEGER :: compute_nwork
@@ -680,8 +682,8 @@ WRITE(stdout,'(2x,76("-"),/)')
 
 CALL write_gruneisen_band_anis(flfrq_thermo,flvec_thermo)
 CALL set_files_for_plot(4, flfrq_thermo, filedata, filerap, &
-                                          fileout, gnu_filename, filenameps)
-CALL plotband_sub(4, filedata, filerap, fileout, gnu_filename, filenameps)
+                                          fileout, gnu_filename, filenameps, filepbs)
+CALL plotband_sub(4, filedata, filerap, fileout, gnu_filename, filenameps, filepbs)
 CALL plot_gruneisen_band_anis(flfrq_thermo)
 !
 !    fit the frequencies of the dos mesh with a polynomial

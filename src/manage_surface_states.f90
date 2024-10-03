@@ -27,12 +27,21 @@ SUBROUTINE manage_surface_states()
   INTEGER :: nks1, nks2, nks1tot, nks2tot
   LOGICAL :: exst
   INTEGER :: find_free_unit
-!
+  CHARACTER(LEN=256) :: fileprojlayer 
+  CHARACTER(LEN=6) :: int_to_char
+
+ !
 !   Find which k points must be done by this pool
 !
   CALL find_nks1nks2(1,nkstot,nks1tot,nks1,nks2tot,nks2,spin_component)
 
-  IF (ionode) INQUIRE( FILE = TRIM(flprojlayer), EXIST = exst )
+  fileprojlayer = flprojlayer
+ 
+  IF (nspin==2) &
+         fileprojlayer = TRIM(flprojlayer)// &
+                              '.'//TRIM(int_to_char(spin_component))
+
+  IF (ionode) INQUIRE( FILE = TRIM(fileprojlayer), EXIST = exst )
   CALL mp_bcast(exst, ionode_id, intra_image_comm)
 !
 !   the file with the projections is created here if it does not exist,
@@ -47,9 +56,9 @@ SUBROUTINE manage_surface_states()
                                                                 surface2)
   IF (ionode) THEN
      iun=find_free_unit()
-     OPEN(UNIT=iun, FILE=TRIM(flprojlayer), STATUS='unknown', ERR=400, &
+     OPEN(UNIT=iun, FILE=TRIM(fileprojlayer), STATUS='unknown', ERR=400, &
                                                             IOSTAT=ios)
-     WRITE(iun, '(5i8)') nat, nlayers, nbnd, nkstot, nspin     
+     WRITE(iun, '(5i8)') nat, nlayers, nbnd, nks2tot-nks1tot+1, nspin     
      WRITE(iun, '(4i8)') surface1, surface2    
      DO ik=nks1tot, nks2tot
         DO ibnd=1, nbnd

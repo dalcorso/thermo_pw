@@ -14,6 +14,8 @@ USE ions_base,         ONLY : nat
 USE control_2d_bands,  ONLY : averag, vacuum, nlayers, identify_sur, &
                               surface1, surface2
 USE data_files,        ONLY : flprojlayer
+USE control_thermo,     ONLY : spin_component
+USE lsda_mod,           ONLY : nspin_=>nspin
 USE io_global,         ONLY : ionode, ionode_id
 USE mp_images,         ONLY : intra_image_comm
 USE mp,                ONLY : mp_bcast
@@ -24,16 +26,23 @@ LOGICAL :: exst
 INTEGER :: iun, ios, idum, ilayer, ik, ibnd, nspin, nat_, nbnd_, nkstot_
 INTEGER :: ispin
 INTEGER :: find_free_unit
+CHARACTER(LEN=256) :: fileprojlayer
+CHARACTER(LEN=6) :: int_to_char
 
 IF (identify_sur) THEN
-   IF (ionode) &
-        INQUIRE( FILE = TRIM(flprojlayer), EXIST = exst ) 
+
+      fileprojlayer = flprojlayer
+      IF (nspin_==2) &
+         fileprojlayer = TRIM(flprojlayer)// &
+                              '.'//TRIM(int_to_char(spin_component))
+      IF (ionode) &
+        INQUIRE( FILE = TRIM(fileprojlayer), EXIST = exst ) 
      CALL mp_bcast(exst,ionode_id,intra_image_comm)
      
      IF (exst) THEN
         iun=find_free_unit()
         IF (ionode) THEN
-           OPEN(UNIT=iun,FILE=TRIM(flprojlayer),STATUS='old',ERR=300,&
+          OPEN(UNIT=iun,FILE=TRIM(fileprojlayer),STATUS='old',ERR=300,&
                                                               IOSTAT=ios)
            READ(iun, '(5i8)') nat, nlayers, nbnd_, nkstot_, nspin     
         ENDIF

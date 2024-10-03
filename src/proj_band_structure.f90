@@ -9,7 +9,7 @@
 !------------------------------------------------------------
  SUBROUTINE proj_band_structure(kx, e, nks_, nbnd_, emin, emax, eref_, &
                  e_rap, nrap, nbnd_rapk, start_rapk, nlines_, start_point_, &
-                 last_point_, nrap_plot, rap_plot )
+                 last_point_, nrap_plot, rap_plot, filepbs)
 !------------------------------------------------------------
 !
 !     This routine uses gnuplot library to plot 
@@ -69,6 +69,7 @@ USE data_files, ONLY : flpbs
 USE gnuplot,  ONLY : gnuplot_polygon, gnuplot_line, gnuplot_write_command
 USE point_group, ONLY : convert_rap
 USE noncollin_module, ONLY : lspinorb
+USE control_thermo,   ONLY : spin_component
 USE io_global, ONLY : ionode, ionode_id, stdout
 USE mp_images, ONLY : intra_image_comm
 USE mp, ONLY : mp_bcast
@@ -81,6 +82,7 @@ INTEGER, INTENT(IN) :: start_point_(nlines_), last_point_(nlines_), &
                        nbnd_rapk(12,nks_), start_rapk(12,nks_)
 INTEGER, INTENT(IN) :: nrap_plot(nks_), rap_plot(12,nks_)
 REAL(DP), INTENT(IN) :: emin, emax, eref_
+CHARACTER(LEN=256) :: filepbs
 REAL(DP) :: e(nbnd_,nks_), kx(nks_), e_rap(nbnd_, nks_)
 
 INTEGER :: nks   ! this is the number of k point of a single path
@@ -180,7 +182,7 @@ IF ( nkz > 1) THEN
 
    IF (ionode) THEN
       iun=find_free_unit()
-      OPEN(UNIT=iun,FILE=TRIM(flpbs),STATUS='unknown',ERR=100,IOSTAT=ios)
+      OPEN(UNIT=iun,FILE=TRIM(filepbs),STATUS='unknown',ERR=100,IOSTAT=ios)
       WRITE(iun, '(3i5,f12.6)') nbnd, nks, nlines, eref
       DO ilines=1, nlines
          WRITE(iun,'(2i5)') start_point(ilines), last_point(ilines)
@@ -202,7 +204,7 @@ ELSE
 !  In this run the PBS information is read from file
 !
    IF (ionode) THEN
-      OPEN(UNIT=iun, FILE=TRIM(flpbs), STATUS='old', ERR=200, IOSTAT=ios)     
+      OPEN(UNIT=iun, FILE=TRIM(filepbs), STATUS='old', ERR=200, IOSTAT=ios)     
       READ(iun, '(3i5,f12.6)') nbnd, nks, nlines, eref
    ENDIF
 200 CALL mp_bcast(ios,ionode_id,intra_image_comm)
@@ -247,6 +249,7 @@ ENDIF
 !     
 ! et1 and et2 (min/max/min/max...) is in a single variable eth(2*nbnd,nks)
 !
+
 ALLOCATE(eth(2*nbnd,nks))
 ALLOCATE(lth(2*nbnd,nks))
 ALLOCATE(x(nks))
