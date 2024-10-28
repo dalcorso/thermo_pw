@@ -10,7 +10,6 @@ set(src_tpw_lib
     lib/elastic_const.f90
     lib/eldos_module.f90
     lib/eos.f90
-    lib/freecad.f90
     lib/gnuplot_color.f90
     lib/gnuplot.f90
     lib/isoentropic.f90
@@ -204,7 +203,6 @@ set(src_tpw_qe
     qe/check_bands.f90
     qe/check_initial_geometry.f90
     qe/check_initial_status_tpw.f90
-    qe/ch_psi_all_tpw.f90
     qe/ch_psi_all_dev.f90
     qe/cegterg_vk.f90
     qe/cegterg_vk_dev.f90
@@ -487,6 +485,7 @@ set(src_tpw
     src/read_minimal_info.f90
     src/readmodes.f90
     src/read_state_densities.f90
+    src/redefine_energies.f90
     src/run_iwork.f90
     src/run_thermo_asyncronously.f90
     src/save_ph_variables.f90

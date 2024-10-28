@@ -60,6 +60,8 @@ main <code>thermo_pw</code> page.</p>
 patches given below.</p>
 
 **Patches for thermo_pw.2.0.0**:
+To compile with cmake copy in <code>thermo_pw/CMakeLists.txt</code> 
+the file that you find <a href="https://people.sissa.it/~dalcorso/thermo_pw/CMakeLists.txt">here</a>.
 
 **Patches for thermo_pw.1.9.1**:
 The code hangs when using start_q and last_q
