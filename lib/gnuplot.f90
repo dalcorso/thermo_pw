@@ -76,6 +76,8 @@ IF (ionode) THEN
    ENDIF
    WRITE(iun_gnuplot,'("set output """, a, """")') TRIM(filename) 
    WRITE(iun_gnuplot,*)
+   WRITE(iun_gnuplot,'("unset arrow")')
+   WRITE(iun_gnuplot,'("unset obj")')
    WRITE(iun_gnuplot,'("set key off")')
    WRITE(iun_gnuplot,'("xscale=",f15.6)') xscale
    WRITE(iun_gnuplot,'("xshift=0.0")') 
