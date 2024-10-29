@@ -56,6 +56,7 @@ INTEGER :: lenwrk_d, lensav_d
 COMPLEX(DP), ALLOCATABLE :: becpk_d(:,:,:,:)
 COMPLEX(DP), ALLOCATABLE :: psk_d(:,:,:,:)
 COMPLEX(DP), ALLOCATABLE :: pssk_d(:,:,:,:)
+REAL(DP),    ALLOCATABLE :: tab_at_d(:,:,:)
 
 COMPLEX(DP), ALLOCATABLE :: vkbk_d(:,:)
 REAL(DP),    ALLOCATABLE :: g2kink_d(:,:)
@@ -114,6 +115,7 @@ LOGICAL :: domag_d
    ATTRIBUTES(DEVICE) :: becpk_d
    ATTRIBUTES(DEVICE) :: psk_d
    ATTRIBUTES(DEVICE) :: pssk_d
+   ATTRIBUTES(DEVICE) :: tab_at_d
    ATTRIBUTES(DEVICE) :: vkbk_d
    ATTRIBUTES(DEVICE) :: g2kink_d
    ATTRIBUTES(DEVICE) :: evck_d
@@ -175,7 +177,7 @@ LOGICAL :: domag_d
 ! variables for saving k-point dependent variables 
 !
 PUBLIC becpk_d, psk_d, pssk_d, vkbk_d, g2kink_d, evck_d, evck, h_diagk_d,  &
-       s_diagk_d 
+       s_diagk_d, tab_at_d
 !
 ! variables for dividing the k points in blocks
 !
@@ -201,7 +203,7 @@ PUBLIC nat_d, ntyp_d, ityp_d, nh_d, isk_d, qq_at_d, deeq_d, lmaxkb_d,      &
 PUBLIC init_k_blocks, allocate_many_k, deallocate_many_k,                  &
        initialize_fft_factors, deallocate_fft_factors,                     &
        initialize_device_variables, allocate_becps_many_k,                 & 
-       deallocate_becps_many_k, recalculate_k_blocks
+       deallocate_becps_many_k
 !
 ! global subroutines of the module
 !
@@ -331,49 +333,7 @@ WRITE(stdout,'(5x,i7,8x,i7,5x,i7,5x,i7,/)') i, nksb(nkblocks), &
                                              startkb(nkblocks)+1, nks
 RETURN
 END SUBROUTINE init_k_blocks
-
-!------------------------------------------------------------------
-SUBROUTINE recalculate_k_blocks(nks)
-!------------------------------------------------------------------
 !
-!   This routine recalculates the size of each block if the number
-!   of k points changes. It recalculate nksb and startkb, while 
-!   the size of the blocks remain the same as well as the number of 
-!   blocks
-!
-IMPLICIT NONE
-INTEGER :: nks
-
-INTEGER :: i, rest
-
-rest=MOD(nks,nkblocks)
-nksb=nks/nkblocks
-DO i=1,rest
-   nksb(i)=nksb(i)+1
-ENDDO
-startkb(1)=0
-DO i=2,nkblocks
-   startkb(i)=startkb(i-1)+nksb(i-1)
-ENDDO
-
-#if defined(__CUDA)
-startkb_d=startkb
-#endif
-
-WRITE(stdout,'(/,5x,"Many-k recalculation")')
-WRITE(stdout,'(5x,i8," k-points divided into ",i5," blocks")') nks, nkblocks
-WRITE(stdout,'(5x,"Maximum size of the blocks",i10)') nksbx
-
-WRITE(stdout,'(5x,"Block number",7x,"size",7x,"start",8x,"end")') 
-DO i=1,nkblocks-1
-   WRITE(stdout,'(5x,i7,8x,i7,5x,i7,5x,i7)') i, nksb(i), startkb(i)+1, &
-                                             startkb(i+1)
-ENDDO
-WRITE(stdout,'(5x,i7,8x,i7,5x,i7,5x,i7,/)') i, nksb(nkblocks), &
-                                             startkb(nkblocks)+1, nks
-RETURN
-END SUBROUTINE recalculate_k_blocks
-
 !------------------------------------------------------------------
 SUBROUTINE allocate_many_k(nsolv)
 !------------------------------------------------------------------
@@ -381,7 +341,8 @@ USE wvfct,            ONLY : nbnd, npwx
 USE uspp,             ONLY : nkb
 USE lsda_mod,         ONLY : nspin
 USE noncollin_module, ONLY : npol, noncolin
-USE uspp_param,       ONLY : nhm
+USE uspp_data,        ONLY : nqx
+USE uspp_param,       ONLY : nhm, nwfcm
 USE ions_base,        ONLY : nat, ntyp=>nsp
 USE gvect,            ONLY : ngm
 USE klist,            ONLY : nks
@@ -421,6 +382,8 @@ ALLOCATE(eigts2_d(-dfftp%nr2:dfftp%nr2,nat) )
 ALLOCATE(eigts3_d(-dfftp%nr3:dfftp%nr3,nat) )
 ALLOCATE(evck(npwx*npol,nbnd*nksbx*nsolv))
 ALLOCATE(evck_d(npwx*npol,nbnd*nksbx*nsolv))
+ALLOCATE(tab_at_d(nqx,nwfcm,ntyp))
+
 
 RETURN
 END SUBROUTINE allocate_many_k
@@ -456,6 +419,7 @@ IF (ALLOCATED(qq_at_d)) DEALLOCATE(qq_at_d)
 IF (ALLOCATED(qq_so_d)) DEALLOCATE(qq_so_d)
 IF (ALLOCATED(evck_d))  DEALLOCATE(evck_d)
 IF (ALLOCATED(evck))    DEALLOCATE(evck)
+IF (ALLOCATED(tab_at_d)) DEALLOCATE(tab_at_d)
 IF (ALLOCATED(g_d))      DEALLOCATE(g_d)
 IF (ALLOCATED(mill_d))   DEALLOCATE(mill_d)
 IF (ALLOCATED(eigts1_d)) DEALLOCATE(eigts1_d)
@@ -476,7 +440,7 @@ USE cell_base,  ONLY : tpiba, omega
 USE uspp,       ONLY : nkb, qq_at, deeq, qq_so, deeq_nc, okvan
 USE gvecw,      ONLY : ecfixed, qcutz, q2sigma
 USE gvect,      ONLY : g, mill, eigts1, eigts2, eigts3
-USE uspp_data,  ONLY : dq, nqx
+USE uspp_data,  ONLY : dq, nqx, tab_at
 USE uspp_param, ONLY : upf, nh, nhm, lmaxkb
 USE klist,      ONLY : xk
 USE wvfct,      ONLY : npwx
@@ -538,6 +502,7 @@ eigts3_d=eigts3
 nbeta_d=nbeta_cpu
 type1ps_d=type1ps
 tvanp_d=tvanp
+tab_at_d=tab_at
 #endif
 
 RETURN

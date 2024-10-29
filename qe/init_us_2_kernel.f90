@@ -25,9 +25,9 @@
                              nqx=>nqx_d, dq=>dq_d, &
                              xk=>xk_d, nbeta=>nbeta_d, &
                              eigts1=>eigts1_d, eigts2=>eigts2_d, &
-                             eigts3=>eigts3_d, mill=>mill_d, g=>g_d 
+                             eigts3=>eigts3_d, mill=>mill_d, g=>g_d, &
+                             tab_at => tab_at_d
     USE klist,        ONLY : igk=>igk_k_d, ngk=>ngk_d
-    USE uspp_data,    ONLY : tab_d
     USE uspp,         ONLY : nhtol=>nhtol_d, nhtolm=>nhtolm_d, indv=>indv_d
     USE uspp,         ONLY : ofsbeta=>ofsbeta_d
     !
@@ -95,8 +95,8 @@
           i1 = i0 + 1
           i2 = i0 + 2
           i3 = i0 + 3
-          vq_d = ux*vx*(wx*tab_d(i0, nb, nt) + px*tab_d(i3, nb, nt)) / 6.d0 + &
-              px*wx*(vx * tab_d(i1, nb, nt) - ux * tab_d(i2, nb, nt)) * 0.5d0
+          vq_d = ux*vx*(wx*tab_at(i0, nb, nt)+px*tab_at(i3, nb, nt)) / 6.d0 + &
+              px*wx*(vx * tab_at(i1, nb, nt)-ux * tab_at(i2, nb, nt)) * 0.5d0
 
           ! add spherical harmonic part  (Y_lm(q)*f_l(q)) 
           DO ih = 1, nh (nt)

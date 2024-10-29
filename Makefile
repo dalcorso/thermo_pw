@@ -42,12 +42,14 @@ join_qe:
           ./QESUB/vloc_mod.f90_qe ; mv ./QESUB/vloc_mod.f90 ../upflib ; fi
 	if test -f ./QESUB/rhoat_mod.f90 ; then mv ../upflib/rhoat_mod.f90 \
           ./QESUB/rhoat_mod.f90_qe ; mv ./QESUB/rhoat_mod.f90 ../upflib ; fi
+	if test -f ./QESUB/uspp_data.f90 ; then mv ../upflib/uspp_data.f90 \
+          ./QESUB/uspp_data.f90_qe ; mv ./QESUB/uspp_data.f90 ../upflib ; fi
+	if test -f ./QESUB/beta_mod.f90 ; then mv ../upflib/beta_mod.f90 \
+          ./QESUB/beta_mod.f90_qe ; mv ./QESUB/beta_mod.f90 ../upflib ; fi
 	if test -f ./QESUB/pwcom.f90 ; then mv ../PW/src/pwcom.f90 \
           ./QESUB/pwcom.f90_qe ; mv ./QESUB/pwcom.f90 ../PW/src ; fi
 	if test -f ./QESUB/bfgs_module.f90 ; then mv ../Modules/bfgs_module.f90 \
           ./QESUB/bfgs_module.f90_qe ; mv ./QESUB/bfgs_module.f90 ../Modules ; fi
-	if test -f ./QESUB/uspp_data.f90 ; then mv ../upflib/uspp_data.f90 \
-          ./QESUB/uspp_data.f90_qe ; mv ./QESUB/uspp_data.f90 ../upflib ; fi
 	if test -f ./QESUB/clocks_handler.f90 ; then mv ../UtilXlib/clocks_handler.f90 \
           ./QESUB/clocks_handler.f90_qe ; mv ./QESUB/clocks_handler.f90 ../UtilXlib ; fi
 leave_qe:
@@ -73,12 +75,15 @@ leave_qe:
 	if test -f ./QESUB/rhoat_mod.f90_qe ; then mv ../upflib/rhoat_mod.f90 \
            ./QESUB/rhoat_mod.f90 ; \
            mv ./QESUB/rhoat_mod.f90_qe ../upflib/rhoat_mod.f90 ; fi
-	if test -f ./QESUB/pwcom.f90_qe ; then mv ../PW/src/pwcom.f90 \
-           ./QESUB/pwcom.f90 ; \
-           mv ./QESUB/pwcom.f90_qe ../PW/src/pwcom.f90 ; fi
 	if test -f ./QESUB/uspp_data.f90_qe ; then mv ../upflib/uspp_data.f90 \
            ./QESUB/uspp_data.f90 ; \
            mv ./QESUB/uspp_data.f90_qe ../upflib/uspp_data.f90 ; fi
+	if test -f ./QESUB/beta_mod.f90_qe ; then mv ../upflib/beta_mod.f90 \
+           ./QESUB/beta_mod.f90 ; \
+           mv ./QESUB/beta_mod.f90_qe ../upflib/beta_mod.f90 ; fi
+	if test -f ./QESUB/pwcom.f90_qe ; then mv ../PW/src/pwcom.f90 \
+           ./QESUB/pwcom.f90 ; \
+           mv ./QESUB/pwcom.f90_qe ../PW/src/pwcom.f90 ; fi
 	if test -f ./QESUB/bfgs_module.f90_qe ; then mv ../Modules/bfgs_module.f90 \
            ./QESUB/bfgs_module.f90 ; \
            mv ./QESUB/bfgs_module.f90_qe ../Modules/bfgs_module.f90 ; fi

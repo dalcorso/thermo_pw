@@ -53,7 +53,7 @@ SUBROUTINE electrons_tpw()
   USE loc_scdm,             ONLY : use_scdm, localize_orbitals
   USE loc_scdm_k,           ONLY : localize_orbitals_k
   !
-  USE wvfct_gpum,           ONLY : using_et, using_wg, using_wg_d
+  USE wvfct_gpum,           ONLY : using_et
   USE scf_gpum,             ONLY : using_vrs
   !
   USE add_dmft_occ,         ONLY : dmft
@@ -127,10 +127,6 @@ SUBROUTINE electrons_tpw()
            READ (iunres, *) (wg(1:nbnd,ik),ik=1,nks)
            READ (iunres, *) (et(1:nbnd,ik),ik=1,nks)
            CLOSE ( unit=iunres, status='delete')
-           CALL using_et(2); CALL using_wg(2)
-#if defined(__CUDA)
-           CALL using_wg_d(0)
-#endif
            ! ... if restarting here, exx was already active
            ! ... initialize stuff for exx
            first = .false.

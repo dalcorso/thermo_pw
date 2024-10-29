@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2001-2006 Quantum ESPRESSO group
+! Copyright (C) 2001-2023 Quantum ESPRESSO Foundation
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -48,7 +48,7 @@ SUBROUTINE init_run_tpw()
   USE many_k_mod,         ONLY : allocate_many_k, init_k_blocks
   USE control_qe,         ONLY : many_k
   USE dfunct_gpum,        ONLY : newd_gpu
-  USE wvfct_gpum,         ONLY : using_et, using_wg, using_wg_d
+  USE wvfct_gpum,         ONLY : using_et
   USE rism_module,        ONLY : lrism, rism_alloc3d
   USE extffield,          ONLY : init_extffield
   USE control_flags,      ONLY : scissor
@@ -147,11 +147,6 @@ SUBROUTINE init_run_tpw()
   CALL using_et(2)
   !
   wg(:,:) = 0.D0
-  CALL using_wg(2)
-#if defined(__CUDA)
-  ! Sync here. Shouldn't be done and will be removed ASAP.
-  CALL using_wg_d(0)
-#endif
   !
   btype(:,:) = 1
   !
