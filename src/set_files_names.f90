@@ -248,6 +248,7 @@ CHARACTER(LEN=6) :: int_to_char
         fileout=' '
      ELSEIF (icode==1) THEN
         fileout="band_files/"//TRIM(flpband)
+        filepbs=TRIM(flpbs)
         IF (nspin==2) THEN
            fileout="band_files/"//TRIM(flpband)//"."//&
                    TRIM(int_to_char(spin_component))
