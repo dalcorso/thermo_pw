@@ -56,7 +56,7 @@ INTEGER :: lenwrk_d, lensav_d
 COMPLEX(DP), ALLOCATABLE :: becpk_d(:,:,:,:)
 COMPLEX(DP), ALLOCATABLE :: psk_d(:,:,:,:)
 COMPLEX(DP), ALLOCATABLE :: pssk_d(:,:,:,:)
-REAL(DP),    ALLOCATABLE :: tab_at_d(:,:,:)
+REAL(DP),    ALLOCATABLE :: tab_beta_d(:,:,:)
 
 COMPLEX(DP), ALLOCATABLE :: vkbk_d(:,:)
 REAL(DP),    ALLOCATABLE :: g2kink_d(:,:)
@@ -76,6 +76,8 @@ LOGICAL,     ALLOCATABLE :: tvanp(:)
 LOGICAL,     ALLOCATABLE :: tvanp_d(:)
 INTEGER,     ALLOCATABLE :: nbeta_d(:) 
 INTEGER,     ALLOCATABLE :: mill_d(:,:)
+INTEGER,     ALLOCATABLE :: ofsbeta_d(:)
+INTEGER,     ALLOCATABLE :: nhtolm_d(:,:)
 REAL(DP),    ALLOCATABLE :: g_d(:,:)
 REAL(DP),    ALLOCATABLE :: xk_d(:,:)
 REAL(DP),    ALLOCATABLE :: wk_d(:)
@@ -115,7 +117,7 @@ LOGICAL :: domag_d
    ATTRIBUTES(DEVICE) :: becpk_d
    ATTRIBUTES(DEVICE) :: psk_d
    ATTRIBUTES(DEVICE) :: pssk_d
-   ATTRIBUTES(DEVICE) :: tab_at_d
+   ATTRIBUTES(DEVICE) :: tab_beta_d
    ATTRIBUTES(DEVICE) :: vkbk_d
    ATTRIBUTES(DEVICE) :: g2kink_d
    ATTRIBUTES(DEVICE) :: evck_d
@@ -139,6 +141,8 @@ LOGICAL :: domag_d
    ATTRIBUTES(DEVICE) :: nbeta_d
    ATTRIBUTES(DEVICE) :: g_d
    ATTRIBUTES(DEVICE) :: mill_d
+   ATTRIBUTES(DEVICE) :: ofsbeta_d
+   ATTRIBUTES(DEVICE) :: nhtolm_d
    ATTRIBUTES(DEVICE) :: xk_d
    ATTRIBUTES(DEVICE) :: wk_d
    ATTRIBUTES(DEVICE) :: isk_d
@@ -177,7 +181,7 @@ LOGICAL :: domag_d
 ! variables for saving k-point dependent variables 
 !
 PUBLIC becpk_d, psk_d, pssk_d, vkbk_d, g2kink_d, evck_d, evck, h_diagk_d,  &
-       s_diagk_d, tab_at_d
+       s_diagk_d, tab_beta_d
 !
 ! variables for dividing the k points in blocks
 !
@@ -196,7 +200,7 @@ PUBLIC nat_d, ntyp_d, ityp_d, nh_d, isk_d, qq_at_d, deeq_d, lmaxkb_d,      &
        tau_d, nqx_d, npwx_d, type1ps_d, noncolin_d, lspinorb_d, lsda_d,    &
        domag_d, tvanp_d, qcutz_d, ecfixed_d, q2sigma_d, nkb_d, okvan_d,    &
        eigts1_d, eigts2_d, eigts3_d, g_d, mill_d, lgauss_d, ltetra_d,      &
-       ngauss_d, degauss_d, omega_d
+       ngauss_d, degauss_d, omega_d, ofsbeta_d, nhtolm_d
 !
 ! host subroutines of the module
 !
@@ -342,7 +346,7 @@ USE uspp,             ONLY : nkb
 USE lsda_mod,         ONLY : nspin
 USE noncollin_module, ONLY : npol, noncolin
 USE uspp_data,        ONLY : nqx
-USE uspp_param,       ONLY : nhm, nwfcm
+USE uspp_param,       ONLY : nhm, nwfcm, nbetam
 USE ions_base,        ONLY : nat, ntyp=>nsp
 USE gvect,            ONLY : ngm
 USE klist,            ONLY : nks
@@ -376,13 +380,15 @@ ELSE
    ALLOCATE(qq_at_d(nhm,nhm,nat))
 ENDIF
 ALLOCATE(mill_d(3,ngm) )
+ALLOCATE(ofsbeta_d(nat) )
+ALLOCATE(nhtolm_d(nhm,ntyp))
 ALLOCATE(g_d(3,ngm) )
 ALLOCATE(eigts1_d(-dfftp%nr1:dfftp%nr1,nat) )
 ALLOCATE(eigts2_d(-dfftp%nr2:dfftp%nr2,nat) )
 ALLOCATE(eigts3_d(-dfftp%nr3:dfftp%nr3,nat) )
 ALLOCATE(evck(npwx*npol,nbnd*nksbx*nsolv))
 ALLOCATE(evck_d(npwx*npol,nbnd*nksbx*nsolv))
-ALLOCATE(tab_at_d(nqx,nwfcm,ntyp))
+ALLOCATE(tab_beta_d(nqx,nbetam,ntyp))
 
 
 RETURN
@@ -419,7 +425,9 @@ IF (ALLOCATED(qq_at_d)) DEALLOCATE(qq_at_d)
 IF (ALLOCATED(qq_so_d)) DEALLOCATE(qq_so_d)
 IF (ALLOCATED(evck_d))  DEALLOCATE(evck_d)
 IF (ALLOCATED(evck))    DEALLOCATE(evck)
-IF (ALLOCATED(tab_at_d)) DEALLOCATE(tab_at_d)
+IF (ALLOCATED(tab_beta_d)) DEALLOCATE(tab_beta_d)
+IF (ALLOCATED(ofsbeta_d))   DEALLOCATE(ofsbeta_d)
+IF (ALLOCATED(nhtolm_d))   DEALLOCATE(nhtolm_d)
 IF (ALLOCATED(g_d))      DEALLOCATE(g_d)
 IF (ALLOCATED(mill_d))   DEALLOCATE(mill_d)
 IF (ALLOCATED(eigts1_d)) DEALLOCATE(eigts1_d)
@@ -437,10 +445,12 @@ USE klist,      ONLY : nks, xk, wk, igk_k, igk_k_d, lgauss, ltetra, &
                        ngauss, degauss
 USE ions_base,  ONLY : nat, ntyp=>nsp, ityp, tau
 USE cell_base,  ONLY : tpiba, omega
-USE uspp,       ONLY : nkb, qq_at, deeq, qq_so, deeq_nc, okvan
+USE uspp,       ONLY : nkb, qq_at, deeq, qq_so, deeq_nc, okvan, ofsbeta, &
+                       nhtolm
 USE gvecw,      ONLY : ecfixed, qcutz, q2sigma
 USE gvect,      ONLY : g, mill, eigts1, eigts2, eigts3
-USE uspp_data,  ONLY : dq, nqx, tab_at
+USE uspp_data,  ONLY : dq, nqx
+USE beta_mod,   ONLY : tab_beta
 USE uspp_param, ONLY : upf, nh, nhm, lmaxkb
 USE klist,      ONLY : xk
 USE wvfct,      ONLY : npwx
@@ -502,7 +512,9 @@ eigts3_d=eigts3
 nbeta_d=nbeta_cpu
 type1ps_d=type1ps
 tvanp_d=tvanp
-tab_at_d=tab_at
+tab_beta_d=tab_beta
+ofsbeta_d=ofsbeta
+nhtolm_d=nhtolm
 #endif
 
 RETURN

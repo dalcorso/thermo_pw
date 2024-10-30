@@ -1,5 +1,6 @@
 Why we need to change these QE routines:
 
+
 clocks_handler.f90 we increase the defaults number of clocks.
                    At line 45 maxclocks=2048
 
@@ -21,3 +22,6 @@ pwcom.f90 igk_k deallocated from the acc system only if allocated.
 bfgs_module.f90  If the bfgs routine exceedes the maximum number of 
             allowed iterations there is no way to change the 
             bfgs_file in a different pw.x run. Added line 1121.
+
+beta_mod.f90 we deallocate tab_beta only if it has been allocated.
+             Moreover we need to use tab_beta so we made it PUBLIC.

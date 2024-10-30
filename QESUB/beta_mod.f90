@@ -24,6 +24,7 @@ MODULE beta_mod
   PUBLIC :: scale_tab_beta
   PUBLIC :: interp_beta
   PUBLIC :: interp_dbeta
+  PUBLIC :: tab_beta
   !
   SAVE
   !

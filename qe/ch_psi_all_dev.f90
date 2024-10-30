@@ -454,9 +454,8 @@ ATTRIBUTES(GLOBAL) SUBROUTINE ch_psi_qqps( outk, nbndk, nkb, nk, npe, &
   USE many_k_mod,     ONLY : pssk_d, becpk_d, isk_d, nat=>nat_d, &
                              ntyp=>ntyp_d, ityp=>ityp_d, nh=>nh_d,      &
                              qq_at=>qq_at_d, lspinorb => lspinorb_d,    &
-                             tvanp => tvanp_d, qq_so => qq_so_d
-
-  USE uspp,           ONLY : ofsbeta=>ofsbeta_d
+                             tvanp => tvanp_d, qq_so => qq_so_d,        &
+                             ofsbeta=>ofsbeta_d
   IMPLICIT NONE
   !
   INTEGER, INTENT(IN), VALUE :: nk, nkb, npe, nsolv, npol

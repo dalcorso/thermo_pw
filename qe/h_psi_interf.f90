@@ -357,9 +357,8 @@ ATTRIBUTES(GLOBAL) SUBROUTINE compute_ps_s_gpu( outk, nveck, nset)
   USE many_k_mod,     ONLY : pssk_d, becpk_d, isk_d, nat=>nat_d, &
                              ntyp=>ntyp_d, ityp=>ityp_d, nh=>nh_d,      &
                              qq_at=>qq_at_d, deeq=>deeq_d, lsda => lsda_d, &
-                             nkb => nkb_d, okvan => okvan_d
-
-  USE uspp, ONLY : ofsbeta=>ofsbeta_d
+                             nkb => nkb_d, okvan => okvan_d, &
+                             ofsbeta=>ofsbeta_d
   IMPLICIT NONE
   !
   INTEGER, INTENT(IN), VALUE :: nset
@@ -378,9 +377,9 @@ ATTRIBUTES(GLOBAL) SUBROUTINE compute_ps_s_nc_gpu(outk, nveck, nset)
                              ntyp=>ntyp_d, ityp=>ityp_d, nh=>nh_d,      &
                              qq_at=>qq_at_d, deeq_nc=>deeq_nc_d,        &
                              qq_so=>qq_so_d, nkb => nkb_d,              &
-                             lspinorb => lspinorb_d, okvan => okvan_d
+                             lspinorb => lspinorb_d, okvan => okvan_d,  &
+                             ofsbeta=>ofsbeta_d
   USE many_k_ph_mod,  ONLY:  deeq_nc_save=> deeq_nc_save_d
-  USE uspp, ONLY : ofsbeta=>ofsbeta_d
   IMPLICIT NONE
   !
   INTEGER, INTENT(IN), VALUE :: nset
