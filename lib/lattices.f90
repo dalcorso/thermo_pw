@@ -173,8 +173,8 @@ CONTAINS
          atp(:,2)=  at(:,2)
          atp(:,3)= -at(:,1) + at(:,3)
      CASE(-13)
-         atp(:,1)=  at(:,1) + at(:,2) 
-         atp(:,2)= -at(:,1) + at(:,2)
+         atp(:,1)=  at(:,1) - at(:,2) 
+         atp(:,2)=  at(:,1) + at(:,2)
          atp(:,3)=  at(:,3)
      CASE DEFAULT
 !
