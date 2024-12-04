@@ -15,6 +15,10 @@ can be found <a href="https://people.sissa.it/dalcorso/thermo_pw/user_guide/inde
 <p align="justify">The following papers describe new
 features implemented in <code>thermo_pw</code>:</p>
 
+18. X. Gong and A. Dal Corso,
+<a href="https://arxiv.org/abs/2412.01695">
+Comp. Phys. Comm. <b>308</b>, 109439 (2025).</a>
+
 17. X. Gong and A. Dal Corso,
 High temperature and pressure thermoelasticity of hcp metals from 
 ab initio quasi-harmonic free energy calculations: the beryllium case
@@ -114,14 +118,14 @@ Clean Ir(111) and Pt(111) electronic surface states: a first-principle fully rel
 <a href="http://www.sciencedirect.com/science/article/pii/S0039602815000734"> Surf. Sci. <B>637-638</B>, 106 (2015)</a>.
 <br>
 <br>
-<p>Refs.6,8 describe how <code>thermo_pw</code> computes temperature
-dependent elastic constants, Ref.1,2,4 pressure and temperature dependent
-elastic constants, Ref.16 elastic constants at T=0 K,
-Ref.17,13 surface band structures, Refs.7,12 eels and optical properties,
-Ref.9 DFPT with fully relativistic pseudopotentials, and Ref.14,15 
-thermodynamic anharmonic properties. Refs.1,2,3,4,5 have examples of 
-pressure and
-temperature parameterized plots.</p>
+<p>Refs.7,9 describe how <code>thermo_pw</code> computes temperature
+dependent elastic constants, Ref.2,3,5 pressure and temperature dependent
+elastic constants, Ref.17 elastic constants at T=0 K,
+Ref.18,14 surface band structures, Refs.8,13 eels and optical properties,
+Ref.10 DFPT with fully relativistic pseudopotentials, and Ref.15,16 
+thermodynamic anharmonic properties. Refs.2,3,4,5,6 have examples of 
+pressure and temperature parameterized plots.
+Ref.1 describes the GPU acceleration for the many\_k option.</p>
 
 <p align="justify">The following works contain some calculations made by <code>thermo_pw</code>:</p>
 <br>
