@@ -16,6 +16,8 @@ can be found <a href="https://people.sissa.it/dalcorso/thermo_pw/user_guide/inde
 features implemented in <code>thermo_pw</code>:</p>
 
 18. X. Gong and A. Dal Corso,
+An alternative GPU acceleration for a pseudopotential plane-waves 
+density functional theory code with applications to metallic systems,
 <a href="https://arxiv.org/abs/2412.01695">
 Comp. Phys. Comm. <b>308</b>, 109439 (2025).</a>
 
