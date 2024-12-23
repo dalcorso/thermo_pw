@@ -52,6 +52,12 @@ make leave\_qe the original files are copied in the QE distribution. If
 you just remove the thermo\_pw directory the files of the QE package are not
 restored and you could have problems to reinstall thermo\_pw.
 
+## PEOPLE
+
+The THERMO\_PW code is designed, written, and maintained by Andrea Dal Corso (SISSA - Trieste). It is an open source code distributed, as is, within the GPL license.
+
+I would like to thank all the people that contributed with comments, requests of improvements, and bug reports. Some people also found bug corrections or wrote new routines and shared their improvements with me. In particular I would like to mention M. Palumbo, O. Motornyi, A. Urru, C. Malica, X. Gong, and B. Thakur. 
+
 ## LICENSE
 
 All the material included in this distribution is free software;
