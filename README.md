@@ -54,7 +54,7 @@ restored and you could have problems to reinstall thermo\_pw.
 
 ## PEOPLE
 
-The \thermo\ code is primarily designed, written, and maintained by Andrea
+The THERMO\_PW code is primarily designed, written, and maintained by Andrea
 Dal Corso
 (SISSA - Trieste).
 
