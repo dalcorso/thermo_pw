@@ -54,14 +54,13 @@ restored and you could have problems to reinstall thermo\_pw.
 
 ## PEOPLE
 
-The THERMO\_PW code is designed, written, and maintained primarily by Andrea
+The \thermo\ code is primarily designed, written, and maintained by Andrea
 Dal Corso
-(SISSA - Trieste). It is an open source code distributed, as is, within the GPL
-license.
+(SISSA - Trieste).
 
-Some routines have been contributed by SISSA PhD students
-and by post-docs that worked with me. Among them
-I mention M. Palumbo, O. Motornyi, A. Urru, C. Malica, X. Gong, and B. Thakur.
+Some routines have been contributed by SISSA PhD students and post-docs.
+Among them I mention M. Palumbo, O. Motornyi, A. Urru, C. Malica, X. Gong,
+and B. Thakur.
 
 I would like also to thank all the people that contributed with comments,
 requests of improvements, and bug reports.
