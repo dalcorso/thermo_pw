@@ -359,6 +359,10 @@ INTEGER :: ipt
 CHARACTER(LEN=80) :: eos_label(4)
 
 npt=ngeo_file
+!
+!  Do not try the EOS fit if there are less then 5 points
+!
+IF (npt<5) RETURN
 ALLOCATE(v0(npt))
 ALLOCATE(e0(npt))
 DO ipt=1, npt
