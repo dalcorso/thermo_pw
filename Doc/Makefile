@@ -1,7 +1,7 @@
 LATEX   = pdflatex
 LATEX2HTML = latex2html
 
-PDFS = user_guide.pdf tutorial.pdf developer_guide.pdf point_groups.pdf thermo.pdf units.pdf equilibrium.pdf
+PDFS = user_guide.pdf tutorial.pdf developer_guide.pdf point_groups.pdf thermo.pdf units.pdf equilibrium.pdf symmetry.pdf
 AUXS = $(PDFS:.pdf=.aux)
 LOGS = $(PDFS:.pdf=.log)
 OUTS = $(PDFS:.pdf=.out)
