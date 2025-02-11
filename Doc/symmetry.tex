@@ -76,30 +76,39 @@
 \tableofcontents
 
 \newpage
+
 \newpage
 {\color{dark-blue}\chapter{Introduction}}
-These notes describe how to exploit symmetry in the calculation of
-quantities that appear in electronic structure codes. The exposition
-is divided in two parts.
-In the first part we will use only the space group operation of a
-solid, in the second part we will consider also the magnetic symmetries
-and assume that each symmetry of the space group might need a time reversal operation.
+These notes describe how to exploit symmetry in electronic structure codes. They assume only that the reader knows the basic group theory concepts as applied to quantum mechanics and in particular to solids. I discuss some of the formulas implemented in Quantum ESPRESSO with the hope that these concepts might be useful to those that want to further develop the code. The exposition is divided in two parts. In the first part I will use the space group operations of a solid while in the second part I will consider also the magnetic symmetries and discuss how to treat symmetries that might require time reversal. 
 
+
+\newpage
+\section{People}
+These notes have been written by Andrea Dal Corso (SISSA, Trieste). 
+
+Disclaimer: These notes contain the concepts that I found useful to understand the symmetry routines of Quantum ESPRESSO, but I am not the author of many of them, so what is written here might be inaccurate or not reflect the original intention of the authors. If you find that something is incorrect or does not reflect what is implemented please e-mail me at dalcorso .at. sissa.it. 
+The concepts presented here have benefited from discussions with several people, among them I would like to thank S. de Gironcoli (and his unpublished notes on the symmetry of the phonon code), A. Smogunov, and A. Urru (and the appendices of his PhD thesis). 
+
+Acknowledgments: The writing of these notes
+has been supported by MAX ``MAterials design at the eXascale" Centre of Excellence 
+for Supercomputing applications (Grant agreement No. 101093374, co-funded by the European High Performance 
+Computing joint Undertaking (JU) of the European Union and participating countries).
+
+\newpage
 \section{Preliminary definitions}
 The equilibrium positions of the atoms in a solid are determined by
-a Bravais lattice and by the position of the atoms inside a unit cell.
+a Bravais lattice and by the positions of the atoms inside a unit cell.
 
-The Bravais lattice is determined by three primitive vectors that
-we indicate with
+The Bravais lattice can be defined by three primitive vectors:
 \begin{equation}
 {\bf a}_1, {\bf a_2}, {\bf a}_3.
 \end{equation}
-Each point of the lattice is determined by three integer values
+Each point of the lattice is given by three integer values
 $n_1, n_2, n_3$ that can be positive, negative, or null.
 We indicate with ${\bf R}_\mu$ the coordinates of the Bravais lattice
 points:
 \begin{equation}
-{\bf R}_\mu = n_1 {\bf a}_1 + n_2 {\bf a}_2 + n_3 {\bf a}_3,
+{\bf R}_\mu = n_1 {\bf a}_1 + n_2 {\bf a}_2 + n_3 {\bf a}_3.
 \end{equation}
 We indicate with $\boldsymbol{\tau}_s$ the positions of the atoms
 inside the unit cell ($s=1,\cdots, N_{at}$).
@@ -112,23 +121,21 @@ The equilibrium positions of the atoms in the solid are therefore:
 and the index $I=\{\mu,s\}$ is a composite index that indicates both the
 Bravais lattice and the atom inside the unit cell.
 
-We say that a rototranslation that we indicate with $\{S,{\bf a}\}$, where
-$S$ is a proper
+We say that a rototranslation $\{S,{\bf a}\}$, where $S$ is a proper
 (or improper) rotation and ${\bf a}$ is a translation, belongs to the solid
 space group if for any $I=\{\mu,s\}$ there is an
 $\bar I=\{\bar \mu,\bar s\}$ such that:
 \begin{equation}
 \{S,{\bf a}\} {\bf R}_I = S {\bf R}_\mu + S \boldsymbol{\tau}_s + {\bf a} =
-{\bf R}_{\bar \mu} + \boldsymbol{\tau}_{\bar s}
+{\bf R}_{\bar \mu} + \boldsymbol{\tau}_{\bar s},
 \label{sg}
 \end{equation}
 and $\gamma(s)=\gamma(\bar s)$.
 
-The operations $\{S_i,{\bf a}_i\}$ for which Eq.~\ref{sg} holds
-form a group known as the solid space group.
-We have
+The operations $\{S_i,{\bf a}_i\}$ for which Eq.~\ref{sg} holds form a group.
+We have:
 \begin{equation}
-\{S_i,{\bf a}_i\} \{S_j,{\bf a}_j\} = \{S_i S_j,S_i {\bf a}_j + {\bf a}_i\}
+\{S_i,{\bf a}_i\} \{S_j,{\bf a}_j\} = \{S_i S_j,S_i {\bf a}_j + {\bf a}_i\}.
 \end{equation}
 The neutral element of the group is $\{\mathbb{I},{\bf 0}\}$ where
 $\mathbb{I}$ is the identity matrix and ${\bf 0}$ is the null translation.
@@ -149,32 +156,29 @@ set $\{S_i,{\bf 0}\}$ is not a subgroup of the space group.
 
 \subsection{The rotation matrix}
 
-There are two ways to express the rotation matrices $S$ of the space
-group. We can consider the three vectors that results from the application
-of $S$ to ${\bf a}_1$, ${\bf a}_2$, and ${\bf a}_3$. Since they must
-be Bravais lattice vectors they can be expressed as
+There are two ways to express the rotation matrices $S$ of the point group. We can consider the three vectors obtained by  application
+of $S$ to ${\bf a}_1$, ${\bf a}_2$, and ${\bf a}_3$. They must be Bravais lattice vectors and they can be expressed as
 \begin{equation}
 {\bf a}'_l = \sum_{m=1}^3 S_{l,m} {\bf a}_m,
 \label{scrys}
 \end{equation}
 where $S_{l,m}$ is a $3\times3$ integer matrix.
-An alternative is to introduce Cartesian coordinates and write the primitive
+Alternatively, we can introduce Cartesian coordinates and write the primitive
 vectors as ${\bf a}_{\alpha,i}$ where $\alpha$ indicates a Cartesian coordinate.
-We can indicate the Cartesian rotation matrix in Cartesian as $S_{\alpha,\beta}$
+We can indicate the Cartesian rotation matrix as $S_{\alpha,\beta}$
 and we have:
 \begin{equation}
 {\bf a}'_{\alpha,l} = \sum_{\beta=1}^3 S_{\alpha,\beta} {\bf a}_{\beta,l}.
 \label{scart}
 \end{equation}
-
-Note that the matrix $S_{\alpha,\beta}$ is an orthogonal ($S_{\beta,\alpha}=S^{-1}_{\alpha,\beta} $) $3\times 3$ matrix, while 
+The matrix $S_{\alpha,\beta}$ is an orthogonal ($S_{\beta,\alpha}=S^{-1}_{\alpha,\beta} $) $3\times 3$ matrix, while 
 $S_{l,m}$ in general is not orthogonal. We
 can write $S_{\alpha,\beta}$ in terms of $S_{l,m}$ or $S_{l,m}$ in terms
 of $S_{\alpha,\beta}$ using the following considerations.
 
-Assuming that ${\bf a}_m$ are in units of $a$ (the lattice constants) we
-can introduce the primitive reciprocal lattice vector ${\bf b}_1$, ${\bf b}_2$,
-and ${\bf b}_3$ (in units of $2\pi \over a$) with the property that
+Assuming that ${\bf a}_m$ are in units of $a$ (the lattice constants), we
+introduce the primitive reciprocal lattice vector ${\bf b}_1$, ${\bf b}_2$,
+and ${\bf b}_3$ (in units of $2\pi \over a$) such that
 \begin{equation}
 {\bf a}_i \cdot {\bf b}_j = \sum_{\alpha=1}^3 {\bf a}_{\alpha,i} {\bf b}_{\alpha, j} =  \delta_{i,j}.
 \label{recips}
@@ -184,19 +188,17 @@ From this equation one derives also that:
 \sum_{j=1}^3 {\bf b}_{\alpha, j} {\bf a}_{\beta, j} =  \delta_{\alpha,\beta}.
 \label{complete}
 \end{equation}
- 
 Multiplying Eq.~\ref{scrys} by ${\bf b}_{\alpha, j}$, summing on $\alpha$ and
 using Eq.~\ref{recips} we have
 \begin{equation}
 \sum_{\alpha=1}^3 {\bf a}'_{\alpha,l} {\bf b}_{\alpha, j} = S_{l,j},
 \end{equation}
-and now using Eq.~\ref{scart} we have
+and using Eq.~\ref{scart}:
 \begin{equation}
 S_{l,j} =\sum_{\alpha=1}^3 \sum_{\beta=1}^3 {\bf b}_{\alpha, j} S_{\alpha,\beta} {\bf a}_{\beta,l}.
 \label{slj}
 \end{equation}
-
-The inverse of this equation can be found multiplying both terms by
+The inverse of this equation can be found by multiplying both terms by
 ${\bf a}_{\gamma,j}$ and ${\bf b}_{\delta,l}$, summing over $j$ and $l$ and
 using Eq.~\ref{complete} twice:
 \begin{equation}
@@ -204,12 +206,11 @@ using Eq.~\ref{complete} twice:
 \end{equation}
 
 \subsection{Rotation of a vector}
-When we have the cartesian coordinates of a vector
-${\bf v}$, the rotated cartesian coordinates are:
+Given the Cartesian coordinates of a vector
+${\bf v}$, the rotated Cartesian coordinates are:
 \begin{equation}
 {\bf v}'_\alpha = \sum_{\beta=1}^3 S_{\alpha,\beta} {\bf v}_\beta.
 \end{equation}
-
 When the vector ${\bf v}$ is expressed in crystal coordinates:
 \begin{equation}
 {\bf v} = \sum_{l=1}^3 {\bf v}_l {\bf a}_l.
@@ -228,10 +229,8 @@ with
 {\bf v}'_m = \sum_{l=1}^3 {\bf v}_l S_{l,m}.
 \label{rotvcry}
 \end{equation}
-
-\subsection{Rotations in reciprocal space}
-
-We can calculate the rotated of the vectors
+\subsection{Rotation of a vector in reciprocal space}
+We can rotate the vectors
 ${\bf b}_1$, ${\bf b}_2$,
 and ${\bf b}_3$. They must be reciprocal lattice vectors so they can be written as linear combination
 of ${\bf b}_1$, ${\bf b}_2$,
@@ -239,7 +238,7 @@ and ${\bf b}_3$:
 \begin{equation}
 {\bf b'}_j = \sum_{m=1}^3 U_{j,m} {\bf b}_m,
 \end{equation}
-where the matrix $U_{j,m}$ is an integer matrix.
+where the matrix $U_{j,m}$ is a $3\times 3$ integer matrix.
 Since
 \begin{equation}
 {\bf a}'_i \cdot {\bf b'}_j = \delta_{i,j},
@@ -253,14 +252,12 @@ From this equation we find that
 \begin{equation}
 U_{j,l} = S^{-1}_{l,j},
 \end{equation}
-where the operator $S^{-1}$ is the inverse of the rotation $S$, belong to the symmetry group, and is an integer matrix.
-
-We can write the rotated of the principal lattice vectors as:
+where the operator $S^{-1}$ is the inverse of the rotation $S$, belongs to the point group, and is an integer matrix.
+The rotated principal reciprocal lattice vectors are:
 \begin{equation}
 {\bf b'}_j = \sum_{m=1}^3 S^{-1}_{m,j} {\bf b}_m.
 \end{equation}
-
-With this equation we can now see how to rotate 
+With this equation we can rotate 
 a vector ${\bf v}$ written in the basis of
 the primitive reciprocal lattice vectors. We have:
 \begin{equation}
@@ -274,13 +271,13 @@ or, in the original reciprocal primitive basis:
 \begin{equation}
 {\bf v}' = \sum_{l=1}^3 \sum_{m=1}^3 {\bf v}_l S^{-1}_{m,l} {\bf b}_m.
 \end{equation}
-So the components rotate as:
+So the components of the rotated vector are:
 \begin{equation}
 {\bf v}'_m = \sum_{l=1}^3 {\bf v}_l S^{-1}_{m,l}.
 \label{rotreccomp}
 \end{equation}
 
-\subsection{Change of basis}
+\subsection{Basis change}
 When a vector is given in Cartesian coordinates (${\bf v}_{\alpha}$) we can write it in the basis of the primitive Bravais lattice vectors.
 We have:
 \begin{equation}
@@ -325,8 +322,8 @@ We can consider the Bloch functions, solutions of the Kohn and Sham equations:
 H_{KS} \psi_{{\bf k}, n}({\bf r})= \varepsilon_{{\bf k}, n}\psi_{{\bf k}, n} ({\bf r}),
 \end{equation}
 where ${\bf k}$ is a wave vector in the first Brillouin zone an $n$ is a band index.
-For each element of the space group $\{S_i,{\bf a}_i\}$ we can associate an operator $O_{\{S_i,{\bf a}_i\}}$ that will rotate the Bloch functions. We require that after the rotation the new function $O_{\{S_i,{\bf a}_i\}} \psi_{{\bf k} n} ({\bf r})$ has in ${\bf r}$ the same value that the original function had in the point
-${\bf r}'$ which after the rotation becomes ${\bf r}$.
+For each element of the space group $\{S_i,{\bf a}_i\}$ we can associate an operator $O_{\{S_i,{\bf a}_i\}}$ that rotates the Bloch functions. We require that after the rotation the new function $O_{\{S_i,{\bf a}_i\}} \psi_{{\bf k} n} ({\bf r})$ has in ${\bf r}$ the same value that the original function had in the point
+${\bf r}'$ that becomes ${\bf r}$ after the rotation.
 We have 
 \begin{equation}
 {\bf r}'= \{S_i,{\bf a}_i\}^{-1} {\bf r}
@@ -349,7 +346,7 @@ O_{\{S_i,{\bf a}_i\}} \psi_{{\bf k}, n} ({\bf r})
 Therefore, $O_{\{S_i,{\bf a}_i\}} \psi_{{\bf k}, n} ({\bf r})$ is a Bloch function with wave-vector $S_i {\bf k}$.
 If $\{S_i,{\bf a}_i\}$ belongs to the solid space group, $O_{\{S_i,{\bf a}_i\}}$ commutes with $H_{KS}$
 and $O_{\{S_i,{\bf a}_i\}} \psi_{{\bf k}, n} ({\bf r})$
-is an eigenstate of the Hamiltonian with
+is an eigenstate with
 eigenvalue $\varepsilon_{{\bf k}, n}$. We can call it $\psi_{S_i {\bf k},n} ({\bf r})$.
 
 \section{The charge density in real space}
@@ -360,7 +357,7 @@ Brillouin zone and the occupied bands:
 n({\bf r}) = 2 \sum_{{\bf k}, v} |\psi_{{\bf k}, v} ({\bf r}) |^2,
 \end{equation}
 where the factor two accounts for spin degeneracy.
-Usually we use a uniform grid $N_{k_1}\times N_{k_2} \times N_{k_3}$ of ${\bf k}$ of points to perform this sum, and we use a grid such that if we apply a rotation $S_i$ of the point group to a wave-vector ${\bf k}$ we obtain the wave-vector $S_i {\bf k}$ which is also a grid point. 
+Usually we use a uniform grid $N_{k_1}\times N_{k_2} \times N_{k_3}$ of ${\bf k}$ of points to perform this sum, and we use a grid such that if we apply a rotation $S_i$ of the point group to a wave-vector ${\bf k}$ we obtain the wave-vector $S_i {\bf k}$ which belongs to the grid. 
 In these hypotheses, the set of wave vectors $S_i {\bf k}$ obtained by applying $S_i$ to all points of the grid
 coincides with the original grid itself. Therefore we 
 can write 
@@ -373,10 +370,10 @@ We can write:
 n({\bf r}) = {2 \over N_S} \sum_{i=1}^{N_S} \sum_{{\bf k} \in IBZ, v} \sum_l |\psi_{S_iS_l{\bf k}, v} ({\bf r}) |^2.
 \end{equation}
 The sum over ${\bf k}$ is limited to the IBZ and the sum over $l$ is over the $N_{\bf k}$ symmetries needed to obtain all the star of ${\bf k}$ from the 
-${\bf k}$ in the IBZ. But now we can exchange the sum over $l$ and the sum over $i$ and notice that the sum over $i$ is over all the elements of the point group and for the rearrangement lemma the elements $\{ S_i S_l\}$ are still all the elements of the point group. It is convenient to introduce
+${\bf k}$ in the IBZ. But now we can exchange the sum over $l$ and the sum over $i$ and notice that the sum over $i$ is over all the elements of the point group and for the rearrangement lemma the elements $\{ S_i S_l\}$ are still all the elements of the point group so the sum over $i$ is independent from $l$. It is convenient to introduce
 a weight $w_{\bf k}$ that gives the number of points in the star of ${\bf k}$ so that we can write
 \begin{equation}
-n({\bf r}) = {2 \over N_S} \sum_{i=1}^{N_S}  \sum_{{\bf k} \in IBZ, v} w_{\bf k}\ |\psi_{S_i{\bf k}, v} ({\bf r}) |^2,
+n({\bf r}) = {2 \over N_S} \sum_{i=1}^{N_S}  \sum_{{\bf k} \in IBZ, v} w_{\bf k}\ |\psi_{S_i{\bf k}, v} ({\bf r}) |^2.
 \end{equation}
 Now we can use Eq.~\ref{psisik} and write
 \begin{equation}
@@ -403,7 +400,7 @@ n({\bf r}) = {1 \over N_S} \sum_{i=1}^{N_S} \tilde n ( \{S_i,{\bf f}_i\} {\bf r}
 \end{equation}
 
 \section{The charge density in reciprocal space}
-Eq.~\ref{symchden1} can be used to find a symmetrization formula in reciprocal space. Taking the Fourier transform at the reciprocal lattice vector ${\bf G}$ we have:
+Eq.~\ref{symchden1} can be used to find a symmetrization formula in reciprocal space. Taking the Fourier transform at the reciprocal lattice vector ${\bf G}$, we have:
 \begin{eqnarray}
 n({\bf G}) &=& {1\over N_S} {1\over \Omega}
 \sum_{i=1}^{N_S} \int_{\Omega} \tilde n ( \{S_i,{\bf f}_i\} {\bf r}) e^{-i{\bf G} \cdot {\bf r}} d^3r\nonumber \\
@@ -452,9 +449,9 @@ So if in the rotated solids we choose the displacements
 the energy cannot change and we can write:
 \begin{equation}
 E_{tot}\left(\{{\bf R}_I + {\bf u}_I\}\right) = E_{tot}\left (\{\{S_i,{\bf a}_i\} ({\bf R}_I + {\bf u}_I)\}\right )=
-E_{tot}\left(\{ {\bf R}_{\bar I} + {\bf u}'_{\bar I}\}\right),
+E_{tot}\left(\{ {\bf R}_{\bar I} + {\bf u}'_{\bar I}\}\right).
 \end{equation}
-and computing the derivatives with respect to ${\bf u}_{I,\alpha}$ we have:
+Computing the derivatives with respect to ${\bf u}_{I,\alpha}$ we have:
 \begin{equation}
 {d E_{tot} \over d {\bf u}_{\mu,s,\alpha}} = \sum_{\beta=1}^3
 {d E_{tot} \over d {\bf u}_{{\bar \mu},{\bar s},\beta}} 
@@ -539,7 +536,8 @@ D_{s,\alpha,s',\beta}({\bf q}) =
 {1 \over N \sqrt{M_s M_s'}} \sum_{\mu} \sum_{\nu}
 e^{-i {\bf q} \cdot {\bf R}_\mu}
 {d^2 E_{tot} \over d {\bf u}_{\mu,s,\alpha} d {\bf u}_{\nu,s',\beta}}
-e^{i {\bf q} \cdot {\bf R}_\nu}
+e^{i {\bf q} \cdot {\bf R}_\nu}.
+\label{dyn_mat}
 \end{equation}
 We can insert a sum over $\bar \mu$ and a sum over
 $\bar \nu$ and divide by $N^2$. We have
@@ -620,7 +618,7 @@ e^{i S {\bf q} \cdot {\bf R}^{S}_{\boldsymbol{\tau}_s} }
 e^{-i S{\bf q} \cdot {\bf R}^{S}_{\boldsymbol{\tau}_{s'}}},
 \label{symdyn1}
 \end{equation}
-to symmetrize a dynamical matrix obtained by doing sums over the ${\bf k}$ points in the IBZ. Usually in this case we reduce the ${\bf k}$ points using only the symmetries of the small cogroup of ${\bf q}$ that is only the rotations for which
+to symmetrize a dynamical matrix obtained by doing sums over the ${\bf k}$ points in the IBZ. Usually in this case we reduce the ${\bf k}$ points using only the symmetries of the cogroup of ${\bf q}$ that is only the rotations for which
 \begin{equation}
 S {\bf q} = {\bf q} + {\bf G}_S
 \end{equation}
@@ -638,7 +636,7 @@ where we used the fact that the dynamical matrix as a function of ${\bf q}$ is p
 ${\bf R}^{S}_{\boldsymbol{\tau}_s}+{\bf a}$ is a
 Bravais lattice vector.
 
-Also Eq.~\ref{dynmat_inv} can be specialized to the symmetries of the small cogroup of ${\bf q}$
+Also Eq.~\ref{dynmat_inv} can be specialized to the symmetries of the cogroup of ${\bf q}$
 \begin{equation}
 D_{\bar s,\alpha,\bar s',\beta}({\bf q}) =
 \sum_{\gamma,\delta=1}^3  S_{i,\alpha,\gamma} S_{i,\beta,\delta}
@@ -710,6 +708,7 @@ The charge density induced by a phonon of wave vector ${\bf q}$ is given by
 \over d {\bf u}_{s,\alpha}({\bf q})} =
 \sum_\mu {d n\left({\bf r}, \{{\bf R}_I + {\bf u}_I\}\right)
 \over d {\bf u}_{\mu,s,\alpha}} e^{i{\bf q}\cdot {\bf R}_\mu},
+\label{drhoph}
 \end{equation}
 and using Eq.~\ref{dnmu} we obtain:
 \begin{eqnarray}
@@ -720,15 +719,8 @@ and using Eq.~\ref{dnmu} we obtain:
 &=& \sum_{\beta=1}^3 S^{-1}_{\alpha,\beta} {d n\left(\{S,{\bf a}\} {\bf r}, \{{\bf R}_{\bar I} + {\bf u}_{\bar I}\}\right)
 \over d {\bf u}_{\bar s,\beta} (S{\bf q})} e^{-iS{\bf q}\cdot {\bf R}^S_{{\boldsymbol{\tau}_s}}} e^{-iS{\bf q}\cdot {\bf a}},
 \end{eqnarray}
-where ${\bf R}^S_{{\boldsymbol{\tau}_s}}$ is defined in Eq.~\ref{rstaus}. 
+where ${\bf R}^S_{{\boldsymbol{\tau}_s}}$ is defined in Eq.~\ref{rstaus}.
 
-This expression can be simplified if we use it for rotations that belong to the small cogroup of {\bf q}, such that $S{\bf q}={\bf q}+{\bf G}_S$.
-Since ${\bf R}^S_{{\boldsymbol{\tau}_s}}+{\bf a}$ is a lattice vector we have
-\begin{equation}
-{d n\left({\bf r}, \{{\bf R}_I + {\bf u}_I\}\right)
-\over d {\bf u}_{s,\alpha}({\bf q})} = \sum_{\beta=1}^3 S^{-1}_{\alpha,\beta} {d n\left(\{S,{\bf a}\} {\bf r}, \{{\bf R}_{\bar I} + {\bf u}_{\bar I}\}\right)
-\over d {\bf u}_{\bar s,\beta} ({\bf q})} e^{-i{\bf q}\cdot {\bf R}^S_{{\boldsymbol{\tau}_s}}} e^{-i{\bf q}\cdot {\bf a}}.
-\end{equation}
 The charge density induced by a phonon can be written as:
 \begin{equation}
 {d n\left({\bf r}, \{{\bf R}_I + {\bf u}_I\}\right)
@@ -742,11 +734,36 @@ We need to symmetrize only the lattice periodic
 part of the induced charge density, so we have
 \begin{equation}
 {d \tilde n\left({\bf r}, \{{\bf R}_I + {\bf u}_I\}\right)
+\over d {\bf u}_{s,\alpha}({\bf q})} = e^{-i{\bf q \cdot {\bf r }}} \sum_{\beta=1}^3 S^{-1}_{\alpha,\beta} 
+e^{i S {\bf q} \cdot \{S,{\bf a}\} {\bf r }}
+{d \tilde n\left(\{S,{\bf a}\} {\bf r}, \{{\bf R}_{\bar I} + {\bf u}_{\bar I}\}\right)
+\over d {\bf u}_{\bar s,\beta} (S{\bf q})} e^{-iS{\bf q}\cdot {\bf R}^S_{{\boldsymbol{\tau}_s}}} e^{-iS{\bf q}\cdot {\bf a}},
+\label{induced_charge}
+\end{equation}
+
+This expression can be simplified if we use it for rotations that belong to the small cogroup of {\bf q}, such that $S{\bf q}={\bf q}+{\bf G}_S$.
+Since ${\bf R}^S_{{\boldsymbol{\tau}_s}}+{\bf a}$ is a lattice vector we have
+\begin{equation}
+{d \tilde n\left({\bf r}, \{{\bf R}_I + {\bf u}_I\}\right)
+\over d {\bf u}_{s,\alpha}({\bf q})} = \sum_{\beta=1}^3 S^{-1}_{\alpha,\beta} e^{i S {\bf q} \cdot {\bf a}} {d \tilde n\left(\{S,{\bf a}\} {\bf r}, \{{\bf R}_{\bar I} + {\bf u}_{\bar I}\}\right)
+\over d {\bf u}_{\bar s,\beta} (S{\bf q})} e^{-i{\bf q}\cdot {\bf R}^S_{{\boldsymbol{\tau}_s}}} e^{-i{\bf q}\cdot {\bf a}}.
+\end{equation}
+Now using the fact that 
+\begin{equation}
+{d \tilde n\left(\{S,{\bf a}\}{\bf r}, \{{\bf R}_I + {\bf u}_I\}\right)
+\over d {\bf u}_{\bar s,\beta}({\bf q}+{\bf G}_S)} 
+= e^{-i{\bf G}_S \cdot (S {\bf r} + {\bf a})}
+{d \tilde n\left(\{S,{\bf a}\}{\bf r}, \{{\bf R}_I + {\bf u}_I\}\right)
+\over d {\bf u}_{\bar s,\beta}({\bf q})}.
+\end{equation}
+we have
+\begin{equation}
+{d \tilde n\left({\bf r}, \{{\bf R}_I + {\bf u}_I\}\right)
 \over d {\bf u}_{s,\alpha}({\bf q})} 
-= e^{-i{\bf q} \cdot {\bf r}}
-e^{i{\bf q}\cdot (S {\bf r} + {\bf a})}
+= e^{-iS^{-1} {\bf G}_S \cdot {\bf r}}
 \sum_{\beta=1}^3 S^{-1}_{\alpha,\beta} {d \tilde n\left(\{S,{\bf a}\} {\bf r}, \{{\bf R}_{\bar I} + {\bf u}_{\bar I}\}\right)
-\over d {\bf u}_{\bar s,\beta} ({\bf q})} e^{-i{\bf q}\cdot {\bf R}^S_{{\boldsymbol{\tau}_s}}} e^{-i{\bf q}\cdot {\bf a}}.
+\over d {\bf u}_{\bar s,\beta} ({\bf q})} e^{-i{\bf q}\cdot {\bf R}^S_{{\boldsymbol{\tau}_s}}}.
+\label{symdrho_one}
 \end{equation}
 This equation can be written also as 
 \begin{equation}
@@ -757,6 +774,14 @@ This equation can be written also as
 \over d {\bf u}_{\bar s,\beta} ({\bf q})} e^{-i{\bf q}\cdot {\bf R}^S_{{\boldsymbol{\tau}_s}}}.
 \label{symdrho}
 \end{equation}
+using the fact that $S^{-1} {\bf G}_S=-{\bf G}_{S^{-1}}$
+as can be deduced comparing the two expressions:
+\begin{eqnarray}
+S{\bf q}&=&{\bf q} + {\bf G}_S \nonumber \\
+S^{-1}{\bf q}&=&{\bf q} + {\bf G}_{S^{-1}}
+\end{eqnarray}
+after applying $S^{-1}$ to the first.
+
 This equation is further transformed before implementation (see the Appendix on irrep).
 
 \section{The charge density induced by an electric field}
@@ -780,7 +805,7 @@ The dielectric constant can be written as
 \epsilon_{\alpha,\beta}=\delta_{\alpha,\beta} -{4 \pi
 \over V} {\partial^2 E_{tot} ({\bf E}) \over \partial {\bf E}_\alpha \partial {\bf E}_\beta}.
 \end{equation}
-If we now consider an operation $\{S,{\bf a}\}$ of the solid space group and rotate the electric field to ${\bf E}'=S{\bf E}$, the total energy in the rotated system does not change. We have therefore:
+For an operation $\{S,{\bf a}\}$ of the solid space group and a rotated electric field to ${\bf E}'=S{\bf E}$, the total energy in the rotated system does not change. We have therefore:
 \begin{equation}
 {\partial^2 E_{tot} ({\bf E}) \over \partial {\bf E}_\alpha \partial {\bf E}_\beta}=\sum_{\gamma,\delta=1}^3
 S^{-1}_{\alpha,\gamma} S^{-1}_{\beta,\delta}
@@ -801,7 +826,6 @@ S^{-1}_{i,\beta,\delta}
 \epsilon_{\gamma,\delta}.
 \label{symepsilon}
 \end{equation}
-
 
 \section{The Born effective charges}
 Born effective charges are second derivative of the total energy with respect to phonon displacements and electric field component:
@@ -829,9 +853,257 @@ Z^*_{\bar s,\gamma,\delta}.
 \end{equation}
 
 \newpage
+{\color{dark-blue}\chapter{Symmetry with spinors}}
+In this chapter we present the modifications of the previous considerantions needed to deal with spinor wavefunctions.
+Spinors can be used together with fully relativistic pseudopotentials to include the effects of spin-orbit coupling. In this case, we can distinguish calculations performed in presence of time-reversal symmetry (nonmagnetic material) or without time reversal symmetry (magnetic material). In the latter case there might be symmetry operations that belong to the solid space group only when coupled with time reversal. If this happens, half rotations of the point group require time reversal and half do not require it. We indicate with $\{\mathcal{T}S,{\bf a}\}$ an operation of the space group that requires time reversal. 
+
+In the context of spinors it is also useful to define for each symmetry operation (with or without time reversal), the operator $\tilde S$ defined as $\tilde S=S$ if $S$ is a proper rotation or $\tilde S= I S$ if $S$ is an improper rotation. Here $I$ is the inversion operator. Therefore $\tilde S$ is always a proper rotation. The inversion operation is defined as $I {\bf r }=-{\bf r}$.
+
+For each rotation matrix $S$, there is in spin space a $2\times 2$ matrix that belongs to the $SU(2)$ group that we indicate with $U(\tilde S)$ that acts on the spinor part of the wavefunctions. It depends only on $\tilde S$ since inversion does not affect the spin part of the wavefunctions.
+A proper rotation is characterized by the versor of the
+rotation axis ${\bf n}$ and the rotation angle
+$\theta$ and the operator $U(\tilde S)$ can be written as:
+\begin{equation}
+U(\tilde S)= e^{-i {\theta \over 2} \boldsymbol{\sigma} \cdot {\bf n} },
+\end{equation}
+where $\boldsymbol{\sigma}$ are the Pauli matrices. 
+
+\section{The Kohn and Sham wavefunctions}
+
+In the noncollinear case, the Kohn and Sham equations are
+\begin{equation}
+\sum_{\sigma'} H_{KS}^{\sigma,\sigma'}
+\psi_{{\bf k},n,\sigma'}({\bf r})=
+\epsilon_{{\bf k},n} \psi_{{\bf k},n,\sigma}({\bf r}),
+\end{equation}
+and the Kohn and Sham Hamiltonian is a $2\times 2$ matrix acting on two component spinors:
+\begin{equation}
+\Psi_{{\bf k},n}= \left( \begin{array}{c}
+\psi_{{\bf k},n,\uparrow}({\bf r})  \\
+\psi_{{\bf k},n,\downarrow} ({\bf r})
+\end{array}
+\right).
+\end{equation}
+Each spinor component is a Bloch function that
+can be written as:
+\begin{equation}
+\psi_{{\bf k},n,\sigma}({\bf r})=
+e^{i{\bf k}\cdot {\bf r}} u_{{\bf k},n,\sigma}({\bf r}),
+\end{equation}
+where $u_{{\bf k},n,\sigma}({\bf r})$ is lattice periodic.
+
+The operator $\mathcal{T}$ that applies time reversal to these spinors is an antilinear operator that can be written as:
+\begin{equation}
+\mathcal{T}=i \sigma_y \mathcal{K},
+\end{equation}
+where $\sigma_y$ is the Pauli matrix:
+\begin{equation}
+\sigma_y= \left( \begin{array}{cc}
+0, & -i  \\
+i, & 0  
+\end{array}
+\right)
+\end{equation}
+and $\mathcal{K}$ is the complex conjugation operator.
+We have therefore:
+\begin{equation}
+\mathcal{T}\Psi_{{\bf k},n}= \left( \begin{array}{c}
+\psi^*_{{\bf k},n,\downarrow}({\bf r})  \\
+-\psi^*_{{\bf k},n,\uparrow} ({\bf r})
+\end{array}
+\right).
+\end{equation}
+and this is a Bloch function with wave-vector
+$-{\bf k}$. If the Hamiltonian is time reversal invariant, it commutes with $\mathcal{T}$ and
+$\mathcal{T}\Psi_{{\bf k},n}$ is also an
+eigenfunction of the Hamiltonian with the same
+eigenvalue $\epsilon_{{\bf k},n}$. We can call
+it $\Psi_{-{\bf k},n}$.
+
+For each element of the space group $\{S,{\bf a}\}$ there will be an operator $O_{\{S,{\bf a}\}}$ that acts on the spinor wavefunctions
+as:
+\begin{equation}
+\left(O_{\{S,{\bf a}\}} \Psi_{{\bf k},n}\right)_{\sigma} = \sum_{\sigma'} U(\tilde S)_{\sigma,\sigma'} \psi_{{\bf k},n,\sigma'}(\{S,{\bf a}\}^{-1}{\bf r}). 
+\end{equation}
+
+\section{Charge and magnetization density}
+When the wavefunctions are spinors, the charge density is:
+\begin{equation}
+n({\bf r}) = \sum_{{\bf k}, v, \sigma} |\psi_{{\bf k}, v, \sigma} ({\bf r}) |^2,
+\end{equation}
+One can demonstrate [2] that when we rotate the system with the operation $\{S,{\bf a}\}$ or with the operation $\{\mathcal{T} S,{\bf a}\}$
+the charge density satisfies the same relation as in Eq.~\ref{symchden}:
+\begin{equation}
+n({\bf r}) = {1 \over N_S} \sum_{i=1}^{N_S} \tilde n ( \{S_i,{\bf f}_i\}^{-1} {\bf r}).
+\end{equation}
+For the magnetization density defined as
+\begin{equation}
+{\bf m}_\alpha({\bf r}) = \mu_B \sum_{{\bf k}, v, \sigma,\sigma'} \psi_{{\bf k}, v, \sigma} ({\bf r})^* \boldsymbol{\sigma}_{\alpha}^{\sigma,\sigma'}
+\psi_{{\bf k}, v, \sigma'} ({\bf r}),
+\end{equation}
+where $\mu_B$ is the Bohr magneton, one has
+\begin{equation}
+{\bf m}_\alpha({\bf r}) = {1 \over N_S} \sum_{i=1}^{N_S} (-1)^{T_{S_i}} \tilde S_{i,\alpha,\beta} \tilde {\bf m}_{\beta} ( \{S_i,{\bf f}_i\}^{-1} {\bf r}),
+\label{symmag}
+\end{equation}
+where $\tilde S_i$ has been defined above and 
+$T_{S_i}=1$ if the operation needs time reversal and $T_{S_i}=0$ otherwise.
+
+We note that to calculate 
+$\tilde {\bf m}_{\beta} ({\bf r})$ we must sum over the ${\bf k}$ points belonging to the irreducible Brillouin zone. This zone is found noting that for operations that require time reversal:
+\begin{equation}
+\mathcal{T} S{\bf k} = - S{\bf k}.
+\end{equation}
+
+\section{Forces and stress}
+No change is made in the symmetrization expression for forces and stress due to the
+time reversal operator since only the spatial part of the symmetry is used to rotate the atomic displacements and the strain.
+
+\section{Dynamical matrix}
+Eq.~\ref{symdyn1} is still valid both for
+operations that require time reversal and for
+those that do not require it:
+\begin{equation}
+D_{s,\alpha,s',\beta}({\bf q}) ={1\over N_S}
+\sum_{i=1}^{N_S}
+\sum_{\gamma,\delta=1}^3  S^{-1}_{i,\alpha,\gamma} S^{-1}_{i,\beta,\delta}
+e^{i S_i {\bf q} \cdot {\bf R}^{S_i}_{\boldsymbol{\tau}_s} }
+\tilde D_{\bar s,\gamma,\bar s',\delta}(S_i{\bf q})
+e^{-i S{\bf q} \cdot {\bf R}^{S_i}_{\boldsymbol{\tau}_{s'}}}.
+\label{symdyn1_again}
+\end{equation}
+We use these relations only for symmetries that belong to the small cogroup of 
+${\bf q}$:
+\begin{equation}
+S{\bf q} = {\bf q} + {\bf G}_S
+\end{equation}
+if they do not require time reversal, or for which
+\begin{equation}
+S{\bf q} = -{\bf q} + {\bf G}_S
+\end{equation}
+if they require time reversal. Introducing the operator $O(S_i)=\mathcal{K}$ if the operation is $\{\mathcal{T}S_i,{\bf a}_i\}$
+or $O(S_i)=\mathbb{I}$ if the operation
+does not require time reversal, we can write
+\begin{equation}
+D_{s,\alpha,s',\beta}({\bf q}) ={1\over N_S}
+\sum_{i=1}^{N_S}
+\sum_{\gamma,\delta=1}^3  S^{-1}_{i,\alpha,\gamma} S^{-1}_{i,\beta,\delta} O(S_i)\left[
+e^{i {\bf q} \cdot {\bf R}^{S_i}_{\boldsymbol{\tau}_s} }
+\tilde D_{\bar s,\gamma,\bar s',\delta}({\bf q})
+e^{-i {\bf q} \cdot {\bf R}^{S_i}_{\boldsymbol{\tau}_{s'}}}\right],
+\label{symdyn1_again1}
+\end{equation}
+where we used the fact that
+\begin{equation}
+\tilde D_{\bar s,\gamma,\bar s',\delta}(-{\bf q})= \tilde D_{\bar s,\gamma,\bar s',\delta}^*({\bf q}).
+\label{dynqmq}
+\end{equation}
+Finally, in order to apply Eq.~\ref{dynmat_inv} we must recognize that for operations that require time reversal it actually reads: 
+\begin{equation}
+D^*_{\bar s,\alpha,\bar s',\beta}(S{\bf q}) =
+\sum_{\gamma,\delta=1}^3  S_{i,\alpha,\gamma} S_{i,\beta,\delta}
+e^{-i {\bf q} \cdot {\bf R}^{S}_{\boldsymbol{\tau}_s} }
+D_{s,\gamma,s',\delta}({\bf q})
+e^{i {\bf q} \cdot {\bf R}^{S}_{\boldsymbol{\tau}_{s'}}},
+\label{dynmat_inv_tr}
+\end{equation}
+What written here (and in particular  Eq.~\ref{dynqmq}) is valid for the adiabatic dynamical matrix at zero frequency. For magnetic material however a dynamical description (as well as possibly the coupling with magnons) for which Eq.~\ref{dynqmq} does not hold, is sometimes necessary to recover the experimental symmetries of the phonon modes. 
+
+\section{Charge density and magnetization induced by a phonon}
+Eq.~\ref{induced_charge} that gives the charge
+induced by a phonon after an operation of the
+solid space group is still valid also if the operation requires time reversal. We have: 
+
+\begin{equation}
+{d \tilde n\left({\bf r}, \{{\bf R}_I + {\bf u}_I\}\right)
+\over d {\bf u}_{s,\alpha}({\bf q})} = e^{-i{\bf q \cdot {\bf r }}} \sum_{\beta=1}^3 S^{-1}_{\alpha,\beta} 
+e^{i S {\bf q} \cdot \{S,{\bf a}\} {\bf r }}
+{d \tilde n\left(\{S,{\bf a}\} {\bf r}, \{{\bf R}_{\bar I} + {\bf u}_{\bar I}\}\right)
+\over d {\bf u}_{\bar s,\beta} (S{\bf q})} e^{-iS{\bf q}\cdot {\bf R}^S_{{\boldsymbol{\tau}_s}}} e^{-iS{\bf q}\cdot {\bf a}},
+\label{induced_charge_1}
+\end{equation}
+For the practical implementation we choose to symmetrize only with operations 
+$\{S,{\bf a}\}$ for which
+\begin{equation}
+S {\bf q} = {\bf q} + {\bf G}_S.
+\end{equation}
+and with operations
+$\{\mathcal{T}S,{\bf a}\}$ for which 
+\begin{equation}
+S {\bf q} = - {\bf q} + {\bf G}_S.
+\end{equation}
+For the former one obtains the Eq.~\ref{symdrho}, while for the later we have
+\begin{equation}
+{d \tilde n\left({\bf r}, \{{\bf R}_I + {\bf u}_I\}\right)
+\over d {\bf u}_{s,\alpha}({\bf q})} = \sum_{\beta=1}^3 S^{-1}_{\alpha,\beta} e^{i S {\bf q} \cdot {\bf a}} {d \tilde n\left(\{S,{\bf a}\} {\bf r}, \{{\bf R}_{\bar I} + {\bf u}_{\bar I}\}\right)
+\over d {\bf u}_{\bar s,\beta} (S{\bf q})} e^{i{\bf q}\cdot {\bf R}^S_{{\boldsymbol{\tau}_s}}} e^{i{\bf q}\cdot {\bf a}}.
+\end{equation}
+Now using the fact that 
+\begin{equation}
+{d \tilde n\left(\{S,{\bf a}\}{\bf r}, \{{\bf R}_I + {\bf u}_I\}\right)
+\over d {\bf u}_{\bar s,\beta}(-{\bf q}+{\bf G}_S)} 
+= e^{-i{\bf G}_S \cdot (S {\bf r} + {\bf a})}
+{d \tilde n\left(\{S,{\bf a}\}{\bf r}, \{{\bf R}_I + {\bf u}_I\}\right)
+\over d {\bf u}_{\bar s,\beta}(-{\bf q})}.
+\end{equation}
+we have
+\begin{equation}
+{d \tilde n\left({\bf r}, \{{\bf R}_I + {\bf u}_I\}\right)
+\over d {\bf u}_{s,\alpha}({\bf q})} 
+= e^{-iS^{-1} {\bf G}_S \cdot {\bf r}}
+\sum_{\beta=1}^3 S^{-1}_{\alpha,\beta} {d \tilde n\left(\{S,{\bf a}\} {\bf r}, \{{\bf R}_{\bar I} + {\bf u}_{\bar I}\}\right)
+\over d {\bf u}_{\bar s,\beta} (-{\bf q})} e^{i{\bf q}\cdot {\bf R}^S_{{\boldsymbol{\tau}_s}}}.
+\label{symdrho_one_1}
+\end{equation}
+This equation can be written also as: 
+\begin{equation}
+{d \tilde n\left({\bf r}, \{{\bf R}_I + {\bf u}_I\}\right)
+\over d {\bf u}_{s,\alpha}({\bf q})} 
+= e^{-i{\bf G}_{S^{-1}} \cdot {\bf r}}
+\sum_{\beta=1}^3 S^{-1}_{\alpha,\beta} {d \tilde n\left(\{S,{\bf a}\} {\bf r}, \{{\bf R}_{\bar I} + {\bf u}_{\bar I}\}\right)
+\over d {\bf u}_{\bar s,\beta} (-{\bf q})} e^{i{\bf q}\cdot {\bf R}^S_{{\boldsymbol{\tau}_s}}}.
+\label{symdrho1}
+\end{equation}
+using the fact that $S^{-1} {\bf G}_S={\bf G}_{S^{-1}}$
+as can be deduced comparing the two expressions:
+\begin{eqnarray}
+S{\bf q}&=&-{\bf q} + {\bf G}_S \nonumber \\
+S^{-1}{\bf q}&=&-{\bf q} + {\bf G}_{S^{-1}}
+\end{eqnarray}
+after applying $S^{-1}$ to the first. Note that if the operation requires time reversal, also its inverse requires it.
+Eqs.~\ref{symdrho} and \ref{symdrho1} can be summarized with the expression:
+\begin{equation}
+{d \tilde n\left({\bf r}, \{{\bf R}_I + {\bf u}_I\}\right)
+\over d {\bf u}_{s,\alpha}({\bf q})} 
+= O(S)\left[ e^{i{\bf G}_{S^{-1}} \cdot {\bf r}}
+\sum_{\beta=1}^3 S^{-1}_{\alpha,\beta} {d \tilde n\left(\{S,{\bf a}\} {\bf r}, \{{\bf R}_{\bar I} + {\bf u}_{\bar I}\}\right)
+\over d {\bf u}_{\bar s,\beta} ({\bf q})} e^{-i{\bf q}\cdot {\bf R}^S_{{\boldsymbol{\tau}_s}}}\right].
+\label{symdrho_final1}
+\end{equation}
+This equation is further transformed before implementation (see the appendix on \texttt{irrep}).
+
+Reasoning in the same manner, starting from
+Eq.~\ref{symmag} for the magnetization density, we obtain the equation
+\begin{equation}
+{d \tilde {\bf m}_\gamma \left({\bf r}, \{{\bf R}_I + {\bf u}_I\}\right)
+\over d {\bf u}_{s,\alpha}({\bf q})} 
+= (-1)^{T_{S}} O(S)\left[ e^{i{\bf G}_{S^{-1}} \cdot {\bf r}}
+\sum_{\beta,\delta=1}^3 \tilde S^{-1}_{\gamma,\delta} S^{-1}_{\alpha,\beta} {d \tilde {\bf m}_\delta\left(\{S,{\bf a}\} {\bf r}, \{{\bf R}_{\bar I} + {\bf u}_{\bar I}\}\right)
+\over d {\bf u}_{\bar s,\beta} ({\bf q})} e^{-i{\bf q}\cdot {\bf R}^S_{{\boldsymbol{\tau}_s}}}\right].
+\label{symdmag_final1}
+\end{equation}
+This equation is further transformed before implementation (see the appendix on \texttt{irrep}).
+
+
+\section{Dielectric constant and Born effective charges}
+
+No change is made in the symmetrization expression for dielectric constants and Born effective charges due to the
+time reversal operator since only the spatial part of the symmetry is used to rotate the displacements and the electric field. 
+
+\newpage
 {\color{dark-blue}\chapter{Appendices}}
 \color{black}
-The main symmetry variables available in Quantum ESPRESSO and their relationship with the symbol used in these notes are
+The main symmetry variables available in Quantum ESPRESSO and their relationship with the symbol used in these notes are:
 
 \begin{itemize}
 
@@ -871,12 +1143,18 @@ It is in crystal coordinates of the principal lattice vector. The symmetry index
 \texttt{gi(3,48)} The vector ${\bf G}_{S_i^{-1}}$
 associated to each symmetry $S_i^{-1}{\bf q}={\bf q}+{\bf G}_{S_i^{-1}}$.
 
+\item 
+\texttt{t\_rev(48)} Contains $T_{S_i}$.  For each symmetry operation it is equal to $1$ if the symmetry requires time reversal, zero otherwise (used only in the noncollinear magnetic case).
+
+\item
+\texttt{u(3*nat,3*nat)} contains the irreps
+($A^p_{s,\alpha}$). The second index is the
+index $p$ of the different \texttt{irrep}, while the first is the composite index ${s,\alpha}$.
+
 \end{itemize}
 
-
 \section{Appendix: Symvector} 
-This routine should apply Eq.~\ref{symforce}. It 
-actually calculates 
+This routine should apply Eq.~\ref{symforce}. It actually calculates 
 \begin{equation}
 {\bf F}_{s,\alpha} ={1 \over N_S} \sum_{i=1}^{N_S} \sum_{\beta, \delta, \epsilon, l, m} {\bf b}_{\alpha,l} {\bf a}_{\epsilon,l} S^{-1}_{i,\epsilon,\beta} {\bf b}_{\beta,m} {\bf a}_{\delta,m}
 {\bf F}_{\bar s,\delta},
@@ -1024,7 +1302,8 @@ the rotation matrix
 t_{q,p}^S=
 \sum_{s,\alpha}
 \sum_{\beta=1}^3 A^p_{s,\alpha} S^{-1}_{\alpha,\beta} e^{-i{\bf q}\cdot {\bf R}^S_{{\boldsymbol{\tau}_s}}} A^{*,q}_{\bar s,\beta} = \sum_{s,\alpha}
-\sum_{\beta=1}^3 A^{*,q}_{\bar s,\beta} S_{\beta,\alpha} e^{-i{\bf q}\cdot {\bf R}^S_{{\boldsymbol{\tau}_s}}} A^p_{s,\alpha} ,
+\sum_{\beta=1}^3 A^{*,q}_{\bar s,\beta} S_{\beta,\alpha} e^{-i{\bf q}\cdot {\bf R}^S_{{\boldsymbol{\tau}_s}}} A^p_{s,\alpha},
+\label{tnotr}
 \end{equation}
 we have the relationship:
 \begin{equation}
@@ -1035,7 +1314,83 @@ This equation is implemented by summing on all symmetry operations of the small 
 {\bf q} and dividing by their number:
 \begin{equation}
 {d \tilde n\left({\bf r}, \{{\bf R}_I + {\bf u}_I\}\right) \over d \lambda^p} = {1\over N_{S_{\bf q}}} \sum_{i=1}^{N_{S_{\bf q}}} e^{i{\bf G}_{S_i^{-1}} \cdot {\bf r}}
-\sum_q t_{q,p}^{S_i} {d \tilde n\left(\{S_i,{\bf a}_i\} {\bf r}, \{{\bf R}_{\bar I} + {\bf u}_{\bar I}\}\right) \over d \lambda^q}. 
+\sum_q t_{q,p}^{S_i} {d \tilde n\left(\{S_i,{\bf a}_i\} {\bf r}, \{{\bf R}_{\bar I} + {\bf u}_{\bar I}\}\right) \over d \lambda^q}.
+\label{drho_irrep}
+\end{equation}
+
+For operations that require the time reversal operators we must start by doing linear combinations of 
+Eq.~\ref{symdrho_final1}:
+\begin{eqnarray}
+{d \tilde n\left({\bf r}, \{{\bf R}_I + {\bf u}_I\}\right)
+\over d \lambda^p}&=&
+\sum_{s,\alpha} A^p_{s,\alpha}
+{d \tilde n\left({\bf r}, \{{\bf R}_I + {\bf u}_I\}\right)
+\over d {\bf u}_{s,\alpha}({\bf q})} 
+\nonumber \\ 
+&=& O(S)\left[ e^{i{\bf G}_{S^{-1}} \cdot {\bf r}} \sum_{q,s,\alpha,\bar{\bar s}, \gamma, \beta} 
+A^{*p}_{s,\alpha} S^{-1}_{\alpha,\beta} 
+A^{*q}_{\bar s,\beta} e^{-i{\bf q}\cdot {\bf R}^S_{{\boldsymbol{\tau}_s}}}
+A^{q}_{\bar {\bar s},\gamma}
+{d \tilde n\left(\{S,{\bf a}\} {\bf r}, \{{\bf R}_{\bar I} + {\bf u}_{\bar I}\}\right)
+\over d {\bf u}_{\bar{\bar s},\gamma} ({\bf q})} \right].
+\label{symdrho_final_irrep1} \nonumber \\
+\end{eqnarray}
+In this case we define
+\begin{equation}
+t_{q,p}^S= O(S)\left[
+\sum_{s,\alpha}
+\sum_{\beta=1}^3 A^p_{s,\alpha} S^{-1}_{\alpha,\beta} e^{i{\bf q}\cdot {\bf R}^S_{{\boldsymbol{\tau}_s}}} A^{q}_{\bar s,\beta}\right] = O(S) \left[\sum_{s,\alpha}
+\sum_{\beta=1}^3 A^{q}_{\bar s,\beta} S_{\beta,\alpha} e^{i{\bf q}\cdot {\bf R}^S_{{\boldsymbol{\tau}_s}}} A^p_{s,\alpha}\right],
+\label{ttr}
+\end{equation}
+and we have the relationship:
+\begin{equation}
+{d \tilde n\left({\bf r}, \{{\bf R}_I + {\bf u}_I\}\right) \over d \lambda^p} = O(S) \left[ e^{i{\bf G}_{S^{-1}} \cdot {\bf r}}
+\sum_q t_{q,p}^S {d \tilde n\left(\{S,{\bf a}\} {\bf r}, \{{\bf R}_{\bar I} + {\bf u}_{\bar I}\}\right) \over d \lambda^q}\right]. 
+\end{equation}
+Eq.~\ref{drho_irrep} can be generalized
+in the noncolinear magnetic case as:
+\begin{equation}
+{d \tilde n\left({\bf r}, \{{\bf R}_I + {\bf u}_I\}\right) \over d \lambda^p} = {1\over N_{S_{\bf q}}} \sum_{i=1}^{N_{S_{\bf q}}} O(S_i)\left[ e^{i{\bf G}_{S_i^{-1}} \cdot {\bf r}}
+\sum_q t_{q,p}^{S_i} {d \tilde n\left(\{S_i,{\bf a}_i\} {\bf r}, \{{\bf R}_{\bar I} + {\bf u}_{\bar I}\}\right) \over d \lambda^q} \right].
+\label{drho_irrep_1}
+\end{equation}
+where however we have two different definitions of $t_{q,p}^{S_i}$ Eq.~\ref{tnotr} when time reversal is not needed and Eq.~\ref{ttr} when the symmetry operation needs time reversal.
+
+Similar expressions can be be found for the symmetrization of the magnetization density. We need now to start from Eq.~\ref{symdmag_final1} and calculate the derivative of the magnetization with respect to the $p$ irreducible mode. For operations that do not require time reversal we have:
+
+\begin{eqnarray}
+\sum_{s,\alpha} A^p_{s,\alpha} {d \tilde {\bf m}_\gamma \left({\bf r}, \{{\bf R}_I + {\bf u}_I\}\right)
+\over d {\bf u}_{s,\alpha}({\bf q})} 
+&=& \Bigg[ e^{i{\bf G}_{S^{-1}} \cdot {\bf r}}
+\sum_{q,s,\alpha,\bar{\bar s},\beta,\delta,\eta} A^{p}_{s,\alpha} S^{-1}_{\alpha,\beta} A^{*q}_{\bar s,\beta} e^{-i{\bf q}\cdot {\bf R}^S_{{\boldsymbol{\tau}_s}}}
+ \nonumber \\
+&\times& A^{q}_{\bar {\bar s},\eta}
+\tilde S^{-1}_{\gamma,\delta} {d \tilde {\bf m}_\delta\left(\{S,{\bf a}\} {\bf r}, \{{\bf R}_{\bar I} + {\bf u}_{\bar I}\}\right)
+\over d {\bf u}_{\bar {\bar s},\eta} ({\bf q})} \Bigg].
+\label{symdmag_final1_irrep}
+\end{eqnarray}
+while for operations that require time reversal we have:
+\begin{eqnarray}
+\sum_{s,\alpha} A^p_{s,\alpha} {d \tilde {\bf m}_\gamma \left({\bf r}, \{{\bf R}_I + {\bf u}_I\}\right)
+\over d {\bf u}_{s,\alpha}({\bf q})} 
+&=& (-1)^{T_{S}} O(S) \Bigg[ e^{i{\bf G}_{S^{-1}} \cdot {\bf r}}
+\sum_{q,s,\alpha,\bar{\bar s},\beta,\delta,\eta} A^{*p}_{s,\alpha} S^{-1}_{\alpha,\beta} A^{*q}_{\bar s,\beta} e^{-i{\bf q}\cdot {\bf R}^S_{{\boldsymbol{\tau}_s}}}
+ \nonumber \\
+&\times& A^{q}_{\bar {\bar s},\eta}
+\tilde S^{-1}_{\gamma,\delta} {d \tilde {\bf m}_\delta\left(\{S,{\bf a}\} {\bf r}, \{{\bf R}_{\bar I} + {\bf u}_{\bar I}\}\right)
+\over d {\bf u}_{\bar {\bar s},\eta} ({\bf q})} \Bigg].
+\label{symdmag_final1_irrep_tr}
+\end{eqnarray}
+With the same definitions of $t^S_{q,p}$ used for the induced density we can summarize these two expressions with 
+\begin{equation}
+{d \tilde {\bf m}_\gamma \left({\bf r}, \{{\bf R}_I + {\bf u}_I\}\right)
+\over d \lambda^p} 
+= (-1)^{T_{S}} O(S) \Bigg[ e^{i{\bf G}_{S^{-1}} \cdot {\bf r}}
+\sum_{q,\delta} t_{q,p}^S
+\tilde S^{-1}_{\gamma,\delta} {d \tilde {\bf m}_\delta\left(\{S,{\bf a}\} {\bf r}, \{{\bf R}_{\bar I} + {\bf u}_{\bar I}\}\right)
+\over d \lambda^q} \Bigg].
+\label{symdmag_final2_irrep_tr}
 \end{equation}
 
 \section{Appendix: Dynamical matrix in the basis of irrep}
@@ -1115,7 +1470,6 @@ S_{i,m,n} S_{i,o,p}
 \tilde D_{\bar s,n,\bar s',p}({\bf q})
 e^{i {\bf q} \cdot \left( {\bf R}^{S}_{\boldsymbol{\tau}_s} - {\bf R}^{S}_{\boldsymbol{\tau}_{s'}} \right)}. 
 \end{equation}
-
 This symmetrized dynamical matrix in the basis
 of the primitive reciprocal lattice vectors 
 can be assigned to all elements $\bar s, \bar s'$.
@@ -1140,6 +1494,113 @@ e^{-i {\bf q} \cdot ({\bf R}^{S}_{\boldsymbol{\tau}_s} - {\bf R}^{S}_{\boldsymbo
 \end{equation}
 On output the dynamical matrix is still in the basis of the primitive reciprocal lattice vectors and the sum over $m,o$ in Eq.~\ref{dynmat_inv_smallq_rec} that is needed to bring it in Cartesian coordinates is made outside this routine.
 
+\section{Appendix: $S_{m} {\bf q} = -{\bf q} + {\bf G}_m$ }
+
+This option is used only with the collinear version of the code. It is disabled for spinors.
+
+From the definition of the dynamical matrix
+(Eq.~\ref{dyn_mat}) we see that
+\begin{equation}
+D_{s,\alpha,s',\beta}({\bf q}) =
+D^*_{s,\alpha,s',\beta}(-{\bf q}).
+\end{equation}
+If among the symmetry operations of the point group there is $S_m$ such that
+\begin{equation}
+S_{m} {\bf q} = -{\bf q} + {\bf G}_{S_m}
+\label{sminusq}
+\end{equation}
+we can use Eq.~\ref{symdyn0} to write
+\begin{eqnarray}
+D_{s,\alpha,s',\beta}({\bf q}) &=&
+\sum_{\gamma,\delta=1}^3  S^{-1}_{m,\alpha,\gamma} S^{-1}_{m,\beta,\delta}
+e^{-i {\bf q} \cdot {\bf R}^{S}_{\boldsymbol{\tau}_s} }
+D_{\bar s,\gamma,\bar s',\delta}(-{\bf q})
+e^{i {\bf q} \cdot {\bf R}^{S}_{\boldsymbol{\tau}_{s'}}} \nonumber \\
+&=&
+\left[ \sum_{\gamma,\delta=1}^3  S^{-1}_{m,\alpha,\gamma} S^{-1}_{m,\beta,\delta}
+e^{i {\bf q} \cdot {\bf R}^{S}_{\boldsymbol{\tau}_s} }
+D_{\bar s,\gamma,\bar s',\delta}({\bf q})
+e^{-i {\bf q} \cdot {\bf R}^{S}_{\boldsymbol{\tau}_{s'}}} 
+\right]^*.
+\label{symdyn0_mq}
+\end{eqnarray}
+So if we have a nonsymmetrized dynamical matrix we can use it with the equation
+\begin{equation}
+D_{s,\alpha,s',\beta}({\bf q})=
+{1\over 2}
+\left\{D_{s,\alpha,s',\beta}({\bf q}) +
+\left[\sum_{\gamma,\delta=1}^3  S^{-1}_{m,\alpha,\gamma} S^{-1}_{m,\beta,\delta}
+e^{i {\bf q} \cdot {\bf R}^{S}_{\boldsymbol{\tau}_s} }
+D_{\bar s,\gamma,\bar s',\delta}({\bf q})
+e^{-i {\bf q} \cdot {\bf R}^{S}_{\boldsymbol{\tau}_{s'}}} 
+\right]^* \right\}
+\end{equation}
+to symmetrize a dynamical matrix in which the
+matrix $S_m$ has been used to reduce the {\bf k} points.
+
+A similar expression can be found also for charge density induced by a phonon. From the definition in Eq.~\ref{drhoph} we have that:
+
+\begin{equation}
+{d n\left({\bf r}, \{{\bf R}_I + {\bf u}_I\}\right)
+\over d {\bf u}_{s,\alpha}(-{\bf q})} =
+{d n\left({\bf r}, \{{\bf R}_I + {\bf u}_I\}\right)^*
+\over d {\bf u}_{s,\alpha}({\bf q})}
+\label{drhoph_def}
+\end{equation}
+Now for the operation $S_m$ in Eq.~\ref{sminusq}, Eq.~\ref{induced_charge} gives:
+\begin{eqnarray}
+{d \tilde n\left({\bf r}, \{{\bf R}_I + {\bf u}_I\}\right)
+\over d {\bf u}_{s,\alpha}({\bf q})} &=& e^{-i{\bf G}_{S^{-1}_m} \cdot {\bf r }} \sum_{\beta=1}^3 S^{-1}_{m,\alpha,\beta} 
+{d \tilde n\left(\{S_m,{\bf a}_m\} {\bf r}, \{{\bf R}_{\bar I} + {\bf u}_{\bar I}\}\right)
+\over d {\bf u}_{\bar s,\beta} (-{\bf q})} e^{i{\bf q}\cdot {\bf R}^S_{{\boldsymbol{\tau}_s}}} \nonumber \\
+&=& \left[
+e^{i{\bf G}_{S^{-1}_m} \cdot {\bf r }} \sum_{\beta=1}^3 S^{-1}_{m,\alpha,\beta} 
+{d \tilde n\left(\{S_m,{\bf a}_m\} {\bf r}, \{{\bf R}_{\bar I} + {\bf u}_{\bar I}\}\right)
+\over d {\bf u}_{\bar s,\beta} ({\bf q})} e^{-i{\bf q}\cdot {\bf R}^S_{{\boldsymbol{\tau}_s}}}\right]^*
+\nonumber \\
+\label{induced_charge_minusq}
+\end{eqnarray}
+Passing now to the basis of \texttt{irrep} we have that
+\begin{equation}
+{d \tilde n\left({\bf r}, \{{\bf R}_I + {\bf u}_I\}\right)
+\over d \lambda_p} =
+\left[
+e^{i{\bf G}_{S^{-1}_m} \cdot {\bf r }} \sum_{q,s,\alpha,\bar{\bar s},\beta,\gamma} A^{*p}_{s,\alpha}S^{-1}_{m,\alpha,\beta} e^{-i{\bf q}\cdot {\bf R}^S_{{\boldsymbol{\tau}_s}}} A^{*q}_{\bar s,\beta} A^{q}_{\bar {\bar s},\gamma}
+{d \tilde n\left(\{S_m,{\bf a}_m\} {\bf r}, \{{\bf R}_{\bar I} + {\bf u}_{\bar I}\}\right)
+\over d {\bf u}_{\bar {\bar s},\gamma} ({\bf q})} \right]^*
+\end{equation}
+Defining:
+\begin{equation}
+t_{q,p}^{S_m}= \left[
+\sum_{s,\alpha}
+\sum_{\beta=1}^3 A^p_{s,\alpha} S^{-1}_{m,\alpha,\beta} e^{i{\bf q}\cdot {\bf R}^{S_m}_{{\boldsymbol{\tau}_s}}} A^{q}_{\bar s,\beta}\right]^* = \left[\sum_{s,\alpha}
+\sum_{\beta=1}^3 A^{q}_{\bar s,\beta} S_{m,\beta,\alpha} e^{i{\bf q}\cdot {\bf R}^{S_m}_{{\boldsymbol{\tau}_s}}} A^p_{s,\alpha}\right]^*,
+\label{ttr}
+\end{equation}
+we obtain the equation:
+\begin{equation}
+{d \tilde n\left({\bf r}, \{{\bf R}_I + {\bf u}_I\}\right)
+\over d \lambda_p} =
+\left[
+e^{i{\bf G}_{S^{-1}_m} \cdot {\bf r }} \sum_{q} 
+t^{S_m}_{q,p}
+{d \tilde n\left(\{S_m,{\bf a}_m\} {\bf r}, \{{\bf R}_{\bar I} + {\bf u}_{\bar I}\}\right)
+\over d \lambda_q} \right]^*,
+\end{equation}
+that can be used in the symmetrization expression:
+\begin{equation}
+{d \tilde n\left({\bf r}, \{{\bf R}_I + {\bf u}_I\}\right)
+\over d \lambda_p} ={1\over 2}\left\{
+{d \tilde n\left({\bf r}, \{{\bf R}_I + {\bf u}_I\}\right)
+\over d \lambda_p}+
+\left[
+e^{i{\bf G}_{S^{-1}_m} \cdot {\bf r }} \sum_{q} 
+t^{S_m}_{q,p}
+{d \tilde n\left(\{S_m,{\bf a}_m\} {\bf r}, \{{\bf R}_{\bar I} + {\bf u}_{\bar I}\}\right)
+\over d \lambda_q} \right]^* \right\},
+\end{equation}
+
+
 \newpage
 
 {\color{dark-blue}\chapter{Bibliography}}
@@ -1151,6 +1612,12 @@ On output the dynamical matrix is still in the basis of the primitive reciprocal
 M. Tinkham, `Group theory and quantum mechanics', Dover Publications, New York,
 (1992). 
 
+\item
+A. Urru, PhD Thesis (SISSA 2020), Appendix E.
+
+\item 
+A. A. Maradunin, S. H. Vosko, `Symmetry properties of the normal vibrations of a crystal', Rev. Mod. Phys.
+{\bf 40}, 1 (1968).
 \end{enumerate}
 
 \end{document}
