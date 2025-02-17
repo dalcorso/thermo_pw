@@ -79,7 +79,7 @@
 
 \newpage
 {\color{dark-blue}\chapter{Introduction}}
-These notes describe how to exploit symmetry in electronic structure codes. They assume only that the reader knows the basic group theory concepts as applied to quantum mechanics and in particular to solids. I discuss some of the formulas implemented in Quantum ESPRESSO with the hope that these concepts might be useful to those that want to further develop the code. The exposition is divided in two parts. In the first part I will use the space group operations of a solid while in the second part I will consider also the magnetic symmetries and discuss how to treat symmetries that might require time reversal. 
+These notes describe how to exploit symmetry in electronic structure codes. They assume only that the reader knows the basic group theory concepts as applied to quantum mechanics and in particular to solids. I discuss some of the formulas implemented in Quantum ESPRESSO with the hope that these concepts might be useful to those who want to further develop the code. The exposition is divided in two parts. In the first part I will use the space group operations of a solid while in the second part I will consider also the magnetic symmetries and discuss how to treat symmetries that might require time reversal. 
 
 
 \newpage
@@ -597,10 +597,10 @@ e^{-i S{\bf q} \cdot {\bf R}^{S}_{\boldsymbol{\tau}_{s'}}}.
 \label{symdyn0}
 \end{equation}
 This expression tell us the equations satisfied by the dynamical matrix elements.
-Its inverse can be obtained easily
+Its inverse can be obtained easily:
 \begin{equation}
 D_{\bar s,\alpha,\bar s',\beta}(S{\bf q}) =
-\sum_{\gamma,\delta=1}^3  S_{i,\alpha,\gamma} S_{i,\beta,\delta}
+\sum_{\gamma,\delta=1}^3  S_{\alpha,\gamma} S_{\beta,\delta}
 e^{-i {\bf q} \cdot {\bf R}^{S}_{\boldsymbol{\tau}_s} }
 D_{s,\gamma,s',\delta}({\bf q})
 e^{i {\bf q} \cdot {\bf R}^{S}_{\boldsymbol{\tau}_{s'}}},
@@ -1147,9 +1147,19 @@ associated to each symmetry $S_i^{-1}{\bf q}={\bf q}+{\bf G}_{S_i^{-1}}$.
 \texttt{t\_rev(48)} Contains $T_{S_i}$.  For each symmetry operation it is equal to $1$ if the symmetry requires time reversal, zero otherwise (used only in the noncollinear magnetic case).
 
 \item
-\texttt{u(3*nat,3*nat)} contains the irreps
-($A^p_{s,\alpha}$). The second index is the
-index $p$ of the different \texttt{irrep}, while the first is the composite index ${s,\alpha}$.
+\texttt{u(3*nat,3*nat)} contains the displacements 
+of each ($A^p_{s,\alpha}$). The second index is the
+index $p$ of the different modes of the \texttt{irrep}, while the first is the composite index ${s,\alpha}$.
+
+\item 
+\texttt{t(npertx,npertx,48,3*nat)} contains the rotation matrices in the basis of the modes $t^S_{q,p}$.
+\texttt{npertx} is the maximum number of perturbations in a single \texttt{irrep}. The last index labels the \texttt{irreps}.
+
+\item 
+\texttt{tmq(npertx,npertx,3*nat)} contains the rotation matrix $S_m$ that sends $\bf {q}$ in
+$-{\bf q}+{\bf G}_{S_m}$ in the basis of the modes $t^{S_m}_{q,p}$.
+
+
 
 \end{itemize}
 
@@ -1575,7 +1585,7 @@ t_{q,p}^{S_m}= \left[
 \sum_{s,\alpha}
 \sum_{\beta=1}^3 A^p_{s,\alpha} S^{-1}_{m,\alpha,\beta} e^{i{\bf q}\cdot {\bf R}^{S_m}_{{\boldsymbol{\tau}_s}}} A^{q}_{\bar s,\beta}\right]^* = \left[\sum_{s,\alpha}
 \sum_{\beta=1}^3 A^{q}_{\bar s,\beta} S_{m,\beta,\alpha} e^{i{\bf q}\cdot {\bf R}^{S_m}_{{\boldsymbol{\tau}_s}}} A^p_{s,\alpha}\right]^*,
-\label{ttr}
+\label{tmq}
 \end{equation}
 we obtain the equation:
 \begin{equation}
@@ -1600,8 +1610,70 @@ t^{S_m}_{q,p}
 \over d \lambda_q} \right]^* \right\},
 \end{equation}
 
-
+\section{Appendix: set\_irr\_sym}
+This routine implements the three Eqs.~\ref{ttr},~\ref{tnotr}, and \ref{tmq}. In all cases the matrix $S_{\beta,\alpha}$ is applied in 
+the crystal basis. We show explicitly only the
+case of $t^S_{q,p}$. We have that using twice Eq.~\ref{complete} we obtain:
+\begin{eqnarray}
+t_{q,p}^S&=&
+\sum_{s,\alpha,\beta, \delta, \eta, j, l}
+ A^{*,q}_{\bar s,\beta} {\bf b}_{\delta, j} {\bf a}_{\beta, j} S_{\delta,\alpha} e^{-i{\bf q}\cdot {\bf R}^S_{{\boldsymbol{\tau}_s}}} {\bf b}_{\eta, l} {\bf a}_{\alpha, l}  A^p_{s,\eta}\nonumber \\ &=&
+ \sum_{s,\alpha,\beta, \delta, \eta, j, l}
+ A^{*,q}_{\bar s,\beta}  {\bf a}_{\beta, j} {\bf b}_{\delta, j} S_{\delta,\alpha} {\bf a}_{\alpha, l} e^{-i{\bf q}\cdot {\bf R}^S_{{\boldsymbol{\tau}_s}}} {\bf b}_{\eta, l} A^p_{s,\eta} \nonumber \\ &=&
+ \sum_{s,\beta,j,l}
+ A^{*,q}_{\bar s,\beta}  {\bf a}_{\beta, j}    e^{-i{\bf q}\cdot {\bf R}^S_{{\boldsymbol{\tau}_s}}}  S_{l,j} A^p_{s,l},
+\label{tnotr_crys}
+\end{eqnarray}
+where
+\begin{equation}
+A^p_{s,l} = \sum_\eta {\bf b}_{\eta, l} A^p_{s,\eta}
+\end{equation}
 \newpage
+is the mode in the basis of the primitive lattice vectors.
+
+\section{Appendix: rotate\_and\_add\_dyn}
+
+This routine implements Eq.~\ref{dynmat_inv} adding four
+$\delta$ functions:
+\begin{eqnarray}
+D_{\bar s,\alpha,\bar s',\beta}(S{\bf q}) &=&
+\sum_{p,q,r,t,\gamma,\delta,\epsilon,\eta,\nu,\rho}  {\bf b}_{\alpha,p} {\bf a}_{\eta,p}S_{\eta,\nu}{\bf b}_{\nu,q} {\bf a}_{\gamma,q} {\bf b}_{\beta,r} {\bf a}_{\rho,r} S_{ \rho,\epsilon} {\bf b}_{\epsilon,t} {\bf a}_{\delta,t}
+D_{s,\gamma,s',\delta}({\bf q})
+e^{-i {\bf q} \cdot \left({\bf R}^{S}_{\boldsymbol{\tau}_s} - {\bf R}^{S}_{\boldsymbol{\tau}_{s'}}\right)}
+\nonumber \\ &=&
+\sum_{p,q,r,t,\gamma,\delta,\epsilon,\eta,\nu,\rho}  {\bf b}_{\alpha,p}{\bf b}_{\beta,r}  {\bf a}_{\eta,p}S^{-1}_{\nu,\eta}{\bf b}_{\nu,q}  {\bf a}_{\rho,r} S^{-1}_{ \epsilon,\rho} {\bf b}_{\epsilon,t} {\bf a}_{\gamma,q} {\bf a}_{\delta,t}
+D_{s,\gamma,s',\delta}({\bf q})
+e^{-i {\bf q} \cdot \left({\bf R}^{S}_{\boldsymbol{\tau}_s} - {\bf R}^{S}_{\boldsymbol{\tau}_{s'}}\right)}
+\nonumber \\
+&=&
+\sum_{p,q,r,t}  {\bf b}_{\alpha,p}{\bf b}_{\beta,r}  S^{-1}_{p,q} S^{-1}_{r,t} 
+D_{s,q,s',t}({\bf q})
+e^{-i {\bf q} \cdot \left({\bf R}^{S}_{\boldsymbol{\tau}_s} - {\bf R}^{S}_{\boldsymbol{\tau}_{s'}}\right)}
+,
+\label{dynmat_inv_cryst}
+\end{eqnarray}
+Where the dynamical matrix in the basis of the primitive lattice vectors is given as input to the routine:
+\begin{equation}
+D_{s,q,s',t}({\bf q})= \sum_{\gamma,\delta}
+ {\bf a}_{\gamma,q} {\bf a}_{\delta,t}
+D_{s,\gamma,s',\delta}({\bf q})
+\end{equation}
+and the output of the routine is the dynamical matrix
+at the rotated ${\bf q}$
+in the same basis
+\begin{equation}
+D_{\bar s,p,\bar s',r}(S{\bf q})=
+\sum_{q,t}  S^{-1}_{p,q} S^{-1}_{r,t} 
+D_{s,q,s',t}({\bf q})
+e^{-i {\bf q} \cdot \left({\bf R}^{S}_{\boldsymbol{\tau}_s} - {\bf R}^{S}_{\boldsymbol{\tau}_{s'}}\right)}
+\end{equation}
+The operations needed to pass to the Cartesian basis 
+are made outside the routine if needed:
+\begin{equation}
+D_{s,\alpha,s',\beta}(S{\bf q})
+=\sum_{p,r}  {\bf b}_{\alpha,p}{\bf b}_{\beta,r}
+D_{s,p,s',r}(S{\bf q})
+\end{equation}
 
 {\color{dark-blue}\chapter{Bibliography}}
 \color{black}
@@ -1621,6 +1693,3 @@ A. A. Maradunin, S. H. Vosko, `Symmetry properties of the normal vibrations of a
 \end{enumerate}
 
 \end{document}
-
-
-scale_sym_ops
