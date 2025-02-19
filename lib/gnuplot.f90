@@ -1047,7 +1047,7 @@ IF (contour_counter > contour_max) CALL errore('gnuplot_set_contour',&
                                                  'too many contours',1)
 contour_color(contour_counter) = color
 IF (ionode) THEN
-   WRITE(iun_gnuplot,'("set cntrparam levels discrete",f12.6)') levr
+   WRITE(iun_gnuplot,'("set cntrparam levels discrete",f16.6)') levr
    filename=TRIM(tablefile)//'_'//TRIM(int_to_char(contour_counter))//'.dat'
    WRITE(iun_gnuplot,'("set output """,a,"""")') TRIM(filename)
    WRITE(iun_gnuplot,'("splot ''",a,"'' using 1:2:3 w l")') TRIM(file2d_dat)
