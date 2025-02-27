@@ -326,6 +326,17 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            IF (start_geometry_qha<1) start_geometry_qha=1
            IF (last_geometry_qha>ngeom) last_geometry_qha=ngeom
            CALL initialize_elastic_cons(ngeom, nwork)
+           !
+           !  Check that start_geometry and last geometry are within the
+           !  range of computed geometries otherwise disregard them
+           !
+           IF ((start_geometry < ((start_geometry_qha-1)*work_base+1)).OR. &
+               (start_geometry > last_geometry_qha*work_base))             &
+               start_geometry = (start_geometry_qha-1)*work_base+1
+           IF ((last_geometry < start_geometry) .OR.                       &
+               (last_geometry > last_geometry_qha*work_base))              &
+               last_geometry = last_geometry_qha*work_base
+   
            start_geometry=MAX((start_geometry_qha-1)*work_base+1, &
                                                        start_geometry)
            last_geometry=MIN(last_geometry_qha*work_base, last_geometry)
