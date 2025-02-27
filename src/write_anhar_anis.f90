@@ -37,7 +37,7 @@ USE debye_module,   ONLY : compute_debye_temperature_macro_el, &
 USE isoentropic,    ONLY : isostress_heat_capacity, thermal_stress,      &
                            gen_average_gruneisen, isoentropic_elastic_constants
 USE data_files,     ONLY : flanhar
-USE io_global,      ONLY : meta_ionode
+USE io_global,      ONLY : meta_ionode, stdout
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
@@ -55,6 +55,8 @@ IF (lmurn.AND..NOT.lcubic) THEN
 !
    filename='anhar_files/'//TRIM(flanhar)//'.celldm'
    CALL add_pressure(filename)
+   WRITE(stdout,'(5x,"Reading thermal expansion tensor from file",a)') &
+                      TRIM(filename)
    ALLOCATE(celldm_t_(6,ntemp))
    ALLOCATE(temp_(ntemp))
    CALL read_alpha_anis_lmurn(ibrav_save, celldm_t_, alpha_anis_t, temp_, &
@@ -2340,7 +2342,7 @@ IF (meta_ionode) THEN
                                                      alpha_t(3,itemp)
          alpha_t(1,itemp)=alpha_t(1,itemp)/1.D6
          alpha_t(3,itemp)=alpha_t(3,itemp)/1.D6
-         alpha_t(2,itemp)=alpha_t(3,itemp)
+         alpha_t(2,itemp)=alpha_t(1,itemp)
       END DO
    ELSEIF ( ibrav==5 ) THEN
       READ(iu_therm,*) 
