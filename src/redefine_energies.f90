@@ -21,7 +21,8 @@ SUBROUTINE redefine_energies(energy_geo, epsilon_geo, epsil_geo, nwork,  &
 USE kinds, ONLY : DP
 USE control_elastic_constants, ONLY : ngeom, nstep_ec, ngeo_strain, &
                                       stype, nmove, atom_step, min_y, &
-                                      epsil_y, lfp
+                                      epsil_y, lfp, start_geometry_qha, &
+                                      last_geometry_qha
 USE polyfit_mod, ONLY : polyfit, compute_poly
 IMPLICIT NONE
 
@@ -42,7 +43,25 @@ ALLOCATE(y(nmove))
 
 iwork=0     ! run on current energy index
 jwork=0     ! run on previous energy index
-DO igeom=1, ngeom  
+!
+!  Increase the iwork and jwork for the geometries not computed
+!
+DO igeom=1, start_geometry_qha-1
+   DO istep=1, nstep_ec
+      DO igeo=1, ngeo_strain
+         IF (stype(istep)) THEN
+            DO imov=1, nmove
+               jwork=jwork+1
+            ENDDO
+         ELSE
+            jwork=jwork+1
+         ENDIF
+         iwork=iwork+1
+      ENDDO
+   ENDDO
+ENDDO
+
+DO igeom=start_geometry_qha, last_geometry_qha
    DO istep=1, nstep_ec
       DO igeo=1, ngeo_strain
          IF (stype(istep)) THEN
@@ -80,6 +99,23 @@ DO igeom=1, ngeom
             energy_geo_eff(iwork)=energy_geo(jwork)
             epsilon_geo_eff(:,:,iwork)=epsilon_geo(:,:,jwork)
          ENDIF
+      ENDDO
+   ENDDO
+ENDDO
+!
+!  Increase the iwork and jwork for the geometries not computed
+!
+DO igeom=last_geometry_qha+1, ngeom
+   DO istep=1, nstep_ec
+      DO igeo=1, ngeo_strain
+         IF (stype(istep)) THEN
+            DO imov=1, nmove
+               jwork=jwork+1
+            ENDDO
+         ELSE
+            jwork=jwork+1
+         ENDIF
+         iwork=iwork+1
       ENDDO
    ENDDO
 ENDDO
@@ -183,7 +219,8 @@ SUBROUTINE write_min_y()
 USE kinds, ONLY : DP
 USE control_elastic_constants, ONLY : ngeom, nstep_ec, ngeo_strain, &
                                       stype, min_y_t, epsil_y,      &
-                                      dyde, all_geometry_done_geo
+                                      dyde, all_geometry_done_geo,  &
+                                      start_geometry_qha, last_geometry_qha
 USE data_files,                ONLY : flanhar
 USE temperature,               ONLY : temp, ntemp
 USE polyfit_mod,               ONLY : polyfit
@@ -201,7 +238,7 @@ iu_rel=find_free_unit()
 ALLOCATE(x(ngeo_strain))
 ALLOCATE(f(ngeo_strain))
 
-DO igeom=1, ngeom
+DO igeom=start_geometry_qha, last_geometry_qha
    IF (.NOT.all_geometry_done_geo(igeom)) CYCLE
    CALL add_geometry_number('anhar_files/', TRIM(flanhar)//'.int_rel', &
                                 filename, igeom)
@@ -309,12 +346,13 @@ SUBROUTINE redefine_energies_qua(energy_geo, epsilon_geo, epsil_geo, nwork,  &
 USE kinds, ONLY : DP
 USE control_elastic_constants, ONLY : ngeom, nstep_ec, ngeo_strain, &
                                       stype, nmove, atom_step, min_y, &
-                                      epsil_y, lzsisa, lfp
+                                      epsil_y, lzsisa, lfp, &
+                                      start_geometry_qha, last_geometry_qha
 USE control_quartic_energy, ONLY : lsolve
 USE polynomial,   ONLY : init_poly, clean_poly, poly2, poly4
 USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_quadratic_extremum
 USE quartic_surfaces, ONLY : fit_multi_quartic, find_quartic_extremum, &
-                             evaluate_fit_quartic
+                             evaluate_fit_quartic 
 
 IMPLICIT NONE
 
@@ -339,9 +377,27 @@ ALLOCATE(y(nmove))
 
 iwork=0     ! run on current energy index
 jwork=0     ! run on previous energy index
+!
+!  Increase the iwork and jwork for the geometries not computed
+!
+DO igeom=1, start_geometry_qha-1
+   DO istep=1, nstep_ec
+      DO igeo=1, ngeo_strain
+         IF (stype(istep)) THEN
+            DO imov=1, nmove
+               jwork=jwork+1
+            ENDDO
+         ELSE
+            jwork=jwork+1
+         ENDIF
+         iwork=iwork+1
+      ENDDO
+   ENDDO
+ENDDO
+
 CALL init_poly(nvar,p2)
 CALL init_poly(nvar,p4)
-DO igeom=1, ngeom  
+DO igeom=start_geometry_qha, last_geometry_qha
    DO istep=1, nstep_ec
       DO igeo=1, ngeo_strain
          IF (stype(istep)) THEN
@@ -379,6 +435,23 @@ DO igeom=1, ngeom
             energy_geo_eff(iwork)=energy_geo(jwork)
             epsilon_geo_eff(:,:,iwork)=epsilon_geo(:,:,jwork)
          ENDIF
+      ENDDO
+   ENDDO
+ENDDO
+!
+!  Increase the iwork and jwork for the geometries not computed
+!
+DO igeom=last_geometry_qha+1, ngeom
+   DO istep=1, nstep_ec
+      DO igeo=1, ngeo_strain
+         IF (stype(istep)) THEN
+            DO imov=1, nmove
+               jwork=jwork+1
+            ENDDO
+         ELSE
+            jwork=jwork+1
+         ENDIF
+         iwork=iwork+1
       ENDDO
    ENDDO
 ENDDO
