@@ -128,7 +128,7 @@ SUBROUTINE deallocate_thermo()
                              el_con_tau_crys_geo, el_con_omega_geo, &
                              epsil_geo, all_geometry_done_geo,     &
                              found_dos_ec, found_ph_ec, tau_acc, min_y, &
-                             epsil_y, min_y_t, dyde
+                             epsil_y, min_y_t, dyde, tau_save_ec
   USE control_pressure, ONLY : press_plot, ipress_plot
   USE uniform_pressure, ONLY : omega_p, density_p, celldm_p, p2_p, p4_p
   USE control_vol,      ONLY : ivol_plot
@@ -246,6 +246,7 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (v_s) )             DEALLOCATE(v_s)
   IF ( ALLOCATED (el_con_geo_t) )    DEALLOCATE(el_con_geo_t) 
   IF ( ALLOCATED (dyde_t) )          DEALLOCATE(dyde_t)
+  IF ( ALLOCATED (tau_save_ec) )     DEALLOCATE(tau_save_ec)
 
   IF ( ALLOCATED (vmin_noe_t) )       DEALLOCATE(vmin_noe_t) 
   IF ( ALLOCATED (density_noe_t) )    DEALLOCATE(density_noe_t) 

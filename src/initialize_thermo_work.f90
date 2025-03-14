@@ -41,12 +41,13 @@ SUBROUTINE initialize_thermo_work(nwork, part)
                                    el_con_omega_geo, el_con_geo,           &
                                    all_geometry_done_geo, found_dos_ec,    &
                                    found_ph_ec, min_y_t, dyde, ngeo_strain, &
-                                   stype
+                                   stype, tau_save_ec
   USE temperature,   ONLY : ntemp
   USE control_eldos, ONLY : lel_free_energy
   USE gvecw,          ONLY : ecutwfc
   USE gvect,          ONLY : ecutrho
   USE control_quadratic_energy, ONLY : nvar
+  USE ions_base,      ONLY : nat
   USE lattices,       ONLY : crystal_parameters
   USE start_k,        ONLY : nk1, nk2, nk3
   USE klist,          ONLY : degauss, lgauss, ltetra
@@ -336,12 +337,12 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            IF ((last_geometry < start_geometry) .OR.                       &
                (last_geometry > last_geometry_qha*work_base))              &
                last_geometry = last_geometry_qha*work_base
-   
            start_geometry=MAX((start_geometry_qha-1)*work_base+1, &
                                                        start_geometry)
            last_geometry=MIN(last_geometry_qha*work_base, last_geometry)
            tot_ngeo=nwork
            ALLOCATE(energy_geo(tot_ngeo))
+           ALLOCATE(tau_save_ec(3,nat,tot_ngeo))
            ALLOCATE(all_geometry_done_geo(ngeom))
            IF (.NOT.lph) ALLOCATE(el_con_geo(6,6,ngeom))
            ALLOCATE(no_ph(tot_ngeo))
@@ -535,7 +536,8 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               DO igeom_qha=start_geometry_qha, last_geometry_qha
                  DO iwork=1,work_base
                     iwork_tot= (igeom_qha-1)*work_base + iwork
-                    lpwband(iwork_tot)=.TRUE.
+                    IF (iwork_tot.GE.start_geometry.AND.iwork_tot &
+                              .LE.last_geometry) lpwband(iwork_tot)=.TRUE.
                  ENDDO
               ENDDO
            ENDIF

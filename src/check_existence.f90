@@ -100,11 +100,13 @@ SUBROUTINE save_existence(iwork, part)
 !
   USE control_thermo,  ONLY : lstress
 
-  USE thermo_mod,      ONLY : energy_geo
+  USE thermo_mod,      ONLY : energy_geo, what
   USE elastic_constants, ONLY : sigma_geo
 
   USE ener,            ONLY : etot
   USE force_mod,       ONLY : sigma
+  USE ions_base,       ONLY : tau, nat
+  USE control_elastic_constants, ONLY : tau_save_ec
 
   USE io_global,       ONLY : ionode
   !
@@ -142,6 +144,10 @@ SUBROUTINE save_existence(iwork, part)
 !
 20   CONTINUE
   END IF
+
+  IF (what=='elastic_constants_geo') THEN
+     tau_save_ec(1:3,1:nat,iwork)=tau(1:3,1:nat)
+  ENDIF
   
   RETURN
 END SUBROUTINE save_existence

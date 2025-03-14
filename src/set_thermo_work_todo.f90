@@ -374,6 +374,7 @@ USE control_flags,  ONLY : lbands
 USE control_bands,  ONLY : nbnd_bands
 USE wvfct,          ONLY : nbnd
 USE thermo_mod,     ONLY : what, ibrav_geo, celldm_geo, ef_geo
+USE control_elastic_constants, ONLY : tau_save_ec
 USE control_thermo, ONLY : outdir_thermo
 USE klist,          ONLY : lgauss, ltetra
 USE ener,           ONLY : ef
@@ -405,10 +406,15 @@ IF (nbnd_bands > nbnd) nbnd = nbnd_bands
 !
 CALL set_fft_mesh()
 !
+IF (what=='elastic_constants_geo') THEN
+   tau(:,:)=tau_save_ec(:,:,iwork)
+ELSE
+!
 ! strain uniformly the coordinates to the new celldm
 !
-tau=tau_save_crys
-CALL cryst_to_cart( nat, tau, at, 1 )
+   tau=tau_save_crys
+   CALL cryst_to_cart( nat, tau, at, 1 )
+ENDIF
 !
 ! set the tmp_dir for this geometry
 !
