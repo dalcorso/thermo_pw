@@ -87,10 +87,13 @@ SELECT CASE (laue)
             strain_list(1) = 'C '
             strain_list(2) = 'E '
             strain_list(3) = 'B1'
-            IF (old_ec) THEN
+            IF (old_ec==0) THEN
                strain_list(4) = 'A '
-            ELSE
+            ELSEIF (old_ec==1) THEN
                strain_list(4) = 'B '
+            ELSEIF (old_ec==2) THEN
+               strain_list(3)='B '
+               strain_list(4)='A '
             ENDIF
             strain_list(5) = 'H '
          ENDIF

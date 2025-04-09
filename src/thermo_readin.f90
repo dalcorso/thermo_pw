@@ -506,7 +506,7 @@ SUBROUTINE thermo_readin()
   lcm_ec=.TRUE.
   lzsisa=.FALSE.
   lfp=.FALSE.
-  old_ec=.TRUE.
+  old_ec=0
 
   ltherm_glob=.FALSE.
   lhugoniot=.FALSE.

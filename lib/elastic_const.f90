@@ -958,7 +958,7 @@ IMPLICIT NONE
 REAL(DP), INTENT(IN) :: epsil_geo(3,3,nwork), omega
 REAL(DP), INTENT(IN) :: energy_geo(nwork)
 INTEGER,  INTENT(IN) :: nwork, ngeo_strain, ibrav, laue, m1
-LOGICAL,  INTENT(IN) :: old_ec
+INTEGER,  INTENT(IN) :: old_ec
 REAL(DP) :: alpha(m1)
 REAL(DP) :: b0, a0, s11, s22, s33, s12, s13, s23, bmat(6,6), aux
 INTEGER  :: base_data
@@ -1049,29 +1049,39 @@ SELECT CASE (laue)
       WRITE(stdout,'("S33=",f15.8," kbar")') s33*ry_kbar
       el_con(3,3) = 1.0_DP / omega * ( 2.0_DP * alpha(3) )
 !
-!  C_13=C_23
+!  C_13=C_23 (with old_ec=0 or old_ec=1) C_12 (with old_ec=2)
 !
       base_data=2*ngeo_strain+1
-      CALL el_cons_ij_ene(1, 1, 'C_13', ngeo_strain, &
-             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
 
-      aux=alpha(2) / omega / 2.0_DP
-      WRITE(stdout,'("(S11+S33)/2",f15.8," kbar",f15.8," kbar")') &
+      IF (old_ec==0.OR.old_ec==1) THEN
+          CALL el_cons_ij_ene(1, 1, 'C_13', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+          aux=alpha(2) / omega / 2.0_DP
+          WRITE(stdout,'("(S11+S33)/2",f15.8," kbar",f15.8," kbar")') &
                                  aux*ry_kbar, (s11+s33)*0.5_DP*ry_kbar
 
-      el_con(1,3) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(1,1) &
+          el_con(1,3) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(1,1) &
                                                      - el_con(3,3)) * 0.5_DP 
-      el_con(3,1) = el_con(1,3)
-      el_con(2,3) = el_con(1,3)
-      el_con(3,2) = el_con(2,3)
+          el_con(3,1) = el_con(1,3)
+          el_con(2,3) = el_con(1,3)
+          el_con(3,2) = el_con(2,3)
+      ELSE
+         CALL el_cons_ij_ene(1, 1, 'C_12', ngeo_strain, &
+              epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+         aux= alpha(2) / omega / 2.0_DP
+         WRITE(stdout,'("S11", f15.8," kbar", f15.8, " kbar")') &
+                                                aux*ry_kbar, s11*ry_kbar
+
+         el_con(1,2) = (1.0_DP / omega *  alpha(3)  -  el_con(1,1)) 
+         el_con(2,1) = el_con(1,2)
+      ENDIF
 !
 !  C_12
 !
       base_data=3*ngeo_strain+1
-      CALL el_cons_ij_ene(1, 1, 'C_12', ngeo_strain, &
+      IF (old_ec==0) THEN
+         CALL el_cons_ij_ene(1, 1, 'C_12', ngeo_strain, &
              epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
-
-      IF (old_ec) THEN
          press=- alpha(2) / omega / 3.0_DP
          WRITE(stdout,'("-(2*S11+S33)/3", f15.8," kbar", f15.8, " kbar")') &
                             press*ry_kbar, -(2.0_DP*s11+s33)/3.0_DP*ry_kbar
@@ -1079,15 +1089,30 @@ SELECT CASE (laue)
          el_con(1,2) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) &
                                 - 2.0_DP * el_con(1,1) - el_con(3,3) &
                                 - 4.0_DP * el_con(1,3) ) * 0.5_DP 
-      ELSE
+         el_con(2,1) = el_con(1,2)
+      ELSEIF (old_ec==1) THEN
+         CALL el_cons_ij_ene(1, 1, 'C_12', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
          aux= alpha(2) / omega / 2.0_DP
          WRITE(stdout,'("S11", f15.8," kbar", f15.8, " kbar")') &
                                                 aux*ry_kbar, s11*ry_kbar
 
          el_con(1,2) = (1.0_DP / omega *  alpha(3)  -  el_con(1,1)) 
-      ENDIF
-      el_con(2,1) = el_con(1,2)
+         el_con(2,1) = el_con(1,2)
 
+      ELSEIF (old_ec==2) THEN
+         CALL el_cons_ij_ene(1, 1, 'C_13', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+         press=- alpha(2) / omega / 3.0_DP
+         WRITE(stdout,'("-(2*S11+S33)/3", f15.8," kbar", f15.8, " kbar")') &
+                            press*ry_kbar, -(2.0_DP*s11+s33)/3.0_DP*ry_kbar
+         el_con(1,3) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) &
+                                - 2.0_DP * el_con(1,1) - el_con(3,3) &
+                                - 2.0_DP * el_con(1,2) ) * 0.25_DP 
+         el_con(3,1) = el_con(1,3)
+         el_con(2,3) = el_con(1,3)
+         el_con(3,2) = el_con(2,3)
+      ENDIF
 !
 !  C_44=C_55
 !
