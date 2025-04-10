@@ -1766,6 +1766,7 @@ DO itempp=1, ntemp_plot
       el_cons_s_ptt(:,:,:,itempp)=el_cons_ptt(:,:,:,itempp) + &
                             csmct_ptt(:,:,:,itempp)
       DO ipress=1,npress
+         IF (ipress==1.OR.ipress==npress) CYCLE
          CALL compute_elastic_compliances(el_cons_s_ptt(:,:,ipress,itempp), &
                                           el_comp_s_ptt(:,:,ipress,itempp))
      !

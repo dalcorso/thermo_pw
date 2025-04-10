@@ -16,7 +16,7 @@ SUBROUTINE write_elastic_t_qha()
 !
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : stdout
-USE thermo_mod, ONLY : ibrav_geo, celldm_geo
+USE thermo_mod, ONLY : ibrav_geo, celldm_geo, omega_geo
 USE thermo_sym, ONLY : laue
 USE control_mur, ONLY : lmurn
 USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
@@ -32,7 +32,7 @@ USE lattices,       ONLY : compress_celldm, crystal_parameters
 USE elastic_constants, ONLY : el_con, el_compliances, write_el_cons_on_file, &
                               compute_elastic_compliances, &
                               print_macro_elasticity
-USE control_thermo, ONLY : ltherm_dos, ltherm_freq
+USE control_thermo, ONLY : ltherm_dos, ltherm_freq, lgeo_from_file
 USE anharmonic,     ONLY : celldm_t, el_cons_t, el_comp_t, b0_ec_t, &
                            el_con_geo_t, macro_el_t
 USE ph_freq_anharmonic, ONLY : celldmf_t, el_consf_t, el_compf_t, b0f_ec_t, &
@@ -47,6 +47,7 @@ IMPLICIT NONE
 CHARACTER(LEN=256) :: filelastic
 INTEGER :: igeo, ibrav, nvar, ndata, jdata
 REAL(DP), ALLOCATABLE :: x(:,:), f(:), xfit(:), x1(:,:)
+REAL(DP) :: compute_omega_geo
 TYPE(poly1) :: ec_p1
 TYPE(poly2) :: ec_p2
 TYPE(poly3) :: ec_p3
@@ -74,9 +75,15 @@ ALLOCATE(xfit(nvar))
 CALL divide(world_comm, ntemp, startt, lastt)
 
 IF (lmurn) THEN
-   DO idata=1,ndata
-      x(1,idata)=celldm_geo(1,idata)
-   ENDDO
+   IF (lgeo_from_file) THEN
+      DO idata=1,ndata
+         x(1,idata)=omega_geo(idata)
+      ENDDO
+   ELSE
+      DO idata=1,ndata
+         x(1,idata)=celldm_geo(1,idata)
+      ENDDO
+   ENDIF
 ELSE
    CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
 ENDIF
@@ -100,7 +107,11 @@ DO itemp=startt,lastt
    IF (itemp==1.OR.itemp==ntemp) CYCLE
    
    IF (el_cons_qha_geo_available.AND.ltherm_dos) THEN
-      CALL compress_celldm(celldm_t(:,itemp),xfit,nvar,ibrav)
+      IF (lgeo_from_file) THEN
+         xfit(1)=compute_omega_geo(ibrav, celldm_t(:,itemp))
+      ELSE
+         CALL compress_celldm(celldm_t(:,itemp),xfit,nvar,ibrav)
+      ENDIF
       f=0.0_DP
       DO i=1,6
          DO j=1,6
@@ -156,7 +167,11 @@ DO itemp=startt,lastt
    END IF
 
    IF (el_consf_qha_geo_available.AND.ltherm_freq) THEN
-      CALL compress_celldm(celldmf_t(:,itemp),xfit,nvar,ibrav)
+      IF (lgeo_from_file) THEN
+         xfit(1)=compute_omega_geo(ibrav, celldmf_t(:,itemp))
+      ELSE
+         CALL compress_celldm(celldmf_t(:,itemp),xfit,nvar,ibrav)
+      ENDIF
       f=0.0_DP
       DO i=1,6
          DO j=1,6
@@ -266,7 +281,7 @@ SUBROUTINE write_elastic_pt_qha()
 !
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : stdout
-USE thermo_mod, ONLY : ibrav_geo, celldm_geo
+USE thermo_mod, ONLY : ibrav_geo, celldm_geo, omega_geo
 USE thermo_sym, ONLY : laue
 USE control_pressure, ONLY : npress_plot, ipress_plot, press
 USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
@@ -285,7 +300,7 @@ USE elastic_constants, ONLY : el_con, el_compliances, write_el_cons_on_file, &
                               compute_elastic_compliances, &
                               print_macro_elasticity
 USE lattices,       ONLY : crystal_parameters
-USE control_thermo, ONLY : ltherm_dos, ltherm_freq
+USE control_thermo, ONLY : ltherm_dos, ltherm_freq, lgeo_from_file
 USE anharmonic,     ONLY : el_con_geo_t
 USE ph_freq_anharmonic,     ONLY : el_conf_geo_t
 USE anharmonic_pt,  ONLY : celldm_pt, el_cons_pt, el_comp_pt, b0_ec_pt, &
@@ -302,6 +317,7 @@ IMPLICIT NONE
 CHARACTER(LEN=256) :: filelastic
 INTEGER :: igeo, ibrav, nvar, ndata, jdata
 REAL(DP), ALLOCATABLE :: x(:,:), f(:), xfit(:), x1(:,:)
+REAL(DP) :: compute_omega_geo
 TYPE(poly1) :: ec_p1
 TYPE(poly2) :: ec_p2
 TYPE(poly3) :: ec_p3
@@ -332,9 +348,15 @@ ALLOCATE(xfit(nvar))
 CALL divide(world_comm, ntemp, startt, lastt)
 
 IF (lmurn) THEN
-   DO idata=1,ndata
-      x(1,idata)=celldm_geo(1,idata)
-   ENDDO
+   IF (lgeo_from_file) THEN
+      DO idata=1,ndata
+         x(1,idata)=omega_geo(idata)
+      ENDDO
+   ELSE
+      DO idata=1,ndata
+         x(1,idata)=celldm_geo(1,idata)
+      ENDDO
+   ENDIF
 ELSE
    CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
 ENDIF
@@ -363,7 +385,11 @@ DO ipressp=1,npress_plot
          IF (itemp==1.OR.itemp==ntemp) CYCLE
    
          IF (el_cons_qha_geo_available) THEN
-            CALL compress_celldm(celldm_pt(:,itemp,ipressp),xfit,nvar,ibrav)
+            IF (lgeo_from_file) THEN
+               xfit(1)=compute_omega_geo(ibrav, celldm_pt(:,itemp,ipressp))
+            ELSE
+               CALL compress_celldm(celldm_pt(:,itemp,ipressp),xfit,nvar,ibrav)
+            ENDIF
             f=0.0_DP
             DO i=1,6
                DO j=1,6
@@ -444,7 +470,12 @@ DO ipressp=1,npress_plot
          IF (itemp==1.OR.itemp==ntemp) CYCLE
    
          IF (el_consf_qha_geo_available) THEN
-            CALL compress_celldm(celldmf_pt(:,itemp,ipressp),xfit,nvar,ibrav)
+            IF (lgeo_from_file) THEN
+               xfit(1)=compute_omega_geo(ibrav, celldmf_pt(:,itemp,ipressp))
+            ELSE
+               CALL compress_celldm(celldmf_pt(:,itemp,ipressp),xfit,&
+                                                                 nvar,ibrav)
+            ENDIF
             f=0.0_DP
             DO i=1,6
                DO j=1,6
@@ -538,7 +569,7 @@ SUBROUTINE write_elastic_ptt_qha()
 !
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : stdout
-USE thermo_mod, ONLY : ibrav_geo, celldm_geo
+USE thermo_mod, ONLY : ibrav_geo, celldm_geo, omega_geo
 USE thermo_sym, ONLY : laue
 USE control_mur, ONLY : lmurn
 USE control_pressure, ONLY : npress, press
@@ -557,7 +588,7 @@ USE elastic_constants, ONLY : el_con, el_compliances, write_el_cons_on_file, &
                               compute_elastic_compliances, &
                               print_macro_elasticity
 USE lattices,       ONLY : crystal_parameters
-USE control_thermo, ONLY : ltherm_dos, ltherm_freq
+USE control_thermo, ONLY : ltherm_dos, ltherm_freq, lgeo_from_file
 USE anharmonic,     ONLY : el_con_geo_t
 USE ph_freq_anharmonic,     ONLY : el_conf_geo_t
 USE anharmonic_ptt,  ONLY : celldm_ptt, el_cons_ptt, el_comp_ptt, b0_ec_ptt, &
@@ -574,6 +605,7 @@ IMPLICIT NONE
 CHARACTER(LEN=256) :: filelastic
 INTEGER :: igeo, ibrav, nvar, ndata, jdata
 REAL(DP), ALLOCATABLE :: x(:,:), f(:), xfit(:), x1(:,:)
+REAL(DP) :: compute_omega_geo
 TYPE(poly1) :: ec_p1
 TYPE(poly2) :: ec_p2
 TYPE(poly3) :: ec_p3
@@ -601,9 +633,15 @@ ALLOCATE(xfit(nvar))
 CALL divide(world_comm, npress, startp, lastp)
 
 IF (lmurn) THEN
-   DO idata=1,ndata
-      x(1,idata)=celldm_geo(1,idata)
-   ENDDO
+   IF (lgeo_from_file) THEN
+      DO idata=1,ndata
+         x(1,idata)=omega_geo(idata)
+      ENDDO
+   ELSE
+      DO idata=1,ndata
+         x(1,idata)=celldm_geo(1,idata)
+      ENDDO
+   ENDIF
 ELSE
    CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
 ENDIF
@@ -629,8 +667,14 @@ DO itempp=1,ntemp_plot
    itemp=itemp_plot(itempp)
    IF (ltherm_dos) THEN
       DO ipress=startp,lastp
+         IF (ipress==1.OR.ipress==npress) CYCLE
          IF (el_cons_qha_geo_available) THEN
-            CALL compress_celldm(celldm_ptt(:,ipress,itempp),xfit,nvar,ibrav)
+            IF (lgeo_from_file) THEN
+               xfit(1)=compute_omega_geo(ibrav, celldm_ptt(:,ipress,itempp))
+            ELSE
+               CALL compress_celldm(celldm_ptt(:,ipress,itempp),xfit,&
+                                                                 nvar,ibrav)
+            ENDIF
             f=0.0_DP
             DO i=1,6
                DO j=1,6
@@ -704,8 +748,14 @@ DO itempp=1,ntemp_plot
 
    IF (ltherm_freq) THEN
       DO ipress=startp,lastp
+         IF (ipress==1.OR.ipress==npress) CYCLE
          IF (el_consf_qha_geo_available) THEN
-            CALL compress_celldm(celldmf_ptt(:,ipress,itempp),xfit,nvar,ibrav)
+            IF (lgeo_from_file) THEN
+               xfit(1)=compute_omega_geo(ibrav, celldmf_ptt(:,ipress,itempp))
+            ELSE
+               CALL compress_celldm(celldmf_ptt(:,ipress,itempp),xfit,&
+                                                                  nvar,ibrav)
+            ENDIF
             f=0.0_DP
             DO i=1,6
                DO j=1,6

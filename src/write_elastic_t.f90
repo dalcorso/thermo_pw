@@ -15,7 +15,7 @@ SUBROUTINE write_elastic_t( )
 !
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : stdout
-USE thermo_mod, ONLY : ibrav_geo, celldm_geo
+USE thermo_mod, ONLY : ibrav_geo, celldm_geo, omega_geo
 USE thermo_sym, ONLY : laue
 USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
 
@@ -27,7 +27,7 @@ USE quartic_surfaces, ONLY : fit_multi_quartic
 USE elastic_constants, ONLY : write_el_cons_on_file
 USE control_elastic_constants, ONLY : el_con_geo, lelastic, lelasticf
 USE lattices,       ONLY : crystal_parameters
-USE control_thermo, ONLY : ltherm_dos, ltherm_freq
+USE control_thermo, ONLY : ltherm_dos, ltherm_freq, lgeo_from_file
 USE control_mur,    ONLY : lmurn
 USE control_macro_elasticity, ONLY: macro_el
 USE anharmonic,     ONLY : celldm_t, el_cons_t, el_comp_t, b0_t
@@ -71,9 +71,15 @@ ENDDO
 !  Part 1 evaluation of the polynomial coefficients
 !
 IF (lmurn) THEN
-   DO idata=1,ndata
-      x(1,idata)=celldm_geo(1,idata)
-   ENDDO
+   IF (lgeo_from_file) THEN
+      DO idata=1,ndata
+         x(1,idata)=omega_geo(idata)
+      ENDDO
+   ELSE
+      DO idata=1,ndata
+         x(1,idata)=celldm_geo(1,idata)
+      ENDDO
+   ENDIF
 ELSE
    CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
 ENDIF
@@ -178,7 +184,7 @@ USE elastic_constants,  ONLY : write_el_cons_on_file, write_macro_el_on_file, &
 USE control_elastic_constants, ONLY : el_con_geo, lelastic_p, &
                                el_cons_geo_available
 USE lattices,           ONLY : crystal_parameters
-USE control_thermo,     ONLY : ltherm_dos, ltherm_freq
+USE control_thermo,     ONLY : ltherm_dos, ltherm_freq, lgeo_from_file
 USE control_macro_elasticity, ONLY: macro_el
 USE polynomial,         ONLY : poly1, poly2, poly3, poly4, init_poly, &
                                clean_poly
@@ -402,7 +408,7 @@ SUBROUTINE write_elastic_pt( )
 !
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : stdout
-USE thermo_mod, ONLY : ibrav_geo, celldm_geo
+USE thermo_mod, ONLY : ibrav_geo, celldm_geo, omega_geo
 USE thermo_sym, ONLY : laue
 USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
 
@@ -416,7 +422,7 @@ USE control_elastic_constants, ONLY : el_con_geo, lelastic_pt, lelasticf_pt
 USE lattices,       ONLY : crystal_parameters
 USE control_mur,    ONLY : lmurn
 USE control_pressure, ONLY : npress_plot, ipress_plot, press
-USE control_thermo, ONLY : ltherm_dos, ltherm_freq
+USE control_thermo, ONLY : ltherm_dos, ltherm_freq, lgeo_from_file
 USE anharmonic_pt,     ONLY : celldm_pt, el_cons_pt, el_comp_pt, b0_pt
 USE ph_freq_anharmonic_pt,     ONLY : celldmf_pt, el_consf_pt, &
                                       el_compf_pt, b0f_pt
@@ -463,9 +469,15 @@ ENDDO
 !  Part 1 evaluation of the polynomial coefficients
 !
 IF (lmurn) THEN
-   DO idata=1, ndata
-      x(1,idata)=celldm_geo(1,idata)
-   ENDDO
+   IF (lgeo_from_file) THEN
+      DO idata=1, ndata
+         x(1,idata)=omega_geo(idata)
+      ENDDO
+   ELSE
+      DO idata=1, ndata
+         x(1,idata)=celldm_geo(1,idata)
+      ENDDO
+   ENDIF
 ELSE
    CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
 ENDIF
@@ -563,7 +575,7 @@ SUBROUTINE write_elastic_ptt( )
 !
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : stdout
-USE thermo_mod, ONLY : ibrav_geo, celldm_geo
+USE thermo_mod, ONLY : ibrav_geo, celldm_geo, omega_geo
 USE thermo_sym, ONLY : laue
 USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
 
@@ -577,7 +589,7 @@ USE control_elastic_constants, ONLY : el_con_geo, lelastic_ptt, lelasticf_ptt
 USE lattices,       ONLY : crystal_parameters
 USE temperature,    ONLY : ntemp_plot, itemp_plot
 USE control_pressure,  ONLY : npress, press
-USE control_thermo,    ONLY : ltherm_dos, ltherm_freq
+USE control_thermo,    ONLY : ltherm_dos, ltherm_freq, lgeo_from_file
 USE anharmonic_ptt,    ONLY : celldm_ptt, el_cons_ptt, el_comp_ptt, b0_ptt, &
                                macro_el_ptt
 USE ph_freq_anharmonic_ptt,  ONLY : celldmf_ptt, el_consf_ptt, el_compf_ptt, &
@@ -626,9 +638,15 @@ ENDDO
 !  Part 1 evaluation of the polynomial coefficients
 !
 IF (lmurn) THEN
-   DO idata=1, ndata
-      x(1,idata)=celldm_geo(1,idata)
-   ENDDO
+   IF (lgeo_from_file) THEN
+      DO idata=1, ndata
+         x(1,idata)=omega_geo(idata)
+      ENDDO
+   ELSE
+      DO idata=1, ndata
+         x(1,idata)=celldm_geo(1,idata)
+      ENDDO
+   ENDIF
 ELSE
    CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
 ENDIF

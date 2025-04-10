@@ -21,6 +21,7 @@ USE temperature,        ONLY : ntemp
 USE elastic_constants,  ONLY : print_macro_elasticity, &
                               compute_elastic_compliances, el_con
 USE control_elastic_constants, ONLY : el_con_geo
+USE control_thermo,     ONLY : lgeo_from_file
 USE linear_surfaces,    ONLY : evaluate_fit_linear
 USE quadratic_surfaces, ONLY : evaluate_fit_quadratic
 USE cubic_surfaces,     ONLY : evaluate_fit_cubic
@@ -35,6 +36,7 @@ INTEGER :: ibrav, nvar
 INTEGER :: poly_degree_elc
 REAL(DP) :: celldm_t(6, ntemp), el_cons_t(6,6,ntemp), el_comp_t(6,6,ntemp), &
             b0_t(ntemp)
+REAL(DP) :: compute_omega_geo
 TYPE(poly1) :: ec_p1(6,6)
 TYPE(poly2) :: ec_p2(6,6)
 TYPE(poly3) :: ec_p3(6,6)
@@ -51,7 +53,12 @@ el_cons_t=0.0_DP
 el_comp_t=0.0_DP
 b0_t=0.0_DP
 DO itemp=startt,lastt
-   CALL compress_celldm(celldm_t(:,itemp),xfit,nvar,ibrav)
+   IF (itemp==1.OR.itemp==ntemp) CYCLE
+   IF (lgeo_from_file) THEN
+      xfit(1)=compute_omega_geo(ibrav, celldm_t(:,itemp))
+   ELSE
+      CALL compress_celldm(celldm_t(:,itemp),xfit,nvar,ibrav)
+   ENDIF
    DO i=1,6
       DO j=1,6
          IF (el_con_geo(i,j,1)>0.1_DP) THEN
@@ -104,6 +111,7 @@ USE linear_surfaces,    ONLY : evaluate_fit_linear
 USE quadratic_surfaces, ONLY : evaluate_fit_quadratic
 USE cubic_surfaces,     ONLY : evaluate_fit_cubic
 USE quartic_surfaces,   ONLY : evaluate_fit_quartic
+USE control_thermo,     ONLY : lgeo_from_file
 USE lattices,           ONLY : compress_celldm
 USE polynomial,         ONLY : poly1, poly2, poly3, poly4
 USE mp_world,           ONLY : world_comm
@@ -114,6 +122,7 @@ INTEGER :: ibrav, nvar
 INTEGER :: poly_degree_elc
 REAL(DP) :: celldm_p(6, npress), el_cons_p(6,6,npress), &
             el_comp_p(6,6,npress), macro_el_p(8,npress)
+REAL(DP) :: compute_omega_geo
 TYPE(poly1) :: ec_p1(6,6)
 TYPE(poly2) :: ec_p2(6,6)
 TYPE(poly3) :: ec_p3(6,6)
@@ -130,7 +139,12 @@ el_cons_p=0.0_DP
 el_comp_p=0.0_DP
 macro_el_p=0.0_DP
 DO ipress=startp,lastp
-   CALL compress_celldm(celldm_p(:,ipress),xfit,nvar,ibrav)
+   IF (ipress==1.OR.ipress==npress) CYCLE
+   IF (lgeo_from_file) THEN
+      xfit(1)=compute_omega_geo(ibrav, celldm_p(:,ipress))
+   ELSE
+      CALL compress_celldm(celldm_p(:,ipress),xfit,nvar,ibrav)
+   ENDIF
    DO i=1,6
       DO j=1,6
          IF (el_con_geo(i,j,1)>0.1_DP) THEN

@@ -10,15 +10,24 @@ SUBROUTINE manage_anhar()
 !---------------------------------------------------------------------
 
 USE kinds,                 ONLY : DP
-USE temperature,           ONLY : ntemp
+USE temperature,           ONLY : ntemp, temp, ntemp_plot, itemp_plot
 USE thermo_mod,            ONLY : tot_ngeo
-USE control_thermo,        ONLY : ltherm_dos, ltherm_freq, ltherm_glob
+USE control_thermo,        ONLY : ltherm_dos, ltherm_freq, ltherm_glob, &
+                                  lgeo_from_file
+USE control_pressure,      ONLY : npress_plot, press, npress, ipress_plot 
 USE control_elastic_constants, ONLY : el_cons_qha_available, &
                                   el_consf_qha_available
+USE initial_conf,          ONLY : ibrav_save
 USE control_eldos,         ONLY : lel_free_energy, hot_electrons
 USE control_emp_free_ener, ONLY : add_empirical, emp_ener, emp_free_ener, &
                                   emp_entr, emp_ce
 USE temperature,           ONLY : temp, ntemp, ntemp_plot, itemp_plot
+USE anharmonic,            ONLY : alpha_anis_t, celldm_t
+USE anharmonic_pt,         ONLY : alpha_anis_pt, celldm_pt
+USE anharmonic_ptt,        ONLY : alpha_anis_ptt, celldm_ptt
+USE ph_freq_anharmonic,    ONLY : alphaf_anis_t, celldmf_t
+USE ph_freq_anharmonic_pt, ONLY : alphaf_anis_pt, celldmf_pt
+USE ph_freq_anharmonic_ptt,ONLY : alphaf_anis_ptt, celldmf_ptt
 USE internal_files_names,  ONLY : flfrq_thermo, flvec_thermo
 USE el_thermodynamics,     ONLY : el_ener, el_free_ener, el_entr, el_ce
 USE data_files,            ONLY : flanhar, fleltherm
@@ -27,10 +36,12 @@ USE io_global,             ONLY : stdout
 
 IMPLICIT NONE
 
-INTEGER :: itemp, igeom
+INTEGER :: itemp, itempp, ipressp, ipress, igeom, ierr
 CHARACTER(LEN=256) :: filedata, filerap, fileout, gnu_filename, filenameps, &
-                      filepbs
+                      filepbs, filename
 LOGICAL :: all_geometry_done, all_el_free, ldummy
+
+REAL(DP), ALLOCATABLE :: temp_(:), press_(:)
 
 CALL check_all_geometries_done(all_geometry_done)
 IF (.NOT.all_geometry_done) RETURN
@@ -315,6 +326,139 @@ IF (.NOT.(el_cons_qha_available.OR.el_consf_qha_available)) &
 !  computes the elastic constants as a function of temperature interpolating 
 !  at the crystal parameters found in the quadratic/quartic fit
 !
+
+IF (lgeo_from_file) THEN
+   IF (ltherm_dos) THEN
+      filename='anhar_files/'//TRIM(flanhar)//'.celldm'
+      CALL add_pressure(filename)
+      WRITE(stdout,'(5x,"Reading thermal expansion tensor from file",a)') &
+                      TRIM(filename)
+      ALLOCATE(temp_(ntemp))
+      CALL read_alpha_anis_lmurn(ibrav_save, celldm_t, alpha_anis_t, temp_, &
+                                  ntemp, filename, ierr)
+      IF (ierr==0) THEN
+         DO itemp=1, ntemp-1
+            IF (ABS(temp_(itemp)-temp(itemp))>0.001_DP) &
+               CALL errore('write_anhar_anis','problem with temperature',1)
+         ENDDO
+      ELSE
+         CALL errore('manage_anhar',&
+                         'lgeo_from_file but celldm files not found',1)
+      ENDIF
+! 
+! Here for curves at constant pressure as a function of temperature 
+! 
+      ierr=0
+      DO ipressp=1, npress_plot
+         IF (ierr/=0) CYCLE
+         ipress=ipress_plot(ipressp)
+         filename='anhar_files/'//TRIM(flanhar)//'.celldm_press'
+         CALL add_value(filename,press(ipress))
+         CALL read_alpha_anis_lmurn(ibrav_save, celldm_pt(:,:,ipressp), &
+                   alpha_anis_pt(:,:,ipressp), temp_, ntemp, filename, ierr)
+         IF (ierr==0) THEN
+            DO itemp=1, ntemp-1
+               IF (ABS(temp_(itemp)-temp(itemp))>0.001_DP) &
+                  CALL errore('write_anhar_anis','problem with temperature',1)
+            ENDDO
+         ELSE
+            CALL errore('manage_anhar',&
+                         'lgeo_from_file but celldm_pt files not found',1)
+         ENDIF
+      ENDDO
+      DEALLOCATE(temp_)
+! 
+! Here for curves at constant temperature as a function of pressure
+!
+      ALLOCATE(press_(npress))
+      ierr=0
+      DO itempp=1, ntemp_plot
+         IF (ierr/=0) CYCLE
+         itemp=itemp_plot(itempp)
+         filename='anhar_files/'//TRIM(flanhar)//'.celldm_temp'
+         CALL add_value(filename,temp(itemp))
+         CALL read_alpha_anis_lmurn(ibrav_save, celldm_ptt(:,:,itempp), &
+                   alpha_anis_ptt(:,:,itempp), press_, npress, filename, ierr)
+
+         IF (ierr==0) THEN
+            DO ipress=1, npress-1
+               IF (ABS(press_(ipress)-press(ipress))>0.001_DP) &
+                  CALL errore('read_anhar_anis_ptt','problem with pressure',1)
+            ENDDO
+         ELSE
+            CALL errore('manage_anhar',&
+                         'lgeo_from_file but celldm_ptt files not found',1)
+         ENDIF
+      ENDDO
+      DEALLOCATE(press_)
+   ENDIF
+
+   IF (ltherm_freq) THEN
+      filename='anhar_files/'//TRIM(flanhar)//'.celldm_ph'
+      CALL add_pressure(filename)
+      WRITE(stdout,'(5x,"Reading thermal expansion tensor from file",a)') &
+                      TRIM(filename)
+      ALLOCATE(temp_(ntemp))
+      CALL read_alpha_anis_lmurn(ibrav_save, celldmf_t, alphaf_anis_t, temp_, &
+                                  ntemp, filename, ierr)
+      IF (ierr==0) THEN
+         DO itemp=1, ntemp-1
+            IF (ABS(temp_(itemp)-temp(itemp))>0.001_DP) &
+               CALL errore('write_anhar_anis','problem with temperature',1)
+         ENDDO
+      ELSE
+         CALL errore('manage_anhar',&
+                         'lgeo_from_file but celldmf files not found',1)
+      ENDIF
+! 
+! Here for curves at constant pressure as a function of temperature 
+! 
+      ierr=0
+      DO ipressp=1, npress_plot
+         IF (ierr/=0) CYCLE
+         ipress=ipress_plot(ipressp)
+         filename='anhar_files/'//TRIM(flanhar)//'.celldm_ph_press'
+         CALL add_value(filename,press(ipress))
+         CALL read_alpha_anis_lmurn(ibrav_save, celldmf_pt(:,:,ipressp), &
+                   alphaf_anis_pt(:,:,ipressp), temp_, ntemp, filename, ierr)
+         IF (ierr==0) THEN
+            DO itemp=1, ntemp-1
+               IF (ABS(temp_(itemp)-temp(itemp))>0.001_DP) &
+                  CALL errore('write_anhar_anis','problem with temperature',1)
+            ENDDO
+         ELSE
+            CALL errore('manage_anhar',&
+                         'lgeo_from_file but celldm_ph_pt files not found',1)
+         ENDIF
+      ENDDO
+      DEALLOCATE(temp_)
+! 
+! Here for curves at constant temperature as a function of pressure
+!
+      ALLOCATE(press_(npress))
+      ierr=0
+      DO itempp=1, ntemp_plot
+         IF (ierr/=0) CYCLE
+         itemp=itemp_plot(itempp)
+         filename='anhar_files/'//TRIM(flanhar)//'.celldm_ph_temp'
+         CALL add_value(filename,temp(itemp))
+         CALL read_alpha_anis_lmurn(ibrav_save, celldmf_ptt(:,:,itempp), &
+                   alphaf_anis_ptt(:,:,itempp), press_, npress, filename, ierr)
+
+         IF (ierr==0) THEN
+            DO ipress=1, npress-1
+               IF (ABS(press_(ipress)-press(ipress))>0.001_DP) &
+                  CALL errore('read_anhar_anis_ptt','problem with pressure',1)
+            ENDDO
+         ELSE
+            CALL errore('manage_anhar',&
+                         'lgeo_from_file but celldm_ph_ptt files not found',1)
+         ENDIF
+      ENDDO
+      DEALLOCATE(press_)
+   ENDIF
+ENDIF
+
 CALL set_elastic_constants_t()
 
 IF (ltherm_dos) THEN
@@ -356,6 +500,7 @@ CALL write_grun_anharmonic()
 !   now plot all the computed quantities
 !
 CALL manage_plot_anhar()
+IF (lgeo_from_file) CALL manage_plot_anhar_anis()
 
 CALL manage_plot_elastic()
 !
