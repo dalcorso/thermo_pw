@@ -32,7 +32,7 @@ CONTAINS
    INTEGER, INTENT(INOUT) :: ityp(nat)
    INTEGER, INTENT(OUT) :: ntyp
 
-   CHARACTER(LEN=3), INTENT(INOUT) :: atm(ntypx)
+   CHARACTER(LEN=*), INTENT(INOUT) :: atm(ntypx)
 
    INTEGER :: na, nb, nt
    LOGICAL :: found

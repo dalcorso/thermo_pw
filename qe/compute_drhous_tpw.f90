@@ -15,7 +15,7 @@ SUBROUTINE compute_drhous_tpw (drhous, dbecsum, wgg, becq, alpq)
   !
   
   USE kinds,      ONLY : DP
-  USE ions_base,  ONLY : nat, ityp, atm
+  USE ions_base,  ONLY : nat, ityp
   USE wavefunctions,  ONLY: evc
   USE buffers,    ONLY : get_buffer
   USE uspp,       ONLY : okvan, nkb, vkb

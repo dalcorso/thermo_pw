@@ -25,3 +25,6 @@ bfgs_module.f90  If the bfgs routine exceedes the maximum number of
 
 beta_mod.f90 we deallocate tab_beta only if it has been allocated.
              Moreover we need to use tab_beta so we made it PUBLIC.
+
+io_dyn_mat.f90 The length of the atm vector became 6, but this routine was
+             not changed

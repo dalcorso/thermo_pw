@@ -69,7 +69,7 @@ SUBROUTINE q2r_sub(fildyn)
   !     dimensions of the FFT grid formed by the q-point grid
   !
   CHARACTER(len=256) :: fildyn, filin, filefrc
-  CHARACTER(len=3)   :: atm(ntypx)
+  CHARACTER(len=6)   :: atm(ntypx)
   CHARACTER(LEN=6), EXTERNAL :: int_to_char
   !
   LOGICAL :: lq, lrigid, lrigid1
@@ -625,7 +625,7 @@ REAL(DP),    INTENT(IN) :: zeu_(3,3,nat_), m_loc_(3,nat_), epsil_(3,3), &
                            at_(3,3), bg_(3,3), omega_, tau_(3,nat_),    &
                            celldm_(6), amass_(ntyp_)
 LOGICAL,     INTENT(IN) :: has_zstar_
-CHARACTER(LEN=3), INTENT(IN) :: atm_(ntyp_)
+CHARACTER(LEN=*), INTENT(IN) :: atm_(ntyp_)
 INTEGER :: i,j,k,ijk
 
 ALLOCATE (frc(nr1,nr2,nr3,3,3,nat_,nat_))

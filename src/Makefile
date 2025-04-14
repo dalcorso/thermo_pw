@@ -216,6 +216,8 @@ libthermo_pw.a : $(THERMOOBJS)
 clean :
 	- /bin/rm -f *.x *.o *.a *~ *_tmp.f90 *.d *.mod *.i *.L
 	- /bin/rm -rf ../../bin/thermo_pw.x 
+
+veryclean : clean
 	- /bin/rm -f ./make.depend
 
 include make.depend

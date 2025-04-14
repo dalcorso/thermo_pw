@@ -192,6 +192,8 @@ clean :
 	- /bin/rm -rf ../../bin/merge_interp.x 
 	- /bin/rm -rf ../../bin/density.x 
 	- /bin/rm -rf ../../bin/template.x 
+
+veryclean : clean
 	- /bin/rm -f  ./make.depend
 
 include make.depend

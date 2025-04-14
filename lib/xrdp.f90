@@ -120,7 +120,7 @@ INTEGER, INTENT(IN) :: ityp(nat)
 REAL(DP), INTENT(IN) :: tau(3,nat)
 REAL(DP), INTENT(IN)   :: at(3,3), bg(3,3), alat, lambda
 LOGICAL, INTENT(IN) :: lcm
-CHARACTER(LEN=3), INTENT(IN) :: atm(ntyp)
+CHARACTER(LEN=*), INTENT(IN) :: atm(ntyp)
 CHARACTER(LEN=*), INTENT(IN) :: in_filename
 
 INTEGER                :: nx1, nx2, nx3
@@ -355,8 +355,6 @@ END SELECT
 RETURN
 END SUBROUTINE select_lambda
 
-
-
 !-----------------------------------------------------------------------
 SUBROUTINE cromermann_form_factor(element, s, ff)
 !-----------------------------------------------------------------------
@@ -404,7 +402,7 @@ par_a_cm=0.0_DP
 par_b_cm=0.0_DP
 par_c_cm=0.0_DP
 
-SELECT CASE (element)
+SELECT CASE (TRIM(element))
    CASE ('Ac')
       par_a_cm(1)=35.6597_DP   
       par_a_cm(2)=23.1032_DP   
@@ -1430,7 +1428,7 @@ par_ff_z=0.0_DP
 par_ff_a=0.0_DP
 par_ff_b=0.0_DP
 
-SELECT CASE (element) 
+SELECT CASE (TRIM(element)) 
 
    CASE ('Ac') 
       par_ff_z=89.0_DP

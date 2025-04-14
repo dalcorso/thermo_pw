@@ -26,7 +26,7 @@ SUBROUTINE read_dyn_from_file_tpw( nqs, xq, epsil, lrigid, &
   INTEGER :: nqs, ntyp, nat, ibrav, ifile
   REAL(DP) :: epsil(3,3)
   REAL(DP) :: xq(3,48), celldm(6), at(3,3), amass(ntyp)
-  CHARACTER(LEN=3) atm(ntyp)
+  CHARACTER(LEN=*) atm(ntyp)
   ! local variables
   INTEGER :: ntyp1,nat1,ibrav1,ityp1
   INTEGER :: i, j, na, nb, nt, ios

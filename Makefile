@@ -52,6 +52,8 @@ join_qe:
           ./QESUB/bfgs_module.f90_qe ; mv ./QESUB/bfgs_module.f90 ../Modules ; fi
 	if test -f ./QESUB/clocks_handler.f90 ; then mv ../UtilXlib/clocks_handler.f90 \
           ./QESUB/clocks_handler.f90_qe ; mv ./QESUB/clocks_handler.f90 ../UtilXlib ; fi
+	if test -f ./QESUB/io_dyn_mat.f90 ; then mv ../PHonon/PH/io_dyn_mat.f90 \
+          ./QESUB/io_dyn_mat.f90_qe ; mv ./QESUB/io_dyn_mat.f90 ../PHonon/PH ; fi
 leave_qe:
 	if test -f ./Makefile_qe ; then mv ../Makefile ./main_Makefile ; \
            mv ./Makefile_qe ../Makefile ; fi
@@ -89,9 +91,14 @@ leave_qe:
            mv ./QESUB/bfgs_module.f90_qe ../Modules/bfgs_module.f90 ; fi
 	if test -f ./QESUB/clocks_handler.f90_qe ; then mv ../UtilXlib/clocks_handler.f90 \
            ./QESUB/clocks_handler.f90 ; \
-	   mv ./QESUB/clocks_handler.f90_qe ../UtilXlib/clocks_handler.f90 ; fi
+	mv ./QESUB/clocks_handler.f90_qe ../UtilXlib/clocks_handler.f90 ; fi
+	if test -f ./QESUB/io_dyn_mat.f90_qe ; then mv ../PHonon/PH/io_dyn_mat.f90 \
+           ./QESUB/io_dyn_mat.f90 ; \
+	   mv ./QESUB/io_dyn_mat.f90_qe ../PHonon/PH/io_dyn_mat.f90 ; fi
 
 clean: thermo_tools_clean thermo_pw_clean thermo_lib_clean thermo_lapack_clean thermo_fft_clean thermo_qe_clean examples_clean examples_qe_clean space_groups_clean doc_clean
+
+veryclean : thermo_pw_veryclean thermo_lib_veryclean thermo_qe_veryclean thermo_tools_veryclean
 
 thermo_pw_clean:
 	( cd src ; $(MAKE) clean )
@@ -129,6 +136,18 @@ doc_clean:
 doc:
 	if test -d Doc ; then \
 	( cd Doc ; $(MAKE) all || exit 1 ) ; fi
+
+thermo_pw_veryclean:
+	( cd src ; $(MAKE) veryclean )
+
+thermo_tools_veryclean:
+	( cd tools ; $(MAKE) veryclean )
+
+thermo_lib_veryclean:
+	( cd lib ; $(MAKE) veryclean )
+
+thermo_qe_veryclean:
+	( cd qe ; $(MAKE) veryclean )
 
 
 distclean: clean 
