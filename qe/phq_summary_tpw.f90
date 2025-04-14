@@ -10,12 +10,10 @@
 subroutine phq_summary_tpw
   !-----------------------------------------------------------------------
   !
-  !    This routine writes on output the quantities which have been read
-  !    from the punch file, and the quantities computed in the phq_setup
-  !    file.
-  !
-  !    if iverbosity = 0 only a partial summary is done.
-  !
+  !! This routine writes on output the quantities which have been read
+  !! from the punch file, and the quantities computed in the 
+  !! \(\texttt{phq_setup}\) file.  
+  !! If \(\text{iverbosity}=0\) only a partial summary is done.
   !
   USE kinds,         ONLY : DP
   USE ions_base,     ONLY : nat, ityp, atm, tau, ntyp => nsp, amass
@@ -27,7 +25,7 @@ subroutine phq_summary_tpw
   USE gvecs,         ONLY : doublegrid, dual, gcutms, ngms
   USE fft_base,      ONLY : dffts
   USE symm_base,     ONLY : s, sr, ft, sname, t_rev
-  USE noncollin_module, ONLY : noncolin, lspinorb, domag
+  USE noncollin_module, ONLY : noncolin, domag, lspinorb
   USE funct,         ONLY : write_dft_name
   USE run_info,      ONLY : title
   USE gamma_gamma,   ONLY : with_symmetry, nasr
@@ -58,6 +56,7 @@ subroutine phq_summary_tpw
   ! counter on polarizations
   ! counter on polarizations
   ! counter on atoms
+  ! counter on atomic types
   ! counter on symmetries
   ! counter on symmetries
   ! counter on symmetries

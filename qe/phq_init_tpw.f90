@@ -33,45 +33,38 @@ SUBROUTINE phq_init_tpw()
   USE cell_base,            ONLY : bg, tpiba
   USE ions_base,            ONLY : nat, ityp, tau
   USE becmod,               ONLY : calbec, becp, becupdate, bec_type, &
-                                   allocate_bec_type_acc, &
-                                   deallocate_bec_type_acc 
+                                   allocate_bec_type_acc, deallocate_bec_type_acc
+  USE control_flags,        ONLY : offload_type
   USE constants,            ONLY : eps8, tpi
-  USE gvect,                ONLY : g, ngm
+  USE gvect,                ONLY : g
   USE klist,                ONLY : xk, ngk, igk_k
   USE lsda_mod,             ONLY : lsda, current_spin, isk
   USE buffers,              ONLY : get_buffer
   USE io_global,            ONLY : stdout
-  USE atom,                 ONLY : msh, rgrid
-  USE vlocal,               ONLY : strf
   USE wvfct,                ONLY : npwx, nbnd
   USE gvecw,                ONLY : gcutw
-  USE control_flags,        ONLY : offload_type
   USE wavefunctions,        ONLY : evc
 #if defined(__CUDA)
   USE wavefunctions_gpum,   ONLY : evc_d
 #endif
   USE noncollin_module,     ONLY : noncolin, domag, npol, lspinorb
   USE uspp,                 ONLY : okvan, vkb, nlcc_any, nkb
-  USE uspp_param,           ONLY : upf
   USE phus,                 ONLY : alphap
   USE nlcc_ph,              ONLY : drc
   USE control_ph,           ONLY : trans, zue, zeu, epsil, all_done
   USE units_lr,             ONLY : lrwfc, iuwfc
   USE efield_mod,           ONLY : zstareu0, zstarue0
 
-  USE mp_bands,             ONLY : intra_bgrp_comm
   USE mp,                   ONLY : mp_sum
   USE acfdtest,             ONLY : acfdt_is_active, acfdt_num_der
   USE el_phon,              ONLY : elph_mat, iunwfcwann, npwq_refolded, &
                                    kpq,g_kpq,igqg,xk_gamma, lrwfcr
   USE wannier_gw,           ONLY : l_head
-  USE Coul_cut_2D,          ONLY : do_cutoff_2D     
-  USE Coul_cut_2D_ph,       ONLY : cutoff_lr_Vlocq , cutoff_fact_qg 
   USE lrus,                 ONLY : becp1, dpqq, dpqq_so
 
   USE qpoint,               ONLY : xq, nksq, eigqts, ikks, ikqs
   USE qpoint_aux,           ONLY : becpt, alphapt, ikmks
-  USE eqv,                  ONLY : vlocq, evq
+  USE eqv,                  ONLY : evq
   USE control_lr,           ONLY : nbnd_occ, lgamma
   USE ldaU,                 ONLY : lda_plus_u
   USE uspp_init,            ONLY : init_us_2
@@ -83,7 +76,7 @@ SUBROUTINE phq_init_tpw()
   !
   ! ... local variables
   !
-  INTEGER :: nt, ik, ikq, ipol, ibnd, ikk, na, ig, irr, imode0
+  INTEGER :: nt, ik, ikq, ipol, ibnd, ikk, na, ig, irr, imode0, itmp
     ! counter on atom types
     ! counter on k points
     ! counter on k+q points
@@ -93,12 +86,11 @@ SUBROUTINE phq_init_tpw()
     ! counter on atoms
     ! counter on G vectors
   INTEGER :: ikqg         !for the case elph_mat=.true.
-  INTEGER :: npw, npwq, itmp, nsolv
+  INTEGER :: npw, npwq, nsolv
   REAL(DP) :: arg
     ! the argument of the phase
   COMPLEX(DP), ALLOCATABLE :: aux1(:,:), tevc(:,:)
     ! used to compute alphap
-  INTEGER :: icar, jcar
 #if defined(__CUDA)
   TYPE(bec_type) :: bectmp
     ! temporary buffer to work with offload of arrays of derived types
@@ -395,7 +387,7 @@ SUBROUTINE phq_init_tpw()
   !
   IF (trans.OR.zeu) CALL drho_tpw()
   !
-  ! Add to the effective charges the terms that do not depend of the 
+  ! Add to the effective charges the terms that do not depend on the 
   ! perturbed wavefunctions
   !
   CALL add_zstar_us_tpw()

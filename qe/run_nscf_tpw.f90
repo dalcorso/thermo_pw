@@ -144,7 +144,7 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   ENDIF
 !°°°°°°°°°°°°°°°°°END OF ACFDT TEST °°°°°°°°°°°°°°°°°°°°°°
 !
-  IF (do_band) CALL non_scf_tpw ( )
+  IF (do_band.AND..NOT.elph_mat) CALL non_scf_tpw ( )
 
 
   IF ( check_stop_now() ) THEN
