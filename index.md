@@ -2,7 +2,6 @@
 <code>Thermo_pw</code> is a Fortran driver designed for the parallel and/or automated computation of material properties. It leverages the powerful routines of Quantum ESPRESSO (QE) as its core engine. For common tasks, <code>thermo_pw</code> offers an alternative workflow organization compared to QE, utilizing asynchronous image parallelization where possible. Furthermore, the code includes pre-processing tools to streamline user input and post-processing tools to generate plots directly comparable with experimental data.
 
 <p align="justify">Get started with <code>thermo_pw</code>:</p>
-<br>
 Quick Introduction: <a href="https://dalcorso.github.io/thermo_pw/thermo_pw_help.html"> click here</a>
 <br>
 Brief Tutorial: <a href="https://people.sissa.it/dalcorso/thermo_pw/tutorial/tutorial.html"> click here</a>
@@ -205,27 +204,27 @@ and at the Quantum-ESPRESSO developers meeting 2018:
 The latest developments of the <code>thermo_pw</code> software can be
 followed <a href="https://github.com/dalcorso/thermo_pw/commits/master">here</a>.</p>
 
-<p align="justify">For problems to compile or run <code>thermo_pw</code> or if you think
-that you have found a bug, please check the quick-help page mentioned above, 
-apply all the patches and if your problem is not solved, post it to the
-<a href="mailto:thermo_pw-forum@lists.quantum-espresso.org">thermo_pw-forum mailing list</a> or e-mail me: <a href="mailto:dalcorso .at. sissa.it">dalcorso .at. sissa.it</a>. To subscribe to the <code>thermo_pw-forum</code> mailing list
-click <a href="https://lists.quantum-espresso.org/mailman/listinfo/thermo_pw-forum">here</a>.
+**Troubleshooting Thermo_pw:
+
+<p align="justify">If you encounter issues compiling or running <code>thermo_pw</code>, or suspect you've found a bug, please follow these steps:</p>
+
+Consult the Quick-Help Page: Refer to the quick-help <a href="https://dalcorso.github.io/thermo_pw/thermo_pw_help.html"> page</a> for potential solutions.
 <br>
-Please do not send me questions about the input of <code>pw.x</code>.
+Apply Patches: Ensure you have applied all available patches to the software.
 <br>
-Errors such as: 
-<br>
-1. tmp_dir cannot be opened
-<br>
-2. error in namelist 
-<br>
-are exactly what the error message says. Some possible solutions
-are indicated in the FAQ (25, 26) 
-<a href="https://dalcorso.github.io/thermo_pw/thermo_pw_help.html">here.</a>
-If these do not solve your problem I have no better answer. 
-You can also find help in the QE user guide, at the
-<code>users@lists.quantum-espresso.org</code> mailing list or search
-in the examples directories.</p>
+Seek Further Assistance: If the problem persists, please post details to the <a href="mailto:thermo_pw-forum@lists.quantum-espresso.org">thermo_pw-forum mailing list</a> or email me at <a href="mailto:dalcorso .at. sissa.it">dalcorso .at. sissa.it</a>. You can subscribe to the thermo_pw-forum mailing list by clicking <a href="https://lists.quantum-espresso.org/mailman/listinfo/thermo_pw-forum">here</a>.
+
+<p align="justify">Important Note: Please do not send me questions regarding the input format for <code>pw.x</code>.</p>
+
+<p align="justify">Errors such as:</p>
+
+    <code>tmp_dir cannot be opened</code>
+    <br>
+    <code>error in namelist</code>
+
+<p align="justify">are often self-explanatory. The error message itself usually indicates the problem. You can find potential solutions in the FAQ (questions 25 and 26) located <a href="https://dalcorso.github.io/thermo_pw/thermo_pw_help.html">here.</a>. If these suggestions do not resolve your issue, I am unlikely to have further specific guidance.
+
+For additional help, you can also consult the Quantum ESPRESSO user guide, post your question to the users mailing list at the <code>users@lists.quantum-espresso.org</code>, or search for similar issues in the examples directories.
 
 **Thermo_pw downloads**:
 <br>
