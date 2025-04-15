@@ -145,6 +145,13 @@ Ref.2 describes the GPU acceleration for the many\_k option.</p>
 
 <p align="justify">The following works contain some calculations made by <code>thermo_pw</code>:</p>
 <br>
+7. B. Thakur, X. Gong, and A. Dal Corso,
+Thermodynamic properties of fcc lead: A scalar and fully 
+relativistic first principle study,
+<a href="https://doi.org/10.1016/j.commatsci.2025.113677">
+Comp. Materials Science <b>249</b>, 113677 (2025)</a>. 
+<br>
+<br>
 6. C. Malica and A. Dal Corso,
 Finite-temperature atomic relaxations: Effect on the temperature-dependent C<sub>44</sub> elastic constants of Si and BAs,
 <a href="https://doi.org/10.1063/5.0093376">
