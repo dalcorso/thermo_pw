@@ -189,6 +189,7 @@ Hole mobility of strained GaN from first principles,
 <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.100.085204">
 Phys. Rev. B <B>100</B>, 085204 (2019)</a>.
 
+<br>
 See also the presentation given at the Quantum-ESPRESSO developers meeting 2017:
 <br>
 <br>
@@ -204,7 +205,7 @@ and at the Quantum-ESPRESSO developers meeting 2018:
 The latest developments of the <code>thermo_pw</code> software can be
 followed <a href="https://github.com/dalcorso/thermo_pw/commits/master">here</a>.</p>
 
-**Troubleshooting Thermo_pw:
+**Troubleshooting <code>thermo_pw</code>:
 
 <p align="justify">If you encounter issues compiling or running <code>thermo_pw</code>, or suspect you've found a bug, please follow these steps:</p>
 
@@ -222,9 +223,11 @@ Seek Further Assistance: If the problem persists, please post details to the <a 
     <br>
     <code>error in namelist</code>
 
-<p align="justify">are often self-explanatory. The error message itself usually indicates the problem. You can find potential solutions in the FAQ (questions 25 and 26) located <a href="https://dalcorso.github.io/thermo_pw/thermo_pw_help.html">here.</a>. If these suggestions do not resolve your issue, I am unlikely to have further specific guidance.
+<p align="justify">are often self-explanatory. The error message itself usually indicates the problem. You can find potential solutions in the FAQ (questions 25 and 26) located <a href="https://dalcorso.github.io/thermo_pw/thermo_pw_help.html">here.</a> If these suggestions do not resolve your issue, I am unlikely to have further specific guidance.</p>
 
-For additional help, you can also consult the Quantum ESPRESSO user guide, post your question to the users mailing list at the <code>users@lists.quantum-espresso.org</code>, or search for similar issues in the examples directories.
+<p aling="justify"> For additional help, you can also consult the Quantum ESPRESSO user guide, post your question to the users mailing list at the <code>users@lists.quantum-espresso.org</code>, or search for similar issues in the examples directories.</p>
+
+<br>
 
 **Thermo_pw downloads**:
 <br>
