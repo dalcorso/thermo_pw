@@ -1,5 +1,11 @@
-New in version 2.0.1
+15/4/2025 Version 2.0.1 is now frozen.
 
+This version is very similar to thermo_pw 2.0.0 but it is
+compatible with Quantum ESPRESSO 7.3.1.
+
+Several bug fixes.
+
+Added some notes on the symmetrization in QE and TPW.
 
 24/09/2024 Version 2.0.0 is now frozen
 New in version 2.0.0
@@ -11,7 +17,6 @@ one dimensional internal parameter in the calculation of
 elastic constants (in collaboration with X. Gong)
 
 Faster version of the many_k option (in collaboration with X. Gong).
-
 
 14/02/2024 Version 1.9.1 is now frozen
 New in version 1.9.1
