@@ -230,6 +230,10 @@ in the examples directories.</p>
 **Thermo_pw downloads**:
 <br>
 <br>
+- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.2.0.1.tar.gz">
+thermo_pw.2.0.1.tar.gz</a>  (released 15-04-2025) compatible with QE-7.3.1.
+<br>
+<br>
 - <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.2.0.0.tar.gz">
 thermo_pw.2.0.0.tar.gz</a>  (released 24-09-2024) compatible with QE-7.3.
 <br>
