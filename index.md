@@ -1,18 +1,18 @@
-<p align="justify"> Thermo_pw is a Fortran driver for the parallel and/or automatic 
-computation of materials properties that uses Quantum ESPRESSO (QE) routines 
-as the underlying engine. For the most common tasks, it provides an alternative organization of the 
-QE work-flow exploiting, when possible, 
-an asynchronous image parallelization. Moreover, the code has a set of 
-pre-processing tools to reduce the input information given by the user 
-and a set of 
-post-processing tools to produce plots directly comparable with experiment.</p>
-<p align="justify"> A quick introduction to the <code>thermo_pw</code> code can be found 
-<a href="https://dalcorso.github.io/thermo_pw/thermo_pw_help.html">here</a>,
-a brief tutorial is available <a href="https://people.sissa.it/dalcorso/thermo_pw/tutorial/tutorial.html">here</a>,
-while the user's guide of <code>thermo_pw</code> version <code>2.0.0</code> 
-can be found <a href="https://people.sissa.it/dalcorso/thermo_pw/user_guide/index.html">here</a>.</p>
-<p align="justify"> Presently there is no reference work for citing <code>thermo_pw</code>. If you want to mention it in your work, you can put a reference to this web page.</p>
-<p align="justify">The following papers describe new
+<p align="justify"> 
+<code>Thermo_pw</code> is a Fortran driver designed for the parallel and/or automated computation of material properties. It leverages the powerful routines of Quantum ESPRESSO (QE) as its core engine. For common tasks, <code>thermo_pw</code> offers an alternative workflow organization compared to QE, utilizing asynchronous image parallelization where possible. Furthermore, the code includes pre-processing tools to streamline user input and post-processing tools to generate plots directly comparable with experimental data.
+
+<p align="justify">Get started with <code>thermo_pw</code>:</p>
+<br>
+Quick Introduction: <a href="https://dalcorso.github.io/thermo_pw/thermo_pw_help.html"> click here</a>
+<br>
+Brief Tutorial: <a href="https://people.sissa.it/dalcorso/thermo_pw/tutorial/tutorial.html"> click here</a>
+<br>
+User's Guide (Version 2.0.0):<a href="https://people.sissa.it/dalcorso/thermo_pw/user_guide/index.html"> click here</a>
+<br>
+
+<p align="justify">Currently, there is no dedicated publication for citing <code>thermo_pw</code>. If you wish to reference it in your work, please cite this webpage.</p>
+
+<p align="justify">The following publications describe new
 features implemented in <code>thermo_pw</code>:</p>
 
 19. X. Gong and A. Dal Corso,
