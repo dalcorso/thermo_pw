@@ -5,11 +5,11 @@ working version of the <a href="http://www.quantum-espresso.org/">Quantum
 ESPRESSO (QE)</a> package. <code>Thermo_pw</code> can be downloaded from its 
 <a href="http://dalcorso.github.io/thermo_pw/">main page</a> as 
 a <code>.tar.gz</code> file. The current production version is 
-<code>2.0.0</code> compatible with 
-<code>QE-7.3</code>. The <code>thermo_pw</code> file should be copied
+<code>2.0.1</code> compatible with 
+<code>QE-7.3.1</code>. The <code>thermo_pw</code> file should be copied
 in the main (QE) directory and unpacked with the command:</p>
 <p align="center">
-<code>tar -xzvf thermo_pw.2.0.0.tar.gz</code>
+<code>tar -xzvf thermo_pw.2.0.1.tar.gz</code>
 </p>
 <p align="justify">This command produces a directory called 
 <code>thermo_pw</code>. To compile the code you need a Fortran compiler, for 
@@ -51,13 +51,15 @@ The <code>git</code> version can be used only together with the version of <code
 <p align="justify"> Although <code>thermo_pw</code> has been 
 used for several years and can be considered reasonably stable, it remains an 
 experimental code given as it is.
-A version of <code>QE</code> older than <code>7.2</code>
+A version of <code>QE</code> older than <code>7.3.1</code>
 can still be used with <code>thermo_pw</code> matching carefully the
 versions of <code>thermo_pw</code> and of <code>QE</code> as explained in the
 main <code>thermo_pw</code> page.</p>
 
 <p align="justify"> Before using <code>thermo_pw</code>, please apply the 
 patches given below.</p>
+
+**Patches for thermo_pw.2.0.1**:
 
 **Patches for thermo_pw.2.0.0**:
 To compile with cmake copy in <code>thermo_pw/CMakeLists.txt</code> 

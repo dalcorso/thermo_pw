@@ -20,7 +20,8 @@ High-pressure and high-temperature thermoelasticity of tantalum:
 an ab-initio study,
 <a href="https://doi.org/10.1063/5.0258989">
 Jour. Chem. Phys. <b>162</b>, 124709 (2025).</a>
-
+<br>
+<br>
 18. X. Gong and A. Dal Corso,
 An alternative GPU acceleration for a pseudopotential plane-waves 
 density functional theory code with applications to metallic systems,
