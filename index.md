@@ -15,51 +15,65 @@ can be found <a href="https://people.sissa.it/dalcorso/thermo_pw/user_guide/inde
 <p align="justify">The following papers describe new
 features implemented in <code>thermo_pw</code>:</p>
 
+19. X. Gong and A. Dal Corso,
+High-pressure and high-temperature thermoelasticity of tantalum: 
+an ab-initio study,
+<a href="https://doi.org/10.1063/5.0258989">
+Jour. Chem. Phys. <b>162</b>, 124709 (2025).</a>
+
 18. X. Gong and A. Dal Corso,
 An alternative GPU acceleration for a pseudopotential plane-waves 
 density functional theory code with applications to metallic systems,
 <a href="https://arxiv.org/abs/2412.01695">
 Comp. Phys. Comm. <b>308</b>, 109439 (2025).</a>
-
+<br>
+<br>
 17. X. Gong and A. Dal Corso,
 High temperature and pressure thermoelasticity of hcp metals from 
 ab initio quasi-harmonic free energy calculations: the beryllium case
 <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.110.094109">
 Phys. Rev. B <b>110</b>, 094109 (2024).</a>
-
+<br>
+<br>
 16. X. Gong and A. Dal Corso,
 Ab-initio quasi-harmonic thermoelasticity of molybdenum at 
 high temperature and pressure,
 <a href="https://pubs.aip.org/aip/jcp/article/160/24/244703/3299207/Ab-initio-quasi-harmonic-thermoelasticity-of">
 Jour. Chem. Phys. <b>160</b>, 244703 (2024).</a>
-
+<br>
+<br>
 15. B. Thakur, X. Gong, and A. Dal Corso,
 Thermodynamic properties of Rhodium: A first principles study,
 <a href="https://doi.org/10.1063/5.0203098"> AIP Advances <b>14</b>, 
 045229 (2024).</a>
-
+<br>
+<br>
 14. X. Gong and A. Dal Corso,
 Pressure and temperature dependent ab-initio
 quasi-harmonic thermoelastic properties of tungsten,
 <a href="https://iopscience.iop.org/article/10.1088/1361-648X/ad3ac3">
 Jour. of Phys.: Condens. Matter <b>36</b>, 285702 (2024).</a>
-
+<br>
+<br>
 13. B. Thakur, X. Gong and A. Dal Corso,
 Ab initio thermodynamic properties of Iridium: A high-pressure and high-temperature study,
 <a href="https://doi.org/10.1016/j.commatsci.2024.112797">
 Comp. Materials Science <B>234</B>, 112797 (2024).</a>
-
+<br>
+<br>
 12. C. Malica and A. Dal Corso,
 Quasi-harmonic thermoelasticity of palladium, platinum, copper and gold
 from first principles,
 <a href="https://iopscience.iop.org/article/10.1088/1361-648X/ac2041">
 J. of Phys.: Condens. Matter <B>33</B>, 475901 (2021).</a>
-
+<br>
+<br>
 11. O. Motornyi, N. Vast, I. Timrov, O. Baseggio, S. Baroni, and A. Dal Corso,
 Electron energy loss spectroscopy of bulk gold with ultrasoft pseudopotentials and the Liouville-Lanczos method,
 <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.102.035156">
 Phys. Rev. B <B>102</B>, 035156 (2020).</a>
-
+<br>
+<br>
 10. C. Malica and A. Dal Corso,
 Quasi-harmonic temperature dependent elastic constants: Applications 
 to Silicon, Aluminum, and Silver,
@@ -120,14 +134,14 @@ Clean Ir(111) and Pt(111) electronic surface states: a first-principle fully rel
 <a href="http://www.sciencedirect.com/science/article/pii/S0039602815000734"> Surf. Sci. <B>637-638</B>, 106 (2015)</a>.
 <br>
 <br>
-<p>Refs.7,9 describe how <code>thermo_pw</code> computes temperature
-dependent elastic constants, Ref.2,3,5 pressure and temperature dependent
-elastic constants, Ref.17 elastic constants at T=0 K,
-Ref.18,14 surface band structures, Refs.8,13 eels and optical properties,
-Ref.10 DFPT with fully relativistic pseudopotentials, and Ref.15,16 
-thermodynamic anharmonic properties. Refs.2,3,4,5,6 have examples of 
+<p>Refs.8,10 describe how <code>thermo_pw</code> computes temperature
+dependent elastic constants, Ref.1,3,4,6 pressure and temperature dependent
+elastic constants, Ref.18 elastic constants at T=0 K,
+Ref.19,15 surface band structures, Refs.8,13 eels and optical properties,
+Ref.11 DFPT with fully relativistic pseudopotentials, and Ref.16,17 
+thermodynamic anharmonic properties. Refs.3,4,5,6,7 have examples of 
 pressure and temperature parameterized plots.
-Ref.1 describes the GPU acceleration for the many\_k option.</p>
+Ref.2 describes the GPU acceleration for the many\_k option.</p>
 
 <p align="justify">The following works contain some calculations made by <code>thermo_pw</code>:</p>
 <br>
