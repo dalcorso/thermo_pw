@@ -92,7 +92,7 @@ DO ikb=1,nkblocks
          IF ( nks > 1 .AND. lscf) THEN
             CALL get_buffer ( evck(1,nbnd*(ik1-1)+1), &
                   nwordwfc, iunwfc, ik )
-         ELSEIF (.NOT.lscf) THEN
+         ELSE
            !
            current_k = ik
            !
@@ -109,8 +109,6 @@ DO ikb=1,nkblocks
 
            evck(1:npwx*npol,nbnd*(ik1-1)+1:nbnd*ik1)=evc(1:npwx*npol,1:nbnd)
            !
-         ELSEIF (nks==1) THEN
-           evck(1:npwx*npol,nbnd*(ik1-1)+1:nbnd*ik1)=evc(1:npwx*npol,1:nbnd)
          ENDIF
       ENDDO
       evck_d=evck
