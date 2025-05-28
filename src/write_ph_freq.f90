@@ -290,15 +290,15 @@ ELSE
 !
    CALL MPI_SEND(ph_freq_data%nu, 3*nat*(lastq(mpime)-                    &
                             startq(mpime) + 1), MPI_DOUBLE_PRECISION, &
-                            meta_ionode_id, mpime, world_comm, istatus, ierr)
+                            meta_ionode_id, mpime, world_comm, ierr)
    CALL MPI_SEND(ph_freq_data%wg, (lastq(mpime)-                      &
                             startq(mpime) + 1), MPI_DOUBLE_PRECISION, &
                             meta_ionode_id, nproc+mpime, world_comm, &
-                                                               istatus, ierr)
+                                                               ierr)
    IF (with_eigen) &
       CALL MPI_SEND(ph_freq_data%displa, 2*3*nat*3*nat*               &
            (lastq(mpime)- startq(mpime) + 1), MPI_DOUBLE_PRECISION,   &
-            meta_ionode_id, 2*nproc+mpime, world_comm, istatus, ierr)
+            meta_ionode_id, 2*nproc+mpime, world_comm, ierr)
 ENDIF
 !
 !  meta_ionode saves the collected data on file and deallocate the buffer
