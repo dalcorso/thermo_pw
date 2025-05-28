@@ -17,7 +17,7 @@ USE uspp,             ONLY : okvan
 USE paw_variables,    ONLY : okpaw
 USE paw_onecenter,    ONLY : paw_dpotential
 USE lrus,             ONLY : int3, int3_paw, int3_nc
-USE nc_mag_aux,       ONLY : int3_save
+USE lr_nc_mag,        ONLY : int3_nc_save
 
 #if defined(__CUDA) 
 USE many_k_ph_mod,    ONLY : int3_d, int3_nc_d
@@ -41,11 +41,11 @@ IF (okpaw) CALL PAW_dpotential(dbecsum,rho%bec,int3_paw,npe)
 CALL newdq (dvscfin, npe)
 !
 !  In the noncollinear magnetic case computes the int3 coefficients with
-!  the opposite sign of the magnetic field. They are saved in int3_save,
+!  the opposite sign of the magnetic field. They are saved in int3_nc_save,
 !  that must have been allocated by the calling routine 
 !
 IF (noncolin.AND.domag) THEN
-   int3_save(:,:,:,:,:,1)=int3_nc(:,:,:,:,:)
+   int3_nc_save(:,:,:,:,:,1)=int3_nc(:,:,:,:,:)
    IF (okpaw) rho%bec(:,:,2:4)=-rho%bec(:,:,2:4)
    DO ipert=1,npe
       dvscfin(:,2:4,ipert)=-dvscfin(:,2:4,ipert)
@@ -60,7 +60,7 @@ IF (noncolin.AND.domag) THEN
 !   here compute the int3 integrals
 !
    CALL newdq (dvscfin, npe)
-   int3_save(:,:,:,:,:,2)=int3_nc(:,:,:,:,:)
+   int3_nc_save(:,:,:,:,:,2)=int3_nc(:,:,:,:,:)
 !
 !  restore the correct sign of the magnetic field.
 !
@@ -72,11 +72,11 @@ IF (noncolin.AND.domag) THEN
 !
 !  put into int3_nc the coefficient with +B
 !
-   int3_nc(:,:,:,:,:)=int3_save(:,:,:,:,:,1)
+   int3_nc(:,:,:,:,:)=int3_nc_save(:,:,:,:,:,1)
 ENDIF
 #if defined(__CUDA)
 IF (noncolin.AND.domag) THEN
-   int3_nc_d=int3_save
+   int3_nc_d=int3_nc_save
 ELSEIF (noncolin) THEN
    int3_nc_d(:,:,:,:,:,1)=int3_nc(:,:,:,:,:)
 ELSE

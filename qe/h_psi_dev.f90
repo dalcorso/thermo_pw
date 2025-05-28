@@ -1370,9 +1370,8 @@ ATTRIBUTES(GLOBAL) SUBROUTINE vlocpsi_gpu_vp(outk, nveck, st, ikt, npol, &
   !
   USE cudafor
   USE util_param,     ONLY : DP
-  USE scf_gpum,       ONLY : vrs_d
   USE many_k_mod,     ONLY : isk => isk_d, lsda => lsda_d, domag => domag_d, &
-                             noncolin => noncolin_d
+                             noncolin => noncolin_d, vrs_d
   IMPLICIT NONE
   !
   LOGICAL, INTENT(IN), VALUE :: minus_b

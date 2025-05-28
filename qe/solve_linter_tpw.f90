@@ -68,7 +68,8 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   USE qpoint,       ONLY : xq, nksq, ikks, ikqs
   USE qpoint_aux,   ONLY : ikmks, ikmkmqs, becpt, alphapt
   USE control_lr,   ONLY : lgamma, alpha_pv
-  USE nc_mag_aux,   ONLY : int1_nc_save, deeq_nc_save, int3_save
+  USE lr_nc_mag,    ONLY : int1_nc_save, deeq_nc_save
+  USE lr_nc_mag,    ONLY :  int3_nc_save
   USE dv_of_drho_lr, ONLY : dv_of_drho
   USE fft_interfaces, ONLY : fft_interpolate, fwfft
   USE ldaU,         ONLY : lda_plus_u
@@ -181,7 +182,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   ALLOCATE (h_diag ( npwx*npol, nbnd))
   ALLOCATE (drhoc(dfftp%nnr))
   IF (noncolin.AND.domag.AND.okvan) THEN
-     ALLOCATE (int3_save( nhm, nhm, nat, nspin_mag, npe, 2))
+     ALLOCATE (int3_nc_save( nhm, nhm, nat, nspin_mag, npe, 2))
      ALLOCATE (dbecsum_aux ( (nhm * (nhm + 1))/2 , nat , nspin_mag , npe))
   ENDIF
 
@@ -491,7 +492,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
         ENDIF
         !
         ! Compute the response HXC potential
-        CALL dv_of_drho (dvscfout(1,1,ipert), .true., drhoc)
+        CALL dv_of_drho (dvscfout(1,1,ipert), drhoc)
      ENDDO
      !
      !   And we mix with the old potential
@@ -600,7 +601,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
      ENDIF
   ENDIF
 
-  IF (convt.AND.nlcc_any) CALL addnlcc (imode0, drhoscfh, npe)
+  IF (convt.AND.nlcc_any) CALL dynmat_nlcc (imode0, drhoscfh, npe)
 
   IF (ALLOCATED(ldoss)) DEALLOCATE (ldoss)
   IF (ALLOCATED(ldos)) DEALLOCATE (ldos)
@@ -616,7 +617,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   DEALLOCATE (dvscfin)
   DEALLOCATE (drhoc)
   IF (noncolin.AND.domag.AND.okvan) THEN
-     DEALLOCATE (int3_save)
+     DEALLOCATE (int3_nc_save)
      DEALLOCATE (dbecsum_aux)
   ENDIF
   IF (ALLOCATED(drhoscf_aux)) DEALLOCATE(drhoscf_aux)

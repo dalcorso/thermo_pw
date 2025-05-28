@@ -26,9 +26,9 @@
                              xk=>xk_d, nbeta=>nbeta_d, &
                              eigts1=>eigts1_d, eigts2=>eigts2_d, &
                              eigts3=>eigts3_d, mill=>mill_d, g=>g_d, &
-                             tab_beta => tab_beta_d, nhtolm=>nhtolm_d
+                             tab_beta => tab_beta_d, nhtolm=>nhtolm_d, &
+                             nhtol=>nhtol_d, indv=>indv_d
     USE klist,        ONLY : igk=>igk_k_d, ngk=>ngk_d
-    USE uspp,         ONLY : nhtol=>nhtol_d, indv=>indv_d
     !
     IMPLICIT NONE
     !

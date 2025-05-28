@@ -108,8 +108,6 @@ SUBROUTINE h_psii_( lda, n, m, psi, hpsi, ik )
   USE sci_mod,                 ONLY: p_psi
   USE fft_helper_subroutines
   !
-  USE scf_gpum,                ONLY: using_vrs
-  !
   IMPLICIT NONE
   !
   INTEGER, INTENT(IN) :: lda
@@ -134,7 +132,6 @@ SUBROUTINE h_psii_( lda, n, m, psi, hpsi, ik )
   !
   CALL start_clock( 'h_psi' ); !write (*,*) 'start h_psi';FLUSH(6)
 
-  CALL using_vrs(0)   ! vloc_psi_gamma (intent:in)
   !
   ! ... Here we set the kinetic energy (k+G)^2 psi and clean up garbage
   !

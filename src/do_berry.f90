@@ -31,7 +31,7 @@ SUBROUTINE do_berry ( exit_status, polar, nppl )
   USE parameters,       ONLY : ntypx, npk
   USE upf_params,       ONLY : lmaxx
   USE cell_base,        ONLY : at
-  USE basis,            ONLY : starting_pot, startingconfig
+  USE starting_scf,     ONLY : starting_pot, startingconfig
   USE control_flags,    ONLY : gamma_only, lscf, lbands, ethr, &
                                istep, nstep, restart, lmd, lbfgs
   USE initial_conf,     ONLY : nosym_save

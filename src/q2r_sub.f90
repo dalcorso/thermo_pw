@@ -49,7 +49,7 @@ SUBROUTINE q2r_sub(fildyn)
   USE mp,         ONLY : mp_bcast
   USE dynamicalq, ONLY : phiq, tau, ityp, zeu
   USE ifc,        ONLY : zasr
-  USE constants,  ONLY : amu_ry
+  USE constants,  ONLY : amu_ry, tpi
   USE fft_scalar, ONLY : cfft3d
   USE io_global,  ONLY : stdout, meta_ionode, meta_ionode_id
   USE mp_images,  ONLY : my_image_id
@@ -84,7 +84,7 @@ SUBROUTINE q2r_sub(fildyn)
   COMPLEX(DP), ALLOCATABLE :: phid(:,:,:,:,:)
   REAL(DP),    ALLOCATABLE :: m_loc(:,:)
   !
-  REAL(DP) :: celldm(6), at(3,3), bg(3,3)
+  REAL(DP) :: celldm(6), at(3,3), bg(3,3), alph
   REAL(DP) :: q(3,48), omega, xq, amass(ntypx), resi
   REAL(DP) :: epsil(3,3), smat(3,3)
   !
@@ -236,8 +236,18 @@ SUBROUTINE q2r_sub(fildyn)
         IF (lrigid .AND. (zasr.NE.'no')) &
            CALL set_zasr ( zasr, nr1,nr2,nr3, nat, ibrav, tau, zeu)
      END IF
-     IF (lrigid.AND..NOT.lrigid1) CALL errore('q2r_sub', &
-           & 'file with dyn.mat. at q=0 should be first of the list',ifile)
+     IF (lrigid) THEN
+        IF (.NOT.lrigid1) CALL errore('q2r', &
+             & 'file with dyn.mat. at q=0 should be first of the list',ifile)
+        !
+        ! alph = 1 is the Ewald parameter. Since it is used as -G^2/4/alph
+        ! and G^2 is in 2pi/alat units, the conversion factor (alat/2pi)^2
+        ! ensures consistency - see issue #601 on gitlab
+        !
+        alph = ( celldm(1) / tpi ) ** 2
+        WRITE (stdout,*) ' alpha Ewald: ',alph
+        !
+     END IF
      !
      WRITE(stdout,*)
      DO nq = 1,nqs
@@ -260,7 +270,7 @@ SUBROUTINE q2r_sub(fildyn)
            nc(m(1),m(2),m(3))=1
            IF (lrigid) THEN
               CALL rgd_blk (nr1,nr2,nr3,nat,phiq(1,1,1,1,nq),q(1,nq), &
-                  tau,epsil,zeu,bg,omega,celldm(1), .false., -1.d0)
+                  tau,epsil,zeu,alph,bg,omega,celldm(1), .false., -1.d0)
            END IF
            CALL trasl ( phid, phiq, nq, nr1,nr2,nr3, nat, m(1),m(2),m(3))
         ELSE
@@ -307,7 +317,7 @@ SUBROUTINE q2r_sub(fildyn)
            CALL write_dyn_mat_header( filefrc, ntyp, nat, ibrav, nspin_mag,  &
                 celldm, at, bg, omega, atm, amass, tau, ityp, m_loc, nqs)
         ENDIF
-        CALL write_ifc(nr1,nr2,nr3,nat,phid)
+        CALL write_ifc(alph, nr1,nr2,nr3,nat,phid)
      ENDIF
   ELSE 
      IF (meta_ionode) THEN

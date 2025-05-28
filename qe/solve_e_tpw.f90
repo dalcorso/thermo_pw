@@ -370,7 +370,7 @@ subroutine solve_e_tpw(drhoscf)
         ELSE
           IF (nlcc_any.and.zeu) call zcopy (dfftp%nnr*nspin_mag,&
                          drhoscfh(1,1,ipol),1,dvscfout(1,1,ipol),1)
-           call dv_of_drho (dvscfout (1, 1, ipol), .false.)
+           call dv_of_drho (dvscfout (1, 1, ipol))
         ENDIF
      enddo
      !

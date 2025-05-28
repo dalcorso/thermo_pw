@@ -19,6 +19,7 @@ SUBROUTINE zstar_eu_loc (drhoscf, zstareu0)
   USE ions_base, ONLY : nat
   USE fft_base,  ONLY : dffts
   USE cell_base, ONLY : omega
+  USE modes,     ONLY : u
   USE noncollin_module, ONLY : nspin_lsda, nspin_mag
 
   IMPLICIT NONE
@@ -40,7 +41,7 @@ SUBROUTINE zstar_eu_loc (drhoscf, zstareu0)
   ALLOCATE (dvloc( dffts%nnr))    
   !
   DO nu_j = 1, 3 * nat
-     CALL compute_dvloc (nu_j, dvloc)
+     CALL compute_dvloc (u(1,nu_j), .FALSE., dvloc)
      DO ipert = 1, 3
         DO is = 1, nspin_lsda
            zstareu0 (ipert, nu_j) = zstareu0 (ipert, nu_j) - &

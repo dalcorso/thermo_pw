@@ -27,9 +27,7 @@ USE uspp,             ONLY : nkb, vkb, okvan
 USE becmod,           ONLY : becp, allocate_bec_type, deallocate_bec_type
 USE fft_base,         ONLY : dffts
 USE wavefunctions,    ONLY : evc
-USE wavefunctions_gpum,    ONLY : evc_d
 USE g_psi_mod,        ONLY : h_diag, s_diag
-USE wvfct_gpum,       ONLY : et_d, using_et, using_et_d
 USE control_flags,    ONLY : ethr, use_gpu, lscf, use_gpu
 USE gcscf_module,     ONLY : lgcscf
 USE buffers,          ONLY : get_buffer, save_buffer
@@ -56,6 +54,7 @@ LOGICAL  :: lrot
 EXTERNAL h_psii, s_psii, g_psii
 EXTERNAL h_psii_gpu, s_psii_gpu, g_psii_dev
 #if defined(__CUDA)
+REAL(DP), DEVICE, ALLOCATABLE :: et_d(:,:)
 REAL(DP), DEVICE, ALLOCATABLE :: ylm_d(:,:,:)
 REAL(DP), DEVICE, ALLOCATABLE :: vkb1_d(:,:,:)
 INTEGER, DEVICE, ALLOCATABLE :: ikt_d(:)
@@ -68,7 +67,9 @@ ALLOCATE( dav_iter( nksbx ))
 ALLOCATE( notcnv( nksbx ))
 ALLOCATE( ikt( nksbx ))
 #if defined(__CUDA)
+   ALLOCATE( et_d( nbnd, nks ))
    ALLOCATE(ikt_d( nksbx ))
+   et_d=et
 #endif
 
 CALL allocate_becps_many_k(1,1)
@@ -92,7 +93,7 @@ DO ikb=1,nkblocks
          IF ( nks > 1 .AND. lscf) THEN
             CALL get_buffer ( evck(1,nbnd*(ik1-1)+1), &
                   nwordwfc, iunwfc, ik )
-         ELSE
+         ELSEIF (.NOT.lscf) THEN
            !
            current_k = ik
            !
@@ -105,10 +106,11 @@ DO ikb=1,nkblocks
            IF ( nkb > 0 ) CALL init_us_2( ngk(ik), igk_k(1,ik), &
                                                     xk(1,ik), vkb, .true.)
            CALL init_wfc ( ik )
-           IF (use_gpu) evc=evc_d
 
            evck(1:npwx*npol,nbnd*(ik1-1)+1:nbnd*ik1)=evc(1:npwx*npol,1:nbnd)
            !
+         ELSEIF (nks==1) THEN
+           evck(1:npwx*npol,nbnd*(ik1-1)+1:nbnd*ik1)=evc(1:npwx*npol,1:nbnd)
          ENDIF
       ENDDO
       evck_d=evck
@@ -154,13 +156,6 @@ DO ikb=1,nkblocks
 !
    ntry=0
 
-   IF (use_gpu) THEN
-      CALL using_et_d(1)
-   ELSE
-      CALL using_et(1)
-   ENDIF
-
-   !$acc data present(et_d)
    david_loop: DO
       IF (use_gpu) THEN
 #if defined(__CUDA)
@@ -168,6 +163,8 @@ DO ikb=1,nkblocks
          ngk(startkb(ikb)+1), npwx, nbnd, nbndx, npol, evck_d, ethr, &
          et_d(:,startkb(ikb)+1), btype(:,startkb(ikb)+1), notcnv, lrot, &
          dav_iter, nhpsi, nksb(ikb), nkb)
+         et(:,startkb(ikb)+1:startkb(ikb)+nksb(ikb))= &
+         et_d(:,startkb(ikb)+1:startkb(ikb)+nksb(ikb))
 #endif
       ELSE
          CALL allocate_bec_type( nkb, nbnd, becp, intra_bgrp_comm )
@@ -183,7 +180,6 @@ DO ikb=1,nkblocks
       !
       IF ( test_exit_cond(nksb(ikb)) ) EXIT david_loop
    ENDDO david_loop
-   !$acc end data
 
    evck(1:npwx*npol,1:nbnd*nksb(ikb))=evck_d(1:npwx*npol,1:nbnd*nksb(ikb))
    DO ik = startkb(ikb)+1, startkb(ikb)+nksb(ikb)
@@ -226,6 +222,7 @@ DEALLOCATE( nhpsi )
 DEALLOCATE( ikt )
 #if defined(__CUDA)
    DEALLOCATE( ikt_d )
+   DEALLOCATE( et_d )
 #endif
 
 RETURN

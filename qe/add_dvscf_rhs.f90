@@ -35,7 +35,7 @@ USE lsda_mod,       ONLY : lsda, current_spin, isk
 USE uspp,           ONLY : okvan
 USE lrus,           ONLY : int3_nc, becp1
 USE qpoint_aux,     ONLY : becpt 
-USE nc_mag_aux,     ONLY : int3_save
+USE lr_nc_mag,      ONLY : int3_nc_save
 USE fft_helper_subroutines, ONLY : fftx_ntgrp
 USE qpoint,         ONLY : ikks 
 USE eqv,            ONLY : dvpsi
@@ -80,7 +80,7 @@ IF (apply_dv) THEN
 !
    IF (isolv==2) THEN
       dvscfins(:,2:4,ipert)=-dvscfins(:,2:4,ipert)
-      IF (okvan) int3_nc(:,:,:,:,ipert)=int3_save(:,:,:,:,ipert,2)
+      IF (okvan) int3_nc(:,:,:,:,ipert)=int3_nc_save(:,:,:,:,ipert,2)
    ENDIF
 !$acc update device(dvscfins(1:dffts%nnr, 1:nspin_mag, 1:npe))
 !
@@ -126,7 +126,7 @@ IF (apply_dv) THEN
 ELSE
    IF (isolv==2) THEN
       dvscfins(:,2:4,ipert)=-dvscfins(:,2:4,ipert)
-      IF (okvan) int3_nc(:,:,:,:,ipert)=int3_save(:,:,:,:,ipert,2)
+      IF (okvan) int3_nc(:,:,:,:,ipert)=int3_nc_save(:,:,:,:,ipert,2)
    ENDIF
 ENDIF
 !
@@ -149,7 +149,7 @@ ENDIF
 !
 IF (isolv==2) THEN
    dvscfins(:,2:4,ipert)=-dvscfins(:,2:4,ipert)
-   IF (okvan) int3_nc(:,:,:,:,ipert)=int3_save(:,:,:,:,ipert,1)
+   IF (okvan) int3_nc(:,:,:,:,ipert)=int3_nc_save(:,:,:,:,ipert,1)
 ENDIF
 
 IF (apply_dv) THEN

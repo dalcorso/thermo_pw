@@ -53,9 +53,6 @@ SUBROUTINE electrons_tpw()
   USE loc_scdm,             ONLY : use_scdm, localize_orbitals
   USE loc_scdm_k,           ONLY : localize_orbitals_k
   !
-  USE wvfct_gpum,           ONLY : using_et
-  USE scf_gpum,             ONLY : using_vrs
-  !
   USE add_dmft_occ,         ONLY : dmft
   USE rism_module,          ONLY : lrism, rism_calc3d
   USE makovpayne,           ONLY : makov_payne
@@ -127,6 +124,7 @@ SUBROUTINE electrons_tpw()
            READ (iunres, *) (wg(1:nbnd,ik),ik=1,nks)
            READ (iunres, *) (et(1:nbnd,ik),ik=1,nks)
            CLOSE ( unit=iunres, status='delete')
+           !$acc update device(et)
            ! ... if restarting here, exx was already active
            ! ... initialize stuff for exx
            first = .false.
@@ -152,7 +150,6 @@ SUBROUTINE electrons_tpw()
                ehart, etxc, vtxc, eth, etotefield, charge, v)
            IF (lrism) CALL rism_calc3d(rho%of_g(:, 1), esol, vsol, v%of_r, tr2)
            IF (okpaw) CALL PAW_potential(rho%bec, ddd_PAW, epaw,etot_cmp_paw)
-           CALL using_vrs(1)
            CALL set_vrs( vrs, vltot, v%of_r, kedtau, v%kin_r, dfftp%nnr, &
                          nspin, doublegrid )
            !
@@ -198,7 +195,6 @@ SUBROUTINE electrons_tpw()
      IF ( stopped_by_user .OR. .NOT. conv_elec ) THEN
         conv_elec=.FALSE.
         IF ( .NOT. first) THEN
-           CALL using_et(0)
            WRITE(stdout,'(5x,"Calculation (EXX) stopped during iteration #", &
                         & i6)') iter
            CALL seqopn (iunres, 'restart_e', 'formatted', exst)
@@ -249,7 +245,6 @@ SUBROUTINE electrons_tpw()
         !
         IF (lrism) CALL rism_calc3d(rho%of_g(:, 1), esol, vsol, v%of_r, tr2)
         IF (okpaw) CALL PAW_potential(rho%bec, ddd_PAW, epaw,etot_cmp_paw)
-        CALL using_vrs(1)
         CALL set_vrs( vrs, vltot, v%of_r, kedtau, v%kin_r, dfftp%nnr, &
              nspin, doublegrid )
         !
@@ -351,7 +346,6 @@ SUBROUTINE electrons_tpw()
      WRITE( stdout,'(/5x,"EXX: now go back to refine exchange calculation")')
      !
      IF ( check_stop_now() .or. (iter.ge.nexxiter) ) THEN
-        CALL using_et(0)
         WRITE(stdout,'(5x,"Calculation (EXX) stopped after iteration #", &
                         & i6)') iter
         conv_elec=.FALSE.
@@ -405,7 +399,7 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
   USE cell_base,            ONLY : at, bg, alat, omega, tpiba2
   USE ions_base,            ONLY : zv, nat, nsp, ityp, tau, compute_eextfor, atm, &
                                    ntyp => nsp
-  USE basis,                ONLY : starting_pot
+  USE starting_scf,         ONLY : starting_pot
   USE bp,                   ONLY : lelfield
   USE fft_base,             ONLY : dfftp
   USE gvect,                ONLY : ngm, gstart, g, gg, gcutm
@@ -472,8 +466,6 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
   USE libmbd_interface,     ONLY : EmbdvdW
   USE add_dmft_occ,         ONLY : dmft, dmft_update, v_dmft, dmft_updated
   !
-  USE wvfct_gpum,           ONLY : using_et
-  USE scf_gpum,             ONLY : using_vrs
   USE device_fbuff_m,       ONLY : dev_buf, pin_buf
   USE pwcom,                ONLY : report_mag 
   USE makovpayne,           ONLY : makov_payne
@@ -557,8 +549,10 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
   !
   iter = 0
   dr2  = 0.0_dp
-  IF ( restart ) CALL restart_in_electrons( iter, dr2, ethr, et )
-  IF ( restart ) CALL using_et(2)
+  IF ( restart ) THEN
+     CALL restart_in_electrons( iter, dr2, ethr, et )
+     !$acc update device (et)
+  ENDIF
   !
   WRITE( stdout, 9000 ) get_clock( 'PWSCF' )
   !
@@ -621,7 +615,6 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
      !
      IF ( check_stop_now() ) THEN
         conv_elec=.FALSE.
-        CALL using_et(0)
         CALL save_in_electrons (iter, dr2, ethr, et )
         GO TO 10
      ENDIF
@@ -696,7 +689,6 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
         !
         IF ( stopped_by_user ) THEN
            conv_elec=.FALSE.
-           CALL using_et( 0 )
            CALL save_in_electrons( iter-1, dr2, ethr, et )
            GO TO 10
         ENDIF
@@ -709,7 +701,6 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
         ! ... explicitly collected to the first node
         ! ... this is done here for et, in sum_band for wg
         !
-        CALL using_et(1)
         CALL poolrecover( et, nbnd, nkstot, nks )
         !
         ! ... the new density is computed here. For PAW:
@@ -726,8 +717,7 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
             WRITE( stdout, '(5X,"WARNING: electron_maxstep > 1 not recommended for dmft = .true.")')
         END IF
 
-        IF (.not. use_gpu) CALL sum_band()
-        IF (      use_gpu) CALL sum_band_gpu()
+        CALL sum_band()
         !
         ! ... if DMFT update was made, make sure it is only done in the first iteration
         ! ... (generally in this mode it should only run a single iteration, but just to make sure!)
@@ -1003,13 +993,8 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
      !
      ! ... define the total local potential (external + scf)
      !
-     CALL using_vrs(1)
-     CALL sum_vrs( dfftp%nnr, nspin, vltot, v%of_r, vrs )
-     !
-     ! ... interpolate the total local potential
-     !
-     CALL using_vrs(1) ! redundant
-     CALL interpolate_vrs( dfftp%nnr, nspin, doublegrid, kedtau, v%kin_r, vrs )
+     CALL set_vrs( vrs, vltot, v%of_r, kedtau, v%kin_r, dfftp%nnr, &
+                   nspin, doublegrid )
      !
      ! ... in the US case we have to recompute the self-consistent
      ! ... term in the nonlocal potential

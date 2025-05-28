@@ -437,7 +437,7 @@ SUBROUTINE do_lanczos_psh()
         IF (lnoloc) THEN
            CALL dv_of_drho_nlf (dvscfin (1, 1, ipol))
         ELSE
-           CALL dv_of_drho (dvscfin (1, 1, ipol), .false.)
+           CALL dv_of_drho (dvscfin (1, 1, ipol))
         ENDIF 
      ENDDO
      !

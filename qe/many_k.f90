@@ -78,6 +78,9 @@ INTEGER,     ALLOCATABLE :: nbeta_d(:)
 INTEGER,     ALLOCATABLE :: mill_d(:,:)
 INTEGER,     ALLOCATABLE :: ofsbeta_d(:)
 INTEGER,     ALLOCATABLE :: nhtolm_d(:,:)
+INTEGER,     ALLOCATABLE :: ijtoh_d(:,:,:)
+INTEGER,     ALLOCATABLE :: nhtol_d(:,:)
+INTEGER,     ALLOCATABLE :: indv_d(:,:)
 REAL(DP),    ALLOCATABLE :: g_d(:,:)
 REAL(DP),    ALLOCATABLE :: xk_d(:,:)
 REAL(DP),    ALLOCATABLE :: wk_d(:)
@@ -89,6 +92,7 @@ COMPLEX(DP), ALLOCATABLE :: deeq_nc_d(:,:,:,:)
 COMPLEX(DP), ALLOCATABLE :: eigts1_d(:,:)
 COMPLEX(DP), ALLOCATABLE :: eigts2_d(:,:)
 COMPLEX(DP), ALLOCATABLE :: eigts3_d(:,:)
+REAL(DP),    ALLOCATABLE :: vrs_d(:,:)
 
 INTEGER :: nat_d
 INTEGER :: ntyp_d
@@ -128,6 +132,7 @@ LOGICAL :: domag_d
 
    ATTRIBUTES(DEVICE) :: nl_d
    ATTRIBUTES(DEVICE) :: work_d
+   ATTRIBUTES(DEVICE) :: vrs_d
    ATTRIBUTES(DEVICE) :: wsave_d
    ATTRIBUTES(DEVICE) :: isindex_d
    ATTRIBUTES(DEVICE) :: iplane_d
@@ -143,6 +148,9 @@ LOGICAL :: domag_d
    ATTRIBUTES(DEVICE) :: mill_d
    ATTRIBUTES(DEVICE) :: ofsbeta_d
    ATTRIBUTES(DEVICE) :: nhtolm_d
+   ATTRIBUTES(DEVICE) :: ijtoh_d
+   ATTRIBUTES(DEVICE) :: nhtol_d
+   ATTRIBUTES(DEVICE) :: indv_d
    ATTRIBUTES(DEVICE) :: xk_d
    ATTRIBUTES(DEVICE) :: wk_d
    ATTRIBUTES(DEVICE) :: isk_d
@@ -200,7 +208,8 @@ PUBLIC nat_d, ntyp_d, ityp_d, nh_d, isk_d, qq_at_d, deeq_d, lmaxkb_d,      &
        tau_d, nqx_d, npwx_d, type1ps_d, noncolin_d, lspinorb_d, lsda_d,    &
        domag_d, tvanp_d, qcutz_d, ecfixed_d, q2sigma_d, nkb_d, okvan_d,    &
        eigts1_d, eigts2_d, eigts3_d, g_d, mill_d, lgauss_d, ltetra_d,      &
-       ngauss_d, degauss_d, omega_d, ofsbeta_d, nhtolm_d
+       ngauss_d, degauss_d, omega_d, ofsbeta_d, nhtolm_d, ijtoh_d, vrs_d,  &
+       nhtol_d, indv_d
 !
 ! host subroutines of the module
 !
@@ -345,7 +354,7 @@ USE wvfct,            ONLY : nbnd, npwx
 USE uspp,             ONLY : nkb
 USE lsda_mod,         ONLY : nspin
 USE noncollin_module, ONLY : npol, noncolin
-USE uspp_data,        ONLY : nqx
+USE beta_mod,         ONLY : nqx
 USE uspp_param,       ONLY : nhm, nwfcm, nbetam
 USE ions_base,        ONLY : nat, ntyp=>nsp
 USE gvect,            ONLY : ngm
@@ -354,8 +363,9 @@ USE fft_base,         ONLY : dfftp
 
 IMPLICIT NONE
 
-INTEGER :: nsolv
+INTEGER :: nsolv, nrxx
 
+nrxx=dfftp%nr1x*dfftp%nr2x*dfftp%nr3
 ALLOCATE(vkbk_d(npwx,nkb*nksbx))
 ALLOCATE(g2kink_d(npwx,nksbx))
 ALLOCATE(h_diagk_d(npwx,npol,nksbx))
@@ -382,6 +392,9 @@ ENDIF
 ALLOCATE(mill_d(3,ngm) )
 ALLOCATE(ofsbeta_d(nat) )
 ALLOCATE(nhtolm_d(nhm,ntyp))
+ALLOCATE(ijtoh_d(nhm,nhm,ntyp))
+ALLOCATE(nhtol_d(nhm,ntyp))
+ALLOCATE(indv_d(nhm,ntyp))
 ALLOCATE(g_d(3,ngm) )
 ALLOCATE(eigts1_d(-dfftp%nr1:dfftp%nr1,nat) )
 ALLOCATE(eigts2_d(-dfftp%nr2:dfftp%nr2,nat) )
@@ -389,6 +402,7 @@ ALLOCATE(eigts3_d(-dfftp%nr3:dfftp%nr3,nat) )
 ALLOCATE(evck(npwx*npol,nbnd*nksbx*nsolv))
 ALLOCATE(evck_d(npwx*npol,nbnd*nksbx*nsolv))
 ALLOCATE(tab_beta_d(nqx,nbetam,ntyp))
+ALLOCATE(vrs_d(dfftp%nnr,nspin))
 
 
 RETURN
@@ -411,6 +425,7 @@ IF (ALLOCATED(s_diagk_d)) DEALLOCATE(s_diagk_d)
 IF (ALLOCATED(tau_d)) DEALLOCATE(tau_d)
 IF (ALLOCATED(ityp_d)) DEALLOCATE(ityp_d)
 IF (ALLOCATED(nh_d)) DEALLOCATE(nh_d)
+IF (ALLOCATED(vrs_d)) DEALLOCATE(vrs_d)
 IF (ALLOCATED(type1ps)) DEALLOCATE(type1ps)
 IF (ALLOCATED(type1ps_d)) DEALLOCATE(type1ps_d)
 IF (ALLOCATED(tvanp)) DEALLOCATE(tvanp)
@@ -428,6 +443,9 @@ IF (ALLOCATED(evck))    DEALLOCATE(evck)
 IF (ALLOCATED(tab_beta_d)) DEALLOCATE(tab_beta_d)
 IF (ALLOCATED(ofsbeta_d))   DEALLOCATE(ofsbeta_d)
 IF (ALLOCATED(nhtolm_d))   DEALLOCATE(nhtolm_d)
+IF (ALLOCATED(ijtoh_d))  DEALLOCATE(ijtoh_d)
+IF (ALLOCATED(nhtol_d))  DEALLOCATE(nhtol_d)
+IF (ALLOCATED(indv_d))   DEALLOCATE(indv_d)
 IF (ALLOCATED(g_d))      DEALLOCATE(g_d)
 IF (ALLOCATED(mill_d))   DEALLOCATE(mill_d)
 IF (ALLOCATED(eigts1_d)) DEALLOCATE(eigts1_d)
@@ -440,17 +458,16 @@ END SUBROUTINE deallocate_many_k
 !------------------------------------------------------------------
 SUBROUTINE initialize_device_variables()
 !------------------------------------------------------------------
-USE scf_gpum,   ONLY : using_vrs_d
 USE klist,      ONLY : nks, xk, wk, igk_k, igk_k_d, lgauss, ltetra, &
                        ngauss, degauss
 USE ions_base,  ONLY : nat, ntyp=>nsp, ityp, tau
 USE cell_base,  ONLY : tpiba, omega
 USE uspp,       ONLY : nkb, qq_at, deeq, qq_so, deeq_nc, okvan, ofsbeta, &
-                       nhtolm
+                       ijtoh, nhtolm, indv, nhtol
 USE gvecw,      ONLY : ecfixed, qcutz, q2sigma
 USE gvect,      ONLY : g, mill, eigts1, eigts2, eigts3
-USE uspp_data,  ONLY : dq, nqx
-USE beta_mod,   ONLY : tab_beta
+USE scf,        ONLY : vrs
+USE beta_mod,   ONLY : tab_beta, dq, nqx
 USE uspp_param, ONLY : upf, nh, nhm, lmaxkb
 USE klist,      ONLY : xk
 USE wvfct,      ONLY : npwx
@@ -498,7 +515,7 @@ lspinorb_d=lspinorb
 lsda_d=lsda
 domag_d=domag
 
-CALL using_vrs_d(0)
+vrs_d=vrs
 DO nt=1,ntyp
    nbeta_cpu(nt)=upf(nt)%nbeta
    type1ps(nt)=upf(nt)%tvanp .OR.upf(nt)%is_multiproj
@@ -515,6 +532,9 @@ tvanp_d=tvanp
 tab_beta_d=tab_beta
 ofsbeta_d=ofsbeta
 nhtolm_d=nhtolm
+ijtoh_d=ijtoh
+nhtol_d=nhtol
+indv_d=indv
 #endif
 
 RETURN

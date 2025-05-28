@@ -70,7 +70,7 @@ SUBROUTINE cgsolve_all_many_k (ch_psi, cg_psi, e, d0psi, dpsi, h_diag,  &
   USE uspp,           ONLY : okvan, deeq_nc
   USE fft_base,       ONLY : dffts
   USE uspp,           ONLY : nkb
-  USE nc_mag_aux,     ONLY : deeq_nc_save
+  USE lr_nc_mag,      ONLY : deeq_nc_save
   USE control_lr,     ONLY : alpha_pv
   USE qpoint_aux,     ONLY : ikmks
   USE io_global,      ONLY : stdout
@@ -147,7 +147,7 @@ ATTRIBUTES(DEVICE) :: h_diag, d0psi, dpsi
   !  step length
   !  the scalar product
   real(DP), allocatable :: rho (:), rhoold (:), eu (:), a(:), c(:)
-  real(DP), ALLOCATABLE :: rho_h(:)
+  real(DP), ALLOCATABLE :: rho_h(:), edev(:,:)
   ! the residue
   ! auxiliary for h_diag
   real(DP), ALLOCATABLE :: kter_eff(:)
@@ -182,7 +182,7 @@ ATTRIBUTES(DEVICE) :: h_diag, d0psi, dpsi
   LOGICAL, ALLOCATABLE, DEVICE :: outk_d(:)
   REAL(DP), ALLOCATABLE, DEVICE :: psicmr(:,:,:,:)
   ATTRIBUTES(DEVICE) :: hpsi, spsi, ps
-  ATTRIBUTES(DEVICE) :: hold, h, g, t, eu, rho
+  ATTRIBUTES(DEVICE) :: hold, h, g, t, eu, rho, edev
   COMPLEX(DP), ALLOCATABLE, DEVICE :: dclambdak_d(:)
   COMPLEX(DP), ALLOCATABLE, DEVICE :: dcgammak_d(:)
 #endif
@@ -199,6 +199,8 @@ ATTRIBUTES(DEVICE) :: h_diag, d0psi, dpsi
   nnr=dffts%nnr
   minus_b=(nsolv==2)
 
+  ALLOCATE(edev(nbnd,nks))
+  edev=e
   ! allocate workspace (bgrp distributed)
   allocate ( conv(nbnd*nk*npe*nsolv) )
   allocate ( hpsi(ndmx*npol,my_nbnd*nk*npe*nsolv))
@@ -249,7 +251,8 @@ ATTRIBUTES(DEVICE) :: h_diag, d0psi, dpsi
 
   ! bgrp parallelization is done outside h_psi/s_psi. set use_bgrp_in_hpsi temporarily to false
   lsave_use_bgrp_in_hpsi = use_bgrp_in_hpsi ; use_bgrp_in_hpsi = .false.
-  !$acc enter data create(a(1:my_nbnd*nk*npe*nsolv),c(1:my_nbnd*nk*npe*nsolv)),copyin(e(1:nbnd,1:nks)) 
+  !$acc enter data create(a(1:my_nbnd*nk*npe*nsolv),c(1:my_nbnd*nk*npe*nsolv))
+  !copyin(e(1:nbnd,1:nks))
   !$acc kernels 
   g=(0.d0,0.d0)
   t=(0.d0,0.d0)
@@ -297,9 +300,9 @@ ATTRIBUTES(DEVICE) :: h_diag, d0psi, dpsi
         DO ipert=1,npe
            id=ik1+(ipert-1)*nk + (isolv-1) * nk * npe
            st_=st(id)
-           !$acc parallel loop present(e)
+           !$acc parallel loop 
            DO ibnd = 1, nbd
-              eu(st_+ibnd) = e (ibnd,ikk)
+              eu(st_+ibnd) = edev (ibnd,ikk)
            ENDDO
         ENDDO
      ENDDO
@@ -332,7 +335,7 @@ iterate:  do iter = 1, maxter
               spsi(i,1:my_nbnd*nk*npe*nsolv)=dpsi(i,1:my_nbnd*nk*npe*nsolv)
            ENDDO
         ENDIF
-
+ 
         call ch_psi_dev (ndmx, outk_d, kdimk_d, npwk_d, st_d, nbndk_d, &
               dpsi, g, hpsi, spsi, ps, eu, current_ikb_ph,             &
               npol, nk, npe, nsolv, nkb, nbnd, my_nbnd, alpha_pv)
@@ -520,12 +523,10 @@ iterate:  do iter = 1, maxter
      conv_d=conv
      lbndk_d=lbndk
      dcgammak_d=dcgammak
-     !$acc host_data use_device(e)
      CALL cgsolve_all_loop4<<<dim3(nk,npe*nsolv,nbnd),dim3(1,1,1)>>>(ndmx, &
-         outk_d, st_d, conv_d, lbndk_d, h, hold, dcgammak_d, eu, e,  &
+         outk_d, st_d, conv_d, lbndk_d, h, hold, dcgammak_d, eu, edev,  &
          current_ikb_ph, npol, nk, npe, nsolv, nbnd, my_nbnd, iter, nks)
      ierr=cudaDeviceSynchronize()
-     !$acc end host_data 
 #else
      DO ik1=1,nk
         ik=ik1+startkb_ph(current_ikb_ph)
@@ -843,6 +844,7 @@ iterate:  do iter = 1, maxter
   DEALLOCATE(conv_d)
   DEALLOCATE(dclambdak_d)
   DEALLOCATE(dcgammak_d)
+  DEALLOCATE(edev)
 #endif
 
   call stop_clock ('cgsolve')

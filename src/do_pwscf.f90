@@ -50,7 +50,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   USE force_mod,            ONLY : sigma, force
   USE check_stop,           ONLY : check_stop_init, check_stop_now
   USE control_pwrun,        ONLY : do_punch
-  USE basis,                ONLY : starting_pot, starting_wfc, startingconfig
+  USE starting_scf,         ONLY : starting_pot, starting_wfc, startingconfig
   USE mp_images,            ONLY : intra_image_comm
   USE extrapolation,        ONLY : update_file, update_pot
   USE control_qe,           ONLY : many_k

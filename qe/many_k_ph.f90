@@ -63,6 +63,7 @@ COMPLEX(DP), ALLOCATABLE :: ortho_ps_d(:,:)
 REAL(DP) :: ef_d
 REAL(DP) :: alpha_pv_d
 REAL(DP),    ALLOCATABLE :: deff_d(:,:,:,:)
+REAL(DP),    ALLOCATABLE :: et_d(:,:)
 COMPLEX(DP), ALLOCATABLE :: deff_nc_d(:,:,:,:,:)
 COMPLEX(DP), ALLOCATABLE :: int1_d(:,:,:,:,:)
 COMPLEX(DP), ALLOCATABLE :: int2_d(:,:,:,:,:)
@@ -108,6 +109,7 @@ ATTRIBUTES(DEVICE) :: ortho_ps_d
 ATTRIBUTES(DEVICE) :: ef_d
 ATTRIBUTES(DEVICE) :: alpha_pv_d
 ATTRIBUTES(DEVICE) :: deff_d
+ATTRIBUTES(DEVICE) :: et_d
 ATTRIBUTES(DEVICE) :: deff_nc_d
 ATTRIBUTES(DEVICE) :: int1_d
 ATTRIBUTES(DEVICE) :: int2_d
@@ -143,7 +145,7 @@ PUBLIC dvpsik_d, dpsik_d, evqk_d, h_diagk_ph_d, becp1k_d, alphak_d, dbecq_d, &
 !  Variables needed to copy on device the phonon variables
 !
 PUBLIC deff_d, deff_nc_d, int1_d, int2_d, int3_d, int1_nc_d, int3_nc_d, &
-       int2_so_d, dbecsum_d, drhoscf_d, &
+       int2_so_d, dbecsum_d, drhoscf_d, et_d, &
        u_d, nbnd_occ_d, ikks_d, ikqs_d, ikmks_d, ikmkmqs_d, deeq_nc_d, &
        deeq_nc_save_d, int1_nc_save_d, ef_d, alpha_pv_d
 !
@@ -301,10 +303,11 @@ SUBROUTINE prepare_ph_device(nsolv)
 USE modes,        ONLY : u
 USE control_lr,   ONLY : nbnd_occ, alpha_pv
 USE ener,         ONLY : ef
+USE wvfct,        ONLY : et
 USE qpoint,       ONLY : ikks, ikqs
 USE phus,         ONLY : int1, int2, int1_nc, int2_so
 USE uspp,         ONLY : deeq_nc
-USE nc_mag_aux,   ONLY : int1_nc_save, deeq_nc_save
+USE lr_nc_mag,    ONLY : int1_nc_save, deeq_nc_save
 USE qpoint_aux,   ONLY : ikmks, ikmkmqs
 USE noncollin_module, ONLY : noncolin
 USE uspp,         ONLY : okvan
@@ -335,6 +338,7 @@ IF (noncolin) THEN
       deeq_nc_d=deeq_nc
    ENDIF
 ENDIF
+et_d=et
 u_d=u
 nbnd_occ_d=nbnd_occ
 startkb_ph_d=startkb_ph
@@ -358,7 +362,7 @@ USE ions_base,        ONLY : nat
 USE uspp_param,       ONLY : nhm
 USE lsda_mod,         ONLY : nspin
 USE qpoint,           ONLY : nksq
-USE klist,            ONLY : nks
+USE klist,            ONLY : nks, nkstot
 USE uspp,             ONLY : nkb
 
 IMPLICIT NONE
@@ -399,6 +403,7 @@ INTEGER, INTENT(IN) :: npe, nsolv, nnr
  ELSE
     ALLOCATE(deff_d(nhm, nhm, nat, nbnd*nksbx_ph*npe*nsolv))
  ENDIF
+ ALLOCATE(et_d(nbnd,nkstot))
  ALLOCATE(int1_d(nhm, nhm, 3, nat, nspin))
  ALLOCATE(int2_d(nhm, nhm, 3, nat, nat))
  ALLOCATE(int3_d(nhm, nhm, nat, nspin_mag, npe))
@@ -451,6 +456,7 @@ IF (ALLOCATED(int3_d)) DEALLOCATE(int3_d)
 IF (ALLOCATED(int1_nc_d)) DEALLOCATE(int1_nc_d)
 IF (ALLOCATED(int2_so_d)) DEALLOCATE(int2_so_d)
 IF (ALLOCATED(int3_nc_d)) DEALLOCATE(int3_nc_d)
+IF (ALLOCATED(et_d)) DEALLOCATE(et_d)
 IF (ALLOCATED(int1_nc_save_d)) DEALLOCATE(int1_nc_save_d)
 IF (ALLOCATED(deeq_nc_save_d)) DEALLOCATE(deeq_nc_save_d)
 

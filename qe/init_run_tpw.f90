@@ -15,10 +15,11 @@ SUBROUTINE init_run_tpw()
   USE symme,              ONLY : sym_rho_init
   USE wvfct,              ONLY : nbnd, nbndx, npwx, et, wg, btype
   USE control_flags,      ONLY : lmd, gamma_only, smallmem, ts_vdw, mbd_vdw, &
-                                 lforce => tprnfor, tstress
+                                 lforce => tprnfor, tstress, tqr, use_gpu
   USE gvect,              ONLY : g, gg, mill, gcutm, ig_l2g, ngm, ngm_g, &
                                  gshells, gstart ! to be communicated to the Solvers if gamma_only
   USE gvecs,              ONLY : gcutms, ngms
+  USE ions_base,          ONLY : nat, nsp
   USE cell_base,          ONLY : alat, at, bg, set_h_ainv, omega
   USE cellmd,             ONLY : lmovecell
   USE dynamics_module,    ONLY : allocate_dyn_vars
@@ -39,20 +40,20 @@ SUBROUTINE init_run_tpw()
   USE Coul_cut_2D,        ONLY : do_cutoff_2D, cutoff_fact 
   USE two_chem,           ONLY : init_twochem, twochem
   USE lsda_mod,           ONLY : nspin
-  USE noncollin_module,   ONLY : domag, npol
+  USE noncollin_module,   ONLY : domag, noncolin, npol, lspinorb
   USE uspp,               ONLY : okvan
   USE xc_lib,             ONLY : xclib_dft_is_libxc, xclib_init_libxc, &
                                  xclib_dft_is, xclib_set_finite_size_volume, &
                                  dft_has_finite_size_correction
-  USE control_flags,      ONLY : use_gpu
   USE many_k_mod,         ONLY : allocate_many_k, init_k_blocks
   USE control_qe,         ONLY : many_k
   USE dfunct_gpum,        ONLY : newd_gpu
-  USE wvfct_gpum,         ONLY : using_et
   USE rism_module,        ONLY : lrism, rism_alloc3d
   USE extffield,          ONLY : init_extffield
   USE control_flags,      ONLY : scissor
   USE sci_mod,            ONLY : allocate_scissor
+  USE uspp_param,         ONLY : nhm
+  USE uspp,               ONLY : allocate_uspp
   !
 #if defined (__ENVIRON)
   USE plugin_flags,        ONLY : use_environ
@@ -117,7 +118,7 @@ SUBROUTINE init_run_tpw()
   !
   ! ... allocate memory for all other arrays (potentials, wavefunctions etc)
   !
-  CALL allocate_nlpot()
+  CALL allocate_uspp(use_gpu,noncolin,lspinorb,tqr,nhm,nsp,nat,nspin)
   IF (okpaw) THEN
      CALL allocate_paw_internals()
      CALL paw_init_onecenter()
@@ -142,9 +143,12 @@ SUBROUTINE init_run_tpw()
 #endif
   !
   ALLOCATE( et( nbnd, nkstot ) , wg( nbnd, nkstot ), btype( nbnd, nkstot ) )
+  !$acc enter data create(et)
   !
   et(:,:) = 0.D0
-  CALL using_et(2)
+  !$acc kernels
+  et(:,:) = 0.D0
+  !$acc end kernels
   !
   wg(:,:) = 0.D0
   !
@@ -159,12 +163,6 @@ SUBROUTINE init_run_tpw()
   END IF
   !
   CALL allocate_wfc_k()
-  IF (many_k) THEN
-     CALL init_k_blocks(npwx,npol,nbndx,nks,nkstot,nbnd,dfftp%nnr,&
-                                                   dffts%nnr,okvan)
-     CALL allocate_many_k(1)
-  ENDIF
-  !
   CALL openfil()
   !
   IF (xclib_dft_is_libxc('ANY')) CALL xclib_init_libxc( nspin, domag )
@@ -179,6 +177,12 @@ SUBROUTINE init_run_tpw()
   END IF
   !
   CALL hinit0()
+  IF (many_k) THEN
+     CALL init_k_blocks(npwx,npol,nbndx,nks,nkstot,nbnd,dfftp%nnr,&
+                                                   dffts%nnr,okvan)
+     CALL allocate_many_k(1)
+  ENDIF
+  !
   !
   CALL potinit()
   IF ( use_gpu ) THEN

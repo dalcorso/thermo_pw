@@ -23,7 +23,7 @@ USE noncollin_module, ONLY : npol
 USE uspp,         ONLY : okvan, deeq_nc
 USE qpoint,       ONLY : ikks, ikqs, nksq
 USE qpoint_aux,   ONLY : ikmks
-USE nc_mag_aux,   ONLY : deeq_nc_save
+USE lr_nc_mag,    ONLY : deeq_nc_save
 USE io_global,    ONLY : stdout
 USE many_k_ph_mod, ONLY : current_ikb_ph, startkb_ph
 

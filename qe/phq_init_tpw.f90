@@ -44,9 +44,6 @@ SUBROUTINE phq_init_tpw()
   USE wvfct,                ONLY : npwx, nbnd
   USE gvecw,                ONLY : gcutw
   USE wavefunctions,        ONLY : evc
-#if defined(__CUDA)
-  USE wavefunctions_gpum,   ONLY : evc_d
-#endif
   USE noncollin_module,     ONLY : noncolin, domag, npol, lspinorb
   USE uspp,                 ONLY : okvan, vkb, nlcc_any, nkb
   USE phus,                 ONLY : alphap
@@ -89,11 +86,12 @@ SUBROUTINE phq_init_tpw()
   INTEGER :: npw, npwq, nsolv
   REAL(DP) :: arg
     ! the argument of the phase
-  COMPLEX(DP), ALLOCATABLE :: aux1(:,:), tevc(:,:)
+  COMPLEX(DP), ALLOCATABLE :: aux1(:,:), tevc(:,:), evc_d(:,:)
     ! used to compute alphap
 #if defined(__CUDA)
   TYPE(bec_type) :: bectmp
     ! temporary buffer to work with offload of arrays of derived types
+  ATTRIBUTES(DEVICE) :: evc_d
 #endif
   !
   !
@@ -103,6 +101,7 @@ SUBROUTINE phq_init_tpw()
   !
 #if defined(__CUDA)
   Call allocate_bec_type_acc ( nkb, nbnd, bectmp )
+  ALLOCATE(evc_d(npwx*npol,nbnd))
 #endif
   IF (many_k)  THEN
      nsolv=1
@@ -214,9 +213,11 @@ SUBROUTINE phq_init_tpw()
      !
 #if defined(__CUDA)
      evc_d = evc
-     !$acc data present_or_copyin(evc)
+     !!$acc data present_or_copyin(evc)
+     !$acc update device(evc)
+     !$acc update host(vkb)
      CALL calbec( offload_type, npw, vkb, evc, bectmp )
-     !$acc end data
+     !!$acc end data
      IF (many_k) CALL becupdate_tpw(becp1k_d(:,:,:,ik), bectmp )
      CALL becupdate( offload_type, becp1, ik, nksq, bectmp )
 #else
@@ -242,7 +243,7 @@ SUBROUTINE phq_init_tpw()
            DO ig = 1, npw
               itmp = igk_k(ig,ikk)
 #if defined(__CUDA)
-              aux1(ig,ibnd) = evc_d(ig,ibnd) * tpiba * ( 0.D0, 1.D0 ) * &
+              aux1(ig,ibnd) = evc(ig,ibnd) * tpiba * ( 0.D0, 1.D0 ) * &
                    ( xk(ipol,ikk) + g(ipol,itmp) )
 #else
               aux1(ig,ibnd) = evc(ig,ibnd) * tpiba * ( 0.D0, 1.D0 ) * &
@@ -256,7 +257,7 @@ SUBROUTINE phq_init_tpw()
               DO ig = 1, npw
                  itmp = igk_k(ig,ikk)
 #if defined(__CUDA)
-                 aux1(ig+npwx,ibnd)=evc_d(ig+npwx,ibnd)*tpiba*(0.D0,1.D0)*&
+                 aux1(ig+npwx,ibnd)=evc(ig+npwx,ibnd)*tpiba*(0.D0,1.D0)*&
                       ( xk(ipol,ikk) + g(ipol,itmp) )
 #else
                  aux1(ig+npwx,ibnd)=evc(ig+npwx,ibnd)*tpiba*(0.D0,1.D0)*&
@@ -396,6 +397,7 @@ SUBROUTINE phq_init_tpw()
   !
 #if defined(__CUDA)
   Call deallocate_bec_type_acc ( bectmp )
+  DEALLOCATE(evc_d)
 #endif
   CALL stop_clock( 'phq_init' )
   !

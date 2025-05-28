@@ -25,6 +25,7 @@ MODULE beta_mod
   PUBLIC :: interp_beta
   PUBLIC :: interp_dbeta
   PUBLIC :: tab_beta
+  PUBLIC :: dq, nqx
   !
   SAVE
   !

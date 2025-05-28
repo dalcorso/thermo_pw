@@ -95,7 +95,7 @@ SUBROUTINE set_int3q(irr, imode0, rpert, drhoscf, int3_paw0, dvscfin)
      ELSE
         drhoc(:) = (0.0_DP,0.0_DP)
      ENDIF
-     CALL dv_of_drho (dvscfin (1, 1, ipol), .TRUE., drhoc)
+     CALL dv_of_drho (dvscfin (1, 1, ipol), drhoc)
   ENDDO
 !
 !   In the PAW case computes the change of the D coefficients

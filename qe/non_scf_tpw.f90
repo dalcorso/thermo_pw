@@ -25,8 +25,6 @@ SUBROUTINE non_scf_tpw( )
   USE wavefunctions,        ONLY : evc
   USE add_dmft_occ,         ONLY : dmft
   !
-  USE wavefunctions_gpum, ONLY : using_evc
-  USE wvfct_gpum,                ONLY : using_et
   USE exx,                  ONLY : exxinit, aceinit, use_ace
   USE scf,                  ONLY : rho, rho_core, rhog_core, v, vltot, vrs, kedtau
   USE ener,                 ONLY : ehart, etxc, vtxc, epaw
@@ -52,8 +50,6 @@ SUBROUTINE non_scf_tpw( )
   REAL(DP) :: charge
   REAL(DP) :: etot_cmp_paw(nat,2,2)
 !
-  CALL using_evc(0) ! This may not be needed. save buffer is intent(in)
-  !
   !
   CALL start_clock( 'electrons' )
   iter = 1
@@ -92,7 +88,6 @@ SUBROUTINE non_scf_tpw( )
   ! ... explicitly collected to the first node
   ! ... this is done here for et, in weights () for wg
   !
-  CALL using_et(1)
   CALL poolrecover( et, nbnd, nkstot, nks )
   !
   ! ... the new density is computed here. For PAW:
@@ -100,8 +95,7 @@ SUBROUTINE non_scf_tpw( )
   ! ... and a subtly different copy in rho%bec (scf module)
   !
   IF(xclib_dft_is('hybrid')) THEN 
-    IF (.not. use_gpu) CALL sum_band()
-    IF (      use_gpu) CALL sum_band_gpu()
+    CALL sum_band()
   END IF 
   !
   ! ... calculate weights of Kohn-Sham orbitals (only weights, not Ef,
@@ -137,8 +131,6 @@ SUBROUTINE non_scf_tpw( )
   ! ... FIXME: it shouldn't be necessary to do this here
   !
   IF ( nks == 1 .AND. (io_level < 2) .AND. (io_level > -1) ) &
-        CALL using_evc(0) ! save buffer is intent(in)
-  IF ( nks == 1 .AND. (io_level < 2) .AND. (io_level > -1) ) &
         CALL save_buffer( evc, nwordwfc, iunwfc, nks )
   !
   ! ... do a Berry phase polarization calculation if required
@@ -152,7 +144,6 @@ SUBROUTINE non_scf_tpw( )
   ! ... for DMFT write everything to file to restart next scf step from here
   !
   IF ( dmft ) THEN
-     CALL using_et(0)
      CALL save_in_electrons( iter-1, dr2, ethr, et )
      RETURN
   ENDIF
@@ -180,7 +171,6 @@ SUBROUTINE non_scf_tpw( )
         conv_elec=.FALSE.
         RETURN
      ENDIF
-     CALL using_et(1)
      CALL poolrecover( et, nbnd, nkstot, nks )
      ef_scf = ef
      ef_scf_up = ef_up
@@ -194,8 +184,6 @@ SUBROUTINE non_scf_tpw( )
      WRITE( stdout, 9102 )
      conv_elec = .TRUE.
      CALL print_ks_energies_nonscf ( ef_scf, ef_scf_up, ef_scf_dw ) 
-     IF ( nks == 1 .AND. (io_level < 2) .AND. (io_level > -1) ) &
-           CALL using_evc(0) ! save buffer is intent(in)
      IF ( nks == 1 .AND. (io_level < 2) .AND. (io_level > -1) ) &
            CALL save_buffer( evc, nwordwfc, iunwfc, nks )
      IF ( lberry ) CALL c_phase()

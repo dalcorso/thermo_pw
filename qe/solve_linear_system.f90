@@ -16,7 +16,7 @@ SUBROUTINE solve_linear_system(dvpsi, dpsi, h_diag, thresh, ik, isolv, lter)
 USE kinds,        ONLY : DP
 USE scf,          ONLY : vrs
 #if defined(__CUDA)
-  USE scf_gpum,   ONLY : vrs_d
+  USE many_k_mod,   ONLY : vrs_d
 #endif
 USE klist,        ONLY : ngk
 USE control_lr,   ONLY : nbnd_occ
@@ -25,7 +25,7 @@ USE noncollin_module, ONLY : npol
 USE uspp,         ONLY : okvan, deeq_nc
 USE qpoint,       ONLY : ikks, ikqs
 USE qpoint_aux,   ONLY : ikmks
-USE nc_mag_aux,   ONLY : deeq_nc_save
+USE lr_nc_mag,    ONLY : deeq_nc_save
 USE io_global,    ONLY : stdout
 
 IMPLICIT NONE

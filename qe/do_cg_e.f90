@@ -384,7 +384,7 @@ SUBROUTINE do_cg_e(drhoscfs)
      !   q /= 0 case) - symmetrize it
      !
      IF (.NOT.lgamma_gamma) THEN
-        CALL psyme (drhoscf)
+        CALL psymdvscf (drhoscf)
         IF ( noncolin.and.domag ) CALL psym_dmage(drhoscf)
      ENDIF
      !
@@ -392,7 +392,7 @@ SUBROUTINE do_cg_e(drhoscfs)
      !
      dvscfin = drhoscf
      DO ipol=1,rpert
-        CALL dv_of_drho (dvscfin (1, 1, ipol), .false.)
+        CALL dv_of_drho (dvscfin (1, 1, ipol))
      ENDDO
      !
      !  And interpolate the potential on the smooth grid if needed

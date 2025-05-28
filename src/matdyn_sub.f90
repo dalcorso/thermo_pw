@@ -845,7 +845,7 @@ SUBROUTINE setupmat_simple (q,dyn,nat,at,bg,tau,omega,alat, &
   INTEGER:: nr1, nr2, nr3, nat, nrws
   REAL(DP) :: q(3), tau(3,nat), at(3,3), bg(3,3), alat,      &
               epsil(3,3), zeu(3,3,nat), rws(0:3,nrws),       &
-              frc(nr1,nr2,nr3,3,3,nat,nat), omega 
+              frc(nr1,nr2,nr3,3,3,nat,nat), omega, alph
 
   COMPLEX(DP) ::  dyn(3,3,nat,nat)
   LOGICAL :: has_zstar, do_init
@@ -853,10 +853,12 @@ SUBROUTINE setupmat_simple (q,dyn,nat,at,bg,tau,omega,alat, &
   ! local variables
   !
   !
+  alph=1.0_DP
   dyn(:,:,:,:) = (0.d0,0.d0)
   CALL frc_blk (dyn,q,tau,nat,nr1,nr2,nr3,frc,at,bg,rws,nrws,do_init)
-  IF (has_zstar) CALL rgd_blk(nr1,nr2,nr3,nat,dyn,q,tau,epsil,zeu,bg,omega, &
-                               celldm(1),.false.,+1.d0)
+  IF (has_zstar) CALL rgd_blk(nr1,nr2,nr3,nat,dyn,q,tau,epsil,zeu,alph,&
+                              bg,omega,celldm(1),.false.,+1.d0)
+
   !
   RETURN
 END SUBROUTINE setupmat_simple

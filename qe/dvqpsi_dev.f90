@@ -682,13 +682,13 @@ USE kinds, ONLY : DP
 USE many_k_ph_mod, ONLY : ps1k_d, ps2k_d, int1_d, int2_d, ikks => ikks_d, &
                  startkb_ph => startkb_ph_d, u => u_d, deff_d, alphak_d,  &
                  becp1k_d, deff_nc_d, int1_nc_save_d, int2_so_d, ps1k_nc_d, &
-                 ps2k_nc_d, alphatk_d, becptk_d, int1_nc => int1_nc_d
+                 ps2k_nc_d, alphatk_d, becptk_d, int1_nc => int1_nc_d, &
+                 et => et_d
 USE many_k_mod, ONLY : vkbk_d, nat => nat_d, ntyp => ntyp_d, &
                 ityp => ityp_d, nh => nh_d, isk => isk_d, nhm => nhm_d,   &
                 qq_at => qq_at_d, deeq =>deeq_d, noncolin => noncolin_d,  &
                 lspinorb => lspinorb_d, lsda => lsda_d, nkb => nkb_d,     &
                 okvan => okvan_d, tpiba => tpiba_d 
-USE wvfct_gpum, ONLY : et => et_d
  
 IMPLICIT NONE
 

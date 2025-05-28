@@ -100,7 +100,6 @@ SUBROUTINE h_psii__gpu( lda, n, m, psi_d, hpsi_d, ik )
   USE bp,                      ONLY: lelfield, l3dstring, gdir, efield, efield_cry
   USE becmod,                  ONLY: bec_type, becp, calbec
   USE lsda_mod,                ONLY: current_spin, isk
-  USE scf_gpum,                ONLY: vrs_d, using_vrs_d
   USE uspp,                    ONLY: nkb, vkb
   USE many_k_mod,              ONLY: vkbk_d
   USE ldaU,                    ONLY: lda_plus_u, lda_plus_u_kind, Hubbard_projectors
@@ -117,7 +116,7 @@ SUBROUTINE h_psii__gpu( lda, n, m, psi_d, hpsi_d, ik )
   USE fft_helper_subroutines
   USE device_memcpy_m,         ONLY: dev_memcpy, dev_memset
   !
-  USE many_k_mod,              ONLY: g2kink_d, becpk_d
+  USE many_k_mod,              ONLY: g2kink_d, becpk_d, vrs_d
 #if defined(__OSCDFT)
   USE plugin_flags,            ONLY : use_oscdft
   USE oscdft_base,             ONLY : oscdft_ctx
@@ -145,7 +144,6 @@ SUBROUTINE h_psii__gpu( lda, n, m, psi_d, hpsi_d, ik )
   COMPLEX(DP) :: adata, aux(nkb,m)
   !
   CALL start_clock_gpu( 'h_psi' ); !write (*,*) 'start h_psi';FLUSH(6)
-!  CALL using_vrs_d(0)
   !
   ! ... Here we add the kinetic energy (k+G)^2 psi and clean up garbage
   !

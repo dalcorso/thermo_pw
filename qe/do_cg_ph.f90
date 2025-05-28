@@ -459,7 +459,7 @@ SUBROUTINE do_cg_ph(irr, imode0, drhoscfs)
      dvscfin = drhoscf
      DO ipol=1,rpert
         drhoc(:) = (0.0_DP,0.0_DP)
-        CALL dv_of_drho (dvscfin (1, 1, ipol), .TRUE., drhoc)
+        CALL dv_of_drho (dvscfin (1, 1, ipol), drhoc)
      ENDDO
 
      IF (lmetq0.and.convt) THEN
@@ -513,7 +513,7 @@ SUBROUTINE do_cg_ph(irr, imode0, drhoscfs)
         IF (okpaw) int3_paw=int3_paw+int3_paw0
      ENDIF
      CALL drhodvus (irr, imode0, dvscfin, rpert)
-     IF (nlcc_any) call addnlcc (imode0, drhoscf, rpert)
+     IF (nlcc_any) call dynmat_nlcc (imode0, drhoscf, rpert)
   ENDIF
 
   DEALLOCATE (aux1)

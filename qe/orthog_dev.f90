@@ -89,13 +89,12 @@ ATTRIBUTES(GLOBAL) SUBROUTINE orthog_ps( st, nbndk, ikb, nk, npe, nsolv, &
   USE cudafor
   USE util_param,     ONLY : DP
   USE klist,          ONLY : ngk => ngk_d
-  USE wvfct_gpum,     ONLY : et => et_d
   USE many_k_mod,     ONLY : lgauss => lgauss_d, ltetra => ltetra_d,    &
                              degauss=> degauss_d, ngauss => ngauss_d
   USE many_k_ph_mod,  ONLY : ikks=>ikks_d, ikqs=>ikqs_d, ikmks=>ikmks_d,    &
                              ikmkmqs=>ikmkmqs_d, startkb_ph => startkb_ph_d,&
                              nbnd_occ => nbnd_occ_d, alpha_pv => alpha_pv_d,&
-                             ef => ef_d
+                             ef => ef_d, et => et_d
   !
   IMPLICIT NONE
 #include<wgauss_interf.f90>
@@ -211,12 +210,11 @@ ATTRIBUTES(GLOBAL) SUBROUTINE orthog_last( st, nbndk, ikb, nk, npe, nsolv, &
   USE cudafor
   USE util_param,     ONLY : DP
   USE klist,          ONLY : ngk => ngk_d
-  USE wvfct_gpum,     ONLY : et => et_d
   USE many_k_mod,     ONLY : lgauss => lgauss_d, ltetra => ltetra_d,    &
                              degauss=> degauss_d, ngauss => ngauss_d
   USE many_k_ph_mod,  ONLY : ikks=>ikks_d, ikqs=>ikqs_d, ikmks=>ikmks_d,    &
                              ikmkmqs=>ikmkmqs_d, startkb_ph => startkb_ph_d,&
-                             nbnd_occ => nbnd_occ_d, ef => ef_d
+                             nbnd_occ => nbnd_occ_d, ef => ef_d, et => et_d
   !
   IMPLICIT NONE
 #include<wgauss_interf.f90>

@@ -35,7 +35,7 @@ SUBROUTINE drho_tpw
   USE control_lr, ONLY : lgamma
 
   USE dynmat,     ONLY : dyn00
-  USE modes,      ONLY : npertx, npert, nirr
+  USE modes,      ONLY : npertx, npert, nirr, u
   USE phus,       ONLY : becsumort, alphap
   USE units_ph,   ONLY : lrdrhous, iudrhous
 
@@ -149,7 +149,7 @@ SUBROUTINE drho_tpw
   wdyn (:,:) = (0.d0, 0.d0)
   nrstot = dffts%nr1 * dffts%nr2 * dffts%nr3
   DO nu_i = 1, 3 * nat
-     CALL compute_dvloc (nu_i, dvlocin)
+     CALL compute_dvloc (u(1,nu_i), .FALSE., dvlocin)
      DO nu_j = 1, 3 * nat
         DO is = 1, nspin_lsda
         ! FIXME: use zgemm instead of dot_product

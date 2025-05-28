@@ -34,7 +34,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
   USE fft_base,             ONLY : dfftp, dffts
   USE lsda_mod,             ONLY : lsda, nspin, current_spin, isk
   USE wvfct,                ONLY : nbnd, npwx, g2kin
-  USE scf,                  ONLY : rho, vrs
+  USE scf,                  ONLY : rho
   USE uspp,                 ONLY : okvan, nkb, vkb, deeq_nc
   USE uspp_param,           ONLY : lmaxkb, nhm
   USE noncollin_module,     ONLY : noncolin, npol, nspin_mag, domag
@@ -76,11 +76,10 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
   USE many_k_mod,   ONLY : evck_d, vkbk_d, g2kink_d, initialize_fft_factors, &
                            deallocate_fft_factors, allocate_becps_many_k, &
                            deallocate_becps_many_k, initialize_device_variables
-  USE wavefunctions_gpum,    ONLY : evc_d, using_evc_d
   USE qpoint,       ONLY : xq, nksq, ikks, ikqs
   USE qpoint_aux,   ONLY : ikmks, ikmkmqs, becpt, alphapt
   USE control_lr,   ONLY : lgamma, alpha_pv, nbnd_occ
-  USE nc_mag_aux,   ONLY : int1_nc_save, deeq_nc_save, int3_save
+  USE lr_nc_mag,   ONLY : int1_nc_save, deeq_nc_save, int3_nc_save
   USE dv_of_drho_lr, ONLY : dv_of_drho
   USE fft_interfaces, ONLY : fft_interpolate, fwfft
   USE ldaU,         ONLY : lda_plus_u
@@ -238,7 +237,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
   ALLOCATE (h_diag ( npwx*npol, nbnd))
   ALLOCATE (drhoc(dfftp%nnr))
   IF (noncolin.AND.domag.AND.okvan) THEN
-     ALLOCATE (int3_save( nhm, nhm, nat, nspin_mag, npe, 2))
+     ALLOCATE (int3_nc_save( nhm, nhm, nat, nspin_mag, npe, 2))
      ALLOCATE (dbecsum_aux ( (nhm * (nhm + 1))/2 , nat , nspin_mag , npe))
   ENDIF
   ALLOCATE(ikt(nksbx_ph))
@@ -279,9 +278,6 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
   !
   ! if q=0 for a metal: allocate and compute local DOS at Ef
   !
-#if defined(__CUDA)
-  CALL using_evc_d(2)
-#endif
   lmetq0 = (lgauss .OR. ltetra) .AND. lgamma
   IF (lmetq0) THEN
      ALLOCATE ( ldos ( dfftp%nnr  , nspin_mag) )
@@ -301,7 +297,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
   !
   DO kter = 1, niter_ph
      iter = kter + iter0
-     WRITE(6,*) 'solve_linter iter', iter
+!     WRITE(6,*) 'solve_linter iter', iter
 
      ltaver = 0
 
@@ -502,17 +498,11 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
                     CALL get_buffer (evq, lrwfc, iuwfc, ikmkmq)
                     evqk_d(:,nbnd*(ikwf-1)+1:nbnd*ikwf) = evq(:,1:nbnd)
                  ENDIF
-                 evc_d=evc
-                 !$acc parallel loop
-                 DO i=1,npwx*npol
-                    evck_d(i,nbnd*(ikwf-1)+1:nbnd*ikwf) = evc_d(i,1:nbnd)
-                 ENDDO
+                 evck_d(1:npwx*npol,nbnd*(ikwf-1)+1:nbnd*ikwf) = &
+                                        evc(1:npwx*npol,1:nbnd)
                  IF (lgamma) THEN
-                    !$acc parallel loop
-                    DO i=1,npwx*npol
-                       evqk_d(i,nbnd*(ikwf-1)+1:nbnd*ikwf)=&
-                                evck_d(i,nbnd*(ikwf-1)+1:nbnd*ikwf)
-                    ENDDO
+                    evqk_d(1:npwx*npol,nbnd*(ikwf-1)+1:nbnd*ikwf)=&
+                                evck_d(1:npwx*npol,nbnd*(ikwf-1)+1:nbnd*ikwf)
                  ENDIF
               ELSEIF (nksq==1) THEN
                  IF (lgamma) THEN
@@ -808,19 +798,11 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
               ENDIF
 #if defined(__CUDA)
               IF ((nksq>1.OR.nsolv==2).AND.noncolin) THEN
-                 !$acc parallel loop
-                 DO i=1,npwx*npol
-                    evc_d(i,1:nbnd)=evck_d(i,nbnd*(ikwf-1)+1:nbnd*ikwf) 
-                 ENDDO
-                 evc=evc_d
-              ENDIF
+                    evc(1:npwx*npol,1:nbnd)=evck_d(1:npwx*npol,nbnd*(ikwf-1)+1:nbnd*ikwf) 
+            ENDIF
 #else
               IF (nksq>1.OR.nsolv==2) THEN
-                 !$acc parallel loop
-                 DO i=1,npwx*npol
-                    evc_d(i,1:nbnd)=evck_d(i,nbnd*(ikwf-1)+1:nbnd*ikwf) 
-                 ENDDO
-                 evc=evc_d
+                 evc(1:npwx*npol,1:nbnd)=evck_d(1:npwx*npol,nbnd*(ikwf-1)+1:nbnd*ikwf) 
               ENDIF
 #endif
               !
@@ -975,7 +957,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
         ENDIF
         !
         ! Compute the response HXC potential
-        CALL dv_of_drho (dvscfout(1,1,ipert), .true., drhoc)
+        CALL dv_of_drho (dvscfout(1,1,ipert), drhoc)
      ENDDO
      !
      !   And we mix with the old potential
@@ -1091,7 +1073,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
      ENDIF
   ENDIF
 
-  IF (convt.AND.nlcc_any) CALL addnlcc (imode0, drhoscfh, npe)
+  IF (convt.AND.nlcc_any) CALL dynmat_nlcc (imode0, drhoscfh, npe)
 
   IF (ALLOCATED(ldoss)) DEALLOCATE (ldoss)
   IF (ALLOCATED(ldos)) DEALLOCATE (ldos)
@@ -1111,7 +1093,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
   DEALLOCATE (dvscfin)
   DEALLOCATE (drhoc)
   IF (noncolin.AND.domag.AND.okvan) THEN
-     DEALLOCATE (int3_save)
+     DEALLOCATE (int3_nc_save)
      DEALLOCATE (dbecsum_aux)
   ENDIF
   IF (ALLOCATED(drhoscf_aux)) DEALLOCATE(drhoscf_aux)

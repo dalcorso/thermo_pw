@@ -14,7 +14,7 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   !
   !
   USE control_flags,   ONLY : conv_ions, lforce=>tprnfor, tstress
-  USE basis,           ONLY : starting_wfc, starting_pot, startingconfig
+  USE starting_scf,    ONLY : starting_wfc, starting_pot, startingconfig
   USE io_files,        ONLY : prefix, tmp_dir, wfc_dir, seqopn
   USE lsda_mod,        ONLY : nspin
   USE control_flags,   ONLY : restart, lscf, io_level
@@ -53,7 +53,6 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   USE rism_module,     ONLY : lrism, rism_set_restart
   USE control_qe,      ONLY : many_k
   USE many_k_mod,      ONLY : deallocate_many_k, allocate_many_k, init_k_blocks
-  USE wvfct_gpum,      ONLY : using_et_d
   !
  !
   IMPLICIT NONE
@@ -98,7 +97,6 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
 !  this should be taken care by read_file, but for some unknown reason
 !  it is presently not updating these variables on the device
 !
-        CALL using_et_d(0)
         eigts1_d=eigts1
         eigts2_d=eigts2
         eigts3_d=eigts3

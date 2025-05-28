@@ -485,14 +485,12 @@ filename_s=TRIM(filelastic_s)
 filename_ph=TRIM(filelastic)//'_ph'
 filename_s_ph=TRIM(filelastic_s)//'_ph'
 
-IF (lelastic.OR.lelasticf) THEN
-   last_ngeom=1
-   first_ngeom=0
-   DO igeom=1,ngeom
-      IF (all_geometry_done_geo(igeom).AND.first_ngeom==0) first_ngeom=igeom
-      IF (all_geometry_done_geo(igeom)) last_ngeom=igeom
-   ENDDO
-ENDIF
+last_ngeom=1
+first_ngeom=0
+DO igeom=1,ngeom
+   IF (all_geometry_done_geo(igeom).AND.first_ngeom==0) first_ngeom=igeom
+   IF (all_geometry_done_geo(igeom)) last_ngeom=igeom
+ENDDO
 
 CALL gnuplot_ylabel(TRIM(label),.FALSE.) 
 IF (lelastic) THEN

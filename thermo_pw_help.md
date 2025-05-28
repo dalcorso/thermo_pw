@@ -46,7 +46,7 @@ package. Then you can give the command:</p>
 <code>git clone https://github.com/dalcorso/thermo_pw</code>
 </p>
 <p align="justify"> and you should get a directory called <code>thermo_pw</code> that contains the source code.
-The <code>git</code> version can be used only together with the version of <code>QE</code> reported here: <code>7.3.1</code>. Please note that sometimes the <code>git</code> version is not working properly and in any case its use is not recommended.</p> 
+The <code>git</code> version can be used only together with the version of <code>QE</code> reported here: <code>7.4</code>. Please note that sometimes the <code>git</code> version is not working properly and in any case its use is not recommended.</p> 
 
 <p align="justify"> Although <code>thermo_pw</code> has been 
 used for several years and can be considered reasonably stable, it remains an 

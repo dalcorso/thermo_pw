@@ -411,10 +411,9 @@ END SUBROUTINE incdrho_calbec
  USE util_param,    ONLY : DP
  USE many_k_mod,    ONLY : ntyp => ntyp_d, nat => nat_d, tvanp => tvanp_d, &
                            ityp => ityp_d, nh => nh_d, wk => wk_d,         &
-                           nhm => nhm_d
+                           nhm => nhm_d, ijtoh => ijtoh_d
  USE many_k_ph_mod, ONLY : dbecq_d, dbecsum_d, ikks => ikks_d,             &
                            startkb_ph => startkb_ph_d, becp1k_d
- USE uspp,          ONLY : ijtoh => ijtoh_d
 
  IMPLICIT NONE
 

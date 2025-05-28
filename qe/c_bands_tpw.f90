@@ -26,7 +26,7 @@ SUBROUTINE c_bands_nscf_tpw( )
   USE io_files,             ONLY : iunhub, iunwfc, nwordwfc, nwordwfcU
   USE buffers,              ONLY : get_buffer, save_buffer, open_buffer, &
                                    close_buffer
-  USE basis,                ONLY : starting_wfc
+  USE starting_scf,         ONLY : starting_wfc
   USE fft_base,             ONLY : dfftp
   USE klist,                ONLY : nkstot, nks, xk, ngk, igk_k
   USE uspp,                 ONLY : vkb, nkb
@@ -53,8 +53,6 @@ SUBROUTINE c_bands_nscf_tpw( )
   USE band_computation,     ONLY : diago_bands, ik_origin, sym_for_diago
   USE noncollin_module,     ONLY : noncolin, npol, domag
 
-  USE wavefunctions_gpum, ONLY : using_evc
-  USE wvfct_gpum,                ONLY : using_et
   USE uspp_init,            ONLY : init_us_2
 
   !
@@ -84,12 +82,10 @@ SUBROUTINE c_bands_nscf_tpw( )
   !
   ik_ = 0
   avg_iter = 0.D0
-  IF ( restart ) CALL using_et(1)
   IF ( restart ) CALL restart_in_cbands( ik_, ethr, avg_iter, et )
   !
   ! ... If restarting, calculated wavefunctions have to be read from file
   !
-  CALL using_evc(1)
   DO ik = 1, ik_
      CALL get_buffer( evc, nwordwfc, iunwfc, ik )
   ENDDO
@@ -158,7 +154,6 @@ SUBROUTINE c_bands_nscf_tpw( )
         !
         IF ( TRIM(starting_wfc) == 'file' ) THEN
            !
-           CALL using_evc(1)
            CALL get_buffer ( evc, nwordwfc, iunwfc, ik )
            !
         ELSE
@@ -170,13 +165,13 @@ SUBROUTINE c_bands_nscf_tpw( )
         ! ... diagonalization of bands for k-point ik
         !
         call diag_bands ( 1, ik, avg_iter )
+        !$acc update self(evc)
         !
         !  In the noncolinear magnetic case we have k, k+q, -k -k-q and
         !  to the last two wavefunctions we must apply t_rev.
         !  When lgamma is true we have only k and -k
         !
         IF (noncolin.AND.domag) THEN
-           CALL using_evc(0)
            IF (lgamma.AND. MOD(ik,2)==0) THEN
               CALL start_clock( 't_rev' )
               CALL apply_trev(evc, ik, ik-1)
@@ -190,7 +185,6 @@ SUBROUTINE c_bands_nscf_tpw( )
         !
         ! ... save wave-functions (unless disabled in input)
         !
-        CALL using_evc(0)
         IF ( io_level > -1 ) CALL save_buffer ( evc, nwordwfc, iunwfc, ik )
         !
         !
@@ -200,7 +194,6 @@ SUBROUTINE c_bands_nscf_tpw( )
            ! ... save wavefunctions to file
            !
            IF (check_stop_now()) THEN
-              CALL using_et(0)
               CALL save_in_cbands(ik, ethr, avg_iter, et )
               RETURN
            ENDIF
