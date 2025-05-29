@@ -289,9 +289,12 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
            IF (nksq.GT.1.OR.nsolv==2) THEN
               IF (lgamma) THEN
                  call get_buffer (evc, lrwfc, iuwfc, ikmk)
+                 !$acc update device(evc)
               ELSE
                  CALL get_buffer (evc, lrwfc, iuwfc, ikmk)
+                 !$acc update device(evc)
                  CALL get_buffer (evq, lrwfc, iuwfc, ikmkmq)
+                 !$acc update device(evq)
               ENDIF
            ENDIF
            !
