@@ -69,7 +69,7 @@ ALLOCATE( ikt( nksbx ))
 #if defined(__CUDA)
    ALLOCATE( et_d( nbnd, nks ))
    ALLOCATE(ikt_d( nksbx ))
-   et_d=et
+   et_d(1:nbnd,1:nks)=et(1:nbnd,1:nks)
 #endif
 
 CALL allocate_becps_many_k(1,1)
@@ -195,6 +195,7 @@ DO ikb=1,nkblocks
       avg_iter=avg_iter+dav_iter(ik)
    ENDDO
 ENDDO
+!$acc update device(et)
 
 CALL mp_sum( avg_iter, inter_pool_comm )
 avg_iter = avg_iter / nkstot

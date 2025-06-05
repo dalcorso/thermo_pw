@@ -951,13 +951,13 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
         ! IT: Should the condition "imode0+ipert > 0" be removed?
         !
         IF (imode0+ipert > 0) THEN
-           CALL addcore (imode0+ipert, drhoc)
+           CALL addcore(u(1, imode0+ipert), drhoc)
         ELSE
            drhoc(:) = (0.0_DP,0.0_DP) 
         ENDIF
         !
         ! Compute the response HXC potential
-        CALL dv_of_drho (dvscfout(1,1,ipert), drhoc)
+        CALL dv_of_drho (dvscfout(1,1,ipert), drhoc=drhoc)
      ENDDO
      !
      !   And we mix with the old potential

@@ -91,7 +91,7 @@ SUBROUTINE set_int3q(irr, imode0, rpert, drhoscf, int3_paw0, dvscfin)
   dvscfin = drhoscf
   DO ipol=1,rpert
      IF (imode0+ipol > 0) THEN
-        CALL addcore (imode0+ipol, drhoc)
+        CALL addcore (u(1,imode0+ipol), drhoc)
      ELSE
         drhoc(:) = (0.0_DP,0.0_DP)
      ENDIF

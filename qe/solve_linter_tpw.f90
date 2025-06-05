@@ -327,6 +327,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
                  IF (isolv==1) THEN
                     CALL dvqpsi_us_tpw (ik, u (1, mode),.false., becp1, &
                                                                     alphap )
+
                     ! DFPT+U: At the first ph iteration the bare perturbed 
                     ! Hubbard potential dvbare_hub_q * psi_kpoint 
                     ! is calculated and added to dvpsi.
@@ -471,6 +472,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
      !   Here we symmetrize them ...
      !
      CALL symmetrize_drho(drhoscfh, dbecsum, irr, npe, 1)
+
      !
      !   ... save them on disk and
      !   compute the corresponding change in scf potential
@@ -489,13 +491,13 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
         ! IT: Should the condition "imode0+ipert > 0" be removed?
         !
         IF (imode0+ipert > 0) THEN
-           CALL addcore (imode0+ipert, drhoc)
+           CALL addcore(u(1, imode0+ipert), drhoc)
         ELSE
            drhoc(:) = (0.0_DP,0.0_DP) 
         ENDIF
         !
         ! Compute the response HXC potential
-        CALL dv_of_drho (dvscfout(1,1,ipert), drhoc)
+        CALL dv_of_drho (dvscfout(1,1,ipert), drhoc=drhoc)
      ENDDO
      !
      !   And we mix with the old potential

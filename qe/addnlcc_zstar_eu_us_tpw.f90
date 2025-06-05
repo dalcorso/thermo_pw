@@ -24,7 +24,7 @@ SUBROUTINE addnlcc_zstar_eu_us_tpw( drhoscf )
 
   USE zstar_add, ONLY : zstareu0_rec
   USE qpoint,    ONLY : xq
-  USE modes,     ONLY : npert, nirr
+  USE modes,     ONLY : npert, nirr, u
   USE eqv,       ONLY : dmuxc
   USE gc_lr,     ONLY : grho, dvxc_rr,  dvxc_sr,  dvxc_ss, dvxc_s
 
@@ -64,7 +64,7 @@ SUBROUTINE addnlcc_zstar_eu_us_tpw( drhoscf )
         !
         DO ipert = 1, npe
            mode = imode0 + ipert
-           CALL addcore (mode, drhoc)
+           CALL addcore (u(1,mode), drhoc)
            dvaux = (0.0_dp,0.0_dp)
            DO is = 1, nspin_lsda
               DO is1 = 1, nspin_mag

@@ -21,6 +21,7 @@ SUBROUTINE clean_pw_tpw( flag)
   USE qrad_mod,  ONLY : deallocate_tab_qrad
   USE rhoc_mod,  ONLY : deallocate_tab_rhc
   USE beta_mod,  ONLY : deallocate_tab_beta
+  USE atwfc_mod, ONLY : deallocate_tab_atwfc
   IMPLICIT NONE
   LOGICAL :: flag
 
@@ -29,6 +30,7 @@ SUBROUTINE clean_pw_tpw( flag)
   CALL deallocate_tab_rhoat()
   CALL deallocate_tab_rhc()
   CALL deallocate_tab_beta()
+  CALL deallocate_tab_atwfc()
   CALL clean_pw(flag)
   !
   RETURN
