@@ -10,44 +10,44 @@
 subroutine dvqpsi_us_tpw (ik, uact, addnlcc, becp1, alphap)
   !----------------------------------------------------------------------
   !
-  !! This routine calculates \(dV_\text{bare}/d\tau \cdot \psi\) for one 
-  !! perturbation with a given q. The displacements are described by a 
-  !! vector u.  
+  !! This routine calculates \(dV_\text{bare}/d\tau \cdot \psi\) for one
+  !! perturbation with a given q. The displacements are described by a
+  !! vector u.
   !! The result is stored in \(\text{dvpsi}\). The routine is called for
-  !! each k-point and for each pattern u. It computes simultaneously all 
-  !! the bands. It implements Eq. (B29) of PRB 64, 235118 (2001). The 
-  !! contribution of the local pseudopotential is calculated here, that 
+  !! each k-point and for each pattern u. It computes simultaneously all
+  !! the bands. It implements Eq. (B29) of PRB 64, 235118 (2001). The
+  !! contribution of the local pseudopotential is calculated here, that
   !! of the nonlocal pseudopotential in \(\texttt{dvqpsi_us_only}\).
   !
   !
-  USE kinds, only : DP
-  USE funct,     ONLY : dft_is_nonlocc
-  USE xc_lib,    ONLY : xclib_dft_is
-  USE ions_base, ONLY : nat, ityp
-  USE cell_base, ONLY : tpiba
-  USE fft_base,  ONLY : dfftp, dffts
-  USE fft_interfaces, ONLY: fwfft, invfft
-  USE gvect,     ONLY : eigts1, eigts2, eigts3, mill, g, &
+  USE kinds,            ONLY : DP
+  USE funct,            ONLY : dft_is_nonlocc
+  USE xc_lib,           ONLY : xclib_dft_is
+  USE ions_base,        ONLY : nat, ityp
+  USE cell_base,        ONLY : tpiba
+  USE fft_base,         ONLY : dfftp, dffts
+  USE fft_interfaces,   ONLY : fwfft, invfft
+  USE gvect,            ONLY : eigts1, eigts2, eigts3, mill, g, &
                         ngm
-  USE gvecs,     ONLY : ngms, doublegrid
-  USE lsda_mod,  ONLY : lsda, isk
-  USE scf,       ONLY : rho, rho_core
+  USE gvecs,            ONLY : ngms, doublegrid
+  USE lsda_mod,         ONLY : lsda, isk
+  USE scf,              ONLY : rho, rho_core
   USE noncollin_module, ONLY : nspin_gga, nspin_mag, npol
-  use uspp_param,ONLY : upf
-  USE wvfct,     ONLY : nbnd, npwx
-  USE wavefunctions,  ONLY: evc
-  USE nlcc_ph,    ONLY : drc
-  USE uspp,       ONLY : nlcc_any
-  USE eqv,        ONLY : dvpsi, dmuxc, vlocq
-  USE qpoint,     ONLY : xq, eigqts, ikqs, ikks
-  USE klist,      ONLY : ngk, igk_k
-  USE gc_lr,      ONLY: grho, dvxc_rr,  dvxc_sr,  dvxc_ss, dvxc_s
-  USE qpoint,     ONLY : nksq
-  USE becmod,     ONLY : bec_type
+  use uspp_param,       ONLY : upf
+  USE wvfct,            ONLY : nbnd, npwx
+  USE wavefunctions,    ONLY : evc
+  USE nlcc_ph,          ONLY : drc
+  USE uspp,             ONLY : nlcc_any
+  USE eqv,              ONLY : dvpsi, dmuxc, vlocq
+  USE qpoint,           ONLY : xq, eigqts, ikqs, ikks
+  USE klist,            ONLY : ngk, igk_k
+  USE gc_lr,            ONLY : grho, dvxc_rr,  dvxc_sr,  dvxc_ss, dvxc_s
+  USE qpoint,           ONLY : nksq
+  USE becmod,           ONLY : bec_type
 
-  USE Coul_cut_2D, ONLY: do_cutoff_2D  
+  USE Coul_cut_2D, ONLY: do_cutoff_2D
   USE Coul_cut_2D_ph, ONLY : cutoff_localq
-  implicit none
+  IMPLICIT NONE
   !
   !   The dummy variables
   !

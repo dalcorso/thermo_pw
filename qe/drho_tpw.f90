@@ -31,6 +31,8 @@ SUBROUTINE drho_tpw
   USE control_ph, ONLY : ldisp, all_done, rec_code_read
 
   USE lrus,       ONLY : becp1
+  USE klist,      ONLY : lgauss
+  USE two_chem,   ONLY : twochem
   USE qpoint,     ONLY : nksq
   USE control_lr, ONLY : lgamma
 
@@ -88,12 +90,15 @@ SUBROUTINE drho_tpw
   !    due to the displacement of the augmentation charge
   !
   CALL compute_becsum_ph()
+  if(twochem.and.lgamma.and.lgauss) call compute_becsum_ph_cond()
   !
   CALL compute_alphasum()
+  if(twochem.and.lgamma.and.lgauss) call compute_alphasum_cond()
   !
   !    then compute the weights
   !
-  ALLOCATE (wgg (nbnd ,nbnd , nksq))
+  call start_clock('compute_wgg')
+  ALLOCATE (wgg (nbnd, nbnd, nksq))
   IF (lgamma) THEN
      becq => becp1
      alpq => alphap
@@ -108,12 +113,15 @@ SUBROUTINE drho_tpw
      ENDDO
   ENDIF
   CALL compute_weight (wgg)
+  call stop_clock('compute_wgg')
   !
   !    becq and alpq are sufficient to compute the part of C^3 (See Eq. 37
   !    which does not contain the local potential
   !
   IF (.NOT.lgamma) CALL compute_becalp (becq, alpq)
+  call start_clock('nldyntot')
   CALL compute_nldyn (dyn00, wgg, becq, alpq)
+  call stop_clock('nldyntot')
   !
   !   now we compute the change of the charge density due to the change of
   !   the orthogonality constraint
@@ -183,7 +191,7 @@ SUBROUTINE drho_tpw
   !
   !    add the augmentation term to the charge density and save it
   !
-  ALLOCATE (drhoust(dfftp%nnr, nspin_mag , npertx))
+  ALLOCATE (drhoust(dfftp%nnr, nspin_mag, npertx))
   drhoust=(0.d0,0.d0)
   !
   !  The calculation of dbecsum is distributed across processors (see addusdbec)
