@@ -42,8 +42,6 @@ join_qe:
           ./QESUB/vloc_mod.f90_qe ; mv ./QESUB/vloc_mod.f90 ../upflib ; fi
 	if test -f ./QESUB/rhoat_mod.f90 ; then mv ../upflib/rhoat_mod.f90 \
           ./QESUB/rhoat_mod.f90_qe ; mv ./QESUB/rhoat_mod.f90 ../upflib ; fi
-	if test -f ./QESUB/uspp_data.f90 ; then mv ../upflib/uspp_data.f90 \
-          ./QESUB/uspp_data.f90_qe ; mv ./QESUB/uspp_data.f90 ../upflib ; fi
 	if test -f ./QESUB/beta_mod.f90 ; then mv ../upflib/beta_mod.f90 \
           ./QESUB/beta_mod.f90_qe ; mv ./QESUB/beta_mod.f90 ../upflib ; fi
 	if test -f ./QESUB/pwcom.f90 ; then mv ../PW/src/pwcom.f90 \
@@ -77,9 +75,6 @@ leave_qe:
 	if test -f ./QESUB/rhoat_mod.f90_qe ; then mv ../upflib/rhoat_mod.f90 \
            ./QESUB/rhoat_mod.f90 ; \
            mv ./QESUB/rhoat_mod.f90_qe ../upflib/rhoat_mod.f90 ; fi
-	if test -f ./QESUB/uspp_data.f90_qe ; then mv ../upflib/uspp_data.f90 \
-           ./QESUB/uspp_data.f90 ; \
-           mv ./QESUB/uspp_data.f90_qe ../upflib/uspp_data.f90 ; fi
 	if test -f ./QESUB/beta_mod.f90_qe ; then mv ../upflib/beta_mod.f90 \
            ./QESUB/beta_mod.f90 ; \
            mv ./QESUB/beta_mod.f90_qe ../upflib/beta_mod.f90 ; fi
