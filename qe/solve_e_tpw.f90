@@ -223,7 +223,10 @@ subroutine solve_e_tpw(drhoscf)
         !
         ! reads unperturbed wavefunctions psi_k in G_space, for all bands
         !
-        if (nksq.gt.1) call get_buffer (evc, lrwfc, iuwfc, ikk)
+        if (nksq.gt.1) THEN
+           call get_buffer (evc, lrwfc, iuwfc, ikk)
+           !$acc update device(evc)
+        ENDIF
         !
         ! compute beta functions and kinetic energy for k-point ik
         ! needed by h_psi, called by ch_psi_all, called by cgsolve_all
@@ -295,11 +298,9 @@ subroutine solve_e_tpw(drhoscf)
            !
 
            conv_root = .true.
-
            call cgsolve_all (ch_psi_all,cg_psi,et(1,ikk),dvpsi,dpsi, &
               h_diag,npwx,npw,thresh,ik,lter,conv_root,anorm,&
               nbnd_occ(ikk),npol)
-
            ltaver = ltaver + lter
            lintercall = lintercall + 1
            if (.not.conv_root) WRITE( stdout, "(5x,'kpoint',i4,' ibnd',i4, &

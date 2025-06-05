@@ -29,6 +29,7 @@ SUBROUTINE compute_drhous_tpw (drhous, dbecsum, wgg, becq, alpq)
 
   USE qpoint,     ONLY : nksq, ikks, ikqs
   USE eqv,        ONLY : evq, dvpsi, dpsi
+  USE control_flags, ONLY : use_gpu
   USE control_lr, ONLY : lgamma, nbnd_occ
   USE control_ph, ONLY : zeu, zue
 
@@ -99,11 +100,13 @@ SUBROUTINE compute_drhous_tpw (drhous, dbecsum, wgg, becq, alpq)
      !
      !   For each k point we construct the beta functions
      !
-     CALL init_us_2 (npwq, igk_k(1,ikq), xk (1, ikq), vkb)
+     CALL init_us_2 (npwq, igk_k(1,ikq), xk (1, ikq), vkb, use_gpu)
+     !$acc update host(vkb)
      !
      !   Read the wavefunctions at k and transform to real space
      !
      CALL get_buffer (evc, lrwfc, iuwfc, ikk)
+     !$acc update device(evc)
      evcr(:,:) = (0.d0, 0.d0)
      DO ibnd = 1, nbnd
         DO ig = 1, npw

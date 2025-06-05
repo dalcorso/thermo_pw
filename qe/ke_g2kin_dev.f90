@@ -195,13 +195,17 @@ ATTRIBUTES(GLOBAL) SUBROUTINE ke_hprec( st, ikb, nk, g2kink_d, h_diag_ph_d, &
   IF (ibnd>nbnd_occ(ikk)) RETURN
 
   ig=(BlockIdx%z-1)*BlockDim%z + ThreadIdx%z
-  IF (ig>npwq) RETURN
+  IF (ig>npwx) RETURN
 
   ikwf=ik1 + (isolv-1)*nk
 
   k2= (ikwf-1)* nbnd + ibnd
 
-  h_diag_ph_d(ig,st_+ibnd)=1.0_DP/MAX(1.0_DP,g2kink_d(ig,ik1)/eprec_d(k2))
+  IF (ig>npwq) THEN
+     h_diag_ph_d(ig,st_+ibnd)=0.0_DP
+  ELSE
+     h_diag_ph_d(ig,st_+ibnd)=1.0_DP/MAX(1.0_DP,g2kink_d(ig,ik1)/eprec_d(k2))
+  ENDIF
   IF (noncolin_d) THEN
      h_diag_ph_d(ig+npwx,st_+ibnd)=h_diag_ph_d(ig,st_+ibnd)
   ENDIF
