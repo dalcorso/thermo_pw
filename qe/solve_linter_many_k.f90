@@ -433,9 +433,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
            !  This is needed to build the right hand side
            !
               IF (iter==1.OR.alpha_pv>0.0_DP) &
-                   CALL init_us_2( npwq,igk_k(1,ikq),xk(1,ikq),vkb,.TRUE.)
-              !$acc update host(vkb)
-              !$acc parallel loop present(vkb)
+                   CALL init_us_2( npwq,igk_k(1,ikq),xk(1,ikq),vkb, .FALSE.)
               DO i=1,npwx
                  vkbk_d(i,nkb*(ik1-1)+1:nkb*ik1)=vkb(i,1:nkb)
               ENDDO
@@ -460,14 +458,11 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
            ! needed by h_psi, called by ch_psi_all, called by cgsolve_all
 
 #if !  defined(__CUDA)              
-           !$acc parallel loop present(vkb)
            DO i=1,npwx
               vkb(i,1:nkb)=vkbk_d(i,nkb*(ik1-1)+1:nkb*ik1)
            ENDDO
-           !$acc update host(vkb)
 
            CALL g2_kin (ikq) 
-           !$acc parallel loop present(g2kin)
            DO i=1,npwx
               g2kink_d(i,ik1)=g2kin(i)
            ENDDO
@@ -525,7 +520,9 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
                  id=ik1 + (ipert - 1) * nksb_ph(ikb) + (isolv-1) * npe * &
                                                             nksb_ph(ikb)
                  st_=st(id)
-!                 h_diagk_ph_d(:,st_+1:st_+nbnd)=h_diag(:,1:nbnd)
+#if ! defined(__CUDA)                 
+                 h_diagk_ph_d(:,st_+1:st_+nbnd)=h_diag(:,1:nbnd)
+#endif
                  !
                  !  and now adds the contribution of the self consistent term
                  !
@@ -558,7 +555,6 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
         CALL set_hprec_dev( st_d, ikb, nksb_ph(ikb), g2kink_d, evqk_d, &
                         eprec_d, h_diagk_ph_d, nbnd, npe, nsolv, npol, npwx)
 #endif
-
 !
 !    Fourth loop over k: reads or computes the bare change of the
 !    wavefunction and adds the products of dV_Hxc/dmu psi
@@ -655,6 +651,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
               ENDDO
            ENDDO
         ENDDO         !
+
 #if defined(__CUDA)
 !
 !   In this case the previous loop computes only a small US part of what
@@ -704,14 +701,15 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
                     dvpsi(1:npwx*npol,1:nbnd)=&
                               dvpsik_d(1:npwx*npol,st_+1:st_+nbnd)
                     CALL save_buffer (dvpsi, lrbar, iubar, nrec)
+                 ELSE
+                    dvpsi(1:npwx*npol,1:nbnd)= &
+                                        dvpsik_d(1:npwx*npol,st_+1:st_+nbnd)
                  ENDIF    
 #if ! defined(__CUDA)
                  evq(:,1:nbnd)=evqk_d(:,nbnd*(ikwf-1)+1:nbnd*ikwf) 
-                 !$acc parallel loop present(vkb)
                  DO i=1,npwx
                     vkb(i,1:nkb)=vkbk_d(i,nkb*(ik1-1)+1:nkb*ik1)
                  ENDDO
-                 !$acc update host(vkb)
                  !
                  ! Ortogonalize dvpsi to valence states: ps = <evq|dvpsi>
                  ! Apply -P_c^+.
