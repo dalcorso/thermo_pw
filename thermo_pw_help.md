@@ -60,15 +60,25 @@ main <code>thermo_pw</code> page.</p>
 patches given below.</p>
 
 **Patches for thermo_pw.2.0.1**:
-
+<br>
+many_k=.TRUE. not working with LSDA. Substitute the file
+<code>thermo_pw/qe/incdrhoscf_dev.f90</code>
+with this <a href="https://people.sissa.it/~dalcorso/incdrhoscf_dev.f90">file</a>.
+<br>
 **Patches for thermo_pw.2.0.0**:
 To compile with cmake copy in <code>thermo_pw/CMakeLists.txt</code> 
 the file that you find <a href="https://people.sissa.it/~dalcorso/thermo_pw/CMakeLists.txt">here</a>.
-
+<br>
+many_k=.TRUE. not working with LSDA. Correct as described for version
+2.0.1.
+<br>
 **Patches for thermo_pw.1.9.1**:
 The code hangs when using start_q and last_q
 with <code>what='elastic_constants_geo'</code>. Correct
 as in commit <code>48b77cc</code> of Mar. 11, 2024.
+<br>
+many_k=.TRUE. not working with LSDA. Correct as described for version
+2.0.1.
 <br>
 **Patches for thermo_pw.1.9.0**:
 <br>
