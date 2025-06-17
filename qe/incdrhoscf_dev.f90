@@ -29,6 +29,8 @@ USE wvfct,         ONLY : npwx
 USE cell_base,     ONLY : omega
 USE ions_base,     ONLY : nat
 USE fft_base,      ONLY : dffts, dfftp
+USE lsda_mod,      ONLY : lsda, isk
+USE qpoint,        ONLY : ikks
 USE uspp,          ONLY : okvan
 USE uspp_param,    ONLY : nhm
 USE many_k_mod,    ONLY : becpk_d
@@ -70,7 +72,7 @@ REAL(DP), DEVICE :: dpsicrm(2,nnrs,npol,nbnd*nksb_ph*npe)
 ! space for the Fourier transform of the induced wavefunctions
 
 INTEGER :: nr1s, nr2s, nr3s, nr1sx, nr2sx, adim, ikb, ierr
-INTEGER :: ik1, id, ipert, ijh, st_, ibnd, na
+INTEGER :: ik1, id, ipert, ijh, st_, ibnd, na, current_spin, ik, ikk
 COMPLEX(DP) :: dbecsum_h((nhm*(nhm+1))/2, nat, nspin_mag, nbnd*nksbx_ph*npe)
 
 nnr=dfftp%nnr
@@ -130,12 +132,17 @@ IF (okvan) THEN
    DO na=1,nat
       DO ijh=1,(nhm * (nhm + 1))/2
          DO ik1=1, nksb_ph
+            ik=ik1+startkb_ph(ikb)
+            ikk = ikks(ik)
+            current_spin=1
+            IF (lsda) current_spin=isk(ikk)
             DO ipert=1, npe
                id=ik1+(ipert-1)*nksb_ph
                st_=st(id)
                DO ibnd=1, nbndk(id)
-                  dbecsum(ijh,na,1,ipert)=dbecsum(ijh,na,1,ipert) + &
-                         dbecsum_h(ijh,na,1,st_+ibnd)
+                  dbecsum(ijh,na,current_spin,ipert)=&
+                         dbecsum(ijh,na,current_spin,ipert) + &
+                         dbecsum_h(ijh,na,current_spin,st_+ibnd)
                ENDDO
             ENDDO
          ENDDO
@@ -411,7 +418,8 @@ END SUBROUTINE incdrho_calbec
  USE util_param,    ONLY : DP
  USE many_k_mod,    ONLY : ntyp => ntyp_d, nat => nat_d, tvanp => tvanp_d, &
                            ityp => ityp_d, nh => nh_d, wk => wk_d,         &
-                           nhm => nhm_d, ijtoh => ijtoh_d
+                           nhm => nhm_d, ijtoh => ijtoh_d, isk => isk_d,   &
+                           lsda => lsda_d
  USE many_k_ph_mod, ONLY : dbecq_d, dbecsum_d, ikks => ikks_d,             &
                            startkb_ph => startkb_ph_d, becp1k_d
 
@@ -425,7 +433,7 @@ END SUBROUTINE incdrho_calbec
  !! input: the starting point of each set in psicr and dpsicr
 
  INTEGER :: ik1, ik, ikk, ipert, id, st_, ibnd, ijkb0, nt, na, ih, jh, ijh, &
-            ikb, jkb, mb 
+            ikb, jkb, mb, current_spin
  REAL(DP) :: wgt
 
  id=(BlockIdx%x-1)*BlockDim%x + ThreadIdx%x
@@ -435,6 +443,8 @@ END SUBROUTINE incdrho_calbec
 
  ik=startkb_ph(current_ikb_ph)+ik1 
  ikk = ikks(ik)
+ current_spin=1
+ IF (lsda) current_spin=isk(ikk)
  mb = nbndk(id)
 
  wgt = wk(ikk) 
@@ -444,7 +454,7 @@ END SUBROUTINE incdrho_calbec
  ibnd=(BlockIdx%z-1)*BlockDim%z + ThreadIdx%z
  IF (ibnd>mb) RETURN
 
- dbecsum_d(1:(nhm*(nhm+1))/2, 1:nat, 1, st_+ibnd)=CMPLX(0.0_DP,0.0_DP,KIND=DP)
+ dbecsum_d(1:(nhm*(nhm+1))/2, 1:nat, current_spin, st_+ibnd)=CMPLX(0.0_DP,0.0_DP,KIND=DP)
 
  ijkb0 = 0
  DO nt = 1, ntyp
@@ -455,14 +465,14 @@ END SUBROUTINE incdrho_calbec
              DO ih = 1, nh(nt)
                 ikb = ijkb0 + ih
                 ijh=ijtoh(ih,ih,nt)
-                dbecsum_d (ijh, na, 1, st_+ibnd) = &
-                   dbecsum_d(ijh, na, 1, st_+ibnd) + wgt * &
+                dbecsum_d (ijh, na, current_spin, st_+ibnd) = &
+                   dbecsum_d(ijh, na, current_spin, st_+ibnd) + wgt * &
                        (CONJG(becp1k_d(ikb,1,ibnd,ik))*dbecq_d(ikb,ibnd,id))
                 DO jh = ih + 1, nh (nt)
                    ijh=ijtoh(ih,jh,nt)
                    jkb = ijkb0 + jh
-                   dbecsum_d (ijh, na, 1, st_+ibnd) =                        &
-                           dbecsum_d (ijh, na, 1, st_+ibnd) +                &
+                   dbecsum_d (ijh, na, current_spin, st_+ibnd) =     &
+                           dbecsum_d (ijh, na, current_spin, st_+ibnd) +  &
                     wgt*(CONJG(becp1k_d(ikb,1,ibnd,ik))*dbecq_d(jkb,ibnd,id)+&
                          CONJG(becp1k_d(jkb,1,ibnd,ik))*dbecq_d(ikb,ibnd,id) )
                 ENDDO
