@@ -47,10 +47,9 @@ npwq=ngk(ikq)
 ikmk=ikk
 IF (isolv==2) THEN
    ikmk=ikmks(ik)
-   vrs(:,2:4)=-vrs(:,2:4)
-#if defined(__CUDA)
-   vrs_d = vrs
-#endif
+   !$acc kernels
+   vrs(:, 2:4) = -vrs(:, 2:4)
+   !$acc end kernels
    IF (okvan) THEN
       deeq_nc(:,:,:,:)=deeq_nc_save(:,:,:,:,2)
       !$acc update device(deeq_nc)
@@ -63,10 +62,9 @@ CALL cgsolve_all (ch_psi_all, cg_psi, et(1,ikmk), dvpsi, dpsi, &
                   anorm, nbnd_occ(ikk), npol )
 
 IF (isolv==2) THEN
-   vrs(:,2:4)=-vrs(:,2:4)
-#if defined(__CUDA)
-   vrs_d = vrs
-#endif
+   !$acc kernels
+   vrs(:, 2:4) = -vrs(:, 2:4)
+   !$acc end kernels
    IF (okvan) THEN
       deeq_nc(:,:,:,:)=deeq_nc_save(:,:,:,:,1)
       !$acc update device(deeq_nc)
