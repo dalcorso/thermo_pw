@@ -260,6 +260,7 @@ set(src_tpw_qe
     qe/init_run_tpw.f90
     qe/init_us_2_kernel.f90
     qe/irrek.f90
+    qe/ke_g2kin_dev.f90
     qe/kpoint_grid.f90
     qe/kpoint_grid_serial_tpw.f90
     qe/lanczos_write_restart.f90
@@ -277,6 +278,7 @@ set(src_tpw_qe
     qe/openfilq_tpw.f90
     qe/orthogonalize_omega.f90
     qe/orthogonalize_tpw.f90
+    qe/orthog_dev.f90
     qe/paw_add_onecenter.f90
     qe/paw_add_symmetry.f90
     qe/pheqscf.f90
