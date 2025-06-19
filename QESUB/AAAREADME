@@ -1,13 +1,24 @@
 Why we need to change these QE routines:
 
+beta_mod.f90 we deallocate tab_beta only if it has been allocated.
+             Moreover we need to use tab_beta so we made it PUBLIC.
+
+bfgs_module.f90  If the bfgs routine exceedes the maximum number of 
+            allowed iterations there is no way to change the 
+            bfgs_file in a different pw.x run. Added line 1121.
 
 clocks_handler.f90 we increase the defaults number of clocks.
                    At line 45 maxclocks=2048
 
+io_dyn_mat.f90 The length of the atm vector became 6, but this routine was
+             not changed
+
+lmdif.f90 we use at line 95 epsdiff=1.d-6 instead of zero.
+
 parameters.f90  we increase the maximum number of k points
                 At line 16 npk=120000
 
-lmdif.f90 we use at line 95 epsdiff=1.d-6 instead of zero.
+pwcom.f90 igk_k deallocated from the acc system only if allocated.
 
 rhoat_mod.f90 we need to call deallocate_tab_rhoat so we make this routine
               public at line 25
@@ -15,16 +26,3 @@ rhoat_mod.f90 we need to call deallocate_tab_rhoat so we make this routine
 vloc_mod.f90 we deallocate tab_vloc only if it has been allocated.
              See at line 238.
 
-uspp_data.f90 tab_at deallocated from the acc system only if allocated.
-
-pwcom.f90 igk_k deallocated from the acc system only if allocated.
-
-bfgs_module.f90  If the bfgs routine exceedes the maximum number of 
-            allowed iterations there is no way to change the 
-            bfgs_file in a different pw.x run. Added line 1121.
-
-beta_mod.f90 we deallocate tab_beta only if it has been allocated.
-             Moreover we need to use tab_beta so we made it PUBLIC.
-
-io_dyn_mat.f90 The length of the atm vector became 6, but this routine was
-             not changed

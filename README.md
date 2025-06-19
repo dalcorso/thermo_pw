@@ -6,15 +6,7 @@
 > Quantum ESPRESSO (QE) (see http://www.quantum-espresso.org)
 > as the underlying engine.
 
-Thermo\_pw reads the same input as the pw.x code of QE and produces postscript
-figures of some material properties. While less flexible than QE,
-for properties such as the electronic band structures, the phonon
-dispersions, or the harmonic and anharmonic thermodynamic quantities,
-it is simpler to use and faster to learn. Moreover it can run in parallel
-creating several images of itself, carrying out asynchronous tasks.
-See [Doc/tutorial.pdf](https://people.sissa.it/~dalcorso/thermo_pw/tutorial.pdf) (or [here](https://people.sissa.it/~dalcorso/thermo_pw/tutorial/tutorial.html)) for an overview of the code
-and the file [Doc/user\_guide.pdf](https://people.sissa.it/~dalcorso/thermo_pw/user_guide.pdf) (or [here](https://people.sissa.it/~dalcorso/thermo_pw/user_guide/user_guide.html)) for a detailed description of its 
-options.
+Thermo\_pw uses the same input format as Quantum ESPRESSO's <code>pw.x</code> code and generates PostScript figures of various material properties. While less flexible than QE for certain aspects, it offers a simpler and faster learning curve for properties such as electronic band structures, phonon dispersions, and both harmonic and anharmonic thermodynamic quantities. Additionally, it supports parallel execution, allowing multiple instances to run asynchronously for image generation. For an overview, refer to [Doc/tutorial.pdf](https://people.sissa.it/~dalcorso/thermo_pw/tutorial.pdf) (or [here](https://people.sissa.it/~dalcorso/thermo_pw/tutorial/tutorial.html)), and for a detailed description of its options, consult [Doc/user\_guide.pdf](https://people.sissa.it/~dalcorso/thermo_pw/user_guide.pdf) (or [here](https://people.sissa.it/~dalcorso/thermo_pw/user_guide/user_guide.html)).
 
 [![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
 
@@ -46,11 +38,7 @@ make leave_qe
 ```
 Then remove this directory.
 
-NB: This code substitutes the main Makefile, and the files install/makedeps.sh
-and install/plugins\_makefile of the QE distribution. Only after typing
-make leave\_qe the original files are copied in the QE distribution. If
-you just remove the thermo\_pw directory the files of the QE package are not
-restored and you could have problems to reinstall thermo\_pw.
+NB: This code replaces the main <code>Makefile</code>, <code>CMakeLists.txt</code>, the <code>install/makedeps.sh</code> and <code>install/plugins_makefile</code> files within your Quantum ESPRESSO (QE) distribution. The original QE files are only restored when you type <code>make leave_qe</code>. If you simply delete the <code>thermo_pw</code> directory, the QE package files will not be restored, which could cause issues if you try to reinstall <code>thermo_pw</code>. Additionally, all files in the <code>QESUB</code> directory are replaced. Please refer to the <code>AAAREADME</code> file in that directory for details on the modifications made to QE.
 
 ## PEOPLE
 
@@ -60,10 +48,10 @@ Dal Corso
 
 Some routines have been contributed by SISSA PhD students and post-docs.
 Among them I mention M. Palumbo, O. Motornyi, A. Urru, C. Malica, X. Gong,
-and B. Thakur.
+B. Thakur, and A. Ahmed.
 
 I would like also to thank all the people that contributed with comments,
-requests of improvements, and bug reports.
+requests for improvements, and bug reports.
 
 ## LICENSE
 

@@ -1,7 +1,9 @@
-New in Version 2.0.2 
+20/06/2025 Version 2.0.2 is now frozen.
 
-This version is compatible with Quantum ESPRESSO 7.4.
+This version is very similar to thermo_pw 2.0.0 but it is
+compatible with Quantum ESPRESSO 7.4.
 
+Removed a problem with many_k=.TRUE. and lsda.
 
 15/4/2025 Version 2.0.1 is now frozen.
 

@@ -5,11 +5,11 @@ working version of the <a href="http://www.quantum-espresso.org/">Quantum
 ESPRESSO (QE)</a> package. <code>Thermo_pw</code> can be downloaded from its 
 <a href="http://dalcorso.github.io/thermo_pw/">main page</a> as 
 a <code>.tar.gz</code> file. The current production version is 
-<code>2.0.1</code> compatible with 
-<code>QE-7.3.1</code>. The <code>thermo_pw</code> file should be copied
+<code>2.0.2</code> compatible with 
+<code>QE-7.4</code>. The <code>thermo_pw</code> file should be copied
 in the main (QE) directory and unpacked with the command:</p>
 <p align="center">
-<code>tar -xzvf thermo_pw.2.0.1.tar.gz</code>
+<code>tar -xzvf thermo_pw.2.0.2.tar.gz</code>
 </p>
 <p align="justify">This command produces a directory called 
 <code>thermo_pw</code>. To compile the code you need a Fortran compiler, for 
@@ -51,7 +51,7 @@ The <code>git</code> version can be used only together with the version of <code
 <p align="justify"> Although <code>thermo_pw</code> has been 
 used for several years and can be considered reasonably stable, it remains an 
 experimental code given as it is.
-A version of <code>QE</code> older than <code>7.3.1</code>
+A version of <code>QE</code> older than <code>7.4</code>
 can still be used with <code>thermo_pw</code> matching carefully the
 versions of <code>thermo_pw</code> and of <code>QE</code> as explained in the
 main <code>thermo_pw</code> page.</p>
@@ -59,25 +59,26 @@ main <code>thermo_pw</code> page.</p>
 <p align="justify"> Before using <code>thermo_pw</code>, please apply the 
 patches given below.</p>
 
+**Patches for thermo_pw.2.0.2**:
+<br>
 **Patches for thermo_pw.2.0.1**:
 <br>
 many_k=.TRUE. not working with LSDA. Substitute the file
 <code>thermo_pw/qe/incdrhoscf_dev.f90</code>
 with this <a href="https://people.sissa.it/~dalcorso/incdrhoscf_dev.f90">file</a>.
-<br>
 **Patches for thermo_pw.2.0.0**:
 To compile with cmake copy in <code>thermo_pw/CMakeLists.txt</code> 
 the file that you find <a href="https://people.sissa.it/~dalcorso/thermo_pw/CMakeLists.txt">here</a>.
 <br>
-many_k=.TRUE. not working with LSDA. Correct as described for version
+many_k=.TRUE. not working with LSDA. Correct as described in version
 2.0.1.
-<br>
+
 **Patches for thermo_pw.1.9.1**:
 The code hangs when using start_q and last_q
 with <code>what='elastic_constants_geo'</code>. Correct
 as in commit <code>48b77cc</code> of Mar. 11, 2024.
 <br>
-many_k=.TRUE. not working with LSDA. Correct as described for version
+many_k=.TRUE. not working with LSDA. Correct as described in version
 2.0.1.
 <br>
 **Patches for thermo_pw.1.9.0**:
