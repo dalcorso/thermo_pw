@@ -74,6 +74,7 @@ PROGRAM epsilon_tpw
   USE lrus,        ONLY : dpqq, dpqq_so
   USE klist,       ONLY : lgauss, ltetra
   USE wvfct,       ONLY : nbnd
+  USE gnuplot,     ONLY : determine_backspace
 
   USE mp_world,    ONLY : world_comm
   USE mp,          ONLY : mp_bcast
@@ -154,6 +155,12 @@ PROGRAM epsilon_tpw
 
   tmp_dir = trimcheck(outdir)
   shift = shift / rytoev
+
+  !
+  !  Determine how the backspace is written on file. This is required by the
+  !  gnuplot library
+  !
+   CALL determine_backspace()
   !
   ! read PW simulation parameters from prefix.save/data-file.xml
   !
@@ -186,6 +193,7 @@ PROGRAM epsilon_tpw
   CALL eps_calc (intersmear, nfs, wmax, wmin, nbndmin, nbndmax, shift, &
                  calculation, fileps)
   !
+
   IF ( ionode ) WRITE( stdout , "(/)" )
   CALL print_clock( 'eps_calc' )
   CALL print_clock( 'dipole_calc' )
