@@ -1,44 +1,48 @@
 # THERMO_PW QUICK HELP
 
-<p align="justify"> In order to use <code>thermo_pw</code> you need a
-working version of the <a href="http://www.quantum-espresso.org/">Quantum 
-ESPRESSO (QE)</a> package. <code>Thermo_pw</code> can be downloaded from its 
-<a href="http://dalcorso.github.io/thermo_pw/">main page</a> as 
-a <code>.tar.gz</code> file. The current production version is 
-<code>2.0.2</code> compatible with 
-<code>QE-7.4</code>. The <code>thermo_pw</code> file should be copied
-in the main (QE) directory and unpacked with the command:</p>
-<p align="center">
+<p align="justify"> 
+To use <code>thermo_pw</code>, a functional version of the <a href="http://www.quantum-espresso.org/">Quantum ESPRESSO (QE)<a> package is required. <code>Thermo_pw</code> can be downloaded from its <a href="http://dalcorso.github.io/thermo_pw/">main page</a> as a <code>.tar.gz</code> file. The current production version is <code>2.0.2</code>, compatible with <code>QE-7.4</code>.</p>
+
+<p align="justify"> 
+Copy the <code>thermo_pw</code> archive into the main <code>QE</code> directory and unpack it using the command:</p>
+<p align="center"> 
 <code>tar -xzvf thermo_pw.2.0.2.tar.gz</code>
 </p>
-<p align="justify">This command produces a directory called 
-<code>thermo_pw</code>. To compile the code you need a Fortran compiler, for 
-instance the <code>gcc</code> package and <code>gfortran</code> (or 
-<code>gcc-fortran</code> in some distributions),
-and the same libraries required by <code>QE</code>. 
-After getting the directory <code>thermo_pw</code> in the main <code>QE</code> 
-directory, cd to the directory <code>thermo_pw</code> and give the command 
-<code>make join_qe</code>. Then cd to the main <code>QE</code> 
-directory and compile <code>thermo_pw</code> with the command:</p>
-<p align="center"><code>
-make thermo_pw
-</code></p>
-<p align="justify"> Instead, to use <code>cmake</code>, you 
-create the directory <code>build</code> enter there and give the command:</p>
-<p align="center"><code>
-cmake -DCMAKE_C_COMPILER=c_compiler -DCMAKE_Fortran_COMPILER=fortran_compiler ../
-</code></p>
-<p align="justify"> Then the command 
-<code>make</code> produces also the <code>thermo_pw.x</code> executable.</p>
-<p align="justify"> To run <code>thermo_pw</code> it is useful to have the 
-<a href="http://www.gnuplot.info/">gnuplot</a> package, and to plot 
-the Brillouin zone
-you need the <a href="http://asymptote.sourceforge.net/">asymptote</a> package. 
-Both are available as precompiled packages in many distributions.
-For further information, please refer to the user guide
-available in the <code>thermo_pw/Doc</code> directory.
-Please report any problem to
-<a href="mailto:dalcorso .at. sissa.it"> dalcorso .at. sissa.it</a>.</p>
+<p align="justify"> 
+This command will create a directory named <code>thermo_pw<code>.
+To compile the code, you will need a Fortran compiler (e.g., the <code>gcc</code> package with <code>gfortran</code>, or <code>gcc-fortran</code> in some distributions) and the same libraries required by <code>QE</code>.</p>
+
+<p align="justify">
+Once the <code>thermo_pw</code> directory is present in the main 
+<code>QE</code> directory, cd into <code>thermo_pw</code> and write:</p>
+<p align="center">
+<code>make join_qe</code>
+</p>
+
+<p align="justify">
+Then, cd back to the main <code>QE</code> directory and compile <code>thermo_pw</code> with the commands:</p>
+<p align="center">
+<code>./configure</code> </p>
+<p align="center">
+<code>make thermo_pw</code></p>
+
+<p align="justify">
+Alternatively, to use <code>cmake</code>, create a <code>build<code> directory, enter it, and execute:</p>
+<p align="center">
+<code>cmake -DCMAKE_C_COMPILER=c_compiler -DCMAKE_Fortran_COMPILER=fortran_compiler ../ </code><p>
+<p align="justify">
+or, to compile for GPU: </p>
+<p align="center">
+<code>cmake -DCMAKE_C_COMPILER=mpicc -DCMAKE_Fortran_COMPILER=mpif90 -DQE_ENABLE_CUDA=ON -DQE_ENABLE_OPENACC=ON -DQE_ENABLE_MPI_GPU_AWARE=ON ../</code></p>
+
+<p align="justify">
+Subsequently, the <code>make</code> command will also generate the <code>thermo_pw.x</code> executable.</p>
+
+<p align="justify">
+For running <code>thermo_pw</code>, the <a href="http://www.gnuplot.info/">gnuplot</a> package is beneficial. To plot the Brillouin zone, the <a href="http://asymptote.sourceforge.net/">asymptote</a> package is necessary. Both are typically available as precompiled packages in many distributions.</p>
+
+<p align="justify">
+For further details, please consult the user guide located in the <code>thermo_pw/Doc<code> directory. Please report any issues to <a href="mailto:dalcorso .at. sissa.it">dalcorso.at.sissa.it</a>.</p>
 
 <p align="justify"> The development version of <code>thermo_pw</code> is hosted at <a href="https://github.com/dalcorso/thermo_pw">https://github.com/dalcorso/thermo_pw</a>. To download it you need the <code>git</code>
 package. Then you can give the command:</p>

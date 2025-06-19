@@ -2,11 +2,11 @@
 <code>Thermo_pw</code> is a Fortran driver designed for the parallel and/or automated computation of material properties. It leverages the powerful routines of Quantum ESPRESSO (QE) as its core engine. For common tasks, <code>thermo_pw</code> offers an alternative workflow organization compared to QE, utilizing asynchronous image parallelization where possible. Furthermore, the code includes pre-processing tools to streamline user input and post-processing tools to generate plots directly comparable with experimental data.
 
 <p align="justify">Get started with <code>thermo_pw</code>:</p>
-Quick Introduction: <a href="https://dalcorso.github.io/thermo_pw/thermo_pw_help.html"> click here</a>
+Quick Introduction: <a href="https://dalcorso.github.io/thermo_pw/thermo_pw_help.html"> click here</a>.
 <br>
-Brief Tutorial: <a href="https://people.sissa.it/dalcorso/thermo_pw/tutorial/tutorial.html"> click here</a>
+Brief Tutorial: <a href="https://people.sissa.it/dalcorso/thermo_pw/tutorial/tutorial.html"> click here</a>.
 <br>
-User's Guide (Version 2.0.0):<a href="https://people.sissa.it/dalcorso/thermo_pw/user_guide/index.html"> click here</a>
+User's Guide (Version 2.0.0):<a href="https://people.sissa.it/dalcorso/thermo_pw/user_guide/index.html"> click here</a>.
 <br>
 
 <p align="justify">Currently, there is no dedicated publication for citing <code>thermo_pw</code>. If you wish to reference it in your work, please cite this webpage.</p>
@@ -145,6 +145,10 @@ Ref.2 describes the GPU acceleration for the many\_k option.</p>
 
 <p align="justify">The following works contain some calculations made by <code>thermo_pw</code>:</p>
 <br>
+8. X. Gong, Ab initio thermoelasticity of crystals at extremes,
+<a href="https://iris.sissa.it/handle/20.500.11767/143090">PhD Thesis.</a>
+<br>
+<br>
 7. B. Thakur, X. Gong, and A. Dal Corso,
 Thermodynamic properties of fcc lead: A scalar and fully 
 relativistic first principle study,
@@ -232,151 +236,150 @@ Seek Further Assistance: If the problem persists, please post details to the <a 
 **Thermo_pw downloads**:
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.2.0.2.tar.gz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.2.0.2.tar.gz">
 thermo_pw.2.0.2.tar.gz</a>  (released 20-06-2025) compatible with QE-7.4.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.2.0.1.tar.gz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.2.0.1.tar.gz">
 thermo_pw.2.0.1.tar.gz</a>  (released 15-04-2025) compatible with QE-7.3.1.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.2.0.0.tar.gz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.2.0.0.tar.gz">
 thermo_pw.2.0.0.tar.gz</a>  (released 24-09-2024) compatible with QE-7.3.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.9.1.tar.gz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.9.1.tar.gz">
 thermo_pw.1.9.1.tar.gz</a>  (released 14-02-2024) compatible with QE-7.3.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.9.0.tar.gz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.9.0.tar.gz">
 thermo_pw.1.9.0.tar.gz</a>  (released 26-01-2024) compatible with QE-7.2.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.8.1.tar.gz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.8.1.tar.gz">
 thermo_pw.1.8.1.tar.gz</a>  (released 05-05-2023) compatible with QE-7.2.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.8.0.tar.gz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.8.0.tar.gz">
 thermo_pw.1.8.0.tar.gz</a>  (released 26-04-2023) compatible with QE-7.1.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.7.1.tar.gz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.7.1.tar.gz">
 thermo_pw.1.7.1.tar.gz</a>  (released 05-07-2022) compatible with QE-7.1.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.7.0.tar.gz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.7.0.tar.gz">
 thermo_pw.1.7.0.tar.gz</a>  (released 05-07-2022) compatible with QE-7.0.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.6.1.tar.gz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.6.1.tar.gz">
 thermo_pw.1.6.1.tar.gz</a>  (released 10-01-2022) compatible with QE-7.0.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.6.0.tar.gz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.6.0.tar.gz">
 thermo_pw.1.6.0.tar.gz</a>  (released 27-12-2021) compatible with QE-6.8.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.5.1.tar.gz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.5.1.tar.gz">
 thermo_pw.1.5.1.tar.gz</a>  (released 22-07-2021) compatible with QE-6.8.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.5.0.tar.gz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.5.0.tar.gz">
 thermo_pw.1.5.0.tar.gz</a>  (released 19-07-2021) compatible with QE-6.7.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.4.1.tar.gz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.4.1.tar.gz">
 thermo_pw.1.4.1.tar.gz</a>  (released 29-12-2020) compatible with QE-6.7.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.4.0.tar.gz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.4.0.tar.gz">
 thermo_pw.1.4.0.tar.gz</a>  (released 22-12-2020) compatible with QE-6.6.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.3.2.tar.gz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.3.2.tar.gz">
 thermo_pw.1.3.2.tar.gz</a>  (released 17-8-2020) compatible with QE-6.6.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.3.1.tar.gz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.3.1.tar.gz">
 thermo_pw.1.3.1.tar.gz</a>  (released 13-8-2020) compatible with QE-6.6.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.3.0.tar.gz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.3.0.tar.gz">
 thermo_pw.1.3.0.tar.gz</a>  (released 12-8-2020) compatible with QE-6.5.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.2.1.tar.gz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.2.1.tar.gz">
 thermo_pw.1.2.1.tar.gz</a>  (released 23-1-2020) compatible with QE-6.5.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.2.0.tar.gz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.2.0.tar.gz">
 thermo_pw.1.2.0.tar.gz</a>  (released 28-12-2019) compatible with QE-6.4.1.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.1.1.tar.gz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.1.1.tar.gz">
 thermo_pw.1.1.1.tar.gz</a>  (released 16-04-2019) compatible with QE-6.4.1.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.1.0.tar.gz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.1.0.tar.gz">
 thermo_pw.1.1.0.tar.gz</a>  (released 16-04-2019) compatible with QE-6.4.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.0.9.tar.gz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.0.9.tar.gz">
 thermo_pw.1.0.9.tar.gz</a>  (released 06-03-2019) compatible with QE-6.3.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.0.0.tar.gz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.0.0.tar.gz">
 thermo_pw.1.0.0.tar.gz</a>  (released 17-07-2018) compatible with QE-6.3.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw-0.9.9.tar.gz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw-0.9.9.tar.gz">
 thermo_pw-0.9.9.tar.gz</a>  (released 05-07-2018) compatible with QE-6.2.1.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw-0.9.0.tar.gz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw-0.9.0.tar.gz">
 thermo_pw-0.9.0.tar.gz</a>  (released 20-12-2017) compatible with QE-6.2.1.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw-0.8.0.tgz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw-0.8.0.tgz">
 thermo_pw-0.8.0.tar.gz</a>  (released 24-10-2017) compatible with QE-6.2.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw-0.8.0-beta.tgz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw-0.8.0-beta.tgz">
 thermo_pw-0.8.0-beta.tar.gz</a>  (released 31-08-2017) compatible with QE-6.2-beta.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.0.7.9.tgz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.0.7.9.tgz">
 thermo_pw.0.7.9.tgz</a>  (released 06-07-2017) compatible with QE-6.1.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.0.7.0.tgz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.0.7.0.tgz">
 thermo_pw.0.7.0.tgz</a>  (released 18-03-2017) compatible with QE-6.1.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.0.6.0.tgz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.0.6.0.tgz">
 thermo_pw.0.6.0.tgz</a>  (released 05-10-2016) compatible with QE-6.0.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.0.5.0.tar.gz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.0.5.0.tar.gz">
 thermo_pw.0.5.0.tar.gz</a>  (released 26-04-2016) compatible with QE-5.4.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.0.4.0.tar.gz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.0.4.0.tar.gz">
 thermo_pw.0.4.0.tar.gz</a>  (released 23-01-2016) compatible with QE-5.3.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.0.3.0.tar.gz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.0.3.0.tar.gz">
 thermo_pw.0.3.0.tar.gz</a>  (released 23-06-2015) compatible with QE-5.2.0 and QE-5.2.1.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.0.2.0.tar.gz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.0.2.0.tar.gz">
 thermo_pw.0.2.0.tar.gz</a>   (released 13-03-2015) compatible with QE-5.1.2.
 <br>
 <br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.0.1.0.tar.gz">
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.0.1.0.tar.gz">
 thermo_pw.0.1.0.tar.gz</a>   (released 28-11-2014) compatible with QE-5.1.1.
 <br>
 <br>
-<p align="justify">Please note that the versions of <code>thermo_pw</code> and 
-of <code>QE</code> must be carefully matched as written above. Mixing two 
-unmatched versions leads to a compilation error.</p>
+<p align="justify">
+Please note that the <code>thermo_pw</code> and <code>QE</code> versions must be carefully matched as specified above. Mismatched versions will result in a compilation error.</p>
 <br>
