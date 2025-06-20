@@ -408,7 +408,7 @@ correctly.
 <br> 
 
 **FAQ:**
-<br><br>
+<br>
 1. How can I learn to use <code>thermo_pw</code>?
 <br>
 To begin, please familiarize yourself with the basic use of <code>Quantum ESPRESSO</code>. Afterward, you can read the <code>thermo_pw</code> tutorial and user's guide and run the examples. These FAQs assume a basic understanding of <code>thermo_pw</code> and contain miscellaneous information not available in the user's guide.
@@ -464,6 +464,7 @@ In some cases, plotting Grüneisen parameters requires higher accuracy in symmet
 This is not an issue with <code>thermo_pw</code> itself. Compiling the <code>thermo_pw</code> documentation requires a comprehensive <code>LaTeX</code> distribution. To resolve the errors, you can:
 <br>
 * Download <code>html.sty</code> from the web and copy it into the <code>thermo_pw/Doc</code> directory.
+<br>
 * Install the <code>latex2html</code> package.
 <br>
 Even if you do not resolve these documentation compilation issues, the <code>thermo_pw.x</code> executable will still be available in the <code>bin</code> directory of your <code>QE</code> installation. Only the documentation will be inaccessible.
@@ -525,48 +526,50 @@ This error most likely indicates a mistake in a variable within your namelist. P
 <br>
 Other common causes include:
 <br>
-* Hidden Characters: Your text editor might have introduced hidden characters into the input file. You can check for these using a command like <code>cat -A input_file</code>.
+* Hidden characters: Your text editor might have introduced hidden characters into the input file. You can check for these using a command like <code>cat -A input_file</code>.
 <br>
-* Version Mismatch: You might be using a user guide from a different <code>thermo_pw</code> version than the one you are running, leading to unrecognized variables. Always ensure that the version of your user guide matches your <code>thermo_pw</code> installation.
+* Version mismatch: You might be using a user guide from a different <code>thermo_pw</code> version than the one you are running, leading to unrecognized variables. Always ensure that the version of your user guide matches your <code>thermo_pw</code> installation.
 <br><br>
-25.  I'm receiving the error "Point group incompatible with the Bravais lattice." What does this mean?
+25. I'm receiving the error "Point group incompatible with the Bravais lattice." What does this mean?
+<br>
 This message indicates that the point group identified for your system is not compatible with the specified Bravais lattice. While the calculation can still proceed, <code>thermo_pw</code> will not be able to automatically determine the space group, nor will it utilize symmetries to simplify the calculation of physical properties.
 <br>
-Possible Causes and Solutions:
+Possible causes and solutions:
 <br>
-    Incorrect Symmetry:
-<br>
+Incorrect symmetry:
 * Missing Symmetries: Investigate why some symmetries might be absent from your input (e.g., imprecise atomic coordinates).
 <br>
-* Excess Symmetries: Conversely, you might have defined too many symmetries that are not truly present in the actual structure.
-<br>
-* Action: Try using one of the Bravais lattices suggested by the code, or review your structure for subtle deviations from the intended symmetry.
+* Excess symmetries: Conversely, you might have defined too many symmetries that are not truly present in the actual structure.
+Action: Try using one of the Bravais lattices suggested by the code, or review your structure for subtle deviations from the intended symmetry.
 <br>
 Supercell:
 <br>
-* The message might also appear if you are intentionally simulating a supercell.
-<br>
-* Action: If this is your intent, you can safely ignore this message and continue the calculation. Otherwise, simplify your unit cell to match the primitive cell.
+* The message might also appear if you are intentionally simulating a supercell. Action: If this is your intent, you can safely ignore this message and continue the calculation. Otherwise, simplify your unit cell to match the primitive cell.
 <br><br>
 26. Is <code>thermo_pw</code> compatible with the GPU version of QE?
 <br>
 Partial compatibility exists.
-    With <code>QE 6.7</code> and <code>thermo_pw</code> version <code>1.5.0</code>, you can compile a GPU-compatible version of <make>thermo_pw</code> by running <code>make tpw_gpu</code>. This is designed to work with <code>q-e-gpu.6.7<code>.
-    For <code>thermo_pw</code> version <code>1.5.1</code> and <code>QE 6.8</code> (or later versions), <code>thermo_pw</code> can be compiled with CUDA support using the same commands you would use to enable CUDA in standard QE. This typically involves configuring QE with specific CUDA options.
+    With <code>QE 6.7</code> and <code>thermo_pw</code> version <code>1.5.0</code>, you can compile a GPU-compatible version of <code>thermo_pw</code> by running <code>make tpw_gpu</code>. This is designed to work with <code>q-e-gpu.6.7</code>.
+For <code>thermo_pw</code> version <code>1.5.1</code> and <code>QE 6.8</code> (or later versions), <code>thermo_pw</code> can be compiled with CUDA support using the same commands you would use to enable CUDA in standard QE. This typically involves configuring QE with specific CUDA options.
 <code>Thermo_pw</code> versions <code>1.9.0</code> to <code>2.0.2</code> has been specifically tested on the Leonardo supercomputer at CINECA using the NVIDIA Fortran compiler.
 These later versions also include custom GPU routines, exclusive to <code>thermo_pw</code>, that enable the simultaneous calculation of numerous <B>k</B>-points on the GPU. These routines are optimized for metallic systems with small cells.
 <br><br>
 27. The band or phonon symmetry is not indicated; instead, many question marks appear in place of irreducible representation names. Why?
+<br>
 The presence of question marks signifies that the symmetry-finding algorithm is unable to definitively determine the symmetry. This can be due to several reasons:
-* Insufficient Accuracy: Your calculation might have a cut-off that is too small, or a self-consistency threshold that is too large, resulting in insufficient accuracy for proper symmetry identification. Action: Please adjust these parameters.
-* Imprecise Atomic Positions: Your atomic positions may be very close to, but not exactly on, a true symmetry position. This is a common issue when using single-precision atomic coordinates. Action: Correct your atomic coordinates by adding more digits of precision.
-* Pseudopotential Issues: There might be a problem with the pseudopotential, possibly indicating a "ghost state." Action: Try using different pseudopotentials to see if the issue resolves.
-* Algorithm Problem: If none of the above solutions apply, there might be an issue with the symmetry-finding algorithm itself. Action: In this case, please send me your input file or post it to one of the forum mailing lists.
+<br>
+* Insufficient accuracy: Your calculation might have a cut-off that is too small, or a self-consistency threshold that is too large, resulting in insufficient accuracy for proper symmetry identification. Action: Please adjust these parameters.
+<br>
+* Imprecise atomic positions: Your atomic positions may be very close to, but not exactly on, a true symmetry position. This is a common issue when using single-precision atomic coordinates. Action: Correct your atomic coordinates by adding more digits of precision.
+<br>
+* Pseudopotential issues: There might be a problem with the pseudopotential, possibly indicating a "ghost state". Action: Try using different pseudopotentials to see if the issue resolves.
+<br>
+* Algorithm problem: If none of the above solutions apply, there might be an issue with the symmetry-finding algorithm itself. Action: In this case, please send me your input file or post it to one of the forum mailing lists.
 <br><br>
 28. Can I compute the temperature dependent elastic constants with 
 <code>thermo_pw</code>?
-Yes, with version-specific capabilities:
 <br>
+Yes, with version-specific capabilities:
 * Quasi-static elastic constants are available starting from version <code>0.6.0</code>.
 <br>
 * Quasi-harmonic elastic constants require version <code>1.2.0</code> or later.
@@ -580,33 +583,34 @@ Important notes:
 * Be aware that quasi-harmonic calculations are highly time-consuming, often requiring, as an order of magnitude, hundreds of phonon dispersion computations.
 <br><br>
 29. I'm receiving a "Laue class not available" error when computing elastic constants. What does this mean?
+<br>
 * This error typically indicates that your system possesses fewer symmetries than expected for its specified Bravais lattice. For example, for a solid with a cubic Bravais lattice, a Laue class cannot be assigned if its point group symmetry is different from T, T_d, T_h, O, or O_h.
 <br>
 * In such cases, <code>thermo_pw</code>'s output will state that the point group and Bravais lattice are incompatible and will suggest alternative compatible Bravais lattices.
 <br>
-Recommended Actions:
+Recommended actions:
 <br>
 * If you are confident in your system's symmetry: Consider using one of the Bravais lattices suggested by <code>thermo_pw</code>.
 <br>
 * If symmetries are missing due to other reasons: (e.g., imprecise atomic coordinates, as discussed in the <code>QE</code> <code>PW</code> user's guide), you must correct these issues before proceeding with the elastic constant calculation.
 <br>
-* For Supercells or Low-Dimensional Systems: If you are using supercells, or have a low-dimensional system within a supercell, <code>thermo_pw</code> might not yet be automatically suited for computing the elastic constants of your system.
+* For supercells or low-dimensional systems: If you are using supercells, or have a low-dimensional system within a supercell, <code>thermo_pw</code> might not yet be automatically suited for computing the elastic constants of your system.
 <br><br>
 30. <code>thermo_pw</code> fails to compile with <code>QE</code> version <code>7.0</code> or later, showing a "no rule to make file make.depend" error. How can I fix this?
+<br>
 After running <code>make join_qe</code> and returning to the <code>QE</code> root directory, you must re-run <code>./configure</code> before attempting <code>make thermo_pw</code>. This step is crucial for regenerating the necessary build dependencies.
 (Thanks to H. Zhao for reporting the problem).
 <br><br>
 31. <code>Thermo_pw</code> is having problems with fully relativistic PAW pseudopotentials. What should I do?
-* Before reporting any issues, please check for a mismatch in the <code>PP_AEWFC_REL</code> tag between your <code>UPF</code> file and <code>thermo_pw</code>'s <code>UPF</code> reading routines. This is a common source of problems.
 <br>
-Understanding the Tag Mismatch:
+Before reporting any issues, please check for a mismatch in the <code>PP_AEWFC_REL</code> tag between your <code>UPF</code> file and <code>thermo_pw</code>'s <code>UPF</code> reading routines. This is a common source of problems.
 <br>
-* From <code>QE</code> versions <code>6.5</code> to <code>6.7</code>, the XML tag for the small component of all-electron partial waves was named PP_AEWFC_rel.
-    In previous <code>QE</code> versions, it was <code>PP_AEWFC_REL</code>.
-    This change means fully relativistic pseudopotentials created with QE versions older than <code>6.5</code> (including many distributed on the <code>QE</code> site) might no longer be read correctly by <code>thermo_pw<code> versions relying on the <code>PP_AEWFC_rel<code> tag.
-    The code often doesn't stop but might produce subtly incorrect results, especially during pseudopotential tests.
+Understanding the tag mismatch:
 <br>
-Solutions for Tag Mismatch:
+* From <code>QE</code> versions <code>6.5</code> to <code>6.7</code>, the XML tag for the small component of all-electron partial waves was named PP_AEWFC_rel. In previous <code>QE</code> versions, it was <code>PP_AEWFC_REL</code>.
+This change means fully relativistic pseudopotentials created with QE versions older than <code>6.5</code> (including many distributed on the <code>QE</code> site) might no longer be read correctly by <code>thermo_pw<code> versions relying on the <code>PP_AEWFC_rel<code> tag. The code often doesn't stop but might produce subtly incorrect results, especially during pseudopotential tests.
+<br>
+Solutions for tag mismatch:
 <br>
 * For PPs with <code>PP_AEWFC_REL</code> (older QE): If your pseudopotential contains the <code>PP_AEWFC_REL<code> tag, manually edit <code>upflib/read_upf_new.f90</code> and <code>upflib/write_upf_new.f90</code>. In both files, search for the string <code>PP_AEWFC_rel</code> and change it to <code>PP_AEWFC_REL</code>.
 <br>
