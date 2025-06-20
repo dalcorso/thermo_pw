@@ -19,94 +19,79 @@ High-pressure and high-temperature thermoelasticity of tantalum:
 an ab-initio study,
 <a href="https://doi.org/10.1063/5.0258989">
 Jour. Chem. Phys. <b>162</b>, 124709 (2025)</a>.</p>
-<br>
 <p align="justify">
 18. X. Gong and A. Dal Corso,
 An alternative GPU acceleration for a pseudopotential plane-waves 
 density functional theory code with applications to metallic systems,
 <a href="https://arxiv.org/abs/2412.01695">
 Comp. Phys. Comm. <b>308</b>, 109439 (2025)</a>.</p>
-<br>
 <p align="justify">
 17. X. Gong and A. Dal Corso,
 High temperature and pressure thermoelasticity of hcp metals from 
 ab initio quasi-harmonic free energy calculations: the beryllium case
 <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.110.094109">
 Phys. Rev. B <b>110</b>, 094109 (2024)</a>.</p>
-<br>
 <p align="justify">
 16. X. Gong and A. Dal Corso,
 Ab-initio quasi-harmonic thermoelasticity of molybdenum at 
 high temperature and pressure,
 <a href="https://pubs.aip.org/aip/jcp/article/160/24/244703/3299207/Ab-initio-quasi-harmonic-thermoelasticity-of">
 Jour. Chem. Phys. <b>160</b>, 244703 (2024)</a>.</p>
-<br>
 <p align="justify">
 15. B. Thakur, X. Gong, and A. Dal Corso,
 Thermodynamic properties of Rhodium: A first principles study,
 <a href="https://doi.org/10.1063/5.0203098"> AIP Advances <b>14</b>, 
 045229 (2024)</a>.</p>
-<br>
 <p align="justify">
 14. X. Gong and A. Dal Corso,
 Pressure and temperature dependent ab-initio
 quasi-harmonic thermoelastic properties of tungsten,
 <a href="https://iopscience.iop.org/article/10.1088/1361-648X/ad3ac3">
 Jour. of Phys.: Condens. Matter <b>36</b>, 285702 (2024)</a>.</p>
-<br>
 <p align="justify">
 13. B. Thakur, X. Gong and A. Dal Corso,
 Ab initio thermodynamic properties of Iridium: A high-pressure and high-temperature study,
 <a href="https://doi.org/10.1016/j.commatsci.2024.112797">
 Comp. Materials Science <B>234</B>, 112797 (2024)</a>.</p>
-<br>
 <p align="justify">
 12. C. Malica and A. Dal Corso,
 Quasi-harmonic thermoelasticity of palladium, platinum, copper and gold
 from first principles,
 <a href="https://iopscience.iop.org/article/10.1088/1361-648X/ac2041">
 J. of Phys.: Condens. Matter <B>33</B>, 475901 (2021)</a>.</p>
-<br>
 <p align="justify">
 11. O. Motornyi, N. Vast, I. Timrov, O. Baseggio, S. Baroni, and A. Dal Corso,
 Electron energy loss spectroscopy of bulk gold with ultrasoft pseudopotentials and the Liouville-Lanczos method,
 <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.102.035156">
 Phys. Rev. B <B>102</B>, 035156 (2020)</a>.</p>
-<br>
 <p align="justify">
 10. C. Malica and A. Dal Corso,
 Quasi-harmonic temperature dependent elastic constants: Applications 
 to Silicon, Aluminum, and Silver,
 <a href="https://iopscience.iop.org/article/10.1088/1361-648X/ab8426/meta">
 J. of Phys.: Condens. Matter <B>32</B>, 315902 (2020)</a>.</p>
-<br>
 <p align="justify">
 9. A. Urru and A. Dal Corso,
 Density functional perturbation theory for lattice dynamics with fully
 relativistic ultrasoft pseudopotentials: The magnetic case,
 <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.100.045115">Phys. Rev. B <B>100</B>, 045115 (2019)</a>.</p>
-<br>
 <p align="justify">
 8. C. Malica and A. Dal Corso,
 Temperature dependent atomic B-factor: an ab-initio calculation,
 <a href="https://doi.org/10.1107/S205327331900514X">Acta Cryst. A <B>75</B>, 624 (2019)</a>.</p>
-<br>
 <p align="justify">
 7. A. Urru and A. Dal Corso,
 Spin-polarized electronic surface states of Re(0001): an ab-initio investigation,
 <a href="https://doi.org/10.1016/j.susc.2019.03.008">Surf. Sci. <B>686</B>, 22 (2019)</a>.</p>
-<br>
 <p align="justify">
 6. O. Motornyi, M. Raynaud, A. Dal Corso, and N. Vast,
 Simulation of electron energy loss spectra with the turboEELS and
 thermo&#95;pw codes,
 <a href="https://iopscience.iop.org/article/10.1088/1742-6596/1136/1/012008/meta">J. Phys.: Conf. Ser. <B>1136</B>, 012008 (2018)</a>.</p>
-<br>
 <p align="justify">
 5. A. Urru and A. Dal Corso,
 Clean Os(0001) electronic surface states: a first-principle fully relativistic investigation,
 <a href="https://www.sciencedirect.com/science/article/pii/S0039602817309469">Surf. Sci. <B> 671</B>, 17 (2018)</a>.</p>
-<br>
 <p align="justify">
 4. M. Palumbo and A. Dal Corso,
 Lattice dynamics and thermophysical properties of h.c.p. Os and Ru from
@@ -114,7 +99,6 @@ the quasi-harmonic approximation,
 <a href="http://iopscience.iop.org/article/10.1088/1361-648X/aa7dca">
 J. of Phys.: Condens. Matter <B>29</B>, 395401 (2017)
 </a>.</p>
-<br>
 <p align="justify">
 3. M. Palumbo and A. Dal Corso,
 Lattice dynamics and thermophysical properties of h.c.p. Re and Tc from
@@ -122,25 +106,24 @@ the quasi-harmonic approximation,
 <a href="http://dx.doi.org/10.1002/pssb.201700101">Physica Status Solidi B:
 Basic Solid State Physics <B>254</B>, 1700101 (2017)
 </a>.</p>
-<br>
 <p align="justify">
 2. A. Dal Corso,
 Elastic constants of Beryllium: a first-principles investigation,
 <a href="http://dx.doi.org/10.1088/0953-8984/28/7/075401"> J. Phys.: Condens. Matter <B>28</B>, 075401 (2016) </a>.</p>
-<br>
 <p align="justify">
 1. A. Dal Corso,
 Clean Ir(111) and Pt(111) electronic surface states: a first-principle fully relativistic investigation,
 <a href="http://www.sciencedirect.com/science/article/pii/S0039602815000734"> Surf. Sci. <B>637-638</B>, 106 (2015)</a>.</p>
 <br>
-<p align="justify">Refs.8,10 describe how <code>thermo_pw</code> computes temperature
-dependent elastic constants, Ref.1,3,4,6 pressure and temperature dependent
-elastic constants, Ref.18 elastic constants at T=0 K,
-Ref.19,15 surface band structures, Refs.8,13 eels and optical properties,
-Ref.11 DFPT with fully relativistic pseudopotentials, and Ref.16,17 
-thermodynamic anharmonic properties. Refs.3,4,5,6,7 have examples of 
+<p align="justify">Refs.12,10 describe how <code>thermo_pw</code> computes temperature
+dependent elastic constants, Ref.14,16,17,19 pressure and temperature dependent
+elastic constants, Ref.2 elastic constants at T=0 K,
+Ref.1,5,7 surface band structures, Refs.6,11 eels and optical properties,
+Ref.8 the calculation of the atomic B factor,
+Ref.9 DFPT with fully relativistic pseudopotentials, and Ref.3,4
+thermodynamic anharmonic properties. Refs.13,14,15,16,17,19 have examples of 
 pressure and temperature parameterized plots.
-Ref.2 describes the GPU acceleration for the many\_k option.</p>
+Ref.18 describes the GPU acceleration for the <code>many_k</code> option.</p>
 
 <p align="justify">The following works contain some calculations made by <code>thermo_pw</code>:</p>
 <br>
@@ -192,14 +175,12 @@ Jour. of Applied Phys. <B>127</B>, 245103 (2020)</a>.</p>
 Hole mobility of strained GaN from first principles,
 <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.100.085204">
 Phys. Rev. B <B>100</B>, 085204 (2019)</a>.</p>
-
 <br>
 <p align="justify">
 See also the presentation given at the Quantum-ESPRESSO developers meeting 2017:</p>
 <br>
 <p align="justify">
 <a href="https://people.sissa.it/~dalcorso/thermo_pw_2017.pdf">Thermo_pw_2017.pdf</a></p>
-<br>
 <p align="justify">
 and at the Quantum-ESPRESSO developers meeting 2018:</p>
 <br>
@@ -233,9 +214,7 @@ Seek Further Assistance: If the problem persists, please post details to the <a 
 <p align="justify">are often self-explanatory. The error message itself usually indicates the problem. You can find potential solutions in the FAQ (questions 25 and 26) located <a href="https://dalcorso.github.io/thermo_pw/thermo_pw_help.html">here.</a> If these suggestions do not resolve your issue, I am unlikely to have further specific guidance.</p>
 
 <p aling="justify"> For additional help, you can also consult the Quantum ESPRESSO user guide, post your question to the users mailing list at the <code>users@lists.quantum-espresso.org</code>, or search for similar issues in the examples directories.</p>
-
 <br>
-
 **Thermo_pw downloads**:
 <br>
 * <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.2.0.2.tar.gz">
