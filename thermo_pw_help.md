@@ -463,10 +463,10 @@ In some cases, plotting Grüneisen parameters requires higher accuracy in symmet
 <br>
 This is not an issue with <code>thermo_pw</code> itself. Compiling the <code>thermo_pw</code> documentation requires a comprehensive <code>LaTeX</code> distribution. To resolve the errors, you can:
 <br>
-* Download <code>html.sty</code> from the web and copy it into the <code>thermo_pw/Doc</code> directory.
+ * Download <code>html.sty</code> from the web and copy it into the <code>thermo_pw/Doc</code> directory.
 <br>
-* Install the <code>latex2html</code> package.
-<br><br>
+ * Install the <code>latex2html</code> package.
+<br>
 Even if you do not resolve these documentation compilation issues, the <code>thermo_pw.x</code> executable will still be available in the <code>bin</code> directory of your <code>QE</code> installation. Only the documentation will be inaccessible.
 <br><br>
 14.  I'm experiencing issues with the projected band structure plot; some gaps have the same color as the projected band structure. What's the problem?
@@ -515,10 +515,10 @@ For a permanent check and resolution of this problem, consider upgrading to <cod
 <br>
 This error typically indicates a problem with the <code>outdir</code> directory specified in your <code>pw.x</code> input file. Most probable causes include:
 <br>
-* A missing parent directory in the path specified for <code>outdir</code>.
+  * A missing parent directory in the path specified for <code>outdir</code>.
 <br>
-* Insufficient permissions to write to or execute in the <code>outdir</code>'s parent directory.
-<br><br>
+  * Insufficient permissions to write to or execute in the <code>outdir</code>'s parent directory.
+<br>
 Please check the <code>outdir</code> path and your directory permissions.
 <br><br>
 24.  I'm receiving an "Error in namelist." What should I do?
@@ -538,14 +538,14 @@ This message indicates that the point group identified for your system is not co
 Possible causes and solutions:
 <br>
 Incorrect symmetry:
-* Missing symmetries: Investigate why some symmetries might be absent from your input (e.g., imprecise atomic coordinates).
+  * Missing symmetries: Investigate why some symmetries might be absent from your input (e.g., imprecise atomic coordinates).
 <br>
-* Excess symmetries: Conversely, you might have defined too many symmetries that are not truly present in the actual structure.
+  * Excess symmetries: Conversely, you might have defined too many symmetries that are not truly present in the actual structure.
 Action: Try using one of the Bravais lattices suggested by the code, or review your structure for subtle deviations from the intended symmetry.
-<br><br>
+<br>
 Supercell:
 <br>
-* The message might also appear if you are intentionally simulating a supercell. Action: If this is your intent, you can safely ignore this message and continue the calculation. Otherwise, simplify your unit cell to match the primitive cell.
+  * The message might also appear if you are intentionally simulating a supercell. Action: If this is your intent, you can safely ignore this message and continue the calculation. Otherwise, simplify your unit cell to match the primitive cell.
 <br><br>
 26. Is <code>thermo_pw</code> compatible with the GPU version of QE?
 <br>
@@ -576,7 +576,7 @@ Yes, with version-specific capabilities:
 * Quasi-harmonic elastic constants require version <code>1.2.0</code> or later.
 <br>
 * The electronic contribution to elastic constants is implemented only from version <code>1.4.0</code> onwards.
-<br><br>
+<br>
 Important notes:
 <br>
 * This feature is still under development and has some limitations. For instance, atomic coordinates are currently relaxed only at zero temperature (within ZSISA). Full free energy minimization is possible only when there is only one internal degree of freedom.
@@ -588,7 +588,7 @@ Important notes:
 * This error typically indicates that your system possesses fewer symmetries than expected for its specified Bravais lattice. For example, for a solid with a cubic Bravais lattice, a Laue class cannot be assigned if its point group symmetry is different from T, T_d, T_h, O, or O_h.
 <br>
 * In such cases, <code>thermo_pw</code>'s output will state that the point group and Bravais lattice are incompatible and will suggest alternative compatible Bravais lattices.
-<br><br>
+<br>
 Recommended actions:
 <br>
 * If you are confident in your system's symmetry: Consider using one of the Bravais lattices suggested by <code>thermo_pw</code>.
@@ -608,12 +608,12 @@ Before reporting any issues, please check for a mismatch in the <code>PP_AEWFC_R
 <br>
 Understanding the tag mismatch:
 <br>
-* From <code>QE</code> versions <code>6.5</code> to <code>6.7</code>, the XML tag for the small component of all-electron partial waves was named PP_AEWFC_rel. In previous <code>QE</code> versions, it was <code>PP_AEWFC_REL</code>.
-This change means fully relativistic pseudopotentials created with QE versions older than <code>6.5</code> (including many distributed on the <code>QE</code> site) might no longer be read correctly by <code>thermo_pw</code> versions relying on the <code>PP_AEWFC_rel<code> tag. The code often doesn't stop but might produce subtly incorrect results, especially during pseudopotential tests.
+* From <code>QE</code> versions <code>6.5</code> to <code>6.7</code>, the XML tag for the small component of all-electron partial waves was named <code>PP_AEWFC_rel</code>. In previous <code>QE</code> versions, it was <code>PP_AEWFC_REL</code>.
+This change means fully relativistic pseudopotentials created with <code>QE</code> versions older than <code>6.5</code> (including many distributed on the <code>QE</code> site) might no longer be read correctly by <code>thermo_pw</code> versions relying on the <code>PP_AEWFC_rel</code> tag. The code often doesn't stop but might produce subtly incorrect results, especially during pseudopotential tests.
 <br>
 Solutions for tag mismatch:
 <br>
-* For PPs with <code>PP_AEWFC_REL</code> (older QE): If your pseudopotential contains the <code>PP_AEWFC_REL<code> tag, manually edit <code>upflib/read_upf_new.f90</code> and <code>upflib/write_upf_new.f90</code>. In both files, search for the string <code>PP_AEWFC_rel</code> and change it to <code>PP_AEWFC_REL</code>.
+* For PPs with <code>PP_AEWFC_REL</code> (older <code>QE</code>): If your pseudopotential contains the <code>PP_AEWFC_REL</code> tag, manually edit <code>upflib/read_upf_new.f90</code> and <code>upflib/write_upf_new.f90</code>. In both files, search for the string <code>PP_AEWFC_rel</code> and change it to <code>PP_AEWFC_REL</code>.
 <br>
 Consistency with newer <code>QE</code> versions:
 </br>
