@@ -461,11 +461,12 @@ In some cases, plotting Grüneisen parameters requires higher accuracy in symmet
 <br><br>
 13. The <code>thermo_pw</code> documentation fails to compile with errors indicating <code>html.sty</code> or <code>latex2html</code> are missing. How can I fix this?
 <br>
-This is not an issue with <code>thermo_pw</code> itself. Compiling the <code>thermo_pw</code> documentation requires a comprehensive <code>LaTeX<code> distribution. To resolve the errors, you can:
+This is not an issue with <code>thermo_pw</code> itself. Compiling the <code>thermo_pw</code> documentation requires a comprehensive <code>LaTeX</code> distribution. To resolve the errors, you can:
 <br>
 * Download <code>html.sty</code> from the web and copy it into the <code>thermo_pw/Doc</code> directory.
 * Install the <code>latex2html</code> package.
 <br>
+
 Even if you do not resolve these documentation compilation issues, the <code>thermo_pw.x</code> executable will still be available in the <code>bin</code> directory of your <code>QE</code> installation. Only the documentation will be inaccessible.
 <br><br>
 14.  I'm experiencing issues with the projected band structure plot; some gaps have the same color as the projected band structure. What's the problem?
@@ -480,13 +481,13 @@ This often occurs if you haven't used enough digits for the atomic positions in 
 <br>
 This error most likely indicates you are simulating a noncollinear magnetic system. Keep in mind that magnetic space group identification isn't implemented in <code>thermo_pw</code>. Versions up to <code>0.9.0</code> don't perform a check for this, which can lead to the error.
 To resolve this, please apply the changes introduced in commit <code>a68e6cb</code> (January 18, 2018).
-If you encounter this error while using <code>ibrav/=0<code> with a collinear system, please send your input file for further investigation.
+If you encounter this error while using <code>ibrav/=0</code> with a collinear system, please send your input file for further investigation.
 <br><br>
 17. When using <code>what='scf_disp'</code> with partial phonon computations (e.g., <code>start_q</code>, <code>last_q</code>, <code>start_irr</code>, <code>last_irr</code>), I receive strange error messages. Why?
 <br>
-The <code>what='scf_disp'</code> option requires all the dynamical matrix files to be present in the dynamical_matrices directory. If you are performing partial phonon calculations, use <code>what='scf_ph'</code> until all necessary dynamical matrices have been generated and collected. Once all files are present, you can then run with <code>what='scf_disp'</code> for the final computation.
+The <code>what='scf_disp'</code> option requires all the dynamical matrix files to be present in the <code>dynamical_matrices</code> directory. If you are performing partial phonon calculations, use <code>what='scf_ph'</code> until all necessary dynamical matrices have been generated and collected. Once all files are present, you can then run with <code>what='scf_disp'</code> for the final computation.
 <br><br>
-18.  I'm computing a phonon dispersion, but some <B>q</B> points are not being computed. What's the reason? 
+18. I'm computing a phonon dispersion, but some <B>q</B> points are not being computed. What's the reason? 
 <br>
 The most probable reason is that you have not cleaned your <code>outdir</code> directory. Note that <code>thermo_pw</code> always attempts to reuse content from the <code>outdir</code> directory if it finds any.
 <br><br>
@@ -508,7 +509,7 @@ Yes, you can. To do so, you must remove both the <code>phdisp_files</code> and <
 Be cautious when using parallel pools. Since version <code>6.6</code>, <code>QE</code> no longer halts if some pools lack <B>k</B>-points, but <code>thermo_pw</code> (version <code>1.3.1</code>) cannot handle this scenario, leading to hangs or crashes.
 To check if this is your situation, search your output file for the string: <code>'suboptimal parallelization: some nodes have no k-points'</code>.
 Solution: Decrease the number of pools until this message no longer appears.
-For a permanent check and resolution of this problem, consider upgrading to <code>thermo_pw 1.3.2<code> or higher.
+For a permanent check and resolution of this problem, consider upgrading to <code>thermo_pw 1.3.2</code> or higher.
 <br><br>
 23.  I'm receiving an error message that <code>tmp_dir</code> cannot be opened. What should I do?
 <br>
@@ -518,6 +519,7 @@ This error typically indicates a problem with the <code>outdir</code> directory 
 <br>
 * Insufficient permissions to write to or execute in the <code>outdir</code>'s parent directory.
 <br>
+
 Please check the <code>outdir</code> path and your directory permissions.
 <br><br>
 24.  I'm receiving an "Error in namelist." What should I do?
@@ -534,28 +536,28 @@ Other common causes include:
 <br>
 This message indicates that the point group identified for your system is not compatible with the specified Bravais lattice. While the calculation can still proceed, <code>thermo_pw</code> will not be able to automatically determine the space group, nor will it utilize symmetries to simplify the calculation of physical properties.
 <br>
-Possible Causes & Solutions:
+Possible Causes and Solutions:
 <br>
     Incorrect Symmetry:
 <br>
-    * Missing Symmetries: Investigate why some symmetries might be absent from your input (e.g., imprecise atomic coordinates).
+* Missing Symmetries: Investigate why some symmetries might be absent from your input (e.g., imprecise atomic coordinates).
 <br>
-    * Excess Symmetries: Conversely, you might have defined too many symmetries that are not truly present in the actual structure.
+* Excess Symmetries: Conversely, you might have defined too many symmetries that are not truly present in the actual structure.
 <br>
-    * Action: Try using one of the Bravais lattices suggested by the code, or review your structure for subtle deviations from the intended symmetry.
+* Action: Try using one of the Bravais lattices suggested by the code, or review your structure for subtle deviations from the intended symmetry.
 <br>
-    Supercell:
+Supercell:
 <br>
-    * The message might also appear if you are intentionally simulating a supercell.
+* The message might also appear if you are intentionally simulating a supercell.
 <br>
-    * Action: If this is your intent, you can safely ignore this message and continue the calculation. Otherwise, simplify your unit cell to match the primitive cell.
+* Action: If this is your intent, you can safely ignore this message and continue the calculation. Otherwise, simplify your unit cell to match the primitive cell.
 <br><br>
 26. Is <code>thermo_pw</code> compatible with the GPU version of QE?
 <br>
 Partial compatibility exists.
-    With <code>QE 6.7</code> and <code>thermo_pw</code> version <code>1.5.0</code>, you can compile a GPU-compatible version of <make>thermo_pw</code> by running <code>make tpw_gpu<code>. This is designed to work with <code>q-e-gpu.6.7<code>.
+    With <code>QE 6.7</code> and <code>thermo_pw</code> version <code>1.5.0</code>, you can compile a GPU-compatible version of <make>thermo_pw</code> by running <code>make tpw_gpu</code>. This is designed to work with <code>q-e-gpu.6.7<code>.
     For <code>thermo_pw</code> version <code>1.5.1</code> and <code>QE 6.8</code> (or later versions), <code>thermo_pw</code> can be compiled with CUDA support using the same commands you would use to enable CUDA in standard QE. This typically involves configuring QE with specific CUDA options.
-<code>Thermo_pw</code> versions 1.9.0 to 2.0.2 has been specifically tested on the Leonardo supercomputer at CINECA using the NVIDIA Fortran compiler.
+<code>Thermo_pw</code> versions <code>1.9.0</code> to <code>2.0.2</code> has been specifically tested on the Leonardo supercomputer at CINECA using the NVIDIA Fortran compiler.
 These later versions also include custom GPU routines, exclusive to <code>thermo_pw</code>, that enable the simultaneous calculation of numerous <B>k</B>-points on the GPU. These routines are optimized for metallic systems with small cells.
 <br><br>
 27. The band or phonon symmetry is not indicated; instead, many question marks appear in place of irreducible representation names. Why?
@@ -568,7 +570,6 @@ The presence of question marks signifies that the symmetry-finding algorithm is 
 <br><br>
 28. Can I compute the temperature dependent elastic constants with 
 <code>thermo_pw</code>?
-
 Yes, with version-specific capabilities:
 <br>
 * Quasi-static elastic constants are available starting from version <code>0.6.0</code>.
@@ -577,18 +578,19 @@ Yes, with version-specific capabilities:
 <br>
 * The electronic contribution to elastic constants is implemented only from version <code>1.4.0</code> onwards.
 <br>
-Important Notes:
+
+Important notes:
 <br>
-* This feature is still under development and has some limitations. For instance, atomic coordinates are currently relaxed only at zero temperature. Full free energy minimization is possible only when there one internal degree of freedom.
+* This feature is still under development and has some limitations. For instance, atomic coordinates are currently relaxed only at zero temperature (within ZSISA). Full free energy minimization is possible only when there is only one internal degree of freedom.
 <br>
 * Be aware that quasi-harmonic calculations are highly time-consuming, often requiring, as an order of magnitude, hundreds of phonon dispersion computations.
 <br><br>
-29.  I'm receiving a "Laue class not available" error when computing elastic constants. What does this mean?
-
+29. I'm receiving a "Laue class not available" error when computing elastic constants. What does this mean?
 * This error typically indicates that your system possesses fewer symmetries than expected for its specified Bravais lattice. For example, for a solid with a cubic Bravais lattice, a Laue class cannot be assigned if its point group symmetry is different from T, T_d, T_h, O, or O_h.
 <br>
 * In such cases, <code>thermo_pw</code>'s output will state that the point group and Bravais lattice are incompatible and will suggest alternative compatible Bravais lattices.
 <br>
+
 Recommended Actions:
 <br>
 * If you are confident in your system's symmetry: Consider using one of the Bravais lattices suggested by <code>thermo_pw</code>.
@@ -597,11 +599,11 @@ Recommended Actions:
 <br>
 * For Supercells or Low-Dimensional Systems: If you are using supercells, or have a low-dimensional system within a supercell, <code>thermo_pw</code> might not yet be automatically suited for computing the elastic constants of your system.
 <br><br>
-30. <code>thermo_pw</code> fails to compile with <code>QE</code> version <code>7.0</code> or later, showing a "no rule to make file make.depend" error. How can I fix this?.
+30. <code>thermo_pw</code> fails to compile with <code>QE</code> version <code>7.0</code> or later, showing a "no rule to make file make.depend" error. How can I fix this?
 After running <code>make join_qe</code> and returning to the <code>QE</code> root directory, you must re-run <code>./configure</code> before attempting <code>make thermo_pw</code>. This step is crucial for regenerating the necessary build dependencies.
 (Thanks to H. Zhao for reporting the problem).
+<br><br>
 31. <code>Thermo_pw</code> is having problems with fully relativistic PAW pseudopotentials. What should I do?
-
 * Before reporting any issues, please check for a mismatch in the <code>PP_AEWFC_REL</code> tag between your <code>UPF</code> file and <code>thermo_pw</code>'s <code>UPF</code> reading routines. This is a common source of problems.
 <br>
 Understanding the Tag Mismatch:
