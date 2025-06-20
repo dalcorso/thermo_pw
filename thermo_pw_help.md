@@ -28,7 +28,7 @@ Then, cd back to the main <code>QE</code> directory and compile <code>thermo_pw<
 <p align="justify">
 Alternatively, to use <code>cmake</code>, create a <code>build</code> directory, enter it, and execute:</p>
 <p align="center">
-<code>cmake -DCMAKE_C_COMPILER=c_compiler -DCMAKE_Fortran_COMPILER=fortran_compiler ../ </code><p>
+<code>cmake -DCMAKE_C_COMPILER=c_compiler -DCMAKE_Fortran_COMPILER=fortran_compiler ../ </code></p>
 <p align="justify">
 or, to compile for GPU: </p>
 <p align="center">
