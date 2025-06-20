@@ -54,7 +54,7 @@ This will create a thermo_pw directory containing the source code.
 Important Note: The Git version can only be used with <code>QE</code> version <code>7.4</code>. Be aware that the Git version may not always function correctly, and its use is generally not recommended.
 Although thermo_pw has been in use for several years and is considered reasonably stable, it remains an experimental code provided "as is."</p>
 
-**Compatibility with Older QE Versions:**
+**Compatibility with Older <code>QE</code> Versions:**
 
 <p align="justify"> 
 Older versions of <code>QE</code> (earlier than <code>7.4</code>) can still be used with <code>thermo_pw</code> by carefully matching the <code>thermo_pw</code> and <code>QE</code> versions, as detailed on the main <code>thermo_pw</code> page.</p>
@@ -148,18 +148,18 @@ adding the instruction v(:,:)=0.0_DP after line 208 and after line
 
 **Patches for thermo_pw.1.5.1**:
 <br>
-* tools/epsilon_tpw.f90 was not updated to the QE68 conventions.
+* tools/epsilon_tpw.f90 was not updated to the <code>QE-6.8</code> conventions.
 Please change as in commit <a href="https://github.com/dalcorso/thermo_pw/commit/cd4353f48263e6015b770ef7488337f75a3184c4">commit_cd4353f</a> of 13/08/2021.
 <br>
 * At line 170 of atomic/src/import_upf.f90 exchange the calls to
 set_pawsetup and radial_grid_copy to have the atomic
-paw tests working again in QE6.8.
+paw tests working again in <code>QE-6.8</code>.
 <br>
 * At line 131 of thermo_pw/qe/pheqscf.f90 remove tpiba2 to have example21
 working again.
 <br>
-* At line 723 of upflib/write_upf_new.f90 of QE7.0 change PP_AEWFC_rel with
-PP_AEWFC_REL. See also the FAQ 34.
+* At line 723 of upflib/write_upf_new.f90 of <code>QE-7.0</code> change <code>PP_AEWFC_rel</code> with
+<code>PP_AEWFC_REL</code>. See also the FAQ 34.
 <br>
 
 **Patches for thermo_pw.1.5.0**:
@@ -170,15 +170,15 @@ PP_AEWFC_REL. See also the FAQ 34.
 * Still a missing transformation of ftau into ft. Please change
 as in commit <a href="https://github.com/dalcorso/thermo_pw/commit/3e3953152e2c81d301eb6a596de97eba07f6841d">commit_3e39531</a> of 7/5/2021.
 <br>
-* At line 576 of upflib/read_upf_new.f90 of QE6.7 change PP_AEWFC_rel with
-PP_AEWFC_REL.
+* At line 576 of upflib/read_upf_new.f90 of <code>QE-6.7</code> change <code>PP_AEWFC_rel</code> with
+<code>PP_AEWFC_REL</code>.
 <br>
-* I usually change line 400 of Modules/read_namelists.f90 of QE6.7
+* I usually change line 400 of Modules/read_namelists.f90 of <code>QE-6.7</code>
 restoring the old default diago_david_ndim=4.
 <br>
 * At line 170 of atomic/src/import_upf.f90 exchange the calls to
 set_pawsetup and radial_grid_copy to have the atomic
-paw tests working again in QE6.7. First call radial_grid_copy.
+paw tests working again in <code>QE-6.7</code>. First call radial_grid_copy.
 <br>
 * At line 131 of thermo_pw/qe/pheqscf.f90 remove tpiba2 to have example21
 working again.
@@ -194,17 +194,17 @@ FR-PP. Please apply the changes as in commit:
 <a href="https://github.com/dalcorso/thermo_pw/commit/743148245d3ee9ce524afe3edc323d5ff3b31a92">commit_7431482</a>.
 <br>
 * To reproduce ph_example07 it is necessary to change line 1049 of 
-file PW/src/pw_restart_new.f90 of QE6.6 as explained for version 1.3.0.
+file PW/src/pw_restart_new.f90 of <code>QE-6.6</code> as explained for version 1.3.0.
 <br>
-* At line 557 of upflib/read_upf_new.f90 of QE6.6 change PP_AEWFC_rel with
-PP_AEWFC_REL.
+* At line 557 of upflib/read_upf_new.f90 of <code>QE6.6</code> change <code>PP_AEWFC_rel</code> with
+<code>PP_AEWFC_REL</code>.
 <br>
-* I usually change line 400 of Modules/read_namelists.f90 of QE6.6 
+* I usually change line 400 of Modules/read_namelists.f90 of <code>QE6.6</code> 
 restoring the old default diago_david_ndim=4.
 <br>
 * At line 170 of atomic/src/import_upf.f90 exchange the calls to
 set_pawsetup and radial_grid_copy to have the atomic
-paw tests working again in QE6.6. First call radial_grid_copy.
+paw tests working again in <code>QE-6.6</code>. First call radial_grid_copy.
 <br>
 * At line 131 of thermo_pw/qe/pheqscf.f90 remove tpiba2 to have example21
 working again.
@@ -220,20 +220,20 @@ commit:
 <a href="https://github.com/dalcorso/thermo_pw/commit/51b600a25dd1d46c2ea004a509beb830d82a5811">commit_51b600a</a>.
 <br>
 * To reproduce ph_example07 it is necessary to change line 1049 of 
-file PW/src/pw_restart_new.f90 of QE6.6 as explained for version 1.3.0.
+file PW/src/pw_restart_new.f90 of <code>QE-6.6</code> as explained for version 1.3.0.
 <br>
-* QE6.6 does not stop any longer if some pools have no k point. thermo_pw
+* <code>QE-6.6</code> does not stop any longer if some pools have no k point. thermo_pw
 is not working in this case. See in the FAQ 24 to solve this problem.
 <br>
 * tools/pdec.f90 does not compile with some compilers. Take the git version
 of this file and recompile.
 <br>
-* I usually change line 400 of Modules/read_namelists.f90 of QE6.6 restoring 
+* I usually change line 400 of Modules/read_namelists.f90 of <code>QE-6.6</code> restoring 
 the old default diago_david_ndim=4.
 <br>
 * At line 170 of atomic/src/import_upf.f90 exchange the calls to
 set_pawsetup and radial_grid_copy to have the atomic
-paw tests working again in QE6.6. First call radial_grid_copy.
+paw tests working again in <code>QE6.6</code>. First call radial_grid_copy.
 <br>
 * At line 131 of thermo_pw/qe/pheqscf.f90 remove tpiba2 to have example21
 working again.
@@ -244,12 +244,12 @@ working again.
 as in commit <a href="https://github.com/dalcorso/thermo_pw/commit/3e3953152e2c81d301eb6a596de97eba07f6841d">commit_3e39531</a> of 7/5/2021.
 <br>
 * To reproduce ph_example07 it is necessary to change line 999 of 
-file PW/src/pw_restart_new.f90 of QE6.5. Substitute angle1, angle2,
+file PW/src/pw_restart_new.f90 of <code>QE-6.5</code>. Substitute angle1, angle2,
 starting_magnetization with starting_magnetization, angle1, angle2.
 <br>
 * At line 170 of atomic/src/import_upf.f90 exchange the calls to 
 set_pawsetup and radial_grid_copy to have the atomic
-paw tests working again in QE6.5. First call radial_grid_copy.
+paw tests working again in <code>QE-6.5</code>. First call radial_grid_copy.
 <br>
 
 **Patches for thermo_pw.1.2.1**:
@@ -264,11 +264,11 @@ in
 
 **Patches for thermo_pw.1.2.0**:
 <br>
-* When what='elastic_constants_t' a bug in QE prevents the use of 
+* When what='elastic_constants_t' a bug in <code>QE</code> prevents the use of 
 use_free_energy=.TRUE. and elastic_algorithm='energy_std'.
 Add the instruction:
 ibrav_ => NULL()
-at line 490 of Modules/qexsd.f90 of QE version 6.4.1.
+at line 490 of Modules/qexsd.f90 of <code>QE</code> version 6.4.1.
 <br>
 
 **Patches for thermo_pw.1.1.1**:
@@ -504,7 +504,7 @@ possible to restart with <code>with_eigen=.TRUE.</code>?
 <br>
 Yes, you can. To do so, you must remove both the <code>phdisp_files</code> and <code>therm_files</code> directories while preserving the <code>dynamical_matrices</code> and <code>restart</code> directories.
 <br><br>
-22. I'm using <code>thermo_pw 1.3.1</code> with <code>QE 6.6</code>, and the code hangs or stops randomly during phonon dispersion calculations. What's the issue? 
+22. I'm using <code>thermo_pw 1.3.1</code> with <code>QE-6.6</code>, and the code hangs or stops randomly during phonon dispersion calculations. What's the issue? 
 <br>
 Be cautious when using parallel pools. Since version <code>6.6</code>, <code>QE</code> no longer halts if some pools lack <B>k</B>-points, but <code>thermo_pw</code> (version <code>1.3.1</code>) cannot handle this scenario, leading to hangs or crashes.
 To check if this is your situation, search your output file for the string: <code>'suboptimal parallelization: some nodes have no k-points'</code>.
@@ -547,11 +547,11 @@ Supercell:
 <br>
   * The message might also appear if you are intentionally simulating a supercell. Action: If this is your intent, you can safely ignore this message and continue the calculation. Otherwise, simplify your unit cell to match the primitive cell.
 <br><br>
-26. Is <code>thermo_pw</code> compatible with the GPU version of QE?
+26. Is <code>thermo_pw</code> compatible with the GPU version of <code>QE</code>?
 <br>
 Partial compatibility exists.
     With <code>QE 6.7</code> and <code>thermo_pw</code> version <code>1.5.0</code>, you can compile a GPU-compatible version of <code>thermo_pw</code> by running <code>make tpw_gpu</code>. This is designed to work with <code>q-e-gpu.6.7</code>.
-For <code>thermo_pw</code> version <code>1.5.1</code> and <code>QE 6.8</code> (or later versions), <code>thermo_pw</code> can be compiled with CUDA support using the same commands you would use to enable CUDA in standard QE. This typically involves configuring QE with specific CUDA options.
+For <code>thermo_pw</code> version <code>1.5.1</code> and <code>QE 6.8</code> (or later versions), <code>thermo_pw</code> can be compiled with CUDA support using the same commands you would use to enable CUDA in standard <code>QE</code>. This typically involves configuring <code>QE</code> with specific CUDA options.
 <code>Thermo_pw</code> versions from <code>1.9.0</code> to <code>2.0.2</code> have been specifically tested on the Leonardo supercomputer at CINECA using the NVIDIA Fortran compiler.
 These later versions also include custom GPU routines, exclusive to <code>thermo_pw</code>, that enable the simultaneous calculation of numerous <B>k</B>-points on the GPU. These routines are optimized for metallic systems with small cells.
 <br><br>
@@ -617,5 +617,5 @@ Solutions for tag mismatch:
 <br>
 Consistency with newer <code>QE</code> versions:
 </br>
-* <code>QE</code> 6.8, 7.0, and 7.1: The <code>upflib/read_upf_new.f90</code> routine in these QE versions correctly reads <code>UPF</code> PPs with the <code>PP_AEWFC_REL</code> tag. However, they continue to write <code>UPF</code> PPs with the <code>PP_AEWFC_rel</code> tag, creating an inconsistency. To ensure <code>thermo_pw</code> correctly reads pseudopotentials generated by the same QE version, you must modify <code>upflib/write_upf_new.f90</code> (changing <code>PP_AEWFC_rel</code> to <code>PP_AEWFC_REL</code>).
+* <code>QE</code> 6.8, 7.0, and 7.1: The <code>upflib/read_upf_new.f90</code> routine in these <code>QE</code> versions correctly reads <code>UPF</code> PPs with the <code>PP_AEWFC_REL</code> tag. However, they continue to write <code>UPF</code> PPs with the <code>PP_AEWFC_rel</code> tag, creating an inconsistency. To ensure <code>thermo_pw</code> correctly reads pseudopotentials generated by the same <code>QE</code> version, you must modify <code>upflib/write_upf_new.f90</code> (changing <code>PP_AEWFC_rel</code> to <code>PP_AEWFC_REL</code>).
 For <code>QE</code> 7.0 only: Additionally, apply the correction described above to <code>PW/src/v_of_rho.f90</code> for <code>QE</code> 7.0.
