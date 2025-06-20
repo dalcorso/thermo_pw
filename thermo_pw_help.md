@@ -1,7 +1,7 @@
 # THERMO_PW QUICK HELP
 
 <p align="justify"> 
-To use <code>thermo_pw</code>, a functional version of the <a href="http://www.quantum-espresso.org/">Quantum ESPRESSO (QE)<a> package is required. <code>Thermo_pw</code> can be downloaded from its <a href="http://dalcorso.github.io/thermo_pw/">main page</a> as a <code>.tar.gz</code> file. The current production version is <code>2.0.2</code>, compatible with <code>QE-7.4</code>.</p>
+To use <code>thermo_pw</code>, a functional version of the <a href="http://www.quantum-espresso.org/">Quantum ESPRESSO (QE)</a> package is required. <code>Thermo_pw</code> can be downloaded from its <a href="http://dalcorso.github.io/thermo_pw/">main page</a> as a <code>.tar.gz</code> file. The current production version is <code>2.0.2</code>, compatible with <code>QE-7.4</code>.</p>
 
 <p align="justify"> 
 Copy the <code>thermo_pw</code> archive into the main <code>QE</code> directory and unpack it using the command:</p>
@@ -9,7 +9,7 @@ Copy the <code>thermo_pw</code> archive into the main <code>QE</code> directory 
 <code>tar -xzvf thermo_pw.2.0.2.tar.gz</code>
 </p>
 <p align="justify"> 
-This command will create a directory named <code>thermo_pw<code>.
+This command will create a directory named <code>thermo_pw</code>.
 To compile the code, you will need a Fortran compiler (e.g., the <code>gcc</code> package with <code>gfortran</code>, or <code>gcc-fortran</code> in some distributions) and the same libraries required by <code>QE</code>.</p>
 
 <p align="justify">
@@ -18,7 +18,6 @@ Once the <code>thermo_pw</code> directory is present in the main
 <p align="center">
 <code>make join_qe</code>
 </p>
-
 <p align="justify">
 Then, cd back to the main <code>QE</code> directory and compile <code>thermo_pw</code> with the commands:</p>
 <p align="center">
@@ -27,7 +26,7 @@ Then, cd back to the main <code>QE</code> directory and compile <code>thermo_pw<
 <code>make thermo_pw</code></p>
 
 <p align="justify">
-Alternatively, to use <code>cmake</code>, create a <code>build<code> directory, enter it, and execute:</p>
+Alternatively, to use <code>cmake</code>, create a <code>build<i/code> directory, enter it, and execute:</p>
 <p align="center">
 <code>cmake -DCMAKE_C_COMPILER=c_compiler -DCMAKE_Fortran_COMPILER=fortran_compiler ../ </code><p>
 <p align="justify">
@@ -42,23 +41,23 @@ Subsequently, the <code>make</code> command will also generate the <code>thermo_
 For running <code>thermo_pw</code>, the <a href="http://www.gnuplot.info/">gnuplot</a> package is beneficial. To plot the Brillouin zone, the <a href="http://asymptote.sourceforge.net/">asymptote</a> package is necessary. Both are typically available as precompiled packages in many distributions.</p>
 
 <p align="justify">
-For further details, please consult the user guide located in the <code>thermo_pw/Doc<code> directory. Please report any issues to <a href="mailto:dalcorso .at. sissa.it">dalcorso.at.sissa.it</a>.</p>
+For further details, please consult the user guide located in the <code>thermo_pw/Doc<i/code> directory. Please report any issues to <a href="mailto:dalcorso .at. sissa.it">dalcorso.at.sissa.it</a>.</p>
 
-<p align="justify"> The development version of <code>thermo_pw</code> is hosted at <a href="https://github.com/dalcorso/thermo_pw">https://github.com/dalcorso/thermo_pw</a>. To download it you need the <code>git</code>
-package. Then you can give the command:</p>
-<p align="center">
-<code>git clone https://github.com/dalcorso/thermo_pw</code>
-</p>
-<p align="justify"> and you should get a directory called <code>thermo_pw</code> that contains the source code.
-The <code>git</code> version can be used only together with the version of <code>QE</code> reported here: <code>7.4</code>. Please note that sometimes the <code>git</code> version is not working properly and in any case its use is not recommended.</p> 
+**Development Version (Git):**
+<p align="justify"> 
+The development version of <code>thermo_pw</code> is hosted on <a href="https://github.com/dalcorso/thermo_pw">https://github.com/dalcorso/thermo_pw</a>. To download it, the git package is required. Then, you can run the command:</p>
+<p align="center"> 
+<code>git clone https://github.com/dalcorso/thermo_pw<code></p>
 
-<p align="justify"> Although <code>thermo_pw</code> has been 
-used for several years and can be considered reasonably stable, it remains an 
-experimental code given as it is.
-A version of <code>QE</code> older than <code>7.4</code>
-can still be used with <code>thermo_pw</code> matching carefully the
-versions of <code>thermo_pw</code> and of <code>QE</code> as explained in the
-main <code>thermo_pw</code> page.</p>
+<p align="justify"> 
+This will create a thermo_pw directory containing the source code.
+Important Note: The Git version can only be used with <code>QE<code> version <code>7.4</code>. Be aware that the Git version may not always function correctly, and its use is generally not recommended.
+Although thermo_pw has been in use for several years and is considered reasonably stable, it remains an experimental code provided "as is."</p>
+
+**Compatibility with Older QE Versions:**
+
+<p align="justify"> 
+Older versions of <code>QE</code> (earlier than <code>7.4</code>) can still be used with <code>thermo_pw</code> by carefully matching the <code>thermo_pw</code> and <code>QE</code> versions, as detailed on the main <code>thermo_pw</code> page.</p>
 
 <p align="justify"> Before using <code>thermo_pw</code>, please apply the 
 patches given below.</p>
@@ -67,46 +66,44 @@ patches given below.</p>
 <br>
 **Patches for thermo_pw.2.0.1**:
 <br>
-many_k=.TRUE. not working with LSDA. Substitute the file
+* <code>many_k=.TRUE.</code> not working with LSDA. Substitute the file
 <code>thermo_pw/qe/incdrhoscf_dev.f90</code>
 with this <a href="https://people.sissa.it/~dalcorso/incdrhoscf_dev.f90">file</a>.
 **Patches for thermo_pw.2.0.0**:
-To compile with cmake copy in <code>thermo_pw/CMakeLists.txt</code> 
+* To compile with <code>cmake</code> copy in <code>thermo_pw/CMakeLists.txt</code> 
 the file that you find <a href="https://people.sissa.it/~dalcorso/thermo_pw/CMakeLists.txt">here</a>.
 <br>
-many_k=.TRUE. not working with LSDA. Correct as described in version
-2.0.1.
+* <code>many_k=.TRUE.</code> not working with LSDA. Correct as described in version <code>2.0.1</code>.
 
 **Patches for thermo_pw.1.9.1**:
-The code hangs when using start_q and last_q
+*The code hangs when using <code>start_q</code> and <code>last_q</code>
 with <code>what='elastic_constants_geo'</code>. Correct
 as in commit <code>48b77cc</code> of Mar. 11, 2024.
 <br>
-many_k=.TRUE. not working with LSDA. Correct as described in version
-2.0.1.
+* <code>many_k=.TRUE.</code> not working with LSDA. Correct as described in version <code>2.0.1</code>.
 <br>
 **Patches for thermo_pw.1.9.0**:
 <br>
-At line 150 of <code>qe/many_k_ph.f90</code> continuation line
+* At line 150 of <code>qe/many_k_ph.f90</code> continuation line
 '&' is missing.
 <br>
-Thermo_pw was not working with scalapak.
+* Thermo_pw was not working with scalapak.
 See bug fix of Feb. 1, 2024.
 <br>
-A problem with calculation of EELS spectrum with 
+* A problem with calculation of EELS spectrum with 
 Sternheimer method.
 See bug fix of Jan. 31, 2024
 <br>
 **Patches for thermo_pw.1.8.1**:
 <br>
-Thermo_pw was not working with scalapak.
+* Thermo_pw was not working with scalapak.
 See bug fix of Feb. 1, 2024
 <br>
-A problem with calculation of EELS spectrum with 
+* A problem with calculation of EELS spectrum with 
 Sternheimer method.
 See bug fix of Jan. 31, 2024
 <br>
-A problem with calculation of electronic free energy 
+* A problem with calculation of electronic free energy 
 See bug fix aeedce4 of Jul. 3, 2023.
 <br>
 
@@ -115,7 +112,7 @@ See bug fix aeedce4 of Jul. 3, 2023.
 * To compile using cmake copy the thermo_pw/CMakeLists.txt of thermo_pw.1.8.1
 in the thermo_pw directory.
 <br>
-A problem with calculation of electronic free energy 
+* A problem with calculation of electronic free energy 
 See bug fix aeedce4 of Jul. 3, 2023.
 <br>
 

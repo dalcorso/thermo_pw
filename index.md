@@ -126,56 +126,47 @@ pressure and temperature parameterized plots.
 Ref.18 describes the GPU acceleration for the <code>many_k</code> option.</p>
 
 <p align="justify">The following works contain some calculations made by <code>thermo_pw</code>:</p>
-<br>
 <p align="justify">
 8. X. Gong, Ab initio thermoelasticity of crystals at extremes,
 <a href="https://iris.sissa.it/handle/20.500.11767/143090">PhD Thesis</a>.</p>
-<br>
 <p align="justify">
 7. B. Thakur, X. Gong, and A. Dal Corso,
 Thermodynamic properties of fcc lead: A scalar and fully 
 relativistic first principle study,
 <a href="https://doi.org/10.1016/j.commatsci.2025.113677">
 Comp. Materials Science <b>249</b>, 113677 (2025)</a>.</p>
-<br>
 <p align="justify">
 6. C. Malica and A. Dal Corso,
 Finite-temperature atomic relaxations: Effect on the temperature-dependent C<sub>44</sub> elastic constants of Si and BAs,
 <a href="https://doi.org/10.1063/5.0093376">
 Jour. Chem. Phys. <B>156</B>, 194111 (2022)</a>.</p> 
-<br>
 <p align="justify">
 5. C. Malica,
 From ab-initio thermodynamics to quasi-harmonic thermoelastic properties 
 of crystals: A new workflow and selected applications,
 <a href="https://iris.sissa.it/retrieve/handle/20.500.11767/125489/148394/Cristiano_Malica_Thesis.pdf">PhD thesis</a>.</p>
-<br>
 <p align="justify">
 4. A. Urru,
 Lattice dynamics with Fully Relativistic Pseudopotentials for magnetic systems,
 with selected applications,
 <a href="https://iris.sissa.it/handle/20.500.11767/115671#.X8uStKYo-cM">PhD thesis</a>.</p>
-<br>
 <p align="justify">
 3. A. Urru and A. Dal Corso,
 Lattice dynamics effects on the magnetocrystalline anisotropy
 energy: application to MnBi,
 <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.102.115126">
 Phys. Rev. B <B>102</B>, 115126 (2020)</a>.</p>
-<br>
 <p align="justify">
 2. C. Malica and A. Dal Corso,
 Temperature dependent elastic constants and thermodynamic properties 
 of BAs: an ab-initio investigation, 
 <a href="https://aip.scitation.org/doi/10.1063/5.0011111">
 Jour. of Applied Phys. <B>127</B>, 245103 (2020)</a>.</p>
-<br>
 <p align="justify">
 1. S. Poncé, D. Jena, and F. Giustino,
 Hole mobility of strained GaN from first principles,
 <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.100.085204">
 Phys. Rev. B <B>100</B>, 085204 (2019)</a>.</p>
-<br>
 <p align="justify">
 See also the presentation given at the Quantum-ESPRESSO developers meeting 2017:</p>
 <br>
