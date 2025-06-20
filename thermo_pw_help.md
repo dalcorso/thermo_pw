@@ -47,11 +47,11 @@ For further details, please consult the user guide located in the <code>thermo_p
 <p align="justify"> 
 The development version of <code>thermo_pw</code> is hosted on <a href="https://github.com/dalcorso/thermo_pw">https://github.com/dalcorso/thermo_pw</a>. To download it, the git package is required. Then, you can run the command:</p>
 <p align="center"> 
-<code>git clone https://github.com/dalcorso/thermo_pw<code></p>
+<code>git clone https://github.com/dalcorso/thermo_pw</code></p>
 
 <p align="justify"> 
 This will create a thermo_pw directory containing the source code.
-Important Note: The Git version can only be used with <code>QE<code> version <code>7.4</code>. Be aware that the Git version may not always function correctly, and its use is generally not recommended.
+Important Note: The Git version can only be used with <code>QE</code> version <code>7.4</code>. Be aware that the Git version may not always function correctly, and its use is generally not recommended.
 Although thermo_pw has been in use for several years and is considered reasonably stable, it remains an experimental code provided "as is."</p>
 
 **Compatibility with Older QE Versions:**
