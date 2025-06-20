@@ -64,24 +64,31 @@ patches given below.</p>
 
 **Patches for thermo_pw.2.0.2**:
 <br>
+
 **Patches for thermo_pw.2.0.1**:
 <br>
 * <code>many_k=.TRUE.</code> not working with LSDA. Substitute the file
 <code>thermo_pw/qe/incdrhoscf_dev.f90</code>
 with this <a href="https://people.sissa.it/~dalcorso/incdrhoscf_dev.f90">file</a>.
+<br>
+
 **Patches for thermo_pw.2.0.0**:
+<br>
 * To compile with <code>cmake</code> copy in <code>thermo_pw/CMakeLists.txt</code> 
 the file that you find <a href="https://people.sissa.it/~dalcorso/thermo_pw/CMakeLists.txt">here</a>.
 <br>
 * <code>many_k=.TRUE.</code> not working with LSDA. Correct as described in version <code>2.0.1</code>.
+<br>
 
 **Patches for thermo_pw.1.9.1**:
-*The code hangs when using <code>start_q</code> and <code>last_q</code>
+<br>
+* The code hangs when using <code>start_q</code> and <code>last_q</code>
 with <code>what='elastic_constants_geo'</code>. Correct
 as in commit <code>48b77cc</code> of Mar. 11, 2024.
 <br>
 * <code>many_k=.TRUE.</code> not working with LSDA. Correct as described in version <code>2.0.1</code>.
 <br>
+
 **Patches for thermo_pw.1.9.0**:
 <br>
 * At line 150 of <code>qe/many_k_ph.f90</code> continuation line
@@ -94,6 +101,7 @@ See bug fix of Feb. 1, 2024.
 Sternheimer method.
 See bug fix of Jan. 31, 2024
 <br>
+
 **Patches for thermo_pw.1.8.1**:
 <br>
 * Thermo_pw was not working with scalapak.
@@ -126,11 +134,14 @@ See bug fix aeedce4 of Jul. 3, 2023.
 <br>
 * There is a problem with the GPU version and metals. Correct as in commit 
 <code>7d344d0</code> of 18/01/2022.
+<br>
 * Correct as in the commit of 04/03/2022 if you have problem with
 magnetic systems.
+<br>
 * Problems with spin-orbit. Correct the routine PW/src/v_of_rho.f90 
 adding the instruction v(:,:)=0.0_DP after line 208 and after line
 476 and recompile.
+<br>
 
 **Patches for thermo_pw.1.6.0**:
 <br>
@@ -139,67 +150,91 @@ adding the instruction v(:,:)=0.0_DP after line 208 and after line
 <br>
 * tools/epsilon_tpw.f90 was not updated to the QE68 conventions.
 Please change as in commit <a href="https://github.com/dalcorso/thermo_pw/commit/cd4353f48263e6015b770ef7488337f75a3184c4">commit_cd4353f</a> of 13/08/2021.
+<br>
 * At line 170 of atomic/src/import_upf.f90 exchange the calls to
 set_pawsetup and radial_grid_copy to have the atomic
 paw tests working again in QE6.8.
+<br>
 * At line 131 of thermo_pw/qe/pheqscf.f90 remove tpiba2 to have example21
 working again.
+<br>
 * At line 723 of upflib/write_upf_new.f90 of QE7.0 change PP_AEWFC_rel with
 PP_AEWFC_REL. See also the FAQ 34.
+<br>
 
 **Patches for thermo_pw.1.5.0**:
 <br>
+
 **Patches for thermo_pw.1.4.1**:
 <br>
 * Still a missing transformation of ftau into ft. Please change
 as in commit <a href="https://github.com/dalcorso/thermo_pw/commit/3e3953152e2c81d301eb6a596de97eba07f6841d">commit_3e39531</a> of 7/5/2021.
+<br>
 * At line 576 of upflib/read_upf_new.f90 of QE6.7 change PP_AEWFC_rel with
 PP_AEWFC_REL.
+<br>
 * I usually change line 400 of Modules/read_namelists.f90 of QE6.7
 restoring the old default diago_david_ndim=4.
+<br>
 * At line 170 of atomic/src/import_upf.f90 exchange the calls to
 set_pawsetup and radial_grid_copy to have the atomic
 paw tests working again in QE6.7. First call radial_grid_copy.
+<br>
 * At line 131 of thermo_pw/qe/pheqscf.f90 remove tpiba2 to have example21
 working again.
+<br>
 
 **Patches for thermo_pw.1.4.0**:
 <br>
 * Still a missing transformation of ftau into ft. Please change
 as in commit <a href="https://github.com/dalcorso/thermo_pw/commit/3e3953152e2c81d301eb6a596de97eba07f6841d">commit_3e39531</a> of 7/5/2021.
+<br>
 * Problems with examples 10,11, and 18. Problems with electric fields and
 FR-PP. Please apply the changes as in commit:
 <a href="https://github.com/dalcorso/thermo_pw/commit/743148245d3ee9ce524afe3edc323d5ff3b31a92">commit_7431482</a>.
+<br>
 * To reproduce ph_example07 it is necessary to change line 1049 of 
 file PW/src/pw_restart_new.f90 of QE6.6 as explained for version 1.3.0.
+<br>
 * At line 557 of upflib/read_upf_new.f90 of QE6.6 change PP_AEWFC_rel with
 PP_AEWFC_REL.
+<br>
 * I usually change line 400 of Modules/read_namelists.f90 of QE6.6 
 restoring the old default diago_david_ndim=4.
+<br>
 * At line 170 of atomic/src/import_upf.f90 exchange the calls to
 set_pawsetup and radial_grid_copy to have the atomic
 paw tests working again in QE6.6. First call radial_grid_copy.
+<br>
 * At line 131 of thermo_pw/qe/pheqscf.f90 remove tpiba2 to have example21
 working again.
+<br>
 
 **Patches for thermo_pw.1.3.1 and thermo_pw.1.3.2**:
 <br>
 * Still a missing transformation of ftau into ft. Please change
 as in commit <a href="https://github.com/dalcorso/thermo_pw/commit/3e3953152e2c81d301eb6a596de97eba07f6841d">commit_3e39531</a> of 7/5/2021.
+<br>
 * The phonon calculation with US-PP and PAW-PP is unstable. Correct as in
 commit: 
 <a href="https://github.com/dalcorso/thermo_pw/commit/51b600a25dd1d46c2ea004a509beb830d82a5811">commit_51b600a</a>.
+<br>
 * To reproduce ph_example07 it is necessary to change line 1049 of 
 file PW/src/pw_restart_new.f90 of QE6.6 as explained for version 1.3.0.
+<br>
 * QE6.6 does not stop any longer if some pools have no k point. thermo_pw
 is not working in this case. See in the FAQ 24 to solve this problem.
+<br>
 * tools/pdec.f90 does not compile with some compilers. Take the git version
 of this file and recompile.
+<br>
 * I usually change line 400 of Modules/read_namelists.f90 of QE6.6 restoring 
 the old default diago_david_ndim=4.
+<br>
 * At line 170 of atomic/src/import_upf.f90 exchange the calls to
 set_pawsetup and radial_grid_copy to have the atomic
 paw tests working again in QE6.6. First call radial_grid_copy.
+<br>
 * At line 131 of thermo_pw/qe/pheqscf.f90 remove tpiba2 to have example21
 working again.
 
@@ -207,12 +242,15 @@ working again.
 <br>
 * Still a missing transformation of ftau into ft. Please change
 as in commit <a href="https://github.com/dalcorso/thermo_pw/commit/3e3953152e2c81d301eb6a596de97eba07f6841d">commit_3e39531</a> of 7/5/2021.
+<br>
 * To reproduce ph_example07 it is necessary to change line 999 of 
 file PW/src/pw_restart_new.f90 of QE6.5. Substitute angle1, angle2,
 starting_magnetization with starting_magnetization, angle1, angle2.
+<br>
 * At line 170 of atomic/src/import_upf.f90 exchange the calls to 
 set_pawsetup and radial_grid_copy to have the atomic
 paw tests working again in QE6.5. First call radial_grid_copy.
+<br>
 
 **Patches for thermo_pw.1.2.1**:
 <br>
@@ -222,6 +260,7 @@ are written in the old format. Change as described in:
 in 
 <a href="https://github.com/dalcorso/thermo_pw/commit/42d4b2d4c0247a4a332f12f9d3abbaf2e77b7f38"> commit 42d4b2d</a> and in
 <a href="https://github.com/dalcorso/thermo_pw/commit/35f6defc268508f8ff6dc422581ab3caa65f6e25">commit 35fedef</a> (Present also in version 1.2.0).
+<br>
 
 **Patches for thermo_pw.1.2.0**:
 <br>
@@ -230,26 +269,32 @@ use_free_energy=.TRUE. and elastic_algorithm='energy_std'.
 Add the instruction:
 ibrav_ => NULL()
 at line 490 of Modules/qexsd.f90 of QE version 6.4.1.
+<br>
 
 **Patches for thermo_pw.1.1.1**:
 <br>
 * A bug in src/initialize_thermo_work.f90 could give wrong
 geometries for mur_lc_t for odd ngeo. Change line 607 of this 
 file to delta=0.0_DP. (Only in versions 1.1.1 and 1.1.0).
+<br>
 
 **Patches for thermo_pw.1.0.0**:
 <br>
 * Grimme-d3 not implemented. 
+<br>
 * zeu+US+pools not working. Apply the changes described in 
 <a href="https://github.com/dalcorso/thermo_pw/commit/6c70c8f68abb017b90da9d4ce4ab0fb7620a3308">commit 6c70c8f</a>. 
+<br>
 * The plotted Gruneisen parameters have the wrong sign when
 lmurn=.TRUE.. Apply the change described in <a href="https://github.com/dalcorso/thermo_pw/commit/d78859e8719894646ee4b416a401676c40ff8eff">commit d78859e</a>.
+<br>
 * Ionic relaxations are working only the first time pw.x is called. Apply the change described in <a href="https://github.com/dalcorso/thermo_pw/commit/6a1a5d8464be36d9d4ce9435f2165bd8484a6acf">commit 6a1a5d8</a>.
 <br>
 
 **Known problems of thermo_pw.0.9.0**:
 <br>
 * Phonons + tetrahedra are not working (not implemented yet).
+<br>
 * Phonons + lsda are not working (use one of previous versions).
 <br>
 
@@ -265,7 +310,9 @@ the following file for
 <code>sym_for_diago=.FALSE</code>. At line 144 of 
 <code>qe/set_defaults_pw.f90</code> remove the <code>_tpw</code> from the 
 call to <code>set_kplusq</code>.
+<br>
 * Some compilers could have problems to compile the routine <code>thermo_pw/qe/set_kplusq.f90</code>. Use the following <a href="http://people.sissa.it/~dalcorso/thermo_pw/set_kplusq.f90">set_kplusq.f90</a>.
+<br>
 * The plotted Gruneisen parameters have the wrong sign when lmurn=.TRUE.. 
 Apply the change described in <a href="https://github.com/dalcorso/thermo_pw/commit/d78859e8719894646ee4b416a401676c40ff8eff">commit d78859e</a>.  
 <br>
@@ -283,8 +330,10 @@ It might affect also previous versions that use the new xml output.
 * With pools, all bands are red in the band plot. At line 550 of 
 <code>src/sym_band_sub.f90</code> substitute <code>nks</code> with 
 <code>nkstot</code> and recompile.
+<br>
 * Some problems with Intel compiler can be solved as described in the patch
 <a href="https://github.com/dalcorso/thermo_pw/commit/68ec9d73fb110f9a10e36b01bab02a01f80b4968">68ec9d7</a>
+<br>
 * When <code>emin_input</code> and <code>emax_input</code> are given in the 
 <code>thermo_control</code> namelist,
 some bands could be missing. The problem can be solved as described
@@ -300,6 +349,7 @@ with <code>after_disp=.TRUE.</code> introduced in this version. Take the file
 of <code>thermo_pw.0.6.0</code> and recompile.<br>
 Moreover, at lines 11307 and 11336 of <code>lib/point_group.f90</code>,
 change <code>1D-8</code> with <code>1D-5</code>.
+<br>
 * Modules/clocks.f90 : line 41 set <code>maxclock=200</code> otherwise 
 <code>thermo_pw</code> might run out of clocks.
 <br>
@@ -315,7 +365,9 @@ change <code>1D-8</code> with <code>1D-5</code>.
 * A problem with <code>max_geometries</code>: this is a bug. Add the instruction
 <code>ph_geometries=0</code> at the line 431 of the file 
 <code>src/thermo_pw.f90</code> and recompile.
+<br>
 * Compilation problem of <code>tools/test_colors.f90</code>: remove the RETURN command at the end of the file.
+<br>
 * Error from <code>find_aux_ind_two_groups</code> in a phonon plot. Please 
 check commit
 <a href="https://people.sissa.it/~dalcorso/matdyn_sub.f90">122688</a>
@@ -328,8 +380,10 @@ and make the same changes to <code>src/matdyn_sub.f90</code>.
 Please change line 571 of <code>src/thermo_readin.f90</code> from 
 <code>CALL clean_ngeo()</code> to
 <code>CALL clean_ngeo(ngeo,ibrav)</code>. 
+<br>
 * Anharmonic properties can be calculated only with the dynamical matrix in
 <code>.xml</code> format. Old format is not working. (See commit 110778).
+<br>
 * The code is not recovering correctly and gives an error 
 <code>check_stop_init</code> not initialized. (Please apply commit 110838).
 <br>
@@ -337,8 +391,10 @@ Please change line 571 of <code>src/thermo_readin.f90</code> from
 **Patches for thermo_pw.0.2.0**:
 <br>
 * Problem in anharmonic properties: update to a newer version.
+<br>
 * Modules/clocks.f90 : line 41 set <code>maxclock=200</code> otherwise 
 <code>thermo_pw</code> might run out of clocks.
+<br>
 * Bug fix: In anharmonic calculations some vertical lines in phonon dispersion 
 plots are double. Update to a newer version. 
 <br>
@@ -355,297 +411,211 @@ correctly.
 <br><br>
 1. How can I learn to use <code>thermo_pw</code>?
 <br>
-Please learn the basic use of <code>Quantum ESPRESSO</code> first. 
-Then you can read the <code>thermo_pw</code> tutorial and user's guide and run 
-the examples. These <code>FAQ</code> assume that you have a basic 
-understanding of <code>thermo_pw</code> and contain miscellaneous information
-not available in the user's guide.
+To begin, please familiarize yourself with the basic use of <code>Quantum ESPRESSO</code>. Afterward, you can read the <code>thermo_pw</code> tutorial and user's guide and run the examples. These FAQs assume a basic understanding of <code>thermo_pw</code> and contain miscellaneous information not available in the user's guide.
 <br><br>
 2. Can I study the thermal expansion of anisotropic solids using <code>thermo_pw</code>?
 <br>
-For some crystal systems, yes, but not all systems are supported
-or tested. Read carefully the user's guide and use a version higher than 
-<code>0.3.0</code>. Also use dynamical matrices in <code>.xml</code> format 
-or the calculation
-of thermal expansion with Gruneisen parameters will not work with all 
-versions previous to <code>0.5.0</code>.
+Yes, for certain crystal systems, but not all are currently supported or extensively tested. Please read the user's guide carefully and ensure you are using a version higher than <code>0.3.0</code>. Additionally, use dynamical matrices in <code>.xml</code> format, as calculations of thermal expansion with Gruneisen parameters will not work with all versions prior to <code>0.5.0</code> otherwise.
 <br><br>
 3. Can I calculate the temperature dependence of the band gap or
 in general of the band structure using <code>thermo_pw</code>?
 <br>
-You can calculate the band structure at the crystal geometry that corresponds
-to a given temperature. In this way you evaluate the effect of thermal
-expansion on the band structure or on the gap. However an important 
-temperature dependence of the band gaps and of the band structure
-comes from the electron-phonon interactions that are not included in 
-<code>thermo_pw</code>. 
-For this purpose you should use another package.
+You can calculate the band structure at the crystal geometry corresponding to a specific temperature. This allows you to evaluate the effect of thermal expansion on the band structure or band gap. However, a significant component of the temperature dependence of band gaps and band structures arises from electron-phonon interactions, which are not included in <code>thermo_pw</code>. For such calculations, you will need to use a different package.
 <br><br>
 4. Can I calculate the equilibrium geometry of a solid at a given temperature using <code>thermo_pw</code>?
 <br>
-Yes, but the calculation is as heavy as computing the anharmonic properties
-and it will take a lot of time and resources. You need to learn how to use 
-<code>thermo_pw</code> before starting such a complex calculation.
+Yes, this is possible. However, the calculation is as computationally intensive as determining quasi-harmonic properties and will require significant time and resources. We strongly recommend that users gain a thorough understanding of <code>thermo_pw</code>'s usage before attempting such a complex calculation.
 <br><br>
 5. Which is the difference between <code>examples</code> and <code>inputs</code>?
 <br>
-<code>Examples</code> illustrate the features of <code>thermo_pw</code> and are fast, but are not converged. <code>inputs</code> are more realistic examples.
+<code>Examples</code> are designed to quickly illustrate <code>thermo_pw</code>'s features; however, they are not fully converged for accuracy. In contrast, <code>inputs</code> provide more realistic, production-ready examples.
 <br><br>
-6. Sometimes the examples of <code>thermo_pw</code> run correctly, sometimes they crash. Which is the problem?
+6. Why do <code>thermo_pw</code> examples sometimes run correctly and sometimes crash?
 <br>
-The most probable reason is that you have not removed the <code>results</code> 
-directory produced by a previous run of the example script.
+The most probable reason is that you have not removed the results directory generated by a previous run of the example script.
 <br><br>
-7. <code>make thermo_pw</code> is not working. Compilation stops with some missing routines error. 
+7. <code>make thermo_pw</code> is not working. The compilation stops with a missing routines error. What's wrong?. 
 <br>
-Most probably you have not matched the versions of <code>QE</code> and of <code>thermo_pw</code>.
+The most probable reason is an incompatibility between the versions of <code>QE</code> and <code>thermo_pw</code>. Please ensure they are compatible.
 <br><br>
-8. I have compiled <code>thermo_pw</code> but as I run it, it stops immediately.
-I am using <code>thermo_pw.0.3.0</code>.
+8. After unpacking the tar file, I don't see a <code>thermo_pw</code> directory. Where is it?
 <br>
-Most probably you have not applied the patch described above. Update to a
-newer version.
+When you unpack the source files downloaded from the GitHub releases page, the directory is named <code>thermo_pw-#version number</code> (e.g., <code>thermo_pw-1.0.0</code>). Simply rename this directory to <code>thermo_pw</code> to proceed.
 <br><br>
-9. After unpacking the tar file there is no <code>thermo_pw</code> directory.
+9. I'm having trouble running the examples, specifically with issues 
+related to images. What should I do?
 <br>
-The directory obtained unpacking the source files obtained from the github 
-releases web page is called <code>thermo_pw-#version number</code>. Just 
-change the name of this directory to <code>thermo_pw</code>.
+If you wish to run the examples without using images, you need to modify the <code>environment_variables</code> file located in your main <code>QE</code> directory. Locate the variable <code>PARA_IMAGE_POSTFIX</code>, and set -ni 1.
 <br><br>
-10. I cannot run the examples. I have problems using images. What 
-should I do?
+10. I don't have a parallel computer and am unfamiliar with <code>MPI</code>. Can I still run <code>thermo_pw</code>? 
 <br>
-If you want to run the examples without images 
-edit the file <code>environment_variables</code> in the main <code>QE</code>
-directory. Search the two variables <code>PARA_IMAGE_PREFIX</code> and
-<code>PARA_IMAGE_POSTFIX</code> and set <code>-ni 1</code>. 
+Yes, you can, but only <code>thermo_pw</code> version 0.5.0 and later can be compiled and run in serial (single-processor) mode. Earlier versions require <code>MPI</code> for compilation and execution.
 <br><br>
-11. I have not a parallel computer. I do not know what <code>mpi</code> is. 
-Can I run <code>thermo_pw</code>?
+11. The phonon dispersion plot appears strange, with disjoint parts and modes not classified by symmetry. What is the cause?
 <br>
-Only <code>thermo_pw.0.5.0</code> or later versions can be compiled in serial. All previous versions must be compiled together with <code>mpi</code>.
+This issue arises because the mode symmetry analysis requires dynamical matrices in <code>.xml</code> format. To resolve this, please ensure you include the <code>.xml</code> extension in the <code>fildyn</code> variable within your <code>ph_control</code> input file. Symmetry matrices are also crucial for recognizing symmetry-equivalent points in the Brillouin zone.
 <br><br>
-12. An ionic relaxation converges with <code>pw.x</code> but not with <code>thermo_pw.x</code> (version <code>0.4.0</code>).
+12. Why does the plot of Grüneisen parameters show strange crossings at certain points sometimes?
 <br>
-This is a bug of version <code>0.4.0</code>. Please  
-update to a newer version.
+In some cases, plotting Grüneisen parameters requires higher accuracy in symmetry analysis than the phonon plot. Accidentally degenerate frequencies might have significantly different Grüneisen parameters. To address this, open <code>PHonon/PH/find_mode_sym.f90</code>, change the parameter <code>5.D-2</code> at line 148 to <code>1.D-2</code> (or a smaller value), and then recompile <code>thermo_pw</code>.
 <br><br>
-13. The plot of the phonon dispersions is very strange with several disjoint
-parts. Moreover the modes are not classified using symmetry. Why?
+13. The <code>thermo_pw</code> documentation fails to compile with errors indicating <code>html.sty</code> or <code>latex2html</code> are missing. How can I fix this?
 <br>
-The mode symmetry analysis requires dynamical matrices in <code>.xml</code> 
-format. Please put the  <code>.xml</code> extension in the <code>fildyn</code>
-variable in the <code>ph.x</code> input.
-Symmetry matrices are needed also to recognize symmetry equivalent point
-on the Brillouin zone.
-<br><br>
-14. The plot of the Gruneisen parameters has strange crossings in some points.
-Why?
+This is not an issue with <code>thermo_pw</code> itself. Compiling the <code>thermo_pw</code> documentation requires a comprehensive <code>LaTeX<code> distribution. To resolve the errors, you can:
 <br>
-In some cases the plot of the Gruneisen parameters needs more accuracy 
-on the symmetry analysis than the phonon plot. Accidentally degenerate 
-frequencies might have very different Gruneisen parameters. Change the 
-parameter <code>5.D-2</code> at line 148 of 
-<code>PHonon/PH/find_mode_sym.f90</code> to <code>1.D-2</code> or 
-less and recompile <code>thermo_pw</code>.
-<br><br>
-15. Thermo_pw documentation does not compile and stops with an error 
-saying that
-<code>html.sty</code> is missing or <code>latex2html</code> is missing.
+* Download <code>html.sty</code> from the web and copy it into the <code>thermo_pw/Doc</code> directory.
+* Install the <code>latex2html</code> package.
 <br>
-This is not a problem of <code>thermo_pw</code>. In order to compile the
-documentation <code>thermo_pw</code> needs a quite complete 
-<code>latex</code> package. You can find <code>html.sty</code> on
-the web and copy it inside <code>thermo_pw/Doc</code> directory and you
-can install the package <code>latex2html</code>. Even if you do not solve this problem, 
-<code>thermo_pw.x</code> will be available in the <code>bin</code> directory 
-of QE. Only the documentation will be missing. 
+Even if you do not resolve these documentation compilation issues, the <code>thermo_pw.x</code> executable will still be available in the <code>bin</code> directory of your <code>QE</code> installation. Only the documentation will be inaccessible.
 <br><br>
-16. The plot of the projected band structure has some problems. Some gaps
-have the same color of the projected band structure. 
+14.  I'm experiencing issues with the projected band structure plot; some gaps have the same color as the projected band structure. What's the problem?
 <br>
-This is a problem of old versions of gnuplot. Update to gnuplot 5.0 or higher.
+This is a known issue with older versions of <code>Gnuplot</code>. Please update to <code>Gnuplot 5.0</code> or higher to resolve it.
 <br><br>
-17. The phonon dispersion plot seems strange, some branches are missing.
+15.  My phonon dispersion plot looks strange, with some branches missing. What could be the issue?
 <br>
-Please check that you used enough digits for the atomic positions. A typical
-problem appears when you write 1/3 and 2/3 in single precision. The 
-<code>pw.x</code> code finds more symmetries than those that are
-actually present in the final modes and the routine that identifies the 
-mode symmetry gets 
-confused.
+This often occurs if you haven't used enough digits for the atomic positions in your input. A common problem arises when positions like 1/3 and 2/3 are specified with insufficient precision. In such cases, the <code>pw.x</code> code may incorrectly identify more symmetries than are actually present in the final modes, confusing the routine that identifies mode symmetry.
 <br><br>
-18. The code fails to identify the space group and stops with an error
-''point group orientation incorrect''.
+16. The code fails to identify the space group and stops with an error: "point group orientation incorrect." Why?
 <br>
-Most probably you are simulating a noncollinear magnetic system. Magnetic
-space group identification is not implemented but no check is done in versions
-up to 0.9.0. Please make the same changes as commit a68e6cb of 18 January 2018.
-If you find this error, you are using ibrav/=0, and your system is collinear,
-please send me your input.
+This error most likely indicates you are simulating a noncollinear magnetic system. Keep in mind that magnetic space group identification isn't implemented in <code>thermo_pw</code>. Versions up to <code>0.9.0</code> don't perform a check for this, which can lead to the error.
+To resolve this, please apply the changes introduced in commit <code>a68e6cb</code> (January 18, 2018).
+If you encounter this error while using <code>ibrav/=0<code> with a collinear system, please send your input file for further investigation.
 <br><br>
-19. <code>what='scf_disp'</code> and partial phonon computations with
-<code>start_q</code>, <code>last_q</code> or <code>start_irr</code> 
-<code>last_irr</code> gives strange error messages.
+17. When using <code>what='scf_disp'</code> with partial phonon computations (e.g., <code>start_q</code>, <code>last_q</code>, <code>start_irr</code>, <code>last_irr</code>), I receive strange error messages. Why?
 <br>
-The option <code>what='scf_disp'</code> requires all the dynamical matrices
-files in the <code>dynamical_matrices</code> directory. Use 
-<code>what='scf_ph'</code> until you collect all the dynamical matrices
-and do a final run with <code>what='scf_disp'</code>.
+The <code>what='scf_disp'</code> option requires all the dynamical matrix files to be present in the dynamical_matrices directory. If you are performing partial phonon calculations, use <code>what='scf_ph'</code> until all necessary dynamical matrices have been generated and collected. Once all files are present, you can then run with <code>what='scf_disp'</code> for the final computation.
 <br><br>
-20. I am computing a phonon dispersion but some <B>q</B> points are not 
-computed.
+18.  I'm computing a phonon dispersion, but some <B>q</B> points are not being computed. What's the reason? 
 <br>
-Most probably you have not cleaned the <code>outdir</code> directory. Note that the 
-<code>thermo_pw</code> always tries to use the content of the 
-<code>outdir</code> directory if present.
+The most probable reason is that you have not cleaned your <code>outdir</code> directory. Note that <code>thermo_pw</code> always attempts to reuse content from the <code>outdir</code> directory if it finds any.
 <br><br>
-21. Is it possible to increase the temperature range? 
+19. Is it possible to increase the temperature range of my calculation?
 <br>
-Yes, you have to remove the <code>therm_files</code> directory
-while keeping the <code>dynamical_matrices</code> and the 
-<code>restart</code> directories. If you removed the <code>outdir</code> 
-directory, use <code>after_disp=.TRUE.</code> and set <code>fildyn</code> 
-with the name of the dynamical matrices.
+Yes, you can. To do so, you must remove the <code>therm_files</code> directory while preserving the <code>dynamical_matrices</code> and <code>restart</code> directories. If you have also removed the <code>outdir</code> directory, set <code>after_disp=.TRUE.</code> in your input and specify the name of the dynamical matrices using the <code>fildyn</code> variable.
 <br><br>
-22. Is it possible to increase the number of points used to compute the
-phonon dos?
+20.  Is it possible to increase the number of points used to compute the phonon DOS?
 <br>
-Yes, you have to remove both the <code>phdisp_files</code> and the
-<code>therm_files</code> directories
-while keeping the <code>dynamical_matrices</code> and the 
-<code>restart</code> directories. 
+Yes, you can. To do so, you must remove both the <code>phdisp_files</code> and <code>therm_files</code> directories while preserving the <code>dynamical_matrices</code> and <code>restart</code> directories.
 <br><br>
-23. I made a calculation with <code>with_eigen=.FALSE.</code>. Is it possible
-to restart with <code>with_eigen=.TRUE.</code>?
+21. I performed calculations with <code>with_eigen=.FALSE.</code>. Is it 
+possible to restart with <code>with_eigen=.TRUE.</code>?
 <br>
-Yes, but you have to remove both the <code>phdisp_files</code> and the 
-<code>therm_files</code> directories, while keeping the 
-<code>dynamical_matrices</code> and the <code>restart</code> directories.
+Yes, you can. To do so, you must remove both the <code>phdisp_files</code> and <code>therm_files</code> directories while preserving the <code>dynamical_matrices</code> and <code>restart</code> directories.
 <br><br>
-24. I am using <code>thermo_pw 1.3.1</code> with<code>QE6.6</code> but 
-the code hangs or stops in random places when computing phonon dispersions. 
+22. I'm using <code>thermo_pw 1.3.1</code> with <code>QE 6.6</code>, and the code hangs or stops randomly during phonon dispersion calculations. What's the issue? 
 <br>
-Be careful with the use of pools. Since version <code>6.6 QE</code> 
-does not stop any longer if some pools have no k points, but 
-<code>thermo_pw</code> cannot deal with 
-this case. In order to check if you are in this situation search the
-string 'suboptimal parallelization: some nodes have no k-points' in your
-output. The solution is to decrease the number of pools until the
-message disappear.
-If you want a permanent check of this problem use <code>thermo_pw.1.3.2</code>.
+Be cautious when using parallel pools. Since version <code>6.6</code>, <code>QE</code> no longer halts if some pools lack <B>k</B>-points, but <code>thermo_pw</code> (version <code>1.3.1</code>) cannot handle this scenario, leading to hangs or crashes.
+To check if this is your situation, search your output file for the string: <code>'suboptimal parallelization: some nodes have no k-points'</code>.
+Solution: Decrease the number of pools until this message no longer appears.
+For a permanent check and resolution of this problem, consider upgrading to <code>thermo_pw 1.3.2<code> or higher.
 <br><br>
-25. <code>tmp_dir</code> cannot be opened.
+23.  I'm receiving an error message that <code>tmp_dir</code> cannot be opened. What should I do?
 <br>
-Check your <code>outdir</code> directory in the <code>pw.x</code> input.
-Usually this error indicates a missing parent directory. You might have
-an error in the path indicated in <code>outdir</code> or
-you are not allowed to write or execute the parent directory.
-<br><br>
-26. Error in namelist.
+This error typically indicates a problem with the <code>outdir</code> directory specified in your <code>pw.x</code> input file. Most probable causes include:
 <br>
-Most probably there is a mistake in a variable of the namelist. Please
-check accurately the user guide. The other possibility is that your
-editor added some hidden characters in the input file. Please check
-for it for instance with the command <code>cat -A input_file</code>.
-Another possibility is that you are reading the user guide of a version
-of <code>thermo_pw</code> different from the one you are using and the
-variable is not yet available. Please match the versions of the user guide
-and of <code>thermo_pw</code>.
-<br><br>
-27. Point group incompatible with the Bravais lattice.
+* A missing parent directory in the path specified for <code>outdir</code>.
 <br>
-This means that your point group is different from the point groups compatible
-with a given Bravais lattice. The calculation is still possible but
-<code>thermo_pw</code> will not be able to find the space group and 
-will not use the symmetries to simplify the calculation of the physical 
-properties. Please check if you can find why some symmetries are missing,
-or why you have too many symmetries. Try to use one of the Bravais
-lattices suggested by the code. The message might also indicate that
-you have a supercell. If this is what you want, just ignore the message and
-continue the calculation, otherwise simplify your cell.
-<br><br>
-28. Is <code>thermo_pw</code> compatible with the GPU version of QE?
+* Insufficient permissions to write to or execute in the <code>outdir</code>'s parent directory.
 <br>
-In part it is. With QE6.7 and with version 1.5.0 
-you can give the command <code>make tpw_gpu</code>
-to obtain a version of the code that can be compiled with 
-<code>q-e-gpu.6.7</code>. Version 1.5.1 and QE6.8 or later versions
-can be compiled with CUDA enabled with the same commands used to
-enable CUDA in QE. You need to run configure with the CUDA options.
-Version 1.9.0 has been tested on Leonardo at CINECA with the nvidia
-fortran compiler. 
+Please check the <code>outdir</code> path and your directory permissions.
 <br><br>
-29. The band or phonon symmetry is not indicated. There are many
-question marks instead of the names of the irreducible representations.
+24.  I'm receiving an "Error in namelist." What should I do?
 <br>
-The question marks indicate that the algorithm that finds the symmetry is
-confused and is unable to find a well defined symmetry. There are several 
-possible reasons: 
-* You might have a too small cut-off, or
-a too large threshold for the self consistence and the symmetry is not
-accurate enough. Please modify these parameters.
-* Your atomic positions are quite close to a symmetry position but
-not exactly there. This is a common problem when using single precision
-atomic coordinates. Please correct the atomic coordinates adding more digits. 
-* There might be some problem with the pseudopotential and
-there is some ghost state. Please check other pseudopotentials to
-see if the problem disappears. 
-* If none of the above applies, there might be a problem in the algorithm 
-that finds the symmetry. Please send me your input or post it to one of
-the forum mailing lists.
+This error most likely indicates a mistake in a variable within your namelist. Please consult the user guide carefully to verify all variable spellings and expected values.
+<br>
+Other common causes include:
+<br>
+* Hidden Characters: Your text editor might have introduced hidden characters into the input file. You can check for these using a command like <code>cat -A input_file</code>.
+<br>
+* Version Mismatch: You might be using a user guide from a different <code>thermo_pw</code> version than the one you are running, leading to unrecognized variables. Always ensure that the version of your user guide matches your <code>thermo_pw</code> installation.
 <br><br>
-30. Can I compute the temperature dependent elastic constants with 
+25.  I'm receiving the error "Point group incompatible with the Bravais lattice." What does this mean?
+<br>
+This message indicates that the point group identified for your system is not compatible with the specified Bravais lattice. While the calculation can still proceed, <code>thermo_pw</code> will not be able to automatically determine the space group, nor will it utilize symmetries to simplify the calculation of physical properties.
+<br>
+Possible Causes & Solutions:
+<br>
+    Incorrect Symmetry:
+<br>
+    * Missing Symmetries: Investigate why some symmetries might be absent from your input (e.g., imprecise atomic coordinates).
+<br>
+    * Excess Symmetries: Conversely, you might have defined too many symmetries that are not truly present in the actual structure.
+<br>
+    * Action: Try using one of the Bravais lattices suggested by the code, or review your structure for subtle deviations from the intended symmetry.
+<br>
+    Supercell:
+<br>
+    * The message might also appear if you are intentionally simulating a supercell.
+<br>
+    * Action: If this is your intent, you can safely ignore this message and continue the calculation. Otherwise, simplify your unit cell to match the primitive cell.
+<br><br>
+26. Is <code>thermo_pw</code> compatible with the GPU version of QE?
+<br>
+Partial compatibility exists.
+    With <code>QE 6.7</code> and <code>thermo_pw</code> version <code>1.5.0</code>, you can compile a GPU-compatible version of <make>thermo_pw</code> by running <code>make tpw_gpu<code>. This is designed to work with <code>q-e-gpu.6.7<code>.
+    For <code>thermo_pw</code> version <code>1.5.1</code> and <code>QE 6.8</code> (or later versions), <code>thermo_pw</code> can be compiled with CUDA support using the same commands you would use to enable CUDA in standard QE. This typically involves configuring QE with specific CUDA options.
+<code>Thermo_pw</code> versions 1.9.0 to 2.0.2 has been specifically tested on the Leonardo supercomputer at CINECA using the NVIDIA Fortran compiler.
+These later versions also include custom GPU routines, exclusive to <code>thermo_pw</code>, that enable the simultaneous calculation of numerous <B>k</B>-points on the GPU. These routines are optimized for metallic systems with small cells.
+<br><br>
+27. The band or phonon symmetry is not indicated; instead, many question marks appear in place of irreducible representation names. Why?
+<br>
+The presence of question marks signifies that the symmetry-finding algorithm is unable to definitively determine the symmetry. This can be due to several reasons:
+* Insufficient Accuracy: Your calculation might have a cut-off that is too small, or a self-consistency threshold that is too large, resulting in insufficient accuracy for proper symmetry identification. Action: Please adjust these parameters.
+* Imprecise Atomic Positions: Your atomic positions may be very close to, but not exactly on, a true symmetry position. This is a common issue when using single-precision atomic coordinates. Action: Correct your atomic coordinates by adding more digits of precision.
+* Pseudopotential Issues: There might be a problem with the pseudopotential, possibly indicating a "ghost state." Action: Try using different pseudopotentials to see if the issue resolves.
+* Algorithm Problem: If none of the above solutions apply, there might be an issue with the symmetry-finding algorithm itself. Action: In this case, please send me your input file or post it to one of the forum mailing lists.
+<br><br>
+28. Can I compute the temperature dependent elastic constants with 
 <code>thermo_pw</code>?
-* Quasi-static elastic constants are available from version <code>0.6.0</code>.Quasi-harmonic elastic constants require version <code>1.2.0</code> or
-later. The electronic contribution is implemented only starting for
-version <code>1.4.0</code>. 
-* Note that this feature is still work in progress and there are still 
-some limitations. For instance, atomic coordinates are relaxed only at 
-zero temperature.
-* Note also that the quasi-harmonic calculation is very time consuming.
-As an order of magnitude it requires hundreds of phonon dispersion 
-calculations.
+
+Yes, with version-specific capabilities:
+<br>
+* Quasi-static elastic constants are available starting from version <code>0.6.0</code>.
+<br>
+* Quasi-harmonic elastic constants require version <code>1.2.0</code> or later.
+<br>
+* The electronic contribution to elastic constants is implemented only from version <code>1.4.0</code> onwards.
+<br>
+Important Notes:
+<br>
+* This feature is still under development and has some limitations. For instance, atomic coordinates are currently relaxed only at zero temperature. Full free energy minimization is possible only when there one internal degree of freedom.
+<br>
+* Be aware that quasi-harmonic calculations are highly time-consuming, often requiring, as an order of magnitude, hundreds of phonon dispersion computations.
 <br><br>
-31. Laue class not available when computing elastic constants.
-* This error usually means that your system has less symmetry than 
-expected from the Bravais lattice. For instance there is no Laue class 
-available for a solid with a cubic Bravais lattice and point group symmetry 
-different from T, T_d, T_h, O, or O_h.
-* In this case the <code>thermo_pw</code> output writes that the point 
-group and the Bravais lattice are not compatible and gives a set of 
-Bravais lattices compatible with the symmetry. If you think that the 
-symmetry of your system is correct, then you should use one of the 
-Bravais lattices suggested by <code>thermo_pw</code>. Instead if some 
-symmetry is missing for other reasons (see the Quantum Espresso PW 
-user's guide for possible reasons), 
-then correct the problem before running the elastic constant calculation.
-* If you are using supercells or you have a low dimensional system in a 
-supercell, then probably thermo_pw is not yet suited to compute automatically
-the elastic constants of your system.
+29.  I'm receiving a "Laue class not available" error when computing elastic constants. What does this mean?
+
+* This error typically indicates that your system possesses fewer symmetries than expected for its specified Bravais lattice. For example, for a solid with a cubic Bravais lattice, a Laue class cannot be assigned if its point group symmetry is different from T, T_d, T_h, O, or O_h.
+<br>
+* In such cases, <code>thermo_pw</code>'s output will state that the point group and Bravais lattice are incompatible and will suggest alternative compatible Bravais lattices.
+<br>
+Recommended Actions:
+<br>
+* If you are confident in your system's symmetry: Consider using one of the Bravais lattices suggested by <code>thermo_pw</code>.
+<br>
+* If symmetries are missing due to other reasons: (e.g., imprecise atomic coordinates, as discussed in the <code>QE</code> <code>PW</code> user's guide), you must correct these issues before proceeding with the elastic constant calculation.
+<br>
+* For Supercells or Low-Dimensional Systems: If you are using supercells, or have a low-dimensional system within a supercell, <code>thermo_pw</code> might not yet be automatically suited for computing the elastic constants of your system.
 <br><br>
-32. <code>Thermo_pw</code> does not compile (with Quantum ESPRESSO version 7.0 or later). There is an error no rule to make file <code>make.depend</code>.
-* After writing <code>make join_qe</code> and returning to QE root directory
-you need to rerun <code>./configure</code> before <code>make thermo_pw</code>.
+30. <code>thermo_pw</code> fails to compile with <code>QE</code> version <code>7.0</code> or later, showing a "no rule to make file make.depend" error. How can I fix this?.
+After running <code>make join_qe</code> and returning to the <code>QE</code> root directory, you must re-run <code>./configure</code> before attempting <code>make thermo_pw</code>. This step is crucial for regenerating the necessary build dependencies.
 (Thanks to H. Zhao for reporting the problem).
-33. <code>Thermo_pw</code> has problems with fully relativistic PAW. 
-* Before reporting such problems check the correct matching of the 
-PP_AEWFC_REL tag in the UPF file and in the upf reading routine. 
-Starting from version 6.5 of QE and until version 6.7 the xml tag for 
-the small component of the all electron partial waves has been called 
-PP_AEWFC_rel, while in previous versions of QE it was called PP_AEWFC_REL. 
-As such the fully relativistic
-pseudopotentials created with a version of QE older than 6.5 (as many of 
-the PPs distributed in the QE site) were no more read correctly. The code
-does not stop and most of the time produces only slightly uncorrect results 
-expecially in the PP test. To read a PP that contains the 
-PP_AEWFC_REL tag you can change the file upflib/read_upf_new.f90 and 
-upflib/write_upf_new.f90 searching
-for the string PP_AEWFC_rel in both files and changing it into PP_AEWFC_REL.
-In QE6.8, QE7.0, and QE7.1 the routine upflib/read_upf_new.f90 
-has been corrected and these versions of QE read correctly UPF PPs with the tag
-PP_AEWFC_REL, but unfortunately continue to write UPF PP with the tag 
-PP_AEWFC_rel. The routine upflib/write_upf_new.f90 must be changed to 
-make the code consistent and to read correctly the pseudopotential generated
-by the same version of QE. For version QE7.0 apply also the correction to
-PW/src/v_of_rho.f90 described above. 
+31. <code>Thermo_pw</code> is having problems with fully relativistic PAW pseudopotentials. What should I do?
+
+* Before reporting any issues, please check for a mismatch in the <code>PP_AEWFC_REL</code> tag between your <code>UPF</code> file and <code>thermo_pw</code>'s <code>UPF</code> reading routines. This is a common source of problems.
+<br>
+Understanding the Tag Mismatch:
+<br>
+* From <code>QE</code> versions <code>6.5</code> to <code>6.7</code>, the XML tag for the small component of all-electron partial waves was named PP_AEWFC_rel.
+    In previous <code>QE</code> versions, it was <code>PP_AEWFC_REL</code>.
+    This change means fully relativistic pseudopotentials created with QE versions older than <code>6.5</code> (including many distributed on the <code>QE</code> site) might no longer be read correctly by <code>thermo_pw<code> versions relying on the <code>PP_AEWFC_rel<code> tag.
+    The code often doesn't stop but might produce subtly incorrect results, especially during pseudopotential tests.
+<br>
+Solutions for Tag Mismatch:
+<br>
+* For PPs with <code>PP_AEWFC_REL</code> (older QE): If your pseudopotential contains the <code>PP_AEWFC_REL<code> tag, manually edit <code>upflib/read_upf_new.f90</code> and <code>upflib/write_upf_new.f90</code>. In both files, search for the string <code>PP_AEWFC_rel</code> and change it to <code>PP_AEWFC_REL</code>.
+<br>
+Consistency with Newer <code>QE</code> Versions:
+</br>
+* <code>QE</code> 6.8, 7.0, and 7.1: The <code>upflib/read_upf_new.f90</code> routine in these QE versions correctly reads <code>UPF</code> PPs with the <code>PP_AEWFC_REL</code> tag. However, they continue to write <code>UPF</code> PPs with the <code>PP_AEWFC_rel</code> tag, creating an inconsistency. To ensure <code>thermo_pw<code> correctly reads pseudopotentials generated by the same QE version, you must modify <code>upflib/write_upf_new.f90</code> (changing <code>PP_AEWFC_rel<code> to <code>PP_AEWFC_REL</code>).
+For <code>QE</code> 7.0 only: Additionally, apply the correction described above to <code>PW/src/v_of_rho.f90</code> for <code>QE</code> 7.0.

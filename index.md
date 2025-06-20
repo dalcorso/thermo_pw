@@ -202,7 +202,7 @@ Seek Further Assistance: If the problem persists, please post details to the <a 
     tmp_dir cannot be opened
     error in namelist
 
-<p align="justify">are often self-explanatory. The error message itself usually indicates the problem. You can find potential solutions in the FAQ (questions 25 and 26) located <a href="https://dalcorso.github.io/thermo_pw/thermo_pw_help.html">here.</a> If these suggestions do not resolve your issue, I am unlikely to have further specific guidance.</p>
+<p align="justify">are often self-explanatory. The error message itself usually indicates the problem. You can find potential solutions in the FAQ (questions 23 and 24) located <a href="https://dalcorso.github.io/thermo_pw/thermo_pw_help.html">here.</a> If these suggestions do not resolve your issue, I am unlikely to have further specific guidance.</p>
 
 <p aling="justify"> For additional help, you can also consult the Quantum ESPRESSO user guide, post your question to the users mailing list at the <code>users@lists.quantum-espresso.org</code>, or search for similar issues in the examples directories.</p>
 <br>
