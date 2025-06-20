@@ -26,7 +26,7 @@ Then, cd back to the main <code>QE</code> directory and compile <code>thermo_pw<
 <code>make thermo_pw</code></p>
 
 <p align="justify">
-Alternatively, to use <code>cmake</code>, create a <code>build<i/code> directory, enter it, and execute:</p>
+Alternatively, to use <code>cmake</code>, create a <code>build</code> directory, enter it, and execute:</p>
 <p align="center">
 <code>cmake -DCMAKE_C_COMPILER=c_compiler -DCMAKE_Fortran_COMPILER=fortran_compiler ../ </code><p>
 <p align="justify">
@@ -41,7 +41,7 @@ Subsequently, the <code>make</code> command will also generate the <code>thermo_
 For running <code>thermo_pw</code>, the <a href="http://www.gnuplot.info/">gnuplot</a> package is beneficial. To plot the Brillouin zone, the <a href="http://asymptote.sourceforge.net/">asymptote</a> package is necessary. Both are typically available as precompiled packages in many distributions.</p>
 
 <p align="justify">
-For further details, please consult the user guide located in the <code>thermo_pw/Doc<i/code> directory. Please report any issues to <a href="mailto:dalcorso .at. sissa.it">dalcorso.at.sissa.it</a>.</p>
+For further details, please consult the user guide located in the <code>thermo_pw/Doc</code> directory. Please report any issues to <a href="mailto:dalcorso .at. sissa.it">dalcorso.at.sissa.it</a>.</p>
 
 **Development Version (Git):**
 <p align="justify"> 
