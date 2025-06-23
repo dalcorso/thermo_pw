@@ -208,6 +208,9 @@ Seek Further Assistance: If the problem persists, please post details to the <a 
 <br>
 **Thermo_pw downloads**:
 <br>
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.2.0.3.tar.gz">
+thermo_pw.2.0.3.tar.gz</a>  (released 23-06-2025) compatible with QE-7.4.1
+<br>
 * <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.2.0.2.tar.gz">
 thermo_pw.2.0.2.tar.gz</a>  (released 20-06-2025) compatible with QE-7.4.
 <br>
