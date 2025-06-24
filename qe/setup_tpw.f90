@@ -675,6 +675,8 @@ SUBROUTINE setup_tpw()
   kunit   = 1
   CALL divide_et_impera ( nkstot, xk, wk, isk, nks )
   !
+  IF (nks==0) CALL errore('setup_nscf_tpw','some pools have no k point',1)
+  !
   ! ... checks and initializations to be performed after parallelization setup
   !
   IF ( lberry .OR. lelfield .OR. lorbm ) THEN

@@ -100,7 +100,7 @@ SUBROUTINE do_berry ( exit_status, polar, nppl )
   !
 9010 FORMAT( /,5X,'Current dimensions of program PWSCF are:', &
            & /,5X,'Max number of different atomic species (ntypx) = ',I2,&
-           & /,5X,'Max number of k-points (npk) = ',I6,&
+           & /,5X,'Max number of k-points (npk) = ',I9,&
            & /,5X,'Max angular momentum in pseudopotentials (lmaxx) = ',i2)
   !
 END SUBROUTINE do_berry
