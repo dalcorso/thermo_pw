@@ -1,4 +1,9 @@
 PROGRAM hex_trig
+!
+!  This program reads the parameters a and c of an hexagonal lattice
+!  (in Angstrom) and gives as output the parameters a and cos(gamma)
+!  of a trigonal lattice equivalent to the hexagonal one.
+!
 USE kinds, ONLY : DP
 IMPLICIT NONE
 REAL(DP)  :: a, c, at, cgammat, csua

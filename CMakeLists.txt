@@ -1012,7 +1012,19 @@ target_link_libraries(qe_tpw_merge_interp_exe
         qe_modules)
 
 ###########################################################
+# wurtzite.x
+###########################################################
+set(src_wurtzite_x tools/wurtzite.f90)
+qe_enable_cuda_fortran("${src_wurtzite_x}")
+qe_add_executable(qe_tpw_wurtzite_exe ${src_wurtzite_x})
+set_target_properties(qe_tpw_wurtzite_exe 
+    PROPERTIES 
+        OUTPUT_NAME wurtzite.x)
+target_link_libraries(qe_tpw_wurtzite_exe
+    PRIVATE
+        qe_modules)
 
+###########################################################
 
 qe_install_targets(
     qe_tpw_lapack
