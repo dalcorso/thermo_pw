@@ -1715,6 +1715,8 @@ MODULE initial_conf
                                ! from pw.x input
   REAL(DP), ALLOCATABLE :: tau_save_crys(:,:) ! save the atomic coordinates read
                                ! from pw.x input in crystal coordinates
+  CHARACTER(LEN=6), ALLOCATABLE :: atm_save(:)
+                               ! from pw.x input the labels of each atom
   INTEGER  :: nr1_save, nr2_save, nr3_save  ! save the fft dimensions
   LOGICAL :: nosym_save        ! save the input nosym
 

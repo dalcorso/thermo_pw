@@ -55,7 +55,7 @@ SUBROUTINE thermo_setup()
   USE initial_conf,         ONLY : celldm_save, ibrav_save, ityp_save,       &
                                    nr1_save, nr2_save, nr3_save, &
                                    nosym_save, tau_save, tau_save_crys, &
-                                   omega_save, at_save
+                                   omega_save, at_save, atm_save
   USE initial_param,        ONLY : ecutwfc0, ecutrho0, ethr0
   USE equilibrium_conf,     ONLY : nr1_0, nr2_0, nr3_0
   USE thermo_sym,           ONLY : code_group_save
@@ -231,6 +231,7 @@ SUBROUTINE thermo_setup()
 ! Save the initial configurantion in the initial variables
 !
   ALLOCATE(ityp_save(nat))
+  ALLOCATE(atm_save(ntyp))
   ALLOCATE(tau_save(3,nat))
   ALLOCATE(tau_save_crys(3,nat))
 
@@ -241,6 +242,7 @@ SUBROUTINE thermo_setup()
   nosym_save=nosym
   ityp_save(:)=ityp(:)
   tau_save=tau
+  atm_save=atm
 !
 !  bring tau_save in crystal coordinates. In strained geometries tau_save
 !  is kept constant.
