@@ -20,7 +20,7 @@ SUBROUTINE write_mur(omega0, b0, b01, b02, emin)
 !
 USE kinds,            ONLY : DP
 USE data_files,       ONLY : flevdat
-USE thermo_mod,       ONLY : ngeo, omega_geo
+USE thermo_mod,       ONLY : ngeo
 USE control_mur,      ONLY : p0
 USE control_vol,      ONLY : nvol, vmin_input, deltav
 USE control_ev,       ONLY : ieos

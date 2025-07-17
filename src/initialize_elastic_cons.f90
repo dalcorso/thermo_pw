@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2014-2017 Andrea Dal Corso
+! Copyright (C) 2014-2025 Andrea Dal Corso
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -20,7 +20,30 @@ SUBROUTINE initialize_elastic_cons( ngeom, nwork )
 !  coordinates of a point in the unstrained cartesian axis into the
 !  coordinates in the cartesian axis of the strained system.
 !  The strain is given in the coordinates axis of the unstrained system.
+!  It sets the following variables
+!  nstep_ec    ! number of strain types
+!  nwork       ! total number of scf calculations to do 
+!  work_base   ! total number of scf calculation for one equilibrium geometry
+!  epsilon_voigt(6,nwork) ! the strain of each run in voigt notation
+!  epsilon_geo(3,3,nwork) ! the strain of each run
+!  epsil_geo(nwork) ! the amplitude of the strain of each run
+!  
+!  advanced or energy algorithm
+!  ibrav_geo(nwork)  ! the bravais lattice code of each run
+!  celldm_geo(6,nwork) ! the crystal parameters of each run
+!  rot_mat(3,3,nwork) ! the possible rotation with respect to the orientation
+!                     ! of the equilibrium cell 
 !
+!  If also atoms are optimized in each run
+!  tau_acc(3,nat,nwork)   ! the atomic coordinates of each run
+!
+!  Moreover it allocates space for
+!  sigma_geo(3,3,nwork)   ! the stress of each run
+!  min_y(ngeo_strain,21,ngeom) ! the minimum of the internal coordinate
+!                              ! for each strain 
+!  epsil_y(ngeo_strain,21,ngeom) ! the strain amplitude of each minimum.
+!  
+!  
 USE kinds,             ONLY : DP
 USE thermo_mod,        ONLY : ibrav_geo, celldm_geo
 USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, rot_mat, &
