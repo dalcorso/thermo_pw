@@ -597,7 +597,7 @@ IF (MOD(iflag,2)==0) THEN
       gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_el_cons_p"
       filenameps=TRIM(flps_el_cons)//".el_cons_p"//TRIM(flext)
       filelastic="elastic_constants/"//TRIM(fl_el_cons)//".el_cons_p"
-      IF (with_s) CALL errore('plot_elastic_t','Called in the wrong case',1)
+      IF (with_s) CALL errore('plot_elastic_t1','Called in the wrong case',1)
    ENDIF
 ELSE
    IF (iflag==1) THEN

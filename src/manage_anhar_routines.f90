@@ -20,7 +20,7 @@ USE mp,          ONLY : mp_barrier
 
 IMPLICIT NONE
 !
-!  We resinchronize the processors here, to be sure that all phonon
+!  We resynchronize the processors here, to be sure that all phonon
 !  calculations finish.
 !
    CALL mp_barrier(world_comm)
