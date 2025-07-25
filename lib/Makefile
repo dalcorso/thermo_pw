@@ -29,6 +29,7 @@ linear_surfaces.o \
 magnetic_point_group.o \
 model_free_energy.o \
 mp_asyn.o \
+numerical_diff.o \
 nye.o \
 optical.o \
 ph_freq_module.o \
