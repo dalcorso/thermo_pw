@@ -15,13 +15,13 @@ SUBROUTINE plot_anhar_anis_celldm()
 !  and for several pressures.
 !
 USE kinds,           ONLY : DP
-USE constants,       ONLY : rydberg_si, avogadro
 USE control_gnuplot, ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
 USE postscript_files, ONLY : flpsanhar
 USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
                             gnuplot_write_header,        &
                             gnuplot_ylabel,              &
                             gnuplot_xlabel,              &
+                            gnuplot_write_command,       &
                             gnuplot_write_file_mul_data, &
                             gnuplot_write_file_mul_data_times, &
                             gnuplot_write_file_mul_point, &
@@ -35,7 +35,8 @@ USE control_elastic_constants, ONLY : lelastic, lelasticf
 USE lattices,        ONLY : celldm_gnuplot_name, needed_celldm
 USE nye,             ONLY : thermal_gnuplot_name, needed_tensor2
 USE temperature,     ONLY : tmin, tmax, temp, ntemp_plot, itemp_plot
-USE control_pressure, ONLY : pressure_kb, press, npress_plot, ipress_plot
+USE control_pressure, ONLY : pressure_kb, press, npress_plot, ipress_plot, &
+                             npress, press
 USE color_mod,       ONLY : color
 USE mp_images,       ONLY : my_image_id, root_image
 USE io_global,       ONLY : ionode
@@ -103,6 +104,19 @@ DO i=1,6
       IF (ltherm_freq) &
          CALL gnuplot_write_file_mul_data(filename2,1,iusing,'color_blue',  &
                                  (.NOT.ltherm_dos), .TRUE., .FALSE.)
+!
+!  plot also b and c
+!
+      IF (i==2.OR.i==3) THEN
+         IF (i==2) CALL gnuplot_ylabel("b (a.u.)",.FALSE.) 
+         IF (i==3) CALL gnuplot_ylabel("c (a.u.)",.FALSE.) 
+         IF (ltherm_dos) &
+            CALL gnuplot_write_file_mul_data_times(filename1,1,2,iusing, &
+                         'color_red', .TRUE., .NOT.ltherm_freq,.FALSE.)
+         IF (ltherm_freq) &
+            CALL gnuplot_write_file_mul_data_times(filename2,1,2,iusing, &
+                        'color_blue', (.NOT.ltherm_dos), .TRUE., .FALSE.)
+      ENDIF
    ENDIF
 ENDDO
 !
@@ -135,6 +149,33 @@ DO i=1,6
                     color(istep), (first_step.AND..NOT.ltherm_dos),  &
                                                      last_step, .FALSE.)
       ENDDO
+      IF (i==2.OR.i==3) THEN
+         istep=0
+         DO ipressp=1,npress_plot
+            first_step=(ipressp==1)
+            last_step=(ipressp==npress_plot)
+            ipress=ipress_plot(ipressp)
+            istep=MOD(istep,8)+1
+            filename="anhar_files/"//TRIM(flanhar)//'.celldm_press'
+            CALL add_value(filename,press(ipress))
+            filename_ph="anhar_files/"//TRIM(flanhar)//'.celldm_ph_press'
+            CALL add_value(filename_ph,press(ipress))
+            IF (first_step) THEN
+               CALL gnuplot_xlabel('T (K)',.FALSE.)
+               CALL gnuplot_set_fact(1.0_DP,.FALSE.)
+               IF (i==2) CALL gnuplot_ylabel("b (a.u.)",.FALSE.) 
+               IF (i==3) CALL gnuplot_ylabel("c (a.u.)",.FALSE.) 
+            ENDIF
+            IF (ltherm_dos) &
+               CALL gnuplot_write_file_mul_data_times(filename,1,2,iusing,&
+                color(istep), first_step, (last_step.AND..NOT.ltherm_freq),&
+                                                                     .FALSE.)
+            IF (ltherm_freq) &
+               CALL gnuplot_write_file_mul_data_times(filename_ph,1,2,iusing,&
+                    color(istep), (first_step.AND..NOT.ltherm_dos),  &
+                                                     last_step, .FALSE.)
+         ENDDO
+      ENDIF
    ENDIF
 ENDDO
 !
@@ -155,6 +196,9 @@ DO i=1,6
          filename_ph="anhar_files/"//TRIM(flanhar)//'.celldm_ph_temp'
          CALL add_value(filename_ph,temp(itemp))
          IF (first_step) THEN
+            WRITE(label,'("set xrange [",f12.5,":",f12.5,"]")') &
+                                  MAX(0.0_DP,press(1)), press(npress)
+            CALL gnuplot_write_command(TRIM(label),.FALSE.)
             CALL gnuplot_xlabel('p (kbar)',.FALSE.)
             CALL gnuplot_set_fact(1.0_DP,.FALSE.)
             CALL gnuplot_ylabel(TRIM(celldm_gnuplot_name(i)),.FALSE.)
@@ -167,6 +211,36 @@ DO i=1,6
              color(istep), (first_step.AND..NOT.ltherm_dos), last_step, &
                                                                  .FALSE.)
       ENDDO
+      IF (i==2.OR.i==3) THEN
+         istep=0
+         DO itempp=1,ntemp_plot
+            first_step=(itempp==1)
+            last_step=(itempp==ntemp_plot)
+            itemp=itemp_plot(itempp)
+            istep=MOD(istep,8)+1
+            filename="anhar_files/"//TRIM(flanhar)//'.celldm_temp'
+            CALL add_value(filename,temp(itemp))
+            filename_ph="anhar_files/"//TRIM(flanhar)//'.celldm_ph_temp'
+            CALL add_value(filename_ph,temp(itemp))
+            IF (first_step) THEN
+               WRITE(label,'("set xrange [",f12.5,":",f12.5,"]")') &
+                                  MAX(0.0_DP,press(1)), press(npress)
+               CALL gnuplot_write_command(TRIM(label),.FALSE.)
+               CALL gnuplot_xlabel('p (kbar)',.FALSE.)
+               CALL gnuplot_set_fact(1.0_DP,.FALSE.)
+               IF (i==2) CALL gnuplot_ylabel("b (a.u.)",.FALSE.) 
+               IF (i==3) CALL gnuplot_ylabel("c (a.u.)",.FALSE.) 
+            ENDIF
+            IF (ltherm_dos) &
+               CALL gnuplot_write_file_mul_data_times(filename,1,2,iusing, &
+              color(istep), first_step, (last_step.AND..NOT.ltherm_freq),  &
+                                                                   .FALSE.)
+            IF (ltherm_freq) &
+               CALL gnuplot_write_file_mul_data_times(filename_ph,1,2,iusing,&
+                color(istep), (first_step.AND..NOT.ltherm_dos), last_step, &
+                                                                 .FALSE.)
+         ENDDO
+      ENDIF
    ENDIF
 ENDDO
 
@@ -192,13 +266,13 @@ SUBROUTINE plot_anhar_anis_alpha()
 !  the thermal expansion as a function of pressure at several temperatures.
 !
 USE kinds,           ONLY : DP
-USE constants,       ONLY : rydberg_si, avogadro
 USE control_gnuplot, ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
 USE postscript_files, ONLY : flpsanhar
 USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
                             gnuplot_write_header,        &
                             gnuplot_ylabel,              &
                             gnuplot_xlabel,              &
+                            gnuplot_write_command,       &
                             gnuplot_write_file_mul_data, &
                             gnuplot_write_file_mul_data_times, &
                             gnuplot_write_file_mul_point, &
@@ -213,7 +287,8 @@ USE control_pressure, ONLY : press
 USE lattices,        ONLY : celldm_gnuplot_name, needed_celldm
 USE nye,             ONLY : thermal_gnuplot_name, needed_tensor2
 USE temperature,     ONLY : tmin, tmax, temp, ntemp_plot, itemp_plot
-USE control_pressure, ONLY : pressure_kb, npress_plot, ipress_plot
+USE control_pressure, ONLY : pressure_kb, npress_plot, ipress_plot, &
+                             npress, press
 USE color_mod,       ONLY : color
 USE mp_images,       ONLY : my_image_id, root_image
 USE io_global,       ONLY : ionode
@@ -343,6 +418,9 @@ DO i=1,6
          filename_ph="anhar_files/"//TRIM(flanhar)//'.celldm_ph_temp'
          CALL add_value(filename_ph,temp(itemp))
          IF (first_step) THEN
+            WRITE(label,'("set xrange [",f12.5,":",f12.5,"]")') &
+                                   MAX(0.0_DP,press(1)), press(npress)
+            CALL gnuplot_write_command(TRIM(label),.FALSE.) 
             CALL gnuplot_xlabel('p (kbar)',.FALSE.)
             CALL gnuplot_set_fact(1.0_DP,.FALSE.)
             WRITE(label,'("Thermal expansion ", a," x 10^6 (K^{-1})")') &
@@ -370,7 +448,7 @@ IF (lgnuplot.AND.ionode) &
 
 RETURN
 END SUBROUTINE plot_anhar_anis_alpha
-
+!
 !-----------------------------------------------------------------
 SUBROUTINE plot_thermal_stress()
 !-----------------------------------------------------------------
