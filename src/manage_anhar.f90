@@ -656,11 +656,6 @@ IF (ltherm_dos) THEN
 !  and the electronic one if available (only for cubic systems)
 !
    CALL write_free_energy()
-!
-!  Here we plot the paths at constant temperature for which the
-!  stress tensor is a uniform pressure
-!
-   CALL plot_multi_energy_t()
 
 ENDIF
 
@@ -790,6 +785,11 @@ IF (ltherm_dos) THEN
 !
    CALL write_anhar_el()
    CALL write_anhar_el_pt()
+!
+!  Here we plot the paths at constant temperature for which the
+!  stress tensor is a uniform pressure
+!
+   CALL plot_multi_energy_t()
 ENDIF
 IF (ltherm_freq) THEN
    CALL write_ph_freq_anhar()

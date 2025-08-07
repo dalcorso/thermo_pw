@@ -135,10 +135,10 @@ PROGRAM thermo_pw
      !   Here the Helmholtz free energy at each geometry is available.
      !   We can write on file the free energy as a function of the volume at
      !   any temperature. For each temperature we can fit the free energy
-     !   (or the Gibbs energy if we have a finite pressure) with a 
-     !   Murnaghan equation or with a quadratic or quartic polynomial. 
+     !   (or the Gibbs energy if we have a finite pressure) with an
+     !   equation of state or with a quadratic or quartic polynomial. 
      !   We save the minimum volume or the crystal parameters. 
-     !   With the Murnaghan fit we save also the bulk modulus and 
+     !   With the equation of state we save also the bulk modulus and 
      !   its pressure derivative for each temperature.
      !   One can also compute here the Gruneisen parameters.
      !

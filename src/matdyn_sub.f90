@@ -824,7 +824,7 @@ SUBROUTINE set_asr_tpw (asr, nr1, nr2, nr3, frc, zeu, nat, ibrav, tau)
   deallocate (frc_new)
   !
   return
-end subroutine set_asr_tpw
+END SUBROUTINE set_asr_tpw
 !
 !
 !-----------------------------------------------------------------------

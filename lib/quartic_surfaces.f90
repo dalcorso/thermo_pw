@@ -173,8 +173,10 @@ ALLOCATE(amat(ndata,ncoeff))
 ALLOCATE(coeff(ncoeff))
 
 IF (nvar<1) CALL errore('fit_multi_quartic','nvar must be larger than 0',1)
-IF (ndata < ncoeff) &
+IF (ndata < ncoeff) THEN
+   WRITE(stdout,'(5x,"ndata =", i5," < ncoeff =", i5 )') ndata, ncoeff
    CALL errore('fit_multi_quartic','Too few sampling data',1)
+ENDIF
 !
 !  prepare the auxiliary matrix
 !
