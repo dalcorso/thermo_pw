@@ -2795,6 +2795,7 @@ USE temperature, ONLY : temp, ntemp
 USE io_global,   ONLY : meta_ionode
 USE el_anharmonic,  ONLY : el_energy_t, el_free_energy_t, el_entropy_t,    &
                            el_ce_t
+USE control_eldos,  ONLY : lel_free_energy
 !
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
@@ -2802,6 +2803,7 @@ INTEGER :: itemp, iu_therm
 
 INTEGER :: find_free_unit
 
+IF (.NOT.lel_free_energy) RETURN
 filename="anhar_files/"//TRIM(flanhar)//".el_therm"
 CALL add_pressure(filename)
 
@@ -2837,12 +2839,14 @@ USE io_global,   ONLY : meta_ionode
 USE el_anharmonic,  ONLY : el_energyf_t, el_free_energyf_t, el_entropyf_t,    &
                            el_cef_t
 !
+USE control_eldos,  ONLY : lel_free_energy
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
 INTEGER :: itemp, iu_therm
 
 INTEGER :: find_free_unit
 
+IF (.NOT.lel_free_energy) RETURN
 filename="anhar_files/"//TRIM(flanhar)//".el_therm_ph"
 CALL add_pressure(filename)
 
@@ -2879,12 +2883,15 @@ USE temperature, ONLY : temp, ntemp
 USE io_global,   ONLY : meta_ionode
 USE el_anharmonic,  ONLY : el_ce_pt
 USE control_pressure, ONLY : press, npress_plot, ipress_plot
+USE control_eldos,  ONLY : lel_free_energy
 !
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
 INTEGER :: itemp, iu_therm, ipress, ipressp
 
 INTEGER :: find_free_unit
+
+IF (.NOT.lel_free_energy) RETURN
 
 DO ipressp=1,npress_plot
    ipress=ipress_plot(ipressp)
@@ -2923,6 +2930,7 @@ USE temperature, ONLY : temp, ntemp
 USE io_global,   ONLY : meta_ionode
 USE el_anharmonic,  ONLY : el_cef_pt
 USE control_pressure, ONLY : press, npress_plot, ipress_plot
+USE control_eldos,  ONLY : lel_free_energy
 !
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
@@ -2930,6 +2938,7 @@ INTEGER :: itemp, iu_therm, ipress, ipressp
 
 INTEGER :: find_free_unit
 
+IF (.NOT.lel_free_energy) RETURN
 DO ipressp=1,npress_plot
    ipress=ipress_plot(ipressp)
    filename="anhar_files/"//TRIM(flanhar)//".el_therm_ph_press"
