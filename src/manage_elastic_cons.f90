@@ -21,7 +21,8 @@ SUBROUTINE manage_elastic_cons(nwork,ngeom)
 !
 
 USE kinds,             ONLY : DP
-USE thermo_mod,        ONLY : energy_geo, density
+USE thermo_mod,        ONLY : energy_geo, density, start_geometry,         &
+                              last_geometry
 USE control_elastic_constants, ONLY : ngeo_strain, frozen_ions,            &
                               elastic_algorithm, rot_mat, elcpvar,         &
                               el_con_omega_geo, elalgen, start_geometry_qha, &
@@ -61,8 +62,10 @@ INTEGER :: iwork, work_base, igeom, base_ind, nwork_eff, istep, igeo
 CHARACTER(LEN=6)    :: int_to_char
 CHARACTER(LEN=256)  :: filelastic
 !
-!  the elastic constants are calculated here
+!  the elastic constants are calculated here if we have the energies
+!  of all geometries
 !
+IF ((start_geometry /= 1).OR.(last_geometry /= nwork)) RETURN
 !  First collect the total energies
 !
 CALL mp_sum(energy_geo, world_comm)
