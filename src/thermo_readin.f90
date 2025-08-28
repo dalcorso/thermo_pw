@@ -677,8 +677,6 @@ SUBROUTINE thermo_readin()
 #if defined(__CUDA)
   ierr = cudaGetDeviceCount( ndev )
   IF (ierr /= 0) CALL errore('thermo_readin', 'cannot get device count', ierr)
-  IF (many_k .AND. nproc /= ndev * nnode) &
-     CALL errore('thermo_readin','many_k requires as many GPU as CPU',1)
 #endif
 
   IF ((ieos /= 1) .AND. (ieos /= 2) .AND. (ieos /= 4) ) &
