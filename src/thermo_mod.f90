@@ -1726,6 +1726,8 @@ MODULE initial_conf
   LOGICAL :: zeu_save     ! save input_zeu, changed in dispersion run
   LOGICAL :: zue_save     ! save input_zue, changed in dispersion run
   INTEGER :: start_q_save, last_q_save ! save start_q and last_q
+  INTEGER :: start_geometry_save, last_geometry_save ! save start and last
+                                 ! geometries if required
 
 END MODULE initial_conf
 

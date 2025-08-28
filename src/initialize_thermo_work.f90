@@ -33,7 +33,8 @@ SUBROUTINE initialize_thermo_work(nwork, part)
                              nnk, nk_test, deltank, nsigma, sigma_test,   &  
                              deltasigma, ncutoffene
   USE equilibrium_conf, ONLY : celldm0, omega0
-  USE initial_conf,   ONLY : ibrav_save
+  USE initial_conf,   ONLY : ibrav_save, start_geometry_save,             &
+                             last_geometry_save
   USE piezoelectric_tensor, ONLY : polar_geo
   USE control_elastic_constants, ONLY : rot_mat, ngeom, use_free_energy,   &
                                    elalgen, work_base, start_geometry_qha, &
@@ -379,6 +380,11 @@ SUBROUTINE initialize_thermo_work(nwork, part)
         CASE DEFAULT
            CALL errore('initialize_thermo_work','what not recognized',1)
      END SELECT
+!
+!  save this parameters if needed in part two
+!
+     start_geometry_save=start_geometry
+     last_geometry_save=last_geometry
      IF (start_geometry_qha<1) start_geometry_qha=1
      IF (last_geometry_qha>ngeom) last_geometry_qha=ngeom
      IF (start_geometry < 1) start_geometry=1
@@ -418,6 +424,12 @@ SUBROUTINE initialize_thermo_work(nwork, part)
 
            ALLOCATE(energy_geo(nwork))
            ALLOCATE(el_con_omega_geo(1))
+           tot_ngeo=nwork
+           IF (last_geometry_save > tot_ngeo) THEN
+               last_geometry=tot_ngeo
+           ELSE
+              last_geometry=last_geometry_save
+           ENDIF
            energy_geo=0.0_DP
            IF (elalgen) THEN
               omega0= compute_omega_geo(ibrav_save, celldm0)
@@ -481,8 +493,10 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               'mur_lc_elastic_constants',    &
               'mur_lc_piezoelectric_tensor', &
               'mur_lc_polarization' )
-           lpwscf(1:nwork)=.TRUE.
-           lef(1:nwork)=(lgauss.OR.ltetra)
+           DO iwork=start_geometry,last_geometry
+              lpwscf(iwork)=.TRUE.
+              lef(iwork)=(lgauss.OR.ltetra)
+           ENDDO
            IF (reduced_grid) THEN
               DO iwork=1,nwork
                  IF (no_ph(iwork)) lpwscf(iwork)=.FALSE.
@@ -492,6 +506,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            DO igeom_qha=start_geometry_qha, last_geometry_qha
               DO iwork=1,work_base
                  iwork_tot= (igeom_qha-1)*work_base + iwork
+                 IF (iwork_tot<start_geometry.OR.iwork_tot>last_geometry) CYCLE
                  lpwscf(iwork_tot)=.TRUE.
               ENDDO
            ENDDO
