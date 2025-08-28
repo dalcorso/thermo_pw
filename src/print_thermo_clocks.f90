@@ -12,6 +12,8 @@ SUBROUTINE print_thermo_clocks()
 !   Print the clocks of thermo_pw
 !
 USE io_global, ONLY : stdout
+USE control_thermo, ONLY : lph
+!
 IMPLICIT NONE
   !
   WRITE(stdout,'(/,5x,"Times for scf pw.x")')
@@ -20,13 +22,15 @@ IMPLICIT NONE
   WRITE(stdout,'(/,5x,"Times for non scf pw.x")')
   CALL print_clock('tpw_nscf_pw')
   WRITE(stdout,'(/,5x,"Times for ph.x ")')
-  CALL print_clock('tpw_ph')
-  CALL print_clock('tpw_nscf_ph')
-  CALL print_clock('tpw_init_ph')
-  CALL print_clock('solve_linter')
-  CALL print_clock('drhodv')
-  CALL print_clock('h_psi_dev')
-  CALL print_clock('fft_h_psi')
+  IF (lph) THEN
+     CALL print_clock('tpw_ph')
+     CALL print_clock('tpw_nscf_ph')
+     CALL print_clock('tpw_init_ph')
+     CALL print_clock('solve_linter')
+     CALL print_clock('drhodv')
+     CALL print_clock('h_psi_dev')
+     CALL print_clock('fft_h_psi')
+  ENDIF
   !
   RETURN
 END SUBROUTINE print_thermo_clocks
