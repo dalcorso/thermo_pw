@@ -2802,8 +2802,11 @@ MODULE space_groups
   CALL find_group_info_ext(nsym, sr_in, code_group, code_group_ext, &
                                                   which_elem, group_desc) 
 
-  IF (.NOT.check_code_group_ext(code_group_ext)) &
-     CALL errore('find_space_group','point group orientation incorrect',1)
+  IF (.NOT.check_code_group_ext(code_group_ext)) THEN
+     CALL infomsg('find_space_group','point group orientation incorrect')
+     sg_number=0
+     RETURN
+  ENDIF
 
   IF (verbosity) THEN
      WRITE(stdout,'(/,5x,"Space group identification, ",i3," symmetries:")') &
@@ -5145,6 +5148,10 @@ MODULE space_groups
   
   INTEGER igroup
 
+  IF (group_code==0) THEN
+     output_name=''
+     RETURN
+  ENDIF
   IF (group_code<1.OR.group_code>230) &
      CALL errore('sg_name','group_code unknown',1)
 
