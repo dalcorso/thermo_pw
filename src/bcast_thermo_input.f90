@@ -16,7 +16,7 @@ SUBROUTINE bcast_thermo_input()
                               ltherm_dos, ltherm_freq, continue_zero_ibrav,   &
                               find_ibrav, all_geometries_together,            &
                               ltherm_glob, lhugoniot, lgeo_from_file,         &
-                              lgeo_to_file
+                              lgeo_to_file, lgruneisen_gen
   USE data_files,      ONLY : flevdat, flfrc, flfrq, fldos, fltherm, flanhar, &
                               filband, flkeconv, flnkconv, flgrun, flpband,   &
                               flpgrun, flenergy, flprojlayer, flpbs, flvec,   &
@@ -33,6 +33,7 @@ SUBROUTINE bcast_thermo_input()
                               nnk, deltank, nsigma, deltasigma
   USE control_bands,   ONLY : emin_input, emax_input, nbnd_bands, lsym,       &
                               enhance_plot
+  USE control_gen_gruneisen, ONLY : ggrun_recipe, icenter_grun
   USE control_paths,   ONLY : q_in_band_form, q_in_cryst_coord, q2d,          &
                               point_label_type, npx, long_path, old_path,     &
                               path_fact, is_a_path
@@ -130,6 +131,11 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( deltasigma, meta_ionode_id, world_comm )
   CALL mp_bcast( flnkconv, meta_ionode_id, world_comm )
   CALL mp_bcast( flpsnkconv, meta_ionode_id, world_comm )
+!
+! general Gruneisen
+!
+  CALL mp_bcast( ggrun_recipe, meta_ionode_id, world_comm )
+  CALL mp_bcast( icenter_grun, meta_ionode_id, world_comm )
 !
 !  scf_bands
 !
@@ -323,6 +329,7 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( lhugoniot, meta_ionode_id, world_comm )
   CALL mp_bcast( lgeo_from_file, meta_ionode_id, world_comm )
   CALL mp_bcast( lgeo_to_file, meta_ionode_id, world_comm )
+  CALL mp_bcast( lgruneisen_gen, meta_ionode_id, world_comm )
   CALL mp_bcast( ngeo_ph, meta_ionode_id, world_comm )
   CALL mp_bcast( fact_ngeo, meta_ionode_id, world_comm )
   CALL mp_bcast( poly_degree_grun, meta_ionode_id, world_comm )

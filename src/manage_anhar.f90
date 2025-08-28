@@ -518,7 +518,7 @@ SUBROUTINE manage_anhar_anis()
 USE kinds,                 ONLY : DP
 USE thermo_mod,            ONLY : reduced_grid, tot_ngeo
 USE temperature,           ONLY : ntemp, temp, ntemp_plot, itemp_plot
-USE control_thermo,        ONLY : ltherm_dos, ltherm_freq
+USE control_thermo,        ONLY : ltherm_dos, ltherm_freq, lgruneisen_gen
 USE control_elastic_constants, ONLY : el_cons_qha_available, &
                                   el_consf_qha_available
 USE control_eldos,         ONLY : lel_free_energy
@@ -574,8 +574,13 @@ IF (ltherm_dos) THEN
 !
 !  fit the free energy with a polynomial
 !
-   CALL fit_free_energy_anis_t()
-   CALL fit_free_energy_noe_anis_t()
+   IF (lgruneisen_gen) THEN
+      CALL fit_free_energy_gruneisen_gen()
+      CALL fit_free_energy_noe_gruneisen_gen()
+   ELSE
+      CALL fit_free_energy_anis_t()
+      CALL fit_free_energy_noe_anis_t()
+   ENDIF
 !
 !  Use the polynomial to find the celldm_t and the energy at the minimum
 !  of the free energy (Gibbs energy if pressure is given in input)
@@ -663,8 +668,13 @@ IF (ltherm_freq) THEN
 !
 !  fit the free energy with a polynomial
 !
-   CALL fit_free_energyf_anis_t()
-   CALL fit_free_energyf_noe_anis_t()
+   IF (lgruneisen_gen) THEN
+      CALL fit_free_energyf_gruneisen_gen()
+      CALL fit_free_energyf_noe_gruneisen_gen()
+   ELSE
+      CALL fit_free_energyf_anis_t()
+      CALL fit_free_energyf_noe_anis_t()
+   ENDIF
 !
 !  Use the polynomial to find the celldm_t and the energy at the minimum
 !  of the free energy (Gibbs energy if pressure is given in input)

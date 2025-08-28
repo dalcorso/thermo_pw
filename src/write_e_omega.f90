@@ -224,6 +224,7 @@ USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_quadratic_extremum, &
 USE quartic_surfaces, ONLY : fit_multi_quartic, find_quartic_extremum, &
                              print_quartic_polynomial, print_chisq_quartic
 USE polynomial,       ONLY : poly2, poly4, init_poly, clean_poly
+USE control_thermo,   ONLY : lgruneisen_gen
 USE lattices,         ONLY : compress_celldm, expand_celldm, crystal_parameters
 USE mp_images,        ONLY : root_image, my_image_id
 USE io_global,        ONLY : ionode, stdout
@@ -248,6 +249,7 @@ TYPE(poly4) :: p4
 
 IF (my_image_id /= root_image) RETURN
 IF (itemp<=0) RETURN
+IF (lgruneisen_gen) RETURN
 !
 !  The name of the output files that will contain the volume, energy, pressure
 !

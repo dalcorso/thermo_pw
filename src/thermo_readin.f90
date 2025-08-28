@@ -31,7 +31,7 @@ SUBROUTINE thermo_readin()
                                    ngeo_ph
   USE control_thermo,       ONLY : outdir_thermo, after_disp, with_eigen,  &
                                    do_scf_relax, ltherm_dos, ltherm_freq,  &
-                                   ltherm_glob,                            &
+                                   ltherm_glob, lgruneisen_gen,            &
                                    continue_zero_ibrav, find_ibrav,        &
                                    set_internal_path, set_2d_path,         &
                                    all_geometries_together, max_seconds_tpw, &
@@ -56,6 +56,7 @@ SUBROUTINE thermo_readin()
                                    letter_path, nrap_plot_in, &
                                    label_disp_q, rap_plot_in, long_path, &
                                    old_path, path_fact, is_a_path
+  USE control_gen_gruneisen, ONLY : ggrun_recipe, icenter_grun
   USE control_gnuplot,      ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
   USE postscript_files,     ONLY : flpsband, flpsdisp, flpsmur, flpsdos, &
                                    flpstherm, flpsanhar, flpskeconv, &
@@ -312,6 +313,9 @@ SUBROUTINE thermo_readin()
                             add_empirical, efe, alpha1,     &
                             alpha2, v0p,                    &
                             ltherm_glob,                    &
+                            lgruneisen_gen,                 &
+                            ggrun_recipe,                   &
+                            icenter_grun,                   &
                             lhugoniot,                      &
                             lgeo_from_file,                 &
                             lgeo_to_file,                   &
@@ -509,6 +513,7 @@ SUBROUTINE thermo_readin()
   old_ec=0
 
   ltherm_glob=.FALSE.
+  lgruneisen_gen=.FALSE.
   lhugoniot=.FALSE.
   lgeo_from_file=.FALSE.
   lgeo_to_file=.FALSE.
@@ -578,6 +583,9 @@ SUBROUTINE thermo_readin()
   ngeo_ph=0
   omega_group=1
   all_geometries_together=.FALSE.
+
+  ggrun_recipe=2
+  icenter_grun=0
 
   add_empirical=.FALSE.
   efe=0

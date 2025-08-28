@@ -1031,10 +1031,16 @@ SUBROUTINE initialize_no_ph(no_ph, tot_ngeo, ibrav)
 !
 !   This routine is used to skip phonon calculations in those geometries
 !   that are not on the grid used to compute the vibrational energy.
+!   When lgruneisen_gen is used, instead, phonons are computed only 
+!   in a few geometries about a central geometry. According to 
+!   ggrun_recipes these allow to compute a linear or a quadratic 
+!   polynomial that fits the free energy.
 !
 USE thermo_mod, ONLY : ngeo, fact_ngeo, ngeo_ph, reduced_grid, &
                        red_central_geo, in_degree
-USE lattices, ONLY : compress_int_vect
+USE control_thermo, ONLY : lgruneisen_gen
+USE control_gen_gruneisen, ONLY : icenter_grun, xngeo, ggrun_recipe, ind_rec3
+USE lattices, ONLY : compress_int_vect, crystal_parameters
 IMPLICIT NONE
 
 INTEGER, INTENT(IN)    :: tot_ngeo, ibrav
@@ -1042,7 +1048,9 @@ LOGICAL, INTENT(INOUT) :: no_ph(tot_ngeo)
 
 LOGICAL :: todo(6), in_grid
 INTEGER :: igeo1, igeo2, igeo3, igeo4, igeo5, igeo6, start, count_ngeo, &
-           aux_deg(tot_ngeo)
+           aux_deg(tot_ngeo), iwork, nvar, icount, iint_geom
+INTEGER, ALLOCATABLE :: ipoint(:), inde(:)
+LOGICAL :: select_ph_to_do
 
 IF (reduced_grid) THEN
    count_ngeo=0
@@ -1076,6 +1084,36 @@ IF (reduced_grid) THEN
    ENDDO
    CALL compress_int_vect(aux_deg,in_degree,tot_ngeo,ibrav)
    RETURN
+ENDIF
+!
+!   Here we set no_ph taking a grid of
+!   2*nvar+1 (ggrun_recipe=1)
+!   3**nvar (ggrun_recipe=2) 
+!   (nvar*(nvar+3))/2+1 (ggrun_recipe=3)
+!   points about a geometry selected with icenter_grun. 
+!   The derivatives of the free energy are then calculated numerically.
+!   When ggrun_recipe=1 the free energy is modeled as a polynomial of 
+!   first degree, when ggrun_recipe=2 or ggrun_recipe=3 the free energy
+!   is modeled with a polynomial of second degree in the crystal parameters.
+!
+IF (lgruneisen_gen) THEN
+   nvar=crystal_parameters(ibrav)
+   ALLOCATE(ipoint(nvar))
+   ALLOCATE(inde(nvar))
+   CALL find_ipoint(icenter_grun, nvar, xngeo, ipoint )
+   icount=0
+   DO iwork=1,tot_ngeo
+      CALL find_ipoint(iwork,nvar,xngeo,inde)
+      no_ph(iwork) = .NOT. select_ph_to_do(iwork,nvar,inde,ipoint, &
+                                           ggrun_recipe)
+      IF (ggrun_recipe==3.AND..NOT.no_ph(iwork)) THEN
+         icount=icount+1
+         ind_rec3(:,icount)=inde(:)-ipoint(:)
+      ENDIF
+   ENDDO
+   DEALLOCATE(inde)
+   DEALLOCATE(ipoint)
+   GOTO 100
 ENDIF
 !
 !  test the compatibility of ngeo and fact_ngeo
@@ -1127,6 +1165,7 @@ DO igeo6 = 1, ngeo(6)
       END DO
    END DO
 END DO
+100 CONTINUE
 
 RETURN
 END SUBROUTINE initialize_no_ph
@@ -1305,3 +1344,96 @@ ELSEIF (fpol) THEN
 ENDIF
 RETURN
 END SUBROUTINE initialize_flags_for_ph
+!
+!---------------------------------------------------------------------
+LOGICAL FUNCTION select_ph_to_do(iwork,nvar,inde,ipoint,ggrun_recipe)
+!---------------------------------------------------------------------
+!
+!  This routine selects on which points to compute the phonon
+!  dispersions in the case lgruneisen_gen=.TRUE.. It selects the 
+!  point ipoint and all the 3^nvar
+!  points about it (grun_recipe=2) or all the 2*nvar
+!  points about it obtained by increasing or decreasing only 
+!  one coordinate (grun_recipe=1) or the nvar * (nvar+3) /2 
+!  points obtained by increasing or decreasing one coordinate
+!  or increasing two of them (grun_recipe=3). 
+!  Note that the user must provide an ipoint inside the mesh.  
+!  If the ipoint is on the border this routine works but it 
+!  will set to .TRUE. less points.
+!  
+!
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: nvar, iwork, ggrun_recipe
+INTEGER, INTENT(IN) :: ipoint(nvar)
+INTEGER, INTENT(IN) :: inde(nvar)
+
+INTEGER :: ivar, iaux
+LOGICAL :: laux
+
+iaux=0
+DO ivar=1,nvar
+   iaux=iaux+ABS(inde(ivar)-ipoint(ivar)) 
+ENDDO
+IF (ggrun_recipe==1) THEN
+   laux=((iaux==0).OR.(iaux==1))
+ELSEIF (ggrun_recipe==2) THEN
+   laux=.TRUE.
+   DO ivar=1,nvar
+      laux=laux.AND.( ((inde(ivar)-ipoint(ivar))==0) .OR.  &
+                      ((inde(ivar)-ipoint(ivar))==1) .OR.  &
+                      ((inde(ivar)-ipoint(ivar))==-1) )
+   ENDDO
+ELSEIF (ggrun_recipe==3) THEN
+   laux=((iaux==0).OR.(iaux==1))
+   iaux=0
+   DO ivar=1, nvar
+      IF ((inde(ivar)-ipoint(ivar))==1) &
+         iaux=iaux+(inde(ivar)-ipoint(ivar)) 
+   ENDDO
+   laux=laux.OR.(iaux==2)
+ENDIF
+select_ph_to_do=laux
+
+RETURN
+END FUNCTION select_ph_to_do
+!
+!---------------------------------------------------------------------
+SUBROUTINE find_ipoint(iwork,nvar,nd,ipoint)
+!---------------------------------------------------------------------
+!
+!  This routine receives the dimensions, nd(nvar), of a grid of nvar 
+!  variables, one point iwork and sets the array ipoint with the coordinate
+!  of iwork in the grid.
+!  The grid is supposed to be ordered as
+!  iwork
+!  1     (1,1,...,1) (nvar variables)
+!  2     (2,1,...,1)
+!  ....
+!  last  (nd(1),nd(2),...,nd(nvar)) 
+!
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: nvar, iwork
+INTEGER, INTENT(IN) :: nd(nvar)
+INTEGER, INTENT(OUT) :: ipoint(nvar)
+
+INTEGER :: iaux, ivar
+INTEGER :: inde(nvar), ncoef(nvar)
+
+ncoef(1)=nd(1)
+DO ivar=2,nvar
+   ncoef(ivar)=ncoef(ivar-1)*nd(ivar)
+ENDDO
+IF (iwork<1.OR.iwork>ncoef(nvar)) CALL errore('find_ipoint','wrong iwork',1)
+
+iaux=iwork
+DO ivar=nvar,2,-1
+   inde(ivar)= iaux / ncoef(ivar-1) + 1
+   iaux = MOD(iaux, ncoef(ivar-1))
+ENDDO
+inde(1)=iaux
+
+ipoint(1:nvar)=inde(1:nvar)
+
+RETURN
+END SUBROUTINE find_ipoint
+

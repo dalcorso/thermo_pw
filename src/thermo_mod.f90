@@ -1233,6 +1233,10 @@ MODULE control_thermo
                                   ! at each temperature with an eos, 
                                   ! otherwise fit the temperature dependent 
                                   ! part of the free energy with a polynomial
+  LOGICAL :: lgruneisen_gen=.FALSE. ! if .true. the free energy is computed
+                                  ! using the Gruneisen theory assuming that
+                                  ! it is a linear or quadratic polynomial
+                                  ! of the geometry parameters
   LOGICAL :: lhugoniot=.FALSE.    ! if .true. the code plots T(p) and V(p)
                                   ! along the Hugoniot
   LOGICAL :: lgeo_from_file=.FALSE. ! geometries for mur_lc read from file
@@ -1682,6 +1686,30 @@ MODULE control_grun
                                 ! for thermodynamic quantities with gruneisen
                                 ! parameters
 END MODULE control_grun
+
+!----------------------------------------------------------------------------
+MODULE control_gen_gruneisen
+!----------------------------------------------------------------------------
+USE kinds, ONLY : DP
+SAVE
+
+INTEGER :: ggrun_recipe !  the degree of the polynomial used to fit 
+                       ! the free energy for general Gruneisen theory 
+                       ! 1 linear polynomial (requires 2 nvar + 1 phonons)   
+                       ! 2 quadratic polynomial (requires 3^nvar phonons)
+                       ! 3 quadratic polynomial (requires nvar (nvar+3) /2 +1
+                       !   phonons)
+                       ! For energy the polynomial degree is 2 or 4
+                       ! controlled by the lquartic variable.
+INTEGER :: icenter_grun! the number of the geometry taken as reference 
+                       ! for the theory
+INTEGER, ALLOCATABLE  :: xngeo(:) ! the size of the mesh (compressed)     
+
+INTEGER, ALLOCATABLE :: ind_rec3(:,:) ! this index gives 
+                       ! for each point on the grid nvar * (nvar+3)/2+1
+                       ! its indices with respect to the reference point 
+
+END MODULE control_gen_gruneisen
 
 !----------------------------------------------------------------------------
 MODULE control_ev

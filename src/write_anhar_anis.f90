@@ -3659,3 +3659,429 @@ ENDIF
 
 RETURN
 END SUBROUTINE write_ph_freq_thermal_press_anis
+!
+!-----------------------------------------------------------------------
+SUBROUTINE fit_free_energy_gruneisen_gen()
+  !-----------------------------------------------------------------------
+  !
+  !   This routine fits the vibrational free energy (plus possibly the
+  !   electronic one) with a polynomial of degree one or two
+  !   at all temperatures. (This routine uses the free energy from 
+  !   phonon dos).
+  !
+  !   The output of this routine are the polynomial coefficients
+  !   p2t_t, or p1t_t, depending on the value of ggrun_recipe
+  !
+  USE kinds,       ONLY : DP
+  USE cell_base,   ONLY : ibrav
+  USE thermo_mod,  ONLY : celldm_geo, no_ph
+  USE control_gen_gruneisen,  ONLY : ggrun_recipe, ind_rec3
+  USE temperature, ONLY : ntemp, temp
+  USE thermodynamics,    ONLY : ph_free_ener
+  USE el_thermodynamics, ONLY : el_free_ener
+  USE control_eldos,     ONLY : lel_free_energy
+  USE anharmonic,  ONLY : p1t_t, p2t_t
+  USE lattices,    ONLY : compress_celldm, crystal_parameters
+  USE io_global,   ONLY : stdout
+
+  USE quadratic_surfaces, ONLY : print_quadratic_polynomial, &
+                                 print_chisq_quadratic
+  USE numerical_derivatives_module, ONLY : numerical_derivatives_nd, &
+                             numerical_derivatives_nd_3, &
+                             numerical_first_derivatives_nd, &
+                             build_poly1_from_taylor, &
+                             build_poly2_from_taylor
+  USE polynomial,  ONLY : init_poly
+
+  IMPLICIT NONE
+  REAL(DP), ALLOCATABLE :: x(:,:), f(:)
+  REAL(DP), ALLOCATABLE :: xi0(:), dfdx(:), d2fdxdy(:)
+  REAL(DP) :: f0
+  INTEGER  :: itemp, idata, nvar, ndata, ndatatot
+  INTEGER  :: compute_nwork, compute_nwork_ph
+  !
+  nvar=crystal_parameters(ibrav)
+  !
+  ndatatot = compute_nwork()
+  ndata = compute_nwork_ph(no_ph,ndatatot)
+  IF (ggrun_recipe==1) THEN
+     IF (ndata.NE.2*nvar+1) CALL errore('fit_free_energy_gruneisen_gen',&
+                                                        'uncorrect ndata',1)
+  ELSEIF (ggrun_recipe==2) THEN
+     IF (ndata.NE.3**nvar) CALL errore('fit_free_energy_gruneisen_gen',&
+                                                        'uncorrect ndata',2)
+  ELSEIF (ggrun_recipe==3) THEN
+     IF (ndata.NE.nvar*(nvar+3)/2+1) CALL errore(&
+                        'fit_free_energy_gruneisen_gen','uncorrect ndata',3)
+  ELSE
+     CALL errore('fit_free_energy_gruneisen_gen','recipe not programmed',1)
+  ENDIF
+
+  ALLOCATE(x(nvar, ndata))
+  ALLOCATE(f(ndata))
+  ALLOCATE(xi0(nvar))
+  ALLOCATE(dfdx(nvar))
+  IF (ggrun_recipe>1) ALLOCATE(d2fdxdy(nvar*(nvar+1)/2))
+  DO itemp=1, ntemp
+     IF (ggrun_recipe>1) THEN
+        CALL init_poly(nvar,p2t_t(itemp))
+     ELSE
+        CALL init_poly(nvar,p1t_t(itemp))
+     ENDIF
+     ndata=0
+     DO idata=1,ndatatot
+        IF (no_ph(idata)) CYCLE
+        ndata=ndata+1
+        CALL compress_celldm(celldm_geo(1,idata), x(1,ndata), nvar, ibrav)
+        f(ndata)=ph_free_ener(itemp,idata)
+        if (lel_free_energy) f(ndata)=f(ndata)+el_free_ener(itemp,idata)
+     END DO
+
+     IF (ggrun_recipe>1) THEN
+        IF (ggrun_recipe==2) THEN
+           CALL numerical_derivatives_nd(f, x, nvar, xi0, f0, dfdx, d2fdxdy ) 
+        ELSE
+           CALL numerical_derivatives_nd_3(f, x, nvar, xi0, f0, dfdx, &
+                                           d2fdxdy, ind_rec3)
+        ENDIF
+        CALL build_poly2_from_taylor(p2t_t(itemp), xi0, f0, dfdx, d2fdxdy, &
+                                                                  nvar)
+     ELSE
+        CALL numerical_first_derivatives_nd(f, x, nvar, xi0, f0, dfdx )
+        CALL build_poly1_from_taylor(p1t_t(itemp), xi0, f0, dfdx, nvar )
+     ENDIF
+
+
+!     CALL print_quadratic_polynomial(nvar, p2t_t(itemp))
+!
+!     WRITE(stdout,'(/,7x,"Energy (1)      Fitted energy (2)   &
+!                                                  &DeltaE (1)-(2)")') 
+!     CALL print_chisq_quadratic(ndata, nvar, x, f, p2t_t(itemp))
+  ENDDO
+  DEALLOCATE(f)
+  DEALLOCATE(x)
+  DEALLOCATE(xi0)
+  DEALLOCATE(dfdx)
+  IF (ggrun_recipe>1) DEALLOCATE(d2fdxdy)
+  !
+  RETURN
+  !
+END SUBROUTINE fit_free_energy_gruneisen_gen
+
+!-----------------------------------------------------------------------
+SUBROUTINE fit_free_energy_noe_gruneisen_gen()
+  !-----------------------------------------------------------------------
+  !
+  !   This routine fits the vibrational free energy 
+  !   with a polynomial of degree one or two
+  !   at all temperatures. (This routine uses the free energy from 
+  !   phonon dos).
+  !
+  !   The output of this routine are the polynomial coefficients
+  !   p2t_noe_t, or p1t_noe_t, depending on the value of ggrun_recipe
+  !
+  USE kinds,       ONLY : DP
+  USE cell_base,   ONLY : ibrav
+  USE thermo_mod,  ONLY : celldm_geo, no_ph
+  USE control_gen_gruneisen,  ONLY : ggrun_recipe, ind_rec3
+  USE temperature, ONLY : ntemp, temp
+  USE thermodynamics,    ONLY : ph_free_ener
+  USE control_eldos,     ONLY : lel_free_energy
+  USE anharmonic,  ONLY : p1t_noe_t, p2t_noe_t
+  USE lattices,    ONLY : compress_celldm, crystal_parameters
+  USE io_global,   ONLY : stdout
+
+  USE quadratic_surfaces, ONLY : print_quadratic_polynomial, &
+                                 print_chisq_quadratic
+  USE numerical_derivatives_module, ONLY : numerical_derivatives_nd, &
+                             numerical_derivatives_nd_3, &
+                             numerical_first_derivatives_nd, &
+                             build_poly1_from_taylor, &
+                             build_poly2_from_taylor
+  USE polynomial,  ONLY : init_poly
+
+  IMPLICIT NONE
+  REAL(DP), ALLOCATABLE :: x(:,:), f(:)
+  REAL(DP), ALLOCATABLE :: xi0(:), dfdx(:), d2fdxdy(:)
+  REAL(DP) :: f0
+  INTEGER  :: itemp, idata, nvar, ndata, ndatatot
+  INTEGER  :: compute_nwork, compute_nwork_ph
+  !
+  IF (.NOT.lel_free_energy) RETURN
+  !
+  nvar=crystal_parameters(ibrav)
+  !
+  ndatatot = compute_nwork()
+  ndata = compute_nwork_ph(no_ph,ndatatot)
+  IF (ggrun_recipe==1) THEN
+     IF (ndata.NE.2*nvar+1) CALL errore('fit_free_energy_noe_gruneisen_gen',&
+                                                        'uncorrect ndata',1)
+  ELSEIF (ggrun_recipe==2) THEN
+     IF (ndata.NE.3**nvar) CALL errore('fit_free_energy_noe_gruneisen_gen',&
+                                                        'uncorrect ndata',2)
+  ELSEIF (ggrun_recipe==3) THEN
+     IF (ndata.NE.nvar*(nvar+3)/2+1) CALL errore(&
+                     'fit_free_energy_noe_gruneisen_gen','uncorrect ndata',3)
+  ELSE
+     CALL errore('fit_free_energy_gruneisen_gen','recipe not programmed',1)
+  ENDIF
+
+  ALLOCATE(x(nvar, ndata))
+  ALLOCATE(f(ndata))
+  ALLOCATE(xi0(nvar))
+  ALLOCATE(dfdx(nvar))
+  IF (ggrun_recipe>1) ALLOCATE(d2fdxdy(nvar*(nvar+1)/2))
+  DO itemp=1, ntemp
+     IF (ggrun_recipe>1) THEN
+        CALL init_poly(nvar,p2t_noe_t(itemp))
+     ELSE
+        CALL init_poly(nvar,p1t_noe_t(itemp))
+     ENDIF
+     ndata=0
+     DO idata=1,ndatatot
+        IF (no_ph(idata)) CYCLE
+        ndata=ndata+1
+        CALL compress_celldm(celldm_geo(1,idata), x(1,ndata), nvar, ibrav)
+        f(ndata)=ph_free_ener(itemp,idata)
+     END DO
+
+     IF (ggrun_recipe>1) THEN
+        IF (ggrun_recipe==2) THEN
+           CALL numerical_derivatives_nd(f, x, nvar, xi0, f0, dfdx, d2fdxdy ) 
+        ELSE
+           CALL numerical_derivatives_nd_3(f, x, nvar, xi0, f0, dfdx, &
+                                           d2fdxdy, ind_rec3)
+        ENDIF
+        CALL build_poly2_from_taylor(p2t_noe_t(itemp), xi0, f0, dfdx, &
+                                                        d2fdxdy, nvar)
+     ELSE
+        CALL numerical_first_derivatives_nd(f, x, nvar, xi0, f0, dfdx )
+        CALL build_poly1_from_taylor(p1t_noe_t(itemp), xi0, f0, dfdx, nvar )
+     ENDIF
+
+
+!     CALL print_quadratic_polynomial(nvar, p2t_t(itemp))
+!
+!     WRITE(stdout,'(/,7x,"Energy (1)      Fitted energy (2)   &
+!                                                  &DeltaE (1)-(2)")') 
+!     CALL print_chisq_quadratic(ndata, nvar, x, f, p2t_t(itemp))
+  ENDDO
+  DEALLOCATE(f)
+  DEALLOCATE(x)
+  DEALLOCATE(xi0)
+  DEALLOCATE(dfdx)
+  IF (ggrun_recipe>1) DEALLOCATE(d2fdxdy)
+  !
+  RETURN
+  !
+END SUBROUTINE fit_free_energy_noe_gruneisen_gen
+
+!-----------------------------------------------------------------------
+SUBROUTINE fit_free_energyf_gruneisen_gen()
+  !-----------------------------------------------------------------------
+  !
+  !   This routine fits the vibrational free energy (plus possibly the
+  !   electronic one) with a polynomial of degree one or two
+  !   at all temperatures. (This routine uses the free energy from 
+  !   direct integration).
+  !
+  !   The output of this routine are the polynomial coefficients
+  !   p2t_t, or p1t_t, depending on the value of l2ggen
+  !
+  USE kinds,       ONLY : DP
+  USE cell_base,   ONLY : ibrav
+  USE thermo_mod,  ONLY : celldm_geo, no_ph
+  USE control_gen_gruneisen,  ONLY : ggrun_recipe, ind_rec3
+  USE temperature, ONLY : ntemp, temp
+  USE ph_freq_thermodynamics,    ONLY : phf_free_ener
+  USE el_thermodynamics, ONLY : el_free_ener
+  USE control_eldos,     ONLY : lel_free_energy
+  USE ph_freq_anharmonic,  ONLY : p1tf_t, p2tf_t
+  USE lattices,    ONLY : compress_celldm, crystal_parameters
+  USE io_global,   ONLY : stdout
+
+  USE quadratic_surfaces, ONLY : print_quadratic_polynomial, &
+                                 print_chisq_quadratic
+  USE numerical_derivatives_module, ONLY : numerical_derivatives_nd, &
+                             numerical_derivatives_nd_3, &
+                             numerical_first_derivatives_nd, &
+                             build_poly1_from_taylor, &
+                             build_poly2_from_taylor
+  USE polynomial,  ONLY : init_poly
+
+  IMPLICIT NONE
+  REAL(DP), ALLOCATABLE :: x(:,:), f(:)
+  REAL(DP), ALLOCATABLE :: xi0(:), dfdx(:), d2fdxdy(:)
+  REAL(DP) :: f0
+  INTEGER  :: itemp, idata, nvar, ndata, ndatatot
+  INTEGER  :: compute_nwork, compute_nwork_ph
+  !
+  nvar=crystal_parameters(ibrav)
+  !
+  ndatatot = compute_nwork()
+  ndata = compute_nwork_ph(no_ph,ndatatot)
+
+  IF (ggrun_recipe==1) THEN
+     IF (ndata.NE.2*nvar+1) CALL errore('fit_free_energyf_gruneisen_gen',&
+                                                        'uncorrect ndata',1)
+  ELSEIF (ggrun_recipe==2) THEN
+     IF (ndata.NE.3**nvar) CALL errore('fit_free_energyf_gruneisen_gen',&
+                                                        'uncorrect ndata',2)
+  ELSEIF (ggrun_recipe==3) THEN
+     IF (ndata.NE.nvar*(nvar+3)/2+1) CALL errore(&
+                        'fit_free_energyf_gruneisen_gen','uncorrect ndata',3)
+  ELSE
+     CALL errore('fit_free_energyf_gruneisen_gen','recipe not programmed',1)
+  ENDIF
+
+  ALLOCATE(x(nvar, ndata))
+  ALLOCATE(f(ndata))
+  ALLOCATE(xi0(nvar))
+  ALLOCATE(dfdx(nvar))
+  IF (ggrun_recipe>1) ALLOCATE(d2fdxdy(nvar*(nvar+1)/2))
+  DO itemp=1, ntemp
+     IF (ggrun_recipe>1) THEN
+        CALL init_poly(nvar,p2tf_t(itemp))
+     ELSE
+        CALL init_poly(nvar,p1tf_t(itemp))
+     ENDIF
+     ndata=0
+     DO idata=1,ndatatot
+        IF (no_ph(idata)) CYCLE
+        ndata=ndata+1
+        CALL compress_celldm(celldm_geo(1,idata), x(1,ndata), nvar, ibrav)
+        f(ndata)=phf_free_ener(itemp,idata)
+        if (lel_free_energy) f(ndata)=f(ndata)+el_free_ener(itemp,idata)
+     END DO
+
+     IF (ggrun_recipe>1) THEN
+        IF (ggrun_recipe==2) THEN
+           CALL numerical_derivatives_nd(f, x, nvar, xi0, f0, dfdx, d2fdxdy )
+        ELSE
+           CALL numerical_derivatives_nd_3(f, x, nvar, xi0, f0, dfdx, &
+                                           d2fdxdy,ind_rec3)
+        ENDIF
+        CALL build_poly2_from_taylor(p2tf_t(itemp), xi0, f0, dfdx, d2fdxdy, &
+                                                                   nvar)
+     ELSE
+        CALL numerical_first_derivatives_nd(f, x, nvar, xi0, f0, dfdx )
+        CALL build_poly1_from_taylor(p1tf_t(itemp), xi0, f0, dfdx, nvar )
+     ENDIF
+  ENDDO
+  DEALLOCATE(f)
+  DEALLOCATE(x)
+  DEALLOCATE(xi0)
+  DEALLOCATE(dfdx)
+  IF (ggrun_recipe>1) DEALLOCATE(d2fdxdy)
+  !
+  RETURN
+  !
+END SUBROUTINE fit_free_energyf_gruneisen_gen
+
+!-----------------------------------------------------------------------
+SUBROUTINE fit_free_energyf_noe_gruneisen_gen()
+  !-----------------------------------------------------------------------
+  !
+  !   This routine fits the vibrational free energy 
+  !   with a polynomial of degree one or two
+  !   at all temperatures. (This routine uses the free energy from 
+  !   phonon dos).
+  !
+  !   The output of this routine are the polynomial coefficients
+  !   p2t_noe_t, or p1t_noe_t, depending on the value of ggrun_recipe
+  !
+  USE kinds,       ONLY : DP
+  USE cell_base,   ONLY : ibrav
+  USE thermo_mod,  ONLY : celldm_geo, no_ph
+  USE control_gen_gruneisen,  ONLY : ggrun_recipe, ind_rec3
+  USE temperature, ONLY : ntemp, temp
+  USE ph_freq_thermodynamics,    ONLY : phf_free_ener
+  USE control_eldos,     ONLY : lel_free_energy
+  USE ph_freq_anharmonic,  ONLY : p1tf_noe_t, p2tf_noe_t
+  USE lattices,    ONLY : compress_celldm, crystal_parameters
+  USE io_global,   ONLY : stdout
+
+  USE quadratic_surfaces, ONLY : print_quadratic_polynomial, &
+                                 print_chisq_quadratic
+  USE numerical_derivatives_module, ONLY : numerical_derivatives_nd, &
+                             numerical_derivatives_nd_3, &
+                             numerical_first_derivatives_nd, &
+                             build_poly1_from_taylor, &
+                             build_poly2_from_taylor
+  USE polynomial,  ONLY : init_poly
+
+  IMPLICIT NONE
+  REAL(DP), ALLOCATABLE :: x(:,:), f(:)
+  REAL(DP), ALLOCATABLE :: xi0(:), dfdx(:), d2fdxdy(:)
+  REAL(DP) :: f0
+  INTEGER  :: itemp, idata, nvar, ndata, ndatatot
+  INTEGER  :: compute_nwork, compute_nwork_ph
+  !
+  IF (.NOT.lel_free_energy) RETURN
+  !
+  nvar=crystal_parameters(ibrav)
+  !
+  ndatatot = compute_nwork()
+  ndata = compute_nwork_ph(no_ph,ndatatot)
+  IF (ggrun_recipe==1) THEN
+     IF (ndata.NE.2*nvar+1) CALL errore('fit_free_energyf_noe_gruneisen_gen',&
+                                                        'uncorrect ndata',1)
+  ELSEIF (ggrun_recipe==2) THEN
+     IF (ndata.NE.3**nvar) CALL errore('fit_free_energyf_noe_gruneisen_gen',&
+                                                        'uncorrect ndata',2)
+  ELSEIF (ggrun_recipe==3) THEN
+     IF (ndata.NE.nvar*(nvar+3)/2+1) CALL errore(&
+                     'fit_free_energyf_noe_gruneisen_gen','uncorrect ndata',3)
+  ELSE
+     CALL errore('fit_free_energyf_gruneisen_gen','recipe not programmed',1)
+  ENDIF
+
+  ALLOCATE(x(nvar, ndata))
+  ALLOCATE(f(ndata))
+  ALLOCATE(xi0(nvar))
+  ALLOCATE(dfdx(nvar))
+  IF (ggrun_recipe>1) ALLOCATE(d2fdxdy(nvar*(nvar+1)/2))
+  DO itemp=1, ntemp
+     IF (ggrun_recipe>1) THEN
+        CALL init_poly(nvar,p2tf_noe_t(itemp))
+     ELSE
+        CALL init_poly(nvar,p1tf_noe_t(itemp))
+     ENDIF
+     ndata=0
+     DO idata=1,ndatatot
+        IF (no_ph(idata)) CYCLE
+        ndata=ndata+1
+        CALL compress_celldm(celldm_geo(1,idata), x(1,ndata), nvar, ibrav)
+        f(ndata)=phf_free_ener(itemp,idata)
+     END DO
+
+     IF (ggrun_recipe>1) THEN
+        IF (ggrun_recipe==2) THEN
+           CALL numerical_derivatives_nd(f, x, nvar, xi0, f0, dfdx, d2fdxdy ) 
+        ELSE
+           CALL numerical_derivatives_nd_3(f, x, nvar, xi0, f0, dfdx, &
+                                           d2fdxdy, ind_rec3)
+        ENDIF
+        CALL build_poly2_from_taylor(p2tf_noe_t(itemp), xi0, f0, dfdx, &
+                                                        d2fdxdy, nvar)
+     ELSE
+        CALL numerical_first_derivatives_nd(f, x, nvar, xi0, f0, dfdx )
+        CALL build_poly1_from_taylor(p1tf_noe_t(itemp), xi0, f0, dfdx, nvar )
+     ENDIF
+
+
+!     CALL print_quadratic_polynomial(nvar, p2t_t(itemp))
+!
+!     WRITE(stdout,'(/,7x,"Energy (1)      Fitted energy (2)   &
+!                                                  &DeltaE (1)-(2)")') 
+!     CALL print_chisq_quadratic(ndata, nvar, x, f, p2t_t(itemp))
+  ENDDO
+  DEALLOCATE(f)
+  DEALLOCATE(x)
+  DEALLOCATE(xi0)
+  DEALLOCATE(dfdx)
+  IF (ggrun_recipe>1) DEALLOCATE(d2fdxdy)
+  !
+  RETURN
+  !
+END SUBROUTINE fit_free_energyf_noe_gruneisen_gen
