@@ -1025,6 +1025,19 @@ target_link_libraries(qe_tpw_wurtzite_exe
         qe_modules)
 
 ###########################################################
+# analyze_dynmat.x
+###########################################################
+set(src_analyze_dynmat_x tools/analyze_dynmat.f90)
+qe_enable_cuda_fortran("${src_analyze_dynmat_x}")
+qe_add_executable(qe_tpw_analyze_dynmat_exe ${src_analyze_dynmat_x})
+set_target_properties(qe_tpw_analyze_dynmat_exe 
+    PROPERTIES 
+        OUTPUT_NAME analyze_dynmat.x)
+target_link_libraries(qe_tpw_analyze_dynmat_exe
+    PRIVATE
+        qe_modules)
+
+###########################################################
 
 qe_install_targets(
     qe_tpw_lapack
@@ -1033,6 +1046,7 @@ qe_install_targets(
     qe_tpw_qe
     qe_tpw
     qe_tpw_exe
+    qe_tpw_analyze_dynmat_exe
     qe_tpw_average_grun_exe
     qe_tpw_bravais_lattices_exe
     qe_tpw_change_dynmat_name_exe
@@ -1061,4 +1075,5 @@ qe_install_targets(
     qe_tpw_space_groups_exe
     qe_tpw_test_colors_exe
     qe_tpw_translate_exe
-    qe_tpw_units_exe)
+    qe_tpw_units_exe
+    qe_tpw_wurtzite_exe)
