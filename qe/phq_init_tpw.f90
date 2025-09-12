@@ -328,6 +328,7 @@ SUBROUTINE phq_init_tpw()
         ! this is the standard treatment
         IF ( .NOT. lgamma .and..not. elph_mat )then 
            CALL get_buffer( evq, lrwfc, iuwfc, ikq )
+           !$acc update device(evq)
         ELSEIF(.NOT. lgamma .and. elph_mat) then
            !
            ! I read the wavefunction in real space and fwfft it
