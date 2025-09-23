@@ -120,15 +120,16 @@ Elastic constants of Beryllium: a first-principles investigation,
 Clean Ir(111) and Pt(111) electronic surface states: a first-principle fully relativistic investigation,
 <a href="http://www.sciencedirect.com/science/article/pii/S0039602815000734"> Surf. Sci. <B>637-638</B>, 106 (2015)</a>.</p>
 <br>
-<p align="justify">Refs.13,11 describe how <code>thermo_pw</code> computes temperature
-dependent elastic constants, Ref.15,17,19,20 pressure and temperature dependent
-elastic constants, Ref.3 elastic constants at T=0 K,
-Ref.2,6,8 surface band structures, Refs.6,11 eels and optical properties,
-Ref.9 the calculation of the atomic B factor,
-Ref.10 DFPT with fully relativistic pseudopotentials, and Ref.4,5
-thermodynamic anharmonic properties. Refs.13,14,15,16,17,20 have examples of 
-pressure and temperature parameterized plots.
-Ref.19 describes the GPU acceleration for the <code>many_k</code> option.</p>
+<p align="justify">Refs.12,10 describe how <code>thermo_pw</code> computes temperature
+dependent elastic constants, Ref.14,16,17,19,20 pressure and temperature 
+dependent
+elastic constants, Ref.2 elastic constants at T=0 K,
+Ref.1,5,7 surface band structures, Refs.6,11 eels and optical properties,
+Ref.8 the calculation of the atomic B factor,
+Ref.9 DFPT with fully relativistic pseudopotentials, and Ref.3,4
+thermodynamic anharmonic properties. Refs.13,14,15,16,17,19,20 have 
+examples of pressure and temperature parameterized plots.
+Ref.18 describes the GPU acceleration for the <code>many_k</code> option.</p>
 
 <p align="justify">The following works contain some calculations made by <code>thermo_pw</code>:</p>
 <p align="justify">
