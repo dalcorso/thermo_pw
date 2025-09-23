@@ -52,6 +52,8 @@ join_qe:
           ./QESUB/clocks_handler.f90_qe ; mv ./QESUB/clocks_handler.f90 ../UtilXlib ; fi
 	if test -f ./QESUB/io_dyn_mat.f90 ; then mv ../PHonon/PH/io_dyn_mat.f90 \
           ./QESUB/io_dyn_mat.f90_qe ; mv ./QESUB/io_dyn_mat.f90 ../PHonon/PH ; fi
+	if test -f ./QESUB/phq_init.f90 ; then mv ../PHonon/PH/phq_init.f90 \
+          ./QESUB/phq_init.f90_qe ; mv ./QESUB/phq_init.f90 ../PHonon/PH ; fi
 leave_qe:
 	if test -f ./Makefile_qe ; then mv ../Makefile ./main_Makefile ; \
            mv ./Makefile_qe ../Makefile ; fi
@@ -90,6 +92,9 @@ leave_qe:
 	if test -f ./QESUB/io_dyn_mat.f90_qe ; then mv ../PHonon/PH/io_dyn_mat.f90 \
            ./QESUB/io_dyn_mat.f90 ; \
 	   mv ./QESUB/io_dyn_mat.f90_qe ../PHonon/PH/io_dyn_mat.f90 ; fi
+	if test -f ./QESUB/phq_init.f90_qe ; then mv ../PHonon/PH/phq_init.f90 \
+           ./QESUB/phq_init.f90 ; \
+	   mv ./QESUB/phq_init.f90_qe ../PHonon/PH/phq_init.f90 ; fi
 
 clean: thermo_tools_clean thermo_pw_clean thermo_lib_clean thermo_lapack_clean thermo_fft_clean thermo_qe_clean examples_clean examples_qe_clean space_groups_clean doc_clean
 

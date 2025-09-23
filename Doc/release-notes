@@ -1,5 +1,14 @@
-New in version 2.1.0:
+23/09/2025 Version 2.1.0 is now frozen:
 
+This version is compatible with Quantum ESPRESSO 7.4.1
+
+Experimental version of the generalized Gruneisen method
+(in collaboration with A. Ahmed).
+
+Start_geometry and last_geometry now work also for the
+self consistent calculations (in collaboration with X. Gong).
+
+A few bug fix.
 
 23/06/2025 Version 2.0.3 is now frozen.
 
