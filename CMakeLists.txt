@@ -20,6 +20,7 @@ set(src_tpw_lib
     lib/magnetic_point_group.f90
     lib/model_free_energy.f90
     lib/mp_asyn.f90
+    lib/numerical_diff.f90
     lib/nye.f90
     lib/optical.f90
     lib/phdos_module.f90
@@ -405,7 +406,6 @@ set(src_tpw
     src/dos_ph.f90
     src/dos_sub.f90
     src/dynmatrix_tpw.f90
-    src/elastic_constants_t.f90
     src/empirical_free_energy.f90
     src/evaluate_celldm.f90
     src/evaluate_vm.f90
@@ -497,6 +497,7 @@ set(src_tpw
     src/set_elastic_constants_t.f90
     src/set_fft_mesh.f90
     src/set_files_names.f90
+    src/set_geometry_el_cons.f90
     src/set_k_points.f90
     src/set_paths_disp.f90
     src/set_piezo_tensor_work.f90

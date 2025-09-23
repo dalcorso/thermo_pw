@@ -51,7 +51,6 @@ do_berry.o \
 do_phonon_tpw.o \
 dos_sub.o \
 dynmatrix_tpw.o \
-elastic_constants_t.o \
 empirical_free_energy.o \
 ev_mod.o \
 ev_sub.o \
@@ -141,6 +140,7 @@ set_2d_bz_path.o \
 set_bz_path.o \
 set_dos_kpoints.o \
 set_elastic_constants_t.o \
+set_geometry_el_cons.o \
 set_fft_mesh.o \
 set_files_names.o \
 set_k_points.o \
