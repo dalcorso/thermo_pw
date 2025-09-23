@@ -62,6 +62,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   INTEGER  :: igeom, igeom_qha, ike, iden, icount, ink, isigma, iwork, &
               iwork_tot, ios
   INTEGER  :: count_energies, iq, irr, start_omega, i, j
+  INTEGER  :: start_geometry_1, last_geometry_1
   REAL(DP) :: compute_omega_geo, dual, kev, kedenv
 !
 !  here initialize the work to do and sets to true the flags that activate
@@ -77,6 +78,8 @@ SUBROUTINE initialize_thermo_work(nwork, part)
      IF (meta_ionode) ios = f_mkdir_safe( 'restart' )
      ngeom=1
      tot_ngeo=1
+     start_geometry_1=1
+     last_geometry_1=1
      SELECT CASE (TRIM(what))
 !
 !   In these cases we do not do any asynchronous work in the first part
@@ -134,6 +137,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            ALLOCATE(keden(nwork))
            ALLOCATE(energy_geo(nwork))
            ALLOCATE(ef_geo(nwork))
+           last_geometry_1=nwork
            icount=0
            DO iden=1, nkeden
               kedenv = ecutrho + (iden-1) * deltakeden
@@ -158,6 +162,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            ALLOCATE(sigma_test(nwork))
            ALLOCATE(energy_geo(nwork))
            ALLOCATE(ef_geo(nwork))
+           last_geometry_1=nwork
            tot_ngeo=0
            icount=0
            DO isigma=1, nsigma
@@ -210,12 +215,14 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               IF (meta_ionode) ios = f_mkdir_safe( 'anhar_files' )
               CALL allocate_el_thermodynamics(tot_ngeo)
            ENDIF
+           last_geometry_1=nwork
         CASE ('mur_lc_bands') 
            do_punch=.FALSE.
            lev_syn_1=.TRUE.
            lpwscf_syn_1=.TRUE.
            lbands_syn_1=.TRUE.
            CALL initialize_mur(nwork)
+           last_geometry_1=nwork
            IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'band_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
@@ -226,6 +233,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            lbands_syn_1 = .TRUE.
            ldos_syn_1 = .TRUE.
            CALL initialize_mur(nwork)
+           last_geometry_1=nwork
            IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
@@ -235,6 +243,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            lev_syn_1=.TRUE.
            lpwscf_syn_1=.NOT.after_disp
            CALL initialize_mur(nwork)
+           last_geometry_1=nwork
            lph=.TRUE.
            tot_ngeo=1
            ALLOCATE(no_ph(tot_ngeo))
@@ -247,6 +256,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            lev_syn_1=.TRUE.
            lpwscf_syn_1=.NOT.after_disp
            CALL initialize_mur(nwork)
+           last_geometry_1=nwork
            lph=.TRUE.
            tot_ngeo=1
            ALLOCATE(no_ph(tot_ngeo))
@@ -264,6 +274,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            lev_syn_1=.TRUE.
            lpwscf_syn_1=do_scf_relax
            CALL initialize_mur(nwork)
+           last_geometry_1=nwork
            lpart2_pw=.TRUE.
            tot_ngeo=1
            IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
@@ -275,6 +286,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            lev_syn_1=.TRUE.
            lpwscf_syn_1=do_scf_relax
            CALL initialize_mur(nwork)
+           last_geometry_1=nwork
            lpart2_pw=.TRUE.
            tot_ngeo=1
            IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
@@ -284,6 +296,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            lev_syn_1=.TRUE.
            lpwscf_syn_1=do_scf_relax
            CALL initialize_mur(nwork)
+           last_geometry_1=nwork
            lpart2_pw=.TRUE.
            tot_ngeo=1
            IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
@@ -309,6 +322,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            nvar=crystal_parameters(ibrav_save)
            CALL allocate_thermodynamics()
            CALL allocate_anharmonic()
+           last_geometry_1=tot_ngeo
            IF (ANY(stype)) ALLOCATE(dyde(21,tot_ngeo,ntemp))
            IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'anhar_files' )
@@ -341,7 +355,12 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            start_geometry=MAX((start_geometry_qha-1)*work_base+1, &
                                                        start_geometry)
            last_geometry=MIN(last_geometry_qha*work_base, last_geometry)
+           IF (start_geometry>1.AND.start_geometry.LE.nwork) &
+               start_geometry_1=start_geometry
+           IF (last_geometry>1.AND.last_geometry.LE.nwork) &
+               last_geometry_1=last_geometry
            tot_ngeo=nwork
+           
            ALLOCATE(energy_geo(tot_ngeo))
            ALLOCATE(tau_save_ec(3,nat,tot_ngeo))
            ALLOCATE(all_geometry_done_geo(ngeom))
@@ -493,7 +512,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               'mur_lc_elastic_constants',    &
               'mur_lc_piezoelectric_tensor', &
               'mur_lc_polarization' )
-           DO iwork=start_geometry,last_geometry
+           DO iwork=start_geometry_1,last_geometry_1
               lpwscf(iwork)=.TRUE.
               lef(iwork)=(lgauss.OR.ltetra)
            ENDDO
