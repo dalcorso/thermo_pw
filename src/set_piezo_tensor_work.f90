@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!------------------------------------------------------------------------
 SUBROUTINE set_piezo_tensor_work( nwork )
+!------------------------------------------------------------------------
 USE kinds,               ONLY : DP
 USE cell_base,           ONLY : ibrav
 USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain
@@ -24,7 +26,14 @@ epsilon_min_off= - delta_epsilon * (ngeo_strain - 1)
 IF (check_group_ibrav(code_group, ibrav)) THEN
    SELECT CASE (code_group)
      CASE(2,16,18,19,20,22,23,25,27,29,32)
+!
+!  Point groups with inversion, the piezoelectric tensor vanishes
+!  C_i, C_2h, C_4h, C_6h, D_2h, D_4h, D_6h, D_3d, S_6, T_h, O_h
+!
      CASE(6,7)
+!
+!   C_4, C_6
+!
         nwork = 4 * ngeo_strain
         ALLOCATE( epsilon_voigt(6, nwork) )
         epsilon_voigt=0.0_DP
@@ -38,6 +47,9 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
                                         2.0_DP * delta_epsilon * ( igeo - 1 )
         ENDDO
      CASE(8)
+!
+!   D_2
+!
         nwork = 3 * ngeo_strain
         ALLOCATE( epsilon_voigt(6, nwork) )
         epsilon_voigt=0.0_DP
@@ -50,6 +62,9 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
                                         2.0_DP * delta_epsilon * ( igeo - 1 )
         ENDDO
      CASE(9)
+!
+!   D_3
+!
         nwork = 2 * ngeo_strain
         ALLOCATE( epsilon_voigt(6, nwork) )
         epsilon_voigt=0.0_DP
@@ -59,6 +74,9 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
                                           2.0_DP * delta_epsilon * ( igeo - 1 )
         ENDDO
      CASE(10,11,28,30)
+!
+!  D_4, D_6, T, T_d
+!
         nwork = ngeo_strain
         ALLOCATE( epsilon_voigt(6, nwork) )
         epsilon_voigt=0.0_DP
@@ -67,6 +85,9 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
                                           2.0_DP * delta_epsilon * ( igeo - 1 )
         ENDDO
      CASE(12)
+!
+!   C_2v
+!
         nwork = 5 * ngeo_strain
         ALLOCATE( epsilon_voigt(6, nwork) )
         epsilon_voigt=0.0_DP
@@ -82,6 +103,9 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
                                          2.0_DP * delta_epsilon * ( igeo - 1 )
         ENDDO
      CASE(13,14,15)
+!
+!   C_3v, C_4v, C_6v
+!
         nwork = 3 * ngeo_strain
         ALLOCATE( epsilon_voigt(6, nwork) )
         epsilon_voigt=0.0_DP
@@ -93,6 +117,9 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
                                          2.0_DP * delta_epsilon * ( igeo - 1 )
         ENDDO
      CASE(17,21)
+!
+!  C_3h, D_3h
+!
         nwork = ngeo_strain
         ALLOCATE( epsilon_voigt(6, nwork) )
         epsilon_voigt=0.0_DP
@@ -100,6 +127,9 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
            epsilon_voigt(1, igeo) = epsilon_min + delta_epsilon * ( igeo - 1 )
         ENDDO
      CASE(24)
+!
+!  D_2d
+!
         nwork = 2 * ngeo_strain
         ALLOCATE( epsilon_voigt(6, nwork) )
         epsilon_voigt=0.0_DP
@@ -110,6 +140,9 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
                                         2.0_DP * delta_epsilon * ( igeo - 1 )
         ENDDO
      CASE(26)
+!
+!  S_4
+!
         nwork = 4 * ngeo_strain
         ALLOCATE( epsilon_voigt(6, nwork) )
         epsilon_voigt=0.0_DP
