@@ -1446,8 +1446,9 @@ IF (iwork<1.OR.iwork>ncoef(nvar)) CALL errore('find_ipoint','wrong iwork',1)
 
 iaux=iwork
 DO ivar=nvar,2,-1
-   inde(ivar)= iaux / ncoef(ivar-1) + 1
-   iaux = MOD(iaux, ncoef(ivar-1))
+   inde(ivar)= (iaux - 1) / ncoef(ivar-1) + 1
+   iaux = MOD(iaux, ncoef(ivar-1)) 
+   IF (iaux==0) iaux=iaux + ncoef(ivar-1)
 ENDDO
 inde(1)=iaux
 

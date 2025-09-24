@@ -92,6 +92,10 @@ MODULE lattices
 !  expand_celldm : receives a vector with the variable crystal parameters
 !                  for a given ibrav and sets the celldm vector
 !
+!  compress_ngeo : receives a vector of integers that define a grid on the
+!                  celldm parameters and produces a vector that define a
+!                  grid of crystal parameters
+!
   USE kinds,      ONLY : DP
   !
   IMPLICIT NONE
@@ -118,7 +122,7 @@ MODULE lattices
          zone_border, same_star, is_compatible_group_ibrav,            &
          bravais_dir, print_bravais_description, crystal_parameters,   &
          compress_celldm, expand_celldm, compress_int_vect, needed_celldm, &
-         celldm_name, celldm_gnuplot_name
+         celldm_name, celldm_gnuplot_name, compress_ngeo
 
 CONTAINS
 
@@ -1830,6 +1834,49 @@ END SELECT
 
 RETURN
 END SUBROUTINE compress_celldm
+!
+!----------------------------------------------------------------------
+SUBROUTINE compress_ngeo(ngeo,ix,nvar,ibrav)
+!----------------------------------------------------------------------
+!
+USE kinds, ONLY : DP
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: nvar, ibrav
+INTEGER, INTENT(IN) :: ngeo(6)
+INTEGER, INTENT(INOUT) :: ix(nvar)
+
+SELECT CASE (ibrav)
+   CASE(1,2,3)
+      ix(1) = ngeo(1)
+   CASE(4,5,6,7)
+      ix(1) = ngeo(1)
+      ix(2) = ngeo(3)
+      IF (ibrav==5) ix(2) = ngeo(4)
+   CASE(8,9,91,10,11)
+      ix(1) = ngeo(1)
+      ix(2) = ngeo(2)
+      ix(3) = ngeo(3)
+   CASE(12,-12,13,-13)
+      ix(1) = ngeo(1)
+      ix(2) = ngeo(2)
+      ix(3) = ngeo(3)
+      IF (ibrav>0) THEN
+!
+!   c unique
+!
+         ix(4) = ngeo(4)
+      ELSE
+!
+!   b unique
+!
+         ix(4) = ngeo(5)
+      ENDIF
+   CASE DEFAULT
+      ix(1:6)=ngeo(1:6)
+END SELECT
+
+RETURN
+END SUBROUTINE compress_ngeo
 
 !----------------------------------------------------------------------
 SUBROUTINE compress_int_vect(inv,x,n,ibrav)

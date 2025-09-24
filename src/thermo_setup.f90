@@ -37,7 +37,8 @@ SUBROUTINE thermo_setup()
   USE thermo_mod,           ONLY : what, ngeo, fact_ngeo, ngeo_ph, lcubic    
   USE temperature,          ONLY : tmin, ntemp_plot
   USE control_thermo,       ONLY : continue_zero_ibrav, find_ibrav, &
-                                   set_internal_path, set_2d_path
+                                   set_internal_path, set_2d_path,  &
+                                   lgruneisen_gen
   USE control_elastic_constants, ONLY : ngeo_strain, elastic_algorithm, &
                                   elcpvar, poly_degree, elalgen
   USE control_eldos,        ONLY : deltae, ndose, lel_free_energy
@@ -46,6 +47,7 @@ SUBROUTINE thermo_setup()
   USE equilibrium_conf,     ONLY : tau0, tau0_crys
   USE control_paths,        ONLY : npk_label, lbar_label
   USE control_grun,         ONLY : temp_ph, volume_ph, celldm_ph
+  USE control_gen_gruneisen, ONLY : xngeo, icenter_grun, ind_rec3, ggrun_recipe
   USE control_xrdp,         ONLY : lambda, lambda_elem
   USE control_2d_bands,     ONLY : lprojpbs, nkz, sur_layers, identify_sur, &
                                    sp_min
@@ -62,7 +64,8 @@ SUBROUTINE thermo_setup()
 !
 !   helper codes from the library
 !
-  USE lattices,             ONLY : find_ibrav_code
+  USE lattices,             ONLY : find_ibrav_code, crystal_parameters, &
+                                   compress_ngeo
   USE xrdp_module,          ONLY : select_lambda
   USE color_mod,            ONLY : set_colors
 !
@@ -90,7 +93,7 @@ SUBROUTINE thermo_setup()
   !
   IMPLICIT NONE
   !
-  INTEGER :: ia, ipol, jpol, igeo, ibrav_, code_group_ext
+  INTEGER :: ia, ipol, jpol, igeo, nvar, ibrav_, code_group_ext
   REAL(DP), PARAMETER :: eps1=1D-8
   REAL(DP) :: ur(3,3), global_s(3,3), rd_ht(3,3), celldm_(6), alat_save, zero
   REAL(DP), ALLOCATABLE :: tau_aux(:,:)
@@ -346,6 +349,18 @@ SUBROUTINE thermo_setup()
 !  gnuplot library
 !
    CALL determine_backspace()
+
+   IF (lgruneisen_gen) THEN
+      nvar=crystal_parameters(ibrav)
+      ALLOCATE(xngeo(nvar))
+      CALL compress_ngeo(ngeo,xngeo,nvar,ibrav)
+!
+!   prepare the array with the indices of each point with respect to
+!   the central one. The array is set by the routine that decides 
+!   in which geometries to compute phonons
+!
+     IF (ggrun_recipe==3) ALLOCATE(ind_rec3(nvar, (nvar*(nvar+3))/2+1))
+  ENDIF
 
   RETURN
   !

@@ -110,6 +110,7 @@ SUBROUTINE deallocate_thermo()
                                label_disp_q, disp_q, disp_wq, nrap_plot_in,   &
                                rap_plot_in, nrap_plot, rap_plot, high_sym_path
   USE control_2d_bands, ONLY : averag, vacuum, aux_ind_sur
+  USE control_gen_gruneisen, ONLY : xngeo, ind_rec3
   USE initial_conf,     ONLY : ityp_save, tau_save, tau_save_crys, &
                                collect_info_save, atm_save
   USE equilibrium_conf, ONLY : tau0, tau0_crys
@@ -636,6 +637,9 @@ SUBROUTINE deallocate_thermo()
 
   IF ( ALLOCATED (tau0) )            DEALLOCATE(tau0)
   IF ( ALLOCATED (tau0_crys) )       DEALLOCATE(tau0_crys)
+
+  IF ( ALLOCATED (xngeo) )           DEALLOCATE(xngeo)
+  IF ( ALLOCATED (ind_rec3) )        DEALLOCATE(ind_rec3)
 
   IF ( ALLOCATED (deb_energy) )      DEALLOCATE( deb_energy )
   IF ( ALLOCATED (deb_free_energy) ) DEALLOCATE( deb_free_energy )

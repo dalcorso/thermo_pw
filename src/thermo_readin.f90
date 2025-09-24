@@ -641,6 +641,20 @@ SUBROUTINE thermo_readin()
      lb0_t=.FALSE.
   ENDIF
 
+  IF (lgruneisen_gen .AND. lmurn) CALL errore('thermo_readin', &
+                              'lgruneisen_gen requires lmurn=.FALSE.',1)
+
+  IF (lgruneisen_gen.AND.what/='mur_lc_t') &
+     CALL errore('thermo_readin', &
+                          'lgruneisen_gen requires what=''mur_lc_t''',1)
+
+  IF (lgruneisen_gen) THEN
+     poly_degree_ph=2
+     IF (ggrun_recipe==1) poly_degree_ph=1
+     poly_degree_thermo=2
+     IF (ggrun_recipe==1) poly_degree_thermo=1
+  ENDIF
+
   IF (npress_plot> max_opt) CALL errore('thermo_readin', &
                                              'npress_plot too large',1) 
 
