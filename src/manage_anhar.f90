@@ -526,6 +526,7 @@ USE thermodynamics,        ONLY : ph_free_ener
 USE ph_freq_thermodynamics, ONLY : phf_free_ener
 USE el_thermodynamics,     ONLY : el_ener, el_free_ener, el_entr, &
                                   el_ce
+USE control_gen_gruneisen, ONLY : ggrun_recipe
 USE data_files,            ONLY : fleltherm
 USE internal_files_names,  ONLY : flfrq_thermo, flvec_thermo
 USE io_global,             ONLY : stdout
@@ -830,30 +831,32 @@ CALL manage_plot_elastic()
 !
 !    calculate and plot the Gruneisen parameters along the given path.
 !
-WRITE(stdout,'(/,2x,76("-"))')
-WRITE(stdout,'(5x,"Computing the anharmonic properties within ")')
-WRITE(stdout,'(5x,"the QHA approximation using Gruneisen parameters.")')
-WRITE(stdout,'(2x,76("-"),/)')
+IF (ggrun_recipe>1) THEN
+   WRITE(stdout,'(/,2x,76("-"))')
+   WRITE(stdout,'(5x,"Computing the anharmonic properties within ")')
+   WRITE(stdout,'(5x,"the QHA approximation using Gruneisen parameters.")')
+   WRITE(stdout,'(2x,76("-"),/)')
 
-CALL write_gruneisen_band_anis(flfrq_thermo,flvec_thermo)
-CALL set_files_for_plot(4, flfrq_thermo, filedata, filerap, &
+   CALL write_gruneisen_band_anis(flfrq_thermo,flvec_thermo)
+   CALL set_files_for_plot(4, flfrq_thermo, filedata, filerap, &
                                           fileout, gnu_filename, filenameps, filepbs)
-CALL plotband_sub(4, filedata, filerap, fileout, gnu_filename, filenameps, filepbs)
-CALL plot_gruneisen_band_anis(flfrq_thermo)
+   CALL plotband_sub(4, filedata, filerap, fileout, gnu_filename, filenameps, filepbs)
+   CALL plot_gruneisen_band_anis(flfrq_thermo)
 !
 !    fit the frequencies of the dos mesh with a polynomial
 !
-CALL set_volume_b0_grun()
-CALL set_elastic_grun()
-IF (reduced_grid) THEN
-   CALL fit_frequencies_anis_reduced()
-ELSE
-   CALL fit_frequencies_anis()
-ENDIF
+   CALL set_volume_b0_grun()
+   CALL set_elastic_grun()
+   IF (reduced_grid) THEN
+      CALL fit_frequencies_anis_reduced()
+   ELSE
+      CALL fit_frequencies_anis()
+   ENDIF
 !
 !    calculate the Gruneisen parameters and the anharmonic quantities
 !
-CALL write_grun_anhar_anis()
+   CALL write_grun_anhar_anis()
+ENDIF
 !
 !    and plot them
 !

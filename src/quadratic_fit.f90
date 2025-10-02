@@ -349,6 +349,7 @@ SUBROUTINE quadratic_fit_t(itemp, celldm_t, free_e_min_t, pt1, pt2, pt3, pt4 )
 
   USE linear_surfaces,  ONLY : fit_multi_linear, print_chisq_linear
   USE quadratic_surfaces, ONLY : fit_multi_quadratic, &
+                      find_quadratic_linear_extremum, &
                       find_two_quadratic_extremum,    &
                       print_quadratic_polynomial,     &
                       summarize_fitting_data,         &
@@ -378,7 +379,11 @@ SUBROUTINE quadratic_fit_t(itemp, celldm_t, free_e_min_t, pt1, pt2, pt3, pt4 )
   !
   ALLOCATE(x_pos_min(nvar))
 
-  CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, enthalpy_p2, pt2)
+  IF (poly_degree_ph > 1) THEN
+     CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, enthalpy_p2, pt2)
+  ELSE
+     CALL find_quadratic_linear_extremum(nvar, x_pos_min, ymin, enthalpy_p2, pt1)
+  ENDIF
 !  WRITE(stdout,'(/,5x,"Extremum of the quadratic found at:")')
 !  CALL write_vector(nvar,x_pos_min)
 !  CALL print_genergy(ymin)
@@ -449,7 +454,8 @@ SUBROUTINE quadratic_fit_t_pm()
   USE uniform_pressure, ONLY : p2_p_p1, p2_p_m1, p4_p_p1, p4_p_m1
 
   USE linear_surfaces,  ONLY : fit_multi_linear, print_chisq_linear
-  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum
+  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum, &
+                                 find_quadratic_linear_extremum
   USE quartic_surfaces, ONLY : find_quartic_quadratic_extremum,     &
                       find_two_quartic_extremum, find_quartic_cubic_extremum,&
                       find_quartic_linear_extremum
@@ -465,8 +471,13 @@ SUBROUTINE quadratic_fit_t_pm()
   ALLOCATE(x_pos_min(nvar))
 
   DO itemp=1, ntemp
-     CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
+     IF (poly_degree_ph>1) then
+        CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
                                             p2_p_p1, p2t_t(itemp))
+     ELSE
+        CALL find_quadratic_linear_extremum(nvar, x_pos_min, ymin, &
+                                            p2_p_p1, p1t_t(itemp))
+     ENDIF
      IF (lquartic) THEN
         IF (poly_degree_ph==4) THEN
            CALL find_two_quartic_extremum(nvar, x_pos_min, ymin, &
@@ -486,8 +497,13 @@ SUBROUTINE quadratic_fit_t_pm()
   ENDDO
 
   DO itemp=1, ntemp
-     CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
-                                     p2_p_m1, p2t_t(itemp))
+     IF (poly_degree_ph>1) then
+        CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
+                                        p2_p_m1, p2t_t(itemp))
+     ELSE
+        CALL find_quadratic_linear_extremum(nvar, x_pos_min, ymin, &
+                                        p2_p_m1, p1t_t(itemp))
+     ENDIF
      IF (lquartic) THEN
         IF (poly_degree_ph==4) THEN
            CALL find_two_quartic_extremum(nvar, x_pos_min, ymin, &
@@ -534,7 +550,8 @@ SUBROUTINE quadratic_fitf_t_pm()
   USE uniform_pressure, ONLY : p2_p_p1, p2_p_m1, p4_p_p1, p4_p_m1
 
   USE linear_surfaces,  ONLY : fit_multi_linear, print_chisq_linear
-  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum
+  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum, &
+                                 find_quadratic_linear_extremum
   USE quartic_surfaces, ONLY : find_quartic_quadratic_extremum,     &
                       find_two_quartic_extremum, find_quartic_cubic_extremum,&
                       find_quartic_linear_extremum
@@ -550,8 +567,13 @@ SUBROUTINE quadratic_fitf_t_pm()
   ALLOCATE(x_pos_min(nvar))
 
   DO itemp=1, ntemp
-     CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
+     IF (poly_degree_ph>1) THEN
+        CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
                                             p2_p_p1, p2tf_t(itemp))
+     ELSE
+        CALL find_quadratic_linear_extremum(nvar, x_pos_min, ymin, &
+                                            p2_p_p1, p1tf_t(itemp))
+     ENDIF
      IF (lquartic) THEN
         IF (poly_degree_ph==4) THEN
            CALL find_two_quartic_extremum(nvar, x_pos_min, ymin, &
@@ -571,8 +593,13 @@ SUBROUTINE quadratic_fitf_t_pm()
   ENDDO
 
   DO itemp=1, ntemp
-     CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
+     IF (poly_degree_ph>1) THEN
+        CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
                                      p2_p_m1, p2tf_t(itemp))
+     ELSE
+        CALL find_quadratic_linear_extremum(nvar, x_pos_min, ymin, &
+                                     p2_p_m1, p1tf_t(itemp))
+     ENDIF
      IF (lquartic) THEN
         IF (poly_degree_ph==4) THEN
            CALL find_two_quartic_extremum(nvar, x_pos_min, ymin, &
@@ -621,7 +648,8 @@ SUBROUTINE quadratic_fit_noe_t_pm()
   USE uniform_pressure, ONLY : p2_p_p1, p2_p_m1, p4_p_p1, p4_p_m1
 
   USE linear_surfaces,  ONLY : fit_multi_linear, print_chisq_linear
-  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum
+  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum, &
+                                 find_quadratic_linear_extremum
   USE quartic_surfaces, ONLY : find_quartic_quadratic_extremum,     &
                       find_two_quartic_extremum, find_quartic_cubic_extremum,&
                       find_quartic_linear_extremum
@@ -640,8 +668,13 @@ SUBROUTINE quadratic_fit_noe_t_pm()
   ALLOCATE(x_pos_min(nvar))
 
   DO itemp=1, ntemp
-     CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
+     IF (poly_degree_ph>1) THEN
+        CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
                                             p2_p_p1, p2t_noe_t(itemp))
+     ELSE
+        CALL find_quadratic_linear_extremum(nvar, x_pos_min, ymin, &
+                                            p2_p_p1, p1t_noe_t(itemp))
+     ENDIF
      IF (lquartic) THEN
         IF (poly_degree_ph==4) THEN
            CALL find_two_quartic_extremum(nvar, x_pos_min, ymin, &
@@ -661,8 +694,13 @@ SUBROUTINE quadratic_fit_noe_t_pm()
   ENDDO
 
   DO itemp=1, ntemp
-     CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
-                                     p2_p_m1, p2t_noe_t(itemp))
+    IF (poly_degree_ph>1) THEN
+        CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
+                                           p2_p_m1, p2t_noe_t(itemp))
+     ELSE
+        CALL find_quadratic_linear_extremum(nvar, x_pos_min, ymin, &
+                                           p2_p_m1, p1t_noe_t(itemp))
+     ENDIF
      IF (lquartic) THEN
         IF (poly_degree_ph==4) THEN
            CALL find_two_quartic_extremum(nvar, x_pos_min, ymin, &
@@ -711,7 +749,8 @@ SUBROUTINE quadratic_fitf_noe_t_pm()
   USE uniform_pressure, ONLY : p2_p_p1, p2_p_m1, p4_p_p1, p4_p_m1
 
   USE linear_surfaces,  ONLY : fit_multi_linear, print_chisq_linear
-  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum
+  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum, &
+                                 find_quadratic_linear_extremum
   USE quartic_surfaces, ONLY : find_quartic_quadratic_extremum,     &
                       find_two_quartic_extremum, find_quartic_cubic_extremum,&
                       find_quartic_linear_extremum
@@ -730,8 +769,13 @@ SUBROUTINE quadratic_fitf_noe_t_pm()
   ALLOCATE(x_pos_min(nvar))
 
   DO itemp=1, ntemp
-     CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
+     IF (poly_degree_ph>1) THEN
+        CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
                                             p2_p_p1, p2tf_noe_t(itemp))
+     ELSE
+        CALL find_quadratic_linear_extremum(nvar, x_pos_min, ymin, &
+                                            p2_p_p1, p1tf_noe_t(itemp))
+     ENDIF
      IF (lquartic) THEN
         IF (poly_degree_ph==4) THEN
            CALL find_two_quartic_extremum(nvar, x_pos_min, ymin, &
@@ -751,8 +795,13 @@ SUBROUTINE quadratic_fitf_noe_t_pm()
   ENDDO
 
   DO itemp=1, ntemp
-     CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
-                                     p2_p_m1, p2tf_noe_t(itemp))
+    IF (poly_degree_ph>1) THEN
+        CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
+                                         p2_p_m1, p2tf_noe_t(itemp))
+     ELSE
+        CALL find_quadratic_linear_extremum(nvar, x_pos_min, ymin, &
+                                         p2_p_m1, p1tf_noe_t(itemp))
+     ENDIF
      IF (lquartic) THEN
         IF (poly_degree_ph==4) THEN
            CALL find_two_quartic_extremum(nvar, x_pos_min, ymin, &
@@ -803,7 +852,8 @@ SUBROUTINE quadratic_fit_pt()
   USE uniform_pressure, ONLY : p2_p, p4_p
 
   USE linear_surfaces,  ONLY : fit_multi_linear, print_chisq_linear
-  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum
+  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum, &
+                                 find_quadratic_linear_extremum
   USE quartic_surfaces, ONLY : find_quartic_quadratic_extremum,     &
                       find_two_quartic_extremum, find_quartic_cubic_extremum,&
                       find_quartic_linear_extremum
@@ -824,8 +874,13 @@ SUBROUTINE quadratic_fit_pt()
      DO itemp=1, ntemp
 
         IF (itemp==1.OR..NOT.lquartic) THEN
-           CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
+          IF (poly_degree_ph>1) THEN
+              CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
                                      p2_p(ipress), p2t_t(itemp))
+           ELSE
+              CALL find_quadratic_linear_extremum(nvar, x_pos_min, ymin, &
+                                     p2_p(ipress), p1t_t(itemp))
+           ENDIF
         ENDIF
 !        WRITE(stdout,'(/,5x,"Extremum of the quadratic found at:")')
 !        CALL write_vector(nvar,x_pos_min)
@@ -896,7 +951,8 @@ SUBROUTINE quadratic_fitf_pt()
   USE uniform_pressure, ONLY : p2_p, p4_p
 
   USE linear_surfaces,  ONLY : fit_multi_linear, print_chisq_linear
-  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum
+  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum, &
+                                 find_quadratic_linear_extremum
   USE quartic_surfaces, ONLY : find_quartic_quadratic_extremum,     &
                       find_two_quartic_extremum, find_quartic_cubic_extremum,&
                       find_quartic_linear_extremum
@@ -917,8 +973,13 @@ SUBROUTINE quadratic_fitf_pt()
      DO itemp=1, ntemp
 
         IF (itemp==1.OR..NOT.lquartic) THEN
-           CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
+           IF (poly_degree_ph>1) THEN
+              CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
                                      p2_p(ipress), p2tf_t(itemp))
+           ELSE
+              CALL find_quadratic_linear_extremum(nvar, x_pos_min, ymin, &
+                                     p2_p(ipress), p1tf_t(itemp))
+           ENDIF
 !        WRITE(stdout,'(/,5x,"Extremum of the quadratic found at:")')
 !        CALL write_vector(nvar,x_pos_min)
 !        CALL print_genergy(ymin)
@@ -989,7 +1050,8 @@ SUBROUTINE quadratic_fit_pt_pm()
   USE uniform_pressure, ONLY : p2_p, p4_p
 
   USE linear_surfaces,  ONLY : fit_multi_linear, print_chisq_linear
-  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum
+  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum, &
+                                 find_quadratic_linear_extremum
   USE quartic_surfaces, ONLY : find_quartic_quadratic_extremum,     &
                       find_two_quartic_extremum, find_quartic_cubic_extremum,&
                       find_quartic_linear_extremum
@@ -1011,8 +1073,13 @@ SUBROUTINE quadratic_fit_pt_pm()
                   CALL errore('quadratic_fit_pt_pm',&
                             'increase pmax and/or decrease pmin',1)
      DO itemp=1, ntemp
-        CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
+        IF (poly_degree_ph>1) THEN
+           CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
                                      p2_p(ipress+1), p2t_t(itemp))
+        ELSE
+           CALL find_quadratic_linear_extremum(nvar, x_pos_min, ymin, &
+                                     p2_p(ipress+1), p1t_t(itemp))
+        ENDIF
 !        WRITE(stdout,'(/,5x,"Extremum of the quadratic found at:")')
 !        CALL write_vector(nvar,x_pos_min)
 !        CALL print_genergy(ymin)
@@ -1114,7 +1181,8 @@ SUBROUTINE quadratic_fitf_pt_pm()
   USE uniform_pressure, ONLY : p2_p, p4_p
 
   USE linear_surfaces,  ONLY : fit_multi_linear, print_chisq_linear
-  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum
+  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum, &
+                                 find_quadratic_linear_extremum
   USE quartic_surfaces, ONLY : find_quartic_quadratic_extremum,     &
                       find_two_quartic_extremum, find_quartic_cubic_extremum,&
                       find_quartic_linear_extremum
@@ -1136,8 +1204,13 @@ SUBROUTINE quadratic_fitf_pt_pm()
                   CALL errore('quadratic_fit_pt_pm',&
                             'increase pmax and/or decrease pmin',1)
      DO itemp=1, ntemp
-        CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
+        IF (poly_degree_ph>1) THEN
+           CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
                                      p2_p(ipress+1), p2tf_t(itemp))
+        ELSE
+           CALL find_quadratic_linear_extremum(nvar, x_pos_min, ymin, &
+                                     p2_p(ipress+1), p1tf_t(itemp))
+        ENDIF
 !        WRITE(stdout,'(/,5x,"Extremum of the quadratic found at:")')
 !        CALL write_vector(nvar,x_pos_min)
 !        CALL print_genergy(ymin)
@@ -1172,8 +1245,13 @@ SUBROUTINE quadratic_fitf_pt_pm()
         CALL expand_celldm(celldmf_pt_p1(:,itemp,ipressp), x_pos_min, nvar, ibrav)
      ENDDO
      DO itemp=1, ntemp
-        CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
+        IF (poly_degree_ph>1) THEN
+           CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
                                      p2_p(ipress-1), p2tf_t(itemp))
+        ELSE
+           CALL find_quadratic_linear_extremum(nvar, x_pos_min, ymin, &
+                                     p2_p(ipress-1), p1tf_t(itemp))
+        ENDIF
 !        WRITE(stdout,'(/,5x,"Extremum of the quadratic found at:")')
 !        CALL write_vector(nvar,x_pos_min)
 !        CALL print_genergy(ymin)
@@ -1239,7 +1317,8 @@ SUBROUTINE quadratic_fit_ptt()
   USE uniform_pressure, ONLY : p2_p, p4_p
 
   USE linear_surfaces,  ONLY : fit_multi_linear, print_chisq_linear
-  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum
+  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum, &
+                                 find_quadratic_linear_extremum
   USE quartic_surfaces, ONLY : find_quartic_quadratic_extremum,     &
                       find_two_quartic_extremum, find_quartic_cubic_extremum,&
                       find_quartic_linear_extremum
@@ -1261,12 +1340,21 @@ SUBROUTINE quadratic_fit_ptt()
      itemp=itemp_plot(itempp)
      DO ipress=1, npress
         IF (ipress==1.OR..NOT.lquartic) THEN
-           CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
+           IF (poly_degree_ph>1) THEN
+              CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
                                      p2_p(ipress), p2t_t(itemp))
-           CALL find_two_quadratic_extremum(nvar, x_pos_min_p1, ymin_p1, &
+              CALL find_two_quadratic_extremum(nvar, x_pos_min_p1, ymin_p1, &
                                      p2_p(ipress), p2t_t(itemp+1))
-           CALL find_two_quadratic_extremum(nvar, x_pos_min_m1, ymin_m1, &
+              CALL find_two_quadratic_extremum(nvar, x_pos_min_m1, ymin_m1, &
                                      p2_p(ipress), p2t_t(itemp-1))
+           ELSE
+              CALL find_quadratic_linear_extremum(nvar, x_pos_min, ymin, &
+                                     p2_p(ipress), p1t_t(itemp))
+              CALL find_quadratic_linear_extremum(nvar, x_pos_min_p1, &
+                                     ymin_p1, p2_p(ipress), p1t_t(itemp+1))
+              CALL find_quadratic_linear_extremum(nvar, x_pos_min_m1, &
+                                     ymin_m1, p2_p(ipress), p1t_t(itemp-1))
+           ENDIF
 !        WRITE(stdout,'(/,5x,"Extremum of the quadratic found at:")')
 !        CALL write_vector(nvar,x_pos_min)
 !        CALL print_genergy(ymin)
@@ -1359,7 +1447,8 @@ SUBROUTINE quadratic_fitf_ptt()
   USE uniform_pressure, ONLY : p2_p, p4_p
 
   USE linear_surfaces,  ONLY : fit_multi_linear, print_chisq_linear
-  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum
+  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum, &
+                                 find_quadratic_linear_extremum
   USE quartic_surfaces, ONLY : find_quartic_quadratic_extremum,     &
                       find_two_quartic_extremum, find_quartic_cubic_extremum,&
                       find_quartic_linear_extremum
@@ -1381,12 +1470,21 @@ SUBROUTINE quadratic_fitf_ptt()
      itemp=itemp_plot(itempp)
      DO ipress=1, npress
         IF (ipress==1.OR..NOT.lquartic) THEN
-           CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
+           IF (poly_degree_ph>1) THEN
+              CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
                                         p2_p(ipress), p2tf_t(itemp))
-           CALL find_two_quadratic_extremum(nvar, x_pos_min_p1, ymin_p1, &
+              CALL find_two_quadratic_extremum(nvar, x_pos_min_p1, ymin_p1, &
                                         p2_p(ipress), p2tf_t(itemp+1))
-           CALL find_two_quadratic_extremum(nvar, x_pos_min_m1, ymin_m1, &
+              CALL find_two_quadratic_extremum(nvar, x_pos_min_m1, ymin_m1, &
                                         p2_p(ipress), p2tf_t(itemp-1))
+           ELSE
+              CALL find_quadratic_linear_extremum(nvar, x_pos_min, ymin, &
+                                        p2_p(ipress), p1tf_t(itemp))
+              CALL find_quadratic_linear_extremum(nvar, x_pos_min_p1,    &
+                                        ymin_p1, p2_p(ipress), p1tf_t(itemp+1))
+              CALL find_quadratic_linear_extremum(nvar, x_pos_min_m1,    &
+                                        ymin_m1, p2_p(ipress), p1tf_t(itemp-1))
+           ENDIF
 !          WRITE(stdout,'(/,5x,"Extremum of the quadratic found at:")')
 !          CALL write_vector(nvar,x_pos_min)
 !          CALL print_genergy(ymin)
