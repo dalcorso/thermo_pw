@@ -51,7 +51,7 @@ The development version of <code>thermo_pw</code> is hosted on <a href="https://
 
 <p align="justify"> 
 This will create a thermo_pw directory containing the source code.
-Important Note: The Git version can only be used with <code>QE</code> version <code>7.4.1</code>. Be aware that the Git version may not always function correctly, and its use is generally not recommended.
+Important Note: The Git version can only be used with <code>QE</code> version <code>7.5</code>. Be aware that the Git version may not always function correctly, and its use is generally not recommended.
 Although thermo_pw has been in use for several years and is considered reasonably stable, it remains an experimental code provided "as is."</p>
 
 **Compatibility with Older <code>QE</code> Versions:**
