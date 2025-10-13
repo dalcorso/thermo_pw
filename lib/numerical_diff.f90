@@ -244,6 +244,7 @@ END SUBROUTINE numerical_first_derivatives_nd
 ! Build poly2 from Taylor coefficients
 !
   USE polynomial, ONLY : poly2
+  USE quadratic_surfaces, ONLY : print_quadratic_polynomial
   IMPLICIT NONE
   TYPE(poly2), INTENT(INOUT) :: poly
   INTEGER, INTENT(IN)   :: nvar
@@ -283,6 +284,7 @@ END SUBROUTINE numerical_first_derivatives_nd
         idx = idx + 1
       ENDDO
    ENDDO
+   CALL print_quadratic_polynomial(nvar, poly)
    RETURN
 END SUBROUTINE build_poly2_from_taylor
 !

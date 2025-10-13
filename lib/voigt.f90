@@ -9,7 +9,9 @@ MODULE voigt
 !
 !   this module contains the support routines for the transformation
 !   of tensors in voigt notation
-!   
+!   factors 1/2 must be dealt with by the calling routine depending
+!   on the nature of the tensor
+!
 
 
   USE kinds,     ONLY : DP
