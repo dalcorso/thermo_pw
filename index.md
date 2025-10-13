@@ -6,7 +6,7 @@ Quick Introduction: <a href="https://dalcorso.github.io/thermo_pw/thermo_pw_help
 
 Brief Tutorial: <a href="https://people.sissa.it/dalcorso/thermo_pw/tutorial/tutorial.html"> click here</a>.
 
-User's Guide (Version 2.0.2):<a href="https://people.sissa.it/dalcorso/thermo_pw/user_guide/index.html"> click here</a>.
+User's Guide (Version 2.1.1):<a href="https://people.sissa.it/dalcorso/thermo_pw/user_guide/index.html"> click here</a>.
 <br>
 <p align="justify">Currently, there is no dedicated publication for citing <code>thermo_pw</code>. If you wish to reference it in your work, please cite this webpage.</p>
 
@@ -213,6 +213,9 @@ Seek Further Assistance: If the problem persists, please post details to the <a 
 <p aling="justify"> For additional help, you can also consult the Quantum ESPRESSO user guide, post your question to the users mailing list at the <code>users@lists.quantum-espresso.org</code>, or search for similar issues in the examples directories.</p>
 <br>
 **Thermo_pw downloads**:
+<br>
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.2.1.1.tar.gz">
+thermo_pw.2.1.1.tar.gz</a>  (released 13-10-2025) compatible with QE-7.5
 <br>
 * <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.2.1.0.tar.gz">
 thermo_pw.2.1.0.tar.gz</a>  (released 24-09-2025) compatible with QE-7.4.1

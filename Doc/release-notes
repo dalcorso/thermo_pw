@@ -1,6 +1,7 @@
-New in Version 2.1.1
+13/10/2025 Version 2.1.1 is now frozen:
 
-
+This version is identical to thermo_pw 2.1.0 but
+it is compatible with Quantum ESPRESSO 7.5
 
 23/09/2025 Version 2.1.0 is now frozen:
 
