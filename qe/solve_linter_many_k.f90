@@ -6,7 +6,7 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !-----------------------------------------------------------------------
-SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
+SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf, drhoscfh)
   !-----------------------------------------------------------------------
   !
   !    Driver routine for the solution of the linear system which
@@ -42,7 +42,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
   USE paw_onecenter,        ONLY : paw_dpotential
   USE buffers,              ONLY : save_buffer, get_buffer
   USE control_flags,        ONLY : use_gpu
-  USE control_ph,           ONLY : rec_code, niter_ph, convt, &
+  USE control_lr,           ONLY : rec_code, niter_ph, convt, &
                                    alpha_mix, rec_code_read, &
                                    where_rec, ext_recover
   USE el_phon,              ONLY : elph
@@ -64,7 +64,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
   USE mp_asyn,              ONLY : asyn_master, with_asyn_images
   USE mp_images,            ONLY : my_image_id, root_image
   USE mp,                   ONLY : mp_sum
-  USE efermi_shift_tpw,     ONLY : ef_shift_tpw, ef_shift_paw_tpw,  def
+  USE efermi_shift,         ONLY : ef_shift, ef_shift_wfc, def
   USE lrus,         ONLY : int3_paw, becp1
   USE eqv,          ONLY : dvpsi, dpsi, evq
   USE many_k_ph_mod, ONLY : dvpsik_d, dpsik_d, evqk_d, h_diagk_ph_d,       &
@@ -98,8 +98,10 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
   ! input: the number of perturbation
   ! input: the position of the modes
 
-  COMPLEX(DP) :: drhoscf (dfftp%nnr, nspin_mag, npe)
+  COMPLEX(DP) :: drhoscf (dffts%nnr, nspin_mag, npe)
   ! output: the change of the scf charge
+  COMPLEX(DP) :: drhoscfh (dfftp%nnr, nspin_mag, npe)
+  ! output: the change of the scf charge on the thick mesh
 
   REAL(DP) , ALLOCATABLE :: h_diag (:,:)
   ! h_diag: diagonal part of the Hamiltonian
@@ -116,8 +118,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
   ! change of the scf potential
   COMPLEX(DP), POINTER :: dvscfins (:,:,:)
   ! change of the scf potential (smooth part only)
-  COMPLEX(DP), ALLOCATABLE :: drhoscfh (:,:,:), dvscfout (:,:,:), & 
-       drhoscf_aux(:,:,:)
+  COMPLEX(DP), ALLOCATABLE :: dvscfout (:,:,:), drhoscf_aux(:,:,:)
   ! change of rho / scf potential (output)
   ! change of scf potential (output)
   COMPLEX(DP), ALLOCATABLE :: ldos (:,:), ldoss (:,:), mixin(:),  &
@@ -203,7 +204,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
   nnrs=dffts%nnr
   CALL init_k_blocks_ph(npwx,npol,nksq,nbnd,nspin,nhm,nkb,nat,nnr,&
                                                               nnrs,npe,nsolv)
-  CALL allocate_many_k_ph(npe,nsolv,nnr)
+  CALL allocate_many_k_ph(npe,nsolv,nnrs)
   CALL allocate_becps_many_k(npe,nsolv)
   CALL initialize_fft_factors(npe,nsolv)
   CALL initialize_device_variables()
@@ -219,7 +220,6 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
      nnrs=nnr
   ENDIF
   !$acc enter data create(dvscfins(1:nnrs, 1:nspin_mag, 1:npe))
-  ALLOCATE (drhoscfh ( dfftp%nnr, nspin_mag , npe))
   ALLOCATE (dvscfout ( dfftp%nnr, nspin_mag , npe))
   ALLOCATE (dvloc ( dffts%nnr, npe))
 #if defined(__CUDA)
@@ -915,15 +915,18 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
      ! q=0 in metallic case deserve special care (e_Fermi can shift)
      !
      IF (okpaw) THEN
-        IF (lmetq0) &
-           CALL ef_shift_paw_tpw (drhoscfh, dbecsum, ldos, ldoss, becsum1, &
-                                                  dos_ef, irr, npe, .false.)
         DO ipert=1,npe
            dbecsum(:,:,:,ipert)=2.0_DP *dbecsum(:,:,:,ipert) &
                                +becsumort(:,:,:,imode0+ipert)
         ENDDO
-     ELSE
-        IF (lmetq0) call ef_shift_tpw(drhoscfh,ldos,ldoss,dos_ef,irr,npe,.false.)
+     ENDIF
+
+     IF (lmetq0) THEN
+        IF (okpaw) THEN
+           CALL ef_shift(npe, dos_ef, ldos, drhoscfh, dbecsum, becsum1)
+        ELSE
+           CALL ef_shift(npe, dos_ef, ldos, drhoscfh)
+        ENDIF
      ENDIF
      !
      !   After the loop over the perturbations we have the linear change
@@ -966,17 +969,15 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
      !  put the fermi energy shift if needed
      !
      IF (lmetq0.AND.convt) THEN
-        IF (okpaw) THEN
-           call ef_shift_paw_tpw (drhoscf, dbecsum, ldos, ldoss, becsum1, &
-                                                  dos_ef, irr, npe, .true.)
-        ELSE
-            call ef_shift_tpw (drhoscf, ldos, ldoss, dos_ef, irr, npe, .true.)
-        ENDIF
+        DO ipert = 1, npe
+           dvscfin(:, 1, ipert) = dvscfin(:, 1, ipert) - def(ipert)
+           IF (lsda) THEN
+              dvscfin(:, 2, ipert) = dvscfin(:, 2, ipert) - def(ipert)
+           ENDIF
+        ENDDO
+
+        CALL ef_shift_wfc (npe, ldoss, drhoscf)
      ENDIF
-     !
-     ! check that convergence has been reached on ALL processors in this image
-     !
-     CALL check_all_convt(convt)
 
      IF (doublegrid) THEN
         DO ipert = 1, npe
@@ -1081,7 +1082,6 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, drhoscf)
   DEALLOCATE (mixin)
   IF (noncolin) DEALLOCATE (dbecsum_nc)
   DEALLOCATE (dvscfout)
-  DEALLOCATE (drhoscfh)
   !$acc exit data delete(dvscfins)
   IF (doublegrid) DEALLOCATE (dvscfins)
   DEALLOCATE (dvloc)

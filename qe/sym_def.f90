@@ -6,7 +6,7 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !---------------------------------------------------------------------
-subroutine sym_def (def, irr)
+subroutine sym_def_tpw (def, irr)
   !---------------------------------------------------------------------
   !! Symmetrizes the first order changes of the Fermi energies of an
   !! irreducible representation. These objects are defined complex because
@@ -16,7 +16,7 @@ subroutine sym_def (def, irr)
   !
   USE kinds, only : DP
   USE modes,   ONLY : npert, t, tmq, npertx
-  USE control_ph, ONLY : lgamma_gamma
+  USE control_lr, ONLY : lgamma_gamma
 
   USE lr_symm_base, ONLY : minus_q, nsymq
 
@@ -77,4 +77,4 @@ subroutine sym_def (def, irr)
   def = w_def / DBLE(nsymq)
 
   return
-end subroutine sym_def
+end subroutine sym_def_tpw

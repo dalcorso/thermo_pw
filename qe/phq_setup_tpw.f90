@@ -69,10 +69,9 @@ subroutine phq_setup_tpw
   USE uspp,          ONLY : nlcc_any, deeq_nc, okvan
   USE noncollin_module, ONLY : noncolin, domag, m_loc, angle1, angle2, ux
   USE nlcc_ph,       ONLY : drc
-  USE control_ph,    ONLY : rec_code, lgamma_gamma, search_sym, start_irr, &
-                            last_irr, niter_ph, alpha_mix, all_done,  &
-                            trans, epsil, recover, where_rec, &
-                            flmixdpot, reduce_io, rec_code_read, &
+  USE control_ph,    ONLY : search_sym, start_irr, &
+                            last_irr, all_done,  &
+                            trans, epsil, recover, &
                             done_epsil, zeu, done_zeu, current_iq, u_from_file
   USE el_phon,       ONLY : elph, comp_elph, done_elph, elph_nbnd_min, elph_nbnd_max
   USE output,        ONLY : fildrho
@@ -101,7 +100,9 @@ subroutine phq_setup_tpw
   USE lr_symm_base,  ONLY : gi, gimq, irotmq, minus_q, invsymq, nsymq, rtau
   USE qpoint,        ONLY : xq, xk_col
   USE lr_nc_mag,     ONLY : deeq_nc_save
-  USE control_lr,    ONLY : lgamma
+  USE control_lr,    ONLY : lgamma, lgamma_gamma, rec_code, reduce_io, &
+                            where_rec, rec_code_read, alpha_mix, niter_ph, &
+                            flmixdpot
   USE ldaU,          ONLY : lda_plus_u, Hubbard_U, Hubbard_J0
   USE ldaU_lr,       ONLY : effU
   USE constants,     ONLY : rytoev

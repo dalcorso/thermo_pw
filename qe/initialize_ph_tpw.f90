@@ -9,7 +9,7 @@
 SUBROUTINE initialize_ph_tpw()
   !-----------------------------------------------------------------------
   !
-  ! This is a driver to the phonon initialization routines.
+  !! This is a driver to the phonon initialization routines.
   !
   USE klist,  ONLY : nks, nkstot
   USE qpoint, ONLY : nksq, nksqtot, ikks, ikqs
@@ -43,7 +43,7 @@ SUBROUTINE initialize_ph_tpw()
            ikks(ik) = ik
            ikqs(ik) = ik
         ENDDO
-     ENDIF
+     END IF
      !
   ELSE
      !
@@ -66,7 +66,7 @@ SUBROUTINE initialize_ph_tpw()
            ikks(ik) = 2 * ik - 1
            ikqs(ik) = 2 * ik
         ENDDO
-     ENDIF
+     END IF
      !
   END IF
   !

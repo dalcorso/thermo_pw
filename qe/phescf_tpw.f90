@@ -21,10 +21,9 @@ SUBROUTINE phescf_tpw()
   USE ions_base,       ONLY : nat
   USE noncollin_module,ONLY : noncolin, nspin_mag, npol, domag
   USE lsda_mod,        ONLY : nspin
-  USE control_ph,      ONLY : convt, zeu, rec_code, rec_code_read, lnoloc, &
-                              where_rec, done_epsil, done_zeu, epsil
-  USE control_lr,      ONLY : lrpa
-  USE eqv,             ONLY : drhoscfs
+  USE control_ph,      ONLY : zeu, lnoloc, done_epsil, done_zeu, epsil
+  USE control_lr,      ONLY : lrpa, convt, rec_code, rec_code_read, where_rec
+  USE eqv,             ONLY : drhos
   USE io_files,        ONLY : tmp_dir
   USE wvfct,           ONLY : nbnd, npwx
   USE control_flags,   ONLY : io_level
@@ -79,7 +78,7 @@ SUBROUTINE phescf_tpw()
      IF (noncolin) ALLOCATE(int3_nc( nhm, nhm, nat, nspin, 3))
   ENDIF
   !
-  ALLOCATE (drhoscfs( dffts%nnr, nspin_mag, 3))
+  ALLOCATE (drhos( dffts%nnr, nspin_mag, 3))
   !
   ! DFPT+U: dnsscf in the electric field calculation
   ! is the scf change of atomic occupations ns induced by the electric field.
@@ -206,10 +205,10 @@ SUBROUTINE phescf_tpw()
         !
         IF (lcg) THEN
            CALL allocate_cg(3,1)
-           CALL do_cg_e(drhoscfs)
+           CALL do_cg_e(drhos)
            CALL deallocate_cg()
         ELSE
-           CALL solve_e_tpw(drhoscfs)
+           CALL solve_e_tpw(drhos)
         ENDIF
         !
         WRITE( stdout, '(/,5X,"End of electric fields calculation")' )
@@ -227,7 +226,7 @@ SUBROUTINE phescf_tpw()
            ! ... calculate the effective charges Z(E,Us) (E=scf,Us=bare)
            !
            IF (.NOT.(lrpa.OR.lnoloc).AND.(zeu.AND..NOT.done_zeu)) THEN
-              CALL zstar_eu_tpw(drhoscfs)
+              CALL zstar_eu_tpw(drhos)
            ELSEIF (done_zeu) THEN
               CALL summarize_zeu()
            ENDIF
@@ -264,7 +263,7 @@ SUBROUTINE phescf_tpw()
      IF (noncolin) DEALLOCATE(int3_nc)
   ENDIF
 
-  DEALLOCATE (drhoscfs)
+  DEALLOCATE (drhos)
   !
   ! DFPT+U
   !

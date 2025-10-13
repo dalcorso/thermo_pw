@@ -31,8 +31,8 @@ SUBROUTINE do_phonon_tpw(auxdyn)
 
   USE disp,            ONLY : nqs
   USE control_ph,      ONLY : epsil, trans, qplot, only_init, &
-                              only_wfc, rec_code, where_rec
-  USE control_lr,      ONLY : lgamma
+                              only_wfc
+  USE control_lr,      ONLY : rec_code, where_rec, lgamma
   USE control_flags,  ONLY : use_gpu
   USE ahc,            ONLY : elph_ahc, elph_do_ahc
   USE el_phon,         ONLY : elph, elph_mat, elph_simple, elph_epa
@@ -44,6 +44,7 @@ SUBROUTINE do_phonon_tpw(auxdyn)
   USE elph_tetra_mod, ONLY : elph_tetra, elph_tetra_lambda, elph_tetra_gamma
   USE elph_scdft_mod, ONLY : elph_scdft
   USE many_k_mod,     ONLY : deallocate_many_k
+  USE control_lr,     ONLY : lmultipole
 
   IMPLICIT NONE
   !
@@ -107,7 +108,8 @@ SUBROUTINE do_phonon_tpw(auxdyn)
      IF ( trans ) THEN
         !
         CALL phqscf_tpw()
-        CALL dynmatrix_tpw(iq)
+        IF (lmultipole) CALL write_drhoun()
+        IF (.NOT. lmultipole) CALL dynmatrix_tpw(iq)
         !
      END IF
      !

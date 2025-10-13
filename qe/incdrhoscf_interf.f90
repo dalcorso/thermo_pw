@@ -58,7 +58,7 @@ ATTRIBUTES(GLOBAL) SUBROUTINE incdrho_dev( nbndk, st, npol, drhoscf, &
   INTEGER, INTENT(IN), DEVICE :: nbndk(nk*npe)
   INTEGER, INTENT(IN), DEVICE :: st(nk*npe)
   INTEGER, INTENT(IN), VALUE :: npol
-  COMPLEX(DP), DEVICE, INTENT(INOUT) :: drhoscf(nnr, nspin_mag, npe)
+  COMPLEX(DP), DEVICE, INTENT(INOUT) :: drhoscf(nnrs, nspin_mag, npe)
   REAL(DP), DEVICE, INTENT(IN) :: psicr(2, nnrs, npol, nbnd * nk * npe)
   REAL(DP), DEVICE, INTENT(IN) :: dpsicr(2, nnrs, npol, nbnd * nk * npe)
 

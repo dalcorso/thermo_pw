@@ -42,9 +42,8 @@ SUBROUTINE manage_ph_symmetry(dyn, w2, num_rap_mode, xq, search_sym, flag)
 USE kinds,         ONLY : DP
 USE cell_base,     ONLY : at, bg
 USE ions_base,     ONLY : nat, tau, ntyp => nsp, ityp, amass
-USE control_ph,    ONLY : lgamma_gamma
 USE fft_base,      ONLY : dfftp
-USE control_lr,    ONLY : lgamma
+USE control_lr,    ONLY : lgamma, lgamma_gamma
 USE noncollin_module, ONLY : nspin_mag
 USE rap_point_group,  ONLY : code_group, nclass, nelem, elem, elem_name
 USE proj_rap_point_group, ONLY : lqproj, qptype, which_elem, group_desc, &

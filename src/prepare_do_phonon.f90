@@ -53,8 +53,8 @@ SUBROUTINE close_ph_geometry(close_ph)
 USE ph_restart,       ONLY : destroy_status_run
 USE save_ph,          ONLY : clean_input_variables
 USE control_ph,       ONLY : done_epsil, done_zeu, done_zue, done_start_zstar, &
-                             rec_code, rec_code_read, epsil, zeu, zue, &
-                             start_q, last_q
+                             epsil, zeu, zue, start_q, last_q
+USE control_lr,       ONLY : rec_code, rec_code_read
 USE initial_conf,     ONLY : epsil_save, zeu_save, zue_save, start_q_save, &
                              last_q_save
 USE ramanm,           ONLY : done_lraman, done_elop

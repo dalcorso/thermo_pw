@@ -31,9 +31,10 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   USE wvfct,     ONLY: nbnd, nbndx, npwx
   !!!
   USE disp,            ONLY : lgamma_iq
-  USE control_ph,      ONLY : reduce_io, recover, tmp_dir_phq, &
+  USE control_ph,      ONLY : recover, tmp_dir_phq, &
                               ext_restart, bands_computed, newgrid, qplot, &
                               only_wfc
+  USE control_lr,      ONLY : reduce_io
   USE io_global,       ONLY : stdout
   USE uspp,            ONLY : okvan
   USE grid_irr_iq,     ONLY : done_bands
@@ -53,6 +54,8 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   USE rism_module,     ONLY : lrism, rism_set_restart
   USE control_qe,      ONLY : many_k
   USE many_k_mod,      ONLY : deallocate_many_k, allocate_many_k, init_k_blocks
+  USE two_chem,        ONLY : twochem
+  USE input_parameters, ONLY : occupations
   !
  !
   IMPLICIT NONE
@@ -79,7 +82,7 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
      ! FIXME: qnorm (also set in setup_nscf) is needed by allocate_nlpot
      kunit = 2
      IF ( lgamma_iq(iq) ) kunit = 1
-     IF (noncolin.AND.domag) THEN
+     IF (noncolin.AND.domag) THEN 
         kunit = 4
         IF (lgamma_iq(iq)) kunit=2
      ENDIF
@@ -116,14 +119,14 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   tmp_dir=tmp_dir_phq
   ! ... Setting the values for the nscf run
   !
-  startingconfig    = 'input'
-  starting_pot      = 'file'
-  starting_wfc      = 'atomic'
-  lscf              = .FALSE.
-  lforce            = .FALSE.
-  tstress           = .FALSE.
-  restart = ext_restart
-  conv_ions=.true.
+  startingconfig = 'input'
+  starting_pot   = 'file'
+  starting_wfc   = 'atomic'
+  lscf           = .FALSE.
+  lforce         = .FALSE.
+  tstress        = .FALSE.
+  restart        = ext_restart
+  conv_ions      = .true.
   ethr_nscf      = 1.0D-9 / nelec 
   !
   ! threshold for diagonalization ethr_nscf - should be good for all cases
@@ -134,6 +137,7 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   !
   CALL setup_nscf_tpw ( newgrid, xq, elph_mat .OR. elph_ahc )
   !
+  if (twochem) occupations ='smearing' !this is needed to avoid init_twochem error check.
   CALL init_run_tpw()
 !°°°°°°°°°°°°°°°°°°°° ACFDT TEST °°°°°°°°°°°°°°°°°°°°°°°°°
   IF (acfdt_is_active) THEN

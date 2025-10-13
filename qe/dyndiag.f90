@@ -16,7 +16,6 @@ subroutine dyndiag_tpw (nat,ntyp,amass,ityp,dyn,w2,z,flag)
   !
   use kinds, only: dp
   use constants, only: amu_ry
-  USE io_global, ONLY : stdout
   implicit none
   ! input
   integer nat, ntyp, ityp(nat)
@@ -63,7 +62,7 @@ subroutine dyndiag_tpw (nat,ntyp,amass,ityp,dyn,w2,z,flag)
         dyn2(j,i) = CONJG(dyn2(i,j))
      end do
   end do
-  if ( diff > 1.d-6 ) write (stdout,'(5x,"Max |d(i,j)-d*(j,i)| = ",f9.6,/,5x, &
+  if ( diff > 1.d-6 ) write (6,'(5x,"Max |d(i,j)-d*(j,i)| = ",f9.6,/,5x, &
        & "Max |d(i,j)-d*(j,i)|/|d(i,j)|: ",f8.4,"%")') diff, difrel*100
   !
   !  divide by the square root of masses

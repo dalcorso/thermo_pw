@@ -7,7 +7,7 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !-----------------------------------------------------------------------
-SUBROUTINE do_cg_ph(irr, imode0, drhoscfs)
+SUBROUTINE do_cg_ph(irr, imode0, drhoscfs, drhoscf)
   !-----------------------------------------------------------------------
   !
   !    This routine is a driver for the solution of the linear system which
@@ -43,15 +43,15 @@ SUBROUTINE do_cg_ph(irr, imode0, drhoscfs)
   USE paw_variables,         ONLY : okpaw
   USE paw_onecenter,         ONLY : paw_dpotential
   USE paw_symmetry,          ONLY : paw_dusymmetrize, paw_dumqsymmetrize
-  USE control_ph,            ONLY : tr2_ph, convt, lnoloc, lgamma_gamma, zeu, &
-                                    niter_ph
-  USE control_lr,            ONLY : alpha_pv, nbnd_occ, lgamma
+  USE control_ph,            ONLY : lnoloc, zeu
+  USE control_lr,            ONLY : alpha_pv, nbnd_occ, lgamma, lgamma_gamma, &
+                                    tr2_ph, convt, niter_ph
   USE lrus,                  ONLY : int3, int3_paw
   USE dv_of_drho_lr,         ONLY : dv_of_drho
   USE lr_global,             ONLY : rpert, evc0, evq0, sevq0, d0psi
   USE lr_cg,                 ONLY : evc1, res, pres, dir, dir_new, prec_vec
   USE lr_symm_base,          ONLY : irotmq, minus_q, nsymq, rtau
-  USE efermi_shift_tpw,      ONLY : ef_shift_tpw, ef_shift_paw_tpw,  def
+  USE efermi_shift,          ONLY : ef_shift, ef_shift_wfc, def
   USE units_ph,              ONLY : iubar, lrbar
   USE units_lr,              ONLY : lrdwf, iudwf, lrwfc, iuwfc
   USE buffers,               ONLY : get_buffer, save_buffer
@@ -65,7 +65,8 @@ SUBROUTINE do_cg_ph(irr, imode0, drhoscfs)
 
   IMPLICIT NONE
   INTEGER, INTENT(IN) :: irr, imode0
-  COMPLEX(DP), INTENT(INOUT) :: drhoscfs(dfftp%nnr, nspin_mag, rpert)
+  COMPLEX(DP), INTENT(INOUT) :: drhoscfs(dffts%nnr, nspin_mag, rpert)
+  COMPLEX(DP), INTENT(INOUT) :: drhoscf(dfftp%nnr, nspin_mag, rpert)
 
   COMPLEX(DP), ALLOCATABLE, TARGET :: &
                    dvscfin (:,:,:)     ! change of the scf potential (input)
@@ -81,7 +82,6 @@ SUBROUTINE do_cg_ph(irr, imode0, drhoscfs)
                    int3_paw0(:,:,:,:,:),   &   ! The PAW coeffiecients
                    drhoscf0(:,:,:),    &   ! The change charge
                    dvscfin0 (:,:,:),   &   ! The change of the potential
-                   drhoscf (:,:,:),    &   ! The change of the scf charge
                    aux2(:,:),          &
                    drhoc(:)                ! The change of the core charge
 
@@ -93,7 +93,7 @@ SUBROUTINE do_cg_ph(irr, imode0, drhoscfs)
   LOGICAL :: lmetq0, all_done_asyn
 
   INTEGER :: kter, iter, iter0, ipol, jpol, ibnd, ik, ikp, ikk, ikq, is, &
-             npw, npwq, incr, v_siz, ig
+             npw, npwq, incr, v_siz, ig, ipert
 
   REAL(DP) :: dos_ef, weight, thresh, dr2, aa
 
@@ -107,7 +107,6 @@ SUBROUTINE do_cg_ph(irr, imode0, drhoscfs)
   iter0=0
 
   ALLOCATE (drhoscf0(dfftp%nnr, nspin_mag, rpert))
-  ALLOCATE (drhoscf(dfftp%nnr, nspin_mag, rpert))
   ALLOCATE (dvscfin0( dfftp%nnr, nspin_mag, rpert))
   ALLOCATE (int3_paw0 (nhm, nhm, nat, nspin_mag, rpert))
   ALLOCATE (aux2(npwx*npol, nbnd))
@@ -429,15 +428,17 @@ SUBROUTINE do_cg_ph(irr, imode0, drhoscfs)
      ! q=0 in metallic case deserve special care (e_Fermi can shift)
      !
      IF (okpaw) THEN
-        CALL mp_sum ( dbecsum, inter_pool_comm )
-        IF (lmetq0) &
-           CALL ef_shift_paw_tpw (drhoscf, dbecsum, ldos, ldoss, becsum1, &
-                                                  dos_ef, irr, rpert, .FALSE.)
-        DO ipol=1,rpert
-           dbecsum(:,:,:,ipol)=2.0_DP *dbecsum(:,:,:,ipol) 
+        DO ipert=1,rpert
+           dbecsum(:,:,:,ipert)=2.0_DP *dbecsum(:,:,:,ipert)
         ENDDO
-     ELSE
-        IF (lmetq0) CALL ef_shift_tpw(drhoscf,ldos,ldoss,dos_ef,irr,rpert,.FALSE.)
+     ENDIF
+
+     IF (lmetq0) THEN
+        IF (okpaw) THEN
+           CALL ef_shift(rpert, dos_ef, ldos, drhoscf, dbecsum, becsum1)
+        ELSE
+           CALL ef_shift(rpert, dos_ef, ldos, drhoscf)
+        ENDIF
      ENDIF
      !
      !   After the loop over the perturbations we have the linear change
@@ -446,7 +447,6 @@ SUBROUTINE do_cg_ph(irr, imode0, drhoscfs)
      !
      IF (.NOT.lgamma_gamma) THEN
         CALL psymdvscf (rpert, irr, drhoscf)
-        IF ( noncolin.and.domag ) CALL psym_dmag( rpert, irr, drhoscf)
         IF (okpaw) THEN
            IF (minus_q) CALL PAW_dumqsymmetrize(dbecsum,rpert,irr, &
                                                 npertx,irotmq,rtau,xq,tmq)
@@ -462,13 +462,15 @@ SUBROUTINE do_cg_ph(irr, imode0, drhoscfs)
         CALL dv_of_drho (dvscfin (1, 1, ipol), drhoc)
      ENDDO
 
-     IF (lmetq0.and.convt) THEN
-        IF (okpaw) THEN
-           CALL ef_shift_paw_tpw (drhoscfs, dbecsum, ldos, ldoss, becsum1, &
-                                                 dos_ef, irr, rpert, .TRUE.)
-        ELSE
-           CALL ef_shift_tpw (drhoscfs, ldos, ldoss, dos_ef, irr, rpert, .TRUE.)
-        ENDIF
+     IF (lmetq0.AND.convt) THEN
+        DO ipert = 1, rpert
+           dvscfin(:, 1, ipert) = dvscfin(:, 1, ipert) - def(ipert)
+           IF (lsda) THEN
+              dvscfin(:, 2, ipert) = dvscfin(:, 2, ipert) - def(ipert)
+           ENDIF
+        ENDDO
+
+        CALL ef_shift_wfc (rpert, ldoss, drhoscfs)
      ENDIF
      !
      !  And interpolate the potential on the smooth grid if needed
@@ -519,7 +521,6 @@ SUBROUTINE do_cg_ph(irr, imode0, drhoscfs)
   DEALLOCATE (aux1)
   DEALLOCATE (dbecsum)
   DEALLOCATE (dvscfin)
-  DEALLOCATE (drhoscf)
   DEALLOCATE (drhoscf0)
   DEALLOCATE (dvscfin0)
   DEALLOCATE (int3_paw0)

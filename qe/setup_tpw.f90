@@ -65,12 +65,12 @@ SUBROUTINE setup_tpw()
   USE wvfct,              ONLY : nbnd, nbndx
   USE control_flags,      ONLY : tr2, ethr, lscf, lbfgs, lmd, david, lecrpa,  &
                                  isolve, niter, noinv, ts_vdw, tstress, &
-                                 lbands, gamma_only, restart
+                                 lbands, gamma_only, restart, use_spinflip, symm_by_label 
   USE cellmd,             ONLY : calc
   USE upf_ions,           ONLY : n_atom_wfc
   USE uspp_param,         ONLY : upf
   USE uspp,               ONLY : okvan
-  USE ldaU,               ONLY : lda_plus_u, init_hubbard
+  USE ldaU,               ONLY : lda_plus_u, init_hubbard, lda_plus_u_kind, orbital_resolved
   USE bp,                 ONLY : gdir, lberry, nppstr, lelfield, lorbm, nx_el,&
                                  nppstr_3d,l3dstring, efield
   USE fixed_occ,          ONLY : f_inp, tfixed_occ, one_atom_occupations
@@ -81,7 +81,7 @@ SUBROUTINE setup_tpw()
                                  starting_magnetization
   USE noncollin_module,   ONLY : noncolin, domag, npol, i_cons, m_loc, &
                                  angle1, angle2, bfield, ux, nspin_lsda, &
-                                 nspin_gga, nspin_mag, lspinorb
+                                 nspin_gga, nspin_mag, lspinorb, colin_mag
   USE qexsd_module,       ONLY : qexsd_readschema
   USE qexsd_copy,         ONLY : qexsd_copy_efermi
   USE qes_libs_module,    ONLY : qes_reset
@@ -99,10 +99,14 @@ SUBROUTINE setup_tpw()
   USE sic_mod,            ONLY : init_sic, occ_f2fn, sic_energy
   USE random_numbers,     ONLY : set_random_seed
   USE dynamics_module,    ONLY : control_temp
+#if defined (__OSCDFT)
+  USE plugin_flags,       ONLY : use_oscdft
+  USE oscdft_base,        ONLY : oscdft_ctx
+#endif
   !
   IMPLICIT NONE
   !
-  INTEGER  :: na, is, ierr, ibnd, ik, nrot_, nbnd_, nr3, nk_, natomwfc
+  INTEGER  :: na, is, ierr, ibnd, ik, nrot_, nbnd_, nr3, nk_, natomwfc 
   LOGICAL  :: magnetic_sym, skip_equivalence=.FALSE.
   REAL(DP) :: iocc, ionic_charge, one
   !
@@ -221,6 +225,36 @@ SUBROUTINE setup_tpw()
   !
   CALL set_spin_vars( lsda, noncolin, domag, &
          npol, nspin, nspin_lsda, nspin_mag, nspin_gga, current_spin )
+  ! set colin_mag.
+  IF (symm_by_label .AND. nspin == 2 .AND. (ANY ( ABS( starting_magnetization(1:ntyp) ) > 1.D-6)) ) THEN 
+    IF (use_spinflip) THEN 
+       colin_mag = 2
+    ELSE 
+       colin_mag = 1 
+    END IF 
+  ELSE IF (symm_by_label) THEN 
+     colin_mag = 0
+  END IF
+  IF ( xclib_dft_is('hybrid') ) THEN
+     IF ( colin_mag == 2 ) THEN
+        CALL infomsg( 'setup', 'colin_mag=2 not implemented for hybrid' )
+        colin_mag = 1
+     ENDIF
+  ENDIF
+  IF (lda_plus_u .AND. lda_plus_u_kind == 2) THEN
+     IF ( colin_mag == 2 ) THEN
+        CALL infomsg( 'setup', 'colin_mag=2 not implemented for lda+U+V' )
+        colin_mag = 1
+     ENDIF
+  ENDIF
+#if defined (__OSCDFT)
+  IF (use_oscdft .AND. (oscdft_ctx%inp%oscdft_type==1)) THEN
+     IF ( colin_mag == 2 ) THEN
+        CALL infomsg( 'setup', 'colin_mag=2 not implemented for OSCDFT' )
+        colin_mag = 1
+     ENDIF
+  ENDIF
+#endif
   !
   ! time reversal operation is set up to 0 by default
   t_rev = 0
@@ -257,7 +291,15 @@ SUBROUTINE setup_tpw()
         do na=1,nat
            m_loc(1,na) = starting_magnetization(ityp(na))
         end do
-     end if
+     !  set initial magnetization for collinear case
+     ELSE IF ( colin_mag >= 1 ) THEN
+        DO na = 1, nat
+            m_loc(1,na) = 0.0_dp
+            m_loc(2,na) = 0.0_dp
+            m_loc(3,na) = starting_magnetization(ityp(na))
+        END DO
+     ENDIF     
+ 
      IF ( i_cons /= 0 .AND. nspin==1 ) &
         CALL errore( 'setup', 'this i_cons requires a magnetic calculation ', 1 )
      IF ( i_cons /= 0 .AND. i_cons /= 1 ) &
@@ -269,8 +311,10 @@ SUBROUTINE setup_tpw()
   ! ... are transformed into standard pseudopotentials
   !
   IF ( lspinorb ) THEN
-     IF ( ALL ( .NOT. upf(:)%has_so ) ) &
-          CALL infomsg ('setup','At least one non s.o. pseudo')
+     IF ( ALL ( .NOT. upf(:)%has_so ) ) CALL errore ('setup', &
+         'Spin-orbit calculations require at least one spin-orbit pseudo',1)
+     IF ( ANY ( .NOT. upf(:)%has_so ) ) CALL infomsg ('setup', &
+         'Not all pseudopotentials have spin-orbit data')
   ELSE
      CALL average_pp ( ntyp )
   END IF
@@ -384,7 +428,7 @@ SUBROUTINE setup_tpw()
            ! ... do not spoil it with a lousy first diagonalization :
            ! ... set a strict ethr in the input file (diago_thr_init)
            !
-           IF ( lgcscf ) THEN
+           IF ( lgcscf .OR. orbital_resolved ) THEN
               !
               ethr = 1.D-8
               !
@@ -416,10 +460,6 @@ SUBROUTINE setup_tpw()
   END IF
   !
   IF ( .NOT. lscf ) niter = 1
-  !
-  ! ... set number of atomic wavefunctions
-  !
-  natomwfc = n_atom_wfc( nat, ityp, noncolin )
   !
   ! ... set the max number of bands used in iterative diagonalization
   !
@@ -506,7 +546,7 @@ SUBROUTINE setup_tpw()
      ELSE
         !
         CALL kpoint_grid ( nrot_,time_reversal, skip_equivalence, s, t_rev, bg,&
-                           npk, k1,k2,k3, nk1,nk2,nk3, nkstot, xk, wk)
+                           npk, k1,k2,k3, nk1,nk2,nk3, nkstot, xk, wk )
         !
      END IF
      !
@@ -579,7 +619,7 @@ SUBROUTINE setup_tpw()
   !
   IF ( .NOT. lbands ) THEN
      CALL irreducible_BZ (nrot_, s, nsym, time_reversal, &
-                          magnetic_sym, at, bg, npk, nkstot, xk, wk, t_rev)
+                          magnetic_sym, at, bg, npk, nkstot, xk, wk, t_rev )
   ELSE
      one = SUM (wk(1:nkstot))
      IF ( one > 0.0_dp ) wk(1:nkstot) = wk(1:nkstot) / one
@@ -641,6 +681,7 @@ SUBROUTINE setup_tpw()
   IF ( nkstot > npk ) CALL errore( 'setup', 'too many k points', nkstot )
 
   IF (one_atom_occupations) THEN
+     natomwfc = n_atom_wfc( nat, ityp, noncolin )
      DO ik=1,nkstot
         DO ibnd=natomwfc+1, nbnd
            IF (f_inp(ibnd,ik)> 0.0_DP) CALL errore('setup', &

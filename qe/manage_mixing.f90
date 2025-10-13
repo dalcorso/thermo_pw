@@ -20,7 +20,7 @@ USE paw_variables,     ONLY : okpaw
 USE fft_base,          ONLY : dfftp
 USE noncollin_module,  ONLY : noncolin, npol, nspin_mag
 USE uspp_param,        ONLY : nhm
-USE control_ph,        ONLY : nmix_ph, tr2_ph, alpha_mix, flmixdpot
+USE control_lr,        ONLY : nmix_ph, tr2_ph, alpha_mix, flmixdpot
 
 IMPLICIT NONE
 INTEGER :: npe, iter, kter

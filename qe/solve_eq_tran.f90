@@ -53,11 +53,11 @@ subroutine solve_eq_tran(iu, flag)
   USE units_ph,              ONLY : lrdrho, iudrho, lrbar, iubar
   USE units_lr,              ONLY : lrdwf, iudwf, lrwfc, iuwfc
   USE output,                ONLY : fildrho
-  USE control_ph,            ONLY : ext_recover, rec_code, &
-                                    lnoloc, convt, tr2_ph, nmix_ph, &
-                                    alpha_mix, lgamma_gamma, niter_ph, &
-                                    flmixdpot, rec_code_read
-  USE control_lr,            ONLY : lgamma, alpha_pv, nbnd_occ
+  USE control_ph,            ONLY : ext_recover, lnoloc
+  USE control_lr,            ONLY : lgamma, alpha_pv, nbnd_occ, convt, &
+                                    tr2_ph, nmix_ph, alpha_mix, &
+                                    lgamma_gamma, niter_ph, &
+                                    flmixdpot, rec_code_read, rec_code
   USE dv_of_drho_lr,         ONLY : dv_of_drho
   USE lrus,                  ONLY : int3_paw
   USE qpoint,                ONLY : xq, nksq, ikks, ikqs

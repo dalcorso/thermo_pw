@@ -28,7 +28,7 @@ SUBROUTINE set_int3q(irr, imode0, rpert, drhoscf, int3_paw0, dvscfin)
   USE modes,            ONLY : npertx, u, t, tmq
   USE buffers,          ONLY : get_buffer
   USE units_ph,         ONLY : iudrhous, lrdrhous
-  USE control_ph,       ONLY : lgamma_gamma
+  USE control_lr,       ONLY : lgamma_gamma
   USE noncollin_module, ONLY : noncolin, nspin_mag, domag
   USE scf,              ONLY : rho
   USE uspp,             ONLY : okvan, nlcc_any
@@ -78,7 +78,6 @@ SUBROUTINE set_int3q(irr, imode0, rpert, drhoscf, int3_paw0, dvscfin)
   !
   IF (.NOT.lgamma_gamma) THEN
      CALL psymdvscf (rpert, irr, drhoscf)
-     IF ( noncolin.and.domag ) CALL psym_dmag( rpert, irr, drhoscf)
      IF (okpaw) THEN
         IF (minus_q) CALL PAW_dumqsymmetrize(dbecsum,rpert,irr, &
                                              npertx,irotmq,rtau,xq,tmq)

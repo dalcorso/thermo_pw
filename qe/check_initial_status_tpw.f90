@@ -77,15 +77,15 @@ SUBROUTINE check_initial_status_tpw(auxdyn, iflag)
   USE disp,            ONLY : nqs, x_q, wq, comp_iq, nq1, nq2, nq3, &
                               done_iq, lgamma_iq
   USE qpoint,          ONLY : xq
-  USE control_lr,      ONLY : lgamma
+  USE control_lr,      ONLY : lgamma, rec_code, rec_code_read, where_rec
   USE output,          ONLY : fildyn, fildvscf
-  USE control_ph,      ONLY : ldisp, recover, where_rec, rec_code, &
+  USE control_ph,      ONLY : ldisp, recover,  &
                               start_q, last_q, current_iq, tmp_dir_ph, &
                               ext_recover, ext_restart, tmp_dir_phq, lqdir, &
                               start_irr, last_irr, newgrid, qplot, &
                               done_zeu, done_start_zstar, done_epsil, &
                               done_zue, always_run, low_directory_check, &
-                              rec_code_read, trans, u_from_file, epsil
+                              trans, u_from_file, epsil
   USE control_qe,      ONLY : use_ph_images
   USE save_ph,         ONLY : tmp_dir_save
   USE units_ph,        ONLY : iudyn

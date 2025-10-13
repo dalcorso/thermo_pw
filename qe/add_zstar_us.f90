@@ -29,7 +29,8 @@ SUBROUTINE add_zstar_us_tpw()
   USE uspp,      ONLY : vkb, nkb, okvan
   USE qpoint,    ONLY : nksq, npwq, ikks
   USE efield_mod, ONLY : zstarue0, zstareu0, zstarue0_rec
-  USE control_ph, ONLY : zue, zeu, done_start_zstar, rec_code_read
+  USE control_ph, ONLY : zue, zeu, done_start_zstar
+  USE control_lr, ONLY : rec_code_read
   USE ph_restart, ONLY : ph_writefile
   USE eqv,       ONLY : dpsi
   USE modes,     ONLY : u, nirr, npert

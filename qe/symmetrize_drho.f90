@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-----------------------------------------------------------------------
 SUBROUTINE symmetrize_drho(drhoscf, dbecsum, irr, npe, code)
+!-----------------------------------------------------------------------
 !
 !  This subroutine symmetrizes drhoscf and, in the PAW case dbecsum, 
 !  calling the appropriate routines according to code
@@ -28,7 +30,7 @@ USE paw_add_symmetry, ONLY : paw_deqsymmetrize
 USE noncollin_module, ONLY : noncolin, nspin_mag, domag
 USE uspp,             ONLY : okvan
 USE paw_variables,    ONLY : okpaw
-USE control_ph,       ONLY : lgamma_gamma
+USE control_lr,       ONLY : lgamma_gamma
 USE qpoint,           ONLY : xq
 !USE lr_sym_mod,       ONLY : psyme_tpw, psymeq_tpw
 USE lr_sym_mod,       ONLY : psymdvscf_tpw, psyme_tpw, psyme_fpol_tpw, &

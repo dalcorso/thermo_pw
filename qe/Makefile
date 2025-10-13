@@ -72,7 +72,6 @@ dvqpsi_us_only_tpw.o \
 dvqpsi_us_many_k.o \
 dvqpsi_dev.o \
 dyndiag.o \
-ef_shift.o \
 electrons_tpw.o \
 ev_xml.o \
 find_band_sym.o \

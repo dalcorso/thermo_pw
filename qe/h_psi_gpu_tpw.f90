@@ -214,14 +214,14 @@ SUBROUTINE h_psii__gpu( lda, n, m, psi_d, hpsi_d, ik )
         !
      ELSE
         ! ... usual reciprocal-space algorithm
-        CALL vloc_psi_gamma_gpu ( lda, n, m, psi_d, vrs_d(1,current_spin), hpsi_d )
+        CALL vloc_psi_gamma_acc ( lda, n, m, psi_d, vrs_d(1,current_spin), hpsi_d )
         !
      ENDIF 
      !
   ELSE IF ( noncolin ) THEN 
      !
      CALL errore('h_psii__gpu','multiple k and noncolin not available',1) 
-     CALL vloc_psi_nc_gpu ( lda, n, m, psi_d, vrs_d, hpsi_d )
+     CALL vloc_psi_nc_acc ( lda, n, m, psi_d, vrs_d, hpsi_d )
      !
   ELSE  
      ! 

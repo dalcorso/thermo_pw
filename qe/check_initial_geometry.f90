@@ -25,9 +25,9 @@ SUBROUTINE check_initial_geometry(auxdyn, iflag)
   USE io_files,        ONLY : tmp_dir
   USE disp,            ONLY : nqs, x_q, lgamma_iq
   USE qpoint,          ONLY : xq
-  USE control_lr,      ONLY : lgamma
+  USE control_lr,      ONLY : lgamma, rec_code
   USE output,          ONLY : fildyn
-  USE control_ph,      ONLY : ldisp, recover, rec_code, &
+  USE control_ph,      ONLY : ldisp, recover, &
                               start_q, last_q, current_iq, tmp_dir_ph, &
                               ext_recover, ext_restart, qplot, &
                               done_zeu, done_start_zstar, done_epsil, &

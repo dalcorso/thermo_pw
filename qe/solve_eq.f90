@@ -57,11 +57,11 @@ subroutine solve_eq(iu, flag)
   USE units_ph,              ONLY : lrdrho, iudrho, lrbar, iubar
   USE output,                ONLY : fildrho
   USE control_flags,         ONLY : use_gpu
-  USE control_ph,            ONLY : ext_recover, rec_code, &
-                                    lnoloc, convt, tr2_ph, &
+  USE control_ph,            ONLY : ext_recover, lnoloc
+  USE control_lr,            ONLY : lgamma, alpha_pv, nbnd_occ, rec_code, &
                                     alpha_mix, lgamma_gamma, niter_ph, &
-                                    flmixdpot, rec_code_read
-  USE control_lr,            ONLY : lgamma, alpha_pv, nbnd_occ
+                                    flmixdpot, rec_code_read, convt, tr2_ph, &
+                                    rec_code
   USE lrus,                  ONLY : int3_paw
   USE qpoint,                ONLY : xq, nksq, ikks, ikqs
   USE recover_mod,           ONLY : read_rec, write_rec

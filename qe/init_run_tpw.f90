@@ -47,7 +47,7 @@ SUBROUTINE init_run_tpw()
                                  dft_has_finite_size_correction
   USE many_k_mod,         ONLY : allocate_many_k, init_k_blocks
   USE control_qe,         ONLY : many_k
-  USE dfunct_gpum,        ONLY : newd_gpu
+  USE dfunct,             ONLY : newd
   USE rism_module,        ONLY : lrism, rism_alloc3d
   USE extffield,          ONLY : init_extffield
   USE control_flags,      ONLY : scissor
@@ -185,17 +185,9 @@ SUBROUTINE init_run_tpw()
   !
   !
   CALL potinit()
-  IF ( use_gpu ) THEN
-    !
-    CALL newd_gpu()
-    !
-  ELSE
-    !
-    CALL newd()
-    !
-    !
-  END IF
-
+  !
+  CALL newd()
+  !
   CALL wfcinit()
   !
   IF(use_wannier) CALL wannier_init()

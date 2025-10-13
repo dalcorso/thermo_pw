@@ -27,9 +27,8 @@ SUBROUTINE pheqscf()
   USE noncollin_module,ONLY : noncolin, nspin_mag, npol
   USE io_files,        ONLY : tmp_dir
   USE lsda_mod,        ONLY : nspin, lsda
-  USE control_ph,      ONLY : convt, zeu, rec_code, rec_code_read, lnoloc, &
-                              where_rec, done_epsil, done_zeu, epsil
-  USE control_lr,      ONLY : lrpa
+  USE control_ph,      ONLY : zeu, lnoloc, done_epsil, done_zeu, epsil
+  USE control_lr,      ONLY : lrpa, convt, rec_code, rec_code_read, where_rec
   USE lr_global,       ONLY : pseudo_hermitian
   USE lr_lanczos,      ONLY : llanczos, iulanczos, only_spectrum
   USE control_flags,   ONLY : io_level

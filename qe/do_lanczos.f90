@@ -54,9 +54,9 @@ SUBROUTINE do_lanczos()
   USE paw_onecenter,         ONLY : paw_dpotential
   USE paw_symmetry,          ONLY : paw_desymmetrize
   USE paw_add_symmetry,      ONLY : paw_deqsymmetrize
-  USE control_ph,            ONLY : lnoloc, lgamma_gamma, rec_code, &
-                                    rec_code_read, ext_recover, recover, convt
-  USE control_lr,            ONLY : alpha_pv, nbnd_occ, lgamma
+  USE control_ph,            ONLY : lnoloc, ext_recover, recover
+  USE control_lr,            ONLY : alpha_pv, nbnd_occ, lgamma, lgamma_gamma, &
+                                    rec_code, rec_code_read, convt
   USE lrus,                  ONLY : int3, int3_paw
   USE dv_of_drho_lr,         ONLY : dv_of_drho
   USE dv_of_drho_clf,        ONLY : dv_of_drho_nlf

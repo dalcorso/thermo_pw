@@ -22,10 +22,11 @@ SUBROUTINE compute_drhous_tpw (drhous, dbecsum, wgg, becq, alpq)
   USE uspp_param, ONLY : nhm
   USE lsda_mod,   ONLY : lsda, nspin, current_spin, isk
   USE klist,      ONLY : xk, wk, ngk, igk_k
-  USE fft_base,   ONLY: dffts, dfftp
+  USE fft_base,   ONLY: dffts
   USE fft_interfaces, ONLY: invfft
   USE wvfct,      ONLY : nbnd, npwx
   USE noncollin_module, ONLY : npol
+  USE uspp_init,  ONLY : init_us_2
 
   USE qpoint,     ONLY : nksq, ikks, ikqs
   USE eqv,        ONLY : evq, dvpsi, dpsi
@@ -38,7 +39,6 @@ SUBROUTINE compute_drhous_tpw (drhous, dbecsum, wgg, becq, alpq)
   USE units_lr,   ONLY : iuwfc, lrwfc
   USE becmod,     ONLY : bec_type
   USE partial,    ONLY : done_irr, comp_irr
-  USE uspp_init,  ONLY : init_us_2
   USE io_global,  ONLY : stdout
   USE mp_bands,   ONLY : intra_bgrp_comm
   USE mp,         ONLY : mp_sum
@@ -48,17 +48,16 @@ SUBROUTINE compute_drhous_tpw (drhous, dbecsum, wgg, becq, alpq)
   !     the dummy variables
   !
 
-  COMPLEX(DP) :: dbecsum (nhm * (nhm + 1) / 2, nat, nspin, 3 * nat) &
-       , drhous (dfftp%nnr, nspin, 3 * nat)
-  !output:the derivative of becsum
-  ! output: add the orthogonality term
-  TYPE (bec_type) :: becq(nksq), & ! (nkb, nbnd)
-                     alpq (3, nksq)
-  ! input: the becp with psi_{k+q}
-  ! input: the alphap with psi_{k+q}
-
-  REAL(DP) :: wgg (nbnd, nbnd, nksq)
-  ! input: the weights
+  COMPLEX(DP) :: dbecsum (nhm * (nhm + 1) / 2, nat, nspin, 3 * nat) 
+  !! output:the derivative of becsum
+  COMPLEX(DP) :: drhous (dffts%nnr, nspin, 3 * nat)
+  !! output: add the orthogonality term
+  type (bec_type) :: becq(nksq)  ! (nkb, nbnd)
+  !! input: the becp with \(\text{psi}_{k+q}\)
+  type (bec_type) :: alpq (3, nksq)
+  !! input: the alphap with \(\text{psi}_{k+q}\)
+  real(DP) :: wgg (nbnd, nbnd, nksq)
+  !! input: the weights
 
   INTEGER :: npw, npwq, ik, ikq, ikk, ig, nu_i, ibnd, ios, jpol, ipol, na
   ! counter on k points

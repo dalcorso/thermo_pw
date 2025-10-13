@@ -15,7 +15,8 @@ SUBROUTINE fast_phq_readin(recover_, igeom)
 !  It must be called by all processors of an image.
 !
 USE input_parameters, ONLY : outdir
-USE control_ph,       ONLY : tmp_dir_ph, tmp_dir_phq, rec_code_read, recover
+USE control_ph,       ONLY : tmp_dir_ph, tmp_dir_phq, recover
+USE control_lr,       ONLY : rec_code_read
 USE ph_restart,       ONLY : ph_readfile
 USE save_ph,          ONLY : save_ph_input_variables, tmp_dir_save
 USE io_files,         ONLY : tmp_dir, check_tempdir

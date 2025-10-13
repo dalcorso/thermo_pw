@@ -23,6 +23,7 @@ SUBROUTINE readmodes (nat,nks,q,displa,ngeo,igeo,ntyp,ityp,amass,iflag,inunit)
   COMPLEX(DP), INTENT(INOUT) :: displa(3*nat,3*nat,ngeo,nks)
   ! local
   INTEGER nat3, na, ipol, iq, nta, sna, i, j
+  CHARACTER(LEN=256) :: lineread
   REAL(DP):: freq(3*nat), inq(3)
   REAL(DP):: znorm
   REAL(DP) :: eps=1.d-3
@@ -34,9 +35,20 @@ SUBROUTINE readmodes (nat,nks,q,displa,ngeo,igeo,ntyp,ityp,amass,iflag,inunit)
   DO iq=1,nks
      READ(inunit,*)
      READ(inunit,*)
-     READ(inunit,'(5x,3f12.4)') inq(1:3)
-     IF (ABS(inq(1)-q(1,iq))+ABS(inq(2)-q(2,iq))+ABS(inq(3)-q(3,iq)) > eps ) &
+     READ(inunit,'(a)') lineread
+!
+!    try the first format
+!     
+     READ(lineread,'(5x,3f12.4)') inq(1:3)
+     IF (ABS(inq(1)-q(1,iq))+ABS(inq(2)-q(2,iq))+ABS(inq(3)-q(3,iq)) > eps )&
+             THEN
+!
+!  if the q does not match try the newer format
+!
+        READ(lineread,'(5x,3f15.8)') inq(1:3)
+        IF (ABS(inq(1)-q(1,iq))+ABS(inq(2)-q(2,iq))+ABS(inq(3)-q(3,iq))>eps) &
         CALL errore('readmodes','Incompatible q points in modes file',1)
+     ENDIF
      READ(inunit,*)
      DO i = 1, nat3
       

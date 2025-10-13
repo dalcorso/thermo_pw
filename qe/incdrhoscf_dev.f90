@@ -62,7 +62,7 @@ INTEGER, DEVICE :: st_d(nksb_ph * npe)
 ! on host and on device
 COMPLEX(DP) :: dbecsum((nhm*(nhm+1))/2, nat, nspin_mag, npe)
 ! inp/out: the dbecsum to accumulate (on host)
-COMPLEX(DP), DEVICE :: drhoscf_d (nnr, nspin_mag, npe)
+COMPLEX(DP), DEVICE :: drhoscf_d (nnrs, nspin_mag, npe)
 ! inp/out: the induced charge density to accumulate (on host)
 COMPLEX(DP), DEVICE :: dpsik(npwx*npol,nbnd*nksbx_ph*npe)
 ! input: the change of wavefunctions
@@ -311,7 +311,7 @@ ATTRIBUTES(GLOBAL) SUBROUTINE incdrho_dev( nbndk, st, npol, drhoscf, &
   !! input: the starting point of each set in psicr and dpsicr
   INTEGER, INTENT(IN), VALUE :: npol
   !! input: the number of components of psicr and dpsicr
-  COMPLEX(DP), DEVICE, INTENT(INOUT) :: drhoscf(nnr, nspin_mag, npe)
+  COMPLEX(DP), DEVICE, INTENT(INOUT) :: drhoscf(nnrs, nspin_mag, npe)
   !! inp/out: the induced charge updated by this routine
   REAL(DP), DEVICE, INTENT(IN) :: psicr(2, nnrs, npol, nbnd * nk * npe)
   !! input: the evc in the real space smooth grid

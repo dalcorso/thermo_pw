@@ -17,7 +17,7 @@ SUBROUTINE drho_tpw
   !
   !
   USE kinds,      ONLY : DP
-  USE gvecs,      ONLY : doublegrid
+  USE gvecs,         ONLY : doublegrid
   USE fft_base,   ONLY : dfftp, dffts
   USE lsda_mod,   ONLY : nspin
   USE cell_base,  ONLY : omega
@@ -28,13 +28,13 @@ SUBROUTINE drho_tpw
   USE uspp,       ONLY : okvan, nkb
   USE wvfct,      ONLY : nbnd
   USE paw_variables,    ONLY : okpaw
-  USE control_ph, ONLY : ldisp, all_done, rec_code_read
+  USE control_ph, ONLY : all_done
 
   USE lrus,       ONLY : becp1
   USE klist,      ONLY : lgauss
   USE two_chem,   ONLY : twochem
   USE qpoint,     ONLY : nksq
-  USE control_lr, ONLY : lgamma
+  USE control_lr, ONLY : lgamma, rec_code_read
 
   USE dynmat,     ONLY : dyn00
   USE modes,      ONLY : npertx, npert, nirr, u
@@ -126,7 +126,7 @@ SUBROUTINE drho_tpw
   !   now we compute the change of the charge density due to the change of
   !   the orthogonality constraint
   !
-  ALLOCATE (drhous ( dfftp%nnr, nspin_mag , 3 * nat))
+  ALLOCATE (drhous ( dffts%nnr, nspin_mag , 3 * nat))
   ALLOCATE (dbecsum( nhm * (nhm + 1) /2, nat, nspin_mag, 3 * nat))
   dbecsum=(0.d0,0.d0)
   IF (noncolin) THEN

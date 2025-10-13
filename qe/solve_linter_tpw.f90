@@ -6,7 +6,7 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !-----------------------------------------------------------------------
-SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
+SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf, drhoscfh)
   !-----------------------------------------------------------------------
   !
   !    Driver routine for the solution of the linear system which
@@ -40,9 +40,9 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   USE paw_onecenter,        ONLY : paw_dpotential
   USE buffers,              ONLY : save_buffer, get_buffer
   USE control_flags,        ONLY : use_gpu
-  USE control_ph,           ONLY : rec_code, niter_ph, convt, &
+  USE control_lr,           ONLY : rec_code, niter_ph, convt, &
                                    alpha_mix, rec_code_read, &
-                                   where_rec, ext_recover
+                                   where_rec, ext_recover, lmultipole
   USE el_phon,              ONLY : elph
   USE modes,                ONLY : u
   USE uspp,                 ONLY : nlcc_any
@@ -62,7 +62,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   USE mp_asyn,              ONLY : asyn_master, with_asyn_images
   USE mp_images,            ONLY : my_image_id, root_image
   USE mp,                   ONLY : mp_sum
-  USE efermi_shift_tpw,     ONLY : ef_shift_tpw, ef_shift_paw_tpw,  def
+  USE efermi_shift,         ONLY : ef_shift, ef_shift_wfc, def
   USE lrus,         ONLY : int3_paw, becp1
   USE eqv,          ONLY : dvpsi, dpsi, evq
   USE qpoint,       ONLY : xq, nksq, ikks, ikqs
@@ -84,8 +84,10 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   ! input: the number of perturbation
   ! input: the position of the modes
 
-  COMPLEX(DP) :: drhoscf (dfftp%nnr, nspin_mag, npe)
-  ! output: the change of the scf charge
+  COMPLEX(DP) :: drhoscf (dffts%nnr, nspin_mag, npe)
+  ! output: the change of the scf charge, only smooth part
+  COMPLEX(DP) :: drhoscfh (dfftp%nnr, nspin_mag, npe)
+  ! output: the change of the scf charge total charge
 
   REAL(DP) , ALLOCATABLE :: h_diag (:,:)
   ! h_diag: diagonal part of the Hamiltonian
@@ -102,7 +104,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   ! change of the scf potential
   COMPLEX(DP), POINTER :: dvscfins (:,:,:)
   ! change of the scf potential (smooth part only)
-  COMPLEX(DP), ALLOCATABLE :: drhoscfh (:,:,:), dvscfout (:,:,:), & 
+  COMPLEX(DP), ALLOCATABLE :: dvscfout (:,:,:), & 
        drhoscf_aux(:,:,:)
   ! change of rho / scf potential (output)
   ! change of scf potential (output)
@@ -168,7 +170,6 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
      nnrs=nnr
   ENDIF
   !$acc enter data create(dvscfins(1:nnrs, 1:nspin_mag, 1:npe))
-  ALLOCATE (drhoscfh ( dfftp%nnr, nspin_mag , npe))
   ALLOCATE (dvscfout ( dfftp%nnr, nspin_mag , npe))
   ALLOCATE (dbecsum ( (nhm * (nhm + 1))/2 , nat , nspin_mag , npe))
   IF (okpaw) THEN
@@ -206,6 +207,19 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
      iter0 = 0
      convt =.FALSE.
      where_rec='no_recover'
+  ENDIF
+
+  IF (lmultipole) THEN
+    !
+    IF (irr == 1) THEN
+      iter0 = 0
+      convt =.FALSE.
+      where_rec='no_recover'
+    ELSE
+      convt=.TRUE.
+      CALL init_rho(npe,drhoscf,drhoscfh,iq_dummy)
+    ENDIF
+    !
   ENDIF
 
   IF (ionode .AND. fildrho /= ' ') THEN
@@ -456,15 +470,18 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
      ! q=0 in metallic case deserve special care (e_Fermi can shift)
      !
      IF (okpaw) THEN
-        IF (lmetq0) &
-           CALL ef_shift_paw_tpw (drhoscfh, dbecsum, ldos, ldoss, becsum1, &
-                                                  dos_ef, irr, npe, .false.)
         DO ipert=1,npe
            dbecsum(:,:,:,ipert)=2.0_DP *dbecsum(:,:,:,ipert) &
                                +becsumort(:,:,:,imode0+ipert)
         ENDDO
-     ELSE
-        IF (lmetq0) call ef_shift_tpw(drhoscfh,ldos,ldoss,dos_ef,irr,npe,.false.)
+     ENDIF
+
+     IF (lmetq0) THEN
+        IF (okpaw) THEN
+           CALL ef_shift(npe, dos_ef, ldos, drhoscfh, dbecsum, becsum1)
+        ELSE
+           CALL ef_shift(npe, dos_ef, ldos, drhoscfh)
+        ENDIF
      ENDIF
      !
      !   After the loop over the perturbations we have the linear change
@@ -497,7 +514,12 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
         ENDIF
         !
         ! Compute the response HXC potential
-        CALL dv_of_drho (dvscfout(1,1,ipert), drhoc=drhoc)
+        IF (.NOT. lmultipole) THEN
+           CALL dv_of_drho (dvscfout(1,1,ipert), drhoc=drhoc)
+        ELSE !FM: as the case of solve_e
+           CALL dv_of_drho(dvscfout(1, 1, ipert))
+        ENDIF
+
      ENDDO
      !
      !   And we mix with the old potential
@@ -508,17 +530,15 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
      !  put the fermi energy shift if needed
      !
      IF (lmetq0.AND.convt) THEN
-        IF (okpaw) THEN
-           call ef_shift_paw_tpw (drhoscf, dbecsum, ldos, ldoss, becsum1, &
-                                                  dos_ef, irr, npe, .true.)
-        ELSE
-            call ef_shift_tpw (drhoscf, ldos, ldoss, dos_ef, irr, npe, .true.)
-        ENDIF
+        DO ipert = 1, npe
+           dvscfin(:, 1, ipert) = dvscfin(:, 1, ipert) - def(ipert)
+           IF (lsda) THEN
+              dvscfin(:, 2, ipert) = dvscfin(:, 2, ipert) - def(ipert)
+           ENDIF
+        ENDDO
+
+        CALL ef_shift_wfc (npe, ldoss, drhoscf) 
      ENDIF
-     !
-     ! check that convergence has been reached on ALL processors in this image
-     !
-     CALL check_all_convt(convt)
 
      IF (doublegrid) THEN
         DO ipert = 1, npe
@@ -589,6 +609,9 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   !    We compute it here.
   !
   IF (convt) THEN
+     !
+     IF (lmultipole) CALL write_epsilon(npe, drhoscfh)
+     !
      CALL drhodvus (irr, imode0, dvscfin, npe)
      IF (fildvscf.NE.' ') THEN
         DO ipert = 1, npe
@@ -616,7 +639,6 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   DEALLOCATE (mixin)
   IF (noncolin) DEALLOCATE (dbecsum_nc)
   DEALLOCATE (dvscfout)
-  DEALLOCATE (drhoscfh)
   !$acc exit data delete(dvscfins)
   IF (doublegrid) DEALLOCATE (dvscfins)
   DEALLOCATE (dvscfin)

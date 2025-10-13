@@ -47,10 +47,10 @@ subroutine solve_e_tpw(drhoscf)
   USE units_lr,              ONLY : lrdwf, iudwf, lrwfc, iuwfc
   USE output,                ONLY : fildrho
   USE control_flags,         ONLY : use_gpu
-  USE control_ph,            ONLY : ext_recover, rec_code, &
-                                    lnoloc, convt, tr2_ph, nmix_ph, zeu, &
-                                    alpha_mix, lgamma_gamma, niter_ph, &
-                                    flmixdpot, rec_code_read
+  USE control_ph,            ONLY : ext_recover, lnoloc, zeu
+  USE control_lr,            ONLY : nmix_ph, alpha_mix, lgamma_gamma, &
+                                    niter_ph, flmixdpot, rec_code_read, &
+                                    rec_code, convt, tr2_ph
   USE recover_mod,           ONLY : read_rec, write_rec
 
   USE mp_pools,              ONLY : inter_pool_comm

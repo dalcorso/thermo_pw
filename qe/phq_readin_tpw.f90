@@ -33,16 +33,17 @@ SUBROUTINE phq_readin_tpw()
   USE fft_base,      ONLY : dffts
   USE cellmd,        ONLY : lmovecell
   USE run_info,      ONLY : title
-  USE control_ph,    ONLY : maxter, alpha_mix, lgamma_gamma, epsil, &
+  USE control_ph,    ONLY : epsil, &
                             zue, zeu, xmldyn, newgrid,                      &
-                            trans, reduce_io, tr2_ph, niter_ph,       &
-                            nmix_ph, ldisp, recover, lnoloc, start_irr, &
+                            trans, ldisp, recover, lnoloc, start_irr, &
                             last_irr, start_q, last_q, current_iq, tmp_dir_ph, &
                             ext_recover, ext_restart, u_from_file, ldiag, &
                             search_sym, lqdir, electron_phonon, tmp_dir_phq, &
-                            rec_code_read, qplot, only_init, only_wfc, &
+                            qplot, only_init, only_wfc, &
                             low_directory_check, nk1, nk2, nk3, k1, k2, k3
-  USE control_lr,    ONLY : lgamma, lrpa
+  USE control_lr,    ONLY : lgamma, lrpa, maxter, alpha_mix, tr2_ph, &
+                            reduce_io, niter_ph, rec_code_read, nmix_ph, &
+                            lgamma_gamma, lmultipole, lnolr
 
   USE save_ph,       ONLY : tmp_dir_save, save_ph_input_variables
   USE gamma_gamma,   ONLY : asr
@@ -80,7 +81,7 @@ SUBROUTINE phq_readin_tpw()
   USE dvscf_interpolate, ONLY : ldvscf_interpolate, do_long_range, &
       do_charge_neutral, wpot_dir
   USE ahc,           ONLY : elph_ahc, ahc_dir, ahc_nbnd, ahc_nbndskip, &
-      skip_upperfan
+      skip_upper
   USE read_namelists_module, ONLY : check_namelist_read
   USE open_close_input_file, ONLY : open_input_file, close_input_file
   USE optical,       ONLY : fru, lcfreq, freq_line, lmagnon, lcharge, &
@@ -146,7 +147,7 @@ SUBROUTINE phq_readin_tpw()
                        lshift_q, read_dns_bare, d2ns_type, diagonalization, &
                        ldvscf_interpolate, do_long_range, do_charge_neutral, &
                        wpot_dir, ahc_dir, ahc_nbnd, ahc_nbndskip, &
-                       skip_upperfan
+                       skip_upper, lmultipole
 
   ! tr2_ph       : convergence threshold
   ! amass        : atomic masses
@@ -300,6 +301,7 @@ SUBROUTINE phq_readin_tpw()
   elop         = .FALSE.
   max_seconds  =  1.E+7_DP
   reduce_io    = .FALSE.
+  lmultipole   = .FALSE.
   IF ( TRIM(outdir) == ' ') THEN
      CALL get_environment_variable( 'ESPRESSO_TMPDIR', outdir )
      IF ( TRIM( outdir ) == ' ' ) outdir = './'
@@ -352,7 +354,7 @@ SUBROUTINE phq_readin_tpw()
   ahc_dir = ' '
   ahc_nbnd = 0
   ahc_nbndskip = 0
-  skip_upperfan = .FALSE.
+  skip_upper = .FALSE.
   elph_ahc = .FALSE.
   !
 
@@ -595,8 +597,8 @@ SUBROUTINE phq_readin_tpw()
   ENDIF
   !
   ! Set default value for fildrho and fildvscf if they are required
-  IF ( (lraman.OR.elop.OR.drho_star%open) .AND. fildrho == ' ') fildrho = 'drho'
-  IF ( (elph_mat.OR.dvscf_star%open) .AND. fildvscf == ' ') fildvscf = 'dvscf'
+  IF ( (lraman.OR.elop.OR.drho_star%open.OR.lmultipole) .AND. fildrho == ' ') fildrho = 'drho'
+  IF ( (elph_mat.OR.dvscf_star%open.OR.lmultipole) .AND. fildvscf == ' ') fildvscf = 'dvscf'
   !
   !  We can calculate  dielectric, raman or elop tensors and no Born effective
   !  charges dF/dE, but we cannot calculate Born effective charges dF/dE
@@ -985,6 +987,19 @@ SUBROUTINE phq_readin_tpw()
   IF (tqr) CALL errore('phq_readin',&
      'The phonon code with Q in real space not available',1)
 
+  IF (lmultipole)  THEN
+     ! FM : incompatibility for lmultipole
+     lnolr = .TRUE.
+     IF (okvan .or. domag) CALL errore('phq_readin',&
+     'lmultipole only for norm-conserving potential and no magnetization', 1)
+     IF (ltetra .OR. lgauss) CALL errore('phq_readin',&
+     'lmultipole does not work with metal', 1)
+     IF (epsil) CALL errore('phq_readin',&
+     'lmultipole is already an electric field calculation', 1)
+#if defined(__CUDA)
+     CALL errore('phq_readin','multipoles for GPU not present in this version', 1)
+#endif
+  END IF
 
   IF (start_irr < 0 ) CALL errore('phq_readin', 'wrong start_irr',1)
   !

@@ -62,7 +62,7 @@ SUBROUTINE phq_init_tpw()
   USE qpoint,               ONLY : xq, nksq, eigqts, ikks, ikqs
   USE qpoint_aux,           ONLY : becpt, alphapt, ikmks
   USE eqv,                  ONLY : evq
-  USE control_lr,           ONLY : nbnd_occ, lgamma
+  USE control_lr,           ONLY : nbnd_occ, lgamma, lmultipole
   USE ldaU,                 ONLY : lda_plus_u
   USE uspp_init,            ONLY : init_us_2
   USE control_qe,           ONLY : many_k
@@ -86,12 +86,11 @@ SUBROUTINE phq_init_tpw()
   INTEGER :: npw, npwq, nsolv
   REAL(DP) :: arg
     ! the argument of the phase
-  COMPLEX(DP), ALLOCATABLE :: aux1(:,:), tevc(:,:), evc_d(:,:)
+  COMPLEX(DP), ALLOCATABLE :: aux1(:,:), tevc(:,:)
     ! used to compute alphap
 #if defined(__CUDA)
   TYPE(bec_type) :: bectmp
     ! temporary buffer to work with offload of arrays of derived types
-  ATTRIBUTES(DEVICE) :: evc_d
 #endif
   !
   !
@@ -101,7 +100,6 @@ SUBROUTINE phq_init_tpw()
   !
 #if defined(__CUDA)
   Call allocate_bec_type_acc ( nkb, nbnd, bectmp )
-  ALLOCATE(evc_d(npwx*npol,nbnd))
 #endif
   IF (many_k)  THEN
      nsolv=1
@@ -125,13 +123,13 @@ SUBROUTINE phq_init_tpw()
      !
   END DO
   !
-  ! ... a0) compute rhocore for each atomic-type if needed for nlcc
+  ! ... a) compute rhocore for each atomic-type if needed for nlcc
   !
   IF ( nlcc_any.AND. (trans.OR.zeu) ) CALL set_drhoc( xq, drc )
   !
   ! ... b) the fourier components of the local potential at q+G
   !
-  CALL init_vlocq ( xq )
+  CALL init_vlocq ( xq ) 
   !
   ! only for electron-phonon coupling with wannier functions
   ! 
@@ -212,12 +210,9 @@ SUBROUTINE phq_init_tpw()
      ! ...    the code
      !
 #if defined(__CUDA)
-     evc_d = evc
-     !!$acc data present_or_copyin(evc)
      !$acc update device(evc)
      !$acc update host(vkb)
      CALL calbec( offload_type, npw, vkb, evc, bectmp )
-     !!$acc end data
      IF (many_k) CALL becupdate_tpw(becp1k_d(:,:,:,ik), bectmp )
      CALL becupdate( offload_type, becp1, ik, nksq, bectmp )
 #else
@@ -242,13 +237,8 @@ SUBROUTINE phq_init_tpw()
         DO ibnd = 1, nbnd
            DO ig = 1, npw
               itmp = igk_k(ig,ikk)
-#if defined(__CUDA)
               aux1(ig,ibnd) = evc(ig,ibnd) * tpiba * ( 0.D0, 1.D0 ) * &
                    ( xk(ipol,ikk) + g(ipol,itmp) )
-#else
-              aux1(ig,ibnd) = evc(ig,ibnd) * tpiba * ( 0.D0, 1.D0 ) * &
-                   ( xk(ipol,ikk) + g(ipol,itmp) )
-#endif
            END DO
         END DO
         IF (noncolin) THEN
@@ -256,13 +246,8 @@ SUBROUTINE phq_init_tpw()
            DO ibnd = 1, nbnd
               DO ig = 1, npw
                  itmp = igk_k(ig,ikk)
-#if defined(__CUDA)
                  aux1(ig+npwx,ibnd)=evc(ig+npwx,ibnd)*tpiba*(0.D0,1.D0)*&
                       ( xk(ipol,ikk) + g(ipol,itmp) )
-#else
-                 aux1(ig+npwx,ibnd)=evc(ig+npwx,ibnd)*tpiba*(0.D0,1.D0)*&
-                      ( xk(ipol,ikk) + g(ipol,itmp) )
-#endif
               END DO
            END DO
         END IF
@@ -394,11 +379,10 @@ SUBROUTINE phq_init_tpw()
   !
   CALL add_zstar_us_tpw()
 
-  IF ( trans ) CALL dynmat0_new()
+  IF ( trans .AND. (.NOT. lmultipole) ) CALL dynmat0_new()
   !
 #if defined(__CUDA)
   Call deallocate_bec_type_acc ( bectmp )
-  DEALLOCATE(evc_d)
 #endif
   CALL stop_clock( 'phq_init' )
   !

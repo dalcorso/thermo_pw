@@ -33,13 +33,13 @@ CONTAINS
     USE lsda_mod, ONLY : nspin
     USE noncollin_module, ONLY : noncolin, nspin_mag, domag
     USE units_ph, ONLY : this_pcxpsi_is_on_file
-    USE control_ph, ONLY : ext_recover, convt
+    USE control_lr, ONLY : ext_recover, convt
     USE efield_mod, ONLY : zstareu0, zstarue0
     USE phus, ONLY : int1, int2
     USE io_files, ONLY : seqopn
 
     USE lrus, ONLY : int3
-    USE eqv,  ONLY : drhoscfs
+    USE eqv,  ONLY : drhos
 
     IMPLICIT NONE
     INTEGER, INTENT(OUT) :: iter0
@@ -60,7 +60,7 @@ CONTAINS
     READ (iunrec) zstareu0, zstarue0
     READ (iunrec) dvscfin
     IF (convt.AND.nlcc_any) READ(iunrec) drhoscfh
-    IF (convt.AND.ALLOCATED(drhoscfs)) READ(iunrec) drhoscfs
+    IF (convt.AND.ALLOCATED(drhos)) READ(iunrec) drhos
     IF (PRESENT(dbecsum)) READ(iunrec) dbecsum
     IF (okvan) THEN
        READ (iunrec) int1, int2, int3

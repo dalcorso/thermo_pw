@@ -76,8 +76,6 @@ CALL allocate_becps_many_k(1,1)
 CALL initialize_fft_factors(1,1)
 CALL initialize_device_variables()
 
-
-
 lrot=(iter==1)
 avg_iter=0.0_DP
 DO ikb=1,nkblocks
@@ -106,6 +104,7 @@ DO ikb=1,nkblocks
            IF ( nkb > 0 ) CALL init_us_2( ngk(ik), igk_k(1,ik), &
                                                     xk(1,ik), vkb, .true.)
            CALL init_wfc ( ik )
+           !$acc update self(evc)
 
            evck(1:npwx*npol,nbnd*(ik1-1)+1:nbnd*ik1)=evc(1:npwx*npol,1:nbnd)
            !

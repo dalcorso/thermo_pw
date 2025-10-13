@@ -19,7 +19,7 @@ SUBROUTINE find_irrep_tpw()
   USE kinds,         ONLY : DP
   USE ions_base,     ONLY : nat
   USE symm_base,     ONLY : nsym
-  USE control_ph,    ONLY : lgamma_gamma
+  USE control_lr,    ONLY : lgamma_gamma
   USE modes,         ONLY : u, npert, nirr
   USE qpoint,        ONLY : xq
   USE control_flags, ONLY : modenum
@@ -47,7 +47,7 @@ SUBROUTINE find_irrep_sym_tpw()
   !
   !
   USE kinds,         ONLY : DP
-  USE control_ph,    ONLY : lgamma_gamma
+  USE control_lr,    ONLY : lgamma_gamma
   USE symm_base,     ONLY : nsym
   USE modes,         ONLY : npertx, npert, nirr, t, tmq
 

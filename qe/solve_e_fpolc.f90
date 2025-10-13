@@ -51,11 +51,11 @@ SUBROUTINE solve_e_fpolc(iu)
   USE units_lr,              ONLY : lrdwf, iudwf, lrwfc, iuwfc
   USE output,                ONLY : fildrho
   USE control_flags,         ONLY : use_gpu
-  USE control_ph,            ONLY : ext_recover, rec_code, &
-                                    lnoloc, convt, tr2_ph, nmix_ph, &
+  USE control_ph,            ONLY : ext_recover, lnoloc
+  USE control_lr,            ONLY : alpha_pv, nbnd_occ, lgamma, &
                                     alpha_mix, lgamma_gamma, niter_ph, &
-                                    flmixdpot, rec_code_read
-  USE control_lr,            ONLY : alpha_pv, nbnd_occ, lgamma
+                                    flmixdpot, rec_code_read, nmix_ph, &
+                                    tr2_ph, convt, rec_code
   USE lrus,                  ONLY : int3_paw
   USE qpoint,                ONLY : nksq
   USE recover_mod,           ONLY : read_rec, write_rec

@@ -29,8 +29,8 @@ subroutine phq_summary_tpw
   USE funct,         ONLY : write_dft_name
   USE run_info,      ONLY : title
   USE gamma_gamma,   ONLY : with_symmetry, nasr
-  USE control_ph,    ONLY : lgamma_gamma, lnoloc, zue, epsil, ldisp, &
-                            nmix_ph, alpha_mix, tr2_ph, zeu, search_sym
+  USE control_ph,    ONLY : lnoloc, zue, epsil, ldisp, zeu, search_sym
+  USE control_lr,    ONLY : lgamma_gamma, nmix_ph, alpha_mix, tr2_ph
   USE freq_ph,       ONLY : fpol, nfs, fiu
   USE partial,       ONLY : atomo, nat_todo, all_comp, done_irr, comp_irr
   USE modes,         ONLY : u, npert, nirr, name_rap_mode

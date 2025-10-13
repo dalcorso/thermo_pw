@@ -44,9 +44,9 @@ SUBROUTINE do_cg_e(drhoscfs)
   USE paw_onecenter,         ONLY : paw_dpotential
   USE paw_symmetry,          ONLY : paw_desymmetrize
   USE paw_add_symmetry,      ONLY : paw_deqsymmetrize
-  USE control_ph,            ONLY : tr2_ph, convt, lnoloc, lgamma_gamma, zeu, &
-                                    niter_ph
-  USE control_lr,            ONLY : alpha_pv, nbnd_occ, lgamma
+  USE control_ph,            ONLY : lnoloc, zeu
+  USE control_lr,            ONLY : alpha_pv, nbnd_occ, lgamma, tr2_ph, convt,&
+                                    niter_ph, lgamma_gamma
   USE lrus,                  ONLY : int3, int3_paw
   USE dv_of_drho_lr,         ONLY : dv_of_drho
   USE lr_global,             ONLY : rpert, evc0, evq0, sevq0, &
@@ -385,7 +385,6 @@ SUBROUTINE do_cg_e(drhoscfs)
      !
      IF (.NOT.lgamma_gamma) THEN
         CALL psymdvscf (drhoscf)
-        IF ( noncolin.and.domag ) CALL psym_dmage(drhoscf)
      ENDIF
      !
      !   calculate the corresponding linear potential response
