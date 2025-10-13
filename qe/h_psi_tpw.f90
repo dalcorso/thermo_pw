@@ -176,9 +176,12 @@ SUBROUTINE h_psii_( lda, n, m, psi, hpsi, ik )
            CALL fwfft_orbital_gamma( hpsi, ibnd, m, add_to_orbital=.TRUE. )
         ENDDO
         !
+     ELSE IF ( dffts%has_task_groups ) THEN
+        ! ... usual reciprocal-space algorithm, with task groups
+        CALL vloc_psi_tg_gamma( lda, n, m, psi, vrs(1,current_spin), hpsi )
      ELSE
         ! ... usual reciprocal-space algorithm
-        CALL vloc_psi_gamma( lda, n, m, psi, vrs(1,current_spin), hpsi ) 
+        CALL vloc_psi_gamma_acc( lda, n, m, psi, vrs(1,current_spin), hpsi )
         !
      ENDIF 
      !
