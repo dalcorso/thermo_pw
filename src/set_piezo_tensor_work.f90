@@ -10,15 +10,15 @@ SUBROUTINE set_piezo_tensor_work( nwork )
 !------------------------------------------------------------------------
 USE kinds,               ONLY : DP
 USE cell_base,           ONLY : ibrav
-USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain
+USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, epsil_geo
 USE elastic_constants,   ONLY : epsilon_voigt, epsilon_geo
 USE strain_mod,          ONLY : trans_epsilon
-USE piezoelectric_tensor, ONLY : polar_geo
+USE piezoelectric_tensor, ONLY : allocate_piezo
 USE rap_point_group,     ONLY : code_group
 IMPLICIT NONE
 INTEGER, INTENT(OUT) :: nwork
-REAL(DP) :: epsilon_min, epsilon_min_off
-INTEGER :: igeo, iwork
+REAL(DP) :: epsilon_min, epsilon_min_off, epsil
+INTEGER :: igeo, iwork, istep, nstep
 LOGICAL :: check_group_ibrav
 
 epsilon_min= - delta_epsilon * (ngeo_strain - 1) / 2.0_DP
@@ -111,6 +111,7 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
         epsilon_voigt=0.0_DP
         DO igeo=1,ngeo_strain
            epsilon_voigt(1, igeo) = epsilon_min + delta_epsilon * ( igeo - 1 )
+           epsilon_voigt(2, igeo) = epsilon_voigt(1, igeo)
            epsilon_voigt(3, ngeo_strain + igeo) = epsilon_min + &
                                                   delta_epsilon * ( igeo - 1 )
            epsilon_voigt(5, 2*ngeo_strain + igeo) = epsilon_min_off + &
@@ -192,12 +193,22 @@ ELSE
    ENDDO
 ENDIF
 
-ALLOCATE( polar_geo(3, nwork) )
+CALL allocate_piezo(nwork)
 ALLOCATE( epsilon_geo(3, 3, nwork) )
-polar_geo=0.0_DP
+ALLOCATE( epsil_geo(nwork) )
 epsilon_geo=0.0_DP
 DO iwork = 1, nwork
    CALL trans_epsilon(epsilon_voigt(1,iwork), epsilon_geo(1,1,iwork), 1)
+ENDDO
+
+nstep=nwork/ngeo_strain
+iwork=0
+DO istep=1,nstep
+   DO igeo=1,ngeo_strain
+      iwork=iwork+1
+      epsil = epsilon_min + delta_epsilon * ( igeo - 1 )
+      epsil_geo(iwork) = epsil
+   ENDDO
 ENDDO
 
 RETURN

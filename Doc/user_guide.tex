@@ -118,10 +118,10 @@ input of \thermo\ by the \texttt{XCrySDen} program).
 
 \item Electronic band structure at fixed geometry.
 
-\item Electronic density of states at fixed geometry. Electronic thermodynamic
-properties: energy, free energy, entropy, and heat capacity. 
+\item Electronic density of states at fixed geometry. 
 
-\item Electronic heat capacity as a function of temperature (for metals only).
+\item Electronic thermodynamic properties: energy, free energy, entropy, 
+and heat capacity (for metals only). 
 
 \item Complex dielectric constant as a function of the complex
 frequency $\omega$ at fixed geometry. Complex index of refraction for
@@ -138,10 +138,12 @@ thermodynamic properties: vibrational energy, vibrational free energy,
 vibrational entropy, and constant volume heat capacity as a function of
 temperature. Atomic Debye-Waller factors as a function of temperature.
 
-\item Frozen ions and relaxed ions elastic constants at fixed geometry.
+\item Frozen ions and relaxed ions zero temperature elastic constants 
+      at fixed geometry.
 
-\item Relaxed ions temperature dependent elastic constants at fixed 
-unperturbed geometry.
+\item Berry phase polarization at fixed geometry.
+
+\item Piezoelectric tensor at zero temperature at fixed geometry.
 
 \item Fit of the total energy as a function of the lattice parameters with
 a quadratic or quartic polynomial and determination of equilibrium lattice 
@@ -167,8 +169,16 @@ of the complex frequency $\omega$ at the minimum of the total energy.
 \item Phonon dispersions and harmonic thermodynamic quantities
 at the minimum of the total energy.
 
-\item Frozen ions and relaxed ions elastic constants at the minimum of the total
-energy.
+\item Frozen ions and relaxed ions zero temperature elastic constants 
+at the minimum of the total energy.
+
+\item Berry phase polarization at the minimum of the total energy.
+
+\item Piezoelectric tensor at zero temperature at the minimum of the
+total energy.
+
+\item Frozen ions and relaxed ions zero temperature elastic constants
+in a grid of geometries.
 
 \item Anharmonic properties within the quasi-harmonic approximation: 
 lattice parameters, thermal expansion tensor, volume, volume thermal 
@@ -181,6 +191,9 @@ capacity, isoentropic bulk modulus, and average Gr\"uneisen parameter as
 a function of temperature (limited to cubic systems).
 Minimum Helmholtz (or Gibbs at finite pressures) free energy 
 as a function of temperature.
+
+\item Frozen ions and relaxed ions temperature dependent elastic constants
+in a grid of geometries within the quasi-harmonic approximation.
 
 \item Isothermal and isoentropic elastic constants and 
 elastic compliances as a function of temperature within the ``quasi-static'' 
@@ -1698,42 +1711,66 @@ Debye's vibrational energy, free energy, entropy, and constant strain heat
 capacity. These quantities are plotted in a postscript file as a function
 of temperature.
 
+\newpage
+{\color{coral}\section{what='scf\_polarization'}}
+\color{black}
+With this option the code calculates the spontaneous polarization.
+It makes a self-consistent calculation followed by three Berry
+phase calculations in which the polarization is calculated in the
+directions of the direct lattice vectors and prints the spontaneous 
+polarization in Cartesian coordinates. Please note that the zero of 
+the polarization is not subtracted.
+The input variable that controls this option is:
+\begin{verbatim}
+nppl: the number of k points per string. In the perpendicular 
+      plane the number of k points is that given as input 
+      of the pw.x code.
+      Default: integer 51
+\end{verbatim}
+This feature is still experimental. Pools are not available with Berry 
+phase calculations.
 
-%{\color{coral}\section{\sc what='scf\_piezoelectric\_tensor'}}
-%\color{black}
-%With this option the code calculates the piezoelectric tensor 
-%($g_{\alpha,m}$ $\alpha=1,3,\ m=1,6$) of the solid.
-%Depending on the point group, it calculates the polarization of the
-%solid for a set of strains of the lattice. For each strain, it relaxes 
-%the ions to their equilibrium positions when \texttt{frozen\_ions=.FALSE.} 
-%or keep them in the strained positions when \texttt{frozen\_ions=.TRUE.}. 
-%Finally it computes the piezoelectric tensor from the numerical derivatives 
-%of the polarization with respect to strain.
-%The number of strains used to compute each derivative 
-%is \texttt{ngeo\_strain}.\\
-%The input variables
-%that control this option are the same as those used for the elastic constant:
-%\begin{verbatim}
-%frozen_ions: if .TRUE. the piezoelectric tensor is calculated 
-%             keeping the ions frozen in the strained positions. 
-%             Default: logical .FALSE.
-%ngeo_strain: the number of strained configurations used. 
-%             Default: integer 4
-%nppl:        the number of k-points per line in Berry phase calculations
-%             Default: integer 51
-%delta_epsilon: the interval of strain values between two geometries.
-%             To avoid a zero strain geometry that might have a
-%             different symmetry ngeo_strain must be even.
-%             Default: real 0.002
-%\end{verbatim}
-%If a file with the elastic constants is found on disk, the code computes also
-%the direct piezoelectric tensor $d_{\alpha,m}$ which describes
-%the polarization induced by an external stress, as $d_{\alpha,m}=
-%\sum_n g_{\alpha,n} C_{nm}^{-1}$. All these quantities are calculated 
-%for a vanishing electric field. \\
-%Number of tasks for this option: \texttt{ngeo\_strain} times the number of
-%independent strains. \\
-%This feature is still incomplete and experimental.
+\newpage
+{\color{coral}\section{what='scf\_piezoelectric\_tensor'}}
+\color{black}
+With this option the code calculates the stress piezoelectric tensor 
+($e_{\alpha,m}$ $\alpha=1,3,\ m=1,6$) of the solid. Both the proper
+and improper tensors are calculated.
+Depending on the point group, it calculates the polarization of the
+solid for a set of strains. For each strain, it relaxes 
+the ions to their equilibrium positions when \texttt{frozen\_ions=.FALSE.} 
+or keeps them in the strained positions when \texttt{frozen\_ions=.TRUE.}. 
+Finally it computes the piezoelectric tensor from the numerical derivatives 
+of the polarization (improper piezoelectric tensor) or of the Berry phase
+(proper piezoelectric tensor) with respect to strain.
+For each strain type, the number of strains used to compute each derivative 
+is \texttt{ngeo\_strain}.\\
+The input variables that control this option are:
+\begin{verbatim}
+frozen_ions: if .TRUE. the piezoelectric tensor is calculated 
+             keeping the ions frozen in the strained positions. 
+             Default: logical .FALSE.
+ngeo_strain: the number of strained configurations used 
+             for each strain type. 
+             Default: integer 4
+nppl:        the number of k-points per line in Berry phase 
+             calculations
+             Default: integer 51
+delta_epsilon: the interval of strain values between two 
+             geometries. To avoid a zero strain geometry 
+             that might have a different symmetry ngeo_strain 
+             must be even.
+             Default: real 0.005
+\end{verbatim}
+If a file with the elastic constants is found on disk, the code computes also
+the strain piezoelectric tensor $d_{\alpha,m}$ which describes
+the polarization induced by an external stress, as $d_{\alpha,m}=
+\sum_n e_{\alpha,n} C_{nm}^{-1}$. All these quantities are calculated 
+for a vanishing electric field. \\
+Number of tasks for this option: \texttt{ngeo\_strain} times the number of
+strain types. \\
+This feature is still experimental. Pools are not available for Berry phase
+calculations.
 %
 
 \newpage
@@ -1998,12 +2035,22 @@ Number of tasks for this option: Maximum between the number of tasks
 needed by the \texttt{what='mur\_lc'} option and the number of tasks
 needed for the \texttt{what='scf\_elastic\_constants'} option.
 
-%{\color{coral}\section{\sc what='mur\_lc\_piezoelectric\_tensor'}}
-%\color{black}
-%As \texttt{what='scf\_piezoelectric\_tensor'} but the calculation is made at the
-%geometry that minimizes the energy. The
-%energy minimization is made as described for \texttt{what='mur\_lc'}. \\
-%This feature is still incomplete and experimental.
+\newpage
+{\color{coral}\section{what='mur\_lc\_polarization'}}
+\color{black}
+As \texttt{what='scf\_polarization'} but the calculation is made at the
+geometry that corresponds to the minimum of the Murnaghan equation. The
+Murnaghan minimization is made as described for \texttt{what='mur\_lc'}.\\
+This feature is still experimental.
+
+\newpage
+{\color{coral}\section{what='mur\_lc\_piezoelectric\_tensor'}}
+\color{black}
+As \texttt{what='scf\_piezoelectric\_tensor'} but the calculation 
+is made at the
+geometry that minimizes the energy. The
+energy minimization is made as described for \texttt{what='mur\_lc'}. \\
+This feature is still experimental.
 
 \newpage
 {\color{coral}\section{what='mur\_lc\_t'}}
@@ -2456,30 +2503,6 @@ compute a phonon dispersion (see above the option \texttt{what='scf\_ph'}). \\
 When \texttt{use\_free\_energy=.TRUE.} and 
 \texttt{all\_geometries\_together=.FALSE.} the number of tasks of this
 option is equal to the number of tasks needed to compute a phonon dispersion.
-
-
-%{\color{coral}\section{\sc what='scf\_polarization'}}
-%\color{black}
-%With this option the code calculates the spontaneous polarization.
-%The code makes a self-consistent calculation followed by three Berry
-%phase calculations in which the polarization is calculated in the
-%direction parallel to the three primitive reciprocal lattice vectors and 
-%prints the spontaneous polarization in Cartesian coordinates.
-%The input variable that controls this option is:
-%\begin{verbatim}
-%nppl: the number of k points per string. In the perpendicular plane the
-%      number of k-point is that given as input of the pw.x code.
-%      Default: integer 51
-%\end{verbatim}
-%This feature is still incomplete and experimental.
-%
-%{\color{coral}\section{\sc what='mur\_lc\_polarization'}}
-%\color{black}
-%As \texttt{what='scf\_polarization'} but the calculation is made at the
-%geometry that corresponds to the minimum of the Murnaghan equation. The
-%Murnaghan minimization is made as described for \texttt{what='mur\_lc'}.\\
-%This feature is still incomplete and experimental.
-%
 
 \newpage
 {\color{dark-blue}\chapter{Restarting an interrupted run}}

@@ -20,10 +20,11 @@ SUBROUTINE check_existence(iwork, part, run)
   USE kinds,           ONLY : DP
   USE constants,       ONLY : ry_kbar
 
-  USE control_thermo,  ONLY : lstress
+  USE control_thermo,  ONLY : lstress, lberry
 
   USE thermo_mod,      ONLY : energy_geo
   USE elastic_constants, ONLY : sigma_geo
+  USE piezoelectric_tensor, ONLY : polar_geo, tot_b_phase
 
   USE io_global,       ONLY : ionode, ionode_id, stdout
   USE mp_images,       ONLY : intra_image_comm
@@ -38,7 +39,7 @@ SUBROUTINE check_existence(iwork, part, run)
   INTEGER  :: find_free_unit
   CHARACTER(LEN=6) :: int_to_char
   CHARACTER(LEN=256) :: filename
-  REAL(DP) :: energy, stress(3,3)
+  REAL(DP) :: energy, stress(3,3), polar(3), tot_b_ph(3)
   LOGICAL :: exst
   run=.TRUE.
   
@@ -61,6 +62,14 @@ SUBROUTINE check_existence(iwork, part, run)
                  READ(iu_ene,*) (stress(ipol,jpol),jpol=1,3)
                  WRITE(stdout,'(3f15.7)') (stress(ipol,jpol)*ry_kbar,jpol=1,3)
               ENDDO
+           END IF
+           IF (lberry(iwork)) THEN
+              WRITE(stdout,'(5x,"Polarizzazione")')
+              READ(iu_ene,*) (polar(ipol),ipol=1,3)
+              WRITE(stdout,'(3f15.7)') (polar(ipol),ipol=1,3)
+              WRITE(stdout,'(5x,"Berry phase")')
+              READ(iu_ene,*) (tot_b_ph(ipol),ipol=1,3)
+              WRITE(stdout,'(3f15.7)') (tot_b_ph(ipol),ipol=1,3)
            END IF
         ELSE
            WRITE(stdout,'(5x,"Stress (kbar)")')
@@ -86,6 +95,12 @@ SUBROUTINE check_existence(iwork, part, run)
         CALL mp_bcast(stress, ionode_id, intra_image_comm)
         sigma_geo(:,:,iwork)=stress(:,:)
      END IF
+     IF (lberry(iwork)) THEN
+        CALL mp_bcast(polar, ionode_id, intra_image_comm)
+        polar_geo(:,iwork)=polar(:)
+        CALL mp_bcast(tot_b_ph, ionode_id, intra_image_comm)
+        tot_b_phase(:,iwork)=tot_b_ph(:)
+     END IF
   END IF
 
   RETURN
@@ -98,10 +113,11 @@ SUBROUTINE save_existence(iwork, part)
 !  This routine saves on file the total energy, and
 !  possibly the stress of a self-consistent run. 
 !
-  USE control_thermo,  ONLY : lstress
+  USE control_thermo,  ONLY : lstress, lberry
 
   USE thermo_mod,      ONLY : energy_geo, what
   USE elastic_constants, ONLY : sigma_geo
+  USE piezoelectric_tensor, ONLY : polar_geo, tot_b_phase
 
   USE ener,            ONLY : etot
   USE force_mod,       ONLY : sigma
@@ -131,6 +147,10 @@ SUBROUTINE save_existence(iwork, part)
            DO ipol=1,3
               WRITE(iu_ene,*) (sigma_geo(ipol,jpol,iwork),jpol=1,3)
            ENDDO
+        ENDIF
+        IF (lberry(iwork)) THEN
+           WRITE(iu_ene,*) (polar_geo(ipol,iwork), ipol=1,3)
+           WRITE(iu_ene,*) (tot_b_phase(ipol,iwork), ipol=1,3)
         ENDIF
      ELSE
         WRITE(iu_ene,*) etot

@@ -25,7 +25,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
   USE control_conv,     ONLY : ke, keden, nk_test, sigma_test
   USE control_eldos,    ONLY : lel_free_energy
   USE initial_conf,     ONLY : ibrav_save, tau_save_crys
-  USE equilibrium_conf, ONLY : at0, tau0
+  USE equilibrium_conf, ONLY : celldm0, at0, tau0
 !
 !  the library modules
 !
@@ -207,7 +207,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
            rd_ht = TRANSPOSE( at ) 
            trd_ht=.TRUE.
            cell_units='alat'
-           CALL cell_base_init ( ibrav, celldm, zero, zero, zero, zero, &
+           CALL cell_base_init ( ibrav, celldm0, zero, zero, zero, zero, &
                          zero, zero, trd_ht, rd_ht, cell_units )
            CALL set_fft_mesh()
            outdir=TRIM(outdir_thermo)//'/g'//TRIM(int_to_char(iwork))//'/'
@@ -215,6 +215,13 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
            IF (.NOT.frozen_ions) CALL clean_bfgs_history()
 
         CASE ('scf_polarization','mur_lc_polarization')
+!
+!  Initialize the QE variables for the ionic relaxation. 
+!
+           CALL set_work_for_relaxation(iwork)
+           outdir=TRIM(outdir_thermo)//'/g'//TRIM(int_to_char(iwork))//'/'
+           CALL set_tmp_dir( outdir )
+           IF (.NOT.frozen_ions) CALL clean_bfgs_history()
      END SELECT
   ELSE
      CALL errore('set_thermo_work_todo','unknown part',1)

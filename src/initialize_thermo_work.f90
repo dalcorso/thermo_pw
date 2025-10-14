@@ -35,7 +35,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   USE equilibrium_conf, ONLY : celldm0, omega0
   USE initial_conf,   ONLY : ibrav_save, start_geometry_save,             &
                              last_geometry_save
-  USE piezoelectric_tensor, ONLY : polar_geo
+  USE piezoelectric_tensor, ONLY : allocate_piezo
   USE control_elastic_constants, ONLY : rot_mat, ngeom, use_free_energy,   &
                                    elalgen, work_base, start_geometry_qha, &
                                    last_geometry_qha, elastic_algorithm,   &
@@ -191,6 +191,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
         CASE ('scf_piezoelectric_tensor')
            lpart2_pw=.TRUE.
            tot_ngeo=1
+           IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
         CASE ('scf_polarization') 
            lpart2_pw=.TRUE.
            tot_ngeo=1
@@ -291,6 +292,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            tot_ngeo=1
            IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
         CASE ('mur_lc_polarization')
            do_punch=.FALSE.
            lev_syn_1=.TRUE.
@@ -471,10 +473,9 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            IF (ALLOCATED(omega_geo)) DEALLOCATE(omega_geo)
            nwork=1
            lpolarization=.TRUE.
-           ALLOCATE(polar_geo(3,nwork))
+           CALL allocate_piezo(nwork)
            ALLOCATE(energy_geo(nwork))
            ALLOCATE(omega_geo(nwork))
-           polar_geo=0.0_DP
            do_punch=.TRUE.
      END SELECT
   ELSE

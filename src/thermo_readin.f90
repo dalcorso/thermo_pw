@@ -41,7 +41,7 @@ SUBROUTINE thermo_readin()
                                    flpbs, flprojlayer, flnkconv, flgrun,   &
                                    flpgrun, fl_el_cons, flpband, flvec,    &
                                    flepsilon, floptical, fleldos, fleltherm, &
-                                   fldosfrq, flelanhar, flgeom
+                                   fldosfrq, flelanhar, flgeom, fl_piezo
   USE temperature,          ONLY : tmin, tmax, deltat, ntemp, ntemp_plot,  &
                                    temp_plot_=>temp_plot, itemp_plot,      &
                                    sigma_ry_=>sigma_ry
@@ -258,6 +258,7 @@ SUBROUTINE thermo_readin()
                             delta_epsilon, epsilon_0,       &
                             poly_degree,                    &
                             fl_el_cons,                     &
+                            fl_piezo,                       &
                             lcm_ec,                         &
                             lzsisa,                         &
                             lfp,                            &
@@ -502,6 +503,7 @@ SUBROUTINE thermo_readin()
   epsilon_0=0.0_DP
   poly_degree=0
   fl_el_cons='output_el_cons.dat'
+  fl_piezo='output_piezo.dat'
   nmove=5
   move_at=0
   atom_dir=0.0_DP

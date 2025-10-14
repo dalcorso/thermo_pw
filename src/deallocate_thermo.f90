@@ -124,6 +124,7 @@ SUBROUTINE deallocate_thermo()
   USE control_mur,      ONLY : p0
   USE control_ev,       ONLY : e0, v0
   USE elastic_constants, ONLY : epsilon_geo, sigma_geo, epsilon_voigt
+  USE piezoelectric_tensor, ONLY : deallocate_piezo
   USE control_elastic_constants, ONLY : rot_mat, el_con_geo, &
                              el_con_ibrav_geo, el_con_celldm_geo, &
                              el_con_tau_crys_geo, el_con_omega_geo, &
@@ -673,6 +674,7 @@ SUBROUTINE deallocate_thermo()
      DEALLOCATE(collect_info_save)
   ENDIF
   CALL deallocate_geometry_file()
+  CALL deallocate_piezo()
 
   RETURN
   !

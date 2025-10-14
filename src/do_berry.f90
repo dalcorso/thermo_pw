@@ -6,7 +6,7 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !----------------------------------------------------------------------------
-SUBROUTINE do_berry ( exit_status, polar, nppl ) 
+SUBROUTINE do_berry ( exit_status, polar, tot_b_phase, nppl ) 
   !----------------------------------------------------------------------------
   !
   ! ... Run an instance of the Plane Wave Self-Consistent Field code 
@@ -30,7 +30,7 @@ SUBROUTINE do_berry ( exit_status, polar, nppl )
   USE io_global,        ONLY : stdout, ionode
   USE parameters,       ONLY : ntypx, npk
   USE upf_params,       ONLY : lmaxx
-  USE cell_base,        ONLY : at
+  USE cell_base,        ONLY : at, omega, alat
   USE starting_scf,     ONLY : starting_pot, startingconfig
   USE control_flags,    ONLY : gamma_only, lscf, lbands, ethr, &
                                istep, nstep, restart, lmd, lbfgs
@@ -44,7 +44,7 @@ SUBROUTINE do_berry ( exit_status, polar, nppl )
   IMPLICIT NONE
   INTEGER, INTENT(OUT) :: exit_status
   INTEGER, INTENT(IN) :: nppl
-  REAL(DP), INTENT(OUT) :: polar(3) 
+  REAL(DP), INTENT(OUT) :: polar(3), tot_b_phase(3) 
 
   REAL(DP) :: polar_at(3), atmod
   INTEGER :: idir
@@ -79,9 +79,13 @@ SUBROUTINE do_berry ( exit_status, polar, nppl )
      !
      CALL non_scf ()
      !
-     !   this is the phase, electronic+ionic
+     !   this is the phase, electronic+ionic. 
      !
-     polar_at(idir) = pdl_tot 
+     tot_b_phase(idir) = pdl_tot
+     !
+     !   We divide here by the volume that might change for each strain. 
+     !
+     polar_at(idir) = pdl_tot / omega
      !
      CALL close_files(.TRUE.)
      !
@@ -89,10 +93,11 @@ SUBROUTINE do_berry ( exit_status, polar, nppl )
      !
   END DO 
 !
-!  to have the true polarization we still need to multiply by alat and
-!  divide by omega
+!  Here we compute polarization of this structure in cartesian coordinates
+!  and in units of e/bohr**2
 !
   polar(:) = polar_at(1)*at(:,1) + polar_at(2)*at(:,2) + polar_at(3)*at(:,3)
+  polar(:) = polar * alat
 
   IF (.NOT.lpolarization) CALL print_polarization(polar(:), .FALSE. )
   !

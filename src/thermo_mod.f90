@@ -1790,6 +1790,8 @@ MODULE equilibrium_conf
                                ! from pw.x input
   REAL(DP), ALLOCATABLE :: tau0_crys(:,:) ! save the atomic coordinates 
                                ! in crystal coordinates
+  REAL(DP) :: polar0(3)        ! the spontaneous polarization of the 
+                               ! equilibrium configuration
   INTEGER  :: nr1_0, nr2_0, nr3_0  ! the fft dimensions of the equilibrium
                                    !  configuration
 END MODULE equilibrium_conf
@@ -2014,6 +2016,8 @@ MODULE data_files
   CHARACTER(LEN=256) :: flprojlayer ! the name of the file with the projections
                                   ! of the wavefunctions on each layer
   CHARACTER(LEN=256) :: fl_el_cons ! the file where the elastic constants are
+                                   ! written
+  CHARACTER(LEN=256) :: fl_piezo  ! the file where the piezoelectric tensor is 
                                    ! written
   CHARACTER(LEN=256) :: flgeom   ! the file with the saved geometries 
 
