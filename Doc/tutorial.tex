@@ -6,7 +6,7 @@
 %! or http://www.gnu.org/copyleft/gpl.txt .
 %!
 \documentclass[12pt,a4paper,twoside]{report}
-\def\version{2.1.1}
+\def\version{2.2.0}
 
 \usepackage[T1]{fontenc}
 \usepackage{bookman}
@@ -403,7 +403,7 @@ parameters as a function of temperature.
 The crystal parameters are plotted as a function of temperature
 in the standard range ($T=1$ K - $T=800$ K) or in the range  
 requested in input, in the file 
-\texttt{output\_anharm.ps}, a name that can be changed in the \thermo\ input.
+\texttt{output\_anhar.celldm.ps}, a name that can be changed in the \thermo\ input.
 Presently no temperature dependence is calculated 
 for the atomic coordinates, so the present approach is applicable
 to solids in which equilibrium atomic positions are fixed by 
@@ -414,7 +414,7 @@ symmetry, while it is an approximation in the other cases.
 \color{black}
 Use \texttt{what='mur\_lc\_t'}. See \texttt{example09}. The components
 of the thermal expansion tensor are shown as a function of temperature 
-in the file \texttt{output\_anharm.ps}, a name that can be changed in 
+in the file \texttt{output\_anhar.celldm.ps}, a name that can be changed in 
 the \thermo\ input.
 
 \newpage
@@ -423,7 +423,7 @@ as a function of temperature keeping into account the thermal expansion?}}
 \color{black}
 Use \texttt{what='mur\_lc\_t'}. The Helmholtz (or Gibbs at finite pressure) 
 free energy is shown as a function of temperature in the file 
-\texttt{output\_anharm.ps}. Note that the absolute value of this energy
+\texttt{output\_anhar.energy.ps}. Note that the absolute value of this energy
 depends on the pseudopotentials as the total energy. You can however
 compare the free energies for different crystal structures 
 and predict if a phase transition occurs and at which temperature (also 

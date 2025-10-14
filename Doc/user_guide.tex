@@ -6,7 +6,7 @@
 %! or http://www.gnu.org/copyleft/gpl.txt .
 %!
 \documentclass[12pt,a4paper,twoside]{report}
-\def\version{2.1.1}
+\def\version{2.2.0}
 
 \usepackage[T1]{fontenc}
 \usepackage{tcolorbox}
@@ -250,6 +250,7 @@ You should have received a copy of the GNU General Public License along with thi
 \hline
 \thermo\ & \qe & release date \\
 \hline
+2.2.0 & 7.5   &   \\
 2.1.1 & 7.5   & 13/10/2025 \\
 2.1.0 & 7.4.1 & 24/09/2025 \\
 2.0.3 & 7.4.1 & 23/06/2025 \\
@@ -2867,6 +2868,10 @@ and roto-translate the atomic positions.
 to write the guide \texttt{units.pdf} and \texttt{equilibrium.pdf}. 
 It computes also the error associated to each conversion factor.
 
+\item \texttt{wurtzite.x} Some tools to work with the wurtzite structure.
+Given a, c/a, and u writes the coordinates of the four atoms or given
+a, c/a, and the coordinates of the atoms finds u.
+
 \end{itemize}
 
 For a detailed description of the input variables please look at the beginning 
@@ -3367,8 +3372,12 @@ documents:
 \begin{itemize}
 
 \item
-\texttt{tutorial.pdf}: a short guide that indicates where to find the
-information needed to compute a given quantity. 
+\texttt{developer\_guide.pdf}: some notes on the internal logic of
+\thermo.
+
+\item
+\texttt{equilibrium.pdf}: some notes on the atomic units used in 
+\thermo\ for the equilibrium thermodynamic tensors.
 
 \item
 \texttt{point\_groups.pdf}: a description of the crystallographic point 
@@ -3378,20 +3387,21 @@ representations, for the interpretation of the color codes in the band
 and phonon dispersion plots.
 
 \item
+\texttt{symmetry.pdf}: some notes explaining how symmetry is used 
+to reduce calculations in electronic structure codes.
+
+\item
 \texttt{thermo.pdf}: some notes on the thermodynamic expressions implemented
 in \thermo.
 
 \item
-\texttt{developer\_guide.pdf}: some notes on the internal logic of
-\thermo.
+\texttt{tutorial.pdf}: a short guide that indicates where to find the
+information needed to compute a given quantity. 
 
 \item
 \texttt{unit.pdf}: some notes on the atomic units used in 
 \thermo.
 
-\item
-\texttt{equilibrium.pdf}: some notes on the atomic units used in 
-\thermo\ for the equilibrium thermodynamic tensors.
 
 \end{itemize}
 
