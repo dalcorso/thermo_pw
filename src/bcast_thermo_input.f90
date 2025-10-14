@@ -60,7 +60,7 @@ SUBROUTINE bcast_thermo_input()
   USE many_k_mod,       ONLY : memgpu
   USE band_computation, ONLY : sym_for_diago
 
-  USE thermo_mod,      ONLY : what, ngeo, step_ngeo, reduced_grid, fact_ngeo, &
+  USE thermo_mod,      ONLY : what, ngeo, step_ngeo, fact_ngeo, &
                               ngeo_ph, max_geometries, start_geometry, &
                               last_geometry
   USE control_quadratic_energy, ONLY : show_fit
@@ -279,7 +279,6 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( step_ngeo, meta_ionode_id, world_comm )
   CALL mp_bcast( lmurn, meta_ionode_id, world_comm )
   CALL mp_bcast( ieos, meta_ionode_id, world_comm )
-  CALL mp_bcast( reduced_grid, meta_ionode_id, world_comm )
   CALL mp_bcast( show_fit, meta_ionode_id, world_comm )
   CALL mp_bcast( vmin_input, meta_ionode_id, world_comm )
   CALL mp_bcast( vmax_input, meta_ionode_id, world_comm )

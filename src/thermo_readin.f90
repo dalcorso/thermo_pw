@@ -25,7 +25,7 @@ SUBROUTINE thermo_readin()
 !
 !  variable read by this routine
 !
-  USE thermo_mod,           ONLY : what, ngeo, step_ngeo, reduced_grid,    &
+  USE thermo_mod,           ONLY : what, ngeo, step_ngeo,     &
                                    fact_ngeo, max_geometries,   &
                                    start_geometry, last_geometry, &
                                    ngeo_ph
@@ -278,7 +278,6 @@ SUBROUTINE thermo_readin()
                             ngeo, step_ngeo,                &
                             ieos,                           &
                             lmurn,                          &
-                            reduced_grid,                   &
                             show_fit,                       &
                             vmin_input, vmax_input, deltav, &
                             pmin, pmax, deltap,             &
@@ -532,7 +531,6 @@ SUBROUTINE thermo_readin()
   step_ngeo(6) = 0.5_DP
   lmurn=.TRUE.
   ieos=4
-  reduced_grid =.FALSE.
   show_fit=.FALSE.
   vmin_input=0.0_DP
   vmax_input=0.0_DP
@@ -634,14 +632,6 @@ SUBROUTINE thermo_readin()
 
   IF (nsigma > max_sigma) CALL errore('thermo_readin','nsigma too large', 1)
   !
-  IF (lmurn.AND.reduced_grid) CALL errore('thermo_readin',&
-                             'lmurn and reduced_grid cannot be both .TRUE.',1)
-  IF (reduced_grid) THEN
-     ltherm_dos=.FALSE.
-     ltherm_freq=.FALSE.
-     lv0_t=.FALSE.
-     lb0_t=.FALSE.
-  ENDIF
 
   IF (lgruneisen_gen .AND. lmurn) CALL errore('thermo_readin', &
                               'lgruneisen_gen requires lmurn=.FALSE.',1)

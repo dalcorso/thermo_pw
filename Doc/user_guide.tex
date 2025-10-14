@@ -1879,8 +1879,7 @@ ieos        : choose the equation of state to use (only when
               4 - Murnaghan
              Default: integer 4
 show_fit   : if .TRUE. show the contour plot of the fitted 
-             energy instead of the energy. Used by default 
-             when reduced_grid is .TRUE..
+             energy instead of the energy.  
              Default: logical .FALSE.
 frozen_ions: if .TRUE. the atomic coordinates are obtained by 
              applying the strain to the coordinates given in the 
@@ -2254,9 +2253,8 @@ lv0_t         : if .TRUE.  the calculation of the thermal
                 equilibrium geometry as a function of temperature 
                 computed from the free energy minimization, 
                 otherwise the equilibrium geometry at T=0 K. 
-                If reduced_grid=.TRUE. or both ltherm_freq=.FALSE. 
-                and ltherm_dos=.FALSE. the input geometry is used 
-                when lv0_t=.FALSE.
+                If both ltherm_freq=.FALSE. and ltherm_dos=.FALSE. 
+                the input geometry is used when lv0_t=.FALSE.
                 Default: logical .TRUE.
 lb0_t         : if .TRUE. the calculation of the thermal expansion 
                 with Gruneisen parameters uses the bulk modulus as 
@@ -2359,20 +2357,6 @@ ngeo_ph(1),...,ngeo_ph(6) These variables are set to compute
                 9        3            4,5,6
                 9        5            3,4,5,6,7
                 Default: integer ngeo(1),...,ngeo(6)
-reduced_grid: if .TRUE. the computed geometries are only along 
-             one dimensional lines. So each parameter is varied 
-             independently keeping the others fixed at the input 
-             values. This option sets ltherm_freq=.FALSE., 
-             ltherm_dos=.FALSE., lv0_t=.FALSE. and lb0_t=.FALSE..
-             With this option the thermal expansion is 
-             calculated only using the Gruneisen parameters 
-             at the input geometry. The multidimensional fit 
-             of the free energy is not done so this method 
-             should be faster than the default one, but it
-             is less precise. This option is used only with 
-             lmurn=.FALSE. and requires a file with the 
-             elastic constants at the input geometry.
-             Default: logical .FALSE.
 all_geometries_together: if .TRUE. all the phonon calculation 
              for all the geometries are used for the image 
              parallelization. To be used only if you have many 
@@ -2689,6 +2673,12 @@ on the internal conventions of \thermo\ or further process its output.
 Currently it contains the following programs:
 
 \begin{itemize}
+
+
+\item \texttt{analyze\_dynmat.x} reads two dynamical matrices files. The 
+first is supposed to be at the $\Gamma$ point, the other at a small 
+${\bf q}$. It applies the acoustic sum rule, the nonanalytic term
+if needed at $\Gamma$, and diagonalizes both matrices. 
 
 \item \texttt{average\_grun.x} reads the thermal expansion, 
 the isothermal bulk modulus, the volume, the isochoric heat capacity,
@@ -3424,7 +3414,6 @@ information needed to compute a given quantity.
 \item
 \texttt{unit.pdf}: some notes on the atomic units used in 
 \thermo.
-
 
 \end{itemize}
 

@@ -13,7 +13,7 @@ SUBROUTINE deallocate_thermo()
   !
   USE kinds,          ONLY : DP
   USE thermo_mod,     ONLY : celldm_geo, energy_geo, omega_geo, ibrav_geo,  &
-                             no_ph, tot_ngeo, in_degree, dynmat_on_file,    &
+                             no_ph, tot_ngeo, dynmat_on_file,    &
                              ef_geo
   USE thermodynamics, ONLY : ph_free_ener, ph_ener, ph_entropy, ph_ce,      &
                              ph_t_debye, ph_e0, ph_b_fact
@@ -104,7 +104,7 @@ SUBROUTINE deallocate_thermo()
                              debye_macro_elf_t, debye_macro_elf_s, dydef_t
   USE grun_anharmonic,  ONLY : betab, alpha_an_g, cp_grun_t, cv_grun_t,     &
                              ce_grun_t, b0_grun_s,                          &
-                             grun_gamma_t, poly_grun, poly_grun_red,        &
+                             grun_gamma_t, poly_grun,                       &
                              grun_cpmce_anis, el_cons_grun_t, el_comp_grun_t
   USE control_paths,    ONLY : xqaux, wqaux, letter, label_list, letter_path, &
                                label_disp_q, disp_q, disp_wq, nrap_plot_in,   &
@@ -166,7 +166,6 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (no_ph) )           DEALLOCATE(no_ph) 
   IF ( ALLOCATED (found_dos_ec) )    DEALLOCATE(found_dos_ec) 
   IF ( ALLOCATED (found_ph_ec) )     DEALLOCATE(found_ph_ec) 
-  IF ( ALLOCATED (in_degree) )       DEALLOCATE(in_degree) 
   IF ( ALLOCATED (dynmat_on_file) )  DEALLOCATE(dynmat_on_file) 
   IF ( ALLOCATED (vmin_t) )          DEALLOCATE(vmin_t) 
   IF ( ALLOCATED (ke) )              DEALLOCATE(ke) 
@@ -542,7 +541,6 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (betab) )            DEALLOCATE(betab) 
   IF ( ALLOCATED (alpha_an_g) )       DEALLOCATE(alpha_an_g) 
   IF ( ALLOCATED (poly_grun) )        DEALLOCATE(poly_grun) 
-  IF ( ALLOCATED (poly_grun_red) )    DEALLOCATE(poly_grun_red) 
   IF ( ALLOCATED (vgrun_t) )          DEALLOCATE(vgrun_t) 
   IF ( ALLOCATED (b0_grun_t) )        DEALLOCATE(b0_grun_t) 
   IF ( ALLOCATED (el_cons_grun_t) )   DEALLOCATE(el_cons_grun_t) 

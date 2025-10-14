@@ -516,7 +516,7 @@ SUBROUTINE manage_anhar_anis()
 !-------------------------------------------------------------------------
 !
 USE kinds,                 ONLY : DP
-USE thermo_mod,            ONLY : reduced_grid, tot_ngeo
+USE thermo_mod,            ONLY : tot_ngeo
 USE temperature,           ONLY : ntemp, temp, ntemp_plot, itemp_plot
 USE control_thermo,        ONLY : ltherm_dos, ltherm_freq, lgruneisen_gen
 USE control_elastic_constants, ONLY : el_cons_qha_available, &
@@ -847,11 +847,7 @@ IF (ggrun_recipe>1) THEN
 !
    CALL set_volume_b0_grun()
    CALL set_elastic_grun()
-   IF (reduced_grid) THEN
-      CALL fit_frequencies_anis_reduced()
-   ELSE
-      CALL fit_frequencies_anis()
-   ENDIF
+   CALL fit_frequencies_anis()
 !
 !    calculate the Gruneisen parameters and the anharmonic quantities
 !

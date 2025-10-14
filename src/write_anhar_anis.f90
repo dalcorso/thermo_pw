@@ -894,7 +894,7 @@ USE kinds,          ONLY : DP
 USE constants,      ONLY : ry_kbar
 USE ions_base,      ONLY : nat
 USE cell_base,      ONLY : ibrav
-USE thermo_mod,     ONLY : ngeo, no_ph, reduced_grid
+USE thermo_mod,     ONLY : ngeo, no_ph
 USE temperature,    ONLY : ntemp, temp
 USE control_grun,   ONLY : vgrun_t, celldm_grun_t, b0_grun_t, lb0_t
 USE ph_freq_thermodynamics, ONLY : ph_freq_save
@@ -902,7 +902,7 @@ USE grun_anharmonic, ONLY : alpha_an_g, grun_gamma_t, done_grun,          &
                            cp_grun_t, b0_grun_s, betab, grun_cpmce_anis,  &
                            cv_grun_t, ce_grun_t, lelastic_grun,           &
                            el_cons_grun_t, el_comp_grun_t, lelastic_grun, &
-                           poly_degree_grun, p_grun_p2, poly_grun_red
+                           poly_degree_grun, p_grun_p2
 USE polyfit_mod,    ONLY : compute_poly, compute_poly_deriv
 USE ph_freq_module, ONLY : thermal_expansion_ph, ph_freq_type,  &
                            destroy_ph_freq, init_ph_freq
@@ -1006,41 +1006,20 @@ DO itemp = 1, ntemp
    iq_eff=0
    DO iq=startq, lastq
       iq_eff=iq_eff+1
-      IF (reduced_grid) THEN
-         DO i=1,nvar
-            DO imode=1,3*nat
-               CALL compute_poly(x(i), poly_degree_grun, &
-                                            poly_grun_red(1,imode,i,iq),f)
-!
-!  this function gives the derivative with respect to x(i) multiplied by x(i)
-!
-               CALL compute_poly_deriv(x(i), poly_degree_grun, &
-                                             poly_grun_red(1,imode,i,iq),g)
-
-               ph_freq%nu(imode,iq_eff) = f
-               IF (f > 0.0_DP ) THEN
-                  ph_grun(i)%nu(imode,iq_eff)= - g / f 
-               ELSE
-                  ph_grun(i)%nu(imode,iq_eff)=0.0_DP
-               END IF
-            ENDDO
-         ENDDO
-      ELSE
-         DO imode=1,3*nat
-            CALL evaluate_fit_quadratic(nvar,x,f,p_grun_p2(imode,iq))
-            CALL evaluate_quadratic_grad(nvar,x,grad,p_grun_p2(imode,iq))
-            ph_freq%nu(imode,iq_eff) = f 
-            IF (f > 0.0_DP ) THEN
-               DO i=1,nvar
-                  ph_grun(i)%nu(imode,iq_eff)=-grad(i) / f
-               END DO
-            ELSE
-               DO i=1,nvar
-                  ph_grun(i)%nu(imode,iq_eff)=0.0_DP
-               END DO
-            END IF
-         END DO
-      ENDIF
+      DO imode=1,3*nat
+         CALL evaluate_fit_quadratic(nvar,x,f,p_grun_p2(imode,iq))
+         CALL evaluate_quadratic_grad(nvar,x,grad,p_grun_p2(imode,iq))
+         ph_freq%nu(imode,iq_eff) = f 
+         IF (f > 0.0_DP ) THEN
+            DO i=1,nvar
+               ph_grun(i)%nu(imode,iq_eff)=-grad(i) / f
+            END DO
+         ELSE
+            DO i=1,nvar
+               ph_grun(i)%nu(imode,iq_eff)=0.0_DP
+            END DO
+         END IF
+      END DO
    END DO
 !
 !  Compute thermal expansion from Gruneisen parameters. Loop over the number 
@@ -1127,14 +1106,12 @@ DO i=1,nvar
 END DO
 DEALLOCATE(ph_grun)
 
-IF (.NOT.reduced_grid) THEN
-   DO imode=1,3*nat
-      DO iq=startq, lastq
-         CALL clean_poly(p_grun_p2(imode,iq))
-      ENDDO
+DO imode=1,3*nat
+   DO iq=startq, lastq
+      CALL clean_poly(p_grun_p2(imode,iq))
    ENDDO
-   DEALLOCATE(p_grun_p2)
-ENDIF
+ENDDO
+DEALLOCATE(p_grun_p2)
 
 DEALLOCATE(grad)
 DEALLOCATE(x)

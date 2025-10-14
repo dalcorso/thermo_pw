@@ -20,7 +20,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   USE kinds,          ONLY : DP
   USE thermo_mod,     ONLY : what, energy_geo, ef_geo, celldm_geo, ibrav_geo, &
                              omega_geo, tot_ngeo, no_ph, start_geometry,    &
-                             last_geometry, reduced_grid, in_degree
+                             last_geometry
   USE control_thermo, ONLY : lpwscf, lpwband, lphonon, lev_syn_1, lev_syn_2, &
                              lph, lef, lpwscf_syn_1, lbands_syn_1, lq2r,   &
                              ltherm, lconv_ke_test, lconv_nk_test,    &
@@ -307,7 +307,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
 !    Here all the cases that compute the free energy and minimize it
 !
         CASE ('mur_lc_t')
-           lev_syn_1=.NOT.reduced_grid
+           lev_syn_1=.TRUE.
            CALL initialize_mur(nwork)
            lph = .TRUE.
            lq2r = .TRUE.
@@ -318,7 +318,6 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            ALLOCATE(found_dos_ec(tot_ngeo))
            ALLOCATE(found_ph_ec(tot_ngeo))
            ALLOCATE(all_geometry_done_geo(tot_ngeo))
-           IF (reduced_grid) ALLOCATE(in_degree(tot_ngeo))
            CALL initialize_no_ph(no_ph, tot_ngeo, ibrav_save)
            CALL summarize_geometries(nwork)
            nvar=crystal_parameters(ibrav_save)
@@ -517,11 +516,6 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               lpwscf(iwork)=.TRUE.
               lef(iwork)=(lgauss.OR.ltetra)
            ENDDO
-           IF (reduced_grid) THEN
-              DO iwork=1,nwork
-                 IF (no_ph(iwork)) lpwscf(iwork)=.FALSE.
-              ENDDO
-           ENDIF
         CASE ('elastic_constants_geo')  
            DO igeom_qha=start_geometry_qha, last_geometry_qha
               DO iwork=1,work_base
@@ -606,7 +600,7 @@ SUBROUTINE set_celldm_geo(celldm_geo, nwork)
 USE kinds,         ONLY : DP
 USE control_thermo, ONLY : lgeo_from_file
 USE constants,     ONLY : pi
-USE thermo_mod,    ONLY : step_ngeo, ngeo, reduced_grid
+USE thermo_mod,    ONLY : step_ngeo, ngeo
 USE initial_conf,  ONLY : celldm_save
 USE geometry_file, ONLY : set_celldm_geo_from_file
 
@@ -647,25 +641,12 @@ DO igeo6 = -ngeo(6)/2, (ngeo(6)-1)/2
                   celldm_geo(1,iwork)=celldm_save(1)+igeo1*step_ngeo(1)
                   celldm_geo(2,iwork)=celldm_save(2)+igeo2*step_ngeo(2)
                   celldm_geo(3,iwork)=celldm_save(3)+igeo3*step_ngeo(3)
-                  IF (reduced_grid.AND.(ABS(igeo1)+ABS(igeo2)+ABS(igeo3)+  &
-                            ABS(igeo4)+ABS(igeo5)+ABS(igeo6)==1)) THEN
-                     IF (igeo1/=0) celldm_geo(1,iwork)=celldm_geo(1,iwork) &
-                                                                  +delta(1)
-                     IF (igeo2/=0) celldm_geo(2,iwork)=celldm_geo(2,iwork) &
-                                                                  +delta(2)
-                     IF (igeo3/=0) celldm_geo(3,iwork)=celldm_geo(3,iwork) &
-                                                                  +delta(3)
-                     IF (igeo4/=0) angle1=angle1+delta(4)*pi/180.0_DP
-                     IF (igeo5/=0) angle2=angle2+delta(5)*pi/180.0_DP
-                     IF (igeo6/=0) angle3=angle3+delta(6)*pi/180.0_DP
-                  ELSEIF(.NOT.reduced_grid) THEN
-                     celldm_geo(1,iwork)=celldm_geo(1,iwork)+delta(1)
-                     celldm_geo(2,iwork)=celldm_geo(2,iwork)+delta(2)
-                     celldm_geo(3,iwork)=celldm_geo(3,iwork)+delta(3)
-                     angle1=angle1+delta(4)*pi/180.0_DP
-                     angle2=angle2+delta(5)*pi/180.0_DP
-                     angle3=angle3+delta(6)*pi/180.0_DP
-                  ENDIF
+                  celldm_geo(1,iwork)=celldm_geo(1,iwork)+delta(1)
+                  celldm_geo(2,iwork)=celldm_geo(2,iwork)+delta(2)
+                  celldm_geo(3,iwork)=celldm_geo(3,iwork)+delta(3)
+                  angle1=angle1+delta(4)*pi/180.0_DP
+                  angle2=angle2+delta(5)*pi/180.0_DP
+                  angle3=angle3+delta(6)*pi/180.0_DP
                   celldm_geo(4,iwork)=COS(angle1)
                   celldm_geo(5,iwork)=COS(angle2)
                   celldm_geo(6,iwork)=COS(angle3)
@@ -1056,8 +1037,7 @@ SUBROUTINE initialize_no_ph(no_ph, tot_ngeo, ibrav)
 !   ggrun_recipes these allow to compute a linear or a quadratic 
 !   polynomial that fits the free energy.
 !
-USE thermo_mod, ONLY : ngeo, fact_ngeo, ngeo_ph, reduced_grid, &
-                       red_central_geo, in_degree
+USE thermo_mod, ONLY : ngeo, fact_ngeo, ngeo_ph
 USE control_thermo, ONLY : lgruneisen_gen
 USE control_gen_gruneisen, ONLY : icenter_grun, xngeo, ggrun_recipe, ind_rec3
 USE lattices, ONLY : compress_int_vect, crystal_parameters
@@ -1066,45 +1046,11 @@ IMPLICIT NONE
 INTEGER, INTENT(IN)    :: tot_ngeo, ibrav
 LOGICAL, INTENT(INOUT) :: no_ph(tot_ngeo)
 
-LOGICAL :: todo(6), in_grid
+LOGICAL :: todo(6)
 INTEGER :: igeo1, igeo2, igeo3, igeo4, igeo5, igeo6, start, count_ngeo, &
            aux_deg(tot_ngeo), iwork, nvar, icount, iint_geom
 INTEGER, ALLOCATABLE :: ipoint(:), inde(:)
 LOGICAL :: select_ph_to_do
-
-IF (reduced_grid) THEN
-   count_ngeo=0
-   no_ph=.TRUE.
-   aux_deg=0
-   DO igeo6 = -ngeo(6)/2, (ngeo(6)-1)/2
-      DO igeo5 = -ngeo(5)/2, (ngeo(5)-1)/2
-         DO igeo4 = -ngeo(4)/2, (ngeo(4)-1)/2
-            DO igeo3 = -ngeo(3)/2, (ngeo(3)-1)/2
-               DO igeo2 = -ngeo(2)/2, (ngeo(2)-1)/2
-                  DO igeo1 = -ngeo(1)/2, (ngeo(1)-1)/2
-                     count_ngeo=count_ngeo+1
-                     IF (in_grid(igeo1,igeo2,igeo3,igeo4,igeo5,igeo6)) THEN
-                        no_ph(count_ngeo)=.FALSE. 
-                        IF (igeo1/=0) aux_deg(count_ngeo)=1
-                        IF (igeo2/=0) aux_deg(count_ngeo)=2
-                        IF (igeo3/=0) aux_deg(count_ngeo)=3
-                        IF (igeo4/=0) aux_deg(count_ngeo)=4
-                        IF (igeo5/=0) aux_deg(count_ngeo)=5
-                        IF (igeo6/=0) aux_deg(count_ngeo)=6
-                     ELSEIF ((ABS(igeo1)+ABS(igeo2)+ABS(igeo3)+ABS(igeo4)+ &
-                                     ABS(igeo5)+ABS(igeo6))==0) THEN
-                        no_ph(count_ngeo)=.FALSE. 
-                        red_central_geo=count_ngeo
-                     ENDIF 
-                  ENDDO
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDDO
-   ENDDO
-   CALL compress_int_vect(aux_deg,in_degree,tot_ngeo,ibrav)
-   RETURN
-ENDIF
 !
 !   Here we set no_ph taking a grid of
 !   2*nvar+1 (ggrun_recipe=1)
@@ -1259,7 +1205,6 @@ END FUNCTION count_energies
 SUBROUTINE find_central_geo(ngeo, no_ph, central_geo)
 !-----------------------------------------------------------------------
 !
-USE thermo_mod, ONLY : reduced_grid, red_central_geo
 !
 IMPLICIT NONE
 INTEGER :: ngeo
@@ -1267,11 +1212,6 @@ LOGICAL :: no_ph(ngeo)
 INTEGER :: central_geo
 
 INTEGER :: igeo
-
-IF (reduced_grid) THEN
-   central_geo=red_central_geo
-   RETURN
-ENDIF
 
 central_geo=ngeo/2
 IF (MOD(ngeo,2)==1) central_geo=central_geo+1
@@ -1287,31 +1227,6 @@ ENDIF
 
 RETURN
 END SUBROUTINE find_central_geo
-
-!-----------------------------------------------------------------------
-FUNCTION in_grid(igeo1, igeo2, igeo3, igeo4, igeo5, igeo6)
-!-----------------------------------------------------------------------
-!
-!  This logical function returns .TRUE. if only one of the six igeo 
-!  is different from zero. These are the geometries at which the phonon
-!  dispersions are calculated when reduced_grid=.TRUE.
-!
-IMPLICIT NONE
-LOGICAL :: in_grid
-INTEGER :: igeo1, igeo2, igeo3, igeo4, igeo5, igeo6, nzero
-
-nzero=0
-IF (igeo1 /= 0) nzero=nzero+1
-IF (igeo2 /= 0) nzero=nzero+1
-IF (igeo3 /= 0) nzero=nzero+1
-IF (igeo4 /= 0) nzero=nzero+1
-IF (igeo5 /= 0) nzero=nzero+1
-IF (igeo6 /= 0) nzero=nzero+1
-
-in_grid=(nzero==1)
-
-RETURN
-END FUNCTION in_grid
 
 !---------------------------------------------------------------------
 SUBROUTINE initialize_flags_for_ph(nwork)

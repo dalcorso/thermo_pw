@@ -58,15 +58,7 @@ MODULE thermo_mod
   INTEGER, ALLOCATABLE :: ibrav_geo(:)          ! the Bravais lattice at
                                                 ! each geometry
   INTEGER :: central_geo                        ! a reference geometry
-  LOGICAL :: reduced_grid                       ! if .TRUE. use a reduced
-                                                ! grid to interpolate the
-                                                ! geometry
-  INTEGER, ALLOCATABLE :: in_degree(:)          ! for each geometry says to
-                                                ! which degree it belongs in 
-                                                ! the reduced grid
-  INTEGER :: red_central_geo                    ! With the reduced_grid option
-                                                ! this is the central geometry
-                                                ! used by all degrees
+
   REAL(DP) :: density                           ! the density of the solid
 
   INTEGER :: max_geometries                     ! This value controls the
@@ -1031,12 +1023,6 @@ MODULE grun_anharmonic
                                              ! frequencies as a function of
                                              ! the crystal parameters
   REAL(DP), ALLOCATABLE :: poly_grun(:,:,:)
-  REAL(DP), ALLOCATABLE :: poly_grun_red(:,:,:,:) ! For each band, each q point
-                                        ! and each crystal parameter
-                                        ! these are the coefficients of 
-                                        ! polynomial which fit the frequency
-                                        ! as a function of crystal parameter
-                                        ! this is for the reduced_grid case
   INTEGER :: poly_degree_grun           ! degree of the polynomial used to
                                         ! intepolate the frequencies
   LOGICAL :: done_grun=.FALSE.          ! the anharmonic quantities with
