@@ -20,7 +20,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   USE kinds,          ONLY : DP
   USE thermo_mod,     ONLY : what, energy_geo, ef_geo, celldm_geo, ibrav_geo, &
                              omega_geo, tot_ngeo, no_ph, start_geometry,    &
-                             last_geometry
+                             last_geometry, iwho
   USE control_thermo, ONLY : lpwscf, lpwband, lphonon, lev_syn_1, lev_syn_2, &
                              lph, lef, lpwscf_syn_1, lbands_syn_1, lq2r,   &
                              ltherm, lconv_ke_test, lconv_nk_test,    &
@@ -74,6 +74,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
 !
 !   the restart directory is used in all cases
 !
+     iwho=0
      ios=0
      IF (meta_ionode) ios = f_mkdir_safe( 'restart' )
      ngeom=1
@@ -753,7 +754,7 @@ SUBROUTINE initialize_mur(nwork)
 !
 USE kinds,         ONLY : DP
 USE thermo_mod,    ONLY : ibrav_geo, ngeo, celldm_geo, energy_geo, ef_geo, &
-                          omega_geo
+                          omega_geo, iwho
 USE control_vol,   ONLY : nvol, vmin_input, vmax_input, deltav
 USE initial_conf,  ONLY : ibrav_save
 USE temperature,   ONLY : ntemp_plot
@@ -772,6 +773,7 @@ INTEGER              :: igeom
 INTEGER              :: compute_nwork
 REAL(DP)             :: compute_omega_geo
 
+iwho=1
 IF (lgeo_from_file) CALL read_geometry_file(ngeo)
 nwork=compute_nwork()
 ALLOCATE(ibrav_geo(nwork))
@@ -828,7 +830,7 @@ SUBROUTINE initialize_mur_qha(nwork)
 !   It allocates the variables el_con_ibrav_geo and el_con_celldm_geo. 
 !
 USE kinds,         ONLY : DP
-USE thermo_mod,    ONLY : ngeo
+USE thermo_mod,    ONLY : ngeo, iwho
 USE ions_base,     ONLY : nat
 USE control_elastic_constants, ONLY : el_con_ibrav_geo, el_con_celldm_geo, &
                                       el_con_tau_crys_geo, el_con_omega_geo
@@ -845,6 +847,7 @@ INTEGER              :: igeom, iwork
 INTEGER              :: compute_nwork
 REAL(DP)             :: compute_omega_geo
 
+iwho=2
 IF (lgeo_from_file) CALL read_geometry_file(ngeo)
 nwork=compute_nwork()
 ALLOCATE(el_con_ibrav_geo(nwork))

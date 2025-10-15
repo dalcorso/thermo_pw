@@ -22,6 +22,9 @@ MODULE thermo_mod
 
   CHARACTER(LEN=30) :: what             ! the type of calculation. See README.
 
+  INTEGER :: iwho                       ! an internal integer code that
+                                        ! allow the code to know what
+                                        ! see initialize_thermo_work 
   INTEGER  :: ngeo(6)                   ! number of different geometries 
                                         ! per celldm parameter
 

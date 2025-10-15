@@ -171,3 +171,56 @@ SUBROUTINE save_existence(iwork, part)
   
   RETURN
 END SUBROUTINE save_existence
+!
+!--------------------------------------------------------
+SUBROUTINE save_geometry(iwork, part, iwho)
+!--------------------------------------------------------
+!
+!  This routine saves on file the crystal parameters, and
+!  the relaxed atomic coordinates. 
+!  The tau are saved as they are in cartesian coordinates 
+!  in units of alat.
+!
+  USE cell_base,       ONLY : ibrav, celldm
+  USE ions_base,       ONLY : atm, tau, nat, ityp
+
+  USE io_global,       ONLY : ionode
+  !
+  IMPLICIT NONE
+  !
+  INTEGER, INTENT(IN) :: iwork, part, iwho
+  INTEGER :: find_free_unit
+  CHARACTER(LEN=6) :: int_to_char
+  CHARACTER(LEN=256) :: filename, label
+  INTEGER :: iu_geo, ios, na
+
+  IF (iwho==0) RETURN
+  IF (ionode) THEN
+     iu_geo=find_free_unit()
+     IF (iwho==1) label='restart/geo_work_part.mlc.'
+     IF (iwho==2) label='restart/geo_work_part.ecg.'
+     filename=TRIM(label)//TRIM(int_to_char(iwork))//'.'//&
+                              TRIM(int_to_char(part))
+     OPEN(UNIT=iu_geo, FILE=TRIM(filename), STATUS='UNKNOWN', &
+                       FORM='FORMATTED', ERR=20, IOSTAT=ios)
+
+     IF (iwork > 0) THEN
+        WRITE(iu_geo,*) ibrav
+        WRITE(iu_geo,*) celldm(:)
+        WRITE(iu_geo,*) nat
+        WRITE(iu_geo,*) (ityp(na), na=1,nat)
+        DO na=1,nat
+           WRITE(iu_geo,'(a6,3e23.14)') atm(ityp(na)), tau(1,na), tau(2,na), &
+                                                                  tau(3,na)
+        ENDDO
+     ENDIF
+     CLOSE(iu_geo)
+!
+!  If the file cannot be written we do nothing
+!
+20   CONTINUE
+  END IF
+
+  RETURN
+END SUBROUTINE save_geometry
+

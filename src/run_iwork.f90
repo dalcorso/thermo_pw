@@ -17,7 +17,7 @@ USE control_thermo,       ONLY : lpwscf, lpwband, lstress, lphonon, lberry, &
                                  lef, geometry, all_geometries_together
 USE control_qe,           ONLY : use_ph_images
 USE control_phrun,        ONLY : auxdyn
-USE thermo_mod,           ONLY : energy_geo, ef_geo
+USE thermo_mod,           ONLY : energy_geo, ef_geo, iwho
 USE elastic_constants,    ONLY : sigma_geo
 USE piezoelectric_tensor, ONLY : polar_geo, tot_b_phase, nppl
 USE ener,                 ONLY : etot, ef
@@ -64,6 +64,7 @@ IF (lpwscf(iwork).OR.lpwband(iwork)) THEN
       IF (lberry(iwork)) CALL do_berry(exit_status, polar_geo(1,iwork), &
                                  tot_b_phase(1,iwork), nppl)
       IF (lpwscf(iwork)) CALL save_existence(iwork,part)
+      IF (lpwscf(iwork)) CALL save_geometry(iwork,part,iwho)
    ENDIF
 ENDIF
 !
