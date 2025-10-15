@@ -14,20 +14,20 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   !  information.
   !  In addition to the variables that control the run it allocates, for
   !  the tasks that require it:
-  !  ibrav_geo, celldm_geo, omega_geo, energy_geo
+  !  ibrav_geo, celldm_geo, at_geo, omega_geo, energy_geo
   !  lpwscf, lstress, lberry, lphonon
   !
   USE kinds,          ONLY : DP
   USE thermo_mod,     ONLY : what, energy_geo, ef_geo, celldm_geo, ibrav_geo, &
                              omega_geo, tot_ngeo, no_ph, start_geometry,    &
-                             last_geometry, iwho
+                             last_geometry, iwho, tau_geo, at_geo
   USE control_thermo, ONLY : lpwscf, lpwband, lphonon, lev_syn_1, lev_syn_2, &
                              lph, lef, lpwscf_syn_1, lbands_syn_1, lq2r,   &
                              ltherm, lconv_ke_test, lconv_nk_test,    &
                              lstress, lelastic_const, lpiezoelectric_tensor, &
                              lberry, lpolarization, lpart2_pw, do_scf_relax, &
                              ldos_syn_1, ltherm_dos, ltherm_freq, after_disp, &
-                             lectqha
+                             lectqha, ltau_from_file
   USE control_pwrun,  ONLY : do_punch
   USE control_conv,   ONLY : nke, ke, deltake, nkeden, deltakeden, keden, &
                              nnk, nk_test, deltank, nsigma, sigma_test,   &  
@@ -365,12 +365,18 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            
            ALLOCATE(energy_geo(tot_ngeo))
            ALLOCATE(tau_save_ec(3,nat,tot_ngeo))
+           ALLOCATE(tau_geo(3,nat,tot_ngeo))
            ALLOCATE(all_geometry_done_geo(ngeom))
            IF (.NOT.lph) ALLOCATE(el_con_geo(6,6,ngeom))
            ALLOCATE(no_ph(tot_ngeo))
            IF (lel_free_energy) ALLOCATE(ef_geo(tot_ngeo))
            energy_geo=0.0_DP
            no_ph=.FALSE.
+           IF (ltau_from_file) THEN
+              DO iwork=1,nwork
+                 CALL check_geometry_exist(iwork,1,iwho)
+              ENDDO
+           ENDIF
            IF (elastic_algorithm=='advanced'.OR.elastic_algorithm=='energy') &
                                                                           THEN
               ALLOCATE(omega_geo(nwork))
@@ -436,15 +442,23 @@ SUBROUTINE initialize_thermo_work(nwork, part)
 
            IF (ALLOCATED(ibrav_geo))  DEALLOCATE(ibrav_geo)
            IF (ALLOCATED(celldm_geo)) DEALLOCATE(celldm_geo)
+           IF (ALLOCATED(at_geo)) DEALLOCATE(at_geo)
+           IF (ALLOCATED(tau_geo)) DEALLOCATE(tau_geo)
            IF (ALLOCATED(energy_geo)) DEALLOCATE(energy_geo)
            IF (ALLOCATED(omega_geo))  DEALLOCATE(omega_geo)
 !
 !     initialise_elastic_cons allocates ibrav_geo and celldm_geo
 !
+           iwho=2
            CALL initialize_elastic_cons(1,nwork)
 
            ALLOCATE(energy_geo(nwork))
            ALLOCATE(el_con_omega_geo(1))
+           IF (ltau_from_file) THEN
+              DO iwork=1,nwork
+                  CALL check_geometry_exist(iwork,part,iwho)
+              ENDDO
+           ENDIF
            tot_ngeo=nwork
            IF (last_geometry_save > tot_ngeo) THEN
                last_geometry=tot_ngeo
@@ -754,13 +768,14 @@ SUBROUTINE initialize_mur(nwork)
 !
 USE kinds,         ONLY : DP
 USE thermo_mod,    ONLY : ibrav_geo, ngeo, celldm_geo, energy_geo, ef_geo, &
-                          omega_geo, iwho
+                          omega_geo, at_geo, iwho, tau_geo
+USE ions_base,     ONLY : nat
 USE control_vol,   ONLY : nvol, vmin_input, vmax_input, deltav
 USE initial_conf,  ONLY : ibrav_save
 USE temperature,   ONLY : ntemp_plot
 USE geometry_file, ONLY : read_geometry_file
 USE uniform_pressure, ONLY : omega_p, density_p, celldm_p, p2_p, p4_p
-USE control_thermo, ONLY : lgeo_from_file
+USE control_thermo, ONLY : lgeo_from_file, ltau_from_file
 USE control_pressure, ONLY : npress, npress_plot
 USE control_mur_p, ONLY : vmin_p, b0_p, b01_p, b02_p, emin_p
 USE control_mur,   ONLY : p0
@@ -769,7 +784,7 @@ IMPLICIT NONE
 
 INTEGER, INTENT(OUT) :: nwork
 
-INTEGER              :: igeom
+INTEGER              :: igeom, iwork
 INTEGER              :: compute_nwork
 REAL(DP)             :: compute_omega_geo
 
@@ -778,10 +793,18 @@ IF (lgeo_from_file) CALL read_geometry_file(ngeo)
 nwork=compute_nwork()
 ALLOCATE(ibrav_geo(nwork))
 ALLOCATE(celldm_geo(6,nwork))
+ALLOCATE(at_geo(3,3,nwork))
 ALLOCATE(energy_geo(nwork))
 ALLOCATE(ef_geo(nwork))
+ALLOCATE(tau_geo(3,nat,nwork))
 ALLOCATE(omega_geo(nwork))
 CALL set_celldm_geo(celldm_geo, nwork)
+IF (ltau_from_file) THEN
+   DO iwork=1,nwork
+      CALL check_geometry_exist(iwork,1,iwho)
+   ENDDO
+ENDIF
+
 DO igeom = 1, nwork
    omega_geo(igeom)=compute_omega_geo(ibrav_save,celldm_geo(:,igeom))
 ENDDO
@@ -833,9 +856,10 @@ USE kinds,         ONLY : DP
 USE thermo_mod,    ONLY : ngeo, iwho
 USE ions_base,     ONLY : nat
 USE control_elastic_constants, ONLY : el_con_ibrav_geo, el_con_celldm_geo, &
-                                      el_con_tau_crys_geo, el_con_omega_geo
+                                      el_con_tau_crys_geo, el_con_omega_geo, &
+                                      el_con_at_geo
 USE geometry_file, ONLY : read_geometry_file
-USE control_thermo, ONLY : lgeo_from_file
+USE control_thermo, ONLY : lgeo_from_file, ltau_el_cons_from_file
 USE initial_conf,  ONLY : ibrav_save, tau_save_crys
 USE io_global, ONLY : stdout
 
@@ -852,15 +876,26 @@ IF (lgeo_from_file) CALL read_geometry_file(ngeo)
 nwork=compute_nwork()
 ALLOCATE(el_con_ibrav_geo(nwork))
 ALLOCATE(el_con_celldm_geo(6,nwork))
+ALLOCATE(el_con_at_geo(3,3,nwork))
 ALLOCATE(el_con_omega_geo(nwork))
 ALLOCATE(el_con_tau_crys_geo(3,nat,nwork))
-el_con_celldm_geo=0.0_DP
-CALL set_celldm_geo(el_con_celldm_geo(:,:), nwork)
-el_con_ibrav_geo(:)=ibrav_save
-DO iwork=1,nwork
-   el_con_tau_crys_geo(:,:,iwork)=tau_save_crys(:,:)
-   el_con_omega_geo(iwork)=compute_omega_geo(ibrav_save, el_con_celldm_geo(:,iwork))
-ENDDO
+IF (ltau_el_cons_from_file) THEN
+!
+!  read from file geometry and atomic coordinates
+!
+   DO iwork=1,nwork
+      CALL check_geometry_el_cons_exist(iwork,1)
+   ENDDO
+ELSE
+   el_con_celldm_geo=0.0_DP
+   CALL set_celldm_geo(el_con_celldm_geo(:,:), nwork)
+   el_con_ibrav_geo(:)=ibrav_save
+   DO iwork=1,nwork
+      el_con_tau_crys_geo(:,:,iwork)=tau_save_crys(:,:)
+      el_con_omega_geo(iwork)=compute_omega_geo(ibrav_save, &
+                                    el_con_celldm_geo(:,iwork))
+   ENDDO
+ENDIF
 
 WRITE(stdout,'(/,5x,70("-"))')
 WRITE(stdout,'(/,5x,"The celldm of the",i5," unperturbed geometries &

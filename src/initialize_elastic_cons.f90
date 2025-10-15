@@ -45,7 +45,7 @@ SUBROUTINE initialize_elastic_cons( ngeom, nwork )
 !  
 !  
 USE kinds,             ONLY : DP
-USE thermo_mod,        ONLY : ibrav_geo, celldm_geo
+USE thermo_mod,        ONLY : ibrav_geo, celldm_geo, at_geo, tau_geo
 USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, rot_mat, &
                                elastic_algorithm, epsilon_0,               &
                                el_con_ibrav_geo, el_con_celldm_geo,        &
@@ -338,6 +338,8 @@ ALLOCATE( epsil_geo(nwork) )
 ALLOCATE( sigma_geo(3, 3, nwork) )
 ALLOCATE( ibrav_geo(nwork) )
 ALLOCATE( celldm_geo(6,nwork) )
+ALLOCATE( at_geo(3,3,nwork) )
+ALLOCATE( tau_geo(3,nat,nwork) )
 ALLOCATE( rot_mat(3,3,nwork) )
 ALLOCATE( tau_acc(3,nat,nwork) )
 ALLOCATE( min_y(ngeo_strain,21,ngeom))

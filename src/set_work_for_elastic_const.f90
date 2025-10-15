@@ -14,9 +14,10 @@ USE kinds,            ONLY : DP
 !
 USE control_thermo,   ONLY : outdir_thermo
 USE equilibrium_conf, ONLY : celldm0, at0, tau0_crys
-USE thermo_mod,       ONLY : celldm_geo, ibrav_geo
+USE thermo_mod,       ONLY : celldm_geo, ibrav_geo, tau_geo
 USE control_elastic_constants, ONLY : frozen_ions, elastic_algorithm,  &
                              rot_mat, ngeom, tau_acc
+USE control_thermo,   ONLY : ltau_from_file
 !
 !  library routines
 !
@@ -75,7 +76,9 @@ IF (elastic_algorithm=='standard'.OR.elastic_algorithm=='energy_std') THEN
                      zero, zero, trd_ht, rd_ht, cell_units )
 !
 !  the atomic coordinates are strained uniformely and are not modified here
+!  except when they are read from file
 !
+   IF (ltau_from_file) tau(:,:)=tau_geo(:,:,iwork)
 ELSEIF (elastic_algorithm=='advanced' .OR. &
                                  elastic_algorithm=='energy') THEN
 !
@@ -100,6 +103,11 @@ ELSEIF (elastic_algorithm=='advanced' .OR. &
 !  bring the tau in the correct units of the new alat
 !
    tau=tau * celldm0(1) / celldm_(1)
+!
+!  Superseed the previous calculation if atomic positions have been
+!  read from file
+!
+   IF (ltau_from_file) tau(:,:)=tau_geo(:,:,iwork)
 !
 !  find the optimal fft mesh
 !

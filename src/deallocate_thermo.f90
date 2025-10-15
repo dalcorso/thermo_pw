@@ -14,7 +14,7 @@ SUBROUTINE deallocate_thermo()
   USE kinds,          ONLY : DP
   USE thermo_mod,     ONLY : celldm_geo, energy_geo, omega_geo, ibrav_geo,  &
                              no_ph, tot_ngeo, dynmat_on_file,    &
-                             ef_geo
+                             ef_geo, tau_geo
   USE thermodynamics, ONLY : ph_free_ener, ph_ener, ph_entropy, ph_ce,      &
                              ph_t_debye, ph_e0, ph_b_fact
   USE ph_freq_thermodynamics, ONLY : phf_free_ener, phf_ener, phf_entropy,  &
@@ -130,7 +130,8 @@ SUBROUTINE deallocate_thermo()
                              el_con_tau_crys_geo, el_con_omega_geo, &
                              epsil_geo, all_geometry_done_geo,     &
                              found_dos_ec, found_ph_ec, tau_acc, min_y, &
-                             epsil_y, min_y_t, dyde, tau_save_ec
+                             epsil_y, min_y_t, dyde, tau_save_ec, &
+                             el_con_at_geo
   USE control_pressure, ONLY : press_plot, ipress_plot
   USE uniform_pressure, ONLY : omega_p, density_p, celldm_p, p2_p, p4_p
   USE control_vol,      ONLY : ivol_plot
@@ -163,6 +164,7 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (celldm_geo) )      DEALLOCATE(celldm_geo) 
   IF ( ALLOCATED (omega_geo) )       DEALLOCATE(omega_geo) 
   IF ( ALLOCATED (ibrav_geo) )       DEALLOCATE(ibrav_geo) 
+  IF ( ALLOCATED (tau_geo) )         DEALLOCATE(tau_geo)
   IF ( ALLOCATED (no_ph) )           DEALLOCATE(no_ph) 
   IF ( ALLOCATED (found_dos_ec) )    DEALLOCATE(found_dos_ec) 
   IF ( ALLOCATED (found_ph_ec) )     DEALLOCATE(found_ph_ec) 
@@ -652,6 +654,7 @@ SUBROUTINE deallocate_thermo()
 
   IF ( ALLOCATED (el_con_ibrav_geo) )  DEALLOCATE( el_con_ibrav_geo )  
   IF ( ALLOCATED (el_con_celldm_geo) ) DEALLOCATE( el_con_celldm_geo )  
+  IF ( ALLOCATED (el_con_at_geo) ) DEALLOCATE( el_con_at_geo )  
   IF ( ALLOCATED (el_con_tau_crys_geo) ) DEALLOCATE( el_con_tau_crys_geo )  
   IF ( ALLOCATED (el_con_omega_geo) ) DEALLOCATE( el_con_omega_geo )  
 

@@ -19,8 +19,8 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
 !  and irr_value is not used.
 !
   USE kinds,            ONLY : DP
-  USE thermo_mod,       ONLY : what, ibrav_geo, celldm_geo, ef_geo
-  USE control_thermo,   ONLY : outdir_thermo
+  USE thermo_mod,       ONLY : what, ibrav_geo, celldm_geo, ef_geo, tau_geo
+  USE control_thermo,   ONLY : outdir_thermo, ltau_from_file
   USE control_elastic_constants, ONLY : frozen_ions, use_free_energy
   USE control_conv,     ONLY : ke, keden, nk_test, sigma_test
   USE control_eldos,    ONLY : lel_free_energy
@@ -142,11 +142,18 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
 !   recompute the fft mesh 
 !
            CALL set_fft_mesh()
+           IF (ltau_from_file) THEN
+!
+!  set the tau read from file
+!
+              tau(:,:)=tau_geo(:,:,iwork)
+           ELSE
 !
 ! strain uniformly the coordinates to the new celldm
 !
-           tau=tau_save_crys
-           CALL cryst_to_cart( nat, tau, at, 1 )
+              tau=tau_save_crys
+              CALL cryst_to_cart( nat, tau, at, 1 )
+           ENDIF
 !
 ! set the tmp_dir for this geometry
 !

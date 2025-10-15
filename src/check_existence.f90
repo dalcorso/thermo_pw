@@ -181,7 +181,7 @@ SUBROUTINE save_geometry(iwork, part, iwho)
 !  The tau are saved as they are in cartesian coordinates 
 !  in units of alat.
 !
-  USE cell_base,       ONLY : ibrav, celldm
+  USE cell_base,       ONLY : ibrav, celldm, at
   USE ions_base,       ONLY : atm, tau, nat, ityp
 
   USE io_global,       ONLY : ionode
@@ -192,7 +192,7 @@ SUBROUTINE save_geometry(iwork, part, iwho)
   INTEGER :: find_free_unit
   CHARACTER(LEN=6) :: int_to_char
   CHARACTER(LEN=256) :: filename, label
-  INTEGER :: iu_geo, ios, na
+  INTEGER :: iu_geo, ios, na, ipol
 
   IF (iwho==0) RETURN
   IF (ionode) THEN
@@ -207,6 +207,10 @@ SUBROUTINE save_geometry(iwork, part, iwho)
      IF (iwork > 0) THEN
         WRITE(iu_geo,*) ibrav
         WRITE(iu_geo,*) celldm(:)
+        WRITE(iu_geo,*) 
+        DO ipol=1,3
+           WRITE(iu_geo, *) at(:,ipol)
+        ENDDO
         WRITE(iu_geo,*) nat
         WRITE(iu_geo,*) (ityp(na), na=1,nat)
         DO na=1,nat
@@ -223,4 +227,161 @@ SUBROUTINE save_geometry(iwork, part, iwho)
 
   RETURN
 END SUBROUTINE save_geometry
+!
+!--------------------------------------------------------
+SUBROUTINE check_geometry_exist(iwork, part, iwho)
+!--------------------------------------------------------
+!
+!  This routine reads from file the crystal parameters, and
+!  the relaxed atomic coordinates. 
+!  The tau are supposed to be in cartesian coordinates 
+!  in units of alat.
+!
+  USE thermo_mod,      ONLY : ibrav_geo, celldm_geo, tau_geo, at_geo
+  USE initial_conf,    ONLY : atm_save
+  USE ions_base,       ONLY : nat, ityp
+
+  USE io_global,       ONLY : ionode, ionode_id
+  USE mp_images,       ONLY : intra_image_comm
+  USE mp,              ONLY : mp_bcast
+  !
+  IMPLICIT NONE
+  !
+  INTEGER, INTENT(IN) :: iwork, part, iwho
+  INTEGER :: find_free_unit
+  CHARACTER(LEN=6) :: int_to_char
+  CHARACTER(LEN=256) :: filename, label
+  INTEGER :: iu_geo, ios, na, ipol
+
+  IF (iwho==0) RETURN
+  IF (ionode) THEN
+     ios=0
+     iu_geo=find_free_unit()
+     IF (iwho==1) label='restart/geo_work_part.mlc.'
+     IF (iwho==2) label='restart/geo_work_part.ecg.'
+     filename=TRIM(label)//TRIM(int_to_char(iwork))//'.'//&
+                              TRIM(int_to_char(part))
+     OPEN(UNIT=iu_geo, FILE=TRIM(filename), STATUS='OLD', &
+                       FORM='FORMATTED', ERR=20, IOSTAT=ios)
+
+     IF (iwork > 0) THEN
+        READ(iu_geo, *, ERR=20, IOSTAT=ios) ibrav_geo(iwork)
+        READ(iu_geo, *, ERR=20, IOSTAT=ios) celldm_geo(:,iwork)
+        READ(iu_geo, *, ERR=20, IOSTAT=ios) 
+        DO ipol=1,3
+           READ(iu_geo, *, ERR=20, IOSTAT=ios) at_geo(:,ipol,iwork)
+        ENDDO
+        READ(iu_geo, *, ERR=20, IOSTAT=ios) nat
+        READ(iu_geo, *, ERR=20, IOSTAT=ios) (ityp(na), na=1,nat)
+        DO na=1,nat
+           READ(iu_geo,*, ERR=20, IOSTAT=ios) &
+                          atm_save(ityp(na)), tau_geo(1,na,iwork), &
+                          tau_geo(2,na,iwork), tau_geo(3,na,iwork)
+        ENDDO
+     ENDIF
+     CLOSE(iu_geo)
+!
+!  If the file cannot be read we stop. This routine is called only 
+!  if explicitely required by the user that must check that the file
+!  is present. The file is produced after a previous self-consistent
+!  calculation on this geometry.
+!
+  END IF
+  CALL mp_bcast(ios, ionode_id, intra_image_comm)
+20  CALL errore('check_geometry_exist',&
+         'geometry file unreadable or inexistent',ABS(ios))
+  CALL mp_bcast(ibrav_geo(iwork), ionode_id, intra_image_comm)
+  CALL mp_bcast(celldm_geo(:,iwork), ionode_id, intra_image_comm)
+  CALL mp_bcast(nat, ionode_id, intra_image_comm)
+  CALL mp_bcast(ityp, ionode_id, intra_image_comm)
+  CALL mp_bcast(atm_save, ionode_id, intra_image_comm)
+  CALL mp_bcast(at_geo(:,:,iwork), ionode_id, intra_image_comm)
+  CALL mp_bcast(tau_geo(:,:,iwork), ionode_id, intra_image_comm)
+
+  RETURN
+END SUBROUTINE check_geometry_exist
+
+!--------------------------------------------------------
+SUBROUTINE check_geometry_el_cons_exist(iwork, part)
+!--------------------------------------------------------
+!
+!  This routine reads from file the crystal parameters, and
+!  the relaxed atomic coordinates. 
+!  The tau are supposed to be in cartesian coordinates 
+!  in units of alat. It sets them in the unperturbed geometries
+!  for elastic_constants_geo calculation
+!
+  USE kinds,  ONLY : DP
+  USE control_elastic_constants,  ONLY : el_con_ibrav_geo, el_con_celldm_geo, &
+                                    el_con_tau_crys_geo, el_con_omega_geo,    &
+                                    el_con_tau_geo, el_con_at_geo
+  USE initial_conf,    ONLY : atm_save
+  USE ions_base,       ONLY : nat, ityp
+
+  USE io_global,       ONLY : ionode, ionode_id
+  USE mp_images,       ONLY : intra_image_comm
+  USE mp,              ONLY : mp_bcast
+  !
+  IMPLICIT NONE
+  !
+  INTEGER, INTENT(IN) :: iwork, part
+  INTEGER :: find_free_unit
+  CHARACTER(LEN=6) :: int_to_char
+  CHARACTER(LEN=256) :: filename
+  REAL(DP) :: tau_(3,nat), celldm_(6), at_(3,3), bg_(3,3), omega_
+  INTEGER :: iu_geo, ios, na, ibrav_, ipol
+
+  IF (ionode) THEN
+     ios=0
+     iu_geo=find_free_unit()
+     filename='restart/geo_work_part.mlc.'//TRIM(int_to_char(iwork))//'.'//&
+                              TRIM(int_to_char(part))
+     OPEN(UNIT=iu_geo, FILE=TRIM(filename), STATUS='OLD', &
+                       FORM='FORMATTED', ERR=20, IOSTAT=ios)
+
+     IF (iwork > 0) THEN
+        READ(iu_geo,*, ERR=20, IOSTAT=ios) el_con_ibrav_geo(iwork)
+        READ(iu_geo,*, ERR=20, IOSTAT=ios) el_con_celldm_geo(:,iwork)
+        READ(iu_geo,*, ERR=20, IOSTAT=ios) 
+        DO ipol=1,3
+           READ(iu_geo, *, ERR=20, IOSTAT=ios) el_con_at_geo(:,ipol,iwork)
+        ENDDO
+        READ(iu_geo,*, ERR=20, IOSTAT=ios) nat
+        READ(iu_geo,*, ERR=20, IOSTAT=ios) (ityp(na), na=1,nat)
+        DO na=1,nat
+           READ(iu_geo,*, ERR=20, IOSTAT=ios) &
+                          atm_save(ityp(na)), tau_(1,na), &
+                          tau_(2,na), tau_(3,na)
+        ENDDO
+        el_con_tau_geo(:,:,iwork)=tau_(:,:)
+        el_con_tau_crys_geo(:,:,iwork)=tau_(:,:)
+        celldm_(1:6)=el_con_celldm_geo(1:6,iwork)
+        ibrav_=el_con_ibrav_geo(iwork)
+        at_(:,:)=el_con_at_geo(:,:,iwork)
+        CALL recips(at_(1,1),at_(1,2),at_(1,3),bg_(1,1),bg_(1,2),bg_(1,3))
+!
+!   put atomic coordinates in the crystal basis
+!
+        CALL cryst_to_cart( nat, el_con_tau_crys_geo(:,:,iwork), bg_, -1 )
+        el_con_omega_geo(iwork)=omega_
+     ENDIF
+     CLOSE(iu_geo)
+!
+!  If the file cannot be read we stop. This routine is called only 
+!  if explicitely required by the user that must check that the file
+!  is present. The file is produced after a previous self-consistent
+!  calculation on this geometry .
+!
+  END IF
+  CALL mp_bcast(ios, ionode_id, intra_image_comm)
+20  CALL errore('check_geometry_el_cons_exist',&
+         'geometry file unreadable or inexistent',ABS(ios))
+  CALL mp_bcast(el_con_ibrav_geo(iwork), ionode_id, intra_image_comm)
+  CALL mp_bcast(el_con_celldm_geo(:,iwork), ionode_id, intra_image_comm)
+  CALL mp_bcast(el_con_omega_geo(iwork), ionode_id, intra_image_comm)
+  CALL mp_bcast(el_con_tau_crys_geo(:,:,iwork), ionode_id, intra_image_comm)
+  CALL mp_bcast(el_con_tau_geo(:,:,iwork), ionode_id, intra_image_comm)
+
+  RETURN
+END SUBROUTINE check_geometry_el_cons_exist
 

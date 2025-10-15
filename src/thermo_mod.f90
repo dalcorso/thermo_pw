@@ -52,8 +52,15 @@ MODULE thermo_mod
                                                 ! geometry
                            stress_geo(:,:,:), & ! the stress at each 
                                                 ! geometry
-                           ef_geo(:)            ! save the fermi energy in
+                           ef_geo(:),         & ! save the fermi energy in
                                                 ! metals
+                           tau_geo(:,:,:),    & ! coordinates of the atoms
+                                                ! in each geometry
+                           at_geo(:,:,:),    &  ! primitive vectors
+                                                ! in each geometry. 
+                           uint_geo(:,:)        ! for each geometry say which
+                                                ! are the internal coordinates
+
 
   REAL(DP) ::              step_ngeo(6)         ! the difference of 
                                                 ! parameters among
@@ -1230,6 +1237,10 @@ MODULE control_thermo
                                   ! along the Hugoniot
   LOGICAL :: lgeo_from_file=.FALSE. ! geometries for mur_lc read from file
   LOGICAL :: lgeo_to_file=.FALSE. ! geometries for mur_lc written to file
+  LOGICAL :: ltau_from_file=.FALSE. ! atomic coordinates for mur_lc from file.
+  LOGICAL :: ltau_el_cons_from_file=.FALSE. ! atomic coordinates for  
+                                    ! unperturbed geometries of
+                                    ! elastic_constants_geo from file
   LOGICAL :: lconv_ke_test=.FALSE.! if .true. this writes the ke test on file
   LOGICAL :: lconv_nk_test=.FALSE.! if .true. this writes the k-point on file
   LOGICAL :: lelastic_const=.FALSE. ! if .true. compute elastic constants
@@ -1376,7 +1387,12 @@ MODULE control_elastic_constants
                                 ! lattice.
   REAL(DP), ALLOCATABLE :: el_con_celldm_geo(:,:) ! the celldm of each 
                                 ! unperturbed lattice.
-  REAL(DP), ALLOCATABLE :: el_con_tau_crys_geo(:,:,:) ! the atomic positions of each
+  REAL(DP), ALLOCATABLE :: el_con_at_geo(:,:,:) ! the at of each unperturbed 
+                                ! lattice.
+  REAL(DP), ALLOCATABLE :: el_con_tau_crys_geo(:,:,:) ! the atomic positions 
+                                ! of each unperturbed solid (crystal).
+  REAL(DP), ALLOCATABLE :: el_con_tau_geo(:,:,:) ! the atomic positions 
+                                ! of each unperturbed solid.
   REAL(DP), ALLOCATABLE :: tau_save_ec(:,:,:) ! The relaxed atomic positions
                                 ! of each geometry
   REAL(DP), ALLOCATABLE :: el_con_omega_geo(:) ! the volume of each 
