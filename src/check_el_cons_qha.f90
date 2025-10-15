@@ -110,13 +110,13 @@ SUBROUTINE check_el_cons_qha()
   CALL find_central_geo(tot_ngeo,no_ph,central_geo)
   WRITE(stdout,'(/,5x,"Central geometry is number",i5)') central_geo
 
-  IF (ltherm_dos) THEN
+  IF (ltherm_dos.AND.el_cons_qha_available) THEN
      IF (found_dos_ec(central_geo)) el_cons_t(:,:,:)=&
                                     el_con_geo_t(:,:,:,central_geo)
      CALL compute_el_comp_t(el_cons_t,el_comp_t, b0_ec_t)
   ENDIF
 
-  IF (ltherm_freq) THEN
+  IF (ltherm_freq.AND.el_consf_qha_available) THEN
      IF (found_ph_ec(central_geo)) el_consf_t(:,:,:)= &
                                     el_conf_geo_t(:,:,:,central_geo)
      CALL compute_el_comp_t(el_consf_t,el_compf_t, b0f_ec_t)
@@ -143,10 +143,6 @@ SUBROUTINE check_el_cons_qha()
   ENDDO
   el_cons_qha_geo_available=(fndos_ec>2)
   el_consf_qha_geo_available=(fnph_ec>2)
-!  DO igeo=1,tot_ngeo
-!     el_cons_qha_geo_available=el_cons_qha_geo_available.AND.found_dos_ec(igeo)
-!     el_consf_qha_geo_available=el_consf_qha_geo_available.AND.found_ph_ec(igeo)
-!  ENDDO
 !
   RETURN
 END SUBROUTINE check_el_cons_qha
