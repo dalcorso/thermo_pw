@@ -67,7 +67,6 @@ dv_of_drho_tran.o \
 dveqpsi_us.o \
 dveqpsi_us_only.o \
 dvkb3_tpw.o \
-dvqpsi_us_tpw.o \
 dvqpsi_us_only_tpw.o \
 dvqpsi_us_many_k.o \
 dvqpsi_dev.o \

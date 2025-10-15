@@ -162,8 +162,6 @@ clean_pw_ph.f90 : has the possibility to choose if to remove the phonon files
 
 adddvscf.f90 : generalized to the noncollinear magnetic case.
 
-dvqpsi_us.f90 : generalized to the noncollinear magnetic case.
-
 dvqpsi_usi_only.f90 : generalized to the noncollinear magnetic case.
 
 incdrhoscf_nc.f90 : generalized to the noncollinear magnetic case.

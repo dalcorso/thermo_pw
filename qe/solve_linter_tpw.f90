@@ -339,7 +339,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf, drhoscfh)
                  !  and written to file
                  !
                  IF (isolv==1) THEN
-                    CALL dvqpsi_us_tpw (ik, u (1, mode),.false., becp1, &
+                    CALL dvqpsi_us (ik, u (1, mode),.false., becp1, &
                                                                     alphap )
 
                     ! DFPT+U: At the first ph iteration the bare perturbed 
@@ -354,7 +354,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf, drhoscfh)
                        !$acc update device(deeq_nc)
                        int1_nc(:,:,:,:,:)=int1_nc_save(:,:,:,:,:,2)
                     ENDIF
-                    CALL dvqpsi_us_tpw (ik, u (1, mode),.false., becpt, &
+                    CALL dvqpsi_us (ik, u (1, mode),.false., becpt, &
                                                                  alphapt)
                     IF (okvan) THEN
                        deeq_nc(:,:,:,:)=deeq_nc_save(:,:,:,:,1)
