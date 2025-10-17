@@ -600,20 +600,20 @@ IF (ltherm_dos) THEN
    CALL quadratic_fit_t_pm()
    CALL quadratic_fit_noe_t_pm()
 !
-!  Here compute the celldm_pt that minimize the Gibbs energy for 
+!  Here compute the celldm_pt that minimizes the Gibbs energy for 
 !  selected pressures and the corresponding volumes
 !
    CALL quadratic_fit_pt()
    CALL compute_volume_pt()
    CALL compute_density_pt()
 !
-!  Here compute the celldm_pt that minimize the Gibbs energy for 
+!  Here compute the celldm_pt that minimizes the Gibbs energy for 
 !  selected pressures +- delta p for computing the bulk modulus
 !  at selected pressures 
 !
    CALL quadratic_fit_pt_pm()
 !
-!  Here compute the celldm_ptt that minimize the Gibbs energy for 
+!  Here compute the celldm_ptt that minimizes the Gibbs energy for 
 !  selected temperatures and the corresponding volumes
 !
    CALL quadratic_fit_ptt()
@@ -621,7 +621,7 @@ IF (ltherm_dos) THEN
    CALL compute_density_ptt()
    CALL write_tp_anis_ptt()
 
-!  Here compute the celldm_ptt_pm that minimize the Gibbs energy for 
+!  Here compute the celldm_ptt_pm that minimizes the Gibbs energy for 
 !  selected temperatures +- deltaT and the corresponding volumes
 !  needed to compute thermal expansion
 !
@@ -694,20 +694,20 @@ IF (ltherm_freq) THEN
    CALL quadratic_fitf_t_pm()
    CALL quadratic_fitf_noe_t_pm()
 !
-!  Here compute the celldm_pt that minimize the Gibbs energy for 
+!  Here compute the celldm_pt that minimizes the Gibbs energy for 
 !  selected pressures and the corresponding volumes
 !
    CALL quadratic_fitf_pt()
    CALL compute_volumef_pt()
    CALL compute_densityf_pt()
 !
-!  Here compute the celldm_pt that minimize the Gibbs energy for 
+!  Here compute the celldm_pt that minimizes the Gibbs energy for 
 !  selected pressures +- delta p for computing the bulk modulus
 !  at selected pressures 
 !
    CALL quadratic_fitf_pt_pm()
 !
-!  Here compute the celldm_ptt that minimize the Gibbs energy for 
+!  Here compute the celldm_ptt that minimizes the Gibbs energy for 
 !  selected temperatures and the corresponding volumes
 !
    CALL quadratic_fitf_ptt()
@@ -715,7 +715,7 @@ IF (ltherm_freq) THEN
    CALL compute_densityf_ptt()
    CALL write_ph_freq_tp_anis_ptt()
 !
-!  Here compute the celldm_ptt_pm that minimize the Gibbs energy for 
+!  Here compute the celldm_ptt_pm that minimizes the Gibbs energy for 
 !  selected temperatures +- deltaT and the corresponding volumes
 !  needed to compute thermal expansion
 !

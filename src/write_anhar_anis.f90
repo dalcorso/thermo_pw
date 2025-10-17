@@ -438,7 +438,7 @@ END SUBROUTINE compute_volume_pt
 SUBROUTINE compute_density_pt()
 !--------------------------------------------------------------------------
 !
-!   This routine receives the vmin_pt and use it to compute the density_pt 
+!   This routine receives the vmin_pt and uses it to compute the density_pt 
 !   as a function of temperature for selected pressures. 
 !
 USE kinds,         ONLY : DP
@@ -463,7 +463,7 @@ END SUBROUTINE compute_density_pt
 SUBROUTINE compute_volumef_pt()
 !--------------------------------------------------------------------------
 !
-!   This routine receives the celldmf_pt and use it to compute the 
+!   This routine receives the celldmf_pt and uses it to compute the 
 !   minimum volume vminf_pt as a function of temperature for selected 
 !   pressures.
 !
@@ -492,7 +492,7 @@ SUBROUTINE compute_densityf_pt()
 !--------------------------------------------------------------------------
 !
 !   This routine receives the vminf_pt at the minimum of the Gibbs energy
-!   and use them to compute the minimum volume vminf_pt as a function of 
+!   and uses them to compute the minimum volume vminf_pt as a function of 
 !   temperature for selected pressures. 
 !
 USE kinds,         ONLY : DP

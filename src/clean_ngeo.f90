@@ -129,3 +129,20 @@ IF (clean_fact) fact_ngeo=1
 RETURN
 END SUBROUTINE clean_ngeo
 
+!-----------------------------------------------------------------------
+SUBROUTINE clean_int_ngeo(int_ngeo, nvar_int)
+!-----------------------------------------------------------------------
+USE kinds, ONLY : DP
+USE control_atomic_pos, ONLY : max_nint_var
+IMPLICIT NONE
+INTEGER :: nvar_int
+INTEGER :: int_ngeo(nvar_int)
+
+INTEGER :: ivar
+
+DO ivar=nvar_int+1, max_nint_var 
+   int_ngeo(ivar)=1
+ENDDO
+
+RETURN
+END SUBROUTINE clean_int_ngeo
