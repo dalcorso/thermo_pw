@@ -36,7 +36,7 @@ SUBROUTINE thermo_readin()
                                    set_internal_path, set_2d_path,         &
                                    all_geometries_together, max_seconds_tpw, &
                                    lhugoniot, lgeo_from_file, lgeo_to_file, &
-                                   ltau_from_file
+                                   ltau_from_file, ltau_el_cons_from_file
   USE data_files,           ONLY : flevdat, flfrc, flfrq, fldos, fltherm,  &
                                    flanhar, filband, flkeconv, flenergy,   &
                                    flpbs, flprojlayer, flnkconv, flgrun,   &
@@ -287,6 +287,7 @@ SUBROUTINE thermo_readin()
                             nvol,                           &
                             lquartic, lsolve,               &
                             ltau_from_file,                 &
+                            ltau_el_cons_from_file,         &
                             flevdat,                        &
                             flpsmur,                        &
                             flps_el_cons,                   &
@@ -457,6 +458,7 @@ SUBROUTINE thermo_readin()
   nspoint=200
   lcm=.FALSE.
   ltau_from_file=.FALSE.
+  ltau_el_cons_from_file=.FALSE.
   flformf='output_formf.dat'
   flpsformf='output_formf'
 

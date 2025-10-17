@@ -64,6 +64,10 @@ ENDDO
 !
 tau=tau0_crys
 CALL cryst_to_cart( nat, tau, at, 1 )
+!
+!  here there is the possibility to add a fixed delta tau to the strained
+!  coordinates. This has to be requested by the user.
+!
 tau(:,:)=tau(:,:)+tau_acc(:,:,iwork)
 !
 zero=0.0_DP
