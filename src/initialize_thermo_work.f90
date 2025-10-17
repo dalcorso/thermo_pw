@@ -1173,41 +1173,7 @@ END DO
 
 RETURN
 END SUBROUTINE initialize_no_ph
-
-!-----------------------------------------------------------------------
-SUBROUTINE set_equilibrium_conf( celldm, tau, at, omega )
-!-----------------------------------------------------------------------
 !
-!  This routine sets the equilibrium variables to those given
-!  in input. The tau are in cartesian coordinates and this routine
-!  computes the reciprocal lattice vectors and the atomic
-!  coordinates in crystal basis.
-!
-USE kinds,            ONLY : DP
-USE ions_base,        ONLY : nat
-USE equilibrium_conf, ONLY : celldm0, omega0, tau0, tau0_crys, at0, bg0
-
-IMPLICIT NONE
-
-REAL(DP), INTENT(IN) :: celldm(6), tau(3,nat), at(3,3), omega
-
-celldm0(:) = celldm(:)
-omega0=omega
-at0(:,:) = at(:,:)
-!
-! compute the reciprocal lattice vectors
-!
-CALL recips(at0(1,1),at0(1,2),at0(1,3),bg0(1,1),bg0(1,2),bg0(1,3))
-!
-! set the equlibrium tau and computes them in crystal coordinates
-!
-tau0(:,:) = tau(:,:)
-tau0_crys=tau0
-CALL cryst_to_cart( nat, tau0_crys, bg0, -1 )
-
-RETURN
-END SUBROUTINE set_equilibrium_conf
-
 !-----------------------------------------------------------------------
 INTEGER FUNCTION count_energies(ecutwfc, ecutrho, deltake, deltakeden, &
                                                              nke, nkeden)
