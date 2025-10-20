@@ -501,14 +501,12 @@ SELECT CASE (laue)
 !
 !  c_41 = c_14 
 !
-      IF (ibrav/=4) THEN
-         CALL el_cons_ij(4, 1, ngeo_strain, epsil_geo, sigma_geo, m1)
-         el_con(1,4) = el_con(4,1)
-         el_con(2,4) = -el_con(1,4)
-         el_con(4,2) = el_con(2,4)
-         el_con(5,6) = el_con(1,4)
-         el_con(6,5) = el_con(5,6)
-      ENDIF
+      CALL el_cons_ij(4, 1, ngeo_strain, epsil_geo, sigma_geo, m1)
+      el_con(1,4) = el_con(4,1)
+      el_con(2,4) = -el_con(1,4)
+      el_con(4,2) = el_con(2,4)
+      el_con(5,6) = el_con(1,4)
+      el_con(6,5) = el_con(5,6)
 !
 !  c_33 
 !
@@ -1199,39 +1197,37 @@ SELECT CASE (laue)
 !
 !  C_14 = -C_24 = C_56
 !
-      IF (ibrav==5) THEN
-         base_data=5*ngeo_strain+1
-         CALL el_cons_ij_ene(1, 1, 'C_14', ngeo_strain, &
+      base_data=5*ngeo_strain+1
+      CALL el_cons_ij_ene(1, 1, 'C_14', ngeo_strain, &
              epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
 
-         el_con(1,4) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(1,1) &
+      el_con(1,4) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(1,1) &
                                                        - el_con(4,4))*0.5_DP
-         el_con(4,1) = el_con(1,4)
+      el_con(4,1) = el_con(1,4)
 
-         el_con(2,4) = -el_con(1,4) 
-         el_con(4,2) = el_con(2,4)
+      el_con(2,4) = -el_con(1,4) 
+      el_con(4,2) = el_con(2,4)
 
-         el_con(5,6) = el_con(1,4) 
-         el_con(6,5) = el_con(5,6)
+      el_con(5,6) = el_con(1,4) 
+      el_con(6,5) = el_con(5,6)
 
-         IF (laue==27) THEN
+      IF (laue==27) THEN
 !
 !  C_25 = -C_15 = C_46
 !
-            base_data=6*ngeo_strain+1
-            CALL el_cons_ij_ene(2, 2, 'C_25', ngeo_strain, &
+         base_data=6*ngeo_strain+1
+         CALL el_cons_ij_ene(2, 2, 'C_25', ngeo_strain, &
                 epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
 
-            el_con(2,5) = ( 1.0_DP / omega * (2.0_DP * alpha(3) ) &
-                                     - el_con(2,2) - el_con(5,5))*0.5_DP
-            el_con(5,2) = el_con(2,5)
+         el_con(2,5) = ( 1.0_DP / omega * (2.0_DP * alpha(3) ) &
+                                  - el_con(2,2) - el_con(5,5))*0.5_DP
+         el_con(5,2) = el_con(2,5)
 
-            el_con(1,5) = -el_con(2,5) 
-            el_con(5,1) = el_con(1,5)
+         el_con(1,5) = -el_con(2,5) 
+         el_con(5,1) = el_con(1,5)
 
-            el_con(4,6) = el_con(2,5) 
-            el_con(6,4) = el_con(4,6)
-         ENDIF
+         el_con(4,6) = el_con(2,5) 
+         el_con(6,4) = el_con(4,6)
       ENDIF
 
       strs=0.0_DP
@@ -2430,21 +2426,11 @@ ELSE
          WRITE(stdout,'(/,5x,"It requires three strains.")') 
          nstrain=3
       CASE (25)
-         IF (ibrav==4) THEN
-            WRITE(stdout,'(/,5x,"It requires five strains.")') 
-            nstrain=5
-         ELSE
-            WRITE(stdout,'(/,5x,"It requires six strains.")') 
-            nstrain=6
-         ENDIF
+          WRITE(stdout,'(/,5x,"It requires six strains.")') 
+          nstrain=6
       CASE (27)
-         IF (ibrav==4) THEN
-            WRITE(stdout,'(/,5x,"It requires five strains.")') 
-            nstrain=5
-         ELSE
-            WRITE(stdout,'(/,5x,"It requires seven strains.")') 
-            nstrain=7
-         ENDIF
+          WRITE(stdout,'(/,5x,"It requires seven strains.")') 
+          nstrain=7
       CASE (19,23)
 !
 !  hexagonal C_6h (6/m), D_6h (6/mmm)

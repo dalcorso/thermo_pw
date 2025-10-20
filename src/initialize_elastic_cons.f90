@@ -195,21 +195,18 @@ SELECT CASE (laue)
             strain_list(3) = 'H '
             IF (ibrav_save==5) strain_list(3) = 'I '
          ELSE
-            nstep=5
+            nstep=6
             strain_list(1) = 'C '
             strain_list(2) = 'E '
             strain_list(3) = 'B1'
             strain_list(4) = 'A '
             strain_list(5) = 'H '
-            IF (ibrav_save==5) THEN
-               nstep = 6
-               strain_list(6) = 'CI'
-               IF (laue==27) THEN
-                  nstep = 7
-                  strain_list(7) = 'CG'
-               ENDIF
-               IF (elastic_algorithm=='energy') nstep=0
-            END IF
+            strain_list(6) = 'CI'
+            IF (laue==27) THEN
+               nstep = 7
+               strain_list(7) = 'CG'
+            ENDIF
+            IF (elastic_algorithm=='energy') nstep=0
          END IF
       ELSE
          CALL errore('initialize_elastic_cons',&
