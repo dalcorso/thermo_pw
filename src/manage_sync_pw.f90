@@ -18,6 +18,7 @@ SUBROUTINE manage_sync_pw()
   USE control_thermo,   ONLY : lbands_syn_1
   USE ions_base,        ONLY : tau
   USE cell_base,        ONLY : at, omega, celldm
+  USE control_atomic_pos, ONLY : linternal_thermo
   USE input_parameters, ONLY : outdir
 
   USE io_files,         ONLY : tmp_dir, wfc_dir, check_tempdir
@@ -50,6 +51,10 @@ CHARACTER (LEN=80) :: message
          CALL decorated1_write(message)
          CALL check_existence(0,1,run)
          IF (run) THEN
+!
+!    with linternal_thermo relaxation was disabled. Here we enable it
+!
+            IF (linternal_thermo) CALL initialize_relaxation()
             CALL do_pwscf(exit_status, .TRUE.)
             CALL save_existence(0,1)
          END IF

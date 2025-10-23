@@ -22,10 +22,11 @@ SUBROUTINE quadratic_fit()
   !
   USE kinds,        ONLY : DP
   USE cell_base,    ONLY : ibrav
+  USE ions_base,    ONLY : nat
   USE control_mur,  ONLY : emin, vmin
   USE equilibrium_conf, ONLY : celldm0
   USE initial_conf, ONLY : ibrav_save
-  USE thermo_mod,   ONLY : celldm_geo, omega_geo, energy_geo
+  USE thermo_mod,   ONLY : celldm_geo_eos, omega_geo_eos, energy_geo_eos
   USE control_pressure, ONLY : pressure, pressure_kb
   USE control_quadratic_energy, ONLY : hessian_v, hessian_e, x_pos_min, &
                                        p2, nvar
@@ -43,6 +44,7 @@ SUBROUTINE quadratic_fit()
                           find_quartic_extremum, print_quartic_polynomial, &
                           print_chisq_quartic, introduce_quartic_fit,      &
                           write_quartic_hessian
+  USE control_atomic_pos, ONLY : linternal_thermo, tau_eq, uint_eq
   USE polynomial,   ONLY : init_poly
   USE vector_mod,       ONLY : write_vector
   USE io_global,    ONLY : stdout
@@ -84,9 +86,9 @@ SUBROUTINE quadratic_fit()
   ncoeff=1+nvar+p2%ncoeff2
   CALL introduce_quadratic_fit(nvar, ncoeff, ndata)
 
-  f(:)=energy_geo(:) + pressure * omega_geo(:)
+  f(1:ndata)=energy_geo_eos(1:ndata) + pressure * omega_geo_eos(1:ndata)
 
-  CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
+  CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo_eos)
   !
 !  CALL summarize_fitting_data(nvar, ndata, x, f)
 
@@ -127,6 +129,7 @@ SUBROUTINE quadratic_fit()
      CALL fit_multi_quartic(ndata,nvar,lsolve,x,f,p4)
      !
      CALL print_quartic_polynomial(nvar,p4) 
+!    WRITE(stdout,'(/,7x,"Energy (1)    Fitted energy (2)   DeltaE (1)-(2)")') 
      CALL print_chisq_quartic(ndata, nvar, x, f, p4)
 !
 !   searching the minimum starting from the minimum of the quadratic
@@ -143,6 +146,11 @@ SUBROUTINE quadratic_fit()
      emin=ymin4
   ENDIF
   vmin=compute_omega_geo(ibrav_save, celldm0)
+
+  IF (linternal_thermo) THEN
+     CALL fit_tau_eq()
+     CALL find_tau_eq(celldm0, tau_eq, uint_eq, nat)
+  ENDIF
 
   DEALLOCATE(f)
   DEALLOCATE(x)
@@ -330,37 +338,31 @@ SUBROUTINE quadratic_fit_t(itemp, celldm_t, free_e_min_t, pt1, pt2, pt3, pt4 )
   !   free energy at temperature itemp
   !   Then it adds the quadratic polynomial that fits the energy
   !   (or enthalphy) and finds the minimum.
-  !   If lquartic is true it interpolates the free energy with a polynomial 
-  !   of degree poly_degree_ph, adds the quartic polynomial that fits 
-  !   the energy (or enthalpy) and finds its minimum starting from
-  !   the minimum of the quadratic polynomial.
+  !   If lquartic is true it receives the polynomial of degree 
+  !   poly_degree_ph that interpolates the free energy, adds the quartic 
+  !   polynomial that fits the energy (or enthalpy) and finds its 
+  !   minimum starting from the minimum of the quadratic polynomial.
   !
   !   The output of this routine is celldm_t at the given temperature itemp
   !   and the free energy at the minimum free_e_min_t
   !
   USE kinds,       ONLY : DP
   USE cell_base,   ONLY : ibrav
-  USE thermo_mod,  ONLY : celldm_geo, no_ph
   USE control_quadratic_energy, ONLY : nvar, enthalpy_p2 => p2
-  USE control_quartic_energy, ONLY :  p4, lquartic, poly_degree_ph, lsolve
+  USE control_quartic_energy, ONLY :  p4, lquartic, poly_degree_ph
   USE lattices,    ONLY : compress_celldm, expand_celldm, crystal_parameters
   USE io_global,   ONLY : stdout
 
-  USE linear_surfaces,  ONLY : fit_multi_linear, print_chisq_linear
-  USE quadratic_surfaces, ONLY : fit_multi_quadratic, &
-                      find_quadratic_linear_extremum, &
-                      find_two_quadratic_extremum,    &
-                      print_quadratic_polynomial,     &
-                      summarize_fitting_data,         &
-                      introduce_quadratic_fit, print_chisq_quadratic
+  USE quadratic_surfaces, ONLY :                                    &
+                      find_two_quadratic_extremum,                  &
+                      find_quadratic_linear_extremum
 
-  USE cubic_surfaces, ONLY : fit_multi_cubic, print_chisq_cubic
   USE quartic_surfaces, ONLY : find_quartic_quadratic_extremum,     &
-                      fit_multi_quartic, find_two_quartic_extremum,     &
-                      find_quartic_cubic_extremum, print_chisq_quartic, &
-                      find_quartic_linear_extremum
+                      find_two_quartic_extremum,                    &
+                      find_quartic_cubic_extremum,                  &
+                      find_quartic_linear_extremum                     
 
-  USE polynomial, ONLY : poly1, poly2, poly3, poly4, init_poly, clean_poly
+  USE polynomial, ONLY : poly1, poly2, poly3, poly4
   USE vector_mod, ONLY : write_vector
 
   IMPLICIT NONE
@@ -372,16 +374,16 @@ SUBROUTINE quadratic_fit_t(itemp, celldm_t, free_e_min_t, pt1, pt2, pt3, pt4 )
   TYPE(poly3) :: pt3             
   TYPE(poly4) :: pt4             
   REAL(DP) :: ymin
-  INTEGER  :: compute_nwork, compute_nwork_ph
   !
   nvar=crystal_parameters(ibrav)
   !
   ALLOCATE(x_pos_min(nvar))
 
-  IF (poly_degree_ph > 1) THEN
+  IF (poly_degree_ph>1) THEN 
      CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, enthalpy_p2, pt2)
   ELSE
-     CALL find_quadratic_linear_extremum(nvar, x_pos_min, ymin, enthalpy_p2, pt1)
+     CALL find_quadratic_linear_extremum(nvar, x_pos_min, ymin, enthalpy_p2, &
+                                                                          pt1)
   ENDIF
 
   IF (lquartic) THEN
@@ -428,7 +430,6 @@ SUBROUTINE quadratic_fit_t_pm()
   USE anharmonic,  ONLY : p1t_t, p2t_t, p3t_t, p4t_t, celldm_t_p1, celldm_t_m1
   USE uniform_pressure, ONLY : p2_p_p1, p2_p_m1, p4_p_p1, p4_p_m1
 
-  USE linear_surfaces,  ONLY : fit_multi_linear, print_chisq_linear
   USE quadratic_surfaces, ONLY : find_two_quadratic_extremum, &
                                  find_quadratic_linear_extremum
   USE quartic_surfaces, ONLY : find_quartic_quadratic_extremum,     &
@@ -439,20 +440,19 @@ SUBROUTINE quadratic_fit_t_pm()
   REAL(DP), ALLOCATABLE :: x_pos_min(:)
   REAL(DP) :: ymin
   INTEGER  :: itemp
-  INTEGER  :: compute_nwork, compute_nwork_ph
   !
   nvar=crystal_parameters(ibrav)
   !
   ALLOCATE(x_pos_min(nvar))
 
   DO itemp=1, ntemp
-     IF (poly_degree_ph>1) then
+     IF (poly_degree_ph>1) then 
         CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
                                             p2_p_p1, p2t_t(itemp))
      ELSE
         CALL find_quadratic_linear_extremum(nvar, x_pos_min, ymin, &
                                             p2_p_p1, p1t_t(itemp))
-     ENDIF
+     endif
      IF (lquartic) THEN
         IF (poly_degree_ph==4) THEN
            CALL find_two_quartic_extremum(nvar, x_pos_min, ymin, &
@@ -472,7 +472,7 @@ SUBROUTINE quadratic_fit_t_pm()
   ENDDO
 
   DO itemp=1, ntemp
-     IF (poly_degree_ph>1) then
+     IF (poly_degree_ph>1) then 
         CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
                                         p2_p_m1, p2t_t(itemp))
      ELSE
@@ -535,7 +535,6 @@ SUBROUTINE quadratic_fitf_t_pm()
   REAL(DP), ALLOCATABLE :: x_pos_min(:)
   REAL(DP) :: ymin
   INTEGER  :: itemp
-  INTEGER  :: compute_nwork, compute_nwork_ph
   !
   nvar=crystal_parameters(ibrav)
   !
@@ -622,8 +621,7 @@ SUBROUTINE quadratic_fit_noe_t_pm()
                           celldm_noe_t_p1, celldm_noe_t_m1
   USE uniform_pressure, ONLY : p2_p_p1, p2_p_m1, p4_p_p1, p4_p_m1
 
-  USE linear_surfaces,  ONLY : fit_multi_linear, print_chisq_linear
-  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum, &
+  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum,       &
                                  find_quadratic_linear_extremum
   USE quartic_surfaces, ONLY : find_quartic_quadratic_extremum,     &
                       find_two_quartic_extremum, find_quartic_cubic_extremum,&
@@ -634,7 +632,6 @@ SUBROUTINE quadratic_fit_noe_t_pm()
   REAL(DP), ALLOCATABLE :: x_pos_min(:)
   REAL(DP) :: ymin
   INTEGER  :: itemp
-  INTEGER  :: compute_nwork, compute_nwork_ph
   !
   IF (.NOT.lel_free_energy) RETURN
 
@@ -669,7 +666,7 @@ SUBROUTINE quadratic_fit_noe_t_pm()
   ENDDO
 
   DO itemp=1, ntemp
-    IF (poly_degree_ph>1) THEN
+     IF (poly_degree_ph>1) THEN
         CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
                                            p2_p_m1, p2t_noe_t(itemp))
      ELSE
@@ -723,8 +720,7 @@ SUBROUTINE quadratic_fitf_noe_t_pm()
                        p4tf_noe_t, celldmf_noe_t_p1, celldmf_noe_t_m1
   USE uniform_pressure, ONLY : p2_p_p1, p2_p_m1, p4_p_p1, p4_p_m1
 
-  USE linear_surfaces,  ONLY : fit_multi_linear, print_chisq_linear
-  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum, &
+  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum,       &
                                  find_quadratic_linear_extremum
   USE quartic_surfaces, ONLY : find_quartic_quadratic_extremum,     &
                       find_two_quartic_extremum, find_quartic_cubic_extremum,&
@@ -735,7 +731,6 @@ SUBROUTINE quadratic_fitf_noe_t_pm()
   REAL(DP), ALLOCATABLE :: x_pos_min(:)
   REAL(DP) :: ymin
   INTEGER  :: itemp
-  INTEGER  :: compute_nwork, compute_nwork_ph
   !
   IF (.NOT.lel_free_energy) RETURN
   !
@@ -770,7 +765,7 @@ SUBROUTINE quadratic_fitf_noe_t_pm()
   ENDDO
 
   DO itemp=1, ntemp
-    IF (poly_degree_ph>1) THEN
+     IF (poly_degree_ph>1) THEN
         CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
                                          p2_p_m1, p2tf_noe_t(itemp))
      ELSE
@@ -826,8 +821,7 @@ SUBROUTINE quadratic_fit_pt()
   USE anharmonic_pt, ONLY : celldm_pt, emin_pt
   USE uniform_pressure, ONLY : p2_p, p4_p
 
-  USE linear_surfaces,  ONLY : fit_multi_linear, print_chisq_linear
-  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum, &
+  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum,  &
                                  find_quadratic_linear_extremum
   USE quartic_surfaces, ONLY : find_quartic_quadratic_extremum,     &
                       find_two_quartic_extremum, find_quartic_cubic_extremum,&
@@ -838,7 +832,6 @@ SUBROUTINE quadratic_fit_pt()
   REAL(DP), ALLOCATABLE :: x_pos_min(:)
   REAL(DP) :: ymin
   INTEGER  :: itemp, ipress, ipressp
-  INTEGER  :: compute_nwork, compute_nwork_ph
   !
   nvar=crystal_parameters(ibrav)
   !
@@ -847,9 +840,8 @@ SUBROUTINE quadratic_fit_pt()
   DO ipressp=1, npress_plot
      ipress=ipress_plot(ipressp)
      DO itemp=1, ntemp
-
         IF (itemp==1.OR..NOT.lquartic) THEN
-          IF (poly_degree_ph>1) THEN
+           IF (poly_degree_ph>1) THEN
               CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
                                      p2_p(ipress), p2t_t(itemp))
            ELSE
@@ -872,11 +864,12 @@ SUBROUTINE quadratic_fit_pt()
              CALL find_quartic_quadratic_extremum(nvar, x_pos_min, ymin, &
                         p4_p(ipress), p2t_t(itemp))
            ENDIF
+!          CALL write_vector(nvar,x_pos_min)
+!          CALL print_genergy(ymin)
         ENDIF
 
         emin_pt(itemp,ipressp)=ymin
         CALL expand_celldm(celldm_pt(:,itemp,ipressp), x_pos_min, nvar, ibrav)
-
      ENDDO
   ENDDO
   DEALLOCATE(x_pos_min)
@@ -911,7 +904,6 @@ SUBROUTINE quadratic_fitf_pt()
   USE ph_freq_anharmonic_pt, ONLY : celldmf_pt, eminf_pt
   USE uniform_pressure, ONLY : p2_p, p4_p
 
-  USE linear_surfaces,  ONLY : fit_multi_linear, print_chisq_linear
   USE quadratic_surfaces, ONLY : find_two_quadratic_extremum, &
                                  find_quadratic_linear_extremum
   USE quartic_surfaces, ONLY : find_quartic_quadratic_extremum,     &
@@ -923,7 +915,6 @@ SUBROUTINE quadratic_fitf_pt()
   REAL(DP), ALLOCATABLE :: x_pos_min(:)
   REAL(DP) :: ymin
   INTEGER  :: itemp, ipress, ipressp
-  INTEGER  :: compute_nwork, compute_nwork_ph
   !
   nvar=crystal_parameters(ibrav)
   !
@@ -957,6 +948,8 @@ SUBROUTINE quadratic_fitf_pt()
               CALL find_quartic_quadratic_extremum(nvar, x_pos_min, ymin, &
                         p4_p(ipress), p2tf_t(itemp))
            ENDIF
+!           CALL write_vector(nvar,x_pos_min)
+!           CALL print_genergy(ymin)
         ENDIF
 
         eminf_pt(itemp,ipressp)=ymin
@@ -996,7 +989,6 @@ SUBROUTINE quadratic_fit_pt_pm()
   USE anharmonic_pt, ONLY : celldm_pt_p1, celldm_pt_m1
   USE uniform_pressure, ONLY : p2_p, p4_p
 
-  USE linear_surfaces,  ONLY : fit_multi_linear, print_chisq_linear
   USE quadratic_surfaces, ONLY : find_two_quadratic_extremum, &
                                  find_quadratic_linear_extremum
   USE quartic_surfaces, ONLY : find_quartic_quadratic_extremum,     &
@@ -1008,7 +1000,6 @@ SUBROUTINE quadratic_fit_pt_pm()
   REAL(DP), ALLOCATABLE :: x_pos_min(:)
   REAL(DP) :: ymin
   INTEGER  :: itemp, ipress, ipressp
-  INTEGER  :: compute_nwork, compute_nwork_ph
   !
   nvar=crystal_parameters(ibrav)
   !
@@ -1042,6 +1033,8 @@ SUBROUTINE quadratic_fit_pt_pm()
               CALL find_quartic_quadratic_extremum(nvar, x_pos_min, ymin, &
                         p4_p(ipress+1), p2t_t(itemp))
            ENDIF
+!           CALL write_vector(nvar,x_pos_min)
+!           CALL print_genergy(ymin)
         ENDIF
 
         CALL expand_celldm(celldm_pt_p1(:,itemp,ipressp), x_pos_min, nvar, ibrav)
@@ -1101,8 +1094,7 @@ SUBROUTINE quadratic_fitf_pt_pm()
   USE ph_freq_anharmonic_pt, ONLY : celldmf_pt_p1, celldmf_pt_m1
   USE uniform_pressure, ONLY : p2_p, p4_p
 
-  USE linear_surfaces,  ONLY : fit_multi_linear, print_chisq_linear
-  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum, &
+  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum,       &
                                  find_quadratic_linear_extremum
   USE quartic_surfaces, ONLY : find_quartic_quadratic_extremum,     &
                       find_two_quartic_extremum, find_quartic_cubic_extremum,&
@@ -1113,7 +1105,6 @@ SUBROUTINE quadratic_fitf_pt_pm()
   REAL(DP), ALLOCATABLE :: x_pos_min(:)
   REAL(DP) :: ymin
   INTEGER  :: itemp, ipress, ipressp
-  INTEGER  :: compute_nwork, compute_nwork_ph
   !
   nvar=crystal_parameters(ibrav)
   !
@@ -1211,9 +1202,8 @@ SUBROUTINE quadratic_fit_ptt()
                               celldm_ptt_m1, emin_ptt_p1, emin_ptt_m1
   USE uniform_pressure, ONLY : p2_p, p4_p
 
-  USE linear_surfaces,  ONLY : fit_multi_linear, print_chisq_linear
-  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum, &
-                                 find_quadratic_linear_extremum
+  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum,       &
+                                 find_quadratic_linear_extremum 
   USE quartic_surfaces, ONLY : find_quartic_quadratic_extremum,     &
                       find_two_quartic_extremum, find_quartic_cubic_extremum,&
                       find_quartic_linear_extremum
@@ -1223,7 +1213,6 @@ SUBROUTINE quadratic_fit_ptt()
   REAL(DP), ALLOCATABLE :: x_pos_min(:), x_pos_min_p1(:), x_pos_min_m1(:)
   REAL(DP) :: ymin, ymin_p1, ymin_m1
   INTEGER  :: ipress, itempp, itemp
-  INTEGER  :: compute_nwork, compute_nwork_ph
   !
   nvar=crystal_parameters(ibrav)
   !
@@ -1235,7 +1224,7 @@ SUBROUTINE quadratic_fit_ptt()
      itemp=itemp_plot(itempp)
      DO ipress=1, npress
         IF (ipress==1.OR..NOT.lquartic) THEN
-           IF (poly_degree_ph>1) THEN
+           IF (poly_degree_ph>1) THEN 
               CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
                                      p2_p(ipress), p2t_t(itemp))
               CALL find_two_quadratic_extremum(nvar, x_pos_min_p1, ymin_p1, &
@@ -1247,7 +1236,7 @@ SUBROUTINE quadratic_fit_ptt()
                                      p2_p(ipress), p1t_t(itemp))
               CALL find_quadratic_linear_extremum(nvar, x_pos_min_p1, &
                                      ymin_p1, p2_p(ipress), p1t_t(itemp+1))
-              CALL find_quadratic_linear_extremum(nvar, x_pos_min_m1, &
+              CALL find_quadratic_linear_extremum(nvar, x_pos_min_m1, & 
                                      ymin_m1, p2_p(ipress), p1t_t(itemp-1))
            ENDIF
         ENDIF
@@ -1282,6 +1271,8 @@ SUBROUTINE quadratic_fit_ptt()
               CALL find_quartic_quadratic_extremum(nvar, x_pos_min_m1, &
                      ymin_m1, p4_p(ipress), p2t_t(itemp-1))
            ENDIF
+!          CALL write_vector(nvar,x_pos_min)
+!          CALL print_genergy(ymin)
         ENDIF
         emin_ptt(ipress,itempp)=ymin
         CALL expand_celldm(celldm_ptt(:,ipress,itempp), x_pos_min, nvar, ibrav)
@@ -1327,8 +1318,7 @@ SUBROUTINE quadratic_fitf_ptt()
                                      eminf_ptt_m1
   USE uniform_pressure, ONLY : p2_p, p4_p
 
-  USE linear_surfaces,  ONLY : fit_multi_linear, print_chisq_linear
-  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum, &
+  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum,       &
                                  find_quadratic_linear_extremum
   USE quartic_surfaces, ONLY : find_quartic_quadratic_extremum,     &
                       find_two_quartic_extremum, find_quartic_cubic_extremum,&
@@ -1339,7 +1329,6 @@ SUBROUTINE quadratic_fitf_ptt()
   REAL(DP), ALLOCATABLE :: x_pos_min(:), x_pos_min_p1(:), x_pos_min_m1(:)
   REAL(DP) :: ymin, ymin_p1, ymin_m1
   INTEGER  :: ipress, itempp, itemp
-  INTEGER  :: compute_nwork, compute_nwork_ph
   !
   nvar=crystal_parameters(ibrav)
   !
@@ -1398,6 +1387,8 @@ SUBROUTINE quadratic_fitf_ptt()
               CALL find_quartic_quadratic_extremum(nvar, x_pos_min_m1, &
                                    ymin_m1, p4_p(ipress), p2tf_t(itemp-1))
            ENDIF
+!           CALL write_vector(nvar,x_pos_min)
+!           CALL print_genergy(ymin)
         ENDIF
 
         eminf_ptt(ipress,itempp)=ymin
@@ -1537,3 +1528,121 @@ SUBROUTINE compute_anhar_poly(celldm_t, free_e_min_t, pt1, pt2, pt3, pt4 )
   RETURN
   !
 END SUBROUTINE compute_anhar_poly
+
+!-------------------------------------------------------------------------
+SUBROUTINE fit_tau_eq()
+  !-----------------------------------------------------------------------
+  !
+  !   This routine receives the internal parameters uint_geo for 
+  !   each external variable (celldm_geo). 
+  !   It fits the internal parameters as a function of the external ones
+  !   with a quadratic or quartic polynomials of dimension equal to the 
+  !   number of indipendent parameters in celldm. 
+  !   If lquartic is true it fits the data with quartic polynomials 
+  !
+  !   the output of this routine is p2_eq or p4_eq. These polynomial are
+  !   deallocated in deallocate_thermo and are available to the other
+  !   routines.
+  !
+  USE kinds,        ONLY : DP
+  USE initial_conf, ONLY : ibrav_save
+  USE thermo_mod,   ONLY : celldm_geo_eos, uint_geo_eos
+  USE control_atomic_pos, ONLY : nint_var, p2_eq, p4_eq
+  USE control_quartic_energy, ONLY : lquartic, lsolve
+  USE lattices,     ONLY : expand_celldm, crystal_parameters
+  USE quadratic_surfaces, ONLY : fit_multi_quadratic
+  USE quartic_surfaces, ONLY : fit_multi_quartic
+  USE polynomial,   ONLY : init_poly
+  USE io_global,    ONLY : stdout
+  IMPLICIT NONE
+
+  INTEGER  :: ndata, ivar, nvar
+  REAL(DP), ALLOCATABLE :: x(:,:), y(:), f(:)
+  REAL(DP) :: ymin, ymin4
+  INTEGER  :: compute_nwork
+  REAL(DP) :: compute_omega_geo
+  !
+  WRITE(stdout,'(/,5x,71("-"))')
+  !
+  nvar=crystal_parameters(ibrav_save)
+  !
+  ndata = compute_nwork()
+
+  WRITE(stdout,'(/,5x,"Fitting the internal parameter(s) with a function &
+                       of the crystal parameters.")') 
+
+  ALLOCATE(x(nvar,ndata))
+  ALLOCATE(f(ndata))
+
+  CALL set_x_from_celldm(ibrav_save, nvar, ndata, x, celldm_geo_eos)
+
+  DO ivar=1, nint_var
+     f(1:ndata)=uint_geo_eos(ivar, 1:ndata)
+     IF (lquartic) THEN
+        CALL init_poly(nvar,p4_eq(ivar))
+        CALL fit_multi_quartic(ndata,nvar,lsolve,x,f,p4_eq(ivar))
+     ELSE
+        CALL init_poly(nvar,p2_eq(ivar))
+        CALL fit_multi_quadratic(ndata,nvar,lsolve,x,f,p2_eq(ivar))
+     ENDIF
+  ENDDO
+
+  DEALLOCATE(f)
+  DEALLOCATE(x)
+  !
+  RETURN
+END SUBROUTINE fit_tau_eq
+
+!-------------------------------------------------------------------------
+SUBROUTINE find_tau_eq(celldm_, tau_eq_, uint_eq_, nat)
+  !-----------------------------------------------------------------------
+  !
+  !   This routine receives the polynomials fitted in fit_tau_eq
+  !   the value of the external parameters celldm_ and evaluates
+  !   the internal parameters for celldm_, setting uint_eq_ and
+  !   tau_eq_.
+  !   
+  !   the output of this routine is uint_eq_, and tau_eq_(:) 
+  !
+  USE kinds,        ONLY : DP
+  USE initial_conf, ONLY : ibrav_save
+  USE control_atomic_pos, ONLY : nint_var, iconstr_internal, p2_eq, p4_eq
+  USE control_quartic_energy, ONLY : lquartic, lsolve
+  USE lattices,     ONLY : expand_celldm, crystal_parameters
+  USE quadratic_surfaces, ONLY : evaluate_fit_quadratic
+  USE quartic_surfaces, ONLY : evaluate_fit_quartic
+  USE io_global,    ONLY : stdout
+  IMPLICIT NONE
+
+  INTEGER, INTENT(IN) :: nat
+  REAL(DP), INTENT(IN) :: celldm_(6)
+  REAL(DP), INTENT(INOUT) :: tau_eq_(3,nat)
+  REAL(DP), INTENT(INOUT) :: uint_eq_(nint_var)
+
+  INTEGER  :: ndata, ivar, nvar
+  REAL(DP), ALLOCATABLE :: x0(:)
+  INTEGER  :: compute_nwork
+  REAL(DP) :: compute_omega_geo
+  !
+  nvar=crystal_parameters(ibrav_save)
+  !
+  ndata = compute_nwork()
+
+  ALLOCATE(x0(nvar))
+
+  CALL set_x_from_celldm(ibrav_save, nvar, 1, x0, celldm_)
+
+  DO ivar=1, nint_var
+     IF (lquartic) THEN
+        CALL evaluate_fit_quartic(nvar,x0,uint_eq_(ivar),p4_eq(ivar))
+     ELSE
+        CALL evaluate_fit_quadratic(nvar,x0,uint_eq_(ivar),p2_eq(ivar))
+     ENDIF
+  ENDDO
+
+  CALL internal_to_tau(celldm_, tau_eq_, uint_eq_, nat, nint_var,   &
+                                             iconstr_internal, 1)
+  DEALLOCATE(x0)
+  !
+  RETURN
+END SUBROUTINE find_tau_eq

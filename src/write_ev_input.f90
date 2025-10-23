@@ -16,7 +16,7 @@ SUBROUTINE write_ev_input(file_dat, pressure)
   !
   USE kinds,            ONLY : DP
   USE mp_images,        ONLY : my_image_id, root_image
-  USE thermo_mod,       ONLY : omega_geo, energy_geo, ngeo
+  USE thermo_mod,       ONLY : omega_geo_eos, energy_geo_eos, ngeo
   USE io_global,        ONLY : ionode
 
   IMPLICIT NONE
@@ -35,8 +35,8 @@ SUBROUTINE write_ev_input(file_dat, pressure)
      iu_ev=find_free_unit()
      OPEN(UNIT=iu_ev, FILE=TRIM(filedata), STATUS='UNKNOWN', FORM='FORMATTED')
      DO igeom=1,ngeo(1)
-        WRITE(iu_ev,'(2e30.15)') omega_geo(igeom), energy_geo(igeom) + &
-                                        pressure * omega_geo(igeom)
+        WRITE(iu_ev,'(2e30.15)') omega_geo_eos(igeom), energy_geo_eos(igeom) &
+                                + pressure * omega_geo_eos(igeom)
      ENDDO
      !
      CLOSE(UNIT=iu_ev,STATUS='keep')
@@ -84,7 +84,7 @@ SUBROUTINE do_ev()
 !  This subroutine computes the equilibrium volume and bulk modulus
 !
 USE constants,   ONLY : ry_kbar
-USE thermo_mod,  ONLY : ngeo, omega_geo, energy_geo
+USE thermo_mod,  ONLY : ngeo, omega_geo_eos, energy_geo_eos
 USE control_mur, ONLY : vmin, b0, b01, b02, emin
 USE control_mur_p,  ONLY : vmin_p, b0_p, b01_p, b02_p, emin_p
 USE control_ev,  ONLY : npt, v0, e0
@@ -120,11 +120,11 @@ INTEGER :: ipress, ipt
      ALLOCATE(v0(npt))
      ALLOCATE(e0(npt))
      DO ipt=1, npt
-        v0(ipt)=omega_geo(ipt)
+        v0(ipt)=omega_geo_eos(ipt)
      ENDDO
      DO ipress=1,npress
         DO ipt=1,npt
-           e0(ipt)=energy_geo(ipt) + press(ipress) * v0(ipt) / ry_kbar
+           e0(ipt)=energy_geo_eos(ipt) + press(ipress) * v0(ipt) / ry_kbar
         ENDDO
         CALL ev_sub_nodisk(vmin_p(ipress), b0_p(ipress), b01_p(ipress), &
                                   b02_p(ipress), emin_p(ipress) )

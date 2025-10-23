@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2013 - 2014 Andrea Dal Corso
+! Copyright (C) 2013 - 2025 Andrea Dal Corso
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -25,6 +25,7 @@ MODULE thermo_mod
   INTEGER :: iwho                       ! an internal integer code that
                                         ! allow the code to know what
                                         ! see initialize_thermo_work 
+
   INTEGER  :: ngeo(6)                   ! number of different geometries 
                                         ! per celldm parameter
 
@@ -54,13 +55,31 @@ MODULE thermo_mod
                                                 ! geometry
                            ef_geo(:),         & ! save the fermi energy in
                                                 ! metals
-                           tau_geo(:,:,:),    & ! coordinates of the atoms
-                                                ! in each geometry
                            at_geo(:,:,:),    &  ! primitive vectors
                                                 ! in each geometry. 
+                           tau_geo(:,:,:),    & ! coordinates of the atoms
+                                                ! in each geometry
                            uint_geo(:,:)        ! for each geometry say which
                                                 ! are the internal coordinates
 
+  LOGICAL, ALLOCATABLE :: no_ph_eos(:)   ! decide in which external geometries
+                                         ! the phonons are calculated 
+!
+!  These are the variables used to calculate the eos.
+!  When linternal_thermo is false they coincide with the previous ones
+!  otherwise they must be calculated removing the internal degrees
+!  of freedom
+!
+  REAL(DP), ALLOCATABLE :: omega_geo_eos(:),    & ! volume (geometry)
+                           celldm_geo_eos(:,:), & ! The celldm for each geometry
+                           energy_geo_eos(:),   & ! The total energy at each
+                                                  ! geometry
+                           tau_geo_eos(:,:,:),  & ! coordinates of the atoms
+                                                ! in each geometry
+                           uint_geo_eos(:,:)    ! for each geometry say which
+                                                ! are the internal coordinates
+  INTEGER :: tot_ngeo_eos               ! total number of geometries 
+                                        ! to compute the eos
 
   REAL(DP) ::              step_ngeo(6)         ! the difference of 
                                                 ! parameters among
@@ -68,7 +87,6 @@ MODULE thermo_mod
   INTEGER, ALLOCATABLE :: ibrav_geo(:)          ! the Bravais lattice at
                                                 ! each geometry
   INTEGER :: central_geo                        ! a reference geometry
-
   REAL(DP) :: density                           ! the density of the solid
 
   INTEGER :: max_geometries                     ! This value controls the
@@ -281,6 +299,22 @@ MODULE thermodynamics
   REAL(DP), ALLOCATABLE :: ph_ce(:,:)        ! phonon heat capacity, T, geometry
   REAL(DP), ALLOCATABLE :: ph_b_fact(:,:,:,:,:)! atomic B factor
 
+  REAL(DP), ALLOCATABLE :: ph_free_ener_eos(:,:) ! phonon free_energy, 
+                                                 ! (T, external geometry) 
+  REAL(DP), ALLOCATABLE :: ph_ener_eos(:,:)      ! phonon total energy, 
+                                                 ! (T, external geometry)
+  REAL(DP), ALLOCATABLE :: ph_entropy_eos(:,:)   ! phonon entropy, 
+                                                 ! (T, external geometry)
+  REAL(DP), ALLOCATABLE :: ph_e0_eos(:)          ! zero point energy, 
+                                                 ! external geometry
+  REAL(DP), ALLOCATABLE :: ph_ce_eos(:,:)        ! phonon heat capacity, 
+                                                 ! (T, external geometry)
+  REAL(DP), ALLOCATABLE :: uint_geo_eos_t(:,:,:) ! internal parameter at 
+                                                 ! each temperature for each
+                                                 ! external geometry
+  REAL(DP), ALLOCATABLE :: tau_geo_eos_t(:,:,:,:)! atomic coordinates for
+                                                 ! each temperature for each
+                                                 ! external geometry
 END MODULE thermodynamics
 
 !----------------------------------------------------------------------------
@@ -307,6 +341,23 @@ MODULE ph_freq_thermodynamics
   REAL(DP), ALLOCATABLE :: phf_ce(:,:)        ! phonon specific heat, T, geometry
   REAL(DP), ALLOCATABLE :: phf_b_fact(:,:,:,:,:) ! atomic B factor
 
+  REAL(DP), ALLOCATABLE :: phf_free_ener_eos(:,:) ! phonon free_energy, 
+                                                 ! (T, external geometry) 
+  REAL(DP), ALLOCATABLE :: phf_ener_eos(:,:)     ! phonon total energy, 
+                                                 ! (T, external geometry)
+  REAL(DP), ALLOCATABLE :: phf_entropy_eos(:,:)  ! phonon entropy, 
+                                                 ! (T, external geometry)
+  REAL(DP), ALLOCATABLE :: phf_e0_eos(:)          ! zero point energy, 
+                                                 ! external geometry
+  REAL(DP), ALLOCATABLE :: phf_ce_eos(:,:)       ! phonon heat capacity, 
+                                                 !
+  REAL(DP), ALLOCATABLE :: uintf_geo_eos_t(:,:,:) ! internal parameter at 
+                                                 ! each temperature for each
+                                                 ! external geometry
+  REAL(DP), ALLOCATABLE :: tauf_geo_eos_t(:,:,:,:)! atomic coordinates for
+                                                 ! each temperature for each
+                                                 ! external geometry
+                                                 ! (T, external geometry)
 END MODULE ph_freq_thermodynamics
 
 !----------------------------------------------------------------------------
@@ -329,6 +380,26 @@ MODULE el_thermodynamics
                                              ! T, geometry
   REAL(DP), ALLOCATABLE :: el_ce(:,:)        ! electronic heat capacity, &
                                              ! T, geometry
+  REAL(DP), ALLOCATABLE :: el_ener_eos(:,:)  ! electronic total energy, &
+                                             ! T, external geometry
+  REAL(DP), ALLOCATABLE :: el_free_ener_eos(:,:) ! electronic free_energy, 
+                                             ! T, external geometry
+  REAL(DP), ALLOCATABLE :: el_entr_eos(:,:)  ! electronic entropy, 
+                                             ! T, external geometry
+  REAL(DP), ALLOCATABLE :: el_mu_eos(:,:)    ! electronic chemical potential, 
+                                             ! T, external geometry
+  REAL(DP), ALLOCATABLE :: el_ce_eos(:,:)    ! electronic heat capacity, 
+                                             ! T, external geometry
+  REAL(DP), ALLOCATABLE :: elf_ener_eos(:,:) ! electronic total energy, 
+                                             ! T, external geometry
+  REAL(DP), ALLOCATABLE :: elf_free_ener_eos(:,:) ! electronic free_energy, 
+                                             ! T, external geometry
+  REAL(DP), ALLOCATABLE :: elf_entr_eos(:,:) ! electronic entropy, 
+                                             ! T, external geometry
+  REAL(DP), ALLOCATABLE :: elf_mu_eos(:,:)   ! electronic chemical potential, 
+                                             ! T, external geometry
+  REAL(DP), ALLOCATABLE :: elf_ce_eos(:,:)   ! electronic heat capacity, 
+                                             ! T, external geometry
 END MODULE el_thermodynamics
 !
 !----------------------------------------------------------------------------
@@ -431,6 +502,16 @@ MODULE anharmonic
   REAL(DP), ALLOCATABLE :: alpha_t(:)  ! linear thermal expansion coefficient
   REAL(DP), ALLOCATABLE :: beta_t(:)   ! volume thermal expansion coefficient
   REAL(DP), ALLOCATABLE :: gamma_t(:)  ! average gruneisen parameter
+  REAL(DP), ALLOCATABLE :: uint_t(:,:) ! QHA internal parameter at 
+                                       ! each temperature 
+  REAL(DP), ALLOCATABLE :: tau_t(:,:,:)! QHA atomic coordinates at
+                                       ! each temperature 
+  REAL(DP), ALLOCATABLE :: alpha_int_t(:,:) ! internal thermal expansion
+  REAL(DP), ALLOCATABLE :: uint_zsisa_t(:,:) ! ZSISA internal parameter at 
+                                       ! each temperature 
+  REAL(DP), ALLOCATABLE :: tau_zsisa_t(:,:,:)! ZSISA atomic coordinates at
+                                       ! each temperature 
+  REAL(DP), ALLOCATABLE :: alpha_int_zsisa_t(:,:) ! internal thermal expansion
 !
 !  Anharmonic quantities for anisotropic thermodynamic
 !
@@ -575,6 +656,17 @@ MODULE anharmonic_pt
   REAL(DP), ALLOCATABLE :: b0_s_pt(:,:)  ! the bulk modulus at constant
                                          ! entropy 
   REAL(DP), ALLOCATABLE :: gamma_pt(:,:) ! the average Gruneisen parameter
+  REAL(DP), ALLOCATABLE :: uint_pt(:,:,:) ! QHA internal parameter at 
+                                       ! each pressure
+  REAL(DP), ALLOCATABLE :: tau_pt(:,:,:,:)! QHA atomic coordinates for
+                                       ! each pressure
+  REAL(DP), ALLOCATABLE :: alpha_int_pt(:,:,:) ! internal thermal expansion
+  REAL(DP), ALLOCATABLE :: uint_zsisa_pt(:,:,:) ! ZSISA internal parameter at 
+                                       ! each temperature 
+  REAL(DP), ALLOCATABLE :: tau_zsisa_pt(:,:,:,:)! ZSISA atomic coordinates for
+                                       ! each temperature 
+  REAL(DP), ALLOCATABLE :: alpha_int_zsisa_pt(:,:,:) ! ZSISA internal thermal 
+                                       ! expansion
 !
 ! Anharmonic quantities for anisotropic thermodynamic
 !
@@ -646,6 +738,18 @@ MODULE ph_freq_anharmonic_pt
   REAL(DP), ALLOCATABLE :: b0f_s_pt(:,:)  ! the bulk modulus at constant
                                          ! entropy 
   REAL(DP), ALLOCATABLE :: gammaf_pt(:,:) ! the average Gruneisen parameter
+  REAL(DP), ALLOCATABLE :: uintf_pt(:,:,:)  ! QHA internal parameter at 
+                                          ! each pressure
+  REAL(DP), ALLOCATABLE :: tauf_pt(:,:,:,:) ! QHA atomic coordinates for
+                                          ! each pressure
+  REAL(DP), ALLOCATABLE :: alphaf_int_pt(:,:,:) ! QHA internal thermal 
+                                        ! expansion at each pressure
+  REAL(DP), ALLOCATABLE :: uintf_zsisa_pt(:,:,:)  ! ZSISA internal parameter 
+                                          ! at each temperature 
+  REAL(DP), ALLOCATABLE :: tauf_zsisa_pt(:,:,:,:) ! ZSISA atomic coordinates 
+                                          ! for each temperature 
+  REAL(DP), ALLOCATABLE :: alphaf_int_zsisa_pt(:,:,:) ! ZSISA internal thermal 
+                                        ! expansion at each pressure
 !
 ! Anharmonic quantities for anisotropic thermodynamic
 !
@@ -718,6 +822,26 @@ MODULE anharmonic_ptt
                                           ! capacity
   REAL(DP), ALLOCATABLE :: b0_s_ptt(:,:)  ! the isoentropic bulk modulus
   REAL(DP), ALLOCATABLE :: gamma_ptt(:,:) ! the average Gruneisen parameter
+  REAL(DP), ALLOCATABLE :: uint_ptt(:,:,:)! QHA internal parameter at 
+                                          ! each pressure for some temperatures
+  REAL(DP), ALLOCATABLE :: tau_ptt(:,:,:,:)! QHA atomic coordinates at
+                                          ! each pressure for some temperatures
+  REAL(DP), ALLOCATABLE :: alpha_int_ptt(:,:,:) ! QHA internal thermal 
+                                          ! expansion
+  REAL(DP), ALLOCATABLE :: uint_ptt_p1(:,:,:)! QHA internal parameter at 
+                                          ! each pressure at T+Delta T
+  REAL(DP), ALLOCATABLE :: tau_ptt_p1(:,:,:,:)! QHA atomic coordinates at
+                                          ! each pressure at T+Delta T
+  REAL(DP), ALLOCATABLE :: uint_ptt_m1(:,:,:)! QHA internal parameter at 
+                                          ! each pressure at T-Delta T
+  REAL(DP), ALLOCATABLE :: tau_ptt_m1(:,:,:,:)! QHA atomic coordinates at
+                                          ! each pressure at T-Delta T
+  REAL(DP), ALLOCATABLE :: uint_zsisa_ptt(:,:,:)! ZSISA internal parameter at 
+                                          ! each temperature 
+  REAL(DP), ALLOCATABLE :: tau_zsisa_ptt(:,:,:,:)! ZSISA atomic coordinates at 
+                                          ! each temperature 
+  REAL(DP), ALLOCATABLE :: alpha_int_zsisa_ptt(:,:,:) ! ZSISA internal 
+                                          ! thermal expansion
 !
 ! Anharmonic quantities for anisotropic thermodynamics
 !
@@ -791,6 +915,27 @@ MODULE ph_freq_anharmonic_ptt
                                           ! capacity
   REAL(DP), ALLOCATABLE :: b0f_s_ptt(:,:)  ! the isoentropic bulk modulus
   REAL(DP), ALLOCATABLE :: gammaf_ptt(:,:) ! the average Gruneisen parameter
+  REAL(DP), ALLOCATABLE :: uintf_ptt(:,:,:) ! QHA internal parameter at 
+                                            ! each temperature 
+  REAL(DP), ALLOCATABLE :: tauf_ptt(:,:,:,:)! QHA atomic coordinates for
+                                            ! each temperature 
+  REAL(DP), ALLOCATABLE :: alphaf_int_ptt(:,:,:) ! QHA internal thermal 
+                                        ! expansion at each temperature
+  REAL(DP), ALLOCATABLE :: uintf_ptt_p1(:,:,:)! QHA internal parameter at 
+                                          ! each pressure at T+Delta T
+  REAL(DP), ALLOCATABLE :: tauf_ptt_p1(:,:,:,:)! QHA atomic coordinates at
+                                          ! each pressure at T+Delta T
+  REAL(DP), ALLOCATABLE :: uintf_ptt_m1(:,:,:)! QHA internal parameter at 
+                                          ! each pressure at T-Delta T
+  REAL(DP), ALLOCATABLE :: tauf_ptt_m1(:,:,:,:)! QHA atomic coordinates at
+                                          ! each pressure at T-Delta T
+  REAL(DP), ALLOCATABLE :: uintf_zsisa_ptt(:,:,:) ! ZSISA internal parameter 
+                                            ! at each temperature 
+  REAL(DP), ALLOCATABLE :: tauf_zsisa_ptt(:,:,:,:)! ZSISA atomic coordinates 
+                                            ! for each temperature 
+  REAL(DP), ALLOCATABLE :: alphaf_int_zsisa_ptt(:,:,:) ! ZSISA internal 
+                                             ! thermal 
+                                             ! expansion at each temperature
 !
 ! Anharmonic quantities for anisotropic thermodynamics
 !
@@ -899,6 +1044,18 @@ MODULE ph_freq_anharmonic
   REAL(DP), ALLOCATABLE :: alphaf_t(:)  ! linear thermal expansion coefficient
   REAL(DP), ALLOCATABLE :: betaf_t(:)   ! volume thermal expansion coefficient
   REAL(DP), ALLOCATABLE :: gammaf_t(:)  ! average gruneisen parameter
+  REAL(DP), ALLOCATABLE :: uintf_t(:,:) ! QHA internal parameter at 
+                                        ! each temperature 
+  REAL(DP), ALLOCATABLE :: tauf_t(:,:,:)! QHA atomic coordinates for
+                                        ! each temperature 
+  REAL(DP), ALLOCATABLE :: alphaf_int_t(:,:) ! QHA internal thermal 
+                                        ! expansion
+  REAL(DP), ALLOCATABLE :: uintf_zsisa_t(:,:) ! ZSISA internal parameter at 
+                                       ! each temperature 
+  REAL(DP), ALLOCATABLE :: tauf_zsisa_t(:,:,:)! ZSISA atomic coordinates at
+                                       ! each temperature 
+  REAL(DP), ALLOCATABLE :: alphaf_int_zsisa_t(:,:) ! ZSISA internal thermal 
+                                        ! expansion
 
 !
 !  Anharmonic quantities for anisotropic thermodynamic
@@ -1033,6 +1190,12 @@ MODULE grun_anharmonic
                                              ! frequencies as a function of
                                              ! the crystal parameters
   REAL(DP), ALLOCATABLE :: poly_grun(:,:,:)
+  REAL(DP), ALLOCATABLE :: poly_grun_red(:,:,:,:) ! For each band, each q point
+                                        ! and each crystal parameter
+                                        ! these are the coefficients of 
+                                        ! polynomial which fit the frequency
+                                        ! as a function of crystal parameter
+                                        ! this is for the reduced_grid case
   INTEGER :: poly_degree_grun           ! degree of the polynomial used to
                                         ! intepolate the frequencies
   LOGICAL :: done_grun=.FALSE.          ! the anharmonic quantities with
@@ -1236,11 +1399,11 @@ MODULE control_thermo
   LOGICAL :: lhugoniot=.FALSE.    ! if .true. the code plots T(p) and V(p)
                                   ! along the Hugoniot
   LOGICAL :: lgeo_from_file=.FALSE. ! geometries for mur_lc read from file
-  LOGICAL :: lgeo_to_file=.FALSE. ! geometries for mur_lc written to file
   LOGICAL :: ltau_from_file=.FALSE. ! atomic coordinates for mur_lc from file.
   LOGICAL :: ltau_el_cons_from_file=.FALSE. ! atomic coordinates for  
                                     ! unperturbed geometries of
                                     ! elastic_constants_geo from file
+  LOGICAL :: lgeo_to_file=.FALSE. ! geometries for mur_lc written to file
   LOGICAL :: lconv_ke_test=.FALSE.! if .true. this writes the ke test on file
   LOGICAL :: lconv_nk_test=.FALSE.! if .true. this writes the k-point on file
   LOGICAL :: lelastic_const=.FALSE. ! if .true. compute elastic constants
@@ -1299,9 +1462,54 @@ LOGICAL, ALLOCATABLE :: me_igeom_iq(:,:) ! if .TRUE. this image must collect
 END MODULE distribute_collection
 
 !----------------------------------------------------------------------------
+MODULE control_atomic_pos
+!----------------------------------------------------------------------------
+  USE kinds,  ONLY : DP
+  USE polynomial, ONLY : poly2, poly4
+
+  LOGICAL :: linternal_thermo ! if .TRUE. there are internal coordinates
+
+  INTEGER :: iconstr_internal ! the number of the constraint implemented in
+                       ! the routine that compute the atomic positions
+
+  INTEGER :: nint_var ! the number of internal degrees of freedom
+
+  INTEGER, PARAMETER :: max_nint_var=2 ! the maximum number of internal degrees of freedom
+
+  INTEGER :: int_ngeo(max_nint_var)  ! how many steps to do for each internal
+                            ! degree of freedom
+
+  REAL(DP) :: int_step_ngeo(max_nint_var) ! the step of each internal
+                            ! degree of freedom
+  INTEGER :: ninternal      ! the number of internal point for each set
+                            ! of crystal parameters
+  REAL(DP), ALLOCATABLE :: uint0(:) ! the values of uint of the input geometry 
+
+  REAL(DP), ALLOCATABLE :: tau_eq(:,:) ! the coordinates of the atom at
+                                       !  equilibrium
+  REAL(DP), ALLOCATABLE :: uint_eq(:)  ! the value of internal coordinates
+                                       ! at equilibrium
+  REAL(DP), ALLOCATABLE :: uint_p(:,:)  ! the value of internal coordinates
+                                       ! at each pressure
+  REAL(DP), ALLOCATABLE :: tau_p(:,:,:)  ! the value of atomic coordinates
+                                        ! at each pressure
+  TYPE(poly2), ALLOCATABLE  :: p2_eq(:)  ! the quadratic polinomial which fits
+                                        ! uint as a function of external par.
+  TYPE(poly4), ALLOCATABLE  :: p4_eq(:) ! the quartic polinomial which fits 
+                                        ! uint as a function of external par.
+  
+  LOGICAL :: linterpolate_tau           ! computes within ZSISA the atomic
+                                        ! coordinates as a function of 
+                                        ! pressure and temperature (requires
+                                        ! a constraint iconstr_internal)
+
+END MODULE control_atomic_pos
+!
+!----------------------------------------------------------------------------
 MODULE control_elastic_constants
 !----------------------------------------------------------------------------
   USE kinds,  ONLY : DP
+  USE control_atomic_pos, ONLY : max_nint_var
   !
   ! ... The variables needed to control the calculation of the elastic 
   !     constants
@@ -1380,7 +1588,6 @@ MODULE control_elastic_constants
   LOGICAL :: lelasticf_ptt=.FALSE. ! elastic constants as a function of 
                                 ! pressure for a few temperatures available
                                 !
-
   REAL(DP), ALLOCATABLE :: el_con_geo(:,:,:)  ! the elastic constants at
                                 ! each geometry
   INTEGER, ALLOCATABLE :: el_con_ibrav_geo(:) ! the ibrav of each unperturbed
@@ -1390,19 +1597,19 @@ MODULE control_elastic_constants
   REAL(DP), ALLOCATABLE :: el_con_at_geo(:,:,:) ! the at of each unperturbed 
                                 ! lattice.
   REAL(DP), ALLOCATABLE :: el_con_tau_crys_geo(:,:,:) ! the atomic positions 
-                                ! of each unperturbed solid (crystal).
+                                ! of each unperturbed lattice (crystal).
   REAL(DP), ALLOCATABLE :: el_con_tau_geo(:,:,:) ! the atomic positions 
-                                ! of each unperturbed solid.
+                                ! of each unperturbed lattice.
   REAL(DP), ALLOCATABLE :: tau_save_ec(:,:,:) ! The relaxed atomic positions
-                                ! of each geometry
+                                ! of each geometry (3,nat,tot_ngeo)
   REAL(DP), ALLOCATABLE :: el_con_omega_geo(:) ! the volume of each 
                                 ! unperturbed cell.
   REAL(DP), ALLOCATABLE :: epsil_geo(:) ! strain amplitude for each geometry
                                 !
   INTEGER :: ngeom=1            ! the number of geometries
 
-  INTEGER :: work_base          ! number of works for one set of
-                                ! elastic constants
+  INTEGER :: work_base          ! number of works for the elastic constants
+                                ! of one equilibrium geometry
 
   LOGICAL :: use_free_energy    ! if true makes the qha approximation 
                                 ! otherwise the quasi-static one.
@@ -1445,14 +1652,16 @@ MODULE control_elastic_constants
                                 ! the atoms with respect to the uniformely
                                 ! strained configuration
                                 !
-  REAL(DP), ALLOCATABLE :: min_y(:,:,:) ! the minimum value of the internal
-                                ! coordinate (ngeo_strain,21,ngeom)
+  REAL(DP), ALLOCATABLE :: min_y(:,:,:,:) ! the minimum value of the internal
+                                ! coordinate (nint_var_ec,ngeo_strain,21,ngeom)
+                                ! minimizing energy
   REAL(DP), ALLOCATABLE :: epsil_y(:,:,:) ! the strain amplitude
                                 ! that has min_y internal coordinate 
                                 ! as a minimum
-  REAL(DP), ALLOCATABLE :: min_y_t(:,:,:,:) ! the minimum value of the internal
-                                ! coordinate (ngeo_strain,21,ngeom,ntemp) at 
-                                ! each temperature
+  REAL(DP), ALLOCATABLE :: min_y_t(:,:,:,:,:) ! the minimum value of the 
+                                ! internal coordinate (nint_var_ec,
+                                ! ngeo_strain,21,ngeom,ntemp) at each 
+                                ! temperature minimizing free energy
   LOGICAL :: lcm_ec             ! if .true. the code moves the other atoms
                                 ! so as to keep the center of mass of the
                                 ! cell fixed.
@@ -1464,13 +1673,31 @@ MODULE control_elastic_constants
   LOGICAL :: lfp                ! when .TRUE. and the previous calculations
                                 ! have been executed makes the frozen phonon
                                 ! approximation, taking the min_y=0.0
+  LOGICAL :: stypec(21)         ! if .TRUE. this strain type needs also
+                                ! atomic relaxations described with 
+                                ! constraint
+  INTEGER :: iconstr_internal_ec(21) ! the number of the constraint 
+                                  ! implemented in the routine 
+                                  ! that compute the atomic positions
+
+  INTEGER :: nint_var_ec(21) ! the number of internal degrees of freedom
+                             ! for each strain type
+
+  INTEGER :: int_ngeo_ec(max_nint_var,21)  ! how many steps to do for 
+                            ! each internal degree of freedom
+
+  REAL(DP) :: int_step_ngeo_ec(max_nint_var,21) ! the step of each internal
+                            ! degree of freedom
+  INTEGER :: ninternal_ec(21) ! the number of internal point for each set
+                              ! of external parameters
+
   INTEGER :: old_ec             ! The hexagonal elastic constants are 
                                 ! computed with the following strain
                                 ! 0  C E B1 A H
                                 ! 1  C E B1 B H
                                 ! 2  C E B  A H
 
-  REAL(DP), ALLOCATABLE :: dyde(:,:,:) ! (21,ngeom,ntemp)
+  REAL(DP), ALLOCATABLE :: dyde(:,:,:,:) ! (nint_var_ec,21,ngeom,ntemp)
 
 END MODULE control_elastic_constants
   !
@@ -1708,6 +1935,7 @@ INTEGER :: ggrun_recipe !  the degree of the polynomial used to fit
                        ! controlled by the lquartic variable.
 INTEGER :: icenter_grun! the number of the geometry taken as reference 
                        ! for the theory
+
 INTEGER, ALLOCATABLE  :: xngeo(:) ! the size of the mesh (compressed)     
 
 INTEGER, ALLOCATABLE :: ind_rec3(:,:) ! this index gives 
@@ -1747,9 +1975,8 @@ MODULE initial_conf
   REAL(DP), ALLOCATABLE :: tau_save(:,:) ! save the atomic coordinates read
                                ! from pw.x input
   REAL(DP), ALLOCATABLE :: tau_save_crys(:,:) ! save the atomic coordinates read
-                               ! from pw.x input in crystal coordinates
   CHARACTER(LEN=6), ALLOCATABLE :: atm_save(:)
-                               ! from pw.x input the labels of each atom
+                               ! from pw.x input the label of each atom
   INTEGER  :: nr1_save, nr2_save, nr3_save  ! save the fft dimensions
   LOGICAL :: nosym_save        ! save the input nosym
 
@@ -1759,8 +1986,8 @@ MODULE initial_conf
   LOGICAL :: zeu_save     ! save input_zeu, changed in dispersion run
   LOGICAL :: zue_save     ! save input_zue, changed in dispersion run
   INTEGER :: start_q_save, last_q_save ! save start_q and last_q
-  INTEGER :: start_geometry_save, last_geometry_save ! save start and last
-                                 ! geometries if required
+  INTEGER :: start_geometry_save, last_geometry_save ! save the initial and
+                          ! final geometries
 
 END MODULE initial_conf
 

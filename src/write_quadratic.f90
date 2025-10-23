@@ -16,7 +16,7 @@ SUBROUTINE write_quadratic()
 !
 USE kinds,          ONLY : DP
 USE data_files,     ONLY : flevdat
-USE thermo_mod,     ONLY : ngeo, celldm_geo
+USE thermo_mod,     ONLY : ngeo, celldm_geo_eos
 USE cell_base,      ONLY : ibrav
 USE control_vol,    ONLY : nvol
 USE control_quadratic_energy, ONLY : p2
@@ -54,8 +54,8 @@ IF (ibrav==1.OR.ibrav==2.OR.ibrav==3) THEN
    xmax=0.0_DP
    xmin=100000.0_DP
    DO iwork = 1, ngeo(1)
-      IF (celldm_geo(1,iwork) > xmax) xmax=celldm_geo(1,iwork)
-      IF (celldm_geo(1,iwork) < xmin) xmin=celldm_geo(1,iwork)
+      IF (celldm_geo_eos(1,iwork) > xmax) xmax=celldm_geo_eos(1,iwork)
+      IF (celldm_geo_eos(1,iwork) < xmin) xmin=celldm_geo_eos(1,iwork)
    ENDDO
    xmin=xmin*0.99_DP
    xmax=xmax*1.01_DP
@@ -65,14 +65,14 @@ ELSEIF (ibrav==4.OR.ibrav==5.OR.ibrav==6.OR.ibrav==7) THEN
    x2max=0.0_DP
    x2min=100000.0_DP
    DO iwork = 1, nwork
-      IF (celldm_geo(1,iwork) > x2max(1)) x2max(1)=celldm_geo(1,iwork)
-      IF (celldm_geo(1,iwork) < x2min(1)) x2min(1)=celldm_geo(1,iwork)
+      IF (celldm_geo_eos(1,iwork) > x2max(1)) x2max(1)=celldm_geo_eos(1,iwork)
+      IF (celldm_geo_eos(1,iwork) < x2min(1)) x2min(1)=celldm_geo_eos(1,iwork)
       IF (ibrav==5) THEN
-         IF (celldm_geo(4,iwork) > x2max(2)) x2max(2)=ACOS(celldm_geo(4,iwork))
-         IF (celldm_geo(4,iwork) < x2min(2)) x2min(2)=ACOS(celldm_geo(4,iwork))
+         IF (celldm_geo_eos(4,iwork) > x2max(2)) x2max(2)=ACOS(celldm_geo_eos(4,iwork))
+         IF (celldm_geo_eos(4,iwork) < x2min(2)) x2min(2)=ACOS(celldm_geo_eos(4,iwork))
       ELSE
-         IF (celldm_geo(3,iwork) > x2max(2)) x2max(2)=celldm_geo(3,iwork)
-         IF (celldm_geo(3,iwork) < x2min(2)) x2min(2)=celldm_geo(3,iwork)
+         IF (celldm_geo_eos(3,iwork) > x2max(2)) x2max(2)=celldm_geo_eos(3,iwork)
+         IF (celldm_geo_eos(3,iwork) < x2min(2)) x2min(2)=celldm_geo_eos(3,iwork)
       ENDIF
    ENDDO
    IF (nvol <= 1) nvol=25

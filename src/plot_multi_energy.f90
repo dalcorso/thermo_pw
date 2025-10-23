@@ -15,7 +15,8 @@ SUBROUTINE plot_multi_energy()
   !
   !
   USE kinds,                ONLY : DP
-  USE thermo_mod,           ONLY : ngeo, celldm_geo, energy_geo, omega_geo
+  USE thermo_mod,           ONLY : ngeo, celldm_geo_eos, energy_geo_eos, &
+                                   omega_geo_eos
   USE initial_conf,         ONLY : ibrav_save
   USE control_gnuplot,      ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
   USE data_files,           ONLY : flenergy, flevdat, flgeom
@@ -76,8 +77,8 @@ SUBROUTINE plot_multi_energy()
         xmax=0.0_DP
         xmin=1000000.0_DP
         DO iwork = 1, nx
-           IF (celldm_geo(1,iwork) > xmax) xmax=celldm_geo(1,iwork)
-           IF (celldm_geo(1,iwork) < xmin) xmin=celldm_geo(1,iwork)
+           IF (celldm_geo_eos(1,iwork) > xmax) xmax=celldm_geo_eos(1,iwork)
+           IF (celldm_geo_eos(1,iwork) < xmin) xmin=celldm_geo_eos(1,iwork)
         ENDDO
         xmin=xmin*0.99_DP
         xmax=xmax*1.01_DP
@@ -128,24 +129,24 @@ SUBROUTINE plot_multi_energy()
         ymin=1.d10
         ymax=-1.d10
         DO iwork = 1, tot_n
-           IF (celldm_geo(1,iwork) > xmax) xmax=celldm_geo(1,iwork)  
-           IF (celldm_geo(1,iwork) < xmin) xmin=celldm_geo(1,iwork)  
+           IF (celldm_geo_eos(1,iwork) > xmax) xmax=celldm_geo_eos(1,iwork)  
+           IF (celldm_geo_eos(1,iwork) < xmin) xmin=celldm_geo_eos(1,iwork)  
            IF (ibrav_save==5) THEN
-              IF (celldm_geo(4,iwork) > ymax) ymax=celldm_geo(4,iwork)  
-              IF (celldm_geo(4,iwork) < ymin) ymin=celldm_geo(4,iwork)  
+              IF (celldm_geo_eos(4,iwork) > ymax) ymax=celldm_geo_eos(4,iwork)  
+              IF (celldm_geo_eos(4,iwork) < ymin) ymin=celldm_geo_eos(4,iwork)  
            ELSE
-              IF (celldm_geo(3,iwork) > ymax) ymax=celldm_geo(3,iwork)  
-              IF (celldm_geo(3,iwork) < ymin) ymin=celldm_geo(3,iwork)  
+              IF (celldm_geo_eos(3,iwork) > ymax) ymax=celldm_geo_eos(3,iwork)  
+              IF (celldm_geo_eos(3,iwork) < ymin) ymin=celldm_geo_eos(3,iwork)  
            ENDIF
         END DO
         IF (ene_levels(1)==-1000._DP) THEN
            emin=1.d10
            emax=-1.d10
            DO iwork = 1, tot_n
-              IF ( energy_geo(iwork) + pressure * omega_geo(iwork) > emax ) &
-                 emax = energy_geo(iwork) + pressure * omega_geo(iwork)
-              IF ( energy_geo(iwork) + pressure * omega_geo(iwork) < emin ) &
-                 emin = energy_geo(iwork) + pressure * omega_geo(iwork)
+              IF ( energy_geo_eos(iwork) + pressure * omega_geo_eos(iwork) > emax ) &
+                 emax = energy_geo_eos(iwork) + pressure * omega_geo_eos(iwork)
+              IF ( energy_geo_eos(iwork) + pressure * omega_geo_eos(iwork) < emin ) &
+                 emin = energy_geo_eos(iwork) + pressure * omega_geo_eos(iwork)
            ENDDO
 !
 !    emax and emin are not used as contours 
@@ -220,19 +221,19 @@ SUBROUTINE plot_multi_energy()
         ymin=1.d10
         ymax=-1.d10
         DO iwork = 1, tot_n
-           IF (celldm_geo(1,iwork) > xmax) xmax=celldm_geo(1,iwork)  
-           IF (celldm_geo(1,iwork) < xmin) xmin=celldm_geo(1,iwork)  
-           IF (celldm_geo(2,iwork) > ymax) ymax=celldm_geo(2,iwork)  
-           IF (celldm_geo(2,iwork) < ymin) ymin=celldm_geo(2,iwork)  
+           IF (celldm_geo_eos(1,iwork) > xmax) xmax=celldm_geo_eos(1,iwork)  
+           IF (celldm_geo_eos(1,iwork) < xmin) xmin=celldm_geo_eos(1,iwork)  
+           IF (celldm_geo_eos(2,iwork) > ymax) ymax=celldm_geo_eos(2,iwork)  
+           IF (celldm_geo_eos(2,iwork) < ymin) ymin=celldm_geo_eos(2,iwork)  
         END DO
         IF (ene_levels(1)==-1000._DP) THEN
            emin=1.d10
            emax=-1.d10
            DO iwork = 1, tot_n
-              IF ( energy_geo(iwork) + pressure * omega_geo(iwork) > emax ) &
-                 emax = energy_geo(iwork) + pressure * omega_geo(iwork)
-              IF ( energy_geo(iwork) + pressure * omega_geo(iwork) < emin ) &
-                 emin = energy_geo(iwork) + pressure * omega_geo(iwork)
+              IF ( energy_geo_eos(iwork) + pressure * omega_geo_eos(iwork) > emax ) &
+                 emax = energy_geo_eos(iwork) + pressure * omega_geo_eos(iwork)
+              IF ( energy_geo_eos(iwork) + pressure * omega_geo_eos(iwork) < emin ) &
+                 emin = energy_geo_eos(iwork) + pressure * omega_geo_eos(iwork)
            ENDDO
 !
 !    emax and emin are not used as contours 

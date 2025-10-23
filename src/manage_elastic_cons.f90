@@ -62,14 +62,19 @@ INTEGER :: iwork, work_base, igeom, base_ind, nwork_eff, istep, igeo
 CHARACTER(LEN=6)    :: int_to_char
 CHARACTER(LEN=256)  :: filelastic
 !
-!  the elastic constants are calculated here if we have the energies
-!  of all geometries
-!
-IF ((start_geometry /= 1).OR.(last_geometry /= nwork)) RETURN
 !  First collect the total energies
 !
 CALL mp_sum(energy_geo, world_comm)
 energy_geo=energy_geo / nproc_image
+!
+!  the elastic constants are calculated here if we have the energies
+!  of all geometries
+!
+lreturn=.FALSE.
+DO iwork=1,nwork
+   lreturn=lreturn.OR.(ABS(energy_geo(iwork))<1.D-10)
+ENDDO
+IF (lreturn) RETURN
 
 ALLOCATE(energy_geo_eff(nwork))
 ALLOCATE(epsilon_geo_eff(3,3,nwork))
@@ -156,7 +161,7 @@ DO igeom=start_geometry_qha, last_geometry_qha
             IF (lcm_ec) WRITE(stdout,'(5x,"Conserving the center of mass")')
             DO igeo=1,ngeo_strain
                WRITE(stdout,'(2f20.8)') epsil_y(igeo,istep,igeom), &
-                                          min_y(igeo,istep,igeom)  
+                                          min_y(1,igeo,istep,igeom)  
             ENDDO
          ENDIF
       ENDDO

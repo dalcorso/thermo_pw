@@ -32,9 +32,9 @@ SUBROUTINE bcast_thermo_input()
   USE control_pressure, ONLY : pressure, pmin, pmax, deltap, npress_plot
   USE control_conv,    ONLY : nke, deltake, nkeden, deltakeden,               &
                               nnk, deltank, nsigma, deltasigma
+  USE control_gen_gruneisen, ONLY : ggrun_recipe, icenter_grun
   USE control_bands,   ONLY : emin_input, emax_input, nbnd_bands, lsym,       &
                               enhance_plot
-  USE control_gen_gruneisen, ONLY : ggrun_recipe, icenter_grun
   USE control_paths,   ONLY : q_in_band_form, q_in_cryst_coord, q2d,          &
                               point_label_type, npx, long_path, old_path,     &
                               path_fact, is_a_path
@@ -55,7 +55,9 @@ SUBROUTINE bcast_thermo_input()
                               frozen_ions, elastic_algorithm, poly_degree, &
                               use_free_energy, start_geometry_qha, &
                               last_geometry_qha, nmove, atom_dir, atom_step, &
-                              stype, move_at, lcm_ec, lzsisa, lfp, old_ec
+                              stype, move_at, lcm_ec, lzsisa, lfp, old_ec,   &
+                              stypec, iconstr_internal_ec, nint_var_ec,      &
+                              int_ngeo_ec, int_step_ngeo_ec
   USE piezoelectric_tensor, ONLY : nppl
   USE control_qe,       ONLY : force_band_calculation, use_ph_images, many_k
   USE many_k_mod,       ONLY : memgpu
@@ -73,6 +75,9 @@ SUBROUTINE bcast_thermo_input()
   USE control_mur,     ONLY : lmurn
   USE control_ev,      ONLY : ieos
   USE control_energy_plot, ONLY : ncontours
+  USE control_atomic_pos,  ONLY : linternal_thermo, &
+                                  iconstr_internal, nint_var, int_ngeo,    &
+                                  int_step_ngeo, linterpolate_tau
   USE control_emp_free_ener, ONLY : add_empirical, efe, alpha1, alpha2, v0p
   USE control_grun,    ONLY : temp_ph, volume_ph, celldm_ph, lv0_t, lb0_t,    &
                               grunmin_input, grunmax_input
@@ -259,7 +264,6 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( epsilon_0, meta_ionode_id, world_comm )
   CALL mp_bcast( poly_degree, meta_ionode_id, world_comm )
   CALL mp_bcast( fl_el_cons, meta_ionode_id, world_comm )
-  CALL mp_bcast( fl_piezo, meta_ionode_id, world_comm )
   CALL mp_bcast( nmove, meta_ionode_id, world_comm )
   CALL mp_bcast( move_at, meta_ionode_id, world_comm )
   CALL mp_bcast( atom_dir, meta_ionode_id, world_comm )
@@ -269,6 +273,12 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( lzsisa, meta_ionode_id, world_comm )
   CALL mp_bcast( lfp, meta_ionode_id, world_comm )
   CALL mp_bcast( old_ec, meta_ionode_id, world_comm )
+  CALL mp_bcast( stypec, meta_ionode_id, world_comm )
+  CALL mp_bcast( iconstr_internal_ec, meta_ionode_id, world_comm )
+  CALL mp_bcast( nint_var_ec, meta_ionode_id, world_comm )
+  CALL mp_bcast( int_ngeo_ec, meta_ionode_id, world_comm )
+  CALL mp_bcast( int_step_ngeo_ec, meta_ionode_id, world_comm )
+  CALL mp_bcast( linterpolate_tau, meta_ionode_id, world_comm )
 !
 !  scf_polarization
 !
@@ -292,14 +302,17 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( nvol_plot, meta_ionode_id, world_comm )
   CALL mp_bcast( lquartic, meta_ionode_id, world_comm )
   CALL mp_bcast( lsolve, meta_ionode_id, world_comm )
-  CALL mp_bcast( ltau_from_file, meta_ionode_id, world_comm )
-  CALL mp_bcast( ltau_el_cons_from_file, meta_ionode_id, world_comm )
   CALL mp_bcast( flevdat, meta_ionode_id, world_comm )
   CALL mp_bcast( flpsmur, meta_ionode_id, world_comm )
   CALL mp_bcast( flps_el_cons, meta_ionode_id, world_comm )
   CALL mp_bcast( ncontours, meta_ionode_id, world_comm )
   CALL mp_bcast( flenergy, meta_ionode_id, world_comm )
   CALL mp_bcast( flpsenergy, meta_ionode_id, world_comm )
+  CALL mp_bcast( linternal_thermo, meta_ionode_id, world_comm )
+  CALL mp_bcast( iconstr_internal, meta_ionode_id, world_comm )
+  CALL mp_bcast( nint_var, meta_ionode_id, world_comm )
+  CALL mp_bcast( int_ngeo, meta_ionode_id, world_comm )
+  CALL mp_bcast( int_step_ngeo, meta_ionode_id, world_comm )
 !
 !  mur_lc_elastic_constants
 !
@@ -329,10 +342,12 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( v0p, meta_ionode_id, world_comm )
   CALL mp_bcast( all_geometries_together, meta_ionode_id, world_comm )
   CALL mp_bcast( ltherm_glob, meta_ionode_id, world_comm )
+  CALL mp_bcast( lgruneisen_gen, meta_ionode_id, world_comm )
   CALL mp_bcast( lhugoniot, meta_ionode_id, world_comm )
   CALL mp_bcast( lgeo_from_file, meta_ionode_id, world_comm )
+  CALL mp_bcast( ltau_from_file, meta_ionode_id, world_comm )
+  CALL mp_bcast( ltau_el_cons_from_file, meta_ionode_id, world_comm )
   CALL mp_bcast( lgeo_to_file, meta_ionode_id, world_comm )
-  CALL mp_bcast( lgruneisen_gen, meta_ionode_id, world_comm )
   CALL mp_bcast( ngeo_ph, meta_ionode_id, world_comm )
   CALL mp_bcast( fact_ngeo, meta_ionode_id, world_comm )
   CALL mp_bcast( poly_degree_grun, meta_ionode_id, world_comm )

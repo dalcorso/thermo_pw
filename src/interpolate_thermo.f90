@@ -18,7 +18,8 @@ SUBROUTINE interpolate_thermo(vmin_t, celldm_t, ph_thermo, thermo_t)
 !
 USE kinds,          ONLY : DP
 USE cell_base,      ONLY : ibrav
-USE thermo_mod,     ONLY : celldm_geo, omega_geo, no_ph, tot_ngeo
+USE thermo_mod,     ONLY : celldm_geo_eos, omega_geo_eos, no_ph_eos, &
+                           tot_ngeo_eos
 USE control_mur,    ONLY : lmurn
 USE temperature,    ONLY : ntemp
 USE linear_surfaces, ONLY : fit_multi_linear, evaluate_fit_linear
@@ -32,7 +33,7 @@ USE mp_world,       ONLY : world_comm
 USE mp,             ONLY : mp_sum
 
 IMPLICIT NONE
-REAL(DP), INTENT(IN)  :: vmin_t(ntemp), ph_thermo(ntemp, tot_ngeo), &
+REAL(DP), INTENT(IN)  :: vmin_t(ntemp), ph_thermo(ntemp, tot_ngeo_eos), &
                          celldm_t(6,ntemp)
 
 REAL(DP), INTENT(OUT) :: thermo_t(ntemp)
@@ -48,7 +49,7 @@ TYPE(poly4) :: p4
 nvar=crystal_parameters(ibrav)
 IF (lmurn) nvar=1         ! only the volume is variable in this case
 !
-ndata = compute_nwork_ph(no_ph,tot_ngeo)
+ndata = compute_nwork_ph(no_ph_eos,tot_ngeo_eos)
 
 ALLOCATE(x(nvar,ndata))
 ALLOCATE(x_pos_min(nvar))
@@ -58,13 +59,13 @@ ALLOCATE(f(ndata))
 !  have been calculated
 !
 ndata=0
-DO igeo=1, tot_ngeo
-   IF (no_ph(igeo)) CYCLE
+DO igeo=1, tot_ngeo_eos
+   IF (no_ph_eos(igeo)) CYCLE
    ndata=ndata+1
    IF (lmurn) THEN
-      x(1,ndata)=omega_geo(igeo)
+      x(1,ndata)=omega_geo_eos(igeo)
    ELSE
-      CALL compress_celldm(celldm_geo(1,igeo), x(1,ndata), nvar, ibrav)
+      CALL compress_celldm(celldm_geo_eos(1,igeo), x(1,ndata), nvar, ibrav)
    ENDIF
 ENDDO
 !
@@ -77,8 +78,8 @@ DO itemp=startt,lastt
 !  collect the computed data at this temperature
 !
    ndata=0
-   DO igeo=1, tot_ngeo
-      IF (no_ph(igeo)) CYCLE
+   DO igeo=1, tot_ngeo_eos
+      IF (no_ph_eos(igeo)) CYCLE
       ndata=ndata+1
       f(ndata)= ph_thermo(itemp,igeo)
    ENDDO
@@ -164,7 +165,8 @@ SUBROUTINE interpolate_thermo_p(vmin_p, celldm_p, ph_thermo, thermo_p, itemp)
 !
 USE kinds,          ONLY : DP
 USE cell_base,      ONLY : ibrav
-USE thermo_mod,     ONLY : celldm_geo, omega_geo, no_ph, tot_ngeo
+USE thermo_mod,     ONLY : celldm_geo_eos, omega_geo_eos, no_ph_eos, &
+                           tot_ngeo_eos
 USE control_mur,    ONLY : lmurn
 USE temperature,    ONLY : ntemp
 USE control_pressure, ONLY : npress
@@ -180,7 +182,7 @@ USE mp,             ONLY : mp_sum
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: itemp
-REAL(DP), INTENT(IN)  :: vmin_p(npress), ph_thermo(ntemp, tot_ngeo), &
+REAL(DP), INTENT(IN)  :: vmin_p(npress), ph_thermo(ntemp, tot_ngeo_eos), &
                          celldm_p(6,npress)
 
 REAL(DP), INTENT(OUT) :: thermo_p(npress)
@@ -196,7 +198,7 @@ TYPE(poly4) :: p4
 nvar=crystal_parameters(ibrav)
 IF (lmurn) nvar=1         ! only the volume is variable in this case
 !
-ndata = compute_nwork_ph(no_ph,tot_ngeo)
+ndata = compute_nwork_ph(no_ph_eos,tot_ngeo_eos)
 
 ALLOCATE(x(nvar,ndata))
 ALLOCATE(x_pos_min(nvar))
@@ -206,13 +208,13 @@ ALLOCATE(f(ndata))
 !  have been calculated
 !
 ndata=0
-DO igeo=1, tot_ngeo
-   IF (no_ph(igeo)) CYCLE
+DO igeo=1, tot_ngeo_eos
+   IF (no_ph_eos(igeo)) CYCLE
    ndata=ndata+1
    IF (lmurn) THEN
-      x(1,ndata)=omega_geo(igeo)
+      x(1,ndata)=omega_geo_eos(igeo)
    ELSE
-      CALL compress_celldm(celldm_geo(1,igeo), x(1,ndata), nvar, ibrav)
+      CALL compress_celldm(celldm_geo_eos(1,igeo), x(1,ndata), nvar, ibrav)
    ENDIF
 ENDDO
 !
@@ -225,8 +227,8 @@ DO ipress=startp,lastp
 !  collect the computed data at this temperature
 !
    ndata=0
-   DO igeo=1, tot_ngeo
-      IF (no_ph(igeo)) CYCLE
+   DO igeo=1, tot_ngeo_eos
+      IF (no_ph_eos(igeo)) CYCLE
       ndata=ndata+1
       f(ndata)= ph_thermo(itemp,igeo)
    ENDDO
@@ -305,11 +307,11 @@ SUBROUTINE interpolate_e0_p(vmin_ptt, celldm_ptt, ph_e0, e0_p)
 !
 USE kinds,             ONLY : DP
 USE control_pressure,  ONLY : npress
-USE thermo_mod,        ONLY : tot_ngeo
+USE thermo_mod,        ONLY : tot_ngeo_eos
 IMPLICIT NONE
 
 REAL(DP), INTENT(IN)  :: vmin_ptt(npress), celldm_ptt(6,npress), &
-                         ph_e0(tot_ngeo)
+                         ph_e0(tot_ngeo_eos)
 REAL(DP), INTENT(OUT) :: e0_p(npress)
 
 INTEGER :: ipress
@@ -338,7 +340,8 @@ USE kinds,          ONLY : DP
 USE cell_base,      ONLY : ibrav
 USE phdos_module,   ONLY : zero_point_energy
 USE ph_freq_module, ONLY : zero_point_energy_ph
-USE thermo_mod,     ONLY : celldm_geo, omega_geo, no_ph, tot_ngeo
+USE thermo_mod,     ONLY : celldm_geo_eos, omega_geo_eos, no_ph_eos, &
+                           tot_ngeo_eos
 USE control_mur,    ONLY : lmurn
 USE temperature,    ONLY : ntemp
 USE linear_surfaces, ONLY : fit_multi_linear, evaluate_fit_linear
@@ -348,11 +351,9 @@ USE quartic_surfaces, ONLY : fit_multi_quartic, evaluate_fit_quartic
 USE control_quartic_energy, ONLY : poly_degree_thermo, lsolve
 USE lattices,       ONLY : compress_celldm, crystal_parameters
 USE polynomial,     ONLY : poly1, poly2, poly3, poly4, init_poly, clean_poly
-USE mp_world,       ONLY : world_comm
-USE mp,             ONLY : mp_sum
 
 IMPLICIT NONE
-REAL(DP), INTENT(IN)  :: vmin_t(ntemp), celldm_t(6,ntemp), ph_e0(tot_ngeo)
+REAL(DP), INTENT(IN)  :: vmin_t(ntemp), celldm_t(6,ntemp), ph_e0(tot_ngeo_eos)
 REAL(DP), INTENT(OUT) :: e0
 INTEGER :: itemp, igeo, nvar, ndata, startt, lastt
 INTEGER :: compute_nwork_ph
@@ -366,7 +367,7 @@ nvar=crystal_parameters(ibrav)
 IF (lmurn) nvar=1         ! only the volume is variable in this case
                           ! also in the anisotropic case
 
-ndata = compute_nwork_ph(no_ph,tot_ngeo)
+ndata = compute_nwork_ph(no_ph_eos,tot_ngeo_eos)
 
 ALLOCATE(x(nvar,ndata))
 ALLOCATE(x_pos_min(nvar))
@@ -376,13 +377,13 @@ ALLOCATE(f(ndata))
 !  have been calculated
 !
 ndata=0
-DO igeo=1, tot_ngeo
-   IF (no_ph(igeo)) CYCLE
+DO igeo=1, tot_ngeo_eos
+   IF (no_ph_eos(igeo)) CYCLE
    ndata=ndata+1
    IF (lmurn) THEN
-      x(1,ndata)=omega_geo(igeo)
+      x(1,ndata)=omega_geo_eos(igeo)
    ELSE
-      CALL compress_celldm(celldm_geo(1,igeo), x(1,ndata), nvar, ibrav)
+      CALL compress_celldm(celldm_geo_eos(1,igeo), x(1,ndata), nvar, ibrav)
    ENDIF
 ENDDO
 
@@ -391,8 +392,8 @@ e0=0.0_DP
 !  collect the computed data at each geometry
 !
 ndata=0
-DO igeo=1, tot_ngeo
-   IF (no_ph(igeo)) CYCLE
+DO igeo=1, tot_ngeo_eos
+   IF (no_ph_eos(igeo)) CYCLE
    ndata=ndata+1
    f(ndata)=ph_e0(igeo)
 ENDDO

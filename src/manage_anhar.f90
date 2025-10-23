@@ -44,6 +44,7 @@ LOGICAL :: all_geometry_done, all_el_free, ldummy
 REAL(DP), ALLOCATABLE :: temp_(:), press_(:)
 
 CALL check_all_geometries_done(all_geometry_done)
+
 IF (.NOT.all_geometry_done) RETURN
 
 IF (hot_electrons) THEN
@@ -83,6 +84,8 @@ IF (ltherm_dos) THEN
    WRITE(stdout,'(5x,"the QHA approximation using phonon dos.")') 
    WRITE(stdout,'(5x,"Writing on file ",a)') TRIM(flanhar)
    WRITE(stdout,'(2x,76("-"),/)')
+!
+   CALL remove_internal_coordinates()
 !
 !  Fit the vibrational (and possibly electronic free energy) with a polynomial
 !  fit_free_energy_noe fits only the vibrational part. The fit is made
@@ -207,6 +210,8 @@ IF (ltherm_freq) THEN
    WRITE(stdout,'(5x,"the QHA approximation using phonon frequencies.")') 
    WRITE(stdout,'(5x,"Writing on file ",a)') TRIM(flanhar)//'_ph'
    WRITE(stdout,'(2x,76("+"),/)')
+!
+   CALL remove_internal_coordinates_ph()
 !
 !  Fit the vibrational (and possibly electronic free energy) with a polynomial
 !
@@ -516,30 +521,36 @@ SUBROUTINE manage_anhar_anis()
 !-------------------------------------------------------------------------
 !
 USE kinds,                 ONLY : DP
-USE thermo_mod,            ONLY : tot_ngeo
+USE thermo_mod,            ONLY : tot_ngeo, energy_geo, no_ph_eos
 USE temperature,           ONLY : ntemp, temp, ntemp_plot, itemp_plot
+USE control_pressure,      ONLY : npress, npress_plot
 USE control_thermo,        ONLY : ltherm_dos, ltherm_freq, lgruneisen_gen
 USE control_elastic_constants, ONLY : el_cons_qha_available, &
                                   el_consf_qha_available
-USE control_eldos,         ONLY : lel_free_energy
-USE thermodynamics,        ONLY : ph_free_ener
-USE ph_freq_thermodynamics, ONLY : phf_free_ener
-USE el_thermodynamics,     ONLY : el_ener, el_free_ener, el_entr, &
-                                  el_ce
 USE control_gen_gruneisen, ONLY : ggrun_recipe
+USE control_atomic_pos,    ONLY : linternal_thermo
+USE control_eldos,         ONLY : lel_free_energy
+USE thermodynamics,        ONLY : ph_free_ener_eos, uint_geo_eos_t
+USE anharmonic,            ONLY : celldm_t, uint_t, tau_t
+USE ph_freq_anharmonic,    ONLY : celldmf_t, uintf_t, tauf_t
+USE anharmonic_pt,         ONLY : celldm_pt, uint_pt, tau_pt
+USE ph_freq_anharmonic_pt, ONLY : celldmf_pt, uintf_pt, tauf_pt
+USE anharmonic_ptt,        ONLY : celldm_ptt, uint_ptt, tau_ptt
+USE ph_freq_anharmonic_ptt, ONLY : celldmf_ptt, uintf_ptt, tauf_ptt
+USE el_thermodynamics,     ONLY : el_free_ener, el_ener, el_entr, el_ce,      &
+                                  el_free_ener_eos, elf_free_ener_eos
+USE ph_freq_thermodynamics, ONLY : phf_free_ener_eos, uintf_geo_eos_t
 USE data_files,            ONLY : fleltherm
 USE internal_files_names,  ONLY : flfrq_thermo, flvec_thermo
 USE io_global,             ONLY : stdout
-USE mp,                    ONLY : mp_sum
-USE mp_world,              ONLY : world_comm
 
 IMPLICIT NONE
-INTEGER :: itemp, itempp, igeom, startt, lastt, idata, ndata
+INTEGER :: itemp, itempp, ipressp, igeom, idata, ndata
 CHARACTER(LEN=256) :: filedata, filerap, fileout, gnu_filename, filenameps, &
                       filepbs
 REAL(DP), ALLOCATABLE :: phf(:)
 LOGICAL :: all_geometry_done, all_el_free, ldummy
-INTEGER :: compute_nwork
+INTEGER :: compute_nwork, nwork_eff
 
 CALL check_all_geometries_done(all_geometry_done)
 IF (.NOT.all_geometry_done) RETURN
@@ -570,8 +581,12 @@ ENDIF
 ndata= compute_nwork()
 
 ALLOCATE(phf(ndata))
-CALL divide(world_comm, ntemp, startt, lastt)
 IF (ltherm_dos) THEN
+!
+!   When there are internal parameters we find those that minimize the
+!   free energy for each set of external parameters.
+!
+    CALL remove_internal_coordinates()
 !
 !  fit the free energy with a polynomial
 !
@@ -583,13 +598,14 @@ IF (ltherm_dos) THEN
       CALL fit_free_energy_noe_anis_t()
    ENDIF
 !
-!  Use the polynomial to find the celldm_t and the energy at the minimum
-!  of the free energy (Gibbs energy if pressure is given in input)
-!  and the corresponding volumes
+!  Use the polynomial to find the celldm_t and the minimum free energy 
+!  (Gibbs energy if pressure is given in input)
 !
    CALL quadratic_fit_t_run()
    CALL quadratic_fit_t_noe_run()
-
+!
+!  and computes the corresponding volumes
+!
    CALL compute_volume_t()
    CALL compute_density_t()
    CALL compute_volume_noe_t()
@@ -644,6 +660,10 @@ IF (ltherm_dos) THEN
    CALL interpolate_harmonic_pt()
    CALL interpolate_harmonic_ptt()
 !
+!  if there are internal degree of freedom interpolate them here
+!
+   CALL interpolate_atomic_positions()
+!
 !  This is obsolete but presently the celldm as a function of pressure
 !  are recalculated and written on file here. Only the writing on file
 !  should remain.
@@ -651,9 +671,10 @@ IF (ltherm_dos) THEN
    DO itempp=1,ntemp_plot
       itemp=itemp_plot(itempp)
       DO idata=1,ndata
-         phf(idata)=ph_free_ener(itemp,idata)
+         IF (no_ph_eos(idata)) CYCLE
+         phf(idata)=ph_free_ener_eos(itemp,idata)
          IF (lel_free_energy) phf(idata)=phf(idata)+ &
-                                    el_free_ener(itemp, idata)
+                                    el_free_ener_eos(itemp, idata)
       ENDDO
       CALL write_e_omega_t(itemp, phf, ndata, '.mur_temp', '_mur_celldm.' )
    ENDDO
@@ -662,10 +683,14 @@ IF (ltherm_dos) THEN
 !  and the electronic one if available (only for cubic systems)
 !
    CALL write_free_energy()
-
 ENDIF
 
 IF (ltherm_freq) THEN
+!
+!   When there are internal parameters we find those that minimize the
+!   free energy for each set of external parameters.
+!
+    CALL remove_internal_coordinates_ph()
 !
 !  fit the free energy with a polynomial
 !
@@ -737,6 +762,10 @@ IF (ltherm_freq) THEN
    CALL interpolate_harmonicf_pt()
    CALL interpolate_harmonicf_ptt()
 !
+!  if there are internal degree of freedom interpolate them here
+!
+   CALL interpolate_atomic_positionsf()
+!
 !  This is obsolete but presently the celldm as a function of pressure
 !  are recalculated and written on file here. Only the writing on file
 !  should remain.
@@ -744,9 +773,10 @@ IF (ltherm_freq) THEN
    DO itempp=1,ntemp_plot
       itemp=itemp_plot(itempp)
       DO idata=1,ndata
-         phf(idata)=phf_free_ener(itemp,idata)
+         IF (no_ph_eos(idata)) CYCLE
+         phf(idata)=phf_free_ener_eos(itemp,idata)
          IF (lel_free_energy) phf(idata)=phf(idata)+ &
-                                    el_free_ener(itemp, idata)
+                                    el_free_ener_eos(itemp, idata)
       ENDDO
       CALL write_e_omega_t(itemp, phf, ndata, '.mur_ph_temp', '_mur_ph_celldm.' )
    ENDDO
@@ -831,7 +861,7 @@ CALL manage_plot_elastic()
 !
 !    calculate and plot the Gruneisen parameters along the given path.
 !
-IF (ggrun_recipe>1) THEN
+IF (ggrun_recipe>1.AND..NOT.linternal_thermo) THEN
    WRITE(stdout,'(/,2x,76("-"))')
    WRITE(stdout,'(5x,"Computing the anharmonic properties within ")')
    WRITE(stdout,'(5x,"the QHA approximation using Gruneisen parameters.")')

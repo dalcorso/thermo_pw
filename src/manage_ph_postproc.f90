@@ -17,6 +17,7 @@ SUBROUTINE manage_ph_postproc(igeom)
 USE control_thermo,   ONLY : ltherm, ltherm_dos, ltherm_freq, set_internal_path
 USE control_paths,    ONLY : disp_nqs
 USE control_phrun,    ONLY : auxdyn
+USE control_atomic_pos, ONLY : linterpolate_tau
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: igeom
@@ -28,6 +29,8 @@ CHARACTER(LEN=256) :: filedata, filerap, fileout, gnu_filename, filenameps, &
 !   written on file
 !
 CALL q2r_sub(auxdyn) 
+!
+IF (linterpolate_tau) CALL save_tau_on_tpw(igeom)
 !
 !    compute interpolated dispersions
 !

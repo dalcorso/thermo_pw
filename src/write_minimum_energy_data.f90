@@ -14,19 +14,23 @@ SUBROUTINE write_minimum_energy_data()
   !
   USE kinds,            ONLY : DP
   USE constants,        ONLY : bohr_radius_si
+  USE ions_base,        ONLY : nat
   USE control_ev,       ONLY : ieos
   USE control_mur,      ONLY : b0, b01, b02, emin, lmurn
   USE equilibrium_conf, ONLY : celldm0
+  USE control_atomic_pos, ONLY : linternal_thermo, nint_var, uint_eq, tau_eq
   USE control_quartic_energy, ONLY : lquartic
+  USE initial_conf,     ONLY : atm_save, ityp_save
   USE lattices,         ONLY : celldm_name, needed_celldm
   USE initial_conf,     ONLY : ibrav_save
   USE control_pressure, ONLY : pressure_kb
   USE io_global,        ONLY : stdout
+
   IMPLICIT NONE
   CHARACTER(LEN=20) :: quantity
   LOGICAL :: celldm_in_use(6)
   REAL(DP) :: omega0, compute_omega_geo
-  INTEGER :: i
+  INTEGER :: i, ipol, na
   !
   WRITE(stdout,'(/,2x,76("-"))')
   IF (lmurn) THEN
@@ -80,6 +84,15 @@ SUBROUTINE write_minimum_energy_data()
   omega0=compute_omega_geo(ibrav_save,celldm0)
   WRITE(stdout,'(5x, "The volume is ",9x,f13.5," (a.u.)^3",&
           f15.5," (A)^3")') omega0, omega0*bohr_radius_si**3/1.D-30
+
+  IF (linternal_thermo) THEN
+      WRITE( stdout,'(/,5x,"Atomic positions: uint=",2f15.8)') &
+                                            (uint_eq(i), i=1, nint_var)
+      WRITE( stdout, '(5x,a6,3f18.10)')     &
+           (atm_save(ityp_save(na)), (tau_eq(ipol,na), ipol=1,3), na=1,nat)
+      WRITE( stdout, *)
+  ENDIF
+
   WRITE(stdout,'(2x,76("-"),/)')
   RETURN
 END SUBROUTINE write_minimum_energy_data

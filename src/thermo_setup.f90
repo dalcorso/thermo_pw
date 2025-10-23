@@ -34,7 +34,9 @@ SUBROUTINE thermo_setup()
   USE kinds,                ONLY : DP
   USE constants,            ONLY : ry_kbar
   USE constants,            ONLY : k_boltzmann_ry
-  USE thermo_mod,           ONLY : what, ngeo, fact_ngeo, ngeo_ph, lcubic    
+  USE thermo_mod,           ONLY : what, ngeo, fact_ngeo, ngeo_ph, lcubic, &
+                                   start_geometry, last_geometry    
+  USE control_atomic_pos,   ONLY : int_ngeo, nint_var
   USE temperature,          ONLY : tmin, ntemp_plot
   USE control_thermo,       ONLY : continue_zero_ibrav, find_ibrav, &
                                    set_internal_path, set_2d_path,  &
@@ -57,7 +59,8 @@ SUBROUTINE thermo_setup()
   USE initial_conf,         ONLY : celldm_save, ibrav_save, ityp_save,       &
                                    nr1_save, nr2_save, nr3_save, &
                                    nosym_save, tau_save, tau_save_crys, &
-                                   omega_save, at_save, atm_save
+                                   omega_save, at_save, atm_save, &
+                                   start_geometry_save, last_geometry_save
   USE initial_param,        ONLY : ecutwfc0, ecutrho0, ethr0
   USE equilibrium_conf,     ONLY : nr1_0, nr2_0, nr3_0
   USE thermo_sym,           ONLY : code_group_save
@@ -279,6 +282,14 @@ SUBROUTINE thermo_setup()
   nr2_0=nr2_save
   nr3_0=nr3_save
 !
+!  Reset start_geometry and last_geometry to their default if the input
+!  is wrong and save them.
+!
+  IF (start_geometry < 1) start_geometry=1
+  IF (last_geometry < 1) last_geometry=1000000
+  start_geometry_save=start_geometry
+  last_geometry_save=last_geometry
+!
 !   Some initialization on ngeo
 !
   IF ( ngeo(1)==0 ) THEN
@@ -301,6 +312,7 @@ SUBROUTINE thermo_setup()
      ENDIF
   END IF
   CALL clean_ngeo(ngeo,fact_ngeo,ngeo_ph,ibrav)
+  CALL clean_int_ngeo(int_ngeo,nint_var)
 !
 !  Initialize colors
 !

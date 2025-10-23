@@ -29,7 +29,8 @@ USE kinds,            ONLY : DP
 USE constants,        ONLY : ry_kbar
 USE data_files,       ONLY : flevdat
 USE cell_base,        ONLY : ibrav
-USE thermo_mod,       ONLY : omega_geo, celldm_geo, energy_geo
+USE ions_base,        ONLY : nat
+USE thermo_mod,       ONLY : omega_geo_eos, celldm_geo_eos, energy_geo_eos
 USE control_mur,      ONLY : omegap0
 USE control_vol,      ONLY : vmin_input, vmax_input
 USE control_thermo,   ONLY : lgeo_to_file
@@ -43,6 +44,7 @@ USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_quadratic_extremum, &
                              print_chisq_quadratic, print_quadratic_polynomial
 USE quartic_surfaces, ONLY : fit_multi_quartic, find_quartic_extremum, &
                              print_quartic_polynomial, print_chisq_quartic
+USE control_atomic_pos, ONLY : uint_p, tau_p, nint_var, linternal_thermo
 USE polynomial,       ONLY : poly2, poly4, init_poly, clean_poly
 USE lattices,         ONLY : compress_celldm, expand_celldm, crystal_parameters
 USE mp_images,        ONLY : root_image, my_image_id
@@ -50,8 +52,8 @@ USE io_global,        ONLY : ionode, stdout
 
 IMPLICIT NONE
 
-CHARACTER(LEN=256) :: filename, filename1
-INTEGER  :: i, iu_mur, ipress, idata, nvar, ndata
+CHARACTER(LEN=256) :: filename, filename1, filename2
+INTEGER  :: i, iu_mur, ipress, idata, nvar, ndata, ivar
 INTEGER  :: find_free_unit, compute_nwork
 REAL(DP) :: ymin, ymin4
 REAL(DP) :: compute_omega_geo
@@ -66,6 +68,11 @@ CALL add_pressure(filename)
 !
 filename1="energy_files/"//TRIM(flevdat)//'_mur_celldm'
 CALL add_pressure(filename1)
+IF (linternal_thermo) THEN
+   filename2="energy_files/"//TRIM(flevdat)//'_mur_uint'
+   CALL add_pressure(filename2)
+ENDIF
+
 ndata=compute_nwork()
 
 WRITE(stdout,'(/,2x,76("*"))')
@@ -91,7 +98,7 @@ ENDDO
 
 IF (lquartic) ALLOCATE(x_min_4(nvar))
 DO idata=1, ndata
-   CALL compress_celldm(celldm_geo(1,idata), x(1,idata), nvar, ibrav)
+   CALL compress_celldm(celldm_geo_eos(1,idata), x(1,idata), nvar, ibrav)
 END DO
 
 DO ipress=1, npress
@@ -99,7 +106,7 @@ DO ipress=1, npress
 !  fit the enthalpy with a quadratic polynomial and find the minimum
 !
    DO idata=1, ndata
-     f(idata)=energy_geo(idata) + press(ipress) * omega_geo(idata) / ry_kbar
+     f(idata)=energy_geo_eos(idata) + press(ipress) * omega_geo_eos(idata) / ry_kbar
    END DO
    CALL fit_multi_quadratic(ndata,nvar,lsolve,x,f,p2_p(ipress))
    IF (ipress==1.OR..NOT.lquartic) THEN
@@ -133,6 +140,9 @@ DO ipress=1, npress
       omega_p(ipress)=compute_omega_geo(ibrav,celldm_p(1,ipress))
       e(ipress) = ymin - press(ipress) * omega_p(ipress) / ry_kbar
    ENDIF
+   IF (linternal_thermo) &
+      CALL find_tau_eq(celldm_p(1,ipress), tau_p(1,1,ipress), &
+                                                 uint_p(1,ipress), nat)
 ENDDO
 CALL find_omega0(press/ry_kbar,omega_p,npress,omegap0)
 
@@ -175,6 +185,19 @@ IF (ionode) THEN
                celldm_p(5, ipress), celldm_p(6, ipress)
    ENDDO 
    CLOSE(UNIT=iu_mur, STATUS='KEEP')
+!
+!  If calculated print the internal parameters as a function of pressure
+!
+   IF (linternal_thermo) THEN
+      OPEN(UNIT=iu_mur, FILE=TRIM(filename2), STATUS='UNKNOWN', &
+      FORM='FORMATTED')
+      WRITE(iu_mur,'( "# pressure (kbar)",3x,"uint(1)",7x,"uint(2)")')
+      DO ipress=1,npress
+         WRITE(iu_mur,'(3f15.8)') press(ipress), (uint_p(ivar, ipress), &
+                                                  ivar=1,nint_var)
+      ENDDO
+      CLOSE(UNIT=iu_mur, STATUS='KEEP')
+   ENDIF
 END IF
 
 DEALLOCATE(x)
@@ -212,7 +235,8 @@ USE kinds,            ONLY : DP
 USE constants,        ONLY : ry_kbar
 USE data_files,       ONLY : flevdat, flanhar
 USE cell_base,        ONLY : ibrav
-USE thermo_mod,       ONLY : omega_geo, celldm_geo, energy_geo, no_ph
+USE thermo_mod,       ONLY : omega_geo_eos, celldm_geo_eos, energy_geo_eos, &
+                             no_ph_eos
 USE control_vol,      ONLY : vmin_input, vmax_input
 USE control_mur,      ONLY : omegap0
 USE temperature,      ONLY : temp
@@ -223,8 +247,8 @@ USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_quadratic_extremum, &
                              print_chisq_quadratic
 USE quartic_surfaces, ONLY : fit_multi_quartic, find_quartic_extremum, &
                              print_quartic_polynomial, print_chisq_quartic
-USE polynomial,       ONLY : poly2, poly4, init_poly, clean_poly
 USE control_thermo,   ONLY : lgruneisen_gen
+USE polynomial,       ONLY : poly2, poly4, init_poly, clean_poly
 USE lattices,         ONLY : compress_celldm, expand_celldm, crystal_parameters
 USE mp_images,        ONLY : root_image, my_image_id
 USE io_global,        ONLY : ionode, stdout
@@ -291,11 +315,11 @@ ENDIF
 
 ndata=0
 DO idata=1,ndatatot
-   IF (no_ph(idata)) CYCLE
+   IF (no_ph_eos(idata)) CYCLE
    ndata=ndata+1
-   CALL compress_celldm(celldm_geo(1,idata), x(1,ndata), nvar, ibrav)
-   f1(ndata)=energy_geo(idata)+phf(idata)
-   ome(ndata)=omega_geo(idata)
+   CALL compress_celldm(celldm_geo_eos(1,idata), x(1,ndata), nvar, ibrav)
+   f1(ndata)=energy_geo_eos(idata)+phf(idata)
+   ome(ndata)=omega_geo_eos(idata)
 END DO
 
 DO ipress=1, npress
@@ -428,7 +452,7 @@ SUBROUTINE compute_celldm_pm()
 USE kinds,            ONLY : DP
 USE constants,        ONLY : ry_kbar
 USE cell_base,        ONLY : ibrav
-USE thermo_mod,       ONLY : omega_geo, celldm_geo, energy_geo, celldm_p1, &
+USE thermo_mod,       ONLY : omega_geo_eos, celldm_geo_eos, energy_geo_eos, celldm_p1, &
                              celldm_m1
 USE control_pressure, ONLY : pressure, deltap
 USE uniform_pressure, ONLY : p2_p_p1, p2_p_m1, p4_p_p1, p4_p_m1
@@ -468,13 +492,13 @@ IF (lquartic) THEN
 ENDIF
 
 DO idata=1, ndata
-   CALL compress_celldm(celldm_geo(1,idata), x(1,idata), nvar, ibrav)
+   CALL compress_celldm(celldm_geo_eos(1,idata), x(1,idata), nvar, ibrav)
 END DO
 !
 !  fit the enthalpy with a quadratic polynomial and find the minimum
 !
 DO idata=1, ndata
-   f(idata)=energy_geo(idata) + (pressure + deltap) * omega_geo(idata) 
+   f(idata)=energy_geo_eos(idata) + (pressure + deltap) * omega_geo_eos(idata) 
 END DO
 CALL fit_multi_quadratic(ndata,nvar,lsolve,x,f,p2_p_p1)
 CALL find_quadratic_extremum(nvar,x_pos_min,ymin,p2_p_p1)
@@ -493,7 +517,7 @@ ENDIF
 !   here at pressure p-deltap
 !
 DO idata=1, ndata
-   f(idata)=energy_geo(idata) + (pressure - deltap) * omega_geo(idata) 
+   f(idata)=energy_geo_eos(idata) + (pressure - deltap) * omega_geo_eos(idata) 
 END DO
 CALL fit_multi_quadratic(ndata,nvar,lsolve,x,f,p2_p_m1)
 CALL find_quadratic_extremum(nvar,x_pos_min,ymin,p2_p_m1)

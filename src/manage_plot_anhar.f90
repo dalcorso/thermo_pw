@@ -47,6 +47,8 @@ IMPLICIT NONE
 
 CALL plot_anhar_anis_celldm()
 CALL plot_anhar_anis_alpha()
+CALL plot_anhar_anis_uint()
+CALL plot_anhar_anis_uint_zsisa()
 CALL plot_anhar_anis_dw()
 CALL plot_thermal_stress()
 CALL plot_generalized_gruneisen()

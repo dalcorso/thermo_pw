@@ -30,6 +30,8 @@ PRIVATE
 
 REAL(DP), ALLOCATABLE :: celldm_geo_file(:,:)
 REAL(DP), ALLOCATABLE :: energy_geo_file(:,:)
+REAL(DP), ALLOCATABLE :: uint_geo_file(:,:)
+REAL(DP), ALLOCATABLE :: tau_geo_file(:,:,:)
 REAL(DP), ALLOCATABLE :: omega_file(:)
 REAL(DP), ALLOCATABLE :: press_file(:)
 REAL(DP), ALLOCATABLE :: energy_file(:)
@@ -41,11 +43,12 @@ REAL(DP) :: b01_file
 REAL(DP) :: b02_file
 REAL(DP) :: emin_file
 
-PUBLIC read_geometry_file, write_geometry_file, set_celldm_geo_from_file, &
-       ngeo_file, celldm_geo_file, deallocate_geometry_file,              &
-       write_geometry_output, compute_celldm_geo_file, energy_geo_file,   &
-       press_file, energy_file, vmin_file, b0_file, b01_file, b02_file,   &
-       emin_file, omega_file, do_ev_geometry
+PUBLIC read_geometry_file, write_geometry_file, write_geometry_tau_file, &
+       set_celldm_geo_from_file, ngeo_file, celldm_geo_file, uint_geo_file, &
+       tau_geo_file, deallocate_geometry_file, write_geometry_output, &
+       compute_celldm_geo_file, energy_geo_file, press_file, energy_file, &
+       vmin_file, b0_file, b01_file, b02_file, emin_file, omega_file, &
+       do_ev_geometry
 
 CONTAINS
 !
@@ -152,6 +155,51 @@ RETURN
 END SUBROUTINE write_geometry_file
 !
 !----------------------------------------------------------------------
+SUBROUTINE write_geometry_tau_file()
+!----------------------------------------------------------------------
+!
+!  This routine writes the file with the geometries. It assumes that the data
+!  are in the variables of this module ngeo_file and celldm_geo_file,
+!  so the calling routine must set these data. Only meta_ionode writes
+!  the file. This routine differs from write_geometry_file because it
+!  should be called only when linternal_thermo is .TRUE.. It writes a
+!  good guess of the relaxed atomic positions in the geometry file.
+!
+USE data_files,  ONLY : flgeom
+USE io_global,   ONLY : meta_ionode, stdout
+USE initial_conf, ONLY : atm_save, ityp_save
+USE ions_base,   ONLY : nat
+USE control_atomic_pos, ONLY : nint_var
+IMPLICIT NONE
+CHARACTER(LEN=256) :: filename
+INTEGER :: iu_geom, igeo, ipol, ivar, na
+INTEGER :: find_free_unit
+
+filename='./'//TRIM(flgeom)//'.tau.dat'
+IF (meta_ionode) THEN
+   iu_geom=find_free_unit()
+   OPEN (UNIT=iu_geom, FILE=TRIM(filename), STATUS='unknown',&
+                                                     FORM='formatted')
+
+   WRITE(iu_geom,'(i8)') ngeo_file
+   DO igeo=1,ngeo_file
+      WRITE(iu_geom,'(f13.8,f16.8,7f13.8)') press_file(igeo), &
+                energy_file(igeo), celldm_geo_file(:,igeo), omega_file(igeo)
+
+      WRITE(iu_geom, '(/,5x,"uint= ",2f18.10)') (uint_geo_file(ivar,igeo), &
+                                                ivar = 1,nint_var)
+      WRITE(iu_geom, '(5x,a6,3f18.10)')     &
+           (atm_save(ityp_save(na)), (tau_geo_file(ipol,na,igeo), &
+                                                    ipol=1,3), na=1,nat)
+      WRITE(iu_geom, *)
+   ENDDO
+   CLOSE(UNIT=iu_geom, STATUS='KEEP')
+ENDIF
+
+RETURN
+END SUBROUTINE write_geometry_tau_file
+!
+!----------------------------------------------------------------------
 SUBROUTINE set_celldm_geo_from_file(celldm_geo, ngeo)
 !----------------------------------------------------------------------
 !
@@ -179,6 +227,8 @@ SUBROUTINE deallocate_geometry_file()
 IMPLICIT NONE
 
 IF (ALLOCATED(celldm_geo_file)) DEALLOCATE(celldm_geo_file)
+IF (ALLOCATED(uint_geo_file)) DEALLOCATE(uint_geo_file)
+IF (ALLOCATED(tau_geo_file)) DEALLOCATE(tau_geo_file)
 IF (ALLOCATED(press_file)) DEALLOCATE(press_file)
 IF (ALLOCATED(omega_file)) DEALLOCATE(omega_file)
 IF (ALLOCATED(energy_file)) DEALLOCATE(energy_file)
@@ -196,8 +246,10 @@ SUBROUTINE write_geometry_output(npress,press,celldmp,energyp)
 !   the points of the mesh only if their pressure is within the range 
 !   of the probed pressures.
 !
-USE thermo_mod, ONLY : ngeo, celldm_geo
+USE thermo_mod, ONLY : ngeo, celldm_geo_eos
 USE initial_conf, ONLY : ibrav_save
+USE control_atomic_pos,  ONLY : linternal_thermo, nint_var
+USE ions_base, ONLY : nat
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: npress
 REAL(DP), INTENT(IN) :: press(npress), celldmp(6,npress), energyp(npress)
@@ -221,9 +273,10 @@ ALLOCATE(energy_file(ngeo_file))
 ngeo_file=0
 DO igeo=1, ngeo(1)
 !
-!   Check that celldm_geo(1,igeo) is within the limits of celldm1
+!   Check that celldm_geo_eos(1,igeo) is within the limits of celldm1
 !
-    IF (celldm_geo(1,igeo)< celldm1_min.OR.celldm_geo(1,igeo)>celldm1_max) &
+    IF (celldm_geo_eos(1,igeo)< celldm1_min.OR.&
+                     celldm_geo_eos(1,igeo)>celldm1_max) &
        CYCLE
 !
 !  find the point of the mesh with the celldmp(1) closer to
@@ -232,7 +285,7 @@ DO igeo=1, ngeo(1)
    ip1=0
    mind=1.D8
    DO ipress=1,npress
-      distance=ABS(celldmp(1,ipress)-celldm_geo(1,igeo))
+      distance=ABS(celldmp(1,ipress)-celldm_geo_eos(1,igeo))
       IF (distance<mind) THEN
           ip1=ipress 
           mind=distance
@@ -242,7 +295,7 @@ DO igeo=1, ngeo(1)
 !  find the second point on the mesh. Here we assume that celldmp(1) 
 !  decreases with pressure
 !
-   IF (celldm_geo(1,igeo) > celldmp(1,ip1)) THEN
+   IF (celldm_geo_eos(1,igeo) > celldmp(1,ip1)) THEN
       IF (ip1==1) THEN
          ip2=2
       ELSE
@@ -256,17 +309,17 @@ DO igeo=1, ngeo(1)
       ENDIF
    ENDIF
 !   WRITE(6,*) 'found indices ', ip1, ip2
-!   WRITE(6,*) 'celldm_geo igeo', igeo, celldm_geo(1, igeo)
+!   WRITE(6,*) 'celldm_geo_eos igeo', igeo, celldm_geo_eos(1, igeo)
 !   WRITE(6,*) 'celldmp(ip1), celldmp(ip2) ', celldmp(1,ip1), celldmp(1,ip2)
 !
-!  Now set celldm_geo_file(1) equal to celldm_geo(1,igeo),
+!  Now set celldm_geo_file(1) equal to celldm_geo_eos(1,igeo),
 !  and interpolate linearly the pressure
 !
    ngeo_file=ngeo_file+1
-   celldm_geo_file(1,ngeo_file)=celldm_geo(1,igeo)
+   celldm_geo_file(1,ngeo_file)=celldm_geo_eos(1,igeo)
    press_file(ngeo_file)=press(ip1) +                      &
                  (press(ip2)-press(ip1)) *                    &
-                 (celldm_geo(1,igeo) - celldmp(1,ip1)) /      &
+                 (celldm_geo_eos(1,igeo) - celldmp(1,ip1)) /      &
                  (celldmp(1,ip2) - celldmp(1,ip1))
    DO i=2,6
       celldm_geo_file(i,ngeo_file)= celldmp(i,ip1) +       &
@@ -284,6 +337,19 @@ ENDDO
 
 CALL do_ev_geometry()
 CALL write_geometry_file()
+IF (linternal_thermo) THEN
+   ALLOCATE(uint_geo_file(nint_var,ngeo_file))
+   ALLOCATE(tau_geo_file(3,nat,ngeo_file))
+   DO igeo=1, ngeo_file
+!
+!     Find the atomic coordinates from the fit of the internal parameters
+!     as a function of the external parameters
+!
+      CALL find_tau_eq(celldm_geo_file(1,igeo), &
+               tau_geo_file(1,1,igeo), uint_geo_file(1,igeo), nat)
+   ENDDO
+   CALL write_geometry_tau_file()
+ENDIF
 CALL deallocate_geometry_file()
 
 RETURN

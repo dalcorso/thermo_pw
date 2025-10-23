@@ -36,24 +36,33 @@ SUBROUTINE initialize_elastic_cons( ngeom, nwork )
 !
 !  If also atoms are optimized in each run
 !  tau_acc(3,nat,nwork)   ! the atomic coordinates of each run
+!                         ! this is supposed to be only the displacement
+!                         ! with respect to the uniformely strained atomic
+!                         ! positions. These displacements are given in
+!                         ! cartesian coordinates in units of the 
+!                         ! unperturbed celldm(1).
 !
 !  Moreover it allocates space for
 !  sigma_geo(3,3,nwork)   ! the stress of each run
-!  min_y(ngeo_strain,21,ngeom) ! the minimum of the internal coordinate
-!                              ! for each strain 
-!  epsil_y(ngeo_strain,21,ngeom) ! the strain amplitude of each minimum.
+!  min_y(max_nint_var,ngeo_strain,21,ngeom) ! the internal coordinates 
+                               ! that minimize the energy for each strain 
+!  epsil_y(ngeo_strain,21,ngeom) ! the strain amplitude of each run.
 !  
 !  
 USE kinds,             ONLY : DP
-USE thermo_mod,        ONLY : ibrav_geo, celldm_geo, at_geo, tau_geo
+USE thermo_mod,        ONLY : ibrav_geo, celldm_geo, at_geo, tau_geo, uint_geo
 USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, rot_mat, &
                                elastic_algorithm, epsilon_0,               &
                                el_con_ibrav_geo, el_con_celldm_geo,        &
                                work_base, elalgen, epsil_geo, tau_acc,     &
                                nmove, atom_step, atom_dir, move_at, stype, &
-                               nstep_ec, min_y, lcm_ec, epsil_y, old_ec
+                               nstep_ec, min_y, lcm_ec, epsil_y, old_ec,   &
+                               iconstr_internal_ec, nint_var_ec,           &
+                               stypec, int_ngeo_ec, int_step_ngeo_ec,      &
+                               ninternal_ec 
+USE control_atomic_pos, ONLY : max_nint_var
 USE initial_conf,      ONLY : ibrav_save
-USE equilibrium_conf,  ONLY : celldm0, bg0
+USE equilibrium_conf,  ONLY : celldm0
 USE thermo_sym,        ONLY : laue
 !
 !  library helper modules
@@ -68,9 +77,9 @@ INTEGER, INTENT(IN) :: ngeom
 INTEGER, INTENT(OUT) :: nwork
 REAL(DP) :: epsilon_min, epsil, tot_mass, sumdisp
 INTEGER  :: igeo, iwork, igeom, istep, nstep, iwork_base, imove, &
-            nstep_tot, na, ipol
+            nstep_tot, na, ipol, istart, ivar
 CHARACTER(LEN=2) :: strain_list(21)
-LOGICAL :: flag
+LOGICAL :: flag, lcons
 
 nstep=0
 SELECT CASE (laue) 
@@ -195,7 +204,7 @@ SELECT CASE (laue)
             strain_list(3) = 'H '
             IF (ibrav_save==5) strain_list(3) = 'I '
          ELSE
-            nstep=6
+            nstep = 6
             strain_list(1) = 'C '
             strain_list(2) = 'E '
             strain_list(3) = 'B1'
@@ -315,20 +324,38 @@ IF (nstep<1.AND.elastic_algorithm=='energy') &
 IF (nstep<1) &
    CALL errore('initialize_elastic_cons', 'Incorrect nstep, &
                                              &check elastic_algorithm',1)
-
+!
+!  Compute the total number of perturbed geometries per unperturbed
+!  one not accounting for ngeo_strain, but accounting for the possibility
+!  that in some strain types we do a nmove or ninternal_ec(istep) 
+!  internal parameter displacements.
+!
 nstep_tot=0
 DO istep=1,nstep
    IF (stype(istep)) THEN
       nstep_tot=nstep_tot+nmove
+      int_ngeo_ec(:,istep)=1
+   ELSEIF (stypec(istep)) THEN
+      ninternal_ec(istep)=1
+      CALL clean_int_ngeo(int_ngeo_ec(1,istep), nint_var_ec(istep))
+      DO ivar=1,nint_var_ec(istep)
+         ninternal_ec(istep)=ninternal_ec(istep)*int_ngeo_ec(ivar,istep)
+      ENDDO
+      nstep_tot=nstep_tot+ninternal_ec(istep)
    ELSE
       nstep_tot=nstep_tot+1
+      int_ngeo_ec(:,istep)=1
    ENDIF
 ENDDO
-
+!
+!   Total number of distorted geometries
+!
 nwork = nstep_tot * ngeo_strain * ngeom
+!
+!   Total number of distorted geometries per unperturbed geometry
+!
 work_base = nstep_tot * ngeo_strain
 nstep_ec=nstep
-
 ALLOCATE( epsilon_voigt(6, nwork) )
 ALLOCATE( epsilon_geo(3, 3, nwork) )
 ALLOCATE( epsil_geo(nwork) )
@@ -338,8 +365,9 @@ ALLOCATE( celldm_geo(6,nwork) )
 ALLOCATE( at_geo(3,3,nwork) )
 ALLOCATE( tau_geo(3,nat,nwork) )
 ALLOCATE( rot_mat(3,3,nwork) )
+ALLOCATE( uint_geo(max_nint_var,nwork) )
 ALLOCATE( tau_acc(3,nat,nwork) )
-ALLOCATE( min_y(ngeo_strain,21,ngeom))
+ALLOCATE( min_y(max_nint_var,ngeo_strain,21,ngeom))
 ALLOCATE( epsil_y(ngeo_strain,21,ngeom))
 
 IF (ngeom==1) THEN
@@ -380,11 +408,31 @@ DO igeom=1, ngeom
                tau_acc(:,move_at(istep),iwork)=(imove-(nmove+1.0_DP)/2.0_DP)* &
                                          atom_step(istep)*atom_dir(:,istep)
             ENDDO
-        ENDIF
+         ENDIF
+         IF (stypec(istep)) THEN
+            iwork_base=iwork
+            DO imove=2, ninternal_ec(istep)
+               iwork=iwork+1
+               epsil_geo(iwork)=epsil_geo(iwork_base)
+               epsilon_voigt(:,iwork)=epsilon_voigt(:,iwork_base)
+               ibrav_geo(iwork)=ibrav_geo(iwork_base)
+               celldm_geo(:,iwork)=celldm_geo(:,iwork_base)
+               rot_mat(:,:,iwork)=rot_mat(:,:,iwork_base)
+            ENDDO
+         ENDIF
       ENDDO
+!
+!   set separately the atomic positions for all ngeo_strain*ninternal_ec(istep)
+!   geometries
+!
+      IF (stypec(istep)) THEN
+         istart=iwork-ngeo_strain*ninternal_ec(istep)+1
+         CALL set_tau_acc(celldm_geo(1,istart), tau_acc(1,1,istart), &
+                  uint_geo(1,istart), ngeo_strain*ninternal_ec(istep), nat, &
+                  nint_var_ec(istep), istep)
+      ENDIF
    ENDDO
 ENDDO
-
 !
 !  Correct the displacement so that it does not change the center of mass
 !  of the system
@@ -410,7 +458,9 @@ ENDIF
 !  tau_acc in units of celldm0(1)
 !
 tau_acc=tau_acc/celldm0(1)
-
+!
+!  Compute the strain tensor from epsilon_voigt
+!
 sigma_geo=0.0_DP
 epsilon_geo=0.0_DP
 DO iwork = 1, nwork

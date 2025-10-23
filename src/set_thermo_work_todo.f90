@@ -22,10 +22,11 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
   USE thermo_mod,       ONLY : what, ibrav_geo, celldm_geo, ef_geo, tau_geo
   USE control_thermo,   ONLY : outdir_thermo, ltau_from_file
   USE control_elastic_constants, ONLY : frozen_ions, use_free_energy
+  USE control_atomic_pos, ONLY : linternal_thermo
   USE control_conv,     ONLY : ke, keden, nk_test, sigma_test
   USE control_eldos,    ONLY : lel_free_energy
   USE initial_conf,     ONLY : ibrav_save, tau_save_crys
-  USE equilibrium_conf, ONLY : celldm0, at0, tau0
+  USE equilibrium_conf, ONLY : at0, tau0, celldm0
 !
 !  the library modules
 !
@@ -124,13 +125,15 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
 !
 !  Initialize the QE variables for the ionic relaxation. 
 !
-           CALL set_work_for_relaxation(iwork)
+           IF (.NOT.linternal_thermo) THEN
+              CALL set_work_for_relaxation(iwork)
 !
 !    In the relaxed ion case we compute the stress but do use it
 !    so lstress(iwork) is .FALSE. but here we set lstres=.TRUE.
 !    To save time or if stress is not available comment this command.
 !
-           tstress=.NOT.frozen_ions
+              tstress=.NOT.frozen_ions
+           ENDIF
 !
 !   now set the celldm
 !
@@ -142,15 +145,15 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
 !   recompute the fft mesh 
 !
            CALL set_fft_mesh()
-           IF (ltau_from_file) THEN
-!
-!  set the tau read from file
-!
+
+           IF (linternal_thermo.OR.ltau_from_file) THEN
               tau(:,:)=tau_geo(:,:,iwork)
            ELSE
 !
-! strain uniformly the coordinates to the new celldm
+! if the atomic position are not determined strain uniformly the 
+! coordinates to the new celldm
 !
+        
               tau=tau_save_crys
               CALL cryst_to_cart( nat, tau, at, 1 )
            ENDIF
@@ -274,24 +277,13 @@ SUBROUTINE set_work_for_relaxation(iwork)
 !  requested in the input of pw.x.
 !
 USE control_thermo,   ONLY : lstress
-USE control_elastic_constants, ONLY : frozen_ions 
-USE input_parameters, ONLY : etot_conv_thr, forc_conv_thr
-USE control_flags,    ONLY : lbfgs, nstep, lforce=>tprnfor, tstress
-USE relax,            ONLY : epse, epsf
+USE control_flags,    ONLY : tstress
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: iwork
 
 tstress=lstress(iwork)
-IF (frozen_ions) THEN
-   lbfgs=.FALSE.
-ELSE
-   lforce=.TRUE.
-   lbfgs = .TRUE.
-   IF (nstep==1) nstep = 20
-   epse = etot_conv_thr
-   epsf = forc_conv_thr
-ENDIF
+CALL initialize_relaxation()
 RETURN
 END SUBROUTINE set_work_for_relaxation
 
@@ -436,3 +428,34 @@ outdir=TRIM(outdir_thermo)//'/g'//TRIM(int_to_char(iwork))//'/'
 CALL set_tmp_dir(outdir)
 RETURN
 END SUBROUTINE set_work_for_bands
+
+!-----------------------------------------------------------------------
+SUBROUTINE initialize_relaxation()
+!-----------------------------------------------------------------------
+!
+!  This routine initializes the variables that usually are initialized
+!  in iosys with calculation='relax'. This is needed because there is 
+!  also the possibility that we relax the ions when in the pw.x input
+!  calculation='scf'. Here we do a minimal initialization of the
+!  pw.x variables. Only lbfgs relaxation is possible.
+!  With frozen_ion=.TRUE. relaxation is disabled even if it was
+!  requested in the input of pw.x.
+!
+USE control_elastic_constants, ONLY : frozen_ions 
+USE input_parameters, ONLY : etot_conv_thr, forc_conv_thr
+USE control_flags,    ONLY : lbfgs, nstep, lforce=>tprnfor
+USE relax,            ONLY : epse, epsf
+
+IMPLICIT NONE
+
+IF (frozen_ions) THEN
+   lbfgs=.FALSE.
+ELSE
+   lforce=.TRUE.
+   lbfgs = .TRUE.
+   IF (nstep==1) nstep = 20
+   epse = etot_conv_thr
+   epsf = forc_conv_thr
+ENDIF
+RETURN
+END SUBROUTINE initialize_relaxation

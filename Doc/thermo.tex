@@ -3638,4 +3638,91 @@ Rombohedral cell (in term of the hexagonal cell):
 {\bf a}_3&=& {\bf a}_1' + {\bf a}_2' + {\bf a}_3'.
 \end{eqnarray}
 
+\appendix
+{\color{dark-blue}\chapter{Constrains}}
+\color{black}
+
+This appendix contains a list of the constraints already implemented in
+\texttt{thermo\_pw} that can be addressed with the variable
+\texttt{iconstr\_internal}.
+
+{\color{web-blue}\subsection{\texttt{iconstr\_internal=1}}}
+\color{black}
+This constraint is suited for the wurtzite structure. This structure has
+an hexagonal lattice with two external parameters $a$ and $c/a$ and 
+four atoms in the unit cell. This constraint assumes that the atoms have
+the following positions (taking $ZnO$ as example):
+\begin{eqnarray}
+\boldsymbol{\tau}_{1,Zn} &=& ( 0, 0, 0), \nonumber \\
+\boldsymbol{\tau}_{2,Zn} &=& ( 1/2, -\sqrt{3}/6, c/2a), \nonumber \\
+\boldsymbol{\tau}_{3,O} &=& ( 0, 0, u c/2a), \nonumber \\
+\boldsymbol{\tau}_{4,O} &=& ( 1/2, -\sqrt{3}/6, (1/2 + u)c/a). \nonumber 
+\end{eqnarray}
+There is one internal adimensional degree of freedom $u$ whose value is 
+close to the ideal $u=3/8$. The atomic coordinates are in units of $a$.
+
+{\color{web-blue}\subsection{\texttt{iconstr\_internal=2}}}
+\color{black}
+This constraint is suited to a distorted hcp structure. The unperturbed 
+hcp structure has an hexagonal lattice with two external parameters
+$a_h$ and $c_h/a_h$ and two atoms in the unit cell:
+\begin{eqnarray}
+\boldsymbol{\tau}_{1,Zn} &=& ( 0, 0, 0), \nonumber \\
+\boldsymbol{\tau}_{2,Zn} &=& ( 1/2, \sqrt{3}/6, c_h/2a_h). \nonumber 
+\end{eqnarray}
+A strain $(\epsilon,0,0,0,0,0)$ transforms the hexagonal lattice to a 
+base centered orthorombic lattice with $a=(1+\epsilon) a_h$,
+$b = \sqrt{3} a_h$, $c = c_h$.
+The atomic positions (always in units of $a_h$) become:
+\begin{eqnarray}
+\boldsymbol{\tau}_{1,Zn} &=& ( 0, -y \over 2, 0), \nonumber \\
+\boldsymbol{\tau}_{2,Zn} &=& ( (1+\epsilon)/2, y_0+{y\over 2}, c_h/2 a_h). \nonumber 
+\end{eqnarray}
+where $y$ is a adimensional parameter and $y_0= \sqrt{3}/6$. 
+This routine mush give as output the difference between the uniformly 
+strained coordinates and the actual coordinates in a.u..
+\begin{eqnarray}
+\Delta \boldsymbol{\tau}_{1,Zn} &=& a_h ( 0, -y / 2  , 0), \nonumber \\
+\Delta \boldsymbol{\tau}_{2,Zn} &=& a_h ( 0, {y\over 2}, 0). \nonumber 
+\end{eqnarray}
+$a_h y$ is the internal coordinate which is given as input and is in a.u..
+
+{\color{web-blue}\subsection{\texttt{iconstr\_internal=3}}}
+\color{black}
+This constraint is suited to a distorted wurtzite structure. The unperturbed 
+wurtzite structure has an hexagonal lattice with two external parameters
+$a_h$ and $c_h/a_h$ and four atoms in the unit cell:
+\begin{eqnarray}
+\boldsymbol{\tau}_{1,Zn} &=& ( 0, 0, 0), \nonumber \\
+\boldsymbol{\tau}_{2,Zn} &=& ( 1/2, -\sqrt{3}/6, c_h/2a_h), \nonumber \\
+\boldsymbol{\tau}_{3,O} &=& ( 0, 0, u_0 c_h/2a_h), \nonumber \\
+\boldsymbol{\tau}_{4,O} &=& ( 1/2, -\sqrt{3}/6, (1/2 + u_0)c_h/a_h). \nonumber 
+\end{eqnarray}
+where $u_0$ is an internal parameter that characterize the wurtzite
+structure.
+A strain $(\epsilon,0,0,0,0,0)$ transforms the hexagonal lattice to a 
+base centered orthorombic lattice with $a=(1+\epsilon) a_h$,
+$b = \sqrt{3} a_h$, $c = c_h$.
+The atomic positions (always in units of $a_h$) become:
+\begin{eqnarray}
+\boldsymbol{\tau}_{1,Zn} &=& ( 0, -{y\over 2}, 0), \nonumber \\
+\boldsymbol{\tau}_{2,Zn} &=& ( (1+\epsilon)/2, y_0+{y\over 2}, c_h/2a_h), \nonumber \\
+\boldsymbol{\tau}_{3,O} &=& ( 0, -{y\over 2}, (u_0+u_1) c_h/2a_h), \nonumber \\
+\boldsymbol{\tau}_{4,O} &=& ( (1+\epsilon)/2, y_0+{y\over 2}, (1/2 + (u_0+u_1))c_h/a_h). \nonumber 
+\end{eqnarray}
+where $y$ is an internal adimensional parameter and $y_0= \sqrt{3}/6$. 
+This routine mush give as output the difference between the uniformly 
+strained coordinates and the actual coordinates in a.u..
+\begin{eqnarray}
+\Delta \boldsymbol{\tau}_{1,Zn} &=& a_h ( 0, -{y\over 2}, 0), \nonumber \\
+\Delta \boldsymbol{\tau}_{2,Zn} &=& a_h ( 0, {y\over 2}, 0), \nonumber \\
+\Delta \boldsymbol{\tau}_{3,O} &=& a_h ( 0, -{y\over 2}, u_1 {c_h\over 2 a_h}), \nonumber \\
+\Delta \boldsymbol{\tau}_{4,O} &=& a_h ( 0, {y\over 2}, u_1 {c_h \over 2 a_h}). \nonumber 
+\end{eqnarray}
+$a_h y$ and $u_1$ are the internal coordinates which form a two dimensional
+space and are given as input. The first is in a.u., the second is adimensional.
+
+\end{document}
+
+
 \end{document}

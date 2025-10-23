@@ -12,6 +12,8 @@ SUBROUTINE plot_geo_p()
 !  This is a driver to plot the geometry as a function of pressure 
 !  It plots: 
 !     the celldm parameters as a function of p
+!     the b and c parameters if celldm(2) and celldm(3) are not zero
+!     the internal parameters if linternal_thermo is true
 !     the volume as a function of p
 !     the ratio volume/volume0 as a function of p 
 ! volume0 is the volume at zero pressure
@@ -26,9 +28,11 @@ USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,  &
                              gnuplot_xlabel,              &
                              gnuplot_set_gfact,           &
                              gnuplot_write_command,       &
-                             gnuplot_write_file_mul_data
+                             gnuplot_write_file_mul_data, &
+                             gnuplot_write_file_mul_data_times
 USE data_files,       ONLY : flevdat
 USE control_mur,      ONLY : omegap0
+USE control_atomic_pos, ONLY : linternal_thermo, nint_var
 USE control_pressure, ONLY : pmin, pmax
 USE initial_conf,     ONLY : ibrav_save
 USE mp_images,        ONLY : my_image_id, root_image
@@ -36,7 +40,8 @@ USE io_global,        ONLY : ionode
 
 IMPLICIT NONE
 
-CHARACTER(LEN=256) :: filename, filename1, filename2, gnu_filename, label
+CHARACTER(LEN=256) :: filename, filename1, filename2, filename3, &
+                      gnu_filename, label
 INTEGER :: ierr, system
 
 IF ( my_image_id /= root_image ) RETURN
@@ -58,6 +63,8 @@ filename1="energy_files/"//TRIM(flevdat)//'_mur_celldm'
 CALL add_pressure(filename1)
 filename2="energy_files/"//TRIM(flevdat)//'_mur'
 CALL add_pressure(filename2)
+filename3="energy_files/"//TRIM(flevdat)//'_mur_uint'
+CALL add_pressure(filename3)
 !
 !  plot a
 !
@@ -71,6 +78,9 @@ IF (ABS(ibrav_save)>7) THEN
    CALL gnuplot_ylabel('b/a',.FALSE.) 
    CALL gnuplot_write_file_mul_data(filename1,1,3,'color_red',.TRUE.,.TRUE.,&
                                                                      .FALSE.)
+   CALL gnuplot_ylabel('b (a.u.)',.FALSE.) 
+   CALL gnuplot_write_file_mul_data_times(filename1,1,2,3,'color_red',.TRUE.,&
+                                       .TRUE., .FALSE.)
 ENDIF
 !
 !  plot c/a
@@ -79,6 +89,9 @@ IF (ibrav_save==4.OR.ABS(ibrav_save)>5) THEN
    CALL gnuplot_ylabel('c/a',.FALSE.) 
    CALL gnuplot_write_file_mul_data(filename1,1,4,'color_red',.TRUE.,.TRUE.,&
                                                                      .FALSE.)
+   CALL gnuplot_ylabel('c (a.u.)',.FALSE.) 
+   CALL gnuplot_write_file_mul_data_times(filename1,1,2,4,'color_red',.TRUE.,&
+                                       .TRUE., .FALSE.)
 ENDIF
 !
 !  plot cos(alpha)
@@ -103,6 +116,15 @@ IF (ibrav_save==14) THEN
    CALL gnuplot_ylabel('cos({/Symbol c})',.FALSE.) 
    CALL gnuplot_write_file_mul_data(filename1,1,5,'color_red',.TRUE.,.TRUE.,&
                                                                      .FALSE.)
+ENDIF
+
+IF (linternal_thermo) THEN
+   CALL gnuplot_ylabel('u_{int}',.FALSE.) 
+   CALL gnuplot_write_file_mul_data(filename3,1,2,'color_red',.TRUE., &
+                                                (nint_var==1), .FALSE.)
+   IF (nint_var==2) &
+      CALL gnuplot_write_file_mul_data(filename3,1,3,'color_red',.FALSE., &
+                                                .TRUE., .FALSE.)
 ENDIF
 !
 !   plot the volume

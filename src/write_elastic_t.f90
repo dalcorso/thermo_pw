@@ -15,7 +15,7 @@ SUBROUTINE write_elastic_t( )
 !
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : stdout
-USE thermo_mod, ONLY : ibrav_geo, celldm_geo, omega_geo
+USE thermo_mod, ONLY : ibrav_geo, celldm_geo, omega_geo, celldm_geo_eos
 USE thermo_sym, ONLY : laue
 USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
 
@@ -81,7 +81,7 @@ IF (lmurn) THEN
       ENDDO
    ENDIF
 ELSE
-   CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
+   CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo_eos)
 ENDIF
 DO i=1,6
    DO j=1,6
@@ -169,7 +169,7 @@ SUBROUTINE write_elastic_p()
 !
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : stdout
-USE thermo_mod, ONLY : ibrav_geo, celldm_geo
+USE thermo_mod, ONLY : ibrav_geo, celldm_geo_eos
 USE thermo_sym, ONLY : laue
 USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
 
@@ -236,7 +236,7 @@ ENDDO
 !
 !  Part 1 evaluation of the polynomial coefficients
 !
-CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
+CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo_eos)
 
 DO i=1,6
    DO j=1,6
@@ -324,7 +324,7 @@ SUBROUTINE write_elastic_mur_p()
 !
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : stdout
-USE thermo_mod, ONLY : omega_geo, ngeo
+USE thermo_mod, ONLY : omega_geo_eos, ngeo
 
 USE initial_conf,       ONLY : ibrav_save
 USE elastic_constants,  ONLY : write_el_cons_on_file, write_macro_el_on_file, &
@@ -364,7 +364,7 @@ DO igeo=1,ngeo(1)
                                     el_comp_p(:,:,igeo))
    CALL print_macro_elasticity(ibrav,el_cons_p(:,:,igeo), &
               el_comp_p(:,:,igeo),macro_el_p(:,igeo),.FALSE.)
-   CALL compute_density(omega_geo(igeo), density_p(igeo),.FALSE.)
+   CALL compute_density(omega_geo_eos(igeo), density_p(igeo),.FALSE.)
 
    CALL print_sound_velocities(ibrav_save, el_cons_p(:,:,igeo), &
            el_comp_p(:,:,igeo), density_p(igeo), v_p(1,igeo), &
@@ -408,7 +408,7 @@ SUBROUTINE write_elastic_pt( )
 !
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : stdout
-USE thermo_mod, ONLY : ibrav_geo, celldm_geo, omega_geo
+USE thermo_mod, ONLY : ibrav_geo, celldm_geo, omega_geo, celldm_geo_eos
 USE thermo_sym, ONLY : laue
 USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
 
@@ -479,7 +479,7 @@ IF (lmurn) THEN
       ENDDO
    ENDIF
 ELSE
-   CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
+   CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo_eos)
 ENDIF
 
 DO i=1,6
@@ -575,7 +575,7 @@ SUBROUTINE write_elastic_ptt( )
 !
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : stdout
-USE thermo_mod, ONLY : ibrav_geo, celldm_geo, omega_geo
+USE thermo_mod, ONLY : ibrav_geo, celldm_geo, omega_geo, celldm_geo_eos
 USE thermo_sym, ONLY : laue
 USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
 
@@ -648,7 +648,7 @@ IF (lmurn) THEN
       ENDDO
    ENDIF
 ELSE
-   CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
+   CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo_eos)
 ENDIF
 
 DO i=1,6

@@ -450,6 +450,322 @@ RETURN
 END SUBROUTINE plot_anhar_anis_alpha
 !
 !-----------------------------------------------------------------
+SUBROUTINE plot_anhar_anis_uint()
+!-----------------------------------------------------------------
+!
+!  This is a driver to plot the quantities written inside 
+!  flanhar//'.uint', flanhar//'.uint_press', flanhar//'.uint_temp'. 
+!  In the same postscript file it plots the internal parameters 
+!  as a function of temperature at the input pressure and for several 
+!  pressures. It writes also the internal parameter as a function 
+!  of pressure at several temperatures.
+!
+USE kinds,           ONLY : DP
+USE control_gnuplot, ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
+USE postscript_files, ONLY : flpsanhar
+USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
+                            gnuplot_write_header,        &
+                            gnuplot_ylabel,              &
+                            gnuplot_xlabel,              &
+                            gnuplot_write_command,       &
+                            gnuplot_write_file_mul_data, &
+                            gnuplot_write_file_mul_data_times, &
+                            gnuplot_write_file_mul_point, &
+                            gnuplot_write_horizontal_line, &
+                            gnuplot_set_fact
+USE data_files,      ONLY : flanhar
+USE initial_conf,    ONLY : ibrav_save
+USE control_thermo,  ONLY : ltherm_dos, ltherm_freq
+USE temperature,     ONLY : tmin, tmax, temp, ntemp_plot, itemp_plot
+USE control_atomic_pos, ONLY : linternal_thermo, nint_var
+USE control_pressure, ONLY : pressure_kb, npress_plot, ipress_plot, press, &
+                             npress
+USE color_mod,       ONLY : color
+USE mp_images,       ONLY : my_image_id, root_image
+USE io_global,       ONLY : ionode
+
+IMPLICIT NONE
+
+CHARACTER(LEN=256) :: gnu_filename, filename, filename_ph, filename1, &
+                      filename2, filenameps, label
+INTEGER :: istep, ipressp, ipress, itempp, itemp, ivar, ierr, system
+CHARACTER(LEN=6) :: int_to_char
+REAL(DP) :: factor
+LOGICAL :: first_step, last_step
+
+IF ( my_image_id /= root_image ) RETURN
+IF ( .NOT. linternal_thermo ) RETURN
+
+gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_anhar_uint'
+CALL add_pressure(gnu_filename)
+
+CALL gnuplot_start(gnu_filename)
+
+filenameps=TRIM(flpsanhar)//'.uint'
+CALL add_pressure(filenameps)
+filenameps=TRIM(filenameps)//TRIM(flext)
+IF (tmin /= 1.0_DP) THEN
+   CALL gnuplot_write_header(filenameps, tmin, tmax, 0.0_DP, 0.0_DP, 1.0_DP, &
+                                                            flext ) 
+ELSE
+   CALL gnuplot_write_header(filenameps, 0.0_DP, tmax, 0.0_DP, 0.0_DP, 1.0_DP,&
+                                                            flext ) 
+ENDIF
+
+filename1='anhar_files/'//TRIM(flanhar)//'.uint'
+CALL add_pressure(filename1)
+filename2='anhar_files/'//TRIM(flanhar)//'.uint_ph'
+CALL add_pressure(filename2)
+
+CALL gnuplot_xlabel('T (K)',.FALSE.) 
+!
+!  Part 1: celldm parameters
+!
+CALL gnuplot_set_fact(1.0_DP,.FALSE.)
+
+DO ivar=1,nint_var
+   WRITE(label,'("u_{int}(",a,")")') TRIM(int_to_char(ivar))
+   CALL gnuplot_ylabel(TRIM(label),.FALSE.) 
+   IF (ltherm_dos) &
+      CALL gnuplot_write_file_mul_data(filename1,1,ivar+1,'color_red',&
+                       .TRUE.,(.NOT.ltherm_freq),.FALSE.)
+   IF (ltherm_freq) &
+      CALL gnuplot_write_file_mul_data(filename2,1,ivar+1,'color_blue', &
+                         .NOT.(ltherm_dos), .TRUE., .FALSE.)
+ENDDO
+!
+!  Temperature dependent internal parameters at several pressures
+!  one parameter per plot
+!
+DO ivar=1,nint_var
+   istep=0
+   DO ipressp=1,npress_plot
+      first_step=(ipressp==1)
+      last_step=(ipressp==npress_plot)
+      ipress=ipress_plot(ipressp)
+      istep=MOD(istep,8)+1
+      filename="anhar_files/"//TRIM(flanhar)//'.uint_press'
+      CALL add_value(filename,press(ipress))
+      filename_ph="anhar_files/"//TRIM(flanhar)//'.uint_ph_press'
+      CALL add_value(filename_ph,press(ipress))
+      IF (first_step) THEN
+         CALL gnuplot_xlabel('T (K)',.FALSE.)
+         CALL gnuplot_set_fact(1.0_DP,.FALSE.)
+         WRITE(label,'("u_{int}(",a,")")') TRIM(int_to_char(ivar))
+         CALL gnuplot_ylabel(TRIM(label),.FALSE.) 
+      ENDIF
+      IF (ltherm_dos) &
+         CALL gnuplot_write_file_mul_data(filename,1,ivar+1,color(istep), &
+                first_step,(last_step.AND..NOT.ltherm_freq),.FALSE.)
+      IF (ltherm_freq) &
+         CALL gnuplot_write_file_mul_data(filename_ph,1,ivar+1,&
+               color(istep),(first_step.AND..NOT.ltherm_dos),last_step,.FALSE.)
+   ENDDO
+ENDDO
+!
+!  Pressure dependent internal parameters at several temperatures
+!
+DO ivar=1, nint_var
+   istep=0
+   DO itempp=1,ntemp_plot
+      first_step=(itempp==1)
+      last_step=(itempp==ntemp_plot)
+      itemp=itemp_plot(itempp)
+      istep=MOD(istep,8)+1
+      filename="anhar_files/"//TRIM(flanhar)//'.uint_temp'
+      CALL add_value(filename,temp(itemp))
+      filename_ph="anhar_files/"//TRIM(flanhar)//'.uint_ph_temp'
+      CALL add_value(filename_ph,temp(itemp))
+      IF (first_step) THEN
+         WRITE(label,'("set xrange [",f12.5,":",f12.5,"]")') &
+                                   MAX(0.0_DP,press(1)), press(npress)
+         CALL gnuplot_write_command(TRIM(label),.FALSE.)
+         CALL gnuplot_xlabel('p (kbar)',.FALSE.)
+         CALL gnuplot_set_fact(1.0_DP,.FALSE.)
+         WRITE(label,'("u_{int}(",a,")")') TRIM(int_to_char(ivar))
+         CALL gnuplot_ylabel(TRIM(label),.FALSE.) 
+      ENDIF
+      IF (ltherm_dos) &
+         CALL gnuplot_write_file_mul_data(filename,1,ivar+1,color(istep), &
+                      first_step,(last_step.AND..NOT.ltherm_freq),.FALSE.)
+      IF (ltherm_freq) &
+         CALL gnuplot_write_file_mul_data(filename_ph,1,ivar+1,&
+          color(istep), (first_step.AND..NOT.ltherm_dos),last_step,.FALSE.)
+   ENDDO
+ENDDO
+
+CALL gnuplot_end()
+
+IF (lgnuplot.AND.ionode) &
+   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+
+!IF (lgnuplot.AND.ionode) &
+!  CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+!                                       //TRIM(gnu_filename), WAIT=.FALSE.)
+
+RETURN
+END SUBROUTINE plot_anhar_anis_uint
+
+!-----------------------------------------------------------------
+SUBROUTINE plot_anhar_anis_uint_zsisa()
+!-----------------------------------------------------------------
+!
+!  This is a driver to plot the quantities written inside 
+!  flanhar//'.uint_zsisa', flanhar//'.uint_zsisa_press', 
+!  flanhar//'.uint_zsisa_temp'. 
+!  In the same postscript file it plots the internal parameters 
+!  as a function of temperature at the input pressure and for several 
+!  pressures. It writes also the internal parameter as a function 
+!  of pressure at several temperatures.
+!
+USE kinds,           ONLY : DP
+USE control_gnuplot, ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
+USE postscript_files, ONLY : flpsanhar
+USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
+                            gnuplot_write_header,        &
+                            gnuplot_ylabel,              &
+                            gnuplot_xlabel,              &
+                            gnuplot_write_command,       &
+                            gnuplot_write_file_mul_data, &
+                            gnuplot_write_file_mul_data_times, &
+                            gnuplot_write_file_mul_point, &
+                            gnuplot_write_horizontal_line, &
+                            gnuplot_set_fact
+USE data_files,      ONLY : flanhar
+USE initial_conf,    ONLY : ibrav_save
+USE control_thermo,  ONLY : ltherm_dos, ltherm_freq
+USE temperature,     ONLY : tmin, tmax, temp, ntemp_plot, itemp_plot
+USE control_atomic_pos, ONLY : linterpolate_tau, nint_var
+USE control_pressure, ONLY : pressure_kb, npress_plot, ipress_plot, press, &
+                             npress
+USE color_mod,       ONLY : color
+USE mp_images,       ONLY : my_image_id, root_image
+USE io_global,       ONLY : ionode
+
+IMPLICIT NONE
+
+CHARACTER(LEN=256) :: gnu_filename, filename, filename_ph, filename1, &
+                      filename2, filenameps, label
+INTEGER :: istep, ipressp, ipress, itempp, itemp, ivar, ierr, system
+CHARACTER(LEN=6) :: int_to_char
+REAL(DP) :: factor
+LOGICAL :: first_step, last_step
+
+IF ( my_image_id /= root_image ) RETURN
+IF ( .NOT. linterpolate_tau ) RETURN
+
+gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_anhar_uint_zsisa'
+CALL add_pressure(gnu_filename)
+
+CALL gnuplot_start(gnu_filename)
+
+filenameps=TRIM(flpsanhar)//'.uint_zsisa'
+CALL add_pressure(filenameps)
+filenameps=TRIM(filenameps)//TRIM(flext)
+IF (tmin /= 1.0_DP) THEN
+   CALL gnuplot_write_header(filenameps, tmin, tmax, 0.0_DP, 0.0_DP, 1.0_DP, &
+                                                            flext ) 
+ELSE
+   CALL gnuplot_write_header(filenameps, 0.0_DP, tmax, 0.0_DP, 0.0_DP, 1.0_DP,&
+                                                            flext ) 
+ENDIF
+
+filename1='anhar_files/'//TRIM(flanhar)//'.uint_zsisa'
+CALL add_pressure(filename1)
+filename2='anhar_files/'//TRIM(flanhar)//'.uint_zsisa_ph'
+CALL add_pressure(filename2)
+
+CALL gnuplot_xlabel('T (K)',.FALSE.) 
+!
+!  Part 1: Internal parameters parameters
+!
+CALL gnuplot_set_fact(1.0_DP,.FALSE.)
+
+DO ivar=1,nint_var
+   WRITE(label,'("u_{int}(",a,")")') TRIM(int_to_char(ivar))
+   CALL gnuplot_ylabel(TRIM(label),.FALSE.) 
+   IF (ltherm_dos) &
+      CALL gnuplot_write_file_mul_data(filename1,1,ivar+1,'color_red',&
+                       .TRUE.,(.NOT.ltherm_freq),.FALSE.)
+   IF (ltherm_freq) &
+      CALL gnuplot_write_file_mul_data(filename2,1,ivar+1,'color_blue', &
+                         .NOT.(ltherm_dos), .TRUE., .FALSE.)
+ENDDO
+!
+!  Part 2: Temperature dependent internal parameters at several pressures
+!  one parameter per plot
+!
+DO ivar=1,nint_var
+   istep=0
+   DO ipressp=1,npress_plot
+      first_step=(ipressp==1)
+      last_step=(ipressp==npress_plot)
+      ipress=ipress_plot(ipressp)
+      istep=MOD(istep,8)+1
+      filename="anhar_files/"//TRIM(flanhar)//'.uint_zsisa_press'
+      CALL add_value(filename,press(ipress))
+      filename_ph="anhar_files/"//TRIM(flanhar)//'.uint_zsisa_ph_press'
+      CALL add_value(filename_ph,press(ipress))
+      IF (first_step) THEN
+         CALL gnuplot_xlabel('T (K)',.FALSE.)
+         CALL gnuplot_set_fact(1.0_DP,.FALSE.)
+         WRITE(label,'("u_{int}(",a,")")') TRIM(int_to_char(ivar))
+         CALL gnuplot_ylabel(TRIM(label),.FALSE.) 
+      ENDIF
+      IF (ltherm_dos) &
+         CALL gnuplot_write_file_mul_data(filename,1,ivar+1,color(istep), &
+                first_step,(last_step.AND..NOT.ltherm_freq),.FALSE.)
+      IF (ltherm_freq) &
+         CALL gnuplot_write_file_mul_data(filename_ph,1,ivar+1,&
+               color(istep),(first_step.AND..NOT.ltherm_dos),last_step,.FALSE.)
+   ENDDO
+ENDDO
+!
+!  Pressure dependent internal parameters at several temperatures
+!
+DO ivar=1, nint_var
+   istep=0
+   DO itempp=1,ntemp_plot
+      first_step=(itempp==1)
+      last_step=(itempp==ntemp_plot)
+      itemp=itemp_plot(itempp)
+      istep=MOD(istep,8)+1
+      filename="anhar_files/"//TRIM(flanhar)//'.uint_zsisa_temp'
+      CALL add_value(filename,temp(itemp))
+      filename_ph="anhar_files/"//TRIM(flanhar)//'.uint_zsisa_ph_temp'
+      CALL add_value(filename_ph,temp(itemp))
+      IF (first_step) THEN
+         WRITE(label,'("set xrange [",f12.5,":",f12.5,"]")') &
+                                   MAX(0.0_DP,press(1)), press(npress)
+         CALL gnuplot_write_command(TRIM(label),.FALSE.)
+         CALL gnuplot_xlabel('p (kbar)',.FALSE.)
+         CALL gnuplot_set_fact(1.0_DP,.FALSE.)
+         WRITE(label,'("u_{int}(",a,")")') TRIM(int_to_char(ivar))
+         CALL gnuplot_ylabel(TRIM(label),.FALSE.) 
+      ENDIF
+      IF (ltherm_dos) &
+         CALL gnuplot_write_file_mul_data(filename,1,ivar+1,color(istep), &
+                      first_step,(last_step.AND..NOT.ltherm_freq),.FALSE.)
+      IF (ltherm_freq) &
+         CALL gnuplot_write_file_mul_data(filename_ph,1,ivar+1,&
+          color(istep), (first_step.AND..NOT.ltherm_dos),last_step,.FALSE.)
+   ENDDO
+ENDDO
+
+CALL gnuplot_end()
+
+IF (lgnuplot.AND.ionode) &
+   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+
+!IF (lgnuplot.AND.ionode) &
+!  CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+!                                       //TRIM(gnu_filename), WAIT=.FALSE.)
+
+RETURN
+END SUBROUTINE plot_anhar_anis_uint_zsisa
+
+
+!-----------------------------------------------------------------
 SUBROUTINE plot_thermal_stress()
 !-----------------------------------------------------------------
 !

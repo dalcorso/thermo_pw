@@ -25,8 +25,8 @@ SUBROUTINE thermo_readin()
 !
 !  variable read by this routine
 !
-  USE thermo_mod,           ONLY : what, ngeo, step_ngeo,     &
-                                   fact_ngeo, max_geometries,   &
+  USE thermo_mod,           ONLY : what, ngeo, step_ngeo,         &
+                                   fact_ngeo, max_geometries,     &
                                    start_geometry, last_geometry, &
                                    ngeo_ph
   USE control_thermo,       ONLY : outdir_thermo, after_disp, with_eigen,  &
@@ -89,7 +89,9 @@ SUBROUTINE thermo_readin()
                                    poly_degree, epsilon_0, use_free_energy, &
                                    start_geometry_qha, last_geometry_qha,   &
                                    nmove, move_at, atom_dir, atom_step,     &
-                                   stype, lcm_ec, lzsisa, lfp, old_ec
+                                   stype, lcm_ec, lzsisa, lfp, old_ec,      &
+                                   stypec, iconstr_internal_ec, nint_var_ec, &
+                                   int_ngeo_ec, int_step_ngeo_ec
   USE control_xrdp,         ONLY : lambda, flxrdp, flpsxrdp, lformf, smin, &
                                    smax, nspoint, flformf, flpsformf, lcm, &
                                    lxrdp, lambda_elem
@@ -98,7 +100,9 @@ SUBROUTINE thermo_readin()
   USE control_quartic_energy, ONLY : lquartic, poly_degree_ph,     &
                                    poly_degree_elc, poly_degree_thermo, &
                                    poly_degree_bfact, lsolve
-  
+  USE control_atomic_pos,   ONLY : linternal_thermo, &
+                                   iconstr_internal, nint_var, int_ngeo,    &
+                                   int_step_ngeo, linterpolate_tau
   USE piezoelectric_tensor, ONLY : nppl
   USE anharmonic,           ONLY : noelcvg
   USE control_emp_free_ener, ONLY : add_empirical, efe, alpha1, alpha2, v0p
@@ -269,6 +273,11 @@ SUBROUTINE thermo_readin()
                             move_at,                        &
                             atom_step,                      &
                             atom_dir,                       &
+                            stypec,                         &
+                            iconstr_internal_ec,            &
+                            nint_var_ec,                    &
+                            int_ngeo_ec,                    &
+                            int_step_ngeo_ec,               &
 !
 !   scf_polarization
 !
@@ -313,6 +322,12 @@ SUBROUTINE thermo_readin()
                             lv0_t, lb0_t,                   &
                             idebye,                         &
                             noelcvg,                        &
+                            linternal_thermo,               &
+                            iconstr_internal,               &
+                            nint_var,                       &
+                            int_ngeo,                       &
+                            int_step_ngeo,                  &
+                            linterpolate_tau,               &
                             add_empirical, efe, alpha1,     &
                             alpha2, v0p,                    &
                             ltherm_glob,                    &
@@ -321,6 +336,8 @@ SUBROUTINE thermo_readin()
                             icenter_grun,                   &
                             lhugoniot,                      &
                             lgeo_from_file,                 &
+                            ltau_from_file,                 &
+                            ltau_el_cons_from_file,         &
                             lgeo_to_file,                   &
                             poly_degree_grun,               &
                             flpgrun, flgrun, flpsgrun,      &
@@ -517,11 +534,20 @@ SUBROUTINE thermo_readin()
   lzsisa=.FALSE.
   lfp=.FALSE.
   old_ec=0
+  stypec=.FALSE.
+  iconstr_internal_ec=0
+  nint_var_ec=1
+  int_ngeo_ec(1,:)=5
+  int_ngeo_ec(2,:)=5
+  int_step_ngeo_ec(1,:)=0.02_DP
+  int_step_ngeo_ec(2,:)=0.02_DP
 
   ltherm_glob=.FALSE.
   lgruneisen_gen=.FALSE.
   lhugoniot=.FALSE.
   lgeo_from_file=.FALSE.
+  ltau_from_file=.FALSE.
+  ltau_el_cons_from_file=.FALSE.
   lgeo_to_file=.FALSE.
   poly_degree_grun=4
 
@@ -592,6 +618,15 @@ SUBROUTINE thermo_readin()
   ggrun_recipe=2
   icenter_grun=0
 
+  linternal_thermo=.FALSE.
+  iconstr_internal=0
+  nint_var=1
+  int_ngeo(1)=5
+  int_ngeo(2)=5
+  int_step_ngeo(1)=0.005
+  int_step_ngeo(2)=0.005
+  linterpolate_tau=.FALSE.
+
   add_empirical=.FALSE.
   efe=0
   alpha1=0.0_DP
@@ -639,7 +674,7 @@ SUBROUTINE thermo_readin()
   !
 
   IF (lgruneisen_gen .AND. lmurn) CALL errore('thermo_readin', &
-                              'lgruneisen_gen requires lmurn=.FALSE.',1)
+                              'lgruneisen_gen requires lmurn=.FALSE.',1) 
 
   IF (lgruneisen_gen.AND.what/='mur_lc_t') &
      CALL errore('thermo_readin', &
@@ -705,6 +740,11 @@ SUBROUTINE thermo_readin()
   IF (poly_degree_elc<1 .OR. poly_degree_elc>4) &
             CALL errore('thermo_readin','poly_degree_elc must be between &
                                                                &1 and 4',1)
+  IF (linterpolate_tau.AND.iconstr_internal==0) &
+       CALL errore('thermo_readin','linterpolate_tau requires a constraint',1)
+  IF (linterpolate_tau.AND.linternal_thermo) &
+       CALL errore('thermo_readin','linterpolate_tau and linternal_thermo &
+                                       &cannot be both .TRUE.',1)
   IF (elastic_algorithm/='standard'.AND.elastic_algorithm/='advanced'.AND. &
       elastic_algorithm/='energy'.AND.elastic_algorithm/='energy_std') &
       CALL errore('thermo_readin','Unrecognized elastic algorithm',1)
@@ -714,12 +754,24 @@ SUBROUTINE thermo_readin()
      CALL errore('thermo_readin','Only the energy algorithms are available &
                                           &in this case',1)
 
+  IF ((what=='scf_elastic_constants'   .OR. &
+       what=='mur_lc_elastic_constants'.OR. &
+       what=='elastic_constants_geo')  .AND. linternal_thermo) &
+     CALL errore('thermo_readin','Use stypec for internal coordinates',1)
+
   IF (ANY(stype).AND.(what=='elastic_constants_geo'.OR.  &
                       what=='scf_elastic_constants'.OR.  &
                       what=='mur_lc_elastic_constants').AND.&
                       (elastic_algorithm/='energy'.AND.  &
                       elastic_algorithm/='energy_std'))  &
      CALL errore('thermo_readin','stype requires an energy algorithm',1)
+
+  IF (ANY(stypec).AND.(what=='elastic_constants_geo'.OR.  &
+                      what=='scf_elastic_constants'.OR.  &
+                      what=='mur_lc_elastic_constants').AND.&
+                      (elastic_algorithm/='energy'.AND.  &
+                      elastic_algorithm/='energy_std'))  &
+     CALL errore('thermo_readin','stypec requires an energy algorithm',1)
 
   IF (lzsisa.AND.lfp) &
      CALL errore('thermo_readin','lzsisa and lfp are mutually exclusive',1)
@@ -728,6 +780,11 @@ SUBROUTINE thermo_readin()
             .OR.what=='scf_elastic_constants'.OR.   &
                 what=='mur_lc_elastic_constants').AND.(.NOT.frozen_ions))  &
      CALL errore('thermo_reading','stype requires frozen_ions=.TRUE.',1)
+
+  IF (ANY(stypec).AND.(what=='elastic_constants_geo' &
+            .OR.what=='scf_elastic_constants'.OR.   &
+                what=='mur_lc_elastic_constants').AND.(.NOT.frozen_ions))  &
+     CALL errore('thermo_reading','stypec requires frozen_ions=.TRUE.',1)
 
   read_paths=( what=='scf_bands'.OR.what=='scf_disp'.OR.what=='plot_bz'.OR. &
                what=='mur_lc_bands' .OR. what=='mur_lc_disp' .OR. &

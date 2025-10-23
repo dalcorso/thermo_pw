@@ -16,7 +16,7 @@ SUBROUTINE write_elastic_t_qha()
 !
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : stdout
-USE thermo_mod, ONLY : ibrav_geo, celldm_geo, omega_geo
+USE thermo_mod, ONLY : ibrav_geo, celldm_geo, omega_geo, celldm_geo_eos
 USE thermo_sym, ONLY : laue
 USE control_mur, ONLY : lmurn
 USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
@@ -85,7 +85,7 @@ IF (lmurn) THEN
       ENDDO
    ENDIF
 ELSE
-   CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
+   CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo_eos)
 ENDIF
 
 el_cons_t=0.0_DP
@@ -281,7 +281,7 @@ SUBROUTINE write_elastic_pt_qha()
 !
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : stdout
-USE thermo_mod, ONLY : ibrav_geo, celldm_geo, omega_geo
+USE thermo_mod, ONLY : ibrav_geo, celldm_geo, omega_geo, celldm_geo_eos
 USE thermo_sym, ONLY : laue
 USE control_pressure, ONLY : npress_plot, ipress_plot, press
 USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
@@ -358,7 +358,7 @@ IF (lmurn) THEN
       ENDDO
    ENDIF
 ELSE
-   CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
+   CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo_eos)
 ENDIF
 
 el_cons_pt=0.0_DP
@@ -380,11 +380,10 @@ IF (pdelc_ph/=poly_degree_elc.AND.ltherm_freq) &
 
 DO ipressp=1,npress_plot
    ipress=ipress_plot(ipressp)
-   IF (ltherm_dos) THEN
+   IF (ltherm_dos.AND.el_cons_qha_geo_available) THEN
       DO itemp=startt,lastt
          IF (itemp==1.OR.itemp==ntemp) CYCLE
    
-         IF (el_cons_qha_geo_available) THEN
             IF (lgeo_from_file) THEN
                xfit(1)=compute_omega_geo(ibrav, celldm_pt(:,itemp,ipressp))
             ELSE
@@ -440,13 +439,12 @@ DO ipressp=1,npress_plot
 !                                               el_cons_pt(i,j,itemp,ipressp)
                ENDDO
             ENDDO
-         ENDIF
-         CALL compute_elastic_compliances(el_cons_pt(:,:,itemp,ipressp),       &
+            CALL compute_elastic_compliances(el_cons_pt(:,:,itemp,ipressp),       &
                                               el_comp_pt(:,:,itemp,ipressp))
-         CALL print_macro_elasticity(ibrav,el_cons_pt(:,:,itemp,ipressp),      &
+            CALL print_macro_elasticity(ibrav,el_cons_pt(:,:,itemp,ipressp),      &
                el_comp_pt(:,:,itemp,ipressp), macro_el_pt(:,itemp,ipressp), &
                                                                      .FALSE.)
-         b0_ec_pt(itemp,ipressp)=(macro_el_pt(1,itemp,ipressp) + &
+            b0_ec_pt(itemp,ipressp)=(macro_el_pt(1,itemp,ipressp) + &
                                macro_el_pt(5,itemp,ipressp) ) * 0.5_DP
       ENDDO
 
@@ -465,11 +463,10 @@ DO ipressp=1,npress_plot
               el_comp_pt(1,1,1,ipressp), b0_ec_pt(1,ipressp), filelastic, 1)
    ENDIF
 
-   IF (ltherm_freq) THEN
+   IF (ltherm_freq.AND.el_consf_qha_geo_available) THEN
       DO itemp=startt,lastt
          IF (itemp==1.OR.itemp==ntemp) CYCLE
    
-         IF (el_consf_qha_geo_available) THEN
             IF (lgeo_from_file) THEN
                xfit(1)=compute_omega_geo(ibrav, celldmf_pt(:,itemp,ipressp))
             ELSE
@@ -526,7 +523,6 @@ DO ipressp=1,npress_plot
 !                                               el_consf_pt(i,j,itemp,ipressp)
                ENDDO
             ENDDO
-         ENDIF
          CALL compute_elastic_compliances(el_consf_pt(:,:,itemp,ipressp), &
                                            el_compf_pt(:,:,itemp,ipressp))
          CALL print_macro_elasticity(ibrav,el_consf_pt(:,:,itemp,ipressp),&
@@ -569,7 +565,7 @@ SUBROUTINE write_elastic_ptt_qha()
 !
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : stdout
-USE thermo_mod, ONLY : ibrav_geo, celldm_geo, omega_geo
+USE thermo_mod, ONLY : ibrav_geo, celldm_geo, omega_geo, celldm_geo_eos
 USE thermo_sym, ONLY : laue
 USE control_mur, ONLY : lmurn
 USE control_pressure, ONLY : npress, press
@@ -643,7 +639,7 @@ IF (lmurn) THEN
       ENDDO
    ENDIF
 ELSE
-   CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
+   CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo_eos)
 ENDIF
 
 el_cons_ptt=0.0_DP
@@ -665,10 +661,9 @@ IF (pdelc_ph/=poly_degree_elc.AND.ltherm_freq) &
 
 DO itempp=1,ntemp_plot
    itemp=itemp_plot(itempp)
-   IF (ltherm_dos) THEN
+   IF (ltherm_dos.AND.el_cons_qha_geo_available) THEN
       DO ipress=startp,lastp
          IF (ipress==1.OR.ipress==npress) CYCLE
-         IF (el_cons_qha_geo_available) THEN
             IF (lgeo_from_file) THEN
                xfit(1)=compute_omega_geo(ibrav, celldm_ptt(:,ipress,itempp))
             ELSE
@@ -721,7 +716,6 @@ DO itempp=1,ntemp_plot
 !                                           el_cons_ptt(i,j,ipress,itempp)
                ENDDO
             ENDDO
-         ENDIF
          CALL compute_elastic_compliances(el_cons_ptt(:,:,ipress,itempp),     &
                                           el_comp_ptt(:,:,ipress,itempp))
          CALL print_macro_elasticity(ibrav,el_cons_ptt(:,:,ipress,itempp),   &
@@ -746,10 +740,9 @@ DO itempp=1,ntemp_plot
               el_comp_ptt(1,1,1,itempp), b0_ec_ptt(1,itempp), filelastic, 3)
    ENDIF
 
-   IF (ltherm_freq) THEN
+   IF (ltherm_freq.AND.el_consf_qha_geo_available) THEN
       DO ipress=startp,lastp
          IF (ipress==1.OR.ipress==npress) CYCLE
-         IF (el_consf_qha_geo_available) THEN
             IF (lgeo_from_file) THEN
                xfit(1)=compute_omega_geo(ibrav, celldmf_ptt(:,ipress,itempp))
             ELSE
@@ -802,7 +795,6 @@ DO itempp=1,ntemp_plot
 !                                           el_consf_ptt(i,j,ipress,itempp)
                ENDDO
             ENDDO
-         ENDIF
          CALL compute_elastic_compliances(el_consf_ptt(:,:,ipress,itempp),     &
                                           el_compf_ptt(:,:,ipress,itempp))
          CALL print_macro_elasticity(ibrav,el_consf_ptt(:,:,ipress,itempp),   &
@@ -846,7 +838,7 @@ SUBROUTINE write_dyde_t_qha(istep)
 !
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : stdout
-USE thermo_mod, ONLY : ibrav_geo, celldm_geo
+USE thermo_mod, ONLY : ibrav_geo, celldm_geo_eos
 USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
 USE linear_surfaces,    ONLY : fit_multi_linear, evaluate_fit_linear
 USE quadratic_surfaces, ONLY : fit_multi_quadratic, evaluate_fit_quadratic
@@ -893,7 +885,7 @@ ALLOCATE(x1(nvar,ndata))
 ALLOCATE(xfit(nvar))
 CALL divide(world_comm, ntemp, startt, lastt)
 
-CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
+CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo_eos)
 
 dyde_t(istep,:)=0.0_DP
 dydef_t(istep,:)=0.0_DP
@@ -917,7 +909,7 @@ DO itemp=startt,lastt
          IF (found_dos_ec(idata)) THEN
             jdata=jdata+1
             x1(:,jdata)=x(:,idata)
-            f(jdata)=dyde(istep,idata,itemp)
+            f(jdata)=dyde(1,istep,idata,itemp)
          ENDIF
       END DO
 
@@ -956,7 +948,7 @@ DO itemp=startt,lastt
          IF (found_ph_ec(idata)) THEN
             jdata=jdata+1
             x1(:,jdata)=x(:,idata)
-            f(jdata)=dyde(istep,idata,itemp)
+            f(jdata)=dyde(1,istep,idata,itemp)
          ENDIF
       ENDDO
 

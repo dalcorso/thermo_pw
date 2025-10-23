@@ -1519,9 +1519,10 @@ SUBROUTINE interpolate_harmonic()
 !   from phonon dos.
 !
 USE kinds,          ONLY : DP
-USE thermodynamics, ONLY : ph_e0, ph_ce, ph_b_fact, ph_ener, ph_free_ener, &
-                                                             ph_entropy
-USE el_thermodynamics, ONLY : el_ener, el_free_ener, el_entr, el_ce
+USE thermodynamics, ONLY : ph_e0_eos, ph_ce_eos, ph_b_fact, ph_ener_eos,  &
+                           ph_free_ener_eos, ph_entropy_eos
+USE el_thermodynamics, ONLY : el_ener_eos, el_free_ener_eos, el_entr_eos, &
+                              el_ce_eos
 USE control_emp_free_ener,  ONLY : add_empirical, emp_ener, emp_free_ener, &
                            emp_entr, emp_ce
 USE el_anharmonic,  ONLY : el_energy_t, el_free_energy_t, el_entropy_t,    &
@@ -1537,15 +1538,15 @@ IMPLICIT NONE
 !
 !   here the vibrational energy, entropy, zero point energy 
 !
-CALL interpolate_thermo(vmin_t, celldm_t, ph_ener, ener_t)
+CALL interpolate_thermo(vmin_t, celldm_t, ph_ener_eos, ener_t)
 
-CALL interpolate_thermo(vmin_t, celldm_t, ph_free_ener, free_ener_t)
+CALL interpolate_thermo(vmin_t, celldm_t, ph_free_ener_eos, free_ener_t)
 
-CALL interpolate_thermo(vmin_t, celldm_t, ph_entropy, entropy_t)
+CALL interpolate_thermo(vmin_t, celldm_t, ph_entropy_eos, entropy_t)
 
-CALL interpolate_e0(vmin_t, celldm_t, ph_e0, e0_t) 
+CALL interpolate_e0(vmin_t, celldm_t, ph_e0_eos, e0_t) 
 
-CALL interpolate_thermo(vmin_t, celldm_t, ph_ce, ce_t) 
+CALL interpolate_thermo(vmin_t, celldm_t, ph_ce_eos, ce_t) 
 cv_t=ce_t
 
 IF (with_eigen) CALL interpolate_b_fact(vmin_t, ph_b_fact, bfact_t)
@@ -1554,13 +1555,14 @@ IF (with_eigen) CALL interpolate_b_fact(vmin_t, ph_b_fact, bfact_t)
 !  to the vibrational one
 !
 IF (lel_free_energy) THEN
-   CALL interpolate_thermo(vmin_t, celldm_t, el_ener, el_energy_t)
+   CALL interpolate_thermo(vmin_t, celldm_t, el_ener_eos, el_energy_t)
    ener_t = ener_t + el_energy_t 
-   CALL interpolate_thermo(vmin_t, celldm_t, el_free_ener, el_free_energy_t)
+   CALL interpolate_thermo(vmin_t, celldm_t, el_free_ener_eos, &
+                                             el_free_energy_t)
    free_ener_t = free_ener_t + el_free_energy_t 
-   CALL interpolate_thermo(vmin_t, celldm_t, el_entr, el_entropy_t)
+   CALL interpolate_thermo(vmin_t, celldm_t, el_entr_eos, el_entropy_t)
    entropy_t = entropy_t + el_entropy_t
-   CALL interpolate_thermo(vmin_t, celldm_t, el_ce, el_ce_t) 
+   CALL interpolate_thermo(vmin_t, celldm_t, el_ce_eos, el_ce_t) 
    ce_t=ce_t+el_ce_t
    cv_t=ce_t
 ELSE
@@ -1599,9 +1601,11 @@ SUBROUTINE interpolate_harmonic_ph()
 !   from Brillouin zone integration.
 !
 USE kinds,    ONLY : DP
-USE ph_freq_thermodynamics, ONLY : phf_e0, phf_ce, phf_b_fact, phf_ener, &
-                                   phf_free_ener, phf_entropy
-USE el_thermodynamics,  ONLY : el_ener, el_free_ener, el_entr, el_ce
+USE ph_freq_thermodynamics, ONLY : phf_e0_eos, phf_ce_eos, phf_b_fact, &
+                                   phf_ener_eos, phf_free_ener_eos,    &
+                                   phf_entropy_eos
+USE el_thermodynamics,  ONLY : el_ener_eos, el_free_ener_eos, el_entr_eos, &
+                               el_ce_eos
 USE control_emp_free_ener,  ONLY : add_empirical, emp_ener, emp_free_ener, &
                                emp_entr, emp_ce
 USE ph_freq_anharmonic, ONLY : vminf_t, celldmf_t, cvf_t, cef_t, enerf_t,&
@@ -1618,15 +1622,15 @@ IMPLICIT NONE
 !   interpolate the vibrational energy, entropy, zero point energy,
 !   heat capacity and b-factor
 !
-CALL interpolate_thermo(vminf_t, celldmf_t, phf_ener, enerf_t) 
+CALL interpolate_thermo(vminf_t, celldmf_t, phf_ener_eos, enerf_t) 
 
-CALL interpolate_thermo(vminf_t, celldmf_t, phf_free_ener, free_enerf_t)
+CALL interpolate_thermo(vminf_t, celldmf_t, phf_free_ener_eos, free_enerf_t)
 
-CALL interpolate_thermo(vminf_t, celldmf_t, phf_entropy, entropyf_t)
+CALL interpolate_thermo(vminf_t, celldmf_t, phf_entropy_eos, entropyf_t)
 
-CALL interpolate_e0(vminf_t, celldmf_t, phf_e0, e0f_t)
+CALL interpolate_e0(vminf_t, celldmf_t, phf_e0_eos, e0f_t)
 
-CALL interpolate_thermo(vminf_t, celldmf_t, phf_ce, cef_t) 
+CALL interpolate_thermo(vminf_t, celldmf_t, phf_ce_eos, cef_t) 
 cvf_t=cef_t
 
 IF (with_eigen) CALL interpolate_b_fact(vminf_t, phf_b_fact, bfactf_t)
@@ -1635,13 +1639,13 @@ IF (with_eigen) CALL interpolate_b_fact(vminf_t, phf_b_fact, bfactf_t)
 !  to the vibrational one
 !
 IF (lel_free_energy) THEN
-   CALL interpolate_thermo(vminf_t, celldmf_t, el_ener, el_energyf_t)
+   CALL interpolate_thermo(vminf_t, celldmf_t, el_ener_eos, el_energyf_t)
    enerf_t = enerf_t + el_energyf_t
-   CALL interpolate_thermo(vminf_t, celldmf_t, el_free_ener, el_free_energyf_t)
+   CALL interpolate_thermo(vminf_t, celldmf_t, el_free_ener_eos, el_free_energyf_t)
    free_enerf_t = free_enerf_t + el_free_energyf_t
-   CALL interpolate_thermo(vminf_t, celldmf_t, el_entr, el_entropyf_t)
+   CALL interpolate_thermo(vminf_t, celldmf_t, el_entr_eos, el_entropyf_t)
    entropyf_t = entropyf_t + el_entropyf_t
-   CALL interpolate_thermo(vminf_t, celldmf_t, el_ce, el_cef_t)
+   CALL interpolate_thermo(vminf_t, celldmf_t, el_ce_eos, el_cef_t)
    cef_t = cef_t + el_cef_t
    cvf_t=cef_t
 ELSE
@@ -1680,8 +1684,10 @@ SUBROUTINE interpolate_harmonic_pt()
 !   quantities computed from phonon dos. 
 !
 USE kinds,          ONLY : DP
-USE thermodynamics, ONLY : ph_ener, ph_free_ener, ph_entropy, ph_ce
-USE el_thermodynamics, ONLY : el_ener, el_free_ener, el_entr, el_ce
+USE thermodynamics, ONLY : ph_ener_eos, ph_free_ener_eos, ph_entropy_eos, &
+                           ph_ce_eos
+USE el_thermodynamics, ONLY : el_ener_eos, el_free_ener_eos, el_entr_eos, &
+                              el_ce_eos
 USE control_emp_free_ener, ONLY : add_empirical, emp_ener, emp_ce, emp_entr
 USE el_anharmonic,  ONLY : el_ener_pt, el_free_ener_pt, el_entr_pt, el_ce_pt
 USE emp_anharmonic, ONLY : emp_free_ener_pt, emp_ener_pt, emp_ce_pt, &
@@ -1698,13 +1704,13 @@ IF (npress_plot==0) RETURN
 
 DO ipressp=1,npress_plot
    CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_pt(:,:,ipressp), &
-                                         ph_ener, ener_pt(:,ipressp))
+                                         ph_ener_eos, ener_pt(:,ipressp))
    CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_pt(:,:,ipressp), &
-                               ph_free_ener, free_ener_pt(:,ipressp))
+                               ph_free_ener_eos, free_ener_pt(:,ipressp))
    CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_pt(:,:,ipressp), &
-                                      ph_entropy, entr_pt(:,ipressp))
+                                      ph_entropy_eos, entr_pt(:,ipressp))
    CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_pt(:,:,ipressp), &
-                                      ph_ce, ce_pt(:,ipressp))
+                                      ph_ce_eos, ce_pt(:,ipressp))
 ENDDO
 cv_pt=ce_pt
 !
@@ -1714,13 +1720,13 @@ cv_pt=ce_pt
 IF (lel_free_energy) THEN
    DO ipressp=1,npress_plot
       CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_pt(:,:,ipressp), &
-                                     el_ener, el_ener_pt(:,ipressp))
+                                     el_ener_eos, el_ener_pt(:,ipressp))
       CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_pt(:,:,ipressp), &
-                                     el_free_ener, el_free_ener_pt(:,ipressp))
+                                     el_free_ener_eos, el_free_ener_pt(:,ipressp))
       CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_pt(:,:,ipressp), &
-                                     el_entr, el_entr_pt(:,ipressp))
+                                     el_entr_eos, el_entr_pt(:,ipressp))
       CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_pt(:,:,ipressp), &
-                                     el_ce, el_ce_pt(:,ipressp))
+                                     el_ce_eos, el_ce_pt(:,ipressp))
    ENDDO
    free_ener_pt=free_ener_pt+el_free_ener_pt
    ener_pt=ener_pt+el_ener_pt
@@ -1768,8 +1774,10 @@ SUBROUTINE interpolate_harmonicf_pt()
 !   quantities computed Brillouin zone integration. 
 !
 USE kinds,          ONLY : DP
-USE ph_freq_thermodynamics, ONLY : phf_ener, phf_free_ener, phf_entropy, phf_ce
-USE el_thermodynamics, ONLY : el_ener, el_free_ener, el_entr, el_ce
+USE ph_freq_thermodynamics, ONLY : phf_ener_eos, phf_free_ener_eos, &
+                                   phf_entropy_eos, phf_ce_eos
+USE el_thermodynamics, ONLY : el_ener_eos, el_free_ener_eos, el_entr_eos, &
+                              el_ce_eos
 USE control_emp_free_ener, ONLY : add_empirical, emp_ener, emp_ce, emp_entr
 USE el_anharmonic,  ONLY : el_enerf_pt, el_free_enerf_pt, el_entrf_pt, &
                            el_cef_pt
@@ -1787,13 +1795,13 @@ IF (npress_plot==0) RETURN
 
 DO ipressp=1,npress_plot
    CALL interpolate_thermo(vminf_pt(:,ipressp), celldmf_pt(:,:,ipressp), &
-                                         phf_ener, enerf_pt(:,ipressp))
+                                         phf_ener_eos, enerf_pt(:,ipressp))
    CALL interpolate_thermo(vminf_pt(:,ipressp), celldmf_pt(:,:,ipressp), &
-                               phf_free_ener, free_enerf_pt(:,ipressp))
+                               phf_free_ener_eos, free_enerf_pt(:,ipressp))
    CALL interpolate_thermo(vminf_pt(:,ipressp), celldmf_pt(:,:,ipressp), &
-                                      phf_entropy, entrf_pt(:,ipressp))
+                                      phf_entropy_eos, entrf_pt(:,ipressp))
    CALL interpolate_thermo(vminf_pt(:,ipressp), celldmf_pt(:,:,ipressp), &
-                                      phf_ce, cef_pt(:,ipressp))
+                                      phf_ce_eos, cef_pt(:,ipressp))
 ENDDO
 cvf_pt=cef_pt
 !
@@ -1803,13 +1811,13 @@ cvf_pt=cef_pt
 IF (lel_free_energy) THEN
    DO ipressp=1,npress_plot
       CALL interpolate_thermo(vminf_pt(:,ipressp), celldmf_pt(:,:,ipressp), &
-                                     el_ener, el_enerf_pt(:,ipressp))
+                                el_ener_eos, el_enerf_pt(:,ipressp))
       CALL interpolate_thermo(vminf_pt(:,ipressp), celldmf_pt(:,:,ipressp), &
-                                     el_free_ener, el_free_enerf_pt(:,ipressp))
+                                el_free_ener_eos, el_free_enerf_pt(:,ipressp))
       CALL interpolate_thermo(vminf_pt(:,ipressp), celldmf_pt(:,:,ipressp), &
-                                     el_entr, el_entrf_pt(:,ipressp))
+                                el_entr_eos, el_entrf_pt(:,ipressp))
       CALL interpolate_thermo(vminf_pt(:,ipressp), celldmf_pt(:,:,ipressp), &
-                                     el_ce, el_cef_pt(:,ipressp))
+                                el_ce_eos, el_cef_pt(:,ipressp))
    ENDDO
    free_enerf_pt=free_enerf_pt+el_free_enerf_pt
    enerf_pt=enerf_pt+el_enerf_pt
@@ -1858,7 +1866,8 @@ SUBROUTINE interpolate_harmonic_noe_t()
 !   phonon dos. Presently only the heat capacity is interpolated.
 !
 USE kinds,          ONLY : DP
-USE thermodynamics, ONLY : ph_ce, ph_ener, ph_free_ener, ph_e0, ph_entropy
+USE thermodynamics, ONLY : ph_ce_eos, ph_ener_eos, ph_free_ener_eos, &
+                           ph_e0_eos, ph_entropy_eos
 USE anharmonic,     ONLY : vmin_noe_t, cv_noe_t, ce_noe_t, ener_noe_t, &
                            free_ener_noe_t, entropy_noe_t, celldm_noe_t, &
                            e0_noe_t
@@ -1870,15 +1879,15 @@ IF (.NOT.lel_free_energy) RETURN
 !
 !   here the vibrational energy, entropy, zero point energy 
 !
-CALL interpolate_thermo(vmin_noe_t, celldm_noe_t, ph_ener, ener_noe_t)
+CALL interpolate_thermo(vmin_noe_t, celldm_noe_t, ph_ener_eos, ener_noe_t)
 
-CALL interpolate_thermo(vmin_noe_t, celldm_noe_t, ph_free_ener, &
+CALL interpolate_thermo(vmin_noe_t, celldm_noe_t, ph_free_ener_eos, &
                                                       free_ener_noe_t)
-CALL interpolate_thermo(vmin_noe_t, celldm_noe_t, ph_entropy, entropy_noe_t)
+CALL interpolate_thermo(vmin_noe_t, celldm_noe_t, ph_entropy_eos, entropy_noe_t)
 
-CALL interpolate_e0(vmin_noe_t, celldm_noe_t, ph_e0, e0_noe_t) 
+CALL interpolate_e0(vmin_noe_t, celldm_noe_t, ph_e0_eos, e0_noe_t) 
 
-CALL interpolate_thermo(vmin_noe_t, celldm_noe_t, ph_ce, ce_noe_t)
+CALL interpolate_thermo(vmin_noe_t, celldm_noe_t, ph_ce_eos, ce_noe_t)
 cv_noe_t=ce_noe_t
 
 RETURN
@@ -1894,8 +1903,8 @@ SUBROUTINE interpolate_harmonic_noe_t_ph()
 !   Brillouin zone integrations. 
 !
 USE kinds,          ONLY : DP
-USE ph_freq_thermodynamics, ONLY : phf_ce, phf_ener, phf_free_ener,      &
-                           phf_e0, phf_entropy
+USE ph_freq_thermodynamics, ONLY : phf_ce_eos, phf_ener_eos, &
+                          phf_free_ener_eos, phf_e0_eos, phf_entropy_eos
 USE ph_freq_anharmonic,  ONLY : vminf_noe_t, cvf_noe_t, cef_noe_t,       &
                            enerf_noe_t, free_enerf_noe_t, entropyf_noe_t, & 
                            celldmf_noe_t, e0f_noe_t
@@ -1907,16 +1916,16 @@ IF (.NOT.lel_free_energy) RETURN
 !
 !   here the vibrational energy, entropy, zero point energy 
 !
-CALL interpolate_thermo(vminf_noe_t, celldmf_noe_t, phf_ener, enerf_noe_t)
+CALL interpolate_thermo(vminf_noe_t, celldmf_noe_t, phf_ener_eos, enerf_noe_t)
 
-CALL interpolate_thermo(vminf_noe_t, celldmf_noe_t, phf_free_ener, &
+CALL interpolate_thermo(vminf_noe_t, celldmf_noe_t, phf_free_ener_eos, &
                                                          free_enerf_noe_t)
-CALL interpolate_thermo(vminf_noe_t, celldmf_noe_t, phf_entropy,   &
+CALL interpolate_thermo(vminf_noe_t, celldmf_noe_t, phf_entropy_eos,   &
                                                            entropyf_noe_t)
 
-CALL interpolate_e0(vminf_noe_t, celldmf_noe_t, phf_e0, e0f_noe_t) 
+CALL interpolate_e0(vminf_noe_t, celldmf_noe_t, phf_e0_eos, e0f_noe_t) 
 
-CALL interpolate_thermo(vminf_noe_t, celldmf_noe_t, phf_ce, cef_noe_t)
+CALL interpolate_thermo(vminf_noe_t, celldmf_noe_t, phf_ce_eos, cef_noe_t)
 cvf_noe_t=cef_noe_t
 
 RETURN
@@ -1932,8 +1941,8 @@ SUBROUTINE interpolate_harmonicf_noe_t()
 !   phonon dos. Presently only the heat capacity is interpolated.
 !
 USE kinds,          ONLY : DP
-USE ph_freq_thermodynamics, ONLY : phf_ce, phf_ener, phf_free_ener, &
-                           phf_e0, phf_entropy
+USE ph_freq_thermodynamics, ONLY : phf_ce_eos, phf_ener_eos, &
+                           phf_free_ener_eos, phf_e0_eos, phf_entropy_eos
 USE ph_freq_anharmonic,     ONLY : vminf_noe_t, cvf_noe_t, cef_noe_t, &
                            enerf_noe_t, free_enerf_noe_t, &
                            entropyf_noe_t, celldmf_noe_t, e0f_noe_t
@@ -1945,15 +1954,15 @@ IF (.NOT.lel_free_energy) RETURN
 !
 !   here the vibrational energy, entropy, zero point energy 
 !
-CALL interpolate_thermo(vminf_noe_t, celldmf_noe_t, phf_ener, enerf_noe_t)
+CALL interpolate_thermo(vminf_noe_t, celldmf_noe_t, phf_ener_eos, enerf_noe_t)
 
-CALL interpolate_thermo(vminf_noe_t, celldmf_noe_t, phf_free_ener, &
+CALL interpolate_thermo(vminf_noe_t, celldmf_noe_t, phf_free_ener_eos, &
                                                       free_enerf_noe_t)
-CALL interpolate_thermo(vminf_noe_t, celldmf_noe_t, phf_entropy, entropyf_noe_t)
+CALL interpolate_thermo(vminf_noe_t, celldmf_noe_t, phf_entropy_eos, entropyf_noe_t)
 
-CALL interpolate_e0(vminf_noe_t, celldmf_noe_t, phf_e0, e0f_noe_t) 
+CALL interpolate_e0(vminf_noe_t, celldmf_noe_t, phf_e0_eos, e0f_noe_t) 
 
-CALL interpolate_thermo(vminf_noe_t, celldmf_noe_t, phf_ce, cef_noe_t)
+CALL interpolate_thermo(vminf_noe_t, celldmf_noe_t, phf_ce_eos, cef_noe_t)
 cvf_noe_t=cef_noe_t
 
 RETURN
@@ -1968,8 +1977,8 @@ SUBROUTINE interpolate_harmonic_ptt()
 !   quantities computed from phonon dos. 
 !
 USE kinds,             ONLY : DP
-USE thermodynamics,    ONLY : ph_ce
-USE el_thermodynamics, ONLY : el_ce
+USE thermodynamics,    ONLY : ph_ce_eos
+USE el_thermodynamics, ONLY : el_ce_eos
 USE el_anharmonic,     ONLY : el_ce_ptt
 USE control_emp_free_ener, ONLY : add_empirical, emp_ce
 USE anharmonic,        ONLY : celldm_t ! this is not used yet, must become ptt
@@ -1986,7 +1995,7 @@ IF (ntemp_plot==0) RETURN
 DO itempp=1,ntemp_plot
    itemp=itemp_plot(itempp)
    CALL interpolate_thermo_p(vmin_ptt(:,itempp), celldm_ptt(:,:,itempp), &
-                           ph_ce, ce_ptt(:,itempp), itemp)
+                           ph_ce_eos, ce_ptt(:,itempp), itemp)
 ENDDO
 cv_ptt=ce_ptt
 !
@@ -1997,7 +2006,7 @@ IF (lel_free_energy) THEN
    DO itempp=1,ntemp_plot
       itemp=itemp_plot(itempp)
       CALL interpolate_thermo_p(vmin_ptt(:,itempp), celldm_ptt(:,:,itempp), &
-                  el_ce, el_ce_ptt(:,itempp), itemp)
+                  el_ce_eos, el_ce_ptt(:,itempp), itemp)
    ENDDO
    ce_ptt=ce_ptt+el_ce_ptt
    cv_ptt=ce_ptt
@@ -2032,8 +2041,8 @@ SUBROUTINE interpolate_harmonicf_ptt()
 !   quantities computed from Brillouin zone integrations. 
 !
 USE kinds,             ONLY : DP
-USE ph_freq_thermodynamics,    ONLY : phf_ce
-USE el_thermodynamics, ONLY : el_ce
+USE ph_freq_thermodynamics,    ONLY : phf_ce_eos
+USE el_thermodynamics, ONLY : el_ce_eos
 USE el_anharmonic,     ONLY : el_cef_ptt
 USE control_emp_free_ener, ONLY : add_empirical, emp_ce
 USE ph_freq_anharmonic_ptt, ONLY : vminf_ptt, celldmf_ptt, cvf_ptt, cef_ptt
@@ -2049,7 +2058,7 @@ IF (ntemp_plot==0) RETURN
 DO itempp=1,ntemp_plot
    itemp=itemp_plot(itempp)
    CALL interpolate_thermo_p(vminf_ptt(:,itempp), celldmf_ptt(:,:,itempp), &
-                           phf_ce, cef_ptt(:,itempp), itemp)
+                           phf_ce_eos, cef_ptt(:,itempp), itemp)
 ENDDO
 cvf_ptt=cef_ptt
 !
@@ -2060,7 +2069,7 @@ IF (lel_free_energy) THEN
    DO itempp=1,ntemp_plot
       itemp=itemp_plot(itempp)
       CALL interpolate_thermo_p(vminf_ptt(:,itempp), celldmf_ptt(:,:,itempp), &
-                  el_ce, el_cef_ptt(:,itempp), itemp)
+                  el_ce_eos, el_cef_ptt(:,itempp), itemp)
    ENDDO
    cef_ptt=cef_ptt+el_cef_ptt
    cvf_ptt=cef_ptt
@@ -2804,6 +2813,7 @@ INTEGER :: itemp, iu_therm
 INTEGER :: find_free_unit
 
 IF (.NOT.lel_free_energy) RETURN
+
 filename="anhar_files/"//TRIM(flanhar)//".el_therm"
 CALL add_pressure(filename)
 
@@ -2838,8 +2848,8 @@ USE temperature, ONLY : temp, ntemp
 USE io_global,   ONLY : meta_ionode
 USE el_anharmonic,  ONLY : el_energyf_t, el_free_energyf_t, el_entropyf_t,    &
                            el_cef_t
-!
 USE control_eldos,  ONLY : lel_free_energy
+!
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
 INTEGER :: itemp, iu_therm
@@ -2847,6 +2857,7 @@ INTEGER :: itemp, iu_therm
 INTEGER :: find_free_unit
 
 IF (.NOT.lel_free_energy) RETURN
+
 filename="anhar_files/"//TRIM(flanhar)//".el_therm_ph"
 CALL add_pressure(filename)
 
@@ -2939,6 +2950,7 @@ INTEGER :: itemp, iu_therm, ipress, ipressp
 INTEGER :: find_free_unit
 
 IF (.NOT.lel_free_energy) RETURN
+
 DO ipressp=1,npress_plot
    ipress=ipress_plot(ipressp)
    filename="anhar_files/"//TRIM(flanhar)//".el_therm_ph_press"

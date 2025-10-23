@@ -69,11 +69,13 @@ generate_k_along_lines_kz.o \
 geometry_file.o \
 initialize_elastic_cons.o \
 initialize_thermo_work.o \
+interpolate_atomic_positions.o \
 interpolate_bfact.o \
 interpolate_el_cons.o \
 interpolate_free_ener_strain.o \
 interpolate_freq.o \
 interpolate_thermo.o \
+interpolate_uint.o \
 io_bands.o \
 local_dos1d_so.o \
 manage_anhar.o \
@@ -133,9 +135,11 @@ read_minimal_info.o \
 read_state_densities.o \
 readmodes.o \
 redefine_energies.o \
+remove_internal_coordinates.o \
 run_iwork.o \
 run_thermo_asyncronously.o \
 save_ph_variables.o \
+save_tau_on_tpw.o \
 set_2d_bz_path.o \
 set_bz_path.o \
 set_dos_kpoints.o \

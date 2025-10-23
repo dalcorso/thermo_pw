@@ -17,7 +17,7 @@ SUBROUTINE write_gnuplot_energy(nwork)
   !
   !
   USE kinds,      ONLY : DP
-  USE thermo_mod, ONLY : energy_geo, ngeo, celldm_geo, omega_geo
+  USE thermo_mod, ONLY : energy_geo_eos, ngeo, celldm_geo_eos, omega_geo_eos
   USE cell_base,  ONLY : ibrav
   USE data_files, ONLY : flenergy
   USE control_pressure, ONLY : pressure
@@ -57,38 +57,38 @@ SUBROUTINE write_gnuplot_energy(nwork)
            CASE(1,2,3)
               DO iwork=1,nwork
                  WRITE(iu_ev,'(2e30.15)', ERR=20, IOSTAT=ios) &
-                           celldm_geo(1,iwork), energy_geo(iwork) &
-                                              + pressure * omega_geo(iwork)
+                           celldm_geo_eos(1,iwork), energy_geo_eos(iwork) &
+                                              + pressure * omega_geo_eos(iwork)
               ENDDO
            CASE(4,6,7)
               DO iwork=1,nwork
                   WRITE (iu_ev,'(3e25.12)', ERR=20, IOSTAT=ios) &
-                        celldm_geo(1,iwork), &
-                        celldm_geo(3,iwork), & 
-                        energy_geo(iwork) + pressure * omega_geo(iwork)
+                        celldm_geo_eos(1,iwork), &
+                        celldm_geo_eos(3,iwork), & 
+                        energy_geo_eos(iwork) + pressure * omega_geo_eos(iwork)
               ENDDO
            CASE(5)
               DO iwork=1,nwork
                  WRITE(iu_ev,'(3e25.12)', ERR=20, IOSTAT=ios) &
-                      celldm_geo(1,iwork), &
-                      celldm_geo(4,iwork), &
-                      energy_geo(iwork) + pressure * omega_geo(iwork)
+                      celldm_geo_eos(1,iwork), &
+                      celldm_geo_eos(4,iwork), &
+                      energy_geo_eos(iwork) + pressure * omega_geo_eos(iwork)
               ENDDO
            CASE(8,9,91,10,11)
               DO iwork=1+(ifiles-1)*ngeo(1)*ngeo(2), ifiles*ngeo(1)*ngeo(2)
                  WRITE(iu_ev,'(3e25.12)', ERR=20, IOSTAT=ios) &
-                     celldm_geo(1,iwork), &
-                     celldm_geo(2,iwork), energy_geo(iwork) &  
-                              + pressure * omega_geo(iwork)
+                     celldm_geo_eos(1,iwork), &
+                     celldm_geo_eos(2,iwork), energy_geo_eos(iwork) &  
+                              + pressure * omega_geo_eos(iwork)
               ENDDO
            CASE DEFAULT
               DO iwork = 1, nwork
                  WRITE(iu_ev,'(7e20.12)', ERR=20, IOSTAT=ios)  &
-                     celldm_geo(1,iwork), celldm_geo(2,iwork), &
-                     celldm_geo(3,iwork), celldm_geo(4,iwork), &
-                     celldm_geo(4,iwork), celldm_geo(5,iwork), &
-                     celldm_geo(6,iwork), energy_geo(iwork)    &  
-                              + pressure * omega_geo(iwork)
+                     celldm_geo_eos(1,iwork), celldm_geo_eos(2,iwork), &
+                     celldm_geo_eos(3,iwork), celldm_geo_eos(4,iwork), &
+                     celldm_geo_eos(4,iwork), celldm_geo_eos(5,iwork), &
+                     celldm_geo_eos(6,iwork), energy_geo_eos(iwork)    &  
+                              + pressure * omega_geo_eos(iwork)
               ENDDO
         END SELECT
         CLOSE(iu_ev)
