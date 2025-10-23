@@ -6,10 +6,11 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !----------------------------------------------------------------------------
-SUBROUTINE manage_piezo_tensor(nwork)
+SUBROUTINE manage_piezo_tensor(nwork,igeom)
 !----------------------------------------------------------------------------
 !
 USE initial_conf,         ONLY : ibrav_save
+USE thermo_mod,           ONLY : energy_geo
 USE thermo_sym,           ONLY : code_group_save
 USE control_elastic_constants, ONLY : ngeo_strain, frozen_ions, epsil_geo
 USE piezoelectric_tensor, ONLY : compute_improper_piezo_tensor, &
@@ -35,16 +36,31 @@ USE mp,                   ONLY : mp_bcast, mp_sum
 USE io_global,            ONLY : stdout, meta_ionode_id 
 
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: nwork
+INTEGER, INTENT(IN) :: nwork, igeom
 LOGICAL :: exst
 
-INTEGER :: igeom
+INTEGER :: iwork
 CHARACTER(LEN=256) :: filepiezo, filelastic
 CHARACTER(LEN=6)   :: int_to_char
+LOGICAL :: lreturn
+!
+!  First collect the total energies
+!
+CALL mp_sum(energy_geo, world_comm)
+energy_geo=energy_geo / nproc_image
+!
+!  the elastic constants are calculated here if we have the energies
+!  of all geometries
+!
+lreturn=.FALSE.
+DO iwork=1,nwork
+   lreturn=lreturn.OR.(ABS(energy_geo(iwork))<1.D-10)
+ENDDO
+IF (lreturn) RETURN
+
 !
 !  First collect the polarization among all images
 !
-igeom=1
 CALL mp_sum(polar_geo, world_comm)
 polar_geo=polar_geo / nproc_image
 CALL mp_sum(tot_b_phase, world_comm)

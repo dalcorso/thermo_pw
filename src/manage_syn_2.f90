@@ -28,7 +28,7 @@ IF (lel_free_energy) CALL manage_el_free_energy(nwork)
 !
 IF (lelastic_const) CALL manage_elastic_cons(nwork, 1)
 !
-IF (lpiezoelectric_tensor) CALL manage_piezo_tensor(nwork)
+IF (lpiezoelectric_tensor) CALL manage_piezo_tensor(nwork, 1)
 !
 IF (lpolarization) CALL print_polarization(polar, .TRUE. )
 

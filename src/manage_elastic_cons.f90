@@ -59,6 +59,7 @@ REAL(DP) :: poisson, bulkm
 REAL(DP), ALLOCATABLE :: sigma_geo_aux(:,:,:), epsilon_geo_eff(:,:,:), &
                                                energy_geo_eff(:)
 INTEGER :: iwork, work_base, igeom, base_ind, nwork_eff, istep, igeo
+LOGICAL :: lreturn
 CHARACTER(LEN=6)    :: int_to_char
 CHARACTER(LEN=256)  :: filelastic
 !
