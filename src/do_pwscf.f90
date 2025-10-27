@@ -63,6 +63,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   USE xc_lib,               ONLY : xclib_dft_is, stop_exx, exx_is_active
   USE beef,                 ONLY : beef_energies
   USE ldaU,                 ONLY : lda_plus_u
+  USE bp,                   ONLY : lberry
   USE add_dmft_occ,         ONLY : dmft
   USE extffield,            ONLY : init_extffield, close_extffield
   USE input_parameters,     ONLY : nextffield
@@ -114,6 +115,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
      starting_pot ='atomic'
      startingconfig='input'
      lscf=.TRUE.
+     lberry=.FALSE.
   ELSE
      starting_pot ='file'
      startingconfig='file'
@@ -122,6 +124,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
      lbfgs=.FALSE.
      lforce=.FALSE.
      tstress=.FALSE.
+     lberry=.FALSE.
 !
 !   in the nscf case we save the wavefunctions to allow restart
 !

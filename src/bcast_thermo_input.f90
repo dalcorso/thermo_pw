@@ -358,6 +358,7 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( flelanhar, meta_ionode_id, world_comm )
   CALL mp_bcast( flpsanhar, meta_ionode_id, world_comm )
   CALL mp_bcast( flgeom, meta_ionode_id, world_comm )
+  CALL mp_bcast( fl_piezo, meta_ionode_id, world_comm )
 !
 !  elastic_constants_t
 !

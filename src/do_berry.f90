@@ -92,6 +92,7 @@ SUBROUTINE do_berry ( exit_status, polar, tot_b_phase, nppl )
      CALL clean_pw_tpw( .FALSE. )
      !
   END DO 
+  nosym=nosym_save
 !
 !  Here we compute polarization of this structure in cartesian coordinates
 !  and in units of e/bohr**2
