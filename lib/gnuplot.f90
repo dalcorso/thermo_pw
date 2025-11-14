@@ -72,7 +72,7 @@ IF (ionode) THEN
                         &color font ""AvantGarde-Book"" fontscale 0.5")')
    ELSE
       WRITE(iun_gnuplot,'("set terminal postscript enhanced solid &
-                                             &color ""AvantGarde-Book"" 20")')
+                                             &color ""AvantGarde-Book"" 25")')
    ENDIF
    WRITE(iun_gnuplot,'("set output """, a, """")') TRIM(filename) 
    WRITE(iun_gnuplot,*)
