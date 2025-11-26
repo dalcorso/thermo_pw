@@ -226,6 +226,7 @@ the bands is in a file called by default \texttt{output\_band.ps}, a name
 that can be changed in the \thermo\ input.
 Check also the option \texttt{what='scf\_2d\_bands'} 
 to plot the surface band structure.
+
 \newpage
 
 {\color{coral}\section{How do I plot the electronic density of states?}}
@@ -686,4 +687,20 @@ units of $2\pi \over a$ ($a$ is the lattice constant \texttt{celldm(1)}
 or in crystal coordinates using \texttt{q\_in\_cryst\_coord=.TRUE.}
 in the \texttt{INPUT\_THERMO} namelist.
 $n_0$ is not used and can be set to any integer value.
+
+\newpage
+
+{\color{coral}\section{How do I compute the piezoelectric tensor?}}
+\color{black}
+Use \texttt{what='scf\_piezoelectric\_tensor'}.
+With this option \thermo\ calls 
+\texttt{pw.x} and the berry phase calculation of the polarization for
+a set of distorted structures, taking as equilibrium configuration
+the geometry given in the \texttt{pw.x} input.
+Finally it calculates the derivatives of the polarization with
+respect to strain and finds the piezoelectric tensor components.
+Using \texttt{what='mur\_lc\_piezoelectric\_tensor'} the code 
+calculates the equilibrium geometry that minimizes the energy
+and takes it as the equilibrium configuration.
+
 \end{document}

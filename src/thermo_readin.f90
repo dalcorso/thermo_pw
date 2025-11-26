@@ -551,7 +551,7 @@ SUBROUTINE thermo_readin()
   lgeo_to_file=.FALSE.
   poly_degree_grun=4
 
-  nppl=51
+  nppl=21
 
   ngeo=0
   step_ngeo(1) = 0.05_DP
