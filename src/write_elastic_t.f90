@@ -85,7 +85,7 @@ ELSE
 ENDIF
 DO i=1,6
    DO j=1,6
-      IF (el_con_geo(i,j,1)>0.1_DP) THEN
+      IF (ABS(el_con_geo(i,j,1))>0.1_DP) THEN
          WRITE(stdout,'(/,5x,"Fitting elastic constants C(",i4,",",i4,")")')&
                        i, j
          DO idata=1,ndata
@@ -240,7 +240,7 @@ CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo_eos)
 
 DO i=1,6
    DO j=1,6
-      IF (el_con_geo(i,j,1)>0.1_DP) THEN
+      IF (ABS(el_con_geo(i,j,1))>0.1_DP) THEN
          WRITE(stdout,'(/,5x,"Fitting elastic constants C(",i4,",",i4,")")')&
                        i, j
          DO idata=1,ndata
@@ -484,7 +484,7 @@ ENDIF
 
 DO i=1,6
    DO j=1,6
-      IF (el_con_geo(i,j,1)>0.1_DP) THEN
+      IF (ABS(el_con_geo(i,j,1))>0.1_DP) THEN
          WRITE(stdout,'(/,5x,"Fitting elastic constants C(",i4,",",i4,")")')&
                        i, j
          DO idata=1,ndata
@@ -653,7 +653,7 @@ ENDIF
 
 DO i=1,6
    DO j=1,6
-      IF (el_con_geo(i,j,1)>0.1_DP) THEN
+      IF (ABS(el_con_geo(i,j,1))>0.1_DP) THEN
          WRITE(stdout,'(/,5x,"Fitting elastic constants C(",i4,",",i4,")")')&
                        i, j
          DO idata=1,ndata

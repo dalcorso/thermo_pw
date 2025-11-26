@@ -61,7 +61,7 @@ DO itemp=startt,lastt
    ENDIF
    DO i=1,6
       DO j=1,6
-         IF (el_con_geo(i,j,1)>0.1_DP) THEN
+         IF (ABS(el_con_geo(i,j,1))>0.1_DP) THEN
             IF (poly_degree_elc==4) THEN
                CALL evaluate_fit_quartic(nvar,xfit,aux,ec_p4(i,j)) 
             ELSEIF (poly_degree_elc==3) THEN
@@ -147,7 +147,7 @@ DO ipress=startp,lastp
    ENDIF
    DO i=1,6
       DO j=1,6
-         IF (el_con_geo(i,j,1)>0.1_DP) THEN
+         IF (ABS(el_con_geo(i,j,1))>0.1_DP) THEN
             IF (poly_degree_elc==4) THEN
                CALL evaluate_fit_quartic(nvar,xfit,aux,ec_p4(i,j)) 
             ELSEIF (poly_degree_elc==3) THEN
