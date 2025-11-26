@@ -36,6 +36,7 @@ ph_freq_module.o \
 phdos_module.o \
 piezoelectric_tensor.o \
 point_group.o \
+polarization.o \
 polyfit.o \
 polynomial.o \
 quadratic_surfaces.o \

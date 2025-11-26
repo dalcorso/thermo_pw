@@ -199,6 +199,11 @@ the ZSISA approximation or within the full free energy minimization (FFEM)
 \item Frozen ions and relaxed ions temperature dependent elastic constants
 in a grid of geometries within the quasi-harmonic approximation.
 
+\item Frozen ions and relaxed ions piezoelectric tensor at zero temperature
+in a grid of geometries.
+
+\item Berry phase polarization at zero temperature in a grid of geometries.
+
 \item Isothermal and isoentropic elastic constants and 
 elastic compliances as a function of temperature within the ``quasi-static'' 
 approximation.
@@ -2564,6 +2569,48 @@ compute a phonon dispersion (see above the option \texttt{what='scf\_ph'}). \\
 When \texttt{use\_free\_energy=.TRUE.} and 
 \texttt{all\_geometries\_together=.FALSE.} the number of tasks of this
 option is equal to the number of tasks needed to compute a phonon dispersion.
+
+\newpage
+{\color{coral}\section{what='polarization\_geo'}}
+\color{black}
+
+With this option the code computes the Berry phase polarization in a grid 
+of geometries, the geometries specified as in \texttt{what='mur\_lc'}.
+The results are written in different files in the directory 
+\texttt{elastic\_constants}. With a subsequent calculation that
+use \texttt{what='mur\_lc'} or \texttt{what='mur\_lc\_t'} the code
+can read the file produced with this option and interpolate the
+polarization at the pressure (and temperature if \texttt{what='mur\_lc\_t'})
+dependent geometries using polynomials. 
+The calculation of polarization is controled by the same variables used
+for the option \texttt{what='scf\_polarization'}.
+The variables that control this option are:
+%\begin{tcolorbox}
+\begin{verbatim}
+fl_polar : the name of the file that contains the polarization.
+         Default : 'output_polar.dat'
+\end{verbatim}
+
+
+\newpage
+{\color{coral}\section{what='piezoelectric\_tensor\_geo'}}
+\color{black}
+
+With this option the code computes the piezoelectric tensor in a grid 
+of geometries, the geometries specified as in \texttt{what='mur\_lc'}.
+The results are written in different files in the directory 
+\texttt{elastic\_constants}. With a subsequent calculation that
+use \texttt{what='mur\_lc'} or \texttt{what='mur\_lc\_t'} the code
+can read the file produced with this option and interpolate the
+piezoelectric tensor at the pressure (and temperature if 
+\texttt{what='mur\_lc\_t'}) dependent geometries. 
+
+%\begin{tcolorbox}
+\begin{verbatim}
+fl_piezo : the name of the file that contains the piezoelectric 
+           tensor.
+         Default : 'output_piezo.dat'
+\end{verbatim}
 
 \newpage
 {\color{coral}\section{\texttt{what='mur\_lc'}, \texttt{what='mur\_lc\_t'} and elastic constants}}

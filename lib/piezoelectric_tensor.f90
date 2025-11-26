@@ -30,14 +30,62 @@ MODULE piezoelectric_tensor
   REAL(DP) :: d_piezo_tensor(3,6)   ! The piezoelectric tensor d_{\alpha,m}
                                     ! linking polarization and stress
  
-  REAL(DP), ALLOCATABLE :: polar_geo(:,:) ! The polarization for each strain
+  REAL(DP), ALLOCATABLE :: polar_strain(:,:) ! The polarization for each strain
                                     ! in units of e bohr/Omega, Omega in bohr^3
   REAL(DP), ALLOCATABLE :: tot_b_phase(:,:) ! Total Berry phase (elec. + ions)
                                     ! in each direction for each strain
 
   INTEGER :: nppl      ! number of points per line in berry phase calculation
 
-  PUBLIC g_piezo_tensor, polar_geo,  compute_improper_piezo_tensor, &
+!
+!   Some array to simplify dealing with piezoelectric tensor
+!
+  CHARACTER(LEN=6) :: pt_names(18)
+
+  DATA  pt_names /                                                   &
+         'e_{11}', 'e_{12}', 'e_{13}', 'e_{14}', 'e_{15}', 'e_{16}', &
+         'e_{21}', 'e_{22}', 'e_{23}', 'e_{24}', 'e_{25}', 'e_{26}', &
+         'e_{31}', 'e_{32}', 'e_{33}', 'e_{34}', 'e_{35}', 'e_{36}' /
+
+
+  CHARACTER(LEN=6) :: ptd_names(18)
+
+  DATA  ptd_names /                                                  &
+         'd_{11}', 'd_{12}', 'd_{13}', 'd_{14}', 'd_{15}', 'd_{16}', &
+         'd_{21}', 'd_{22}', 'd_{23}', 'd_{24}', 'd_{25}', 'd_{26}', &
+         'd_{31}', 'd_{32}', 'd_{33}', 'd_{34}', 'd_{35}', 'd_{36}' /
+
+  INTEGER, PARAMETER :: pt_types=20
+
+  INTEGER :: pt_code_group(pt_types)  ! code of the point group for each type
+  DATA  pt_code_group / 30, 28, 26, 24, 21, 17, 15, 14, 13, 12, 11, 10, &
+                         9, 8, 7, 6, 5, 4, 3, 1 /
+
+  INTEGER  :: pt_present(18, pt_types)
+
+  DATA pt_present / &
+       0,0,0,1,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, & ! 30  T_d
+       0,0,0,1,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, & ! 28  T
+       0,0,0,2,3,0, 0,0,0,0,0,0, 1,0,0,0,0,4, & ! 26  S_4
+       0,0,0,1,0,0, 0,0,0,0,0,0, 0,0,0,0,0,2, & ! 24  D_2d
+       1,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, & ! 21  D_3h
+       1,0,0,0,0,0, 0,2,0,0,0,0, 0,0,0,0,0,0, & ! 17  C_3h
+       0,0,0,0,3,0, 0,0,0,0,0,0, 1,0,2,0,0,0, & ! 15  C_6v
+       0,0,0,0,3,0, 0,0,0,0,0,0, 1,0,2,0,0,0, & ! 14  C_4v
+       0,0,0,0,4,0, 0,1,0,0,0,0, 2,0,3,0,0,0, & ! 13  C_3v
+       0,0,0,0,4,0, 0,0,0,5,0,0, 1,2,3,0,0,0, & ! 12  C_2v
+       0,0,0,1,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, & ! 11  D_6
+       0,0,0,1,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, & ! 10  D_4
+       1,0,0,2,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, & !  9  D_3
+       0,0,0,1,0,0, 0,0,0,0,2,0, 0,0,0,0,0,3, & !  8  D_2
+       0,0,0,2,3,0, 0,0,0,0,0,0, 1,0,0,0,0,0, & !  7  C_6
+       0,0,0,3,4,0, 0,0,0,0,0,0, 1,0,2,0,0,0, & !  6  C_4
+       1,0,0,5,6,0, 0,2,0,0,0,0, 3,0,4,0,0,0, & !  5  C_3
+       0,0,0,4,0,5, 1,2,3,0,6,0, 0,0,0,7,0,8, & !  4  C_2
+       1,2,3,0,4,0, 0,0,0,5,0,6, 7,8,9,0,10,0, & !  3  C_s
+       1,2,3,4,5,6, 7,8,9,10,11,12, 13,14,15,16,17,18 / !  1  C_1
+
+  PUBLIC g_piezo_tensor, polar_strain,  compute_improper_piezo_tensor, &
          compute_proper_piezo_tensor,                     &
          print_d_piezo_tensor, print_g_piezo_tensor,      &
          print_e_piezo_tensor, e_piezo_tensor,            &
@@ -47,7 +95,9 @@ MODULE piezoelectric_tensor
          proper_improper_piezo, clean_piezo_tensor,       &
          print_piezo_info, tot_b_phase, allocate_piezo,   &
          deallocate_piezo, write_piezo_tensor,            &
-         read_piezo_tensor
+         read_piezo_tensor, write_piezo_tensor_on_file,   &
+         pt_names, ptd_names, pt_types, pt_present,       &
+         pt_code_group, get_pt_type
 
 CONTAINS
 !
@@ -74,7 +124,8 @@ WRITE(stdout,'(5x,"Piezoelectric tensor d_ij [pC/N] ")')
 WRITE(stdout,'(4x,"i j=",i9,5i12)') (i, i=1,6)
 !
 !  the factor 10000.0 comes from the fact that the compliances were in 1/kbar
-!  that is in 1/10^8 Pa, to have pC/N we need to multiply and divide by 10000
+!  that is in 1/10^8 Pa, to have pC/N we need to multiply by 10^12 and
+!  10^12/10^8=10^4=10000.0
 !
 fact= electron_si / (bohr_radius_si)**2 * 10000.0_DP
 DO i=1,3
@@ -200,10 +251,14 @@ SUBROUTINE allocate_piezo(nwork)
 IMPLICIT NONE
 INTEGER :: nwork
 
-ALLOCATE(polar_geo(3,nwork))
+ALLOCATE(polar_strain(3,nwork))
 ALLOCATE(tot_b_phase(3,nwork))
-polar_geo=0.0_DP
+polar_strain=0.0_DP
 tot_b_phase=0.0_DP
+g_piezo_tensor=0.0_DP
+eg_piezo_tensor=0.0_DP
+e_piezo_tensor=0.0_DP
+d_piezo_tensor=0.0_DP
 
 RETURN
 END SUBROUTINE allocate_piezo
@@ -213,7 +268,7 @@ SUBROUTINE deallocate_piezo()
 !-------------------------------------------------------------------------
 IMPLICIT NONE
 
-IF (ALLOCATED(polar_geo)) DEALLOCATE(polar_geo)
+IF (ALLOCATED(polar_strain)) DEALLOCATE(polar_strain)
 IF (ALLOCATED(tot_b_phase)) DEALLOCATE(tot_b_phase)
 
 RETURN
@@ -232,11 +287,13 @@ SUBROUTINE write_piezo_tensor(filename,polar0)
 !  the proper piezoelectric tensor
 !
 USE io_global, ONLY : ionode, ionode_id
+USE constants, ONLY : electron_si, bohr_radius_si
 USE mp_images, ONLY : intra_image_comm
 USE mp,        ONLY : mp_bcast 
 IMPLICIT NONE
 CHARACTER(LEN=*), INTENT(IN) :: filename
 REAL(DP), INTENT(IN) :: polar0(3)
+REAL(DP) :: fact
 INTEGER :: find_free_unit
 INTEGER :: outunit, ios, i, j
 
@@ -248,23 +305,34 @@ ENDIF
 100 CALL mp_bcast(ios,ionode_id,intra_image_comm)
     CALL errore('write_piezo_tensor','ploblem opening output file', ABS(ios))
 
+fact= electron_si / (bohr_radius_si)**2
 IF (ionode) THEN
    WRITE(outunit,'("Spontaneous polarization (e/bohr**2)")')
-   WRITE(outunit,'(4e20.10)') (polar0(i), i=1,3)
+   WRITE(outunit,'(3e19.10)') (polar0(i), i=1,3)
    WRITE(outunit,*)
    WRITE(outunit,'("Improper piezoelectric tensor (e/bohr**2)")')
    DO i=1,3
-      WRITE(outunit,'(4e20.10)') (g_piezo_tensor(i,j), j=1,6)
+      WRITE(outunit,'(6e19.10)') (g_piezo_tensor(i,j), j=1,6)
    ENDDO
    WRITE(outunit,*)
    WRITE(outunit,'("Proper corrected piezoelectric tensor (e/bohr**2)")')
    DO i=1,3
-      WRITE(outunit,'(4e20.10)') (eg_piezo_tensor(i,j), j=1,6)
+      WRITE(outunit,'(6e19.10)') (eg_piezo_tensor(i,j), j=1,6)
    END DO
    WRITE(outunit,*)
    WRITE(outunit,'("Proper piezoelectric tensor (e/bohr**2)")')
    DO i=1,3
-      WRITE(outunit,'(4e20.10)') (e_piezo_tensor(i,j), j=1,6)
+      WRITE(outunit,'(6e19.10)') (e_piezo_tensor(i,j), j=1,6)
+   END DO
+   WRITE(outunit,*)
+   WRITE(outunit,'("Proper piezoelectric tensor (C/m**2)")')
+   DO i=1,3
+      WRITE(outunit,'(6e19.10)') (e_piezo_tensor(i,j)*fact, j=1,6)
+   END DO
+   WRITE(outunit,*)
+   WRITE(outunit,'("Strain piezoelectric tensor (pC/N)")')
+   DO i=1,3
+      WRITE(outunit,'(6e19.10)') (d_piezo_tensor(i,j)*fact*1.D4, j=1,6)
    END DO
    CLOSE(outunit)
 ENDIF
@@ -279,12 +347,14 @@ SUBROUTINE read_piezo_tensor(filename, polar0, exists)
 !  This routine reads the piezoelectric tensor from file.
 !
 USE io_global, ONLY : ionode, ionode_id
+USE constants, ONLY : electron_si, bohr_radius_si
 USE mp_images, ONLY : intra_image_comm
 USE mp,        ONLY : mp_bcast 
 IMPLICIT NONE
 CHARACTER(LEN=*), INTENT(IN) :: filename
 REAL(DP) :: polar0(3)
 LOGICAL, INTENT(OUT) :: exists
+REAL(DP) :: e_piezo_tensor_cm2(3,6), fact
 INTEGER :: inunit, ios, i, j
 INTEGER :: find_free_unit
 
@@ -294,24 +364,38 @@ IF (ionode) THEN
        ERR=100, IOSTAT=ios)
 ENDIF
 
+fact = electron_si / bohr_radius_si**2
 IF (ionode) THEN
    READ(inunit,*)
-   WRITE(inunit,'(4e20.10)') (polar0(i), i=1,3)
+   READ(inunit,'(3e19.10)') (polar0(i), i=1,3)
    READ(inunit,*)
    READ(inunit,*)
    DO i=1,3
-      READ(inunit,'(4e20.10)',ERR=100,IOSTAT=ios) (g_piezo_tensor(i,j), j=1,6)
+      READ(inunit,'(6e19.10)',ERR=100,IOSTAT=ios) (g_piezo_tensor(i,j), j=1,6)
    ENDDO
    READ(inunit,*)
    READ(inunit,*)
    DO i=1,3
-      READ(inunit,'(4e20.10)',ERR=100,IOSTAT=ios) (eg_piezo_tensor(i,j), j=1,6)
+      READ(inunit,'(6e19.10)',ERR=100,IOSTAT=ios) (eg_piezo_tensor(i,j), j=1,6)
    END DO
    READ(inunit,*)
    READ(inunit,*)
    DO i=1,3
-      READ(inunit,'(4e20.10)',ERR=100,IOSTAT=ios) (e_piezo_tensor(i,j), j=1,6)
+      READ(inunit,'(6e19.10)',ERR=100,IOSTAT=ios) (e_piezo_tensor(i,j), j=1,6)
    END DO
+   READ(inunit,*)
+   READ(inunit,*)
+   DO i=1,3
+      READ(inunit,'(6e19.10)',ERR=100,IOSTAT=ios) (e_piezo_tensor_cm2(i,j),&
+                                                                       j=1,6)
+   END DO
+   READ(inunit,*)
+   READ(inunit,*)
+   DO i=1,3
+      READ(inunit,'(6e19.10)',ERR=100,IOSTAT=ios) (d_piezo_tensor(i,j), j=1,6)
+   END DO
+   d_piezo_tensor=d_piezo_tensor / fact / 1.D-4 ! bring it back to units 
+                                                ! e/(bohr**2 * kbar)
    CLOSE(inunit)
 ENDIF
 100 CALL mp_bcast(ios,ionode_id,intra_image_comm)
@@ -322,6 +406,7 @@ ENDIF
 CALL mp_bcast(g_piezo_tensor,ionode_id,intra_image_comm)
 CALL mp_bcast(eg_piezo_tensor,ionode_id,intra_image_comm)
 CALL mp_bcast(e_piezo_tensor,ionode_id,intra_image_comm)
+CALL mp_bcast(d_piezo_tensor,ionode_id,intra_image_comm)
 exists=.TRUE.
 
 RETURN
@@ -1562,5 +1647,415 @@ ENDIF
 
 RETURN
 END SUBROUTINE proper_improper_piezo
+!
+!-------------------------------------------------------------------------
+SUBROUTINE write_piezo_tensor_on_file(temp, ntemp, ibrav, code_group, &
+                                  e_piezo_tensor_t, filename, iflag, iwhat)
+!-------------------------------------------------------------------------
+!
+!  iflag=0 writes the piezoelectric tensor as a function of temperature
+!  iflag=2 writes the piezoelectric tensor as a function of pressure
+!  iwhat=1 writes e_piezo_tensor
+!  iwhat=2 writes d_piezo_tensor
+!
+USE kinds,      ONLY : DP
+USE io_global,  ONLY : meta_ionode, meta_ionode_id, stdout
+USE mp_world,   ONLY : world_comm
+USE mp,         ONLY : mp_bcast
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ntemp, ibrav, code_group, iflag, iwhat
+REAL(DP), INTENT(IN) :: temp(ntemp), e_piezo_tensor_t(3,6,ntemp)
+CHARACTER(LEN=*), INTENT(IN) :: filename
+
+INTEGER :: itemp, iu_piezo, ios
+INTEGER :: find_free_unit
+CHARACTER(LEN=7) :: label
+!
+! If the piezoelectric tensor vanishes return
+!
+SELECT CASE (code_group)
+   CASE(2,16,18,19,20,22,23,25,27,29,31,32)
+   RETURN
+END SELECT
+
+iu_piezo=find_free_unit()
+IF (meta_ionode) &
+   OPEN(UNIT=iu_piezo, FILE=TRIM(filename), FORM='formatted', &
+                                       STATUS='UNKNOWN', ERR=30, IOSTAT=ios)
+30 CALL mp_bcast(ios, meta_ionode_id, world_comm)
+   CALL errore('write_piezo_on_file','opening piezo tensor (T) file',&
+                                                             ABS(ios))
+!
+!  Choose if to plot as a function of temperature or pressure
+!
+IF (iflag<2) THEN
+   label='  T(K) '
+ELSE
+   label='p(kbar)'
+ENDIF
+
+IF (meta_ionode) THEN
+
+   IF (iwhat==1) THEN
+      WRITE(iu_piezo,'("#    stress piezoelectric tensor in e/bohr^2 units")')
+      WRITE(iu_piezo,'("#    multiply by 0.57214766E+02 to have it in C/m^2")')
+   ELSE
+      WRITE(iu_piezo,'("#    strain piezoelectric tensor in e/bohr^2/kbar &
+                                                                     &units")')
+      WRITE(iu_piezo,'("#    multiply by 0.57214766E+06 to have it in pC/N")')
+   ENDIF
+   SELECT CASE (code_group)
+      CASE(30,28)
+!
+!   T_d, T
+!
+         IF (iwhat==1) THEN
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " e_14 ")') label
+         ELSE
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " d_14 ")') label
+         ENDIF
+
+         DO itemp=2,ntemp-1
+            WRITE(iu_piezo,'(e16.8,5e20.12)') temp(itemp),  &
+                e_piezo_tensor_t(1,4,itemp)
+         ENDDO
+      CASE(26)
+!
+!   S_4
+!
+         IF (iwhat==1) THEN
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " e_31 ", &
+                   &13x, " e_14 ", 13x, " e_15 ")') label
+         ELSE
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " d_31 ", &
+                   &13x, " d_14 ", 13x, " d_15 ")') label
+         ENDIF
+
+         DO itemp=2,ntemp-1
+            WRITE(iu_piezo,'(e16.8,5e20.12)') temp(itemp),  &
+                e_piezo_tensor_t(3,1,itemp),                &  
+                e_piezo_tensor_t(1,4,itemp),                &
+                e_piezo_tensor_t(1,5,itemp)
+         ENDDO
+      CASE(24)
+!
+!   D_2d
+!
+         IF (iwhat==1) THEN
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " e_14 ", &
+                   &13x, " e_36 ")') label
+         ELSE
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " d_14 ", &
+                   &13x, " d_36 ")') label
+         ENDIF
+
+         DO itemp=2,ntemp-1
+            WRITE(iu_piezo,'(e16.8,5e20.12)') temp(itemp),  &
+                e_piezo_tensor_t(1,4,itemp),                &  
+                e_piezo_tensor_t(3,6,itemp)                
+         ENDDO
+      CASE(21)
+!
+!   D_3h
+!
+         IF (iwhat==1) THEN
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " e_11 ")') label
+         ELSE
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " d_11 ")') label
+         ENDIF
+
+         DO itemp=2,ntemp-1
+            WRITE(iu_piezo,'(e16.8,5e20.12)') temp(itemp),  &
+                e_piezo_tensor_t(1,1,itemp)                
+         ENDDO
+      CASE(17)
+!
+!   C_3h
+!
+         IF (iwhat==1) THEN
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " e_11 ", &
+                   &13x, " e_22 ")') label
+         ELSE
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " d_11 ", &
+                   &13x, " d_22 ")') label
+         ENDIF
+
+         DO itemp=2,ntemp-1
+            WRITE(iu_piezo,'(e16.8,5e20.12)') temp(itemp),  &
+                e_piezo_tensor_t(1,1,itemp),                &  
+                e_piezo_tensor_t(2,2,itemp)                
+         ENDDO
+
+      CASE(14,15)
+!
+!   C_4v and C_6v
+!
+         IF (iwhat==1) THEN
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " e_31 ", &
+                  & 13x, "     e_33 ", 13x, "     e_15 ")') label
+         ELSE
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " d_31 ", &
+                  & 13x, "     d_33 ", 13x, "     d_15 ")') label
+         ENDIF
+         DO itemp=2,ntemp-1
+            WRITE(iu_piezo,'(e16.8,5e20.12)') temp(itemp),  &
+                e_piezo_tensor_t(3,1,itemp), e_piezo_tensor_t(3,3,itemp), &
+                e_piezo_tensor_t(1,5,itemp)
+         ENDDO
+      CASE(13)
+!
+!   C_3v
+!
+         IF (iwhat==1) THEN
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " e_22 ", &
+                   &13x, " e_31 ", 13x, " e_33 ", 13x, " e_15 ")') label
+         ELSE
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " d_22 ", &
+                   &13x, " d_31 ", 13x, " d_33 ", 13x, " d_15 ")') label
+         ENDIF
+
+         DO itemp=2,ntemp-1
+            WRITE(iu_piezo,'(e16.8,5e20.12)') temp(itemp),  &
+                e_piezo_tensor_t(2,2,itemp),                &  
+                e_piezo_tensor_t(3,1,itemp),                &  
+                e_piezo_tensor_t(3,3,itemp),                &  
+                e_piezo_tensor_t(1,5,itemp)                
+         ENDDO
+      CASE(12)
+!
+!   C_2v
+!
+         IF (iwhat==1) THEN
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " e_31 ", &
+                   &13x, " e_32 ", 13x, " e_33 ", 13x, " e_15 ")') label
+         ELSE
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " d_31 ", &
+                   &13x, " d_32 ", 13x, " d_33 ", 13x, " d_15 ")') label
+         ENDIF
+
+         DO itemp=2,ntemp-1
+            WRITE(iu_piezo,'(e16.8,5e20.12)') temp(itemp),  &
+                e_piezo_tensor_t(3,1,itemp),                &  
+                e_piezo_tensor_t(3,2,itemp),                &  
+                e_piezo_tensor_t(3,3,itemp),                &  
+                e_piezo_tensor_t(1,5,itemp)                
+         ENDDO
+      CASE(11,10)
+!
+!   D_6, D_4
+!
+         IF (iwhat==1) THEN
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " e_14 ")') label
+         ELSE
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " d_14 ")') label
+         ENDIF
+
+         DO itemp=2,ntemp-1
+            WRITE(iu_piezo,'(e16.8,5e20.12)') temp(itemp),  &
+                e_piezo_tensor_t(1,4,itemp)                
+         ENDDO
+
+      CASE(9)
+!
+!   D_3
+!
+         IF (iwhat==1) THEN
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " e_11 ", 13x, " e_14 ")') label
+         ELSE
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " d_11 ", 13x, " d_14 ")') label
+         ENDIF
+
+         DO itemp=2,ntemp-1
+            WRITE(iu_piezo,'(e16.8,5e20.12)') temp(itemp),  &
+                e_piezo_tensor_t(1,1,itemp),                &  
+                e_piezo_tensor_t(1,4,itemp)
+         ENDDO
+      CASE(8)
+!
+!   D_2
+!
+         IF (iwhat==1) THEN
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " e_14 ", &
+                   &13x, " e_25 ", 13x, " e_36 ")') label
+         ELSE
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " d_14 ", &
+                   &13x, " d_25 ", 13x, " d_36 ")') label
+         ENDIF
+         DO itemp=2,ntemp-1
+            WRITE(iu_piezo,'(e16.8,5e20.12)') temp(itemp),  &
+                e_piezo_tensor_t(1,4,itemp),                &  
+                e_piezo_tensor_t(2,5,itemp),                &  
+                e_piezo_tensor_t(3,6,itemp)  
+         ENDDO
+      CASE(7)
+!
+!   C_6
+!
+         IF (iwhat==1) THEN
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " e_31 ", &
+                   &13x, " e_14 ", 13x, " e_15 ")') label
+         ELSE
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " d_31 ", &
+                   &13x, " d_14 ", 13x, " d_15 ")') label
+         ENDIF
+
+         DO itemp=2,ntemp-1
+            WRITE(iu_piezo,'(e16.8,5e20.12)') temp(itemp),  &
+                e_piezo_tensor_t(3,1,itemp),                &  
+                e_piezo_tensor_t(1,4,itemp),                &  
+                e_piezo_tensor_t(1,5,itemp)  
+         ENDDO
+      CASE(6)
+!
+!   C_4
+!
+         IF (iwhat==1) THEN
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " e_31 ", &
+                   &13x, " e_33 ", 13x, " e_14 ", 13x, " e_15 ")') label
+         ELSE
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " d_31 ", &
+                   &13x, " d_33 ", 13x, " d_14 ", 13x, " d_15 ")') label
+         ENDIF
+         DO itemp=2,ntemp-1
+            WRITE(iu_piezo,'(e16.8,5e20.12)') temp(itemp),  &
+                e_piezo_tensor_t(3,1,itemp),                &  
+                e_piezo_tensor_t(3,3,itemp),                &  
+                e_piezo_tensor_t(1,4,itemp),                &  
+                e_piezo_tensor_t(1,5,itemp)  
+         ENDDO
+      CASE(5)
+!
+!   C_3
+!
+         IF (iwhat==1) THEN
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " e_11 ", &
+                   &13x, " e_22 ", 13x, " e_31 ", 13x, " e_33 ")') label
+         ELSE
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " d_11 ", &
+                   &13x, " d_22 ", 13x, " d_31 ", 13x, " d_33 ")') label
+         ENDIF
+
+         DO itemp=2,ntemp-1
+            WRITE(iu_piezo,'(e16.8,5e20.12)') temp(itemp),  &
+                e_piezo_tensor_t(1,1,itemp),                &  
+                e_piezo_tensor_t(2,2,itemp),                &  
+                e_piezo_tensor_t(3,1,itemp),                &  
+                e_piezo_tensor_t(3,3,itemp)  
+         ENDDO
+      CASE(4)
+!
+!   C_2
+!
+         IF (iwhat==1) THEN
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " e_21 ", &
+                   &13x, " e_22 ", 13x, " e_23 ", 13x, " e_14 ", &
+                   &13x, " e_16 ", 13x, " e_25 ", 13x, " e_34 ", &
+                   &13x, " e_36 ")') label
+         ELSE
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " d_21 ", &
+                   &13x, " d_22 ", 13x, " d_23 ", 13x, " d_14 ", &
+                   &13x, " d_16 ", 13x, " d_25 ", 13x, " d_34 ", &
+                   &13x, " d_36 ")') label
+
+         ENDIF
+
+         DO itemp=2,ntemp-1
+            WRITE(iu_piezo,'(e16.8,5e20.12)') temp(itemp),  &
+                e_piezo_tensor_t(2,1,itemp),                &  
+                e_piezo_tensor_t(2,2,itemp),                &  
+                e_piezo_tensor_t(2,3,itemp),                &  
+                e_piezo_tensor_t(1,4,itemp),                &  
+                e_piezo_tensor_t(1,6,itemp),                &  
+                e_piezo_tensor_t(2,5,itemp),                &  
+                e_piezo_tensor_t(3,4,itemp),                &  
+                e_piezo_tensor_t(3,6,itemp)  
+         ENDDO
+
+      CASE(3)
+!
+!   C_s
+!
+         IF (iwhat==1) THEN
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " e_11 ",             &
+                   &13x, " e_12 ", 13x, " e_13 ", 13x, " e_15",  &
+                   &13x, " e_24 ", 13x, " e_26 ", 13x, " e_31 ", &
+                   &13x, " e_32 ", 13x, " e_33 ", 13x, " e_35 ")') label
+         ELSE
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " d_11 ",             &
+                   &13x, " d_12 ", 13x, " d_13 ", 13x, " d_15",  &
+                   &13x, " d_24 ", 13x, " d_26 ", 13x, " d_31 ", &
+                   &13x, " d_32 ", 13x, " d_33 ", 13x, " d_35 ")') label
+         ENDIF
+
+         DO itemp=2,ntemp-1
+            WRITE(iu_piezo,'(e16.8,5e20.12)') temp(itemp),  &
+                e_piezo_tensor_t(1,1,itemp),                &  
+                e_piezo_tensor_t(1,2,itemp),                &  
+                e_piezo_tensor_t(1,3,itemp),                &  
+                e_piezo_tensor_t(1,5,itemp),                &  
+                e_piezo_tensor_t(2,4,itemp),                &  
+                e_piezo_tensor_t(2,6,itemp),                &  
+                e_piezo_tensor_t(3,1,itemp),                &  
+                e_piezo_tensor_t(3,2,itemp),                &
+                e_piezo_tensor_t(3,3,itemp),                &
+                e_piezo_tensor_t(3,5,itemp)  
+         ENDDO
+
+      CASE DEFAULT
+         IF (iwhat==1) THEN
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " e_11 ",             &
+                   &13x, " e_12 ", 13x, " e_13 ", 13x, " e_14",  &
+                   &13x, " e_15 ", 13x, " e_16 ", 13x, " e_21 ", &
+                   &13x, " e_22 ", 13x, " e_23 ", 13x, " e_24 ", &
+                   &13x, " e_25 ", 13x, " e_26 ", 13x, " e_31 ", &
+                   &13x, " e_32 ", 13x, " e_33 ", 13x, " e_34 ", &
+                   &13x, " e_35 ", 13x, " e_36 ")') label
+         ELSE
+            WRITE(iu_piezo,'("#",5x, a7, 13x, " d_11 ",             &
+                   &13x, " d_12 ", 13x, " d_13 ", 13x, " d_14",  &
+                   &13x, " d_15 ", 13x, " d_16 ", 13x, " d_21 ", &
+                   &13x, " d_22 ", 13x, " d_23 ", 13x, " d_24 ", &
+                   &13x, " d_25 ", 13x, " d_26 ", 13x, " d_31 ", &
+                   &13x, " d_32 ", 13x, " d_33 ", 13x, " d_34 ", &
+                   &13x, " d_35 ", 13x, " d_36 ")') label
+         ENDIF
+
+         DO itemp=2,ntemp-1
+            WRITE(iu_piezo,'(e16.8,21e20.12)') temp(itemp), &
+                  e_piezo_tensor_t(1,1,itemp), e_piezo_tensor_t(1,2,itemp), &
+                  e_piezo_tensor_t(1,3,itemp), e_piezo_tensor_t(1,4,itemp), &
+                  e_piezo_tensor_t(1,5,itemp), e_piezo_tensor_t(1,6,itemp), &
+                  e_piezo_tensor_t(2,1,itemp), e_piezo_tensor_t(2,2,itemp), &
+                  e_piezo_tensor_t(2,3,itemp), e_piezo_tensor_t(2,4,itemp), &
+                  e_piezo_tensor_t(2,5,itemp), e_piezo_tensor_t(2,6,itemp), &
+                  e_piezo_tensor_t(3,1,itemp), e_piezo_tensor_t(3,2,itemp), &
+                  e_piezo_tensor_t(3,3,itemp), e_piezo_tensor_t(3,4,itemp), &
+                  e_piezo_tensor_t(3,5,itemp), e_piezo_tensor_t(3,6,itemp)
+         ENDDO
+   END SELECT
+   CLOSE(iu_piezo)
+ENDIF
+
+RETURN
+END SUBROUTINE write_piezo_tensor_on_file
+
+!-----------------------------------------------------------------------
+FUNCTION get_pt_type(code_group)
+!-----------------------------------------------------------------------
+INTEGER :: get_pt_type
+INTEGER, INTENT(IN) :: code_group
+
+INTEGER :: itype, aux_type
+
+aux_type=0
+DO itype=1,pt_types
+   IF (pt_code_group(itype)==code_group) aux_type=itype
+ENDDO
+IF (aux_type==0) CALL errore('get_pt_type','code_group not available',1)
+
+get_pt_type=aux_type
+RETURN
+END FUNCTION get_pt_type
+
 
 END MODULE piezoelectric_tensor
