@@ -797,12 +797,15 @@ CALL check_el_cons_qha()
 !
 IF (.NOT.(el_cons_qha_available.OR.el_consf_qha_available)) &
                                                 CALL check_el_cons()
+CALL check_piezo_tensor()
 !
 !  If the elastic constants are on file and the user allows it, the code 
 !  computes the elastic constants as a function of temperature interpolating 
 !  at the crystal parameters found in the quadratic/quartic fit
 !
 CALL set_elastic_constants_t()
+
+CALL set_piezo_tensor_t()
 
 IF (ltherm_dos) THEN
 !
@@ -859,6 +862,10 @@ ENDIF
 !
 CALL manage_plot_elastic()
 !
+!  Plot piezoelectric tensor when what='mur_lc_t'
+!
+CALL manage_plot_piezo()
+!
 !    calculate and plot the Gruneisen parameters along the given path.
 !
 IF (ggrun_recipe>1.AND..NOT.linternal_thermo) THEN
@@ -901,6 +908,7 @@ SUBROUTINE manage_el_anhar()
 !-------------------------------------------------------------------
 !
 USE kinds,                 ONLY : DP
+USE thermo_mod,            ONLY : tot_ngeo, start_geometry, last_geometry
 USE temperature,           ONLY : ntemp
 USE data_files,            ONLY : flelanhar
 USE el_anharmonic,         ONLY : vmine_t, b0e_t, b01e_t, b02e_t, &
@@ -912,6 +920,8 @@ USE mp,                    ONLY : mp_sum
 IMPLICIT NONE
 
 INTEGER :: itemp
+
+IF (last_geometry-start_geometry+1 /= tot_ngeo) RETURN
 
 WRITE(stdout,'(/,2x,76("-"))')
 WRITE(stdout,'(5x,"Computing the crystal parameters adding ")')

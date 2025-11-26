@@ -34,7 +34,7 @@ SUBROUTINE thermo_summary()
                                    letter_path, label_list, point_label_type
   USE control_asy,          ONLY : flasy, lasymptote, asymptote_command
   USE control_elastic_constants, ONLY : frozen_ions, ngeo_strain, &
-                                   elastic_algorithm, elalgen
+                                   elastic_algorithm, elalgen, use_free_energy
   USE control_xrdp,         ONLY : lambda, flxrdp, lformf, &
                                    flformf, smin, smax, nspoint, lcm
   USE xrdp_module,          ONLY : write_form_factor, compute_xrdp
@@ -142,8 +142,12 @@ SUBROUTINE thermo_summary()
           IF (frozen_ions) WRITE(stdout,'(5x,"The ions are frozen" )')
           lelc = .TRUE.
      CASE ('elastic_constants_geo')
-          WRITE(stdout,'(5x,"Computing the temperature dependent elastic" )')
-          WRITE(stdout,'(5x,"constants within quasi-harmonic approximation" )')
+          WRITE(stdout,'(5x,"Computing the elastic constants" )')
+          IF (use_free_energy) THEN
+             WRITE(stdout,'(5x,"within quasi-harmonic approximation" )')
+          ELSE
+             WRITE(stdout,'(5x,"at zero temperature" )')
+          ENDIF
           WRITE(stdout,'(5x,"for several geometries" )')
           IF (frozen_ions) WRITE(stdout,'(5x,"The ions are frozen" )')
           lelc = .TRUE.
@@ -156,6 +160,11 @@ SUBROUTINE thermo_summary()
                                   &minimum volume")')
           IF (frozen_ions) WRITE(stdout,'(5x,"The ions are frozen" )')
           lpiezo=.TRUE.
+     CASE ('piezoelectric_tensor_geo')
+          WRITE(stdout,'(5x,"Computing the piezoelectric tensor" )')
+          WRITE(stdout,'(5x,"for several geometries" )')
+          IF (frozen_ions) WRITE(stdout,'(5x,"The ions are frozen" )')
+          lpiezo = .TRUE.
      CASE ('scf_polarization') 
           WRITE(stdout,'(5x,"Computing the spontaneous polarization")')
           lpolar=.TRUE.
@@ -163,6 +172,11 @@ SUBROUTINE thermo_summary()
           WRITE(stdout,'(5x,"Computing the spontaneous polarization at the &
                                   &minimum volume")')
           lpolar=.TRUE.
+     CASE ('polarization_geo')
+          WRITE(stdout,'(5x,"Computing the Berry phase polarization" )')
+          WRITE(stdout,'(5x,"for several geometries" )')
+          IF (frozen_ions) WRITE(stdout,'(5x,"The ions are frozen" )')
+          lpolar = .TRUE.
      CASE ('scf_nk')
           WRITE(stdout,'(5x,"Testing the total energy convergence with the k &
                          &points mesh")')

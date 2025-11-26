@@ -53,6 +53,7 @@ SUBROUTINE thermo_setup()
   USE control_xrdp,         ONLY : lambda, lambda_elem
   USE control_2d_bands,     ONLY : lprojpbs, nkz, sur_layers, identify_sur, &
                                    sp_min
+  USE polarization_vector,  ONLY : mod_tot
 !
 !  variables modified by this routine
 !
@@ -79,8 +80,9 @@ SUBROUTINE thermo_setup()
   USE cell_base,            ONLY : at, bg, ibrav, celldm, omega, &
                                    cell_base_init, alat
   USE ions_base,            ONLY : nat, tau, ntyp => nsp, ityp, amass, atm, &
-                                   if_pos
+                                   if_pos, zv
 
+  USE lsda_mod,             ONLY : nspin
   USE gvecw,                ONLY : ecutwfc
   USE gvect,                ONLY : ecutrho
   USE symm_base,            ONLY : nosym
@@ -96,7 +98,7 @@ SUBROUTINE thermo_setup()
   !
   IMPLICIT NONE
   !
-  INTEGER :: ia, ipol, jpol, igeo, nvar, ibrav_, code_group_ext
+  INTEGER :: na, ia, ipol, jpol, igeo, nvar, ibrav_, code_group_ext
   REAL(DP), PARAMETER :: eps1=1D-8
   REAL(DP) :: ur(3,3), global_s(3,3), rd_ht(3,3), celldm_(6), alat_save, zero
   REAL(DP), ALLOCATABLE :: tau_aux(:,:)
@@ -294,7 +296,8 @@ SUBROUTINE thermo_setup()
 !
   IF ( ngeo(1)==0 ) THEN
      IF (what(1:4) == 'scf_') ngeo=1
-     IF (what(1:6) == 'mur_lc'.OR.what=='elastic_constants_geo') THEN
+     IF (what(1:6) == 'mur_lc'.OR.what=='elastic_constants_geo'&
+         .OR.what=='polarization_geo'.OR.what=='piezoelectric_tensor_geo') THEN
         IF (lmurn) THEN
            ngeo(1)=9
            DO igeo=2,6
@@ -350,6 +353,14 @@ SUBROUTINE thermo_setup()
         sur_layers=MIN(2, nat/2)
      ENDIF
   ENDIF
+!
+!  Initialize the format of the berry phase produced by the routine do_berry
+!
+  mod_tot=2
+  IF (nspin>1) mod_tot=1
+  DO na=1,nat
+     IF (MOD(NINT(zv(ityp(na))),2)==1) mod_tot=1
+  ENDDO
 !
 !  Initialize here the internal names of the files for dealing with many
 !  geometries

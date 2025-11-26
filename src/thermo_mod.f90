@@ -557,6 +557,13 @@ MODULE anharmonic
                                        ! internal parameter with respect to 
                                        ! strain
 !
+!  The piezoelectric tensor and related quantities
+!
+  REAL(DP), ALLOCATABLE :: e_piezo_tensor_t(:,:,:) ! stress piezoelectric 
+                                         ! tensor as a function of temperature 
+  REAL(DP), ALLOCATABLE :: d_piezo_tensor_t(:,:,:) ! strain piezoelectric 
+                                         ! tensor as a function of temperature 
+!
 !  The parameters of the interpolation neglecting the electronic exitation
 !  contribution
 !
@@ -689,11 +696,19 @@ MODULE anharmonic_pt
   REAL(DP), ALLOCATABLE :: debye_macro_el_s_pt(:,:)  ! adiabatic debye temper.
   REAL(DP), ALLOCATABLE :: v_pt(:,:,:)           ! isothermal sound speed
   REAL(DP), ALLOCATABLE :: v_s_pt(:,:,:)         ! isoentropic sound speed
+!
+!  The piezoelectric tensor and related quantities
+!
+  REAL(DP), ALLOCATABLE :: e_piezo_tensor_pt(:,:,:,:) ! piezoelectric tensor as 
+                                         ! a function of temperature 
+  REAL(DP), ALLOCATABLE :: d_piezo_tensor_pt(:,:,:,:) ! piezoelectric tensor as 
+                                         ! a function of temperature 
 
   REAL(DP), ALLOCATABLE :: celldm_pt_p1(:,:,:)   ! crystal parameters at p+dp
   REAL(DP), ALLOCATABLE :: celldm_pt_m1(:,:,:)   ! crystal parameters at p-dp
 
 END MODULE anharmonic_pt
+!
 !----------------------------------------------------------------------------
 MODULE ph_freq_anharmonic_pt
 !----------------------------------------------------------------------------
@@ -772,6 +787,13 @@ MODULE ph_freq_anharmonic_pt
   REAL(DP), ALLOCATABLE :: vf_s_pt(:,:,:)         ! isoentropic sound speed
   REAL(DP), ALLOCATABLE :: debye_macro_elf_pt(:,:)  ! isothermal debye temper.
   REAL(DP), ALLOCATABLE :: debye_macro_elf_s_pt(:,:)  ! adiabatic debye temper.
+!
+!  The piezoelectric tensor and related quantities
+!
+  REAL(DP), ALLOCATABLE :: e_piezo_tensorf_pt(:,:,:,:) ! piezoelectric tensor as 
+                                                  ! a function of temperature 
+  REAL(DP), ALLOCATABLE :: d_piezo_tensorf_pt(:,:,:,:) ! piezoelectric tensor as 
+                                                  ! a function of temperature 
 
   REAL(DP), ALLOCATABLE :: celldmf_pt_p1(:,:,:)   ! crystal parameters at p+dp
   REAL(DP), ALLOCATABLE :: celldmf_pt_m1(:,:,:)   ! crystal parameters at p-dp
@@ -869,6 +891,13 @@ MODULE anharmonic_ptt
   REAL(DP), ALLOCATABLE :: debye_macro_el_s_ptt(:,:) ! isoentropic debye temp.
   REAL(DP), ALLOCATABLE :: v_ptt(:,:,:)            ! isothermal sound speed
   REAL(DP), ALLOCATABLE :: v_s_ptt(:,:,:)          ! isoentropic sound speed
+!
+!  The piezoelectric tensor and related quantities
+!
+  REAL(DP), ALLOCATABLE :: e_piezo_tensor_ptt(:,:,:,:) ! piezoelectric tensor as 
+                                                  ! a function of pressure
+  REAL(DP), ALLOCATABLE :: d_piezo_tensor_ptt(:,:,:,:) ! piezoelectric tensor as 
+                                                  ! a function of pressure
 
 END MODULE anharmonic_ptt
 !----------------------------------------------------------------------------
@@ -963,6 +992,13 @@ MODULE ph_freq_anharmonic_ptt
   REAL(DP), ALLOCATABLE :: vf_s_ptt(:,:,:)          ! isoentropic sound speed
   REAL(DP), ALLOCATABLE :: debye_macro_elf_ptt(:,:)  ! isothermal debye temper.
   REAL(DP), ALLOCATABLE :: debye_macro_elf_s_ptt(:,:)  ! adiabatic debye temper.
+!
+!  The piezoelectric tensor and related quantities
+!
+  REAL(DP), ALLOCATABLE :: e_piezo_tensorf_ptt(:,:,:,:) ! piezoelectric tensor as
+                                                  ! a function of pressure 
+  REAL(DP), ALLOCATABLE :: d_piezo_tensorf_ptt(:,:,:,:) ! piezoelectric tensor as
+                                                  ! a function of pressure 
 
 END MODULE ph_freq_anharmonic_ptt
 !
@@ -1144,6 +1180,14 @@ MODULE ph_freq_anharmonic
   REAL(DP), ALLOCATABLE :: el_conf_geo_t(:,:,:,:) ! the temperature dependent
                                             ! elastic constants at all 
                                             ! geometries
+!
+!  The piezoelectric tensor and related quantities
+!
+  REAL(DP), ALLOCATABLE :: e_piezo_tensorf_t(:,:,:) ! stress piezoelectric 
+                                         ! tensor as a function of temperature 
+  REAL(DP), ALLOCATABLE :: d_piezo_tensorf_t(:,:,:) ! strain piezoelectric 
+                                         ! tensor as a function of temperature 
+
   REAL(DP), ALLOCATABLE :: celldmf_t_p1(:,:)! the celldm at the pressure+dp
                                            ! as a function of T
   REAL(DP), ALLOCATABLE :: celldmf_t_m1(:,:)! the celldm at the pressure-dp
@@ -1700,6 +1744,56 @@ MODULE control_elastic_constants
   REAL(DP), ALLOCATABLE :: dyde(:,:,:,:) ! (nint_var_ec,21,ngeom,ntemp)
 
 END MODULE control_elastic_constants
+!
+!----------------------------------------------------------------------------
+MODULE control_piezoelectric_tensor
+!----------------------------------------------------------------------------
+!
+  USE kinds,  ONLY : DP
+
+  LOGICAL :: piezo_available=.FALSE.  ! when this flag becomes true it
+                                ! means that the piezoelectric tensor has been
+                                ! read from file and is available
+
+  LOGICAL :: piezo_geo_available=.FALSE.  ! when this flag becomes true it
+                                ! means that the piezoelectric tensor for each 
+                                ! geometry is available and can be 
+                                ! interpolated at each temperature
+  LOGICAL :: lpiezo=.FALSE.     ! piezoelectric tensor e written on file
+ 
+  LOGICAL :: lpiezof=.FALSE.    ! piezoelectric tensorf e written on file
+
+  LOGICAL :: lpiezo_d=.FALSE.     ! piezoelectric tensor d written on file
+ 
+  LOGICAL :: lpiezof_d=.FALSE.    ! piezoelectric tensorf d written on file
+
+  REAL(DP), ALLOCATABLE :: g_piezo_tensor_geo(:,:,:) ! the improper 
+                                ! piezoelectric tensor at each geometry
+  REAL(DP), ALLOCATABLE :: eg_piezo_tensor_geo(:,:,:) ! the proper 
+                                ! piezoelectric tensor at each geometry
+  REAL(DP), ALLOCATABLE :: e_piezo_tensor_geo(:,:,:) ! the proper piezoelectric
+                                ! tensor at each geometry
+  REAL(DP), ALLOCATABLE :: d_piezo_tensor_geo(:,:,:) ! the strain piezoelectric
+                                ! tensor at each geometry
+  REAL(DP), ALLOCATABLE :: polar0_geo(:,:) ! the polarization of each
+                                ! unperturbed geometry
+
+  LOGICAL :: lpiezo_pt=.FALSE.     ! piezoelectric tensor pt written on file
+ 
+  LOGICAL :: lpiezof_pt=.FALSE.    ! piezoelectric tensorf pt written on file
+
+  LOGICAL :: lpiezo_d_pt=.FALSE.   ! piezoelectric tensor d written on file
+ 
+  LOGICAL :: lpiezof_d_pt=.FALSE.  ! piezoelectric tensorf d written on file
+
+  LOGICAL :: lpiezo_ptt=.FALSE.     ! piezoelectric tensor ptt written on file
+ 
+  LOGICAL :: lpiezof_ptt=.FALSE.    ! piezoelectric tensorf ptt written on file
+
+  LOGICAL :: lpiezo_d_ptt=.FALSE.     ! piezoelectric tensor ptt written on file
+ 
+  LOGICAL :: lpiezof_d_ptt=.FALSE.    ! piezoelectric tensorf ptt written on file
+END MODULE
   !
 !----------------------------------------------------------------------------
 MODULE control_conv
@@ -2251,6 +2345,8 @@ MODULE data_files
                                    ! written
   CHARACTER(LEN=256) :: fl_piezo  ! the file where the piezoelectric tensor is 
                                    ! written
+  CHARACTER(LEN=256) :: fl_polar  ! the file where the polarization is 
+                                  ! written
   CHARACTER(LEN=256) :: flgeom   ! the file with the saved geometries 
 
 END MODULE data_files

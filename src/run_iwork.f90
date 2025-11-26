@@ -19,7 +19,7 @@ USE control_qe,           ONLY : use_ph_images
 USE control_phrun,        ONLY : auxdyn
 USE thermo_mod,           ONLY : energy_geo, ef_geo, iwho
 USE elastic_constants,    ONLY : sigma_geo
-USE piezoelectric_tensor, ONLY : polar_geo, tot_b_phase, nppl
+USE piezoelectric_tensor, ONLY : polar_strain, tot_b_phase, nppl
 USE ener,                 ONLY : etot, ef
 USE force_mod,            ONLY : sigma
 USE freq_ph,              ONLY : fpol
@@ -61,10 +61,12 @@ IF (lpwscf(iwork).OR.lpwband(iwork)) THEN
       IF (lpwscf(iwork)) energy_geo(iwork)=etot
       IF (lef(iwork)) ef_geo(iwork)=ef
       IF (lstress(iwork)) sigma_geo(:,:,iwork)=sigma(:,:)
-      IF (lberry(iwork)) CALL do_berry(exit_status, polar_geo(1,iwork), &
+      IF (lberry(iwork)) CALL do_berry(exit_status, polar_strain(1,iwork), &
                                  tot_b_phase(1,iwork), nppl)
-      IF (lpwscf(iwork)) CALL save_existence(iwork,part)
-      IF (lpwscf(iwork)) CALL save_geometry(iwork,part,iwho)
+      IF (lpwscf(iwork)) THEN
+         CALL save_existence(iwork,part)
+         CALL save_geometry(iwork,part,iwho)
+      ENDIF
    ENDIF
 ENDIF
 !

@@ -90,3 +90,24 @@ ENDIF
 
 RETURN
 END SUBROUTINE set_elastic_constants_t
+
+!----------------------------------------------------------------------
+SUBROUTINE set_piezo_tensor_t()
+!----------------------------------------------------------------------
+!
+!  This routine sets the temperature dependent piezoelectric tensor
+!  depending on what has been found in the files and the user requests.
+!  It will use the piezoelectric tensor at several geometries found in the 
+!  elastic_constants directory (quasi-static approximation). 
+!
+USE control_piezoelectric_tensor, ONLY : piezo_geo_available
+IMPLICIT NONE
+
+IF (piezo_geo_available) THEN
+   CALL write_piezo_t()
+   CALL write_piezo_pt()
+   CALL write_piezo_ptt()
+ENDIF
+
+RETURN
+END SUBROUTINE set_piezo_tensor_t

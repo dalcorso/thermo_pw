@@ -86,3 +86,21 @@ ENDIF
 
 RETURN
 END SUBROUTINE manage_plot_elastic
+!
+!---------------------------------------------------------------------------
+SUBROUTINE manage_plot_piezo()
+!---------------------------------------------------------------------------
+USE thermo_mod,   ONLY : what
+
+IMPLICIT NONE
+IF (what=='mur_lc_t') THEN
+   CALL plot_piezo_t(0)
+   CALL plot_piezo_d_t(0)
+   CALL plot_piezo_pt()
+   CALL plot_piezo_d_pt()
+   CALL plot_piezo_ptt()
+   CALL plot_piezo_d_ptt()
+ENDIF
+
+RETURN
+END SUBROUTINE manage_plot_piezo

@@ -45,6 +45,9 @@ SUBROUTINE initialize_thermo_work(nwork, part)
                                    all_geometry_done_geo, found_dos_ec,    &
                                    found_ph_ec, min_y_t, dyde, ngeo_strain, &
                                    stype, tau_save_ec
+  USE control_piezoelectric_tensor, ONLY : g_piezo_tensor_geo, &
+                                   eg_piezo_tensor_geo, e_piezo_tensor_geo, &
+                                   d_piezo_tensor_geo, polar0_geo                               
   USE temperature,   ONLY : ntemp
   USE control_eldos, ONLY : lel_free_energy
   USE gvecw,          ONLY : ecutwfc
@@ -448,7 +451,16 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               IF (meta_ionode) ios = f_mkdir_safe( 'phdisp_files' )
               IF (meta_ionode) ios = f_mkdir_safe( 'anhar_files' )
            ENDIF
-
+        CASE ('piezoelectric_tensor_geo')
+           lpart2_pw=.TRUE.
+           do_punch=.TRUE.
+           IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
+        CASE ('polarization_geo') 
+           lpart2_pw=.TRUE.
+           do_punch=.TRUE.
+           tot_ngeo=1
+           IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
         CASE DEFAULT
            CALL errore('initialize_thermo_work','what not recognized',1)
      END SELECT
@@ -510,11 +522,21 @@ SUBROUTINE initialize_thermo_work(nwork, part)
         CASE ('scf_piezoelectric_tensor', 'mur_lc_piezoelectric_tensor')
            IF (ALLOCATED(energy_geo)) DEALLOCATE(energy_geo)
            IF (ALLOCATED(omega_geo)) DEALLOCATE(omega_geo)
-           CALL set_piezo_tensor_work(nwork) 
+           CALL set_unperturbed_geometry(ngeom)
+           WRITE(6,*) 'set_unperturbed_geometry', ngeom
+           FLUSH(6)
+           start_geometry_qha=1
+           last_geometry_qha=1
+           CALL set_piezo_tensor_work(1,nwork) 
            start_geometry=MAX(1, start_geometry_save)
            last_geometry=MIN(nwork, last_geometry_save)
            ALLOCATE(energy_geo(nwork))
            ALLOCATE(omega_geo(nwork))
+           ALLOCATE(polar0_geo(3,ngeom))
+           ALLOCATE(g_piezo_tensor_geo(3,6,ngeom))
+           ALLOCATE(eg_piezo_tensor_geo(3,6,ngeom))
+           ALLOCATE(e_piezo_tensor_geo(3,6,ngeom))
+           ALLOCATE(d_piezo_tensor_geo(3,6,ngeom))
            energy_geo=0.0_DP
            lpiezoelectric_tensor=.TRUE.
            do_punch=.TRUE.
@@ -527,6 +549,44 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            ALLOCATE(energy_geo(nwork))
            ALLOCATE(omega_geo(nwork))
            do_punch=.TRUE.
+        CASE ('piezoelectric_tensor_geo')
+           lpiezoelectric_tensor=.TRUE.
+           CALL initialize_mur_qha(ngeom)
+           IF (start_geometry_qha<1) start_geometry_qha=1
+           IF (last_geometry_qha>ngeom) last_geometry_qha=ngeom
+           CALL set_piezo_tensor_work(ngeom, nwork)
+           !
+           !  Check that start_geometry and last geometry are within the
+           !  range of computed geometries otherwise disregard them
+           !
+           start_geometry=start_geometry_save
+           last_geometry=last_geometry_save
+           IF ((start_geometry < ((start_geometry_qha-1)*work_base+1)).OR. &
+               (start_geometry > last_geometry_qha*work_base))             &
+               start_geometry = (start_geometry_qha-1)*work_base+1
+           IF ((last_geometry < start_geometry) .OR.                       &
+               (last_geometry > last_geometry_qha*work_base))              &
+               last_geometry = last_geometry_qha*work_base
+           start_geometry=MAX((start_geometry_qha-1)*work_base+1, &
+                                                       start_geometry)
+           last_geometry=MIN(last_geometry_qha*work_base, last_geometry)
+           ALLOCATE(polar0_geo(3,ngeom))
+           ALLOCATE(g_piezo_tensor_geo(3,6,ngeom))
+           ALLOCATE(eg_piezo_tensor_geo(3,6,ngeom))
+           ALLOCATE(e_piezo_tensor_geo(3,6,ngeom))
+           ALLOCATE(d_piezo_tensor_geo(3,6,ngeom))
+           ALLOCATE(energy_geo(nwork))
+        CASE ('polarization_geo')
+           CALL initialize_mur(nwork)
+           ALLOCATE(no_ph(nwork))
+           ALLOCATE(no_ph_eos(nwork))
+           no_ph=.TRUE.
+           no_ph_eos=.TRUE.
+           CALL summarize_geometries(nwork)
+           start_geometry=MAX(1, start_geometry_save)
+           last_geometry=MIN(nwork, last_geometry_save)
+           CALL allocate_piezo(nwork)
+           lpolarization=.TRUE.
      END SELECT
   ELSE
      CALL errore('initialize_thermo_work','unknown part',1)
@@ -577,6 +637,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            ENDDO
            lstress(1:nwork)=.NOT.elalgen
            IF (lel_free_energy) lef(1:nwork)=(lgauss.OR.ltetra)
+        CASE ('polarization_geo')
         CASE DEFAULT
           CALL errore('initialize_thermo_work','unknown what',1)
      END SELECT
@@ -634,7 +695,8 @@ SUBROUTINE initialize_thermo_work(nwork, part)
 !  in the second part
 !
         CASE ('scf_piezoelectric_tensor', 'mur_lc_piezoelectric_tensor', &
-              'scf_polarization', 'mur_lc_polarization')
+              'scf_polarization', 'mur_lc_polarization','polarization_geo',&
+              'piezoelectric_tensor_geo')
            DO iwork=start_geometry,last_geometry
               lpwscf(iwork)=.TRUE.
               lberry(iwork)=.TRUE.
@@ -1310,8 +1372,13 @@ ELSE
    el_con_ibrav_geo(:)=ibrav_save
    DO iwork=1,nwork
       el_con_tau_crys_geo(:,:,iwork)=tau_save_crys(:,:)
-      el_con_omega_geo(iwork)=compute_omega_geo(ibrav_save, &
-                                    el_con_celldm_geo(:,iwork))
+!      el_con_omega_geo(iwork)=compute_omega_geo(ibrav_save, &
+!                                    el_con_celldm_geo(:,iwork))
+      CALL latgen(ibrav_save, el_con_celldm_geo(1,iwork), &
+              el_con_at_geo(1,1,iwork), el_con_at_geo(1,2,iwork), &
+              el_con_at_geo(1,3,iwork), el_con_omega_geo(iwork)) 
+      el_con_at_geo(:,:,iwork)=el_con_at_geo(:,:,iwork)/   &
+                                          el_con_celldm_geo(1,iwork)
    ENDDO
 ENDIF
 
@@ -1827,8 +1894,8 @@ SUBROUTINE set_unperturbed_geometry(ngeom)
 !
 USE kinds, ONLY : DP
 USE control_elastic_constants, ONLY : el_con_ibrav_geo, el_con_celldm_geo, &
-                                      el_con_omega_geo
-USE equilibrium_conf, ONLY : celldm0, omega0
+                                      el_con_omega_geo, el_con_at_geo
+USE equilibrium_conf, ONLY : celldm0, omega0, at0
 USE initial_conf, ONLY : ibrav_save, at_save
 IMPLICIT NONE
 INTEGER, INTENT(OUT) :: ngeom
@@ -1838,13 +1905,15 @@ ngeom=1
 
 ALLOCATE(el_con_ibrav_geo(1))
 ALLOCATE(el_con_celldm_geo(6,1))
+ALLOCATE(el_con_at_geo(3,3,1))
 ALLOCATE(el_con_omega_geo(1))
 el_con_ibrav_geo(1)=ibrav_save
 el_con_celldm_geo(:,1)=celldm0(:)
+el_con_at_geo(:,:,1)=at0(:,:)
 IF (ibrav_save/=0) THEN
    omega0= compute_omega_geo(ibrav_save, celldm0)
 ELSE
-   CALL volume (1.0_dp, at_save(1,1), at_save(1,2), at_save(1,3), omega0)
+   CALL volume (1.0_dp, at0(1,1), at0(1,2), at0(1,3), omega0)
 ENDIF
 el_con_omega_geo(1)=omega0
 

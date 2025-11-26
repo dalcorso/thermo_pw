@@ -180,6 +180,7 @@ SUBROUTINE allocate_anharmonic()
                                   cv_t, cp_t, b0_s, alpha_t, beta_t, gamma_t,&
                                   celldm_t, alpha_anis_t, cpmce_anis,        &
                                   bfact_t, bths_t, ggamma_t, el_cons_t,      &
+                                  e_piezo_tensor_t, d_piezo_tensor_t,        &
                                   el_comp_t, el_cons_s, el_comp_s,           &
                                   macro_el_t, macro_el_s, v_s, v_t,          &
                                   el_con_geo_t, vmin_noe_t, b0_noe_t,        &
@@ -203,6 +204,7 @@ SUBROUTINE allocate_anharmonic()
                                   csmct_pt, el_cons_pt, el_cons_s_pt,        &
                                   el_comp_pt, el_comp_s_pt,                  &
                                   macro_el_pt, macro_el_s_pt, v_pt,          &
+                                  e_piezo_tensor_pt, d_piezo_tensor_pt,      &
                                   v_s_pt, celldm_pt_p1, celldm_pt_m1,        &
                                   b0_ec_pt, debye_macro_el_pt,               &
                                   debye_macro_el_s_pt, uint_pt, tau_pt,      &
@@ -214,7 +216,9 @@ SUBROUTINE allocate_anharmonic()
                                   el_cons_ptt, el_cons_s_ptt,                &
                                   el_comp_ptt, el_comp_s_ptt,                &
                                   macro_el_ptt, macro_el_s_ptt, v_ptt,       &
-                                  v_s_ptt, celldm_ptt_p1, celldm_ptt_m1,     &
+                                  v_s_ptt, e_piezo_tensor_ptt,               &
+                                  d_piezo_tensor_ptt,                        &
+                                  celldm_ptt_p1, celldm_ptt_m1,              &
                                   emin_ptt_p1, emin_ptt_m1, vmin_ptt_p1,     &
                                   vmin_ptt_m1, alpha_anis_ptt, density_ptt,  &
                                   cpmce_anis_ptt, bths_ptt, ggamma_ptt,      &
@@ -233,6 +237,7 @@ SUBROUTINE allocate_anharmonic()
                                   bfactf_t, bthsf_t, ggammaf_t,              &
                                   el_consf_t, el_compf_t, el_consf_s,        &
                                   el_compf_s, macro_elf_t, macro_elf_s,      &
+                                  e_piezo_tensorf_t, d_piezo_tensorf_t,      &
                                   vf_t, vf_s, el_conf_geo_t, densityf_t,     &
                                   csmctf_t, p1tf_t, p2tf_t, p3tf_t, p4tf_t,  &
                                   p1tf_noe_t, p2tf_noe_t, p3tf_noe_t,        &
@@ -257,6 +262,7 @@ SUBROUTINE allocate_anharmonic()
                                   celldmf_pt_m1, alphaf_anis_pt,             &
                                   el_consf_pt, el_compf_pt, cpmcef_anis_pt,  &
                                   el_consf_s_pt, el_compf_s_pt,              &
+                                  e_piezo_tensorf_pt, d_piezo_tensorf_pt,    &
                                   bthsf_pt, ggammaf_pt, csmctf_pt,           &
                                   macro_elf_pt, macro_elf_s_pt, vf_pt,       &
                                   vf_s_pt, b0f_ec_pt,                        &
@@ -277,6 +283,7 @@ SUBROUTINE allocate_anharmonic()
                                   bthsf_ptt, ggammaf_ptt, csmctf_ptt,        &
                                   macro_elf_ptt, macro_elf_s_ptt, vf_ptt,    &
                                   vf_s_ptt, b0f_ec_ptt,                      &
+                                  e_piezo_tensorf_ptt, d_piezo_tensorf_ptt,  &
                                   debye_macro_elf_ptt, debye_macro_elf_s_ptt,&
                                   uintf_ptt, tauf_ptt, uintf_zsisa_ptt,      &
                                   tauf_zsisa_ptt, alphaf_int_ptt,            &
@@ -366,6 +373,9 @@ SUBROUTINE allocate_anharmonic()
   IF (.NOT. ALLOCATED (v_t) )           ALLOCATE(v_t(3,ntemp))
   IF (.NOT. ALLOCATED (el_con_geo_t) )  ALLOCATE(el_con_geo_t(6,6,ntemp,&
                                                                    tot_ngeo)) 
+  IF (.NOT. ALLOCATED (e_piezo_tensor_t) ) ALLOCATE(e_piezo_tensor_t(3,6,ntemp)) 
+  IF (.NOT. ALLOCATED (d_piezo_tensor_t) ) ALLOCATE(d_piezo_tensor_t(3,6,ntemp)) 
+
   IF (.NOT. ALLOCATED (dyde_t) )        ALLOCATE(dyde_t(21,ntemp)) 
   IF (.NOT. ALLOCATED (celldm_t_p1) )   ALLOCATE(celldm_t_p1(6,ntemp)) 
   IF (.NOT. ALLOCATED (celldm_t_m1) )   ALLOCATE(celldm_t_m1(6,ntemp)) 
@@ -602,6 +612,9 @@ SUBROUTINE allocate_anharmonic()
                                                            ntemp,tot_ngeo)) 
   IF (.NOT. ALLOCATED (dydef_t) )        ALLOCATE(dydef_t(21,ntemp)) 
 
+  IF (.NOT. ALLOCATED (e_piezo_tensorf_t) ) ALLOCATE(e_piezo_tensorf_t(3,6,ntemp)) 
+  IF (.NOT. ALLOCATED (d_piezo_tensorf_t) ) ALLOCATE(d_piezo_tensorf_t(3,6,ntemp)) 
+
   IF (.NOT. ALLOCATED (vminf_noe_t) )       ALLOCATE(vminf_noe_t(ntemp)) 
   IF (.NOT. ALLOCATED (densityf_noe_t) )    ALLOCATE(densityf_noe_t(ntemp)) 
   IF (.NOT. ALLOCATED (celldmf_noe_t) )     ALLOCATE(celldmf_noe_t(6,ntemp)) 
@@ -707,6 +720,10 @@ SUBROUTINE allocate_anharmonic()
                           ALLOCATE(debye_macro_el_pt(ntemp,npress_plot))
      IF (.NOT. ALLOCATED (debye_macro_el_s_pt) ) &
                           ALLOCATE(debye_macro_el_s_pt(ntemp,npress_plot))
+     IF (.NOT. ALLOCATED (e_piezo_tensor_pt) ) &
+                          ALLOCATE(e_piezo_tensor_pt(3,6,ntemp,npress_plot))
+     IF (.NOT. ALLOCATED (d_piezo_tensor_pt) ) &
+                          ALLOCATE(d_piezo_tensor_pt(3,6,ntemp,npress_plot))
 
      IF (.NOT. ALLOCATED (el_free_enerf_pt) ) ALLOCATE(el_free_enerf_pt(ntemp,&
                                                                  npress_plot))
@@ -748,6 +765,10 @@ SUBROUTINE allocate_anharmonic()
                           ALLOCATE(debye_macro_elf_pt(ntemp,npress_plot))
      IF (.NOT. ALLOCATED (debye_macro_elf_s_pt) ) &
                           ALLOCATE(debye_macro_elf_s_pt(ntemp,npress_plot))
+     IF (.NOT. ALLOCATED (e_piezo_tensorf_pt) ) &
+                          ALLOCATE(e_piezo_tensorf_pt(3,6,ntemp,npress_plot))
+     IF (.NOT. ALLOCATED (d_piezo_tensorf_pt) ) &
+                          ALLOCATE(d_piezo_tensorf_pt(3,6,ntemp,npress_plot))
   ENDIF
   IF (ntemp_plot>0) THEN
      IF (.NOT. ALLOCATED (alpha_anis_ptt) ) ALLOCATE(alpha_anis_ptt&
@@ -807,6 +828,10 @@ SUBROUTINE allocate_anharmonic()
                           ALLOCATE(debye_macro_el_ptt(npress,ntemp_plot))
      IF (.NOT. ALLOCATED (debye_macro_el_s_ptt) ) &
                           ALLOCATE(debye_macro_el_s_ptt(npress,ntemp_plot))
+     IF (.NOT. ALLOCATED (e_piezo_tensor_ptt) ) &
+                          ALLOCATE(e_piezo_tensor_ptt(3,6,npress,ntemp_plot))
+     IF (.NOT. ALLOCATED (d_piezo_tensor_ptt) ) &
+                          ALLOCATE(d_piezo_tensor_ptt(3,6,npress,ntemp_plot))
      IF (.NOT. ALLOCATED (alphaf_anis_ptt) ) ALLOCATE(alphaf_anis_ptt&
                                                     (6,npress,ntemp_plot)) 
      IF (.NOT. ALLOCATED (densityf_ptt) )  ALLOCATE(densityf_ptt&
@@ -839,6 +864,10 @@ SUBROUTINE allocate_anharmonic()
                           ALLOCATE(debye_macro_elf_ptt(npress,ntemp_plot))
      IF (.NOT. ALLOCATED (debye_macro_elf_s_ptt) ) &
                           ALLOCATE(debye_macro_elf_s_ptt(npress,ntemp_plot))
+     IF (.NOT. ALLOCATED (e_piezo_tensorf_ptt) ) &
+                          ALLOCATE(e_piezo_tensorf_ptt(3,6,npress,ntemp_plot))
+     IF (.NOT. ALLOCATED (d_piezo_tensorf_ptt) ) &
+                          ALLOCATE(d_piezo_tensorf_ptt(3,6,npress,ntemp_plot))
   ENDIF
 
   IF (.NOT. ALLOCATED (el_energyf_t) )  ALLOCATE(el_energyf_t(ntemp))

@@ -12,7 +12,7 @@ USE kinds,     ONLY : DP
 USE constants, ONLY : electron_si, bohr_radius_si
 USE cell_base, ONLY : alat, omega
 USE io_global, ONLY : stdout
-USE piezoelectric_tensor,  ONLY : polar_geo
+USE piezoelectric_tensor,  ONLY : polar_strain
 
 USE mp,        ONLY : mp_sum
 USE mp_world,  ONLY : world_comm
@@ -24,9 +24,9 @@ LOGICAL, INTENT(IN) :: flag
 REAL(DP) :: fact, polar(3)
 
 IF (flag) THEN
-   CALL mp_sum(polar_geo, world_comm)
-   polar_geo=polar_geo / nproc_image
-   polar=polar_geo(:,1)
+   CALL mp_sum(polar_strain, world_comm)
+   polar_strain=polar_strain / nproc_image
+   polar=polar_strain(:,1)
 ELSE
    polar=polar_
 ENDIF

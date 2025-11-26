@@ -84,3 +84,90 @@ SUBROUTINE check_el_cons()
 
   RETURN
 END SUBROUTINE check_el_cons
+
+!---------------------------------------------------------------------
+SUBROUTINE check_piezo_tensor()
+  !-----------------------------------------------------------------------
+  !
+  !  This routine tries to read the piezoelectric tensor from file for all
+  !  the geometries considered in the calculation.
+  !  If it finds one geometry it sets piezo_available to true.
+  !  If it finds all geometries it sets also piezo_geo_available to true.
+  !  It fills the variables g_piezo_tensor_geo, eg_piezo_tensor_geo, 
+  !  e_piezo_tensor_geo, d_piezo_tensor_geo
+  !
+  USE kinds,             ONLY : DP
+  USE io_global,         ONLY : stdout
+  USE cell_base,         ONLY : ibrav
+  USE piezoelectric_tensor, ONLY : read_piezo_tensor, &
+                                   g_piezo_tensor,    &
+                                   eg_piezo_tensor,   &
+                                   e_piezo_tensor,    &
+                                   d_piezo_tensor
+
+  USE control_piezoelectric_tensor, ONLY : piezo_available,  &
+                                        piezo_geo_available, &
+                                        g_piezo_tensor_geo,  &
+                                        eg_piezo_tensor_geo, &
+                                        e_piezo_tensor_geo,  &
+                                        d_piezo_tensor_geo,  &
+                                        polar0_geo
+
+  USE thermo_mod,        ONLY : tot_ngeo
+  USE data_files,        ONLY : fl_piezo
+  !
+  IMPLICIT NONE
+  CHARACTER(LEN=256) :: filepiezo
+  INTEGER            :: igeo
+  LOGICAL            :: exst, found(tot_ngeo)
+  !
+  !   If the piezoelectric tensor is already allocated we do not reread them
+  !
+  IF (ALLOCATED(g_piezo_tensor_geo)) RETURN
+
+  ALLOCATE( g_piezo_tensor_geo(3,6,tot_ngeo) )
+  ALLOCATE( eg_piezo_tensor_geo(3,6,tot_ngeo) )
+  ALLOCATE( e_piezo_tensor_geo(3,6,tot_ngeo) )
+  ALLOCATE( d_piezo_tensor_geo(3,6,tot_ngeo) )
+  ALLOCATE( polar0_geo(3,tot_ngeo) )
+  g_piezo_tensor_geo=0.0_DP
+  eg_piezo_tensor_geo=0.0_DP
+  e_piezo_tensor_geo=0.0_DP
+  d_piezo_tensor_geo=0.0_DP
+  polar0_geo=0.0_DP
+  found=.FALSE.
+  piezo_available=.FALSE.
+  piezo_geo_available=.FALSE.
+  DO igeo = 1, tot_ngeo
+     CALL add_geometry_number('elastic_constants/', fl_piezo, &
+                                filepiezo, igeo)
+     CALL read_piezo_tensor(filepiezo, polar0_geo(1,igeo), exst)
+     IF (.NOT.exst) CYCLE
+     found(igeo)=.TRUE.
+     g_piezo_tensor_geo(:,:,igeo)=g_piezo_tensor(:,:)
+     eg_piezo_tensor_geo(:,:,igeo)=eg_piezo_tensor(:,:)
+     e_piezo_tensor_geo(:,:,igeo)=e_piezo_tensor(:,:)
+     d_piezo_tensor_geo(:,:,igeo)=d_piezo_tensor(:,:)
+     WRITE(stdout,'(5x,"Geometry number",i5," piezoelectric tensor found")') &
+                                                                          igeo
+     piezo_available=.TRUE.
+  ENDDO
+  IF (.NOT.piezo_available) THEN
+     DEALLOCATE(g_piezo_tensor_geo)
+     DEALLOCATE(eg_piezo_tensor_geo)
+     DEALLOCATE(e_piezo_tensor_geo)
+     DEALLOCATE(d_piezo_tensor_geo)
+     DEALLOCATE(polar0_geo)
+     RETURN
+  ENDIF
+!
+!  If the code arrives here we check if the piezoelectric tensors have been
+!  found for all geometries and in that case set the appropriate flag.
+! 
+  piezo_geo_available=.TRUE.
+  DO igeo=1,tot_ngeo
+     piezo_geo_available=piezo_geo_available.AND.found(igeo)
+  ENDDO     
+
+  RETURN
+END SUBROUTINE check_piezo_tensor

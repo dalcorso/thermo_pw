@@ -1,24 +1,26 @@
 !
-! Copyright (C) 2014 Andrea Dal Corso
+! Copyright (C) 2014-2025 Andrea Dal Corso
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !------------------------------------------------------------------------
-SUBROUTINE set_piezo_tensor_work( nwork )
+SUBROUTINE set_piezo_tensor_work( ngeom, nwork )
 !------------------------------------------------------------------------
 USE kinds,               ONLY : DP
 USE cell_base,           ONLY : ibrav
-USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, epsil_geo
+USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, epsil_geo,&
+                                      work_base
 USE elastic_constants,   ONLY : epsilon_voigt, epsilon_geo
 USE strain_mod,          ONLY : trans_epsilon
 USE piezoelectric_tensor, ONLY : allocate_piezo
 USE rap_point_group,     ONLY : code_group
 IMPLICIT NONE
+INTEGER, INTENT(IN)  :: ngeom
 INTEGER, INTENT(OUT) :: nwork
 REAL(DP) :: epsilon_min, epsilon_min_off, epsil
-INTEGER :: igeo, iwork, istep, nstep
+INTEGER :: igeo, iwork, istep, nstep, igeom, istart
 LOGICAL :: check_group_ibrav
 
 epsilon_min= - delta_epsilon * (ngeo_strain - 1) / 2.0_DP
@@ -34,164 +36,228 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
 !
 !   C_4, C_6
 !
-        nwork = 4 * ngeo_strain
+        nstep = 4
+        nwork = nstep * ngeo_strain * ngeom
         ALLOCATE( epsilon_voigt(6, nwork) )
         epsilon_voigt=0.0_DP
-        DO igeo=1,ngeo_strain
-           epsilon_voigt(1, igeo) = epsilon_min + delta_epsilon * ( igeo - 1 )
-           epsilon_voigt(3, ngeo_strain+igeo) = epsilon_min + &
+        istart=0
+        DO igeom=1, ngeom
+           DO igeo=1,ngeo_strain
+              epsilon_voigt(1, istart+igeo) = epsilon_min + delta_epsilon &
+                                                             * ( igeo - 1 )
+              epsilon_voigt(3, ngeo_strain+istart+igeo) = epsilon_min + &
                                                  delta_epsilon * ( igeo - 1 )
-           epsilon_voigt(4, 2*ngeo_strain + igeo) = epsilon_min_off + &
-                                        2.0_DP * delta_epsilon * ( igeo - 1 )
-           epsilon_voigt(5, 3*ngeo_strain + igeo) = epsilon_min_off + &
-                                        2.0_DP * delta_epsilon * ( igeo - 1 )
+              epsilon_voigt(4, 2*ngeo_strain+istart+igeo) = epsilon_min_off &
+                                  + 2.0_DP * delta_epsilon * ( igeo - 1 )
+              epsilon_voigt(5, 3*ngeo_strain+istart+igeo) = epsilon_min_off& 
+                             + 2.0_DP * delta_epsilon * ( igeo - 1 )
+           ENDDO
+           istart=istart + nstep * ngeo_strain
         ENDDO
      CASE(8)
 !
 !   D_2
 !
-        nwork = 3 * ngeo_strain
+        nstep = 3
+        nwork = nstep * ngeo_strain * ngeom
         ALLOCATE( epsilon_voigt(6, nwork) )
         epsilon_voigt=0.0_DP
-        DO igeo=1,ngeo_strain
-           epsilon_voigt(4, igeo) = epsilon_min_off + &
+        istart=0
+        DO igeom=1, ngeom
+           DO igeo=1,ngeo_strain
+              epsilon_voigt(4, istart+igeo) = epsilon_min_off + &
                                         2.0_DP * delta_epsilon * ( igeo - 1 )
-           epsilon_voigt(5, ngeo_strain + igeo) = epsilon_min_off + &
+              epsilon_voigt(5, ngeo_strain+istart+igeo) = epsilon_min_off + &
                                         2.0_DP * delta_epsilon * ( igeo - 1 )
-           epsilon_voigt(6, 2*ngeo_strain + igeo) = epsilon_min_off + &
-                                        2.0_DP * delta_epsilon * ( igeo - 1 )
+              epsilon_voigt(6, 2*ngeo_strain+istart+igeo) = epsilon_min_off &
+                                      + 2.0_DP * delta_epsilon * ( igeo - 1 )
+           ENDDO
+           istart=istart + nstep * ngeo_strain
         ENDDO
      CASE(9)
 !
 !   D_3
 !
-        nwork = 2 * ngeo_strain
+        nstep = 2
+        nwork = nstep * ngeo_strain * ngeom
         ALLOCATE( epsilon_voigt(6, nwork) )
         epsilon_voigt=0.0_DP
-        DO igeo=1,ngeo_strain
-           epsilon_voigt(1, igeo) = epsilon_min +  delta_epsilon * ( igeo - 1 )
-           epsilon_voigt(4, ngeo_strain + igeo) = epsilon_min_off + &
+        istart=0
+        DO igeom=1, ngeom
+           DO igeo=1,ngeo_strain
+              epsilon_voigt(1, istart+igeo) = epsilon_min + delta_epsilon*&
+                                                               ( igeo - 1 )
+              epsilon_voigt(4, ngeo_strain+istart+igeo) = epsilon_min_off + &
                                           2.0_DP * delta_epsilon * ( igeo - 1 )
+           ENDDO
+           istart=istart + nstep * ngeo_strain
         ENDDO
      CASE(10,11,28,30)
 !
 !  D_4, D_6, T, T_d
 !
-        nwork = ngeo_strain
+        nstep = 1
+        nwork = nstep * ngeo_strain * ngeom
         ALLOCATE( epsilon_voigt(6, nwork) )
         epsilon_voigt=0.0_DP
-        DO igeo=1,ngeo_strain
-           epsilon_voigt(4, igeo) = epsilon_min_off + &
+        istart=0
+        DO igeom=1,ngeom
+           DO igeo=1,ngeo_strain
+              epsilon_voigt(4, istart+igeo) = epsilon_min_off + &
                                           2.0_DP * delta_epsilon * ( igeo - 1 )
+           ENDDO
+           istart=istart + nstep * ngeo_strain
         ENDDO
      CASE(12)
 !
 !   C_2v
 !
-        nwork = 5 * ngeo_strain
+        nstep = 5
+        nwork = nstep * ngeo_strain * ngeom
         ALLOCATE( epsilon_voigt(6, nwork) )
         epsilon_voigt=0.0_DP
-        DO igeo=1,ngeo_strain
-           epsilon_voigt(1, igeo) = epsilon_min + delta_epsilon * ( igeo - 1 )
-           epsilon_voigt(2, ngeo_strain + igeo) = epsilon_min + &
-                                                  delta_epsilon * ( igeo - 1 )
-           epsilon_voigt(3, 2*ngeo_strain + igeo) = epsilon_min + &
-                                                  delta_epsilon * ( igeo - 1 )
-           epsilon_voigt(4, 3*ngeo_strain + igeo) = epsilon_min_off + &
-                                         2.0_DP * delta_epsilon * ( igeo - 1 )
-           epsilon_voigt(5, 4*ngeo_strain + igeo) = epsilon_min_off + &
-                                         2.0_DP * delta_epsilon * ( igeo - 1 )
+        istart=0
+        DO igeom=1,ngeom
+           DO igeo=1,ngeo_strain
+              epsilon_voigt(1, istart+igeo) = epsilon_min + delta_epsilon * &
+                                                               ( igeo - 1 )
+              epsilon_voigt(2, ngeo_strain+istart+igeo) = epsilon_min + &
+                                              delta_epsilon * ( igeo - 1 )
+              epsilon_voigt(3, 2*ngeo_strain+istart+igeo) = epsilon_min + &
+                                              delta_epsilon * ( igeo - 1 )
+              epsilon_voigt(4, 3*ngeo_strain+istart+igeo) = epsilon_min_off + &
+                                     2.0_DP * delta_epsilon * ( igeo - 1 )
+              epsilon_voigt(5, 4*ngeo_strain+istart+igeo) = epsilon_min_off + &
+                                     2.0_DP * delta_epsilon * ( igeo - 1 )
+           ENDDO
+           istart=istart + nstep * ngeo_strain
         ENDDO
      CASE(13,14,15)
 !
 !   C_3v, C_4v, C_6v
 !
-        nwork = 3 * ngeo_strain
+        nstep = 3
+        nwork = nstep * ngeo_strain * ngeom
         ALLOCATE( epsilon_voigt(6, nwork) )
         epsilon_voigt=0.0_DP
-        DO igeo=1,ngeo_strain
-           epsilon_voigt(1, igeo) = epsilon_min + delta_epsilon * ( igeo - 1 )
-           epsilon_voigt(2, igeo) = epsilon_voigt(1, igeo)
-           epsilon_voigt(3, ngeo_strain + igeo) = epsilon_min + &
+        istart=0
+        DO igeom=1,ngeom
+           DO igeo=1,ngeo_strain
+              epsilon_voigt(1, istart+igeo) = epsilon_min + delta_epsilon * &
+                                                            ( igeo - 1 )
+              epsilon_voigt(2, istart+igeo) = epsilon_voigt(1, igeo)
+              epsilon_voigt(3, ngeo_strain+istart+igeo) = epsilon_min + &
                                                   delta_epsilon * ( igeo - 1 )
-           epsilon_voigt(5, 2*ngeo_strain + igeo) = epsilon_min_off + &
+              epsilon_voigt(5, 2*ngeo_strain+istart+igeo) = epsilon_min_off + &
                                          2.0_DP * delta_epsilon * ( igeo - 1 )
+           ENDDO
+           istart=istart + nstep * ngeo_strain
         ENDDO
      CASE(17,21)
 !
 !  C_3h, D_3h
 !
-        nwork = ngeo_strain
+        nstep=1
+        nwork = nstep * ngeo_strain * ngeom
         ALLOCATE( epsilon_voigt(6, nwork) )
         epsilon_voigt=0.0_DP
-        DO igeo=1,ngeo_strain
-           epsilon_voigt(1, igeo) = epsilon_min + delta_epsilon * ( igeo - 1 )
+        istart=0
+        DO igeom=1,ngeom
+           DO igeo=1,ngeo_strain
+              epsilon_voigt(1, istart+igeo) = epsilon_min + delta_epsilon*&
+                                                                   (igeo-1)
+           ENDDO
+           istart=istart + nstep * ngeo_strain
         ENDDO
      CASE(24)
 !
 !  D_2d
 !
-        nwork = 2 * ngeo_strain
+        nstep = 2
+        nwork = nstep * ngeo_strain * ngeom
         ALLOCATE( epsilon_voigt(6, nwork) )
         epsilon_voigt=0.0_DP
-        DO igeo=1,ngeo_strain
-           epsilon_voigt(4, igeo) = epsilon_min_off + &
+        istart=0
+        DO igeom=1,ngeom
+           DO igeo=1,ngeo_strain
+              epsilon_voigt(4, istart+igeo) = epsilon_min_off + &
                                         2.0_DP * delta_epsilon * ( igeo - 1 )
-           epsilon_voigt(6, ngeo_strain + igeo) = epsilon_min_off + &
+              epsilon_voigt(6, ngeo_strain+istart+igeo) = epsilon_min_off + &
                                         2.0_DP * delta_epsilon * ( igeo - 1 )
+           ENDDO
+           istart=istart + nstep * ngeo_strain
         ENDDO
      CASE(26)
 !
 !  S_4
 !
-        nwork = 4 * ngeo_strain
+        nstep = 4 
+        nwork = nstep * ngeo_strain * ngeom
         ALLOCATE( epsilon_voigt(6, nwork) )
         epsilon_voigt=0.0_DP
-        DO igeo=1,ngeo_strain
-           epsilon_voigt(1, igeo) = epsilon_min + delta_epsilon * ( igeo - 1 )
-           epsilon_voigt(4, ngeo_strain + igeo) = epsilon_min_off + &
+        istart=0
+        DO igeom=1,ngeom
+           DO igeo=1,ngeo_strain
+              epsilon_voigt(1, istart+igeo) = epsilon_min + delta_epsilon * &
+                                                                ( igeo - 1 )
+              epsilon_voigt(4, ngeo_strain+istart+igeo) = epsilon_min_off + &
                                        2.0_DP * delta_epsilon * ( igeo - 1 )
-           epsilon_voigt(5, 2 * ngeo_strain + igeo) = epsilon_min_off + &
+              epsilon_voigt(5, 2*ngeo_strain+istart+igeo) = epsilon_min_off + &
                                        2.0_DP * delta_epsilon * ( igeo - 1 )
-           epsilon_voigt(6, 3 * ngeo_strain + igeo) = epsilon_min_off + &
+              epsilon_voigt(6, 3*ngeo_strain+istart+igeo) = epsilon_min_off + &
                                        2.0_DP * delta_epsilon * ( igeo - 1 )
+           ENDDO
+           istart=istart + nstep * ngeo_strain
         ENDDO
      CASE DEFAULT
-        nwork = 6 * ngeo_strain
+        nstep = 6 
+        nwork = nstep * ngeo_strain * ngeom
         ALLOCATE( epsilon_voigt(6, nwork) )
         epsilon_voigt=0.0_DP
-        DO igeo=1,ngeo_strain
-           epsilon_voigt(1, igeo) = epsilon_min + delta_epsilon * ( igeo - 1 )
-           epsilon_voigt(2, ngeo_strain+igeo) = epsilon_min + &
+        istart=0
+        DO igeom=1, ngeom
+           DO igeo=1,ngeo_strain
+              epsilon_voigt(1,istart+igeo) = epsilon_min + delta_epsilon * &
+                                                                  ( igeo - 1 )
+              epsilon_voigt(2,ngeo_strain+istart+igeo) = epsilon_min + &
                                                   delta_epsilon * ( igeo - 1 )
-           epsilon_voigt(3, 2*ngeo_strain+igeo) = epsilon_min + &
+              epsilon_voigt(3,2*ngeo_strain+istart+igeo) = epsilon_min + &
                                                   delta_epsilon * ( igeo - 1 )
-           epsilon_voigt(4, 3*ngeo_strain + igeo) = epsilon_min_off + &
+              epsilon_voigt(4,3*ngeo_strain+istart+igeo) = epsilon_min_off + &
                                          2.0_DP * delta_epsilon * ( igeo - 1 )
-           epsilon_voigt(5, 4*ngeo_strain + igeo) = epsilon_min_off + &
+              epsilon_voigt(5,4*ngeo_strain +istart+igeo) = epsilon_min_off + &
                                          2.0_DP * delta_epsilon * ( igeo - 1 )
-           epsilon_voigt(6, 5*ngeo_strain + igeo) = epsilon_min_off + &
+              epsilon_voigt(6,5*ngeo_strain+istart+igeo) = epsilon_min_off + &
                                          2.0_DP * delta_epsilon * ( igeo - 1 )
+           ENDDO
+           istart=istart + nstep * ngeo_strain
         ENDDO
    END SELECT
 ELSE
-   nwork = 6 * ngeo_strain
+   nstep = 6
+   nwork = nstep * ngeo_strain * ngeom
    ALLOCATE( epsilon_voigt(6, nwork) )
    epsilon_voigt=0.0_DP
-   DO igeo=1,ngeo_strain
-      epsilon_voigt(1, igeo) = epsilon_min + delta_epsilon * ( igeo - 1 )
-      epsilon_voigt(2, ngeo_strain+igeo) = epsilon_min + &
+   istart=0
+   DO igeom=1,ngeom
+      DO igeo=1,ngeo_strain
+         epsilon_voigt(1, istart+igeo) = epsilon_min + delta_epsilon * ( igeo - 1 )
+         epsilon_voigt(2, ngeo_strain+istart+igeo) = epsilon_min + &
                                              delta_epsilon * ( igeo - 1 )
-      epsilon_voigt(3, 2*ngeo_strain + igeo) = epsilon_min + &
+         epsilon_voigt(3, 2*ngeo_strain+istart+igeo) = epsilon_min + &
                                              delta_epsilon * ( igeo - 1 )
-      epsilon_voigt(4, 3*ngeo_strain + igeo) = epsilon_min_off + &
+         epsilon_voigt(4, 3*ngeo_strain +istart+igeo) = epsilon_min_off + &
                                     2.0_DP * delta_epsilon * ( igeo - 1 )
-      epsilon_voigt(5, 4*ngeo_strain + igeo) = epsilon_min_off + &
+         epsilon_voigt(5, 4*ngeo_strain +istart+igeo) = epsilon_min_off + &
                                     2.0_DP * delta_epsilon * ( igeo - 1 )
-      epsilon_voigt(6, 5*ngeo_strain + igeo) = epsilon_min_off + &
+         epsilon_voigt(6, 5*ngeo_strain +istart+igeo) = epsilon_min_off + &
                                     2.0_DP * delta_epsilon * ( igeo - 1 )
+      ENDDO
+      istart=istart + nstep * ngeo_strain
    ENDDO
 ENDIF
+
+work_base= nstep * ngeo_strain
 
 CALL allocate_piezo(nwork)
 ALLOCATE( epsilon_geo(3, 3, nwork) )
@@ -201,15 +267,15 @@ DO iwork = 1, nwork
    CALL trans_epsilon(epsilon_voigt(1,iwork), epsilon_geo(1,1,iwork), 1)
 ENDDO
 
-nstep=nwork/ngeo_strain
 iwork=0
-DO istep=1,nstep
-   DO igeo=1,ngeo_strain
-      iwork=iwork+1
-      epsil = epsilon_min + delta_epsilon * ( igeo - 1 )
-      epsil_geo(iwork) = epsil
+DO igeom=1,ngeom
+   DO istep=1,nstep
+      DO igeo=1,ngeo_strain
+         iwork=iwork+1
+         epsil = epsilon_min + delta_epsilon * ( igeo - 1 )
+         epsil_geo(iwork) = epsil
+      ENDDO
    ENDDO
 ENDDO
-
 RETURN
 END SUBROUTINE set_piezo_tensor_work

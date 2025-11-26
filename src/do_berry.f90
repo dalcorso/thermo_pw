@@ -33,12 +33,11 @@ SUBROUTINE do_berry ( exit_status, polar, tot_b_phase, nppl )
   USE cell_base,        ONLY : at, omega, alat
   USE starting_scf,     ONLY : starting_pot, startingconfig
   USE control_flags,    ONLY : gamma_only, lscf, lbands, ethr, &
-                               istep, nstep, restart, lmd, lbfgs
+                               istep, nstep, lbfgs
   USE initial_conf,     ONLY : nosym_save
   USE initial_param,    ONLY : ethr0
-  USE control_thermo,   ONLY : lpolarization
+  USE polarization_vector,  ONLY : mod_tot
   USE symm_base,        ONLY : nosym
-  USE input_parameters, ONLY : diago_thr_init
   USE bp,               ONLY : pdl_tot, nppstr, gdir, lberry
   !
   IMPLICIT NONE
@@ -81,6 +80,17 @@ SUBROUTINE do_berry ( exit_status, polar, tot_b_phase, nppl )
      !
      !   this is the phase, electronic+ionic. 
      !
+     !
+     !   the routine bp_c_phase does not bring the total phase
+     !   in the standard interval [-1,1) (mod 2) or [-1/2,1/2). We do
+     !   it here otherwise the derivatives of polarization might explode.
+     !
+     IF (mod_tot==2) then
+        pdl_tot=pdl_tot-2.d0*nint(pdl_tot/2.d0)
+     ELSE
+        pdl_tot=pdl_tot-nint(pdl_tot)
+     ENDIF
+     !
      tot_b_phase(idir) = pdl_tot
      !
      !   We divide here by the volume that might change for each strain. 
@@ -100,7 +110,7 @@ SUBROUTINE do_berry ( exit_status, polar, tot_b_phase, nppl )
   polar(:) = polar_at(1)*at(:,1) + polar_at(2)*at(:,2) + polar_at(3)*at(:,3)
   polar(:) = polar * alat
 
-  IF (.NOT.lpolarization) CALL print_polarization(polar(:), .FALSE. )
+  CALL print_polarization(polar(:), .FALSE.)
   !
   RETURN
   !

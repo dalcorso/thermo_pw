@@ -21,7 +21,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
   USE kinds,            ONLY : DP
   USE thermo_mod,       ONLY : what, ibrav_geo, celldm_geo, ef_geo, tau_geo
   USE control_thermo,   ONLY : outdir_thermo, ltau_from_file
-  USE control_elastic_constants, ONLY : frozen_ions, use_free_energy
+  USE control_elastic_constants, ONLY : frozen_ions, use_free_energy, ngeom
   USE control_atomic_pos, ONLY : linternal_thermo
   USE control_conv,     ONLY : ke, keden, nk_test, sigma_test
   USE control_eldos,    ONLY : lel_free_energy
@@ -121,7 +121,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
               'mur_lc_t',                    &
               'mur_lc_elastic_constants',    &
               'mur_lc_piezoelectric_tensor', &
-              'mur_lc_polarization')
+              'mur_lc_polarization')         
 !
 !  Initialize the QE variables for the ionic relaxation. 
 !
@@ -201,8 +201,10 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
            niter=electron_maxstep
            CALL set_work_for_relaxation(iwork)
            CALL set_work_for_elastic_const(iwork)
-        CASE ('scf_piezoelectric_tensor', 'mur_lc_piezoelectric_tensor')
+        CASE ('scf_piezoelectric_tensor', 'mur_lc_piezoelectric_tensor', &
+                               'piezoelectric_tensor_geo')
            niter=electron_maxstep
+           IF (ngeom>1) CALL set_geometry_el_cons(iwork)
            ibrav=0
            DO i=1, 3
               CALL apply_strain(at0(1,i), at(1,i), epsilon_geo(1,1,iwork))
@@ -223,12 +225,31 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
            outdir=TRIM(outdir_thermo)//'/g'//TRIM(int_to_char(iwork))//'/'
            CALL set_tmp_dir( outdir )
            IF (.NOT.frozen_ions) CALL clean_bfgs_history()
-
         CASE ('scf_polarization','mur_lc_polarization')
 !
 !  Initialize the QE variables for the ionic relaxation. 
 !
+           niter=electron_maxstep
            CALL set_work_for_relaxation(iwork)
+           CALL set_fft_mesh()
+           outdir=TRIM(outdir_thermo)//'/g'//TRIM(int_to_char(iwork))//'/'
+           CALL set_tmp_dir( outdir )
+           IF (.NOT.frozen_ions) CALL clean_bfgs_history()
+        CASE ('polarization_geo')
+!
+!  Initialize the QE variables for the ionic relaxation. 
+!
+           niter=electron_maxstep
+           CALL set_work_for_relaxation(iwork)
+!
+!   now set the celldm
+!
+           celldm(:)=celldm_geo(:,iwork)
+           rd_ht=0.0_DP
+           CALL cell_base_init ( ibrav_save, celldm, zero, zero, zero, zero, &
+                                     zero, zero, .FALSE., rd_ht, ' ' )
+           tau(:,:)=tau_geo(:,:,iwork)
+           CALL set_fft_mesh()
            outdir=TRIM(outdir_thermo)//'/g'//TRIM(int_to_char(iwork))//'/'
            CALL set_tmp_dir( outdir )
            IF (.NOT.frozen_ions) CALL clean_bfgs_history()
@@ -459,3 +480,4 @@ ELSE
 ENDIF
 RETURN
 END SUBROUTINE initialize_relaxation
+

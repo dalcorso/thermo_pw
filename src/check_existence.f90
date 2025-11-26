@@ -24,7 +24,8 @@ SUBROUTINE check_existence(iwork, part, run)
 
   USE thermo_mod,      ONLY : energy_geo
   USE elastic_constants, ONLY : sigma_geo
-  USE piezoelectric_tensor, ONLY : polar_geo, tot_b_phase
+  USE polarization_vector, ONLY : mod_tot
+  USE piezoelectric_tensor, ONLY : polar_strain, tot_b_phase
 
   USE io_global,       ONLY : ionode, ionode_id, stdout
   USE mp_images,       ONLY : intra_image_comm
@@ -64,12 +65,21 @@ SUBROUTINE check_existence(iwork, part, run)
               ENDDO
            END IF
            IF (lberry(iwork)) THEN
-              WRITE(stdout,'(5x,"Polarizzazione")')
+              WRITE(stdout,'(5x,"Polarization (e/bohr**2)")')
               READ(iu_ene,*) (polar(ipol),ipol=1,3)
               WRITE(stdout,'(3f15.7)') (polar(ipol),ipol=1,3)
               WRITE(stdout,'(5x,"Berry phase")')
               READ(iu_ene,*) (tot_b_ph(ipol),ipol=1,3)
               WRITE(stdout,'(3f15.7)') (tot_b_ph(ipol),ipol=1,3)
+              IF (mod_tot==2) then
+                 DO ipol=1,3
+                    tot_b_ph(ipol)=tot_b_ph(ipol)-2.d0*nint(tot_b_ph(ipol)/2.d0)
+                 ENDDO
+              ELSE
+                 DO ipol=1,3
+                    tot_b_ph(ipol)=tot_b_ph(ipol)-nint(tot_b_ph(ipol))
+                 ENDDO
+              ENDIF
            END IF
         ELSE
            WRITE(stdout,'(5x,"Stress (kbar)")')
@@ -97,7 +107,7 @@ SUBROUTINE check_existence(iwork, part, run)
      END IF
      IF (lberry(iwork)) THEN
         CALL mp_bcast(polar, ionode_id, intra_image_comm)
-        polar_geo(:,iwork)=polar(:)
+        polar_strain(:,iwork)=polar(:)
         CALL mp_bcast(tot_b_ph, ionode_id, intra_image_comm)
         tot_b_phase(:,iwork)=tot_b_ph(:)
      END IF
@@ -117,7 +127,7 @@ SUBROUTINE save_existence(iwork, part)
 
   USE thermo_mod,      ONLY : energy_geo, what
   USE elastic_constants, ONLY : sigma_geo
-  USE piezoelectric_tensor, ONLY : polar_geo, tot_b_phase
+  USE piezoelectric_tensor, ONLY : polar_strain, tot_b_phase
 
   USE ener,            ONLY : etot
   USE force_mod,       ONLY : sigma
@@ -149,7 +159,7 @@ SUBROUTINE save_existence(iwork, part)
            ENDDO
         ENDIF
         IF (lberry(iwork)) THEN
-           WRITE(iu_ene,*) (polar_geo(ipol,iwork), ipol=1,3)
+           WRITE(iu_ene,*) (polar_strain(ipol,iwork), ipol=1,3)
            WRITE(iu_ene,*) (tot_b_phase(ipol,iwork), ipol=1,3)
         ENDIF
      ELSE
@@ -328,7 +338,8 @@ SUBROUTINE check_geometry_el_cons_exist(iwork, part)
   INTEGER :: find_free_unit
   CHARACTER(LEN=6) :: int_to_char
   CHARACTER(LEN=256) :: filename
-  REAL(DP) :: tau_(3,nat), celldm_(6), at_(3,3), bg_(3,3), omega_
+  REAL(DP) :: tau_(3,nat), celldm_(6), at_(3,3), bg_(3,3), omega_, &
+              compute_omega_geo
   INTEGER :: iu_geo, ios, na, ibrav_, ipol
 
   IF (ionode) THEN
@@ -363,7 +374,7 @@ SUBROUTINE check_geometry_el_cons_exist(iwork, part)
 !   put atomic coordinates in the crystal basis
 !
         CALL cryst_to_cart( nat, el_con_tau_crys_geo(:,:,iwork), bg_, -1 )
-        el_con_omega_geo(iwork)=omega_
+        el_con_omega_geo(iwork)=compute_omega_geo(ibrav_,celldm_)
      ENDIF
      CLOSE(iu_geo)
 !

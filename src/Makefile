@@ -95,6 +95,7 @@ manage_ph_all_geometries.o \
 manage_ph_postproc.o \
 manage_ph_run.o \
 manage_ph_symmetry.o \
+manage_polarization.o \
 manage_surface_states.o \
 manage_syn_1.o \
 manage_syn_2.o \
@@ -121,6 +122,7 @@ plot_macro_el_t.o \
 plot_multi_energy.o \
 plot_mur.o \
 plot_optical_const.o \
+plot_piezo_t.o \
 plot_phdos.o \
 plot_thermo.o \
 plot_xrdp.o \
@@ -182,6 +184,7 @@ write_minimum_energy_data.o \
 write_mur.o \
 write_ph_freq.o \
 write_ph_dispersions.o \
+write_piezo_t.o \
 write_phdos.o \
 write_quadratic.o \
 write_thermo.o 
