@@ -22,12 +22,9 @@ SUBROUTINE phqscf_tpw
   USE fft_base,         ONLY : dffts, dfftp
   USE uspp,             ONLY : okvan
   USE control_ph,       ONLY : zue
-  USE control_lr,       ONLY : convt, rec_code
   USE partial,          ONLY : done_irr, comp_irr
   USE modes,            ONLY : nirr, npert
-  USE lrus,             ONLY : int3, int3_nc, int3_paw
   USE uspp_param,       ONLY : nhm
-  USE eqv,              ONLY : drhos
   USE paw_variables,    ONLY : okpaw
   USE noncollin_module, ONLY : noncolin, nspin_mag, domag
   USE lr_cg,            ONLY : lcg
@@ -36,12 +33,15 @@ SUBROUTINE phqscf_tpw
   USE mp_pools,         ONLY : inter_pool_comm
   USE mp_bands,         ONLY : intra_bgrp_comm
   USE mp,               ONLY : mp_sum
+  USE lrus,             ONLY : int3, int3_nc, int3_paw
+  USE eqv,              ONLY : drhos
   USE dynmat,           ONLY : dyn_hub_scf
   USE ldaU,             ONLY : lda_plus_u, Hubbard_lmax
   USE ldaU_lr,          ONLY : dnsscf
   USE ldaU_ph,          ONLY : dnsscf_all_modes
   USE units_ph,         ONLY : iundnsscf
   USE control_flags,    ONLY : iverbosity
+  USE control_lr,       ONLY : convt, rec_code
   USE write_hub
   USE magnetic_charges, ONLY : mag_charge_mode, mag_charge
   USE control_lr,       ONLY : lgamma
@@ -112,8 +112,6 @@ SUBROUTINE phqscf_tpw
            IF (okpaw) ALLOCATE (int3_paw (nhm, nhm, nat, nspin_mag, npe))
            IF (noncolin) ALLOCATE(int3_nc( nhm, nhm, nat, nspin, npe))
         ENDIF
-        CALL deallocate_dnsorth()
-        CALL ph_deallocate_upert()
         !
         ! DFPT+U: dnsscf in the phonon calculation
         ! is the scf change of atomic occupations ns 
@@ -170,6 +168,9 @@ SUBROUTINE phqscf_tpw
            IF (okpaw) DEALLOCATE (int3_paw)
            IF (noncolin) DEALLOCATE(int3_nc)
         ENDIF
+        CALL deallocate_dnsorth()
+        CALL ph_deallocate_upert()
+
         tcpu = get_clock ('PHONON')
         !
         DEALLOCATE (drhos)

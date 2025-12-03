@@ -62,6 +62,14 @@ Older versions of <code>QE</code> (earlier than <code>7.4.1</code>) can still be
 <p align="justify"> Before using <code>thermo_pw</code>, please apply the 
 patches given below.</p>
 
+**Patches for thermo_pw.2.1.1**:
+<br>
+The Fermi energy shift is not computed in phonon calculations.
+Please correct as in commit 71e7c41 of 3/12/2025.
+but put the two lines, CALL deallocate_dnsorth()
+and CALL ph_deallocate_upert() at line 171,172.
+
+
 **Patches for thermo_pw.2.1.0**:
 <br>
 

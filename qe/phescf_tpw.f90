@@ -9,8 +9,8 @@
 SUBROUTINE phescf_tpw()
   !-----------------------------------------------------------------------
   !
-  ! ... This is the main driver for the calculation of the
-  ! ... response to an electric field and related quantities.
+  !! This is the main driver for the calculation of the
+  !! response to an electric field and related quantities.
   !
   USE io_global,       ONLY : stdout
   USE paw_variables,   ONLY : okpaw
@@ -22,14 +22,12 @@ SUBROUTINE phescf_tpw()
   USE noncollin_module,ONLY : noncolin, nspin_mag, npol, domag
   USE lsda_mod,        ONLY : nspin
   USE control_ph,      ONLY : zeu, lnoloc, done_epsil, done_zeu, epsil
-  USE control_lr,      ONLY : lrpa, convt, rec_code, rec_code_read, where_rec
   USE eqv,             ONLY : drhos
   USE io_files,        ONLY : tmp_dir
   USE wvfct,           ONLY : nbnd, npwx
   USE control_flags,   ONLY : io_level
   USE output,          ONLY : fildrho
   USE ph_restart,      ONLY : ph_writefile
-  USE lrus,            ONLY : int3, int3_nc, int3_paw
   USE freq_ph
   USE optical,         ONLY : current_w, fru, polarc, epsilonc, epsilonm1c, &
                               lr1dwf, iu1dwf, lcfreq, start_freq, last_freq
@@ -39,6 +37,8 @@ SUBROUTINE phescf_tpw()
   USE partial,         ONLY : comp_irr
   USE images_omega,    ONLY : comp_f
   USE ramanm,          ONLY : ramtns, lraman, elop, done_lraman, done_elop
+  USE lrus,            ONLY : int3, int3_nc, int3_paw
+  USE control_lr,      ONLY : convt, lrpa, rec_code, rec_code_read, where_rec
   USE buffers,         ONLY : close_buffer, open_buffer
   USE io_global,       ONLY : ionode, ionode_id
   USE mp_images,       ONLY : intra_image_comm
