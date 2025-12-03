@@ -77,6 +77,9 @@ SUBROUTINE phescf_tpw()
      IF (okpaw) ALLOCATE (int3_paw ( nhm, nhm, nat, nspin_mag, 3))
      IF (noncolin) ALLOCATE(int3_nc( nhm, nhm, nat, nspin, 3))
   ENDIF
+  ! Set symmetry representation in lr_symm_base
+  !
+  CALL ph_set_upert_e()
   !
   ALLOCATE (drhos( dffts%nnr, nspin_mag, 3))
   !
@@ -264,6 +267,8 @@ SUBROUTINE phescf_tpw()
   ENDIF
 
   DEALLOCATE (drhos)
+  !
+  CALL ph_deallocate_upert()
   !
   ! DFPT+U
   !

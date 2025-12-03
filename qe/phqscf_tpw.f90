@@ -100,6 +100,10 @@ SUBROUTINE phqscf_tpw
            WRITE( stdout, '(//,5x,"Representation #",i4," modes #",8i4)') &
                               irr, (imode0+irr1, irr1=1,npe)
         ENDIF
+        ! Initialize LR_Modules variables
+        !
+        CALL ph_set_upert_phonon(irr)
+        IF (okvan) CALL dnsq_orth_set_irr(irr, imode0)
         !
         !    then for this irreducible representation we solve the linear system
         !
@@ -108,6 +112,8 @@ SUBROUTINE phqscf_tpw
            IF (okpaw) ALLOCATE (int3_paw (nhm, nhm, nat, nspin_mag, npe))
            IF (noncolin) ALLOCATE(int3_nc( nhm, nhm, nat, nspin, npe))
         ENDIF
+        CALL deallocate_dnsorth()
+        CALL ph_deallocate_upert()
         !
         ! DFPT+U: dnsscf in the phonon calculation
         ! is the scf change of atomic occupations ns 
