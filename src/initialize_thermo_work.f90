@@ -1813,7 +1813,7 @@ INTEGER, INTENT(IN) :: ipoint(nvar)
 INTEGER, INTENT(IN) :: inde(nvar)
 
 INTEGER :: ivar, iaux
-LOGICAL :: laux
+LOGICAL :: laux, laux1
 
 iaux=0
 DO ivar=1,nvar
@@ -1835,7 +1835,16 @@ ELSEIF (ggrun_recipe==3) THEN
       IF ((inde(ivar)-ipoint(ivar))==1) &
          iaux=iaux+(inde(ivar)-ipoint(ivar)) 
    ENDDO
-   laux=laux.OR.(iaux==2)
+   laux1=(iaux==2)
+!
+!  remove the points with indeces lower that ipoint 
+!  or that in any direction are more distant than one point
+!
+   DO ivar=1, nvar
+      IF (inde(ivar)< ipoint(ivar)) laux1=.FALSE.
+      IF (ABS(inde(ivar)-ipoint(ivar))>1) laux1=.FALSE.
+   ENDDO
+   laux=laux.OR.laux1
 ENDIF
 select_ph_to_do=laux
 
