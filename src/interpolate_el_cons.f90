@@ -330,7 +330,7 @@ DEALLOCATE(xfit)
 
 RETURN
 END SUBROUTINE interpolate_piezo_tensor_p
-
+!
 !----------------------------------------------------------------------------
 SUBROUTINE compute_d_piezo_tensor_t(e_piezo_tensor_t,el_comp_t,&
                                         d_piezo_tensor_t,ntemp)
@@ -355,3 +355,316 @@ ENDDO
 
 RETURN
 END SUBROUTINE compute_d_piezo_tensor_t
+!
+!----------------------------------------------------------------------------
+SUBROUTINE interpolate_epsilon_infty(celldm_t, nvar, ibrav, pt_p1, pt_p2, &
+                    pt_p3, pt_p4, poly_degree_elc, epsilon_infty_t)
+!----------------------------------------------------------------------------
+!
+! This routine receives as input the coeffients of polynomials which 
+! interpolate the dielectric constant on a grid of geometries,  
+! the celldm that corresponds to each temperature and gives as output
+! the dielectric constant interpolated at the celldm that corresponds 
+! to each temperature.
+!  
+USE kinds,              ONLY : DP
+USE temperature,        ONLY : ntemp
+USE thermo_mod,         ONLY : epsilon_infty_geo
+USE control_thermo,     ONLY : lgeo_from_file
+USE linear_surfaces,    ONLY : evaluate_fit_linear
+USE quadratic_surfaces, ONLY : evaluate_fit_quadratic
+USE cubic_surfaces,     ONLY : evaluate_fit_cubic
+USE quartic_surfaces,   ONLY : evaluate_fit_quartic
+USE lattices,           ONLY : compress_celldm
+USE polynomial,         ONLY : poly1, poly2, poly3, poly4
+USE mp_world,           ONLY : world_comm
+USE mp,                 ONLY : mp_sum
+
+IMPLICIT NONE
+INTEGER :: ibrav, nvar
+INTEGER :: poly_degree_elc
+REAL(DP) :: celldm_t(6, ntemp), epsilon_infty_t(3,3,ntemp)
+REAL(DP) :: compute_omega_geo
+TYPE(poly1) :: pt_p1(3,3)
+TYPE(poly2) :: pt_p2(3,3)
+TYPE(poly3) :: pt_p3(3,3)
+TYPE(poly4) :: pt_p4(3,3)
+
+REAL(DP), ALLOCATABLE :: xfit(:)
+
+INTEGER  :: i, j, itemp, startt, lastt
+REAL(DP) :: aux, macro_el(8)
+
+ALLOCATE(xfit(nvar))
+CALL divide(world_comm, ntemp, startt, lastt)
+epsilon_infty_t=0.0_DP
+DO itemp=startt,lastt
+   IF (itemp==1.OR.itemp==ntemp) CYCLE
+   IF (lgeo_from_file) THEN
+      xfit(1)=compute_omega_geo(ibrav, celldm_t(:,itemp))
+   ELSE
+      CALL compress_celldm(celldm_t(:,itemp),xfit,nvar,ibrav)
+   ENDIF
+   DO i=1,3
+      DO j=1,3
+         IF (ABS(epsilon_infty_geo(i,j,1))>1.D-6) THEN
+            IF (poly_degree_elc==4) THEN
+               CALL evaluate_fit_quartic(nvar,xfit,aux,pt_p4(i,j)) 
+            ELSEIF (poly_degree_elc==3) THEN
+               CALL evaluate_fit_cubic(nvar,xfit,aux,pt_p3(i,j))
+            ELSEIF (poly_degree_elc==2) THEN
+               CALL evaluate_fit_quadratic(nvar,xfit,aux,pt_p2(i,j))
+            ELSEIF (poly_degree_elc==1) THEN
+               CALL evaluate_fit_linear(nvar,xfit,aux,pt_p1(i,j))
+            ELSE
+               CALL errore('interpolate_piezo_tensor',&
+                                           'wrong poly_degree_elc',1)
+            ENDIF
+            epsilon_infty_t(i,j,itemp)=aux
+         ENDIF
+      ENDDO
+   ENDDO
+ENDDO
+CALL mp_sum(epsilon_infty_t, world_comm)
+
+DEALLOCATE(xfit)
+
+RETURN
+END SUBROUTINE interpolate_epsilon_infty
+!
+!----------------------------------------------------------------------------
+SUBROUTINE interpolate_epsilon_infty_p(celldm_p, nvar, ibrav, pt_p1, pt_p2, &
+           pt_p3, pt_p4, poly_degree_elc, epsilon_infty_p )
+!----------------------------------------------------------------------------
+!
+! This routine receives as input the coeffients of polynomials which 
+! interpolate the piezoelectric tensor on a grid of geometries,  
+! the celldm_p that corresponds to each pressure and gives as output
+! the piezoelectric tensor interpolated at the celldm_p that corresponds 
+! to each pressure.
+!  
+USE kinds,              ONLY : DP
+USE thermo_mod,         ONLY : epsilon_infty_geo
+USE control_pressure,   ONLY : npress
+
+USE linear_surfaces,    ONLY : evaluate_fit_linear
+USE quadratic_surfaces, ONLY : evaluate_fit_quadratic
+USE cubic_surfaces,     ONLY : evaluate_fit_cubic
+USE quartic_surfaces,   ONLY : evaluate_fit_quartic
+
+USE control_thermo,     ONLY : lgeo_from_file
+USE lattices,           ONLY : compress_celldm
+USE polynomial,         ONLY : poly1, poly2, poly3, poly4
+USE mp_world,           ONLY : world_comm
+USE mp,                 ONLY : mp_sum
+
+IMPLICIT NONE
+INTEGER :: ibrav, nvar
+INTEGER :: poly_degree_elc
+REAL(DP) :: celldm_p(6, npress), epsilon_infty_p(3,3,npress)
+REAL(DP) :: compute_omega_geo
+TYPE(poly1) :: pt_p1(3,3)
+TYPE(poly2) :: pt_p2(3,3)
+TYPE(poly3) :: pt_p3(3,3)
+TYPE(poly4) :: pt_p4(3,3)
+
+REAL(DP), ALLOCATABLE :: xfit(:)
+
+INTEGER  :: i, j, ipress, startp, lastp
+REAL(DP) :: aux
+
+ALLOCATE(xfit(nvar))
+CALL divide(world_comm, npress, startp, lastp)
+epsilon_infty_p=0.0_DP
+DO ipress=startp,lastp
+   IF (ipress==1.OR.ipress==npress) CYCLE
+   IF (lgeo_from_file) THEN
+      xfit(1)=compute_omega_geo(ibrav, celldm_p(:,ipress))
+   ELSE
+      CALL compress_celldm(celldm_p(:,ipress),xfit,nvar,ibrav)
+   ENDIF
+   DO i=1,3
+      DO j=1,3
+         IF (ABS(epsilon_infty_geo(i,j,1))>1.D-6) THEN
+            IF (poly_degree_elc==4) THEN
+               CALL evaluate_fit_quartic(nvar,xfit,aux,pt_p4(i,j)) 
+            ELSEIF (poly_degree_elc==3) THEN
+               CALL evaluate_fit_cubic(nvar,xfit,aux,pt_p3(i,j))
+            ELSEIF (poly_degree_elc==2) THEN
+               CALL evaluate_fit_quadratic(nvar,xfit,aux,pt_p2(i,j))
+            ELSEIF (poly_degree_elc==1) THEN
+               CALL evaluate_fit_linear(nvar,xfit,aux,pt_p1(i,j))
+            ELSE
+               CALL errore('interpolate_epsilon_infty_p',&
+                                          'wrong poly_degree_elc',1)
+            ENDIF
+            epsilon_infty_p(i,j,ipress)=aux
+         ENDIF
+      ENDDO
+   ENDDO
+ENDDO
+CALL mp_sum(epsilon_infty_p, world_comm)
+
+DEALLOCATE(xfit)
+
+RETURN
+END SUBROUTINE interpolate_epsilon_infty_p
+
+!
+!----------------------------------------------------------------------------
+SUBROUTINE interpolate_zeu(celldm_t, nvar, nat, ibrav, pt_p1, pt_p2, &
+                    pt_p3, pt_p4, poly_degree_elc, zeu_t)
+!----------------------------------------------------------------------------
+!
+! This routine receives as input the coeffients of polynomials which 
+! interpolate the Born effective charges on a grid of geometries,  
+! the celldm that corresponds to each temperature and gives as output
+! the Born effective charges interpolated at the celldm that corresponds 
+! to each temperature.
+!  
+USE kinds,              ONLY : DP
+USE temperature,        ONLY : ntemp
+USE thermo_mod,         ONLY : zeu_geo
+USE control_thermo,     ONLY : lgeo_from_file
+USE linear_surfaces,    ONLY : evaluate_fit_linear
+USE quadratic_surfaces, ONLY : evaluate_fit_quadratic
+USE cubic_surfaces,     ONLY : evaluate_fit_cubic
+USE quartic_surfaces,   ONLY : evaluate_fit_quartic
+USE lattices,           ONLY : compress_celldm
+USE polynomial,         ONLY : poly1, poly2, poly3, poly4
+USE mp_world,           ONLY : world_comm
+USE mp,                 ONLY : mp_sum
+
+IMPLICIT NONE
+INTEGER :: ibrav, nvar, nat
+INTEGER :: poly_degree_elc
+REAL(DP) :: celldm_t(6, ntemp), zeu_t(3,3,nat,ntemp)
+REAL(DP) :: compute_omega_geo
+TYPE(poly1) :: pt_p1(3,3,nat)
+TYPE(poly2) :: pt_p2(3,3,nat)
+TYPE(poly3) :: pt_p3(3,3,nat)
+TYPE(poly4) :: pt_p4(3,3,nat)
+
+REAL(DP), ALLOCATABLE :: xfit(:)
+
+INTEGER  :: i, j, na, itemp, startt, lastt
+REAL(DP) :: aux, macro_el(8)
+
+ALLOCATE(xfit(nvar))
+CALL divide(world_comm, ntemp, startt, lastt)
+zeu_t=0.0_DP
+DO itemp=startt,lastt
+   IF (itemp==1.OR.itemp==ntemp) CYCLE
+   IF (lgeo_from_file) THEN
+      xfit(1)=compute_omega_geo(ibrav, celldm_t(:,itemp))
+   ELSE
+      CALL compress_celldm(celldm_t(:,itemp),xfit,nvar,ibrav)
+   ENDIF
+   DO na=1, nat
+      DO i=1,3
+         DO j=1,3
+            IF (ABS(zeu_geo(i,j,na,1))>1.D-6) THEN
+               IF (poly_degree_elc==4) THEN
+                  CALL evaluate_fit_quartic(nvar,xfit,aux,pt_p4(i,j,na)) 
+               ELSEIF (poly_degree_elc==3) THEN
+                  CALL evaluate_fit_cubic(nvar,xfit,aux,pt_p3(i,j,na))
+               ELSEIF (poly_degree_elc==2) THEN
+                  CALL evaluate_fit_quadratic(nvar,xfit,aux,pt_p2(i,j,na))
+               ELSEIF (poly_degree_elc==1) THEN
+                  CALL evaluate_fit_linear(nvar,xfit,aux,pt_p1(i,j,na))
+               ELSE
+                  CALL errore('interpolate_zeu',&
+                                           'wrong poly_degree_elc',1)
+               ENDIF
+               zeu_t(i,j,na,itemp)=aux
+            ENDIF
+         ENDDO
+      ENDDO
+   ENDDO
+ENDDO
+CALL mp_sum(zeu_t, world_comm)
+
+DEALLOCATE(xfit)
+
+RETURN
+END SUBROUTINE interpolate_zeu
+!
+!----------------------------------------------------------------------------
+SUBROUTINE interpolate_zeu_p(celldm_p, nvar, nat, ibrav, pt_p1, pt_p2, &
+           pt_p3, pt_p4, poly_degree_elc, zeu_p )
+!----------------------------------------------------------------------------
+!
+! This routine receives as input the coeffients of polynomials which 
+! interpolate the Born effective charge on a grid of geometries,  
+! the celldm_p that corresponds to each pressure and gives as output
+! the Born effective charge interpolated at the celldm_p that corresponds 
+! to each pressure.
+!  
+USE kinds,              ONLY : DP
+USE thermo_mod,         ONLY : zeu_geo
+USE control_pressure,   ONLY : npress
+
+USE linear_surfaces,    ONLY : evaluate_fit_linear
+USE quadratic_surfaces, ONLY : evaluate_fit_quadratic
+USE cubic_surfaces,     ONLY : evaluate_fit_cubic
+USE quartic_surfaces,   ONLY : evaluate_fit_quartic
+
+USE control_thermo,     ONLY : lgeo_from_file
+USE lattices,           ONLY : compress_celldm
+USE polynomial,         ONLY : poly1, poly2, poly3, poly4
+USE mp_world,           ONLY : world_comm
+USE mp,                 ONLY : mp_sum
+
+IMPLICIT NONE
+INTEGER :: ibrav, nvar, nat
+INTEGER :: poly_degree_elc
+REAL(DP) :: celldm_p(6, npress), zeu_p(3,3,nat,npress)
+REAL(DP) :: compute_omega_geo
+TYPE(poly1) :: pt_p1(3,3,nat)
+TYPE(poly2) :: pt_p2(3,3,nat)
+TYPE(poly3) :: pt_p3(3,3,nat)
+TYPE(poly4) :: pt_p4(3,3,nat)
+
+REAL(DP), ALLOCATABLE :: xfit(:)
+
+INTEGER  :: i, j, na, ipress, startp, lastp
+REAL(DP) :: aux
+
+ALLOCATE(xfit(nvar))
+CALL divide(world_comm, npress, startp, lastp)
+zeu_p=0.0_DP
+DO ipress=startp,lastp
+   IF (ipress==1.OR.ipress==npress) CYCLE
+   IF (lgeo_from_file) THEN
+      xfit(1)=compute_omega_geo(ibrav, celldm_p(:,ipress))
+   ELSE
+      CALL compress_celldm(celldm_p(:,ipress),xfit,nvar,ibrav)
+   ENDIF
+   DO na=1, nat
+      DO i=1,3
+         DO j=1,3
+            IF (ABS(zeu_geo(i,j,na,1))>1.D-6) THEN
+               IF (poly_degree_elc==4) THEN
+                  CALL evaluate_fit_quartic(nvar,xfit,aux,pt_p4(i,j,na)) 
+               ELSEIF (poly_degree_elc==3) THEN
+                  CALL evaluate_fit_cubic(nvar,xfit,aux,pt_p3(i,j,na))
+               ELSEIF (poly_degree_elc==2) THEN
+                  CALL evaluate_fit_quadratic(nvar,xfit,aux,pt_p2(i,j,na))
+               ELSEIF (poly_degree_elc==1) THEN
+                  CALL evaluate_fit_linear(nvar,xfit,aux,pt_p1(i,j,na))
+               ELSE
+                  CALL errore('interpolate_zeu_p',&
+                                          'wrong poly_degree_elc',1)
+               ENDIF
+               zeu_p(i,j,na,ipress)=aux
+            ENDIF
+         ENDDO
+      ENDDO
+   ENDDO
+ENDDO
+CALL mp_sum(zeu_p, world_comm)
+
+DEALLOCATE(xfit)
+
+RETURN
+END SUBROUTINE interpolate_zeu_p
