@@ -10,7 +10,7 @@ SUBROUTINE remove_internal_coordinates()
 !---------------------------------------------------------------------------
 !
 USE thermo_mod,            ONLY : tot_ngeo, celldm_geo_eos, uint_geo, &
-                                  tot_ngeo_eos, energy_geo
+                                  tot_ngeo_eos, energy_geo, at_geo, ibrav_geo
 USE ions_base,             ONLY : nat
 USE temperature,           ONLY : ntemp, temp
 USE control_atomic_pos,    ONLY : linternal_thermo, nint_var, iconstr_internal
@@ -54,8 +54,10 @@ INTEGER :: igeom, itemp
 !
       DO igeom = 1, tot_ngeo_eos
          DO itemp=1, ntemp
-            CALL internal_to_tau(celldm_geo_eos(1,igeom),              &
+            CALL internal_to_tau(ibrav_geo(igeom),                 &
+                          celldm_geo_eos(1,igeom),                     &
                           tau_geo_eos_t(1,1,itemp,igeom),              &
+                          at_geo(1,1,igeom),                       &
                           uint_geo_eos_t(1,itemp, igeom),              &
                           nat, nint_var, iconstr_internal, 1)
          ENDDO
@@ -88,7 +90,7 @@ SUBROUTINE remove_internal_coordinates_ph()
 !---------------------------------------------------------------------------
 !
 USE thermo_mod,            ONLY : tot_ngeo, celldm_geo_eos, uint_geo, &
-                                  tot_ngeo_eos, energy_geo
+                                  tot_ngeo_eos, energy_geo, ibrav_geo, at_geo
 USE ions_base,             ONLY : nat
 USE temperature,           ONLY : ntemp
 USE control_atomic_pos,    ONLY : linternal_thermo, nint_var, iconstr_internal
@@ -133,8 +135,10 @@ INTEGER :: igeom, itemp
 !
       DO igeom = 1, tot_ngeo_eos
          DO itemp=1, ntemp
-            CALL internal_to_tau(celldm_geo_eos(1,igeom),               &
+            CALL internal_to_tau(ibrav_geo(igeom),                  &
+                          celldm_geo_eos(1,igeom),                      &
                           tauf_geo_eos_t(1,1,itemp,igeom),              &
+                          at_geo(1,1,igeom),                        &
                           uintf_geo_eos_t(1,itemp, igeom),              &
                           nat, nint_var, iconstr_internal, 1)
          ENDDO

@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2013-2020 Andrea Dal Corso
+! Copyright (C) 2013-2025 Andrea Dal Corso
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -21,6 +21,7 @@ PROGRAM thermo_pw
   ! ... If there are several available images the different tasks are
   ! ... carried out in parallel. This driver can carry out a scf 
   ! ... calculation, a non scf calculation to determine the band structure,
+  ! ... a Berry phase calculation to determine the polarization,
   ! ... or a linear response calculation at a given q and for a given
   ! ... representation. Finally several post processing tasks are carried
   ! ... out in parallel or by the root image. 
@@ -29,7 +30,7 @@ PROGRAM thermo_pw
   ! ...
 
   USE control_thermo,   ONLY : lev_syn_2, lph, lpwscf_syn_1, lectqha, &
-                               lpart2_pw
+                               lpiezotqha, lpart2_pw
   !
   !  variables of pw or phonon used here
   !
@@ -150,6 +151,16 @@ PROGRAM thermo_pw
      !   temperature dependent elastic constants
      !
      IF (lectqha) CALL manage_elastic_cons_qha()
+     !
+     !   When lpiezotqha=.TRUE. we have computed the Helmholtz free energy 
+     !   for all the strained geometries needed for the piezoelectric tensor
+     !   (for a single unperturbed geometry or for a mesh of unperturbed 
+     !   geometries) and compute here the temperature dependent piezoelectric
+     !   tensor using the free energy for the internal geometry where 
+     !   possible.
+     !
+     IF (lpiezotqha) CALL manage_piezo_tensor_qha()
+     !
   ENDIF
   !
 1000  CALL thermo_end(code) 

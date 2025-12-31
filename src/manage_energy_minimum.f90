@@ -18,7 +18,8 @@ USE kinds,            ONLY : DP
 USE thermo_mod,       ONLY : celldm_geo, omega_geo, central_geo, density, &
                              energy_geo, uint_geo, tau_geo, celldm_geo_eos, &
                              omega_geo_eos, energy_geo_eos, uint_geo_eos,   &
-                             tau_geo_eos, tot_ngeo, tot_ngeo_eos
+                             tau_geo_eos, tot_ngeo, tot_ngeo_eos, ibrav_geo, &
+                             at_geo
 USE control_mur,      ONLY : vmin, b0, b01, b02, emin, lmurn
 USE control_thermo,   ONLY : lgeo_from_file
 USE control_atomic_pos, ONLY : linternal_thermo, iconstr_internal, nint_var, &
@@ -72,7 +73,8 @@ IF (linternal_thermo) THEN
    DO igeom = 1, tot_ngeo_eos
       omega_geo_eos(igeom)=compute_omega_geo(ibrav_save,&
                                                    celldm_geo_eos(:,igeom))
-      CALL internal_to_tau(celldm_geo_eos(1,igeom), tau_geo_eos(1,1,igeom), &
+      CALL internal_to_tau(ibrav_geo(igeom),celldm_geo_eos(1,igeom), &
+                          tau_geo_eos(1,1,igeom), at_geo(1,1,igeom), &
                           uint_geo_eos(1,igeom), nat, nint_var,      &
                                              iconstr_internal, 1)
    ENDDO

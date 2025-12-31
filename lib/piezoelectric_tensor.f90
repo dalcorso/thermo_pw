@@ -29,7 +29,22 @@ MODULE piezoelectric_tensor
                                     ! polarization and strain
   REAL(DP) :: d_piezo_tensor(3,6)   ! The piezoelectric tensor d_{\alpha,m}
                                     ! linking polarization and stress
- 
+!
+!  The following four variables are auxiliary, they can contain another
+!  copy of the piezoelectric tensor. Usually the clamped ion term
+! 
+  REAL(DP) :: g_piezo_tensor_fi(3,6)   ! The piezoelectric tensor g_{\alpha,m}
+                                    ! improper piezoelectric tensor linking
+                                    ! polarization and strain
+  REAL(DP) :: eg_piezo_tensor_fi(3,6)  ! The piezoelectric tensor eg_{\alpha,m}
+                                    ! proper piezoelectric tensor obtained
+                                    ! transforming the improper one
+  REAL(DP) :: e_piezo_tensor_fi(3,6)   ! The piezoelectric tensor e_{\alpha,m}
+                                    ! proper piezoelectric tensor linking
+                                    ! polarization and strain
+  REAL(DP) :: d_piezo_tensor_fi(3,6)   ! The piezoelectric tensor d_{\alpha,m}
+                                    ! linking polarization and stress
+
   REAL(DP), ALLOCATABLE :: polar_strain(:,:) ! The polarization for each strain
                                     ! in units of e bohr/Omega, Omega in bohr^3
   REAL(DP), ALLOCATABLE :: tot_b_phase(:,:) ! Total Berry phase (elec. + ions)
@@ -87,31 +102,33 @@ MODULE piezoelectric_tensor
 
   PUBLIC g_piezo_tensor, polar_strain,  compute_improper_piezo_tensor, &
          compute_proper_piezo_tensor,                     &
-         print_d_piezo_tensor, print_g_piezo_tensor,      &
-         print_e_piezo_tensor, e_piezo_tensor,            &
-         eg_piezo_tensor, print_eg_piezo_tensor,          &
+         print_piezo_tensor, e_piezo_tensor,              &
+         eg_piezo_tensor,                                 &
          compute_d_piezo_tensor, d_piezo_tensor, nppl,    &
          compute_polarization_equil,                      &
          proper_improper_piezo, clean_piezo_tensor,       &
          print_piezo_info, tot_b_phase, allocate_piezo,   &
          deallocate_piezo, write_piezo_tensor,            &
          read_piezo_tensor, write_piezo_tensor_on_file,   &
+         read_piezo_tensor_fi,                            &
          pt_names, ptd_names, pt_types, pt_present,       &
-         pt_code_group, get_pt_type
+         pt_code_group, get_pt_type, compute_relax_piezo, &
+         e_piezo_tensor_fi, eg_piezo_tensor_fi,           &
+         d_piezo_tensor_fi
 
 CONTAINS
 !
 !---------------------------------------------------------------------------
-SUBROUTINE print_d_piezo_tensor(frozen_ions)
+SUBROUTINE print_piezo_tensor(piezo_tensor, fact, label, frozen_ions)
 !---------------------------------------------------------------------------
 !
 !  This routine writes on output the piezoelectric tensor
 !
 USE kinds, ONLY : DP
-USE constants, ONLY : electron_si, bohr_radius_si
-USE cell_base, ONLY : alat, omega
 IMPLICIT NONE
+CHARACTER(LEN=*), INTENT(IN) :: label
 LOGICAL, INTENT(IN) :: frozen_ions
+REAL(DP), INTENT(IN) :: piezo_tensor(3,6)
 REAL(DP) :: fact
 INTEGER :: i, j
 CHARACTER(LEN=30) :: fi_string
@@ -120,130 +137,16 @@ fi_string=''
 IF (frozen_ions) fi_string="Frozen ions"
 
 WRITE(stdout,'(/,5x,a)') TRIM(fi_string)
-WRITE(stdout,'(5x,"Piezoelectric tensor d_ij [pC/N] ")')
+WRITE(stdout,'(5x, a)') TRIM(label)
 WRITE(stdout,'(4x,"i j=",i9,5i12)') (i, i=1,6)
 !
-!  the factor 10000.0 comes from the fact that the compliances were in 1/kbar
-!  that is in 1/10^8 Pa, to have pC/N we need to multiply by 10^12 and
-!  10^12/10^8=10^4=10000.0
-!
-fact= electron_si / (bohr_radius_si)**2 * 10000.0_DP
 DO i=1,3
-   WRITE(stdout,'(i5, 6f12.5)') i, (d_piezo_tensor(i,j)*fact, j=1,6)
+   WRITE(stdout,'(i5, 6f12.5)') i, (piezo_tensor(i,j)*fact, j=1,6)
 ENDDO
 WRITE(stdout,'(/,20x,40("-"),/)')
 
 RETURN
-END SUBROUTINE print_d_piezo_tensor
-
-!---------------------------------------------------------------------------
-SUBROUTINE print_g_piezo_tensor(frozen_ions)
-!---------------------------------------------------------------------------
-!
-!  This routine writes on output the piezoelectric tensor
-!  The piezoelectric tensor enters in units of e / bohr**2
-!
-USE kinds, ONLY : DP
-USE constants, ONLY : electron_si, bohr_radius_si
-IMPLICIT NONE
-LOGICAL, INTENT(IN) :: frozen_ions
-REAL(DP) :: fact
-INTEGER :: i, j
-CHARACTER(LEN=30) :: fi_string
-
-fi_string=''
-IF (frozen_ions) fi_string="Frozen ions"
-
-WRITE(stdout,'(/,5x,a)') TRIM(fi_string)
-WRITE(stdout,'(5x,"Improper piezoelectric tensor &
-                                &gamma_ij [ 10^{-2} e/(a.u.)^2 ]")')
-WRITE(stdout,'(4x,"i j=",i9,5i12)') (i, i=1,6)
-fact= 100.0_DP 
-DO i=1,3
-   WRITE(stdout,'(i5, 6f12.5)') i, (g_piezo_tensor(i,j)*fact, j=1,6)
-ENDDO
-
-WRITE(stdout,'(/,5x,a)') TRIM(fi_string)
-WRITE(stdout,'(5x,"Improper piezoelectric tensor gamma_ij [C/m^2] ")')
-WRITE(stdout,'(4x,"i j=",i9,5i12)') (i, i=1,6)
-fact= electron_si / (bohr_radius_si)**2 
-DO i=1,3
-   WRITE(stdout,'(i5, 6f12.5)') i, (g_piezo_tensor(i,j)*fact, j=1,6)
-ENDDO
-WRITE(stdout,'(/,20x,40("-"),/)')
-
-RETURN
-END SUBROUTINE print_g_piezo_tensor
-!
-!---------------------------------------------------------------------------
-SUBROUTINE print_e_piezo_tensor(frozen_ions)
-!---------------------------------------------------------------------------
-!
-!  This routine writes on output the proper piezoelectric tensor
-!  The piezoelectric tensor enters in units of e / bohr**2
-!
-USE kinds, ONLY : DP
-USE constants, ONLY : electron_si, bohr_radius_si
-IMPLICIT NONE
-LOGICAL, INTENT(IN) :: frozen_ions
-REAL(DP) :: fact
-INTEGER :: i, j
-CHARACTER(LEN=30) :: fi_string
-
-fi_string=''
-IF (frozen_ions) fi_string="Frozen ions"
-
-WRITE(stdout,'(/,5x,a)') TRIM(fi_string)
-WRITE(stdout,'(5x,"Proper piezoelectric tensor &
-                                &gamma_ij [ 10^{-2} e/(a.u.)^2 ]")')
-WRITE(stdout,'(4x,"i j=",i9,5i12)') (i, i=1,6)
-fact= 100.0_DP 
-DO i=1,3
-   WRITE(stdout,'(i5, 6f12.5)') i, (e_piezo_tensor(i,j)*fact, j=1,6)
-ENDDO
-
-WRITE(stdout,'(/,5x,a)') TRIM(fi_string)
-WRITE(stdout,'(5x,"Proper piezoelectric tensor gamma_ij [C/m^2] ")')
-WRITE(stdout,'(4x,"i j=",i9,5i12)') (i, i=1,6)
-fact= electron_si / (bohr_radius_si)**2 
-DO i=1,3
-   WRITE(stdout,'(i5, 6f12.5)') i, (e_piezo_tensor(i,j)*fact, j=1,6)
-ENDDO
-WRITE(stdout,'(/,20x,40("-"),/)')
-
-RETURN
-END SUBROUTINE print_e_piezo_tensor
-!
-!---------------------------------------------------------------------------
-SUBROUTINE print_eg_piezo_tensor(frozen_ions)
-!---------------------------------------------------------------------------
-!
-!  This routine writes on output the proper piezoelectric tensor
-!  obtained transforming the improper one with the 
-!  polarization of the unperturbed structure.
-!  The piezoelectric tensor enters in units of e / bohr**2
-!
-USE kinds, ONLY : DP
-USE constants, ONLY : electron_si, bohr_radius_si
-IMPLICIT NONE
-LOGICAL, INTENT(IN) :: frozen_ions
-REAL(DP) :: fact
-INTEGER :: i, j
-CHARACTER(LEN=30) :: fi_string
-
-fi_string=''
-IF (frozen_ions) fi_string="Frozen ions"
-WRITE(stdout,'(/,5x,a)') TRIM(fi_string)
-WRITE(stdout,'(5x,"Proper transformed piezoelectric tensor gamma_ij [C/m^2] ")')
-WRITE(stdout,'(4x,"i j=",i9,5i12)') (i, i=1,6)
-fact= electron_si / (bohr_radius_si)**2 
-DO i=1,3
-   WRITE(stdout,'(i5, 6f12.5)') i, (eg_piezo_tensor(i,j)*fact, j=1,6)
-ENDDO
-WRITE(stdout,'(/,20x,40("-"),/)')
-
-RETURN
-END SUBROUTINE print_eg_piezo_tensor
+END SUBROUTINE print_piezo_tensor
 
 !-------------------------------------------------------------------------
 SUBROUTINE allocate_piezo(nwork)
@@ -403,6 +306,7 @@ IF (ios /= 0) THEN
    exists=.FALSE.
    RETURN
 ENDIF
+CALL mp_bcast(polar0,ionode_id,intra_image_comm)
 CALL mp_bcast(g_piezo_tensor,ionode_id,intra_image_comm)
 CALL mp_bcast(eg_piezo_tensor,ionode_id,intra_image_comm)
 CALL mp_bcast(e_piezo_tensor,ionode_id,intra_image_comm)
@@ -411,6 +315,80 @@ exists=.TRUE.
 
 RETURN
 END SUBROUTINE read_piezo_tensor
+!
+!-------------------------------------------------------------------------
+SUBROUTINE read_piezo_tensor_fi(filename, polar0_fi, exists)
+!-------------------------------------------------------------------------
+!
+!  This routine reads the piezoelectric tensor from file and
+!  save it in the auxiliary variable with the fi extension
+!
+USE io_global, ONLY : ionode, ionode_id
+USE constants, ONLY : electron_si, bohr_radius_si
+USE mp_images, ONLY : intra_image_comm
+USE mp,        ONLY : mp_bcast 
+IMPLICIT NONE
+CHARACTER(LEN=*), INTENT(IN) :: filename
+REAL(DP) :: polar0_fi(3)
+LOGICAL, INTENT(OUT) :: exists
+REAL(DP) :: e_piezo_tensor_cm2(3,6), fact
+INTEGER :: inunit, ios, i, j
+INTEGER :: find_free_unit
+
+IF (ionode) THEN
+   inunit=find_free_unit()
+   OPEN(UNIT=inunit, FILE=TRIM(filename), STATUS='old', FORM='formatted', &
+       ERR=100, IOSTAT=ios)
+ENDIF
+
+fact = electron_si / bohr_radius_si**2
+IF (ionode) THEN
+   READ(inunit,*)
+   READ(inunit,'(3e19.10)') (polar0_fi(i), i=1,3)
+   READ(inunit,*)
+   READ(inunit,*)
+   DO i=1,3
+      READ(inunit,'(6e19.10)',ERR=100,IOSTAT=ios) (g_piezo_tensor_fi(i,j), j=1,6)
+   ENDDO
+   READ(inunit,*)
+   READ(inunit,*)
+   DO i=1,3
+      READ(inunit,'(6e19.10)',ERR=100,IOSTAT=ios) (eg_piezo_tensor_fi(i,j), j=1,6)
+   END DO
+   READ(inunit,*)
+   READ(inunit,*)
+   DO i=1,3
+      READ(inunit,'(6e19.10)',ERR=100,IOSTAT=ios) (e_piezo_tensor_fi(i,j), j=1,6)
+   END DO
+   READ(inunit,*)
+   READ(inunit,*)
+   DO i=1,3
+      READ(inunit,'(6e19.10)',ERR=100,IOSTAT=ios) (e_piezo_tensor_cm2(i,j),&
+                                                                       j=1,6)
+   END DO
+   READ(inunit,*)
+   READ(inunit,*)
+   DO i=1,3
+      READ(inunit,'(6e19.10)',ERR=100,IOSTAT=ios) (d_piezo_tensor_fi(i,j), j=1,6)
+   END DO
+   d_piezo_tensor_fi=d_piezo_tensor_fi / fact / 1.D-4 ! bring it back to units 
+                                                ! e/(bohr**2 * kbar)
+   CLOSE(inunit)
+ENDIF
+100 CALL mp_bcast(ios,ionode_id,intra_image_comm)
+IF (ios /= 0) THEN
+   exists=.FALSE.
+   RETURN
+ENDIF
+CALL mp_bcast(polar0_fi,ionode_id,intra_image_comm)
+CALL mp_bcast(g_piezo_tensor_fi,ionode_id,intra_image_comm)
+CALL mp_bcast(eg_piezo_tensor_fi,ionode_id,intra_image_comm)
+CALL mp_bcast(e_piezo_tensor_fi,ionode_id,intra_image_comm)
+CALL mp_bcast(d_piezo_tensor_fi,ionode_id,intra_image_comm)
+exists=.TRUE.
+
+RETURN
+END SUBROUTINE read_piezo_tensor_fi
 !---------------------------------------------------------------------------
 SUBROUTINE compute_improper_piezo_tensor(polar_geo, epsil_geo, nwork, &
                                 ngeo, ibrav, code_group)
@@ -426,7 +404,7 @@ IMPLICIT NONE
 REAL(DP), INTENT(IN) :: polar_geo(3,nwork), epsil_geo(3,3,nwork)
 INTEGER, INTENT(IN) :: ngeo, ibrav, code_group, nwork
 INTEGER :: i, j, igeo, alpha, ind, mn
-LOGICAL check_group_ibrav
+LOGICAL :: check_group_ibrav
 
 WRITE(stdout,'(/,20x,40("-"),/)')
 g_piezo_tensor=0.0_DP
@@ -719,7 +697,7 @@ REAL(DP), INTENT(IN) :: tot_b_phase(3,nwork), epsil_geo(3,3,nwork), &
                         at(3,3)
 INTEGER, INTENT(IN) :: ngeo, ibrav, code_group, nwork
 INTEGER :: i, j, igeo, alpha, ind, mn
-LOGICAL check_group_ibrav
+LOGICAL :: check_group_ibrav
 
 WRITE(stdout,'(/,20x,40("-"),/)')
 e_piezo_tensor=0.0_DP
@@ -1034,7 +1012,7 @@ IMPLICIT NONE
 REAL(DP), INTENT(INOUT) :: piezo(3,6)
 INTEGER, INTENT(IN) ::  ibrav, code_group
 INTEGER :: i, j, igeo, alpha, ind, mn
-LOGICAL check_group_ibrav
+LOGICAL :: check_group_ibrav
 
 REAL(DP) :: epiezo(3,6)
 
@@ -1593,7 +1571,7 @@ IF (dir==1) THEN
          piezo_voigt_aux(i,m)=piezo_in(i,m)*2.0_DP
       ENDDO
    ENDDO
-   CALL to_voigt3(piezo_voigt_aux, piezo_in_aux, .FALSE.)
+   CALL to_voigt3(piezo_voigt_aux, piezo_in_aux, 1.0_DP, .FALSE.)
    DO ipol=1,3
       DO jpol=1,3
          DO kpol=1,3
@@ -1606,7 +1584,7 @@ IF (dir==1) THEN
          ENDDO
       ENDDO
    ENDDO
-   CALL to_voigt3(piezo_out, piezo_in_aux, .TRUE.)
+   CALL to_voigt3(piezo_out, piezo_in_aux, 1.0_DP, .TRUE.)
    DO i=1,3
       DO m=3,6
          piezo_out(i,m)=piezo_out(i,m)*0.5_DP
@@ -1622,7 +1600,7 @@ ELSEIF (dir==-1) THEN
          piezo_voigt_aux(i,m)=piezo_in(i,m)*2.0_DP
       ENDDO
    ENDDO
-   CALL to_voigt3(piezo_voigt_aux, piezo_in_aux, .FALSE.)
+   CALL to_voigt3(piezo_voigt_aux, piezo_in_aux, 1.0_DP, .FALSE.)
    DO ipol=1,3
       DO jpol=1,3
          DO kpol=1,3
@@ -1635,7 +1613,7 @@ ELSEIF (dir==-1) THEN
          ENDDO
       ENDDO
    ENDDO
-   CALL to_voigt3(piezo_out, piezo_in_aux, .TRUE.)
+   CALL to_voigt3(piezo_out, piezo_in_aux, 1.0_DP, .TRUE.)
    DO i=1,3
       DO m=3,6
          piezo_out(i,m)=piezo_out(i,m)*0.5_DP
@@ -2057,5 +2035,81 @@ get_pt_type=aux_type
 RETURN
 END FUNCTION get_pt_type
 
+!-------------------------------------------------------------------------
+SUBROUTINE compute_relax_piezo(ibrav, code_group, nat, max_nint_var, &
+                               nint_var_ec, stypes, piezo_relax,     &
+                               zeu_eq, dtau_dint, duint_depsilon)
+!-------------------------------------------------------------------------
+
+USE kinds, ONLY : DP
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ibrav, code_group, nat, max_nint_var, stypes
+INTEGER, INTENT(IN) :: nint_var_ec(stypes)
+REAL(DP), INTENT(OUT) :: piezo_relax(3,6)
+REAL(DP), INTENT(IN) :: zeu_eq(3,3,nat)
+REAL(DP), INTENT(IN) :: dtau_dint(3,nat,max_nint_var,stypes)
+REAL(DP), INTENT(IN) :: duint_depsilon(max_nint_var,stypes)
+
+INTEGER :: itypes, iint, ipol, jpol, i, j, na
+REAL(DP) :: piezo_relax_aux(3,stypes)
+LOGICAL :: check_group_ibrav
+
+
+piezo_relax=0.0_DP
+piezo_relax_aux=0.0_DP
+DO itypes=1, stypes
+   DO iint=1, nint_var_ec(itypes)
+      DO ipol=1,3
+         DO jpol=1,3
+            DO na=1,nat
+               piezo_relax_aux(ipol,itypes) = piezo_relax_aux(ipol,itypes) +  &
+                     zeu_eq(ipol,jpol,na) * dtau_dint(jpol,na,iint,itypes) * &
+                                            duint_depsilon(iint,itypes)
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDDO
+ENDDO
+
+IF (check_group_ibrav(code_group, ibrav)) THEN
+   SELECT CASE (code_group)
+     CASE(2,16,18,19,20,22,23,25,27,29,32)
+     CASE(14,15)
+!
+! C_4v tetragonal, C_6v hexagonal
+!
+!         WRITE(stdout,'(5x,"(  .    .    .    .   d15   .  )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .   d15   .    .  )")') 
+!         WRITE(stdout,'(5x,"( d31  d31  d33   .    .    .  )")') 
+
+        IF (stypes /= 3) CALL errore('compute_relax_piezo','problem with &
+                         C_4v of C_6v',1)
+!
+!   The factor 0.5 is due to the fact that in strain type 1 we have both
+!   epsilon_xx and epsilon_yy
+!   The factor 0.5 in piezo_relax(1,5) is due to the fact that
+!   e_5 = 2.0 * e_xz
+!
+        piezo_relax(3,1) = piezo_relax_aux(3,1) * 0.5_DP 
+        piezo_relax(3,2) = piezo_relax(3,1)
+        piezo_relax(3,3) = piezo_relax_aux(3,2)
+        piezo_relax(1,5) = piezo_relax_aux(1,3) * 0.5_DP
+        piezo_relax(2,4) = piezo_relax(1,5)
+     CASE DEFAULT
+        CALL errore('compute_relax_piezo', 'point group not implemented',1) 
+  END SELECT
+ELSE
+   IF (stypes /= 6) CALL errore('compute_relax_piezo','problem with &
+                         generic piezo',1)
+   DO i=1,3
+      DO j=1,6
+         piezo_relax(i,j) = piezo_relax_aux(i,j)
+      ENDDO
+   ENDDO
+ENDIF
+
+
+RETURN
+END SUBROUTINE compute_relax_piezo
 
 END MODULE piezoelectric_tensor

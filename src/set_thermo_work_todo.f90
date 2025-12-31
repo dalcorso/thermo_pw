@@ -21,7 +21,8 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
   USE kinds,            ONLY : DP
   USE thermo_mod,       ONLY : what, ibrav_geo, celldm_geo, ef_geo, tau_geo
   USE control_thermo,   ONLY : outdir_thermo, ltau_from_file
-  USE control_elastic_constants, ONLY : frozen_ions, use_free_energy, ngeom
+  USE control_elastic_constants, ONLY : frozen_ions, use_free_energy, ngeom, &
+                               tau_acc
   USE control_atomic_pos, ONLY : linternal_thermo
   USE control_conv,     ONLY : ke, keden, nk_test, sigma_test
   USE control_eldos,    ONLY : lel_free_energy
@@ -170,6 +171,35 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
            niter=electron_maxstep
            CALL set_work_for_relaxation(iwork)
            CALL set_work_for_elastic_const(iwork)
+
+        CASE ('piezoelectric_tensor_geo')
+           niter=electron_maxstep
+           CALL set_geometry_el_cons(iwork)
+           ibrav=0
+           DO i=1, 3
+              CALL apply_strain(at0(1,i), at(1,i), epsilon_geo(1,1,iwork))
+           ENDDO
+           DO ia=1,nat
+              CALL apply_strain(tau0(1,ia), tau(1,ia), epsilon_geo(1,1,iwork))
+           ENDDO
+!
+!   there is the possibility to add a fixed displacement to the atomic positions
+!
+           tau(:,:)=tau(:,:)+tau_acc(:,:,iwork)
+           CALL print_strain(epsilon_geo(:,:,iwork))
+
+           CALL set_work_for_relaxation(iwork)
+
+           rd_ht = TRANSPOSE( at ) 
+           trd_ht=.TRUE.
+           cell_units='alat'
+           CALL cell_base_init ( ibrav, celldm0, zero, zero, zero, zero, &
+                         zero, zero, trd_ht, rd_ht, cell_units )
+           CALL set_fft_mesh()
+           outdir=TRIM(outdir_thermo)//'/g'//TRIM(int_to_char(iwork))//'/'
+           CALL set_tmp_dir( outdir )
+           IF (.NOT.frozen_ions) CALL clean_bfgs_history()
+
         CASE DEFAULT
            CALL errore('set_thermo_work_todo','unknown what',1)
      END SELECT
@@ -191,6 +221,9 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
            ELSEIF (lel_free_energy) THEN
               CALL set_work_for_bands(iwork)
            ENDIF
+        CASE('piezoelectric_tensor_geo')
+           IF (use_free_energy) &
+              CALL set_work_for_ph(iwork, igeom, iq_point, irr_value)
         CASE ('mur_lc')
 
            CALL set_work_for_bands(iwork)
@@ -201,10 +234,9 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
            niter=electron_maxstep
            CALL set_work_for_relaxation(iwork)
            CALL set_work_for_elastic_const(iwork)
-        CASE ('scf_piezoelectric_tensor', 'mur_lc_piezoelectric_tensor', &
-                               'piezoelectric_tensor_geo')
+        CASE ('scf_piezoelectric_tensor', 'mur_lc_piezoelectric_tensor' )
            niter=electron_maxstep
-           IF (ngeom>1) CALL set_geometry_el_cons(iwork)
+           CALL set_geometry_el_cons(iwork)
            ibrav=0
            DO i=1, 3
               CALL apply_strain(at0(1,i), at(1,i), epsilon_geo(1,1,iwork))
@@ -212,6 +244,10 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
            DO ia=1,nat
               CALL apply_strain(tau0(1,ia), tau(1,ia), epsilon_geo(1,1,iwork))
            ENDDO
+!
+!   there is the possibility to add a fixed displacement to the atomic positions
+!
+           tau(:,:)=tau(:,:)+tau_acc(:,:,iwork)
            CALL print_strain(epsilon_geo(:,:,iwork))
 
            CALL set_work_for_relaxation(iwork)

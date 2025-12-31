@@ -798,6 +798,8 @@ CALL check_el_cons_qha()
 IF (.NOT.(el_cons_qha_available.OR.el_consf_qha_available)) &
                                                 CALL check_el_cons()
 CALL check_piezo_tensor()
+
+CALL build_el_cons_d()
 !
 !  If the elastic constants are on file and the user allows it, the code 
 !  computes the elastic constants as a function of temperature interpolating 
@@ -806,6 +808,10 @@ CALL check_piezo_tensor()
 CALL set_elastic_constants_t()
 
 CALL set_piezo_tensor_t()
+
+CALL set_epsilon_infty_t()
+
+CALL set_zeu_t()
 
 IF (ltherm_dos) THEN
 !

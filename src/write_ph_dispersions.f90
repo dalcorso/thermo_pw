@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2016 Andrea Dal Corso
+! Copyright (C) 2016-2025 Andrea Dal Corso
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -49,7 +49,7 @@ SUBROUTINE write_ph_dispersions()
   IMPLICIT NONE
   !
   CHARACTER(LEN=256) :: filefrq, filename, filevec
-  INTEGER :: nqs, nta, ipol, ios, code_group_old, n, i, iq, nq, iout
+  INTEGER :: ios, code_group_old, n, i, iq, nq, iout
   LOGICAL :: lo_to_split
   CHARACTER(LEN=15), ALLOCATABLE :: name_rap_mode(:)
   REAL(DP) :: ps, qh, dq(3), q1(3), q2(3), modq1, modq2, dqmod
@@ -272,3 +272,42 @@ SUBROUTINE write_ph_dispersions()
   !
   RETURN
 END SUBROUTINE write_ph_dispersions
+!
+!---------------------------------------------------------------------
+SUBROUTINE write_ph_gamma(igeom)
+  !-----------------------------------------------------------------------
+  !
+  !  This routine computes the phonon frequencies at the gamma point
+  !  of the Brillouin zone. It is called only for insulating materials
+  !  and provides the phonon frequencies and displacements without
+  !  the LO-TO splitting. These can be used to calculate epsilon_0 from
+  !  epsilon_infty.
+  !
+  USE kinds,      ONLY : DP
+  USE thermo_mod, ONLY : z_geo, freq_geo
+  USE ions_base,  ONLY : nat
+  USE matdyn_mod,    ONLY : matdyn_interp
+  USE ifc,           ONLY : has_zstar
+  !
+  IMPLICIT NONE
+  !
+  INTEGER, INTENT(IN) :: igeom
+
+  REAL(DP) :: q(3,1)
+  REAL(DP) :: freq_save(3*nat)
+  COMPLEX(DP) :: z_save(3*nat,3*nat)
+  INTEGER :: disp_nqs
+  !
+  IF (.NOT. has_zstar) RETURN
+  disp_nqs=1
+  q=0.0_DP
+!
+!  we always need the eigenvectors 
+!
+  CALL matdyn_interp(disp_nqs, q, freq_save, 1, disp_nqs, z_save)
+
+  z_geo(1:3*nat,1:3*nat,igeom)=z_save(1:3*nat,1:3*nat)
+  freq_geo(1:3*nat,igeom)=freq_save(1:3*nat)
+  !
+  RETURN
+END SUBROUTINE write_ph_gamma

@@ -112,17 +112,19 @@ RETURN
 END SUBROUTINE to_voigt2
 
 !-----------------------------------------------------------------------
-SUBROUTINE to_voigt3(av, a, flag)
+SUBROUTINE to_voigt3(av, a, fact, flag)
 !-----------------------------------------------------------------------
 !
 !  This routine transforms a rank 3 3x3x3 tensor in a 3x6 component Voigt array
 !  (flag=.true.) or viceversa (flag=.false.)
+!  If needed multiply the ijk factors where j/=k by the factor fact.
 !
 USE kinds, ONLY : DP
 IMPLICIT NONE
 
 REAL(DP), INTENT(INOUT) :: a(3,3,3)
 REAL(DP), INTENT(INOUT) :: av(3,6)
+REAL(DP), INTENT(IN) :: fact
 LOGICAL, INTENT(IN) :: flag
 
 INTEGER :: ij, i, j
@@ -131,14 +133,22 @@ IF (flag) THEN
    av=0.0_DP
    DO ij=1,6
       CALL voigt_extract_indices(i,j,ij)
-      av(:,ij) = a(:,i,j) 
+      IF (i/=j) THEN
+         av(:,ij) = a(:,i,j) * fact
+      ELSE
+         av(:,ij) = a(:,i,j) 
+      ENDIF
    ENDDO
 ELSE
    a=0.0_DP
    DO i=1,3
       DO j=1,3
          CALL voigt_index(i,j,ij)
-         a(:,i,j) = av(:,ij)
+         IF (i/=j) THEN
+            a(:,i,j) = av(:,ij) * fact
+         ELSE
+            a(:,i,j) = av(:,ij)
+         ENDIF
       ENDDO
    ENDDO
 ENDIF

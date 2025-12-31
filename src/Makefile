@@ -89,6 +89,7 @@ manage_elastic_cons_qha_2.o \
 manage_energy_minimum.o \
 manage_hot_electrons.o \
 manage_piezo_tensor.o \
+manage_piezo_tensor_qha.o \
 manage_plot_anhar.o \
 manage_ph.o \
 manage_ph_all_geometries.o \
@@ -152,6 +153,7 @@ set_files_names.o \
 set_k_points.o \
 set_paths_disp.o \
 set_piezo_tensor_work.o \
+set_tau_acc.o \
 set_temperature.o \
 set_thermo_work_todo.o \
 set_work_for_elastic_const.o \
@@ -175,6 +177,7 @@ write_e_omega.o \
 write_el_thermo.o \
 write_elastic_t.o \
 write_elastic_t_qha.o \
+write_epsilon_infty_t.o \
 write_ev_input.o \
 write_free_energy.o \
 write_gnuplot_energy.o \
@@ -187,7 +190,8 @@ write_ph_dispersions.o \
 write_piezo_t.o \
 write_phdos.o \
 write_quadratic.o \
-write_thermo.o 
+write_thermo.o \
+write_zeu_t.o 
 
 #libraries of QE
 PWOBJS = ../../PHonon/PH/libph.a \

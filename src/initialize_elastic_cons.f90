@@ -57,7 +57,7 @@ USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, rot_mat, &
                                work_base, elalgen, epsil_geo, tau_acc,     &
                                nmove, atom_step, atom_dir, move_at, stype, &
                                nstep_ec, min_y, lcm_ec, epsil_y, old_ec,   &
-                               iconstr_internal_ec, nint_var_ec,           &
+                               nint_var_ec,                                &
                                stypec, int_ngeo_ec, int_step_ngeo_ec,      &
                                ninternal_ec 
 USE control_atomic_pos, ONLY : max_nint_var

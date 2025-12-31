@@ -14,6 +14,7 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   !
   !
   USE control_flags,   ONLY : conv_ions, lforce=>tprnfor, tstress
+  USE bp,              ONLY : lberry
   USE starting_scf,    ONLY : starting_wfc, starting_pot, startingconfig
   USE io_files,        ONLY : prefix, tmp_dir, wfc_dir, seqopn
   USE lsda_mod,        ONLY : nspin
@@ -125,6 +126,7 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   lscf           = .FALSE.
   lforce         = .FALSE.
   tstress        = .FALSE.
+  lberry         = .FALSE.
   restart        = ext_restart
   conv_ions      = .true.
   ethr_nscf      = 1.0D-9 / nelec 

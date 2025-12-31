@@ -111,3 +111,64 @@ ENDIF
 
 RETURN
 END SUBROUTINE set_piezo_tensor_t
+
+!----------------------------------------------------------------------
+SUBROUTINE set_epsilon_infty_t()
+!----------------------------------------------------------------------
+!
+!  This routine sets the temperature dependent dielectric constants
+!  depending on what has been found in the files and the user requests.
+!  It will use the dielectric constant at several geometries found in the 
+!  dynamical matrix file (quasi-static approximation). 
+!
+USE thermo_mod, ONLY : tot_ngeo
+USE control_epsilon_infty, ONLY : epsilon_infty_geo_available, &
+                                  lepsilon_infty_geo
+IMPLICIT NONE
+
+INTEGER :: igeom
+
+epsilon_infty_geo_available=.TRUE.
+DO igeom=1,tot_ngeo
+   epsilon_infty_geo_available=epsilon_infty_geo_available.AND. &
+                                         lepsilon_infty_geo(igeom)
+ENDDO
+
+
+IF (epsilon_infty_geo_available) THEN
+   CALL write_epsilon_infty_t()
+   CALL write_epsilon_infty_pt()
+   CALL write_epsilon_infty_ptt()
+ENDIF
+
+RETURN
+END SUBROUTINE set_epsilon_infty_t
+
+!----------------------------------------------------------------------
+SUBROUTINE set_zeu_t()
+!----------------------------------------------------------------------
+!
+!  This routine sets the temperature dependent born effective charge
+!  depending on what has been found in the files and the user requests.
+!  It will use the born effective charges at several geometries found in the 
+!  dynamical matrix file (quasi-static approximation). 
+!
+USE thermo_mod, ONLY : tot_ngeo
+USE control_epsilon_infty, ONLY : zeu_geo_available, lzeu_geo
+IMPLICIT NONE
+
+INTEGER :: igeom
+
+zeu_geo_available=.TRUE.
+DO igeom=1,tot_ngeo
+   zeu_geo_available=zeu_geo_available.AND.lzeu_geo(igeom)
+ENDDO
+
+IF (zeu_geo_available) THEN
+   CALL write_zeu_t()
+   CALL write_zeu_pt()
+   CALL write_zeu_ptt()
+ENDIF
+
+RETURN
+END SUBROUTINE set_zeu_t

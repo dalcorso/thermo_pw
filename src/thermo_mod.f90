@@ -80,6 +80,19 @@ MODULE thermo_mod
                                                 ! are the internal coordinates
   INTEGER :: tot_ngeo_eos               ! total number of geometries 
                                         ! to compute the eos
+  REAL(DP), ALLOCATABLE :: epsilon_infty_geo(:,:,:) ! the dielectric constant
+                                        ! of each geometry high frequency
+  REAL(DP), ALLOCATABLE :: epsilon_zero_geo(:,:,:) ! the dielectric constant
+                                        ! of each geometry low frequency
+  REAL(DP), ALLOCATABLE :: epsilon_zerom1_geo(:,:,:) ! the inverse of the 
+                                        ! dielectric constant
+                                        ! of each geometry low frequency
+  REAL(DP), ALLOCATABLE :: zeu_geo(:,:,:,:) ! the born effective change
+                                            ! of each geometry 
+  REAL(DP), ALLOCATABLE :: freq_geo(:,:) ! the frequencies at gamma of
+                                         ! each geometry in cm^-1
+  COMPLEX(DP), ALLOCATABLE :: z_geo(:,:,:) ! the eigenvectors of the 
+                                         ! dynamical matrix at gamma
 
   REAL(DP) ::              step_ngeo(6)         ! the difference of 
                                                 ! parameters among
@@ -315,6 +328,9 @@ MODULE thermodynamics
   REAL(DP), ALLOCATABLE :: tau_geo_eos_t(:,:,:,:)! atomic coordinates for
                                                  ! each temperature for each
                                                  ! external geometry
+  REAL(DP), ALLOCATABLE :: e_piezo_tensor_eos_t(:,:,:,:) ! the piezoelectric
+                                                 ! tensor in each geometry
+                                                 ! computed with FFEM
 END MODULE thermodynamics
 
 !----------------------------------------------------------------------------
@@ -358,6 +374,9 @@ MODULE ph_freq_thermodynamics
                                                  ! each temperature for each
                                                  ! external geometry
                                                  ! (T, external geometry)
+  REAL(DP), ALLOCATABLE :: e_piezo_tensorf_eos_t(:,:,:,:) ! the piezoelectric
+                                                 ! tensor in each geometry
+                                                 ! computed with FFEM
 END MODULE ph_freq_thermodynamics
 
 !----------------------------------------------------------------------------
@@ -563,6 +582,10 @@ MODULE anharmonic
                                          ! tensor as a function of temperature 
   REAL(DP), ALLOCATABLE :: d_piezo_tensor_t(:,:,:) ! strain piezoelectric 
                                          ! tensor as a function of temperature 
+  REAL(DP), ALLOCATABLE :: epsilon_infty_t(:,:,:) ! epsilon infinity as a 
+                                         ! function of temperature 
+  REAL(DP), ALLOCATABLE :: zeu_t(:,:,:,:)! Born effective charge as a 
+                                         ! function of temperature 
 !
 !  The parameters of the interpolation neglecting the electronic exitation
 !  contribution
@@ -703,6 +726,10 @@ MODULE anharmonic_pt
                                          ! a function of temperature 
   REAL(DP), ALLOCATABLE :: d_piezo_tensor_pt(:,:,:,:) ! piezoelectric tensor as 
                                          ! a function of temperature 
+  REAL(DP), ALLOCATABLE :: epsilon_infty_pt(:,:,:,:) ! epsilon infinity as a 
+                                         ! function of temperature several p
+  REAL(DP), ALLOCATABLE :: zeu_pt(:,:,:,:,:) ! Born effective charge as a 
+                                         ! function of temperature several p
 
   REAL(DP), ALLOCATABLE :: celldm_pt_p1(:,:,:)   ! crystal parameters at p+dp
   REAL(DP), ALLOCATABLE :: celldm_pt_m1(:,:,:)   ! crystal parameters at p-dp
@@ -794,6 +821,10 @@ MODULE ph_freq_anharmonic_pt
                                                   ! a function of temperature 
   REAL(DP), ALLOCATABLE :: d_piezo_tensorf_pt(:,:,:,:) ! piezoelectric tensor as 
                                                   ! a function of temperature 
+  REAL(DP), ALLOCATABLE :: epsilon_inftyf_pt(:,:,:,:) ! epsilon infinity as a 
+                                         ! function of pressure several T
+  REAL(DP), ALLOCATABLE :: zeuf_pt(:,:,:,:,:) ! Born effective charge as a 
+                                         ! function of pressure at several T
 
   REAL(DP), ALLOCATABLE :: celldmf_pt_p1(:,:,:)   ! crystal parameters at p+dp
   REAL(DP), ALLOCATABLE :: celldmf_pt_m1(:,:,:)   ! crystal parameters at p-dp
@@ -898,6 +929,10 @@ MODULE anharmonic_ptt
                                                   ! a function of pressure
   REAL(DP), ALLOCATABLE :: d_piezo_tensor_ptt(:,:,:,:) ! piezoelectric tensor as 
                                                   ! a function of pressure
+  REAL(DP), ALLOCATABLE :: epsilon_infty_ptt(:,:,:,:) ! epsilon infinity as a 
+                                         ! function of pressure several T
+  REAL(DP), ALLOCATABLE :: zeu_ptt(:,:,:,:,:) ! Born effective charge as a 
+                                         ! function of pressure at several T
 
 END MODULE anharmonic_ptt
 !----------------------------------------------------------------------------
@@ -999,6 +1034,10 @@ MODULE ph_freq_anharmonic_ptt
                                                   ! a function of pressure 
   REAL(DP), ALLOCATABLE :: d_piezo_tensorf_ptt(:,:,:,:) ! piezoelectric tensor as
                                                   ! a function of pressure 
+  REAL(DP), ALLOCATABLE :: epsilon_inftyf_ptt(:,:,:,:) ! epsilon infinity as a 
+                                         ! function of pressure several T
+  REAL(DP), ALLOCATABLE :: zeuf_ptt(:,:,:,:,:) ! Born effective charge as a 
+                                         ! function of pressure several T
 
 END MODULE ph_freq_anharmonic_ptt
 !
@@ -1018,6 +1057,7 @@ MODULE anharmonic_vt
   REAL(DP), ALLOCATABLE :: press_vtt(:,:) ! the thermal pressure as a function
                            ! of temperature for selected volumes
 END MODULE anharmonic_vt
+!
 !----------------------------------------------------------------------------
 MODULE ph_freq_anharmonic_vt
 !----------------------------------------------------------------------------
@@ -1187,6 +1227,10 @@ MODULE ph_freq_anharmonic
                                          ! tensor as a function of temperature 
   REAL(DP), ALLOCATABLE :: d_piezo_tensorf_t(:,:,:) ! strain piezoelectric 
                                          ! tensor as a function of temperature 
+  REAL(DP), ALLOCATABLE :: epsilon_inftyf_t(:,:,:) ! epsilon infinity 
+                                         ! as a function of temperature 
+  REAL(DP), ALLOCATABLE :: zeuf_t(:,:,:,:) ! Born effective cgarge
+                                         ! as a function of temperature 
 
   REAL(DP), ALLOCATABLE :: celldmf_t_p1(:,:)! the celldm at the pressure+dp
                                            ! as a function of T
@@ -1475,7 +1519,9 @@ MODULE control_thermo
                             ! converted input
   LOGICAL :: lectqha=.FALSE. ! if .true. compute the elastic constants 
                             ! within the qha at many geometries
-  !
+  LOGICAL :: lpiezotqha=.FALSE. ! if .true. compute the piezoelectric 
+                            ! tensor using internal geometries obtained
+                            ! by minimizing the free energy.
   CHARACTER(LEN=256) :: outdir_thermo ! the outdir read from the input
   !
   LOGICAL :: set_internal_path ! the path provided by thermo_pw is used
@@ -1518,7 +1564,7 @@ MODULE control_atomic_pos
 
   INTEGER :: nint_var ! the number of internal degrees of freedom
 
-  INTEGER, PARAMETER :: max_nint_var=2 ! the maximum number of internal degrees of freedom
+  INTEGER, PARAMETER :: max_nint_var=3 ! the maximum number of internal degrees of freedom
 
   INTEGER :: int_ngeo(max_nint_var)  ! how many steps to do for each internal
                             ! degree of freedom
@@ -1626,6 +1672,8 @@ MODULE control_elastic_constants
                                 !
   REAL(DP), ALLOCATABLE :: el_con_geo(:,:,:)  ! the elastic constants at
                                 ! each geometry
+  REAL(DP), ALLOCATABLE :: el_con_d_geo(:,:,:)  ! the elastic constants at
+                                ! each geometry at constant D
   INTEGER, ALLOCATABLE :: el_con_ibrav_geo(:) ! the ibrav of each unperturbed
                                 ! lattice.
   REAL(DP), ALLOCATABLE :: el_con_celldm_geo(:,:) ! the celldm of each 
@@ -1695,6 +1743,10 @@ MODULE control_elastic_constants
                                 ! that has min_y internal coordinate 
                                 ! as a minimum
   REAL(DP), ALLOCATABLE :: min_y_t(:,:,:,:,:) ! the minimum value of the 
+                                ! internal coordinate (nint_var_ec,
+                                ! ngeo_strain,21,ngeom,ntemp) at each 
+                                ! temperature minimizing free energy
+  REAL(DP), ALLOCATABLE :: min_yf_t(:,:,:,:,:) ! the minimum value of the 
                                 ! internal coordinate (nint_var_ec,
                                 ! ngeo_strain,21,ngeom,ntemp) at each 
                                 ! temperature minimizing free energy
@@ -1785,6 +1837,72 @@ MODULE control_piezoelectric_tensor
   LOGICAL :: lpiezo_d_ptt=.FALSE.     ! piezoelectric tensor ptt written on file
  
   LOGICAL :: lpiezof_d_ptt=.FALSE.    ! piezoelectric tensorf ptt written on file
+
+  LOGICAL :: decompose_piezo       ! if .TRUE. the code try to write the
+                                   ! piezoelectric tensor as a sum of a 
+                                   ! clamped ion and a ionic terms.
+  REAL(DP), ALLOCATABLE :: piezo_zeu_geo(:,:,:,:) ! the Born effective charge
+                                   ! of each equilibrium geometry.
+ 
+  REAL(DP), ALLOCATABLE :: dtau_dint(:,:,:,:,:) ! the derivative of tau with
+                                   ! respect to the internal parameters
+                                   ! for each strain type.
+  REAL(DP), ALLOCATABLE :: dint_depsilon_geo(:,:,:) ! the derivative of 
+                                ! the internal parameter with respect to 
+                                ! the strain
+  REAL(DP), ALLOCATABLE :: e_piezo_tensor_fi_geo(:,:,:) ! the proper clamped ion
+                                ! piezoelectric tensor at each geometry
+                                ! if available on file
+  REAL(DP), ALLOCATABLE :: e_piezo_tensor_relax_geo(:,:,:) ! the proper
+                                ! relaxation term of the
+                                ! piezoelectric tensor at each geometry
+
+
+END MODULE
+!
+!----------------------------------------------------------------------------
+MODULE control_epsilon_infty
+!----------------------------------------------------------------------------
+!
+  USE kinds,  ONLY : DP
+
+  LOGICAL :: epsilon_infty_geo_available=.FALSE.  ! when this flag 
+                                ! becomes true it means that the dielectric 
+                                ! constant has been read from file and 
+                                ! is available for all geometries
+
+  LOGICAL, ALLOCATABLE :: lepsilon_infty_geo(:)   ! becomes true for 
+                                ! each geometry for which epsilon_infty exists
+
+  LOGICAL :: zeu_geo_available=.FALSE.  ! when this flag 
+                                ! becomes true it means that the dielectric 
+                                ! constant has been read from file and 
+                                ! is available for all geometries
+
+  LOGICAL, ALLOCATABLE :: lzeu_geo(:) ! becomes true for 
+                                ! each geometry for which epsilon_infty exists
+
+  LOGICAL :: lepsilon_infty=.FALSE.   ! dielectric constant written on file
+  LOGICAL :: lepsilon_inftyf=.FALSE.  ! dielectric constantf written on file
+  LOGICAL :: lepsilon_infty_pt=.FALSE.  ! dielectric constant pt written on 
+                                        ! file
+  LOGICAL :: lepsilon_inftyf_pt=.FALSE. ! dielectric constantf pt written on 
+                                        ! file
+  LOGICAL :: lepsilon_infty_ptt=.FALSE. ! dielectric constant ptt written on 
+                                        ! file
+  LOGICAL :: lepsilon_inftyf_ptt=.FALSE. ! dielectric constantf ptt written 
+                                        ! on file
+  LOGICAL :: lzeu=.FALSE.   ! dielectric constant written on file
+  LOGICAL :: lzeuf=.FALSE.  ! dielectric constantf written on file
+  LOGICAL :: lzeu_pt=.FALSE.  ! dielectric constant pt written on 
+                              ! file
+  LOGICAL :: lzeuf_pt=.FALSE. ! dielectric constantf pt written on 
+                              ! file
+  LOGICAL :: lzeu_ptt=.FALSE. ! dielectric constant ptt written on 
+                              ! file
+  LOGICAL :: lzeuf_ptt=.FALSE.! dielectric constantf ptt written 
+                              ! on file
+
 END MODULE
   !
 !----------------------------------------------------------------------------
@@ -2336,6 +2454,9 @@ MODULE data_files
   CHARACTER(LEN=256) :: fl_el_cons ! the file where the elastic constants are
                                    ! written
   CHARACTER(LEN=256) :: fl_piezo  ! the file where the piezoelectric tensor is 
+                                   ! written
+  CHARACTER(LEN=256) :: fl_dielectric  ! the file where the dielectric
+                                   ! constant and born effective charges are 
                                    ! written
   CHARACTER(LEN=256) :: fl_polar  ! the file where the polarization is 
                                   ! written

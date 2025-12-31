@@ -21,14 +21,16 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   USE thermo_mod,     ONLY : what, energy_geo, ef_geo, celldm_geo, ibrav_geo, &
                              omega_geo, tot_ngeo, no_ph, start_geometry,    &
                              last_geometry, iwho, tau_geo, at_geo, &
-                             tot_ngeo_eos, no_ph_eos, uint_geo
+                             tot_ngeo_eos, no_ph_eos, uint_geo,    &
+                             epsilon_infty_geo, zeu_geo, freq_geo, z_geo, &
+                             epsilon_zero_geo, epsilon_zerom1_geo
   USE control_thermo, ONLY : lpwscf, lpwband, lphonon, lev_syn_1, lev_syn_2, &
                              lph, lef, lpwscf_syn_1, lbands_syn_1, lq2r,   &
                              ltherm, lconv_ke_test, lconv_nk_test,    &
                              lstress, lelastic_const, lpiezoelectric_tensor, &
                              lberry, lpolarization, lpart2_pw, do_scf_relax, &
                              ldos_syn_1, ltherm_dos, ltherm_freq, after_disp, &
-                             lectqha, ltau_from_file
+                             lectqha, ltau_from_file, lpiezotqha
   USE control_pwrun,  ONLY : do_punch
   USE control_conv,   ONLY : nke, ke, deltake, nkeden, deltakeden, keden, &
                              nnk, nk_test, deltank, nsigma, sigma_test,   &  
@@ -36,18 +38,22 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   USE equilibrium_conf, ONLY : celldm0, omega0
   USE control_atomic_pos, ONLY : max_nint_var
   USE initial_conf,   ONLY : ibrav_save, start_geometry_save,             &
-                             last_geometry_save
+                             last_geometry_save, omega_save
   USE piezoelectric_tensor, ONLY : allocate_piezo
   USE control_elastic_constants, ONLY : rot_mat, ngeom, use_free_energy,   &
                                    elalgen, work_base, start_geometry_qha, &
                                    last_geometry_qha, elastic_algorithm,   &
                                    el_con_omega_geo, el_con_geo,           &
                                    all_geometry_done_geo, found_dos_ec,    &
-                                   found_ph_ec, min_y_t, dyde, ngeo_strain, &
-                                   stype, tau_save_ec
+                                   found_ph_ec, min_y_t, min_yf_t, dyde,   &
+                                   ngeo_strain, stype, tau_save_ec,        &
+                                   el_con_celldm_geo, nint_var_ec,         &
+                                   iconstr_internal_ec
   USE control_piezoelectric_tensor, ONLY : g_piezo_tensor_geo, &
                                    eg_piezo_tensor_geo, e_piezo_tensor_geo, &
-                                   d_piezo_tensor_geo, polar0_geo                               
+                                   e_piezo_tensor_fi_geo,                   &
+                                   d_piezo_tensor_geo, polar0_geo
+  USE control_epsilon_infty,        ONLY : lepsilon_infty_geo, lzeu_geo
   USE temperature,   ONLY : ntemp
   USE control_eldos, ONLY : lel_free_energy
   USE gvecw,          ONLY : ecutwfc
@@ -65,7 +71,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   INTEGER, INTENT(IN)  :: part
 
   INTEGER  :: igeom, igeom_qha, ike, iden, icount, ink, isigma, iwork, &
-              iwork_tot, start_geometry1, last_geometry1, ios
+              iwork_tot, start_geometry1, last_geometry1, istep, nstep, ios
   INTEGER  :: count_energies, iq, irr, start_omega, i, j
   REAL(DP) :: compute_omega_geo, dual, kev, kedenv
 !
@@ -119,8 +125,21 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            tot_ngeo_eos=tot_ngeo
            ALLOCATE(no_ph(tot_ngeo))
            ALLOCATE(no_ph_eos(tot_ngeo))
+           ALLOCATE(epsilon_infty_geo(3,3,tot_ngeo))
+           ALLOCATE(zeu_geo(3,3,nat,tot_ngeo))
+           ALLOCATE(lepsilon_infty_geo(tot_ngeo))
+           ALLOCATE(lzeu_geo(tot_ngeo))
+           ALLOCATE(omega_geo(tot_ngeo))
+           omega_geo(1)=omega_save
+           lepsilon_infty_geo=.FALSE.
+           lzeu_geo=.FALSE.
+           ALLOCATE(epsilon_zero_geo(3,3,tot_ngeo))
+           ALLOCATE(epsilon_zerom1_geo(3,3,tot_ngeo))
+           ALLOCATE(freq_geo(3*nat,tot_ngeo))
+           ALLOCATE(z_geo(3*nat,3*nat,tot_ngeo))
            no_ph(1)=.FALSE.
            no_ph_eos(1)=.FALSE.
+           IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
            IF (meta_ionode) ios = f_mkdir_safe( 'dynamical_matrices' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
         CASE ('scf_disp')
@@ -130,11 +149,24 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            tot_ngeo_eos=tot_ngeo
            ALLOCATE(no_ph(tot_ngeo))
            ALLOCATE(no_ph_eos(tot_ngeo))
+           ALLOCATE(epsilon_infty_geo(3,3,tot_ngeo))
+           ALLOCATE(zeu_geo(3,3,nat,tot_ngeo))
+           ALLOCATE(lepsilon_infty_geo(tot_ngeo))
+           ALLOCATE(lzeu_geo(tot_ngeo))
+           lepsilon_infty_geo=.FALSE.
+           lzeu_geo=.FALSE.
+           ALLOCATE(epsilon_zero_geo(3,3,tot_ngeo))
+           ALLOCATE(epsilon_zerom1_geo(3,3,tot_ngeo))
+           ALLOCATE(freq_geo(3*nat,tot_ngeo))
+           ALLOCATE(z_geo(3*nat,3*nat,tot_ngeo))
+           ALLOCATE(omega_geo(tot_ngeo))
+           omega_geo(1)=omega_save
            no_ph(1)=.FALSE.
            no_ph_eos(1)=.FALSE.
            lq2r = .TRUE.
            ltherm = ltherm_dos .OR. ltherm_freq
            CALL allocate_thermodynamics()
+           IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
            IF (meta_ionode) ios = f_mkdir_safe( 'dynamical_matrices' )
            IF (meta_ionode) ios = f_mkdir_safe( 'phdisp_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
@@ -410,7 +442,6 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            tot_ngeo_eos=tot_ngeo
            ALLOCATE(energy_geo(tot_ngeo))
            ALLOCATE(tau_save_ec(3,nat,tot_ngeo))
-           ALLOCATE(tau_geo(3,nat,tot_ngeo))
            ALLOCATE(all_geometry_done_geo(ngeom))
            IF (.NOT.lph) ALLOCATE(el_con_geo(6,6,ngeom))
            ALLOCATE(no_ph(tot_ngeo))
@@ -437,6 +468,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               CALL allocate_thermodynamics()
               CALL allocate_anharmonic()
               ALLOCATE(min_y_t(max_nint_var,ngeo_strain,21,ngeom,ntemp))
+              ALLOCATE(min_yf_t(max_nint_var,ngeo_strain,21,ngeom,ntemp))
               ALLOCATE(dyde(max_nint_var,21,ngeom,ntemp))
            ELSE
               no_ph=.TRUE.
@@ -452,10 +484,63 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               IF (meta_ionode) ios = f_mkdir_safe( 'anhar_files' )
            ENDIF
         CASE ('piezoelectric_tensor_geo')
-           lpart2_pw=.TRUE.
            do_punch=.TRUE.
+           lpiezoelectric_tensor=.TRUE.
+           lpiezotqha=use_free_energy
+           lph=use_free_energy
+           lq2r = use_free_energy
+           ltherm = use_free_energy
+           CALL initialize_mur_qha(ngeom)
+           IF (start_geometry_qha<1) start_geometry_qha=1
+           IF (last_geometry_qha>ngeom) last_geometry_qha=ngeom
+           CALL set_piezo_tensor_work(ngeom, nwork)
+           !
+           !  Check that start_geometry and last geometry are within the
+           !  range of computed geometries otherwise disregard them
+           !
+           start_geometry=start_geometry_save
+           last_geometry=last_geometry_save
+           IF ((start_geometry < ((start_geometry_qha-1)*work_base+1)).OR. &
+               (start_geometry > last_geometry_qha*work_base))             &
+               start_geometry = (start_geometry_qha-1)*work_base+1
+           IF ((last_geometry < start_geometry) .OR.                       &
+               (last_geometry > last_geometry_qha*work_base))              &
+               last_geometry = last_geometry_qha*work_base
+           start_geometry=MAX((start_geometry_qha-1)*work_base+1, &
+                                                       start_geometry)
+           last_geometry=MIN(last_geometry_qha*work_base, last_geometry)
+           tot_ngeo=nwork
+           tot_ngeo_eos=tot_ngeo
+           ALLOCATE(all_geometry_done_geo(ngeom))
+           ALLOCATE(no_ph(tot_ngeo))
+           ALLOCATE(no_ph_eos(tot_ngeo))
+           no_ph=.FALSE.
+           no_ph_eos=.FALSE.
+           ALLOCATE(polar0_geo(3,ngeom))
+           ALLOCATE(g_piezo_tensor_geo(3,6,ngeom))
+           ALLOCATE(eg_piezo_tensor_geo(3,6,ngeom))
+           ALLOCATE(e_piezo_tensor_geo(3,6,ngeom))
+           ALLOCATE(d_piezo_tensor_geo(3,6,ngeom))
+           ALLOCATE(energy_geo(nwork))
+           IF (use_free_energy) THEN
+              CALL allocate_thermodynamics()
+              CALL allocate_anharmonic()
+              ALLOCATE(min_y_t(max_nint_var,ngeo_strain,21,ngeom,ntemp))
+              ALLOCATE(min_yf_t(max_nint_var,ngeo_strain,21,ngeom,ntemp))
+              ALLOCATE(dyde(max_nint_var,21,ngeom,ntemp))
+           ELSE
+              no_ph=.TRUE.
+              no_ph_eos=.TRUE.
+           ENDIF
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
+           IF (use_free_energy) THEN
+              IF (meta_ionode) ios = f_mkdir_safe( 'dynamical_matrices' )
+              IF (meta_ionode) ios = f_mkdir_safe( 'phdisp_files' )
+              IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
+              IF (meta_ionode) ios = f_mkdir_safe( 'anhar_files' )
+           ENDIF
         CASE ('polarization_geo') 
            lpart2_pw=.TRUE.
            do_punch=.TRUE.
@@ -485,6 +570,10 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            ELSEIF (lel_free_energy) THEN
               nwork=tot_ngeo
            ENDIF
+        CASE ('piezoelectric_tensor_geo')
+           IF (use_free_energy) THEN
+              CALL initialize_ph_work(nwork)
+           ENDIF
         CASE ('mur_lc')
              nwork=tot_ngeo
         CASE ('scf_elastic_constants', 'mur_lc_elastic_constants')
@@ -500,8 +589,8 @@ SUBROUTINE initialize_thermo_work(nwork, part)
 !     initialise_elastic_cons allocates ibrav_geo and celldm_geo
 !
            iwho=2
-           CALL set_unperturbed_geometry(ngeom)
            CALL initialize_elastic_cons(ngeom,nwork)
+           CALL set_unperturbed_geometry(ngeom)
            ALLOCATE(energy_geo(nwork))
            start_geometry=MAX(1, start_geometry_save)
            last_geometry=MIN(nwork, last_geometry_save)
@@ -521,10 +610,14 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            CALL allocate_debye()
         CASE ('scf_piezoelectric_tensor', 'mur_lc_piezoelectric_tensor')
            IF (ALLOCATED(energy_geo)) DEALLOCATE(energy_geo)
+           IF (ALLOCATED(ibrav_geo)) DEALLOCATE(ibrav_geo)
+           IF (ALLOCATED(celldm_geo)) DEALLOCATE(celldm_geo)
+           IF (ALLOCATED(at_geo)) DEALLOCATE(at_geo)
+           IF (ALLOCATED(tau_geo)) DEALLOCATE(tau_geo)
            IF (ALLOCATED(omega_geo)) DEALLOCATE(omega_geo)
+           IF (ALLOCATED(uint_geo)) DEALLOCATE(uint_geo)
+           iwho=2
            CALL set_unperturbed_geometry(ngeom)
-           WRITE(6,*) 'set_unperturbed_geometry', ngeom
-           FLUSH(6)
            start_geometry_qha=1
            last_geometry_qha=1
            CALL set_piezo_tensor_work(1,nwork) 
@@ -549,33 +642,6 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            ALLOCATE(energy_geo(nwork))
            ALLOCATE(omega_geo(nwork))
            do_punch=.TRUE.
-        CASE ('piezoelectric_tensor_geo')
-           lpiezoelectric_tensor=.TRUE.
-           CALL initialize_mur_qha(ngeom)
-           IF (start_geometry_qha<1) start_geometry_qha=1
-           IF (last_geometry_qha>ngeom) last_geometry_qha=ngeom
-           CALL set_piezo_tensor_work(ngeom, nwork)
-           !
-           !  Check that start_geometry and last geometry are within the
-           !  range of computed geometries otherwise disregard them
-           !
-           start_geometry=start_geometry_save
-           last_geometry=last_geometry_save
-           IF ((start_geometry < ((start_geometry_qha-1)*work_base+1)).OR. &
-               (start_geometry > last_geometry_qha*work_base))             &
-               start_geometry = (start_geometry_qha-1)*work_base+1
-           IF ((last_geometry < start_geometry) .OR.                       &
-               (last_geometry > last_geometry_qha*work_base))              &
-               last_geometry = last_geometry_qha*work_base
-           start_geometry=MAX((start_geometry_qha-1)*work_base+1, &
-                                                       start_geometry)
-           last_geometry=MIN(last_geometry_qha*work_base, last_geometry)
-           ALLOCATE(polar0_geo(3,ngeom))
-           ALLOCATE(g_piezo_tensor_geo(3,6,ngeom))
-           ALLOCATE(eg_piezo_tensor_geo(3,6,ngeom))
-           ALLOCATE(e_piezo_tensor_geo(3,6,ngeom))
-           ALLOCATE(d_piezo_tensor_geo(3,6,ngeom))
-           ALLOCATE(energy_geo(nwork))
         CASE ('polarization_geo')
            CALL initialize_mur(nwork)
            ALLOCATE(no_ph(nwork))
@@ -637,6 +703,11 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            ENDDO
            lstress(1:nwork)=.NOT.elalgen
            IF (lel_free_energy) lef(1:nwork)=(lgauss.OR.ltetra)
+        CASE ('piezoelectric_tensor_geo')
+           DO iwork=start_geometry,last_geometry
+              lpwscf(iwork)=.TRUE.
+              lberry(iwork)=.TRUE.
+           ENDDO
         CASE ('polarization_geo')
         CASE DEFAULT
           CALL errore('initialize_thermo_work','unknown what',1)
@@ -695,12 +766,13 @@ SUBROUTINE initialize_thermo_work(nwork, part)
 !  in the second part
 !
         CASE ('scf_piezoelectric_tensor', 'mur_lc_piezoelectric_tensor', &
-              'scf_polarization', 'mur_lc_polarization','polarization_geo',&
-              'piezoelectric_tensor_geo')
+              'scf_polarization', 'mur_lc_polarization','polarization_geo')
            DO iwork=start_geometry,last_geometry
               lpwscf(iwork)=.TRUE.
               lberry(iwork)=.TRUE.
            ENDDO
+        CASE('piezoelectric_tensor_geo') 
+           CALL initialize_flags_for_ph(nwork)
      END SELECT
   ENDIF
 
@@ -797,7 +869,8 @@ RETURN
 END SUBROUTINE set_celldm_geo
 !
 !-----------------------------------------------------------------------
-SUBROUTINE set_tau_geo(celldm_geo, tau_geo, uint_geo, nwork, nat, nint_var)
+SUBROUTINE set_tau_geo(ibrav_geo, celldm_geo, tau_geo, at_geo, uint_geo, &
+                                 nwork, nat, nint_var)
 !-----------------------------------------------------------------------
 !
 !   This routine sets the grid of values on uint_geo.
@@ -810,12 +883,12 @@ SUBROUTINE set_tau_geo(celldm_geo, tau_geo, uint_geo, nwork, nat, nint_var)
 USE kinds,         ONLY : DP
 USE control_atomic_pos, ONLY : ninternal, int_ngeo, int_step_ngeo, &
                        iconstr_internal, uint0, uint_eq, tau_eq
-USE cell_base,     ONLY : celldm
+USE cell_base,     ONLY : celldm, at, ibrav
 USE ions_base,     ONLY : tau
 
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: nwork, nat, nint_var
-REAL(DP), INTENT(IN) :: celldm_geo(6,nwork)
+INTEGER, INTENT(IN) :: nwork, nat, nint_var, ibrav_geo(nwork)
+REAL(DP), INTENT(IN) :: celldm_geo(6,nwork), at_geo(3,3,nwork)
 REAL(DP), INTENT(INOUT) :: tau_geo(3,nat,nwork)
 REAL(DP), INTENT(INOUT) :: uint_geo(nint_var,nwork)
 
@@ -832,7 +905,8 @@ ALLOCATE(tau_eq(3,nat))
 !
 ALLOCATE(uint0(nint_var))
 
-CALL internal_to_tau(celldm, tau, uint0, nat, nint_var, iconstr_internal, 2)
+CALL internal_to_tau(ibrav, celldm, tau, at, uint0, nat, nint_var, &
+                                           iconstr_internal, 2)
 !
 !  then generate a mesh of dimensions nint_var of values of u centered
 !  in uint0
@@ -862,157 +936,13 @@ ENDDO
 !  and determine for each value of u the atomic coodinates
 !
 DO iwork=1,nwork
-   CALL internal_to_tau(celldm_geo(1,iwork), tau_geo(1,1,iwork), &
+   CALL internal_to_tau(ibrav_geo(iwork), celldm_geo(1,iwork), &
+                        tau_geo(1,1,iwork), at_geo(1,1,iwork), &
                        uint_geo(1,iwork), nat, nint_var, iconstr_internal, 1)
 ENDDO
 
 RETURN
 END SUBROUTINE set_tau_geo
-!
-!-----------------------------------------------------------------------
-SUBROUTINE set_tau_acc(celldm_geo, tau_geo, uint_geo, nwork,            &
-                                                   nat, nint_var, it)
-!-----------------------------------------------------------------------
-!
-!   This routine sets the grid of values on uint_geo.
-!   Data are arranged so that the ninternal displacements for the
-!   first set of external parameters is written first. Then there 
-!   are the ninternal displacements for the second set of external
-!   parameters, etc.
-!
-USE kinds,         ONLY : DP
-USE control_elastic_constants, ONLY : ninternal_ec, int_ngeo_ec, &
-                       nint_var_ec, int_step_ngeo_ec, iconstr_internal_ec
-USE control_atomic_pos, ONLY : max_nint_var
-USE cell_base,     ONLY : celldm
-USE ions_base,     ONLY : tau
-
-IMPLICIT NONE
-INTEGER, INTENT(IN) :: nwork, nat, nint_var, it
-REAL(DP), INTENT(IN) :: celldm_geo(6,nwork)
-REAL(DP), INTENT(INOUT) :: tau_geo(3,nat,nwork)
-REAL(DP), INTENT(INOUT) :: uint_geo(max_nint_var,nwork)
-
-INTEGER  :: igeo(max_nint_var), id(max_nint_var)
-INTEGER  :: iwork, total_work, iw, nexternal, iexternal, iinternal, ivar
-REAL(DP) :: delta(nint_var)
-!
-!  then generate a mesh of dimensions nint_var of values of u centered
-!  in 0.0
-!
-delta=0.0_DP
-DO iw=1,nint_var
-   IF (MOD(int_ngeo_ec(iw,it),2)==0) delta(iw)=int_step_ngeo_ec(iw,it)/2.0_DP
-   id(iw)=int_ngeo_ec(iw,it)/2+1 
-ENDDO
-!
-!  compute the displacement with respect to the strained atomic
-!  positions
-!
-uint_geo=0.0_DP
-total_work=0
-nexternal=nwork/ninternal_ec(it)
-DO iexternal=1,nexternal
-   DO iinternal=1,ninternal_ec(it)
-      CALL find_ipoint(iinternal, nint_var_ec(it), int_ngeo_ec(:,it), igeo)
-      total_work=total_work+1
-      DO ivar=1,nint_var_ec(it) 
-         uint_geo(ivar,total_work)=(igeo(ivar)-id(ivar))*&
-                   int_step_ngeo_ec(ivar,it) + delta(ivar) 
-      ENDDO
-   ENDDO
-ENDDO
-!
-!  and determine for each value of u the atomic coodinates
-!
-DO iwork=1,nwork
-   CALL internal_to_tau(celldm_geo(1,iwork), tau_geo(1,1,iwork), &
-                       uint_geo(1,iwork), nat, nint_var_ec(it),  &
-                       iconstr_internal_ec(it), 1)
-ENDDO
-
-RETURN
-END SUBROUTINE set_tau_acc
-!
-!-----------------------------------------------------------------------
-SUBROUTINE internal_to_tau(celldm_geo, tau_geo, uint_geo, &
-                               nat, nint_var, iconstr_internal, iflag)
-!-----------------------------------------------------------------------
-!
-!   This routine transforms the values of uint_geo into atomic 
-!   coordinates tau_geo (iflag=1) or from the values of tau_geo
-!   it finds u_geo
-!
-USE kinds,         ONLY : DP
-USE control_atomic_pos, ONLY : ninternal
-
-IMPLICIT NONE
-INTEGER, INTENT(IN) :: iflag    ! 1 use uint_geo to obtain tau_geo
-                                ! 2 use tau_geo to obtain u
-INTEGER, INTENT(IN) :: nat, nint_var
-INTEGER, INTENT(IN) :: iconstr_internal
-REAL(DP), INTENT(IN) :: celldm_geo(6)
-REAL(DP), INTENT(INOUT) :: tau_geo(3,nat)
-REAL(DP), INTENT(INOUT) :: uint_geo(nint_var)
-
-INTEGER  :: na
-REAL(DP) :: delta(nint_var), tau_aux(3,nat)
-
-IF ( iconstr_internal==1) THEN
-!
-!  In this constraint u is one dimensional and it is the parameter that
-!  determines the atomic positions of the wurtzite structure. Atomic
-!  coordinates on output are cartesian in units of celldm(1)
-!
-   IF (iflag==1) THEN
-      tau_geo(:,:)=0.0_DP
-      tau_geo(1,2)=0.5_DP
-      tau_geo(2,2)=-SQRT(3.0_DP) / 6.0_DP
-      tau_geo(3,2)= celldm_geo(3)/2.0_DP
-      tau_geo(3,3)= celldm_geo(3) * uint_geo(1)
-      tau_geo(1,4)=0.5_DP
-      tau_geo(2,4)=-SQRT(3.0_DP) / 6.0_DP
-      tau_geo(3,4)= celldm_geo(3)*(1.0_DP/2.0_DP+uint_geo(1))
-   ELSEIF (iflag==2) THEN
-!
-!     This routine works only if atom 1 and 2 are of the same type
-!     and are in the origin and in the middle of the cell (0,0,c/2a).
-!     Atom 3 and 4 are assumed to be in (1/2, -\sqrt(3)/6, u c/a) and 
-!     (1/2, -\sqrt(3)/6, (u+1/2) c/a). A global translation of all atoms
-!     is also allowed
-!     
-      tau_aux=tau_geo
-      DO na=1,nat
-         tau_aux(:,na)=tau_aux(:,na)-tau_geo(:,1)
-      ENDDO
-      uint_geo(1)=0.0_DP
-      DO na=1,nat
-         IF (uint_geo(1)==0.0_DP.AND.ABS(tau_aux(3,na)-celldm_geo(3)*0.5_DP)>&
-                1.D-2.AND.ABS(tau_aux(3,na)-celldm_geo(3)*0.5_DP)>1.D-2) THEN
-             uint_geo(1)=tau_aux(3,na) / celldm_geo(3)
-             IF (uint_geo(1)>0.5_DP) uint_geo(1)=uint_geo(1)-0.5_DP
-         ENDIF
-      ENDDO
-   ENDIF
-ELSEIF ( iconstr_internal==2) THEN
-!
-!  In this constraint the hcp structure is distorted with a strain
-! (\epsilon,0,0,0,0,0). In this case the routine receives the displacement
-! u along y (one dimensional) and gives as output the displacements of
-! the coordinates of the two atoms of the hcp structure
-!
-    IF (iflag==1) THEN
-       tau_geo(:,:) = 0.0_DP
-       tau_geo(2,1) = - uint_geo(1) / 2.0_DP
-       tau_geo(2,2) =   uint_geo(1) / 2.0_DP
-    ELSEIF (iflag==2) THEN
-       uint_geo(1) = tau_geo(2,2) * 2.0_DP
-    ENDIF
-
-ENDIF
-
-RETURN
-END SUBROUTINE internal_to_tau
 !
 !-----------------------------------------------------------------------
 SUBROUTINE summarize_geometries(nwork)
@@ -1112,7 +1042,7 @@ IF (ANY(stypec)) THEN
                   iwork=iwork+1
                   WRITE(stdout,'(5x,i5,": ", i3,6f10.5,l2)') iwork, &
                       ibrav_geo(iwork), celldm_geo(:,iwork), .NOT.no_ph(iwork)
-                  WRITE( stdout,'(5x,"Atomic positions: uint=",2f15.8)') &
+                  WRITE( stdout,'(5x,"Atomic positions: uint=",5f15.8)') &
                          (uint_geo(ivar,iwork), ivar=1, nint_var_ec(istep))
                   WRITE( stdout, '(6x,i4,8x,a6," tau(",i4,") = &
                                                          &(",3f12.7,"  )")') &
@@ -1225,9 +1155,11 @@ SUBROUTINE initialize_mur(nwork)
 USE kinds,         ONLY : DP
 USE thermo_mod,    ONLY : ibrav_geo, ngeo, celldm_geo, energy_geo, ef_geo, &
                           omega_geo, at_geo, tau_geo, tot_ngeo_eos, iwho,  &
-                          uint_geo
+                          uint_geo, epsilon_infty_geo, zeu_geo, z_geo,     &
+                          freq_geo, epsilon_zero_geo, epsilon_zerom1_geo
 USE control_atomic_pos, ONLY : linternal_thermo, nint_var, ninternal, &
                                int_ngeo, p2_eq, p4_eq, tau_p, uint_p
+USE control_epsilon_infty, ONLY : lepsilon_infty_geo, lzeu_geo
 USE ions_base,     ONLY : nat
 USE control_vol,   ONLY : nvol, vmin_input, vmax_input, deltav
 USE initial_conf,  ONLY : ibrav_save
@@ -1265,10 +1197,21 @@ ALLOCATE(energy_geo(nwork))
 ALLOCATE(ef_geo(nwork))
 ALLOCATE(tau_geo(3,nat,nwork))
 ALLOCATE(omega_geo(nwork))
+ALLOCATE(epsilon_infty_geo(3,3,nwork))
+ALLOCATE(zeu_geo(3,3,nat,nwork))
+ALLOCATE(lepsilon_infty_geo(nwork))
+ALLOCATE(lzeu_geo(nwork))
+ALLOCATE(epsilon_zero_geo(3,3,nwork))
+ALLOCATE(epsilon_zerom1_geo(3,3,nwork))
+ALLOCATE(freq_geo(3*nat,nwork))
+ALLOCATE(z_geo(3*nat,3*nat,nwork))
 ALLOCATE(uint_geo(nint_var,nwork))
+lepsilon_infty_geo=.FALSE.
+lzeu_geo=.FALSE.
 CALL set_celldm_geo(celldm_geo, nwork)
 IF (linternal_thermo) THEN
-   CALL set_tau_geo(celldm_geo, tau_geo, uint_geo, nwork, nat, nint_var)
+   CALL set_tau_geo(ibrav_geo, celldm_geo, tau_geo, at_geo, uint_geo, &
+                    nwork, nat, nint_var)
 ELSEIF (ltau_from_file) THEN
    DO iwork=1,nwork
       CALL check_geometry_exist(iwork,1,iwho)
@@ -1928,3 +1871,56 @@ el_con_omega_geo(1)=omega0
 
 RETURN
 END SUBROUTINE set_unperturbed_geometry
+
+!-----------------------------------------------------------------------
+SUBROUTINE dtau_dinternal(celldm_geo, dtau_dint, nat, nint_var, &
+                                                   iconstr_internal)
+!-----------------------------------------------------------------------
+!
+!   This routine set the vector dtau_dint, the derivative of the atomic
+!   positions with respect to the internal parameters
+!
+USE kinds,         ONLY : DP
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: nat, nint_var
+INTEGER, INTENT(IN) :: iconstr_internal
+REAL(DP), INTENT(IN) :: celldm_geo(6)
+REAL(DP), INTENT(INOUT) :: dtau_dint(3,nat,nint_var)
+
+!
+!  This routine provides the derivative of tau with respect to u
+!
+dtau_dint(:,:,:)=0.0_DP
+IF ( iconstr_internal==1) THEN
+!
+!  In this constraint u is one dimensional and it is the parameter that
+!  determines the atomic positions of the wurtzite structure. Atomic
+!  coordinates on output are cartesian in units of celldm(1)
+!
+    dtau_dint(3,3,1)= celldm_geo(3)
+    dtau_dint(3,4,1)= celldm_geo(3)
+ELSEIF ( iconstr_internal==2) THEN
+!
+!  In this constraint the hcp structure is distorted with a strain
+! (\epsilon,0,0,0,0,0). In this case the routine receives the displacement
+! u along y (one dimensional) and gives as output the displacements of
+! the coordinates of the two atoms of the hcp structure
+!
+    dtau_dint(2,1,1) = - 1.0_DP / 2.0_DP
+    dtau_dint(2,2,1) =   1.0_DP / 2.0_DP
+ELSEIF ( iconstr_internal==3) THEN
+!
+!  In this constraint the wurtzite structure is distorted with a strain
+! (0,0,0,0,\epsilon,0). In this case the routine receives the displacement
+! u along x (one dimensional) and gives as output the displacements of
+! the cation moves along -x while the anion along +x
+!
+    dtau_dint(1,1,1) =   1.0_DP 
+    dtau_dint(1,2,1) =   1.0_DP 
+    dtau_dint(1,3,1) =  -1.0_DP 
+    dtau_dint(1,4,1) =  -1.0_DP 
+ENDIF
+
+RETURN
+END SUBROUTINE dtau_dinternal

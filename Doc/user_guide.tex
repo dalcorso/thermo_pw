@@ -1742,6 +1742,27 @@ phase calculations in which the polarization is calculated in the
 directions of the direct lattice vectors and prints the spontaneous 
 polarization in Cartesian coordinates. Please note that the zero of 
 the polarization is not subtracted.
+\texttt{frozen\_ions=.TRUE.} require also a previous \texttt{what='scf'}
+calculation where the atomic positions of the equilibrium configuration
+are calculated and written on file. \texttt{ltau\_el\_cons\_from\_file=.TRUE.}
+must be used.
+If the flag \texttt{decompose\_piezo} is set to .TRUE. and the output
+of a previous \texttt{frozen\_ions=.TRUE.} calculation is on file, this
+option prints also the decomposition of the piezoelectric tensor into a
+clamped-ion and ionic constributions. This calculation requires also
+the Born effective charges written inside a dynamical matrix at the
+$\Gamma$ point of the equilibrium configuration.
+If the clamped-ion term is not found on file only the ionic contribution
+is printed and the clamped ion term is deduced from the difference with
+the relaxed piezoelectric tensor. If the Born effective charges are
+not found on file only the derivative of the internal parameters with
+respect to strain are calculated. \texttt{decompose\_piezo} works
+only for the components of the piezoelectric tensor derived for the strain
+types for which the user specifies the constraint number.
+
+
+
+
 The input variable that controls this option is:
 \begin{verbatim}
 nppl: the number of k points per string. In the perpendicular 
@@ -1772,6 +1793,23 @@ The input variables that control this option are:
 frozen_ions: if .TRUE. the piezoelectric tensor is calculated 
              keeping the ions frozen in the strained positions. 
              Default: logical .FALSE.
+decompose_piezo : if .TRUE. the piezoelectric tensor is decomposed into
+             a clamped ion and an atomic relaxation contributions.
+             The clamped ion term as well as the Born effective charges 
+             must be calculated separately for each equilibrium geometry.
+             This flag takes the relaxed coordinates of each strained geometry
+             and use them to find the internal parameters. The latter are
+             derived with respect to strain for each strain type.
+             The plots shows the temperature (and pressure) dependence of 
+             these internal parameters (within the ZSISA approximation). 
+             This flag requires a iconstr_internal_ec for each strain type.
+             Default: .FALSE.
+iconstr_internal_ec(1:strain_types): The constraint number that
+             determines which manifold is used to describe atomic
+             motion. The strain_types depend on the point group:they are
+             written on output.
+             Default: integer none (it must be set
+             if compute_duintde is .TRUE.).
 ngeo_strain: the number of strained configurations used 
              for each strain type. 
              Default: integer 4
@@ -2600,6 +2638,13 @@ piezoelectric tensor at the pressure (and temperature if
 fl_piezo : the name of the file that contains the piezoelectric 
            tensor.
          Default : 'output_piezo.dat'
+linterpolate_tau : if .TRUE. the atomic positions of each distorted 
+             geometry used to calculate the piezoelectric tensor is
+             used to find the internal parameters and the latter are
+             derived with respect to the strain.
+             This flag requires a iconstr_internal value for each strain
+             type. 
+             Default: .FALSE.
 \end{verbatim}
 
 \newpage

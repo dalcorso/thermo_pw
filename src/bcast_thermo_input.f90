@@ -23,7 +23,7 @@ SUBROUTINE bcast_thermo_input()
                               flpgrun, flenergy, flprojlayer, flpbs, flvec,   &
                               flepsilon, fleldos, fleltherm, fldosfrq,        &
                               fl_el_cons, flelanhar, flgeom, fl_piezo,        &
-                              fl_polar
+                              fl_polar, fl_dielectric
   USE postscript_files, ONLY : flpsband, flpsdisp, flpsdos,                   &
                               flpstherm,  flpsanhar, flpsmur, flpskeconv,     &
                               flpsnkconv, flpsgrun, flpsenergy, flpsepsilon,  &
@@ -59,6 +59,7 @@ SUBROUTINE bcast_thermo_input()
                               stype, move_at, lcm_ec, lzsisa, lfp, old_ec,   &
                               stypec, iconstr_internal_ec, nint_var_ec,      &
                               int_ngeo_ec, int_step_ngeo_ec
+  USE control_piezoelectric_tensor, ONLY : decompose_piezo
   USE piezoelectric_tensor, ONLY : nppl
   USE control_qe,       ONLY : force_band_calculation, use_ph_images, many_k
   USE many_k_mod,       ONLY : memgpu
@@ -284,6 +285,10 @@ SUBROUTINE bcast_thermo_input()
 !
   CALL mp_bcast( nppl, meta_ionode_id, world_comm )
 !
+!  scf_piezoelectric_tensor
+!
+  CALL mp_bcast( decompose_piezo, meta_ionode_id, world_comm )
+!
 !  mur_lc
 !
   CALL mp_bcast( ngeo, meta_ionode_id, world_comm )
@@ -359,6 +364,7 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( flpsanhar, meta_ionode_id, world_comm )
   CALL mp_bcast( flgeom, meta_ionode_id, world_comm )
   CALL mp_bcast( fl_piezo, meta_ionode_id, world_comm )
+  CALL mp_bcast( fl_dielectric, meta_ionode_id, world_comm )
   CALL mp_bcast( fl_polar, meta_ionode_id, world_comm )
 !
 !  elastic_constants_t

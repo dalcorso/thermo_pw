@@ -1605,7 +1605,7 @@ SUBROUTINE find_tau_eq(celldm_, tau_eq_, uint_eq_, nat)
   !   the output of this routine is uint_eq_, and tau_eq_(:) 
   !
   USE kinds,        ONLY : DP
-  USE initial_conf, ONLY : ibrav_save
+  USE initial_conf, ONLY : ibrav_save, at_save
   USE control_atomic_pos, ONLY : nint_var, iconstr_internal, p2_eq, p4_eq
   USE control_quartic_energy, ONLY : lquartic, lsolve
   USE lattices,     ONLY : expand_celldm, crystal_parameters
@@ -1640,8 +1640,8 @@ SUBROUTINE find_tau_eq(celldm_, tau_eq_, uint_eq_, nat)
      ENDIF
   ENDDO
 
-  CALL internal_to_tau(celldm_, tau_eq_, uint_eq_, nat, nint_var,   &
-                                             iconstr_internal, 1)
+  CALL internal_to_tau(ibrav_save, celldm_, tau_eq_, at_save, uint_eq_, &
+                                  nat, nint_var, iconstr_internal, 1)
   DEALLOCATE(x0)
   !
   RETURN

@@ -17,11 +17,13 @@ USE control_thermo,       ONLY : lpwscf, lpwband, lstress, lphonon, lberry, &
                                  lef, geometry, all_geometries_together
 USE control_qe,           ONLY : use_ph_images
 USE control_phrun,        ONLY : auxdyn
-USE thermo_mod,           ONLY : energy_geo, ef_geo, iwho
+USE thermo_mod,           ONLY : energy_geo, ef_geo, iwho, tau_geo
 USE elastic_constants,    ONLY : sigma_geo
 USE piezoelectric_tensor, ONLY : polar_strain, tot_b_phase, nppl
+USE control_piezoelectric_tensor, ONLY : decompose_piezo
 USE ener,                 ONLY : etot, ef
 USE force_mod,            ONLY : sigma
+USE ions_base,            ONLY : tau, nat
 USE freq_ph,              ONLY : fpol
 USE io_global,            ONLY : stdout
 
@@ -66,6 +68,7 @@ IF (lpwscf(iwork).OR.lpwband(iwork)) THEN
       IF (lpwscf(iwork)) THEN
          CALL save_existence(iwork,part)
          CALL save_geometry(iwork,part,iwho)
+         IF (decompose_piezo) tau_geo(1:3,1:nat,iwork)=tau(1:3,1:nat)
       ENDIF
    ENDIF
 ENDIF

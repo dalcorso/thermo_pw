@@ -76,7 +76,7 @@ IF (lmurn.AND..NOT.lcubic) THEN
 ELSE
    CALL compute_alpha_anis(celldm_t, alpha_anis_t, temp, ntemp, ibrav_save)
    IF (linternal_thermo) CALL compute_alpha_internal(uint_t, alpha_int_t, &
-                                                      temp, ntemp)
+                                                      nint_var, temp, ntemp)
 ENDIF
 
 IF (lelastic) THEN
@@ -784,7 +784,7 @@ ELSE
    CALL compute_alpha_anis(celldmf_t, alphaf_anis_t, temp, ntemp, &
                                                              ibrav_save)
    IF (linternal_thermo) CALL compute_alpha_internal(uintf_t, &
-                                              alphaf_int_t, temp, ntemp)
+                                       alphaf_int_t, nint_var, temp, ntemp)
 ENDIF
 
 IF (lelasticf) THEN
@@ -1263,7 +1263,7 @@ DO ipressp=1, npress_plot
       CALL compute_alpha_anis(celldm_pt(:,:,ipressp), &
                      alpha_anis_pt(:,:,ipressp), temp, ntemp, ibrav_save)
       IF (linternal_thermo) CALL compute_alpha_internal(uint_pt(:,:,ipressp),&
-                                 alpha_int_pt(:,:,ipressp), temp, ntemp)
+                             alpha_int_pt(:,:,ipressp), nint_var, temp, ntemp)
    ENDIF
 
    CALL interpolate_e0(vmin_pt(:,ipressp), celldm_pt(:,:,ipressp), ph_e0, e0)
@@ -1552,7 +1552,7 @@ DO ipressp=1, npress_plot
                   alphaf_anis_pt(:,:,ipressp), temp, ntemp, ibrav_save)
       IF (linternal_thermo) CALL compute_alpha_internal(&
                uintf_pt(:,:,ipressp), alphaf_int_pt(:,:,ipressp), &
-               temp, ntemp)
+               nint_var, temp, ntemp)
    ENDIF
    IF (lelasticf_pt) THEN
       CALL isostress_heat_capacity(vminf_pt(:,ipressp), &
@@ -2709,7 +2709,7 @@ RETURN
 END SUBROUTINE compute_alpha_anis
 !
 !-----------------------------------------------------------------------
-SUBROUTINE compute_alpha_internal(uint_t, alpha_int_t, temp, ntemp)
+SUBROUTINE compute_alpha_internal(uint_t, alpha_int_t, nint_var, temp, ntemp)
 
 !-----------------------------------------------------------------------
 !
@@ -2718,10 +2718,9 @@ SUBROUTINE compute_alpha_internal(uint_t, alpha_int_t, temp, ntemp)
 !  quantities are function of temperature.
 !
 USE kinds, ONLY : DP
-USE control_atomic_pos, ONLY : nint_var
 
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: ntemp
+INTEGER, INTENT(IN) :: ntemp, nint_var
 REAL(DP), INTENT(IN) :: uint_t(nint_var,ntemp), temp(ntemp)
 REAL(DP), INTENT(INOUT) :: alpha_int_t(nint_var,ntemp)
 

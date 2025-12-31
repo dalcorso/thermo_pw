@@ -14,7 +14,7 @@ SUBROUTINE manage_syn_1(nwork)
 !
 
 USE control_thermo,   ONLY : lev_syn_1, lconv_ke_test, lconv_nk_test,  &
-                             lectqha
+                             lectqha, lpiezoelectric_tensor
 
 USE control_elastic_constants, ONLY : ngeom
 
@@ -46,6 +46,10 @@ INTEGER :: nwork
 !  the T=0 K elastic constants for all the reference geometries.
 !
   IF (lectqha) CALL manage_elastic_cons(nwork,ngeom)
+!
+!  here computes the piezoelectric tensor at T=0 K
+!
+  IF (lpiezoelectric_tensor) CALL manage_piezo_tensor(nwork, ngeom)
 
   RETURN
 END SUBROUTINE manage_syn_1

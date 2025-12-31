@@ -16,8 +16,8 @@ SUBROUTINE save_tau_on_tpw(igeom)
 !
 USE kinds, ONLY : DP
 USE thermo_mod, ONLY : uint_geo_eos, tau_geo_eos
-USE ions_base,  ONLY : tau, nat 
-USE cell_base,  ONLY : celldm
+USE ions_base,  ONLY : tau, nat
+USE cell_base,  ONLY : celldm, ibrav, at
 USE control_atomic_pos, ONLY : nint_var, iconstr_internal
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: igeom
@@ -25,7 +25,8 @@ REAL(DP) :: uint(nint_var)
 !
 !  get the constraint from the atomic positions
 !
-CALL internal_to_tau(celldm, tau, uint, nat, nint_var, iconstr_internal, 2)
+CALL internal_to_tau(ibrav, celldm, tau, at, uint, nat, nint_var, &
+                     iconstr_internal, 2)
 !
 !  and copy it in the variables of thermo_pw
 !

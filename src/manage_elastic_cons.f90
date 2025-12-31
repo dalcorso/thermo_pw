@@ -80,7 +80,7 @@ IF (lreturn) RETURN
 ALLOCATE(energy_geo_eff(nwork))
 ALLOCATE(epsilon_geo_eff(3,3,nwork))
 
-CALL redefine_energies_qua(energy_geo, epsilon_geo, epsil_geo, nwork,  &
+CALL redefine_energies(energy_geo, epsilon_geo, epsil_geo, nwork,  &
                        energy_geo_eff, epsilon_geo_eff, nwork_eff)
 !
 !  Then collect the stress if it has been calculated

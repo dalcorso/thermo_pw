@@ -43,7 +43,7 @@ SUBROUTINE thermo_readin()
                                    flpgrun, fl_el_cons, flpband, flvec,    &
                                    flepsilon, floptical, fleldos, fleltherm, &
                                    fldosfrq, flelanhar, flgeom, fl_piezo,  &
-                                   fl_polar
+                                   fl_polar, fl_dielectric
   USE temperature,          ONLY : tmin, tmax, deltat, ntemp, ntemp_plot,  &
                                    temp_plot_=>temp_plot, itemp_plot,      &
                                    sigma_ry_=>sigma_ry
@@ -92,7 +92,8 @@ SUBROUTINE thermo_readin()
                                    nmove, move_at, atom_dir, atom_step,     &
                                    stype, lcm_ec, lzsisa, lfp, old_ec,      &
                                    stypec, iconstr_internal_ec, nint_var_ec, &
-                                   int_ngeo_ec, int_step_ngeo_ec
+                                   int_ngeo_ec, int_step_ngeo_ec, max_nint_var
+  USE control_piezoelectric_tensor, ONLY : decompose_piezo
   USE control_xrdp,         ONLY : lambda, flxrdp, flpsxrdp, lformf, smin, &
                                    smax, nspoint, flformf, flpsformf, lcm, &
                                    lxrdp, lambda_elem
@@ -265,6 +266,7 @@ SUBROUTINE thermo_readin()
                             poly_degree,                    &
                             fl_el_cons,                     &
                             fl_piezo,                       &
+                            fl_dielectric,                  &
                             fl_polar,                       &
                             lcm_ec,                         &
                             lzsisa,                         &
@@ -284,6 +286,8 @@ SUBROUTINE thermo_readin()
 !   scf_polarization
 !
                             nppl,                           &
+!   scf_piezoelectric_tensor
+                            decompose_piezo,                &
 !
 !   mur_lc
 !
@@ -526,6 +530,7 @@ SUBROUTINE thermo_readin()
   poly_degree=0
   fl_el_cons='output_el_cons.dat'
   fl_piezo='output_piezo.dat'
+  fl_dielectric='output_dielectric.dat'
   fl_polar='output_polar.dat'
   nmove=5
   move_at=0
@@ -539,10 +544,8 @@ SUBROUTINE thermo_readin()
   stypec=.FALSE.
   iconstr_internal_ec=0
   nint_var_ec=1
-  int_ngeo_ec(1,:)=5
-  int_ngeo_ec(2,:)=5
-  int_step_ngeo_ec(1,:)=0.02_DP
-  int_step_ngeo_ec(2,:)=0.02_DP
+  int_ngeo_ec=5
+  int_step_ngeo_ec=0.02_DP
 
   ltherm_glob=.FALSE.
   lgruneisen_gen=.FALSE.
@@ -554,6 +557,7 @@ SUBROUTINE thermo_readin()
   poly_degree_grun=4
 
   nppl=21
+  decompose_piezo = .FALSE.
 
   ngeo=0
   step_ngeo(1) = 0.05_DP
@@ -744,6 +748,11 @@ SUBROUTINE thermo_readin()
                                                                &1 and 4',1)
   IF (linterpolate_tau.AND.iconstr_internal==0) &
        CALL errore('thermo_readin','linterpolate_tau requires a constraint',1)
+  IF (decompose_piezo.AND.SUM(iconstr_internal_ec(:))==0) &
+       CALL errore('thermo_readin','decompose piezo but no constraint',1)
+  IF (decompose_piezo.AND.frozen_ions) &
+       CALL errore('thermo_readin','decompose piezo requires &
+                                               &frozen_ions=.FALSE.',1)
   IF (linterpolate_tau.AND.linternal_thermo) &
        CALL errore('thermo_readin','linterpolate_tau and linternal_thermo &
                                        &cannot be both .TRUE.',1)
@@ -783,6 +792,8 @@ SUBROUTINE thermo_readin()
                 what=='mur_lc_elastic_constants').AND.(.NOT.frozen_ions))  &
      CALL errore('thermo_reading','stype requires frozen_ions=.TRUE.',1)
 
+  IF (ANY(nint_var_ec>max_nint_var)) &
+     CALL errore('thermo_readin','Some nint_var_ec too big',1)
   IF (ANY(stypec).AND.(what=='elastic_constants_geo' &
             .OR.what=='scf_elastic_constants'.OR.   &
                 what=='mur_lc_elastic_constants').AND.(.NOT.frozen_ions))  &

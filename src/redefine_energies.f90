@@ -44,7 +44,7 @@ REAL(DP), INTENT(IN)  :: epsilon_geo(3,3,nwork)
 REAL(DP), INTENT(OUT) :: epsilon_geo_eff(3,3,nwork)
 
 INTEGER :: igeom, istep, igeo, iwork, jwork, imov, ivar
-REAL(DP) :: a(3), emin, xmin
+REAL(DP) :: a(3), emin, xmin(1)
 REAL(DP), ALLOCATABLE :: ene(:), y(:), yv(:,:), xmin_v(:), ene_v(:)
 TYPE(poly2) :: p2
 TYPE(poly4) :: p4
@@ -63,6 +63,10 @@ DO igeom=1, start_geometry_qha-1
       DO igeo=1, ngeo_strain
          IF (stype(istep)) THEN
             DO imov=1, nmove
+               jwork=jwork+1
+            ENDDO
+         ELSEIF (stypec(istep)) THEN
+            DO imov=1, ninternal_ec(istep)
                jwork=jwork+1
             ENDDO
          ELSE
@@ -85,25 +89,25 @@ DO igeom=start_geometry_qha, last_geometry_qha
 !  strained position
 !
                y(imov)=(imov-(nmove+1.0_DP)/2.0_DP)*atom_step(istep)
-!               WRITE(6,*) y(imov), ene(imov)
             ENDDO
 !          
-!           Fit the data with a parabola and put the minimum energy
+!           Fit the data with a parabola find the minimum,
+!           then refit with a quartic and find the minimum starting 
+!           from the one of the parabola
 !
-            CALL polyfit(y,ene,nmove,a,2)
-!
-!   In the frozen phonon case take xmin=0.0_DP
-!
+            CALL fit_multi_quartic(nmove,1,lsolve,y,ene,p4)
             IF (lfp) THEN
-               xmin=0.0_DP
+               xmin(1)=0.0_DP
+               CALL evaluate_fit_quartic(1,xmin,emin,p4)
             ELSE
-               xmin= - a(2) / 2.0_DP / a(3)
+               CALL fit_multi_quadratic(nmove,1,lsolve,y,ene,p2)
+               CALL find_quadratic_extremum(1,xmin,emin,p2)
+               CALL find_quartic_extremum(1,xmin,emin,p4)
             ENDIF
-            CALL compute_poly(xmin, 2, a, emin)
             iwork=iwork+1
             energy_geo_eff(iwork)= emin
             epsilon_geo_eff(:,:,iwork)=epsilon_geo(:,:,jwork)   
-            min_y(1,igeo,istep,igeom)=xmin
+            min_y(1,igeo,istep,igeom)=xmin(1)
             epsil_y(igeo,istep,igeom)=epsil_geo(jwork)
          ELSEIF (stypec(istep)) THEN
             ALLOCATE(yv(nint_var_ec(istep),ninternal_ec(istep)))
@@ -164,6 +168,10 @@ DO igeom=last_geometry_qha+1, ngeom
             DO imov=1, nmove
                jwork=jwork+1
             ENDDO
+         ELSEIF (stypec(istep)) THEN
+            DO imov=1, ninternal_ec(istep)
+               jwork=jwork+1
+            ENDDO
          ELSE
             jwork=jwork+1
          ENDIF
@@ -178,6 +186,7 @@ DEALLOCATE(y)
 
 RETURN
 END SUBROUTINE redefine_energies
+
 !--------------------------------------------------------------------------
 SUBROUTINE write_min_y()
 !--------------------------------------------------------------------------
@@ -309,146 +318,11 @@ CALL mp_sum(dyde(:,:,igeom,:),world_comm)
 
 RETURN
 END SUBROUTINE read_dyde
-
-!------------------------------------------------------------------------
-SUBROUTINE redefine_energies_qua(energy_geo, epsilon_geo, epsil_geo, nwork,  &
-                             energy_geo_eff, epsilon_geo_eff, nwork_eff)
-!------------------------------------------------------------------------
-!
-! This routine is used when the elastic constants are calculated by
-! moving atoms in some strain types. 
-! It receives the list of energies and strain and remove all the energies
-! that correspond to the same strain but different atomic positions and
-! substitutes them with the energy at the minimum. To obtain it, it fits
-! the energies as a function of the atomic position with a fourth
-! order polynomial and finds the minimum.
-!
-USE kinds, ONLY : DP
-USE control_elastic_constants, ONLY : ngeom, nstep_ec, ngeo_strain, &
-                                      stype, nmove, atom_step, min_y, &
-                                      epsil_y, lzsisa, lfp, &
-                                      start_geometry_qha, last_geometry_qha
-USE control_quartic_energy, ONLY : lsolve
-USE polynomial,   ONLY : init_poly, clean_poly, poly2, poly4
-USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_quadratic_extremum
-USE quartic_surfaces, ONLY : fit_multi_quartic, find_quartic_extremum, &
-                             evaluate_fit_quartic 
-
-IMPLICIT NONE
-
-INTEGER, INTENT(IN)   :: nwork
-INTEGER, INTENT(OUT)  :: nwork_eff
-REAL(DP), INTENT(IN)  :: energy_geo(nwork)
-REAL(DP), INTENT(OUT) :: energy_geo_eff(nwork)
-REAL(DP), INTENT(OUT) :: epsil_geo(nwork)
-REAL(DP), INTENT(IN)  :: epsilon_geo(3,3,nwork)
-REAL(DP), INTENT(OUT) :: epsilon_geo_eff(3,3,nwork)
-
-INTEGER :: igeom, istep, igeo, iwork, jwork, imov, nvar
-REAL(DP) :: emin, xmin(1)
-REAL(DP), ALLOCATABLE :: ene(:), y(:)
-TYPE(poly2) :: p2
-TYPE(poly4) :: p4
-
-
-nvar=1
-ALLOCATE(ene(nmove))
-ALLOCATE(y(nmove))
-
-iwork=0     ! run on current energy index
-jwork=0     ! run on previous energy index
-!
-!  Increase the iwork and jwork for the geometries not computed
-!
-DO igeom=1, start_geometry_qha-1
-   DO istep=1, nstep_ec
-      DO igeo=1, ngeo_strain
-         IF (stype(istep)) THEN
-            DO imov=1, nmove
-               jwork=jwork+1
-            ENDDO
-         ELSE
-            jwork=jwork+1
-         ENDIF
-         iwork=iwork+1
-      ENDDO
-   ENDDO
-ENDDO
-
-CALL init_poly(nvar,p2)
-CALL init_poly(nvar,p4)
-DO igeom=start_geometry_qha, last_geometry_qha
-   DO istep=1, nstep_ec
-      DO igeo=1, ngeo_strain
-         IF (stype(istep)) THEN
-            DO imov=1, nmove
-               jwork=jwork+1
-               ene(imov)=energy_geo(jwork)
-!
-!  y is the displacement (in a.u.) of the atom with respect to the uniformely
-!  strained position
-!
-               y(imov)=(imov-(nmove+1.0_DP)/2.0_DP)*atom_step(istep)
-            ENDDO
-!          
-!           Fit the data with a parabola find the minimum,
-!           then refit with a quartic and find the minimum starting 
-!           from the one of the parabola
-!
-            CALL fit_multi_quartic(nmove,1,lsolve,y,ene,p4)
-            IF (lfp) THEN
-               xmin(1)=0.0_DP
-               CALL evaluate_fit_quartic(1,xmin,emin,p4)
-            ELSE
-               CALL fit_multi_quadratic(nmove,1,lsolve,y,ene,p2)
-               CALL find_quadratic_extremum(1,xmin,emin,p2)
-               CALL find_quartic_extremum(1,xmin,emin,p4)
-            ENDIF
-            iwork=iwork+1
-            energy_geo_eff(iwork)= emin
-            epsilon_geo_eff(:,:,iwork)=epsilon_geo(:,:,jwork)   
-            min_y(1,igeo,istep,igeom)=xmin(1)
-            epsil_y(igeo,istep,igeom)=epsil_geo(jwork)
-         ELSE
-            jwork=jwork+1
-            iwork=iwork+1
-            energy_geo_eff(iwork)=energy_geo(jwork)
-            epsilon_geo_eff(:,:,iwork)=epsilon_geo(:,:,jwork)
-         ENDIF
-      ENDDO
-   ENDDO
-ENDDO
-!
-!  Increase the iwork and jwork for the geometries not computed
-!
-DO igeom=last_geometry_qha+1, ngeom
-   DO istep=1, nstep_ec
-      DO igeo=1, ngeo_strain
-         IF (stype(istep)) THEN
-            DO imov=1, nmove
-               jwork=jwork+1
-            ENDDO
-         ELSE
-            jwork=jwork+1
-         ENDIF
-         iwork=iwork+1
-      ENDDO
-   ENDDO
-ENDDO
-nwork_eff=iwork
-
-DEALLOCATE(ene)
-DEALLOCATE(y)
-CALL clean_poly(p2)
-CALL clean_poly(p4)
-
-RETURN
-END SUBROUTINE redefine_energies_qua
 !
 !------------------------------------------------------------------------
 SUBROUTINE redefine_energies_qua_t(energy_geo, epsilon_geo, epsil_geo,  &
-                nwork, energy_geo_eff, epsilon_geo_eff, nwork_eff, igeom, & 
-                itemp)
+                nwork, energy_geo_eff, epsilon_geo_eff, min_y_t,        &
+                nwork_eff, igeom)
 !------------------------------------------------------------------------
 !
 ! This routine is used when the elastic constants are calculated by
@@ -461,10 +335,11 @@ SUBROUTINE redefine_energies_qua_t(energy_geo, epsilon_geo, epsil_geo,  &
 !
 USE kinds, ONLY : DP
 USE thermo_mod, ONLY : uint_geo
-USE control_elastic_constants, ONLY : ngeom, nstep_ec, ngeo_strain, &
-                                      stype, nmove, atom_step, min_y_t, &
-                                      epsil_y, min_y, lzsisa, lfp, &
-                                      stypec, nint_var_ec, ninternal_ec
+USE control_elastic_constants, ONLY : ngeom, nstep_ec, ngeo_strain,      &
+                                      stype, nmove, atom_step,           &
+                                      epsil_y, min_y, lzsisa, lfp,       &
+                                      stypec, nint_var_ec, ninternal_ec, &
+                                      max_nint_var
 USE control_quartic_energy, ONLY : lsolve
 USE polynomial,   ONLY : init_poly, clean_poly, poly2, poly4
 USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_quadratic_extremum
@@ -474,13 +349,13 @@ IMPLICIT NONE
 
 INTEGER, INTENT(IN)   :: nwork
 INTEGER, INTENT(IN)   :: igeom
-INTEGER, INTENT(IN)   :: itemp
 INTEGER, INTENT(OUT)  :: nwork_eff
 REAL(DP), INTENT(IN)  :: energy_geo(nwork)
 REAL(DP), INTENT(OUT) :: energy_geo_eff(nwork)
 REAL(DP), INTENT(OUT) :: epsil_geo(nwork)
 REAL(DP), INTENT(IN)  :: epsilon_geo(3,3,nwork)
 REAL(DP), INTENT(OUT) :: epsilon_geo_eff(3,3,nwork)
+REAL(DP), INTENT(OUT) :: min_y_t(max_nint_var, ngeo_strain, 21)
 
 INTEGER :: istep, igeo, iwork, jwork, imov, nvar, ivar
 REAL(DP) :: a(3), emin, xmin(1)
@@ -528,7 +403,7 @@ DO istep=1, nstep_ec
          iwork=iwork+1
          energy_geo_eff(iwork)= emin
          epsilon_geo_eff(:,:,iwork)=epsilon_geo(:,:,jwork)   
-         min_y_t(1,igeo,istep,igeom,itemp)=xmin(1)
+         min_y_t(1,igeo,istep)=xmin(1)
          epsil_y(igeo,istep,igeom)=epsil_geo(jwork)
       ELSEIF (stypec(istep)) THEN
          ALLOCATE(yv(nint_var_ec(istep), ninternal_ec(istep)))
@@ -559,7 +434,7 @@ DO istep=1, nstep_ec
                                                                istep,igeom)
             CALL evaluate_fit_quartic(nint_var_ec(istep),xmin_v,emin,p4c)
          ELSEIF (lfp) THEN
-            xmin(1)=0.0_DP
+            xmin_v=0.0_DP
             CALL evaluate_fit_quartic(nint_var_ec(istep),xmin_v,emin,p4c)
          ELSE
             CALL fit_multi_quadratic(nmove,nint_var_ec(istep),lsolve,&
@@ -570,7 +445,7 @@ DO istep=1, nstep_ec
          iwork=iwork+1
          energy_geo_eff(iwork)= emin
          epsilon_geo_eff(:,:,iwork)=epsilon_geo(:,:,jwork)   
-         min_y_t(1:nint_var_ec(istep),igeo,istep,igeom,itemp)=xmin_v(:)
+         min_y_t(1:nint_var_ec(istep),igeo,istep)=xmin_v(:)
          epsil_y(igeo,istep,igeom)=epsil_geo(jwork)
          DEALLOCATE(yv)
          DEALLOCATE(ene_v)
@@ -895,3 +770,358 @@ CALL clean_poly(p4)
 RETURN
 END SUBROUTINE redefine_thermo_t
 
+!------------------------------------------------------------------------
+SUBROUTINE redefine_polar(polar_strain, tot_b_phase, nwork, &
+               polar_strain_eff, tot_b_phase_eff, epsil_geo, epsil_geo_eff)
+!------------------------------------------------------------------------
+!
+! This routine is used when the piezoelectric tensor is calculated by
+! moving atoms in some strain types. 
+! It receives the list of polarization and berry phase and remove 
+! all the energies that correspond to the same strain but different 
+! atomic positions and substitutes them with the energy at the minimum. 
+! To obtain it, it fits the energies as a function of the atomic 
+! position with a second order polynomial and finds the minimum.
+!
+USE kinds, ONLY : DP
+USE thermo_mod, ONLY : uint_geo
+USE control_elastic_constants, ONLY : ngeom, nstep_ec, ngeo_strain,     &
+                                      stype, nmove, atom_step, min_y,   &
+                                      epsil_y, lfp, start_geometry_qha, &
+                                      last_geometry_qha, ninternal_ec,  &
+                                      nint_var_ec, stypec
+USE quadratic_surfaces,       ONLY : fit_multi_quadratic, &
+                                     find_quadratic_extremum
+USE quartic_surfaces,         ONLY : fit_multi_quartic, &
+                                     find_quartic_extremum, &
+                                     evaluate_fit_quartic
+USE control_quartic_energy,  ONLY : lsolve
+USE polynomial, ONLY : poly4, clean_poly, init_poly
+IMPLICIT NONE
+
+INTEGER, INTENT(IN)   :: nwork
+REAL(DP), INTENT(IN)  :: polar_strain(3,nwork)
+REAL(DP), INTENT(OUT) :: polar_strain_eff(3,nwork)
+REAL(DP), INTENT(IN)  :: tot_b_phase(3,nwork)
+REAL(DP), INTENT(OUT) :: tot_b_phase_eff(3,nwork)
+REAL(DP), INTENT(IN)  :: epsil_geo(nwork)
+REAL(DP), INTENT(OUT) :: epsil_geo_eff(nwork)
+
+INTEGER :: igeom, istep, igeo, iwork, jwork, imov, ivar, ipol
+REAL(DP) :: pol(3), bph(3)
+REAL(DP), ALLOCATABLE :: y(:), yv(:,:), pstrain(:,:), bphase(:,:)
+TYPE(poly4) :: p4(3), p4_b(3)
+
+
+
+iwork=0     ! run on current energy index
+jwork=0     ! run on previous energy index
+!
+!  Increase the iwork and jwork for the geometries not computed
+!
+DO igeom=1, start_geometry_qha-1
+   DO istep=1, nstep_ec
+      DO igeo=1, ngeo_strain
+         IF (stype(istep)) THEN
+            DO imov=1, nmove
+               jwork=jwork+1
+            ENDDO
+         ELSEIF (stypec(istep)) THEN
+            DO imov=1, ninternal_ec(istep)
+               jwork=jwork+1
+            ENDDO
+         ELSE
+            jwork=jwork+1
+         ENDIF
+         iwork=iwork+1
+      ENDDO
+   ENDDO
+ENDDO
+
+DO igeom=start_geometry_qha, last_geometry_qha
+   DO istep=1, nstep_ec
+      DO igeo=1, ngeo_strain
+         IF (stype(istep)) THEN
+            ALLOCATE(pstrain(nmove,3))
+            ALLOCATE(bphase(nmove,3))
+            ALLOCATE(y(nmove))
+            DO ipol=1,3
+               CALL init_poly(1,p4(ipol))
+               CALL init_poly(1,p4_b(ipol))
+            ENDDO
+            DO imov=1, nmove
+               jwork=jwork+1
+               DO ipol=1,3 
+                  pstrain(imov,ipol)=polar_strain(ipol,jwork)
+                  bphase(imov,ipol)=tot_b_phase(ipol,jwork)
+               ENDDO
+!
+!  y is the displacement (in a.u.) of the atom with respect to the uniformely
+!  strained position
+!
+               y(imov)=(imov-(nmove+1.0_DP)/2.0_DP)*atom_step(istep)
+            ENDDO
+!          
+!           Fit the data with a quartic and evaluate them at the minimum
+!           of the internal parameter that should be already available.
+!
+            DO ipol=1,3
+               CALL fit_multi_quartic(nmove,1,lsolve,y,pstrain(1,ipol),p4(ipol))
+               CALL fit_multi_quartic(nmove,1,lsolve,y,bphase(1,ipol),&
+                                                                     p4_b(ipol))
+               CALL evaluate_fit_quartic(1,min_y(1,igeo,istep,igeom),pol(ipol),&
+                                                       p4(ipol))
+               CALL evaluate_fit_quartic(1,min_y(1,igeo,istep,igeom),bph(ipol),&
+                                                       p4_b(ipol))
+            ENDDO
+            iwork=iwork+1
+            polar_strain_eff(iwork,:)= pol(:)
+            tot_b_phase_eff(iwork,:)= bph(:)
+            epsil_geo_eff(iwork)=epsil_geo(jwork)
+            DO ipol=1,3
+               CALL clean_poly(p4(ipol))
+               CALL clean_poly(p4_b(ipol))
+            ENDDO
+            DEALLOCATE(pstrain)
+            DEALLOCATE(bphase)
+            DEALLOCATE(y)
+         ELSEIF (stypec(istep)) THEN
+            ALLOCATE(yv(nint_var_ec(istep),ninternal_ec(istep)))
+            ALLOCATE(pstrain(ninternal_ec(istep),3))
+            ALLOCATE(bphase(ninternal_ec(istep),3))
+            DO ipol=1,3
+               CALL init_poly(nint_var_ec(istep),p4(ipol))
+               CALL init_poly(nint_var_ec(istep),p4_b(ipol))
+            ENDDO
+            DO imov=1, ninternal_ec(istep)
+               jwork=jwork+1
+               DO ipol=1,3 
+                  pstrain(imov,ipol)=polar_strain(ipol,jwork)
+                  bphase(imov,ipol)=tot_b_phase(ipol,jwork)
+               ENDDO
+!
+!  y is the displacement (in a.u.) of the atom with respect to the uniformely
+!  strained position
+!
+               DO ivar=1,nint_var_ec(istep)
+                  yv(ivar, imov)= uint_geo(ivar, jwork)
+               ENDDO
+!              WRITE(6,*) yv(ivar, imov), ene(imov)
+            ENDDO
+!
+!   fit the polarization and the berry phase with a quartic and interpolate
+!   at the internal parameter at the minimum energy (already available)
+!
+            DO ipol=1,3
+               CALL fit_multi_quartic(ninternal_ec(istep),nint_var_ec(istep),&
+                                   lsolve,yv,pstrain(1,ipol),p4(ipol))
+               CALL fit_multi_quartic(ninternal_ec(istep),nint_var_ec(istep),&
+                                   lsolve,yv,bphase(1,ipol),p4_b(ipol))
+               CALL evaluate_fit_quartic(nint_var_ec(istep),&
+                    min_y(1:nint_var_ec(istep),igeo,istep,igeom),pol(ipol),&
+                                                               p4(ipol))
+               CALL evaluate_fit_quartic(nint_var_ec(istep),&
+                    min_y(1:nint_var_ec(istep),igeo,istep,igeom),bph(ipol),&
+                                                              p4_b(ipol))
+            ENDDO
+            iwork=iwork+1
+            polar_strain_eff(:,iwork)=pol(:)
+            tot_b_phase_eff(:,iwork)= bph(:)
+            epsil_geo_eff(iwork)=epsil_geo(jwork)
+            DEALLOCATE(pstrain)
+            DEALLOCATE(bphase)
+            DEALLOCATE(yv)
+            DO ipol=1,3
+               CALL clean_poly(p4(ipol))
+               CALL clean_poly(p4_b(ipol))
+            ENDDO
+         ELSE
+            jwork=jwork+1
+            iwork=iwork+1
+            polar_strain_eff(:,iwork)=polar_strain(:,jwork)
+            tot_b_phase_eff(:,iwork)=tot_b_phase(:,jwork)
+            epsil_geo_eff(iwork)=epsil_geo(jwork)
+         ENDIF
+      ENDDO
+   ENDDO
+ENDDO
+!
+!  Increase the iwork and jwork for the geometries not computed
+!
+DO igeom=last_geometry_qha+1, ngeom
+   DO istep=1, nstep_ec
+      DO igeo=1, ngeo_strain
+         IF (stype(istep)) THEN
+            DO imov=1, nmove
+               jwork=jwork+1
+            ENDDO
+         ELSEIF (stypec(istep)) THEN
+            DO imov=1, ninternal_ec(istep)
+               jwork=jwork+1
+            ENDDO
+         ELSE
+            jwork=jwork+1
+         ENDIF
+         iwork=iwork+1
+      ENDDO
+   ENDDO
+ENDDO
+
+
+RETURN
+END SUBROUTINE redefine_polar
+
+!------------------------------------------------------------------------
+SUBROUTINE redefine_polar_qha_t(polar_strain, tot_b_phase, nwork, &
+               polar_strain_eff, tot_b_phase_eff, epsil_geo,      &
+               epsil_geo_eff, min_y_t)
+!------------------------------------------------------------------------
+!
+! This routine is used when the piezoelectric tensor is calculated by
+! moving atoms in some strain types. 
+! It receives the list of polarization and berry phase and remove 
+! all the energies that correspond to the same strain but different 
+! atomic positions and substitutes them with the energy at the minimum. 
+! To obtain it, it fits the energies as a function of the atomic 
+! position with a second order polynomial and finds the minimum.
+!
+USE kinds, ONLY : DP
+USE thermo_mod, ONLY : uint_geo
+USE control_elastic_constants, ONLY : nstep_ec, ngeo_strain,            &
+                                      stype, nmove, atom_step,          &
+                                      epsil_y, lfp, start_geometry_qha, &
+                                      last_geometry_qha, ninternal_ec,  &
+                                      nint_var_ec, stypec, max_nint_var
+USE quadratic_surfaces,       ONLY : fit_multi_quadratic, &
+                                     find_quadratic_extremum
+USE quartic_surfaces,         ONLY : fit_multi_quartic, &
+                                     find_quartic_extremum, &
+                                     evaluate_fit_quartic
+USE control_quartic_energy,  ONLY : lsolve
+USE polynomial, ONLY : poly4, clean_poly, init_poly
+IMPLICIT NONE
+
+INTEGER,  INTENT(IN)  :: nwork
+REAL(DP), INTENT(IN)  :: polar_strain(3,nwork)
+REAL(DP), INTENT(OUT) :: polar_strain_eff(3,nwork)
+REAL(DP), INTENT(IN)  :: tot_b_phase(3,nwork)
+REAL(DP), INTENT(OUT) :: tot_b_phase_eff(3,nwork)
+REAL(DP), INTENT(IN)  :: epsil_geo(nwork)
+REAL(DP), INTENT(OUT) :: epsil_geo_eff(nwork)
+REAL(DP), INTENT(OUT) :: min_y_t(max_nint_var, ngeo_strain, 21)
+
+INTEGER :: istep, igeo, iwork, jwork, imov, ivar, ipol
+REAL(DP) :: pol(3), bph(3)
+REAL(DP), ALLOCATABLE :: y(:), yv(:,:), pstrain(:,:), bphase(:,:)
+TYPE(poly4) :: p4(3), p4_b(3)
+
+
+iwork=0     ! run on current energy index
+jwork=0     ! run on previous energy index
+
+DO istep=1, nstep_ec
+   DO igeo=1, ngeo_strain
+      IF (stype(istep)) THEN
+         ALLOCATE(pstrain(nmove,3))
+         ALLOCATE(bphase(nmove,3))
+         ALLOCATE(y(nmove))
+         DO ipol=1,3
+            CALL init_poly(1,p4(ipol))
+            CALL init_poly(1,p4_b(ipol))
+         ENDDO
+         DO imov=1, nmove
+            jwork=jwork+1
+            DO ipol=1,3 
+               pstrain(imov,ipol)=polar_strain(ipol,jwork)
+               bphase(imov,ipol)=tot_b_phase(ipol,jwork)
+            ENDDO
+!
+!  y is the displacement (in a.u.) of the atom with respect to the uniformely
+!  strained position
+!
+            y(imov)=(imov-(nmove+1.0_DP)/2.0_DP)*atom_step(istep)
+         ENDDO
+!          
+!           Fit the data with a quartic and evaluate them at the minimum
+!           of the internal parameter that should be already available.
+!
+         DO ipol=1,3
+            CALL fit_multi_quartic(nmove,1,lsolve,y,pstrain(1,ipol),p4(ipol))
+            CALL fit_multi_quartic(nmove,1,lsolve,y,bphase(1,ipol), p4_b(ipol))
+            CALL evaluate_fit_quartic(1,min_y_t(1,igeo,istep), &
+                          pol(ipol),p4(ipol))
+            CALL evaluate_fit_quartic(1,min_y_t(1,igeo,istep), &
+                                      bph(ipol), p4_b(ipol))
+         ENDDO
+         iwork=iwork+1
+         polar_strain_eff(iwork,:)= pol(:)
+         tot_b_phase_eff(iwork,:)= bph(:)
+         epsil_geo_eff(iwork)=epsil_geo(jwork)
+         DO ipol=1,3
+            CALL clean_poly(p4(ipol))
+            CALL clean_poly(p4_b(ipol))
+         ENDDO
+         DEALLOCATE(pstrain)
+         DEALLOCATE(bphase)
+         DEALLOCATE(y)
+      ELSEIF (stypec(istep)) THEN
+         ALLOCATE(yv(nint_var_ec(istep),ninternal_ec(istep)))
+         ALLOCATE(pstrain(ninternal_ec(istep),3))
+         ALLOCATE(bphase(ninternal_ec(istep),3))
+         DO ipol=1,3
+            CALL init_poly(nint_var_ec(istep),p4(ipol))
+            CALL init_poly(nint_var_ec(istep),p4_b(ipol))
+         ENDDO
+         DO imov=1, ninternal_ec(istep)
+            jwork=jwork+1
+            DO ipol=1,3 
+               pstrain(imov,ipol)=polar_strain(ipol,jwork)
+               bphase(imov,ipol)=tot_b_phase(ipol,jwork)
+            ENDDO
+!
+!  y is the displacement (in a.u.) of the atom with respect to the uniformely
+!  strained position
+!
+            DO ivar=1,nint_var_ec(istep)
+               yv(ivar, imov)= uint_geo(ivar, jwork)
+            ENDDO
+!            WRITE(6,*) yv(ivar, imov), ene(imov)
+         ENDDO
+!
+!   fit the polarization and the berry phase with a quartic and interpolate
+!   at the internal parameter at the minimum energy (already available)
+!
+         DO ipol=1,3
+            CALL fit_multi_quartic(ninternal_ec(istep),nint_var_ec(istep),&
+                                lsolve,yv,pstrain(1,ipol),p4(ipol))
+            CALL fit_multi_quartic(ninternal_ec(istep),nint_var_ec(istep),&
+                                lsolve,yv,bphase(1,ipol),p4_b(ipol))
+            CALL evaluate_fit_quartic(nint_var_ec(istep),                 &
+                 min_y_t(1:nint_var_ec(istep),igeo,istep), pol(ipol), p4(ipol))
+            CALL evaluate_fit_quartic(nint_var_ec(istep),                 &
+                 min_y_t(1:nint_var_ec(istep),igeo,istep), bph(ipol), &
+                                                                    p4_b(ipol))
+         ENDDO
+         iwork=iwork+1
+         polar_strain_eff(:,iwork)=pol(:)
+         tot_b_phase_eff(:,iwork)= bph(:)
+         epsil_geo_eff(iwork)=epsil_geo(jwork)
+         DEALLOCATE(pstrain)
+         DEALLOCATE(bphase)
+         DEALLOCATE(yv)
+         DO ipol=1,3
+            CALL clean_poly(p4(ipol))
+            CALL clean_poly(p4_b(ipol))
+         ENDDO
+      ELSE
+         jwork=jwork+1
+         iwork=iwork+1
+         polar_strain_eff(:,iwork)=polar_strain(:,jwork)
+         tot_b_phase_eff(:,iwork)=tot_b_phase(:,jwork)
+         epsil_geo_eff(iwork)=epsil_geo(jwork)
+      ENDIF
+   ENDDO
+ENDDO
+
+RETURN
+END SUBROUTINE redefine_polar_qha_t
