@@ -103,7 +103,10 @@ MODULE elastic_constants
          write_sound_on_file,       &    ! write sound velocities on file 
          get_ec_type,               &    ! gives the ec_type from laue class
                                          ! and ibrav parameter
-         ec_present, ecm_names, ect_names
+         ece_to_ecd,                &    ! transform constant E field EC to
+                                         ! constant D field EC
+         ec_present, ecm_names, ect_names ! auxiliary variables
+        
 
 
 CONTAINS
@@ -3320,6 +3323,70 @@ ENDIF
 
 RETURN
 END SUBROUTINE write_sound_on_file
+
+!-------------------------------------------------------------------------
+SUBROUTINE ece_to_ecd(e_piezo_tensor, epsilonm1_zero, ce, cd)
+!-------------------------------------------------------------------------
+!
+!  This routine receives as input the stress piezoelectric tensor 
+!  (in e/(a.u.)**2), the elastic constants at constant electric field
+!  (in kbar), the inverse of the relative dielectric constant (adimensional)
+!  and gives as output the elastic constants calculated at constant
+!  displacement (also in kbar). 
+!  NB: the first index of the piezoelectric tensor refer to the polarization,
+!  the other two to the strain.
+!
+USE kinds, ONLY : DP
+USE constants, ONLY : epsnought_si, electron_si, bohr_radius_si
+USE voigt, ONLY : to_voigt3, to_voigt4
+
+IMPLICIT NONE
+
+REAL(DP), INTENT(INOUT) :: e_piezo_tensor(3,6), epsilonm1_zero(3,3), &
+                        ce(6,6)
+REAL(DP), INTENT(OUT) :: cd(6,6)
+
+INTEGER :: ipol, jpol, kpol, lpol, mpol, npol
+REAL(DP) :: fact
+REAL(DP) :: e_piezo_aux(3,3,3), ce_aux(3,3,3,3), cd_aux(3,3,3,3)
+
+CALL to_voigt3(e_piezo_tensor, e_piezo_aux, 2.0_DP, .FALSE.)
+
+DO ipol=1,3
+   DO jpol=1,3
+      WRITE(6,*) ipol, jpol, (e_piezo_aux(ipol,jpol,kpol), kpol=1,3)
+   ENDDO
+ENDDO
+
+CALL to_voigt4(ce, ce_aux, .FALSE.)
+!
+!  the electron charge and bohr_radius terms convert the piezoelectric tensors
+!  in C/m^2 * C/m^2, the vacuum permittivity epsnought_si is in C^2/(N m^2)
+!  so that the added term will be in N/m^2. The factor 10^8 transforms
+!  the term in kbar because 1 kbar = 10^8 N/m^2.
+!
+fact= electron_si **2 / ( bohr_radius_si )**4 / epsnought_si / 1.D8
+DO ipol=1,3
+   DO jpol=1,3
+      DO kpol=1,3
+         DO lpol=1,3
+            cd_aux(ipol,jpol,kpol,lpol)=ce_aux(ipol,jpol,kpol,lpol)
+            DO mpol=1,3
+               DO npol=1,3
+                  cd_aux(ipol,jpol,kpol,lpol)=cd_aux(ipol,jpol,kpol,lpol) + &
+                                 fact*e_piezo_aux(mpol,ipol,jpol)* &
+                                 epsilonm1_zero(mpol,npol) *       &
+                                 e_piezo_aux(npol,kpol,lpol)
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDDO
+ENDDO
+
+CALL to_voigt4(cd, cd_aux, .TRUE.)
+RETURN
+END SUBROUTINE ece_to_ecd
 
 !-----------------------------------------------------------------------
 FUNCTION get_ec_type(laue, ibrav)
