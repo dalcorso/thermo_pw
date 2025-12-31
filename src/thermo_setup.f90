@@ -102,6 +102,7 @@ SUBROUTINE thermo_setup()
   REAL(DP), PARAMETER :: eps1=1D-8
   REAL(DP) :: ur(3,3), global_s(3,3), rd_ht(3,3), celldm_(6), alat_save, zero
   REAL(DP), ALLOCATABLE :: tau_aux(:,:)
+  REAL(DP) :: compute_omega_geo
   !
   !
   with_asyn_images=(nimage>1)
@@ -245,7 +246,7 @@ SUBROUTINE thermo_setup()
 
   ibrav_save=ibrav
   at_save = at
-  omega_save=omega
+  omega_save=compute_omega_geo(ibrav, celldm)
   celldm_save=celldm
   nosym_save=nosym
   ityp_save(:)=ityp(:)
