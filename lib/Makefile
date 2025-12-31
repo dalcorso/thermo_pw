@@ -16,6 +16,7 @@ cubic_surfaces.o \
 color.o \
 debye_module.o \
 diagonalize.o \
+dielectric_constant.o \
 elastic_const.o \
 eldos_module.o \
 eos.o \
