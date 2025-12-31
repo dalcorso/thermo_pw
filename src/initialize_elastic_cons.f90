@@ -52,7 +52,7 @@ SUBROUTINE initialize_elastic_cons( ngeom, nwork )
 USE kinds,             ONLY : DP
 USE thermo_mod,        ONLY : ibrav_geo, celldm_geo, at_geo, tau_geo, uint_geo
 USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, rot_mat, &
-                               elastic_algorithm, epsilon_0,               &
+                               elastic_algorithm,                          &
                                el_con_ibrav_geo, el_con_celldm_geo,        &
                                work_base, elalgen, epsil_geo, tau_acc,     &
                                nmove, atom_step, atom_dir, move_at, stype, &
@@ -377,7 +377,7 @@ IF (ngeom==1) THEN
    el_con_celldm_geo(:,1)=celldm0(:)
 ENDIF
 flag=(elastic_algorithm=='standard'.OR.elastic_algorithm=='energy_std')
-epsilon_min= - delta_epsilon * (ngeo_strain - 1 ) / 2.0_DP - epsilon_0
+epsilon_min= - delta_epsilon * (ngeo_strain - 1 ) / 2.0_DP 
 iwork=0
 tau_acc=0.0_DP
 DO igeom=1, ngeom
@@ -386,10 +386,6 @@ DO igeom=1, ngeom
          iwork=iwork+1
          epsil = epsilon_min + delta_epsilon * ( igeo - 1 )
          epsil_geo(iwork) = epsil 
-         IF (igeo > ngeo_strain/2) epsil=epsil + 2.0_DP*epsilon_0
-         IF (MOD(ngeo_strain,2)==1 .AND. igeo==(ngeo_strain/2 + 1)) &
-                                                epsil=epsil-epsilon_0
-
          CALL set_strain_adv(strain_list(istep), el_con_ibrav_geo(igeom),  &
               el_con_celldm_geo(1,igeom), epsil, &
               epsilon_voigt(1,iwork), ibrav_geo(iwork), &

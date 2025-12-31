@@ -1645,16 +1645,6 @@ delta_epsilon: the interval of strain values between two
              that might have a different symmetry ngeo_strain 
              must be even.
              Default: real 0.005
-epsilon_0:   a minimum strain. For small strains the ionic 
-             relaxation routine requires a very small threshold 
-             to give the correct internal relaxations and 
-             sometimes fail to converge. In this case you 
-             can increase delta_epsilon, but if delta_epsilon 
-             becomes too large you can reach the nonlinear 
-             regime. In this case you can use a small 
-             delta_epsilon and a minimum strain (To be used 
-             only for difficult systems).
-             Default: real 0.0
 poly_degree: degree of the polynomial used to interpolate 
              stress or energy. ngeo_strain must be larger 
              than poly_degree+1.

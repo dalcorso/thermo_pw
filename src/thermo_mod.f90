@@ -1560,14 +1560,6 @@ MODULE control_elastic_constants
   !
   SAVE
   REAL(DP) :: delta_epsilon               ! the distance between two strains (D)
-  REAL(DP) :: epsilon_0                   ! a minimum strain (e_0). 
-                                          ! For ngeo_strain even, the
-                                          ! strains will be:
-                                          ! -e_0-D/2, -e0-3D/2, ...
-                                          ! e_0+D/2, e0+3D/2, ...
-                                          ! For ngeo_strain odd:
-                                          !  0, -e0-D, -e0-2D, ... 
-                                          !      e0+D,  e0+2D
   REAL(DP), ALLOCATABLE :: rot_mat(:,:,:) ! rotation matrix between the
                                           ! cartesian coordinates of the
                                           ! strained and unstrained cell  

@@ -87,7 +87,7 @@ SUBROUTINE thermo_readin()
                                    nvol_plot, ivol_plot_=>ivol_plot
   USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, &
                                    frozen_ions, elastic_algorithm, &
-                                   poly_degree, epsilon_0, use_free_energy, &
+                                   poly_degree, use_free_energy, &
                                    start_geometry_qha, last_geometry_qha,   &
                                    nmove, move_at, atom_dir, atom_step,     &
                                    stype, lcm_ec, lzsisa, lfp, old_ec,      &
@@ -261,7 +261,7 @@ SUBROUTINE thermo_readin()
                             frozen_ions,                    &
                             ngeo_strain,                    &
                             elastic_algorithm,              &
-                            delta_epsilon, epsilon_0,       &
+                            delta_epsilon,                  &
                             poly_degree,                    &
                             fl_el_cons,                     &
                             fl_piezo,                       &
@@ -523,7 +523,6 @@ SUBROUTINE thermo_readin()
   ngeo_strain=0
   elastic_algorithm='standard'
   delta_epsilon=0.005_DP
-  epsilon_0=0.0_DP
   poly_degree=0
   fl_el_cons='output_el_cons.dat'
   fl_piezo='output_piezo.dat'

@@ -52,7 +52,7 @@ SUBROUTINE bcast_thermo_input()
                               lambda_elem
   USE control_dosq,    ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq,     &
                               freqmin_input, freqmax_input, phdos_sigma
-  USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, epsilon_0,&
+  USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, &
                               frozen_ions, elastic_algorithm, poly_degree, &
                               use_free_energy, start_geometry_qha, &
                               last_geometry_qha, nmove, atom_dir, atom_step, &
@@ -262,7 +262,6 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( ngeo_strain, meta_ionode_id, world_comm )
   CALL mp_bcast( elastic_algorithm, meta_ionode_id, world_comm )
   CALL mp_bcast( delta_epsilon, meta_ionode_id, world_comm )
-  CALL mp_bcast( epsilon_0, meta_ionode_id, world_comm )
   CALL mp_bcast( poly_degree, meta_ionode_id, world_comm )
   CALL mp_bcast( fl_el_cons, meta_ionode_id, world_comm )
   CALL mp_bcast( nmove, meta_ionode_id, world_comm )
