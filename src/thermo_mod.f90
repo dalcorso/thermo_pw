@@ -2140,6 +2140,9 @@ INTEGER :: ggrun_recipe !  the degree of the polynomial used to fit
 INTEGER :: icenter_grun! the number of the geometry taken as reference 
                        ! for the theory
 
+INTEGER :: njump       ! the step in the original mesh of the points
+                       ! in which phonons are calculated (usually 1)
+
 INTEGER, ALLOCATABLE  :: xngeo(:) ! the size of the mesh (compressed)     
 
 INTEGER, ALLOCATABLE :: ind_rec3(:,:) ! this index gives 

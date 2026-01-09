@@ -1511,7 +1511,8 @@ SUBROUTINE initialize_no_ph(no_ph, no_ph_eos, tot_ngeo, ibrav)
 !
 USE thermo_mod, ONLY : ngeo, fact_ngeo, ngeo_ph
 USE control_thermo, ONLY : lgruneisen_gen
-USE control_gen_gruneisen, ONLY : icenter_grun, xngeo, ggrun_recipe, ind_rec3
+USE control_gen_gruneisen, ONLY : icenter_grun, xngeo, ggrun_recipe, ind_rec3,&
+                                  njump
 USE lattices, ONLY : compress_int_vect, crystal_parameters
 USE control_atomic_pos, ONLY : ninternal, linternal_thermo
 IMPLICIT NONE
@@ -1547,7 +1548,7 @@ IF (lgruneisen_gen) THEN
                                            ggrun_recipe)
       IF (ggrun_recipe==3.AND..NOT.no_ph_eos(iwork)) THEN
          icount=icount+1
-         ind_rec3(:,icount)=inde(:)-ipoint(:)
+         ind_rec3(:,icount)=(inde(:)-ipoint(:)) / njump
       ENDIF
    ENDDO
    DEALLOCATE(inde)
@@ -1748,48 +1749,77 @@ LOGICAL FUNCTION select_ph_to_do(iwork,nvar,inde,ipoint,ggrun_recipe)
 !  Note that the user must provide an ipoint inside the mesh.  
 !  If the ipoint is on the border this routine works but it 
 !  will set to .TRUE. less points.
-!  
 !
+!  recipe = 1 : center +/-  one coordinate 
+!  recipe = 2 : all {-1,0,+1} combinations
+!  recipe = 3 : center +/-  one coordinate + two coordinates
+!
+!---------------------------------------------------------------------
+USE control_gen_gruneisen, ONLY : njump
+
 IMPLICIT NONE
+
 INTEGER, INTENT(IN) :: nvar, iwork, ggrun_recipe
 INTEGER, INTENT(IN) :: ipoint(nvar)
 INTEGER, INTENT(IN) :: inde(nvar)
 
-INTEGER :: ivar, iaux
-LOGICAL :: laux, laux1
+INTEGER :: ivar
+INTEGER :: ndiff, npos
+LOGICAL :: laux
 
-iaux=0
-DO ivar=1,nvar
-   iaux=iaux+ABS(inde(ivar)-ipoint(ivar)) 
+!-------------------------------------------------------------
+! Count displaced coordinates
+! ndiff = number of coordinates displaced by +/-njump
+! npos  = number of positive displacements
+!-------------------------------------------------------------
+ndiff = 0
+npos  = 0
+
+DO ivar = 1, nvar
+   IF (inde(ivar) /= ipoint(ivar)) THEN
+      IF (ABS(inde(ivar)-ipoint(ivar)) == njump) THEN
+         ndiff = ndiff + 1
+         IF (inde(ivar) > ipoint(ivar)) npos = npos + 1
+      ELSE
+         ndiff = 100   ! reject larger jumps
+      ENDIF
+   ENDIF
 ENDDO
-IF (ggrun_recipe==1) THEN
-   laux=((iaux==0).OR.(iaux==1))
-ELSEIF (ggrun_recipe==2) THEN
-   laux=.TRUE.
-   DO ivar=1,nvar
-      laux=laux.AND.( ((inde(ivar)-ipoint(ivar))==0) .OR.  &
-                      ((inde(ivar)-ipoint(ivar))==1) .OR.  &
-                      ((inde(ivar)-ipoint(ivar))==-1) )
+
+!-------------------------------------------------------------
+! Selection rules
+!-------------------------------------------------------------
+laux = .FALSE.
+
+IF (ggrun_recipe == 1) THEN
+
+   ! center or ± one coordinate
+   laux = (ndiff == 0) .OR. (ndiff == 1)
+
+ELSEIF (ggrun_recipe == 2) THEN
+
+   ! full 3^nvar cube
+   laux = .TRUE.
+   DO ivar = 1, nvar
+      laux = laux .AND. ( ((inde(ivar)-ipoint(ivar)) == 0) .OR. &
+                          ((inde(ivar)-ipoint(ivar)) == njump) .OR. &
+                          ((inde(ivar)-ipoint(ivar)) == -njump) )
    ENDDO
-ELSEIF (ggrun_recipe==3) THEN
-   laux=((iaux==0).OR.(iaux==1))
-   iaux=0
-   DO ivar=1, nvar
-      IF ((inde(ivar)-ipoint(ivar))==1) &
-         iaux=iaux+(inde(ivar)-ipoint(ivar)) 
-   ENDDO
-   laux1=(iaux==2)
-!
-!  remove the points with indeces lower that ipoint 
-!  or that in any direction are more distant than one point
-!
-   DO ivar=1, nvar
-      IF (inde(ivar)< ipoint(ivar)) laux1=.FALSE.
-      IF (ABS(inde(ivar)-ipoint(ivar))>1) laux1=.FALSE.
-   ENDDO
-   laux=laux.OR.laux1
+
+ELSEIF (ggrun_recipe == 3) THEN
+
+   ! center
+   IF (ndiff == 0) laux = .TRUE.
+
+   ! +/- one coordinate
+   IF (ndiff == 1) laux = .TRUE.
+
+   ! + two coordinates only
+   IF (ndiff == 2 .AND. npos == 2) laux = .TRUE.
+
 ENDIF
-select_ph_to_do=laux
+
+select_ph_to_do = laux
 
 RETURN
 END FUNCTION select_ph_to_do

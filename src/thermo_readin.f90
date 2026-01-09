@@ -58,7 +58,7 @@ SUBROUTINE thermo_readin()
                                    letter_path, nrap_plot_in, &
                                    label_disp_q, rap_plot_in, long_path, &
                                    old_path, path_fact, is_a_path
-  USE control_gen_gruneisen, ONLY : ggrun_recipe, icenter_grun
+  USE control_gen_gruneisen, ONLY : ggrun_recipe, icenter_grun, njump
   USE control_gnuplot,      ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
   USE postscript_files,     ONLY : flpsband, flpsdisp, flpsmur, flpsdos, &
                                    flpstherm, flpsanhar, flpskeconv, &
@@ -623,6 +623,7 @@ SUBROUTINE thermo_readin()
 
   ggrun_recipe=2
   icenter_grun=0
+  njump=1
 
   linternal_thermo=.FALSE.
   iconstr_internal=0
