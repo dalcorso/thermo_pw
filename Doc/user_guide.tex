@@ -2632,6 +2632,18 @@ use \texttt{what='mur\_lc'} or \texttt{what='mur\_lc\_t'} the code
 can read the file produced with this option and interpolate the
 piezoelectric tensor at the pressure (and temperature if 
 \texttt{what='mur\_lc\_t'}) dependent geometries. 
+Usually the piezoelectric coefficient is calculated using
+\texttt{frozen\_ions=.FALSE.} relaxing the atomic positions for 
+each distorted configuration. In this case the piezoelectric tensor 
+is computed within ZSISA.
+It is also possible to use the flag \texttt{use\_free\_energy=.TRUE.}. 
+Together with the flags \texttt{stypec} 
+(see the option \texttt{what='scf\_elastic\_constants'}) 
+the code can compute the internal parameters as a function of strain
+by minimizing the free energy at each temperature. These temperature 
+dependent internal 
+parameters are used to compute the temperature dependent piezoelectric
+tensors within the full free energy minimization (FFEM).
 
 %\begin{tcolorbox}
 \begin{verbatim}
@@ -2639,12 +2651,17 @@ fl_piezo : the name of the file that contains the piezoelectric
            tensor.
          Default : 'output_piezo.dat'
 linterpolate_tau : if .TRUE. the atomic positions of each distorted 
-             geometry used to calculate the piezoelectric tensor is
-             used to find the internal parameters and the latter are
-             derived with respect to the strain.
-             This flag requires a iconstr_internal value for each strain
-             type. 
-             Default: .FALSE.
+           geometry used to calculate the piezoelectric tensor is
+           used to find the internal parameters and the latter are
+           derived with respect to the strain.
+           This flag requires a iconstr_internal value for each strain
+           type. 
+           Default: .FALSE.
+doberry : this flag must be .TRUE. to compute the Berry phase of each
+          distorted configuration. It can be set to .FALSE. 
+          when use_free_energy=.TRUE. and the code computes the phonons
+          of each distorted configuration within FFEM.
+          Default: .TRUE.
 \end{verbatim}
 
 \newpage

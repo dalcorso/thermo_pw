@@ -131,6 +131,10 @@ calculation to compute the band structure.
 H0) \texttt{lectqha=.TRUE.} computes the elastic constants at $T=0$
 as second derivatives of the energy or from the stress strain relationship. 
 
+\item 
+I0) \texttt{lpiezotqha=.TRUE.} computes the piezoelectric tensor at $T=0$
+from the polarization induced by a strain.
+
 \end{itemize}
 
 The second part can have an asynchronous part in which
@@ -202,20 +206,40 @@ enough information is available.
 P) Calculation of the Gr\"uneisen parameters on a uniform mesh of {\bf q} 
 points and calculation of the thermal expansion from the Gr\"uneisen parameters.
 Calculation of the isoentropic quantities when available.
+
+\item
+R) Interpolation of the temperature dependent elastic constants within the
+`quasi-static' or `quasi-harmonic' approximation. Ionic positions can be
+treated within the 
+
+\item
+S) Interpolation of the temperature dependent piezoelectric tensor within the
+`quasi-harmonic' ZSISA or (full free energy minimization) FFEM approximation.
+
 \end{itemize}
 
-Instead if \texttt{lectqha=.TRUE.} the code will do:
+If \texttt{lectqha=.TRUE.} the code will do:
 \begin{itemize}
 \item
 Q) Calculation of the temperature dependent elastic constants within the
 `fixed-geometry quasi-harmonic' approximation.
 
-\item
-R) Calculation of the temperature dependent elastic constants within the
-`quasi-harmonic' approximation.
-
-
 \end{itemize}
+
+If \texttt{lpiezotqha=.TRUE.} the code will do:
+\begin{itemize}
+\item
+T) Calculation of the temperature dependent piezoelectric tensor within the
+`fixed-geometry quasi-harmonic' approximation (within ZSISA or FFEM).
+\end{itemize}
+
+If \texttt{lpyrotqha=.TRUE.} the code will do:
+\begin{itemize}
+\item
+T) Calculation of the temperature dependent pyroelectric tensor within the
+`fixed-geometry quasi-harmonic' approximation (only within FFEM).
+\end{itemize}
+
 There are also two initial routines (\texttt{thermo\_setup} and 
 \texttt{thermo\_summary}) that can carry out preprocessing tasks, such as 
 finding the space group or suggesting alternative \texttt{ibrav} and 
@@ -232,35 +256,38 @@ The different \texttt{what} activates the following parts of the code:
 
 \begin{footnotesize}
 \begin{verbatim}
-what         A   B   C   D   E    F  H0  G1    H    I   L   G2   M  N  O  P  Q  R
+what         A  B  C  D  E  F  H0  G1  H  I  L  G2  M  N  O  P  Q  R  S  T  U
 
 plot_bz
-scf                          *
-scf_ke       *   *
-scf_nk       *       *
-scf_bands                    *    *
-scf_2d_bands                 *    *
-scf_dos                      *    *
-scf_ph                       *                              *
-scf_disp                     *                              *
-scf_elastic_constants                    *    *
-scf_piezoelectric_tensor                 *          +
-scf_polarization                         *              +
-mur_lc       *           *              (*)
-mur_lc_bands *           *   *    *
-mur_lc_dos   *           *   *    *
-mur_lc_ph    *           *   *                              *
-mur_lc_disp  *           *   *                              *
+scf                      *
+scf_ke       *  *
+scf_nk       *     *
+scf_bands                *  *
+scf_2d_bands             *  *
+scf_dos                  *  *
+scf_ph                   *                       *
+scf_disp                 *                       *
+scf_elastic_constants              *   *
+scf_piezoelectric_tensor           *      *      
+scf_polarization                   *  
+mur_lc       *        *               (*)
+mur_lc_bands *        *  *  *
+mur_lc_dos   *        *  *  *
+mur_lc_ph    *        *  *                       *
+mur_lc_disp  *        *  *                       *
 mur_lc_elastic_constants
-             *           *               *    *
+             *        *  *         *   *
 mur_lc_piezoelectric_tensor
-             *           *               *          +
+             *        *  *         *      *    
 mur_lc_polarization
-             *           *               *               +
-mur_lc_t     *           *                                  *   *  *  *  *
+             *        *            *               
+mur_lc_t     *        *                          *  *  *  *  *     *  *
 elastic_constants_geo
-             *                       *  (*)                 *               *   *
-+ not yet active or working.
+             *                     *  (*)        *              *  
+piezoelectric_tensor_geo
+             *                                   *                       *
+polarization_geo
+             *                                   *                          *
 (*) when lel_free_energy=.TRUE. and use_free_energy=.FALSE.. 
 \end{verbatim}
 \end{footnotesize}
@@ -315,6 +342,9 @@ Elastic constants and bulk modulus
 as a function of temperature                   mur_lc_t, elastic_constants_geo
 Elastic compliances and compressibility
 as a function of temperature                   mur_lc_t, elastic_constants_geo
+Piezoelectric tensor
+as a function of temperature                   mur_lc_t, 
+                                               piezoelectric_tensor_geo
 
 For cubic systems, or when elastic constants are on file,
 also the following quantities are plotted:
@@ -745,6 +775,15 @@ The following directories are created within the \texttt{working} directory:
 \begin{verbatim}
 restart         : a directory where each task creates a file with the total
                   energy and possibly the stress that it has calculated.
+                  If the task computes the Berry phase, both the polarization
+                  and the Berry phase of each geometry are saved here.
+                  This directory contains also files with the geometry
+                  of each task: bravais lattice, crystal parameters and
+                  atomic positions. If the bravais lattece is ibrav=0 
+                  this file contains also the primitive Bravais lattice 
+                  vectors at. Atomic positions files with extension mlc 
+                  correspond to equilibrium geometries, while extension 
+                  elc correspond to distorted geometries.
 
 gnuplot_files   : a directory where the gnuplot scripts are written.
 
@@ -775,9 +814,15 @@ anhar_files     : a directory that contains the files with the anharmonic
                   readable by the gnuplot code.
                   The 'quasi-static', 'fixed geometry quasi-harmonic' and
                   'quasi-harmonic' elastic constants are saved here.
+                  The 'quasi-static, 'fixed geometry FFEM' piezoelectric
+                  tensor files are saved here.
 
 elastic_constants : a directory that contains the elastic constants files
-                    at T=0.
+                  at T=0 K. This directory contains also the piezoelectric
+                  tensor file at T=0 K when this is calculated.
+                  It can contain also files with the dielectric constant
+                  and the Born effective charges for each geometry when 
+                  they are calculated.
 \end{verbatim}
 \end{footnotesize}
 The postscript files with the physical quantities are all written in
@@ -853,11 +898,21 @@ manage_ph_symmetry.f90
 \end{verbatim}
 coordinates the symmetry analysis of the phonon modes,
 \begin{verbatim}
-manage_elastic_cons.f90        
+manage_elastic_cons.f90  
 \end{verbatim}
 coordinates the calculation of the elastic constants, the sound velocities,
 the Debye temperature and the harmonic thermodynamic properties within the 
 Debye approximation,
+\begin{verbatim}
+manage_piezo_tensor.f90  
+\end{verbatim}
+coordinates the calculation of the piezoelectric tensor, both proper and
+improper, its decomposition into a clamped ions and a relaxed ion term, and
+the calculation of the polarization of the undistorted geometry,
+\begin{verbatim}
+manage_polarization.f90  
+\end{verbatim}
+coordinates the calculation of the spontaneous polarization
 \begin{verbatim}
 manage_anhar_routines.f90 manage_anhar.f90               
 \end{verbatim}
@@ -866,6 +921,15 @@ coordinates the calculation of the anharmonic thermodynamic quantities,
 manage_elastic_cons_qha.f90, manage_elastic_cons_qha_2.f90        
 \end{verbatim}
 coordinates the calculation of the temperature dependent elastic constants,
+\begin{verbatim}
+manage_piezo_tensor_qha.f90
+\end{verbatim}
+coordinates the calculation of the temperature dependent piezoelectric tensor
+within the FFEM,
+\begin{verbatim}
+manage_polarization_qha.f90  
+\end{verbatim}
+coordinates the calculation of the pyroelectric tensor with FFEM,
 \begin{verbatim}
 manage_el_free_energy.f90      
 \end{verbatim}
@@ -877,13 +941,14 @@ Presently the managers are called in the sequence:
 a.r.  (part 1)
                -> manage_energy_minimum -> manage_xrdp
 manage_syn_1   -> manage_elastic_cons
-
+               -> manage_piezo_tensor
                -> manage_bands -> manage_surface_states
 manage_sync_pw -> manage_xrdp
 
 a.r.  (part 2)
                -> manage_el_free_energy
 manage_syn_2   -> manage_elastic_cons
+               -> manage_piezo_tensor
 
                                            -> manage_collection
                -> manage_ph_all_geometries (a.r. part 2) 
@@ -895,6 +960,8 @@ manage_ph_run  -> manage_ph (a.r. part 2) -> manage_collection
 manage_anhar_routines -> manage_anhar_anis
 
 manage_elastic_cons_qha -> manage_elastic_cons_qha_2
+
+manage_piezo_tensor_qha
 
 a.r. means asynchronous run.
 \end{verbatim}
@@ -2108,6 +2175,11 @@ Presently it contains a driver that calls LAPACK routines
 for real symmetric matrices.
 
 \item
+\texttt{dielectric.f90} contains routines to calculate the static dielectric 
+constant $\epsilon_0$ and routines to save on files the dielectric constant
+and the Born effective charges.
+
+\item
 \texttt{elastic\_const.f90} contains routines to calculate the elastic
 constants given the strain and the induced stress or the strain and
 the energy or the Helmholtz free energy. It can also compute
@@ -2218,6 +2290,10 @@ It has routines that finds all the subgroups or supergroups of a given given
 point group.
 
 \item
+\texttt{polarization.f90} contains routine to deal with the Berry phase
+polarization. Presently only files to read and write it on file.
+
+\item
 \texttt{polyfit.f90} contains routines to deal with polynomial
 interpolation of arbitrary degree for a single variable. Presently
 it contains a routine that finds the polynomial interpolation a set of data,
@@ -2320,10 +2396,10 @@ contained in the file \texttt{control\_qe.f90} and should be added there.
 {\color{dark-blue}\chapter{Make join\_qe and make leave\_qe}}
 \color{black}
 
-The command \texttt{make join\_qe} substitutes three files of the QE
+The command \texttt{make join\_qe} substitutes four files of the QE
 distribution: \texttt{Makefile} in the main QE directory, 
-\texttt{install/makedeps.sh} and \texttt{install/}
-\texttt{plugins\_makefile}.
+\texttt{install/makedeps.sh}, \texttt{install/}
+\texttt{plugins\_makefile} and \texttt{CMakeLists.txt}. 
 These files need to be modified to insert the commands needed to
 compile \tpw. The original files of the QE distribution are copied
 in the main \texttt{thermo\_pw} directory with the name extension
@@ -2332,6 +2408,9 @@ files in the QE distribution.
 Occasionally this technique is also used to substitute a few QE files
 to correct bugs identified between the release of the QE package 
 and the release of the \tpw\ package. In these cases it is important
-to give the comman \texttt{make join\_qe} before compiling QE.
+to give the command \texttt{make join\_qe} before compiling QE.
+Some files contains parameters which are increased to improve the 
+working of \texttt{thermo\_pw}. For instance, we increase the maximum 
+number of ${\bf k}$ points, the maximum number of allocatable clocks, etc.
 
 \end{document}
