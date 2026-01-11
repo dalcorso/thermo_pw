@@ -24,7 +24,7 @@ INTEGER :: nwork
 ! here we return synchronized and calculate the elastic constants 
 ! from energy or stress 
 !
-IF (lel_free_energy) CALL manage_el_free_energy(nwork)
+IF (lel_free_energy) CALL manage_el_free_energy()
 !
 IF (lelastic_const) CALL manage_elastic_cons(nwork, 1)
 !
