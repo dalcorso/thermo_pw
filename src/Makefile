@@ -22,6 +22,7 @@ allocate_thermo.o \
 bands_sub.o \
 bcast_thermo_input.o \
 b_factor_reduction.o \
+build_el_cons_d.o \
 check_all_geometries_done.o \
 check_dynmat_all_geo_on_file.o \
 check_el_cons.o \
@@ -178,6 +179,7 @@ write_el_thermo.o \
 write_elastic_t.o \
 write_elastic_t_qha.o \
 write_epsilon_infty_t.o \
+write_epsilonm1_t.o \
 write_ev_input.o \
 write_free_energy.o \
 write_gnuplot_energy.o \
