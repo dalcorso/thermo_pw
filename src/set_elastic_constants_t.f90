@@ -100,10 +100,16 @@ SUBROUTINE set_piezo_tensor_t()
 !  It will use the piezoelectric tensor at several geometries found in the 
 !  elastic_constants directory (quasi-static approximation). 
 !
-USE control_piezoelectric_tensor, ONLY : piezo_geo_available
+USE control_piezoelectric_tensor, ONLY : piezo_geo_available,       &
+                                         piezo_qha_geo_available,   &
+                                         piezof_qha_geo_available
 IMPLICIT NONE
 
-IF (piezo_geo_available) THEN
+IF (piezo_qha_geo_available.OR.piezof_qha_geo_available) THEN
+   CALL write_piezo_t_qha()
+   CALL write_piezo_pt_qha()
+   CALL write_piezo_ptt_qha()
+ELSEIF (piezo_geo_available) THEN
    CALL write_piezo_t()
    CALL write_piezo_pt()
    CALL write_piezo_ptt()
@@ -172,3 +178,73 @@ ENDIF
 
 RETURN
 END SUBROUTINE set_zeu_t
+!
+!----------------------------------------------------------------------
+SUBROUTINE set_elastic_constants_d_t()
+!----------------------------------------------------------------------
+!
+!  This routine sets the temperature dependent elastic constants at
+!  constants electric displacement depending on what has been found 
+!  in the files and the user requests.
+!  It needs the piezoelectric tensor, the static dielectric constants, 
+!  and the elastic constants calculated at constant electric field.
+!
+USE control_piezoelectric_tensor, ONLY : piezo_geo_available,       &
+                                         piezo_qha_geo_available,   &
+                                         piezof_qha_geo_available
+IMPLICIT NONE
+
+IF (piezo_qha_geo_available.OR.piezof_qha_geo_available) THEN
+   CALL write_elastic_constants_d_t_qha()
+   CALL write_elastic_constants_d_pt_qha()
+   CALL write_elastic_constants_d_ptt_qha()
+ELSEIF (piezo_geo_available) THEN
+!   CALL write_elastic_constants_d_t()
+!   CALL write_elastic_constants_d_pt()
+!   CALL write_elastic_constants_d_ptt()
+ENDIF
+
+RETURN
+END SUBROUTINE set_elastic_constants_d_t
+
+!----------------------------------------------------------------------
+SUBROUTINE set_epsilonm1_t()
+!----------------------------------------------------------------------
+!
+!  This routine sets the temperature dependent inverse of the dielectric
+!  constant. 
+!
+USE control_epsilon_infty, ONLY : epsilon_infty_geo_available
+
+IMPLICIT NONE
+
+IF (epsilon_infty_geo_available) THEN
+   CALL write_epsilonm1_t()
+   CALL write_epsilonm1_pt()
+   CALL write_epsilonm1_ptt()
+ENDIF
+
+RETURN
+END SUBROUTINE set_epsilonm1_t
+!
+!----------------------------------------------------------------------
+SUBROUTINE set_pyro_t()
+!----------------------------------------------------------------------
+!
+!  This routine sets the temperature dependent pyroelectric tensor 
+!  given the Born effective charges and the derivatives of the
+!  internal parameters. If it finds the piezoelectric tensor
+!  it computes also its contribution to the pyroelectricity.
+!
+USE control_piezoelectric_tensor, ONLY : piezo_qha_geo_available,   &
+                                         piezof_qha_geo_available
+IMPLICIT NONE
+
+IF (piezo_qha_geo_available.OR.piezof_qha_geo_available) THEN
+   CALL write_pyro_t_qha()
+!   CALL write_pyro_pt_qha()
+!   CALL write_pyro_ptt_qha()
+ENDIF
+
+RETURN
+END SUBROUTINE set_pyro_t

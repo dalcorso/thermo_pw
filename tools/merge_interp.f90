@@ -11,7 +11,7 @@ PROGRAM merge_interp
 !
 !  This program is a driver for the routine dosplineint_1D.
 !  The input is the following
-!  file1    the name of file 1
+!  file1    the name of file 1 without any ' ' or " "
 !  ncol     number of columns of file 1
 !  nx1, ny1 the column with x and f(x) for file1
 !  fact1    the column nx1 and ny1 are multiplied by fact1

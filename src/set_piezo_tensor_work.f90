@@ -32,7 +32,7 @@ USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, epsil_geo,&
                                       tau_acc, el_con_tau_crys_geo
 USE control_piezoelectric_tensor, ONLY : e_piezo_tensor_relax_geo,     &
                                          e_piezo_tensor_fi_geo,        &
-                                         dtau_dint, dint_depsilon_geo, &
+                                         dtau_dint_pt, dint_depsilon_geo, &
                                          decompose_piezo, piezo_zeu_geo
 USE elastic_constants,   ONLY : epsilon_voigt, epsilon_geo, sigma_geo
 USE strain_mod,          ONLY : trans_epsilon, set_strain_adv
@@ -321,7 +321,7 @@ ENDDO
 IF (decompose_piezo) THEN
    nstep=nwork/ngeo_strain/ngeom
    ALLOCATE(piezo_zeu_geo(3,3,nat,ngeom))
-   ALLOCATE(dtau_dint(3,nat,max_nint_var,nstep,ngeom))
+   ALLOCATE(dtau_dint_pt(3,nat,max_nint_var,nstep,ngeom))
    ALLOCATE(dint_depsilon_geo(max_nint_var,nstep,ngeom))
    IF (ltau_from_file) THEN
       DO iwork=1,nwork
@@ -331,7 +331,7 @@ IF (decompose_piezo) THEN
    DO igeom=1,ngeom
       DO istep=1, nstep
          CALL dtau_dinternal(el_con_celldm_geo(1,igeom),        &
-                dtau_dint(1,1,1,istep,igeom), nat, nint_var_ec(istep),&
+                dtau_dint_pt(1,1,1,istep,igeom), nat, nint_var_ec(istep),&
                         iconstr_internal_ec(istep))
       ENDDO
    ENDDO

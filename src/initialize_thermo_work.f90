@@ -36,7 +36,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
                              nnk, nk_test, deltank, nsigma, sigma_test,   &  
                              deltasigma, ncutoffene
   USE equilibrium_conf, ONLY : celldm0, omega0
-  USE control_atomic_pos, ONLY : max_nint_var
+  USE control_atomic_pos, ONLY : max_nint_var, iconstr_internal
   USE initial_conf,   ONLY : ibrav_save, start_geometry_save,             &
                              last_geometry_save, omega_save
   USE piezoelectric_tensor, ONLY : allocate_piezo
@@ -48,11 +48,12 @@ SUBROUTINE initialize_thermo_work(nwork, part)
                                    found_ph_ec, min_y_t, min_yf_t, dyde,   &
                                    ngeo_strain, stype, tau_save_ec,        &
                                    el_con_celldm_geo, nint_var_ec,         &
-                                   iconstr_internal_ec
+                                   iconstr_internal_ec, el_con_d_geo
   USE control_piezoelectric_tensor, ONLY : g_piezo_tensor_geo, &
                                    eg_piezo_tensor_geo, e_piezo_tensor_geo, &
                                    e_piezo_tensor_fi_geo,                   &
-                                   d_piezo_tensor_geo, polar0_geo
+                                   d_piezo_tensor_geo, polar0_geo,          &
+                                   found_dos_pt, found_ph_pt, doberry
   USE control_epsilon_infty,        ONLY : lepsilon_infty_geo, lzeu_geo
   USE temperature,   ONLY : ntemp
   USE control_eldos, ONLY : lel_free_energy
@@ -396,6 +397,9 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            ALLOCATE(no_ph_eos(tot_ngeo))
            ALLOCATE(found_dos_ec(tot_ngeo))
            ALLOCATE(found_ph_ec(tot_ngeo))
+           ALLOCATE(found_dos_pt(tot_ngeo))
+           ALLOCATE(found_ph_pt(tot_ngeo))
+           ALLOCATE(el_con_d_geo(6,6,tot_ngeo))
            ALLOCATE(all_geometry_done_geo(tot_ngeo))
            CALL initialize_no_ph(no_ph, no_ph_eos, tot_ngeo, ibrav_save)
            CALL summarize_geometries(nwork)
@@ -589,8 +593,8 @@ SUBROUTINE initialize_thermo_work(nwork, part)
 !     initialise_elastic_cons allocates ibrav_geo and celldm_geo
 !
            iwho=2
-           CALL initialize_elastic_cons(ngeom,nwork)
            CALL set_unperturbed_geometry(ngeom)
+           CALL initialize_elastic_cons(ngeom,nwork)
            ALLOCATE(energy_geo(nwork))
            start_geometry=MAX(1, start_geometry_save)
            last_geometry=MIN(nwork, last_geometry_save)
@@ -706,7 +710,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
         CASE ('piezoelectric_tensor_geo')
            DO iwork=start_geometry,last_geometry
               lpwscf(iwork)=.TRUE.
-              lberry(iwork)=.TRUE.
+              lberry(iwork)=doberry
            ENDDO
         CASE ('polarization_geo')
         CASE DEFAULT

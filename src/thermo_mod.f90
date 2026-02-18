@@ -491,6 +491,7 @@ MODULE anharmonic
   REAL(DP), ALLOCATABLE :: vmin_t(:)   ! minimum volume at each T
   REAL(DP), ALLOCATABLE :: b0_t(:)     ! bulk modulus at each T from EOS
   REAL(DP), ALLOCATABLE :: b0_ec_t(:)  ! bulk modulus at each T from EC
+  REAL(DP), ALLOCATABLE :: b0_ec_d_t(:)  ! bulk modulus at each T from EC
   REAL(DP), ALLOCATABLE :: b01_t(:)    ! pressure derivative of b0 at each T
   REAL(DP), ALLOCATABLE :: b02_t(:)    ! second pressure derivative of b0
                                        ! at each T
@@ -536,6 +537,7 @@ MODULE anharmonic
 !
   REAL(DP), ALLOCATABLE :: celldm_t(:,:) ! the lattice parameters as a 
                            ! function of temperature
+
   REAL(DP), ALLOCATABLE :: density_t(:)  ! the density
   REAL(DP), ALLOCATABLE :: alpha_anis_t(:,:)  ! thermal expansion tensor 
                                           ! (Voigt index)
@@ -545,6 +547,8 @@ MODULE anharmonic
                                          ! temperature
   REAL(DP), ALLOCATABLE :: csmct_t(:,:,:) ! difference of elastic constants
   REAL(DP), ALLOCATABLE :: bths_t(:,:,:)  ! thermal stress
+  REAL(DP), ALLOCATABLE :: csmct_d_t(:,:,:) ! difference of elastic constants
+  REAL(DP), ALLOCATABLE :: bths_d_t(:,:,:)  ! thermal stress
   REAL(DP), ALLOCATABLE :: ggamma_t(:,:,:)! generalized average gruneisen 
                                        ! parameter
 !
@@ -558,9 +562,18 @@ MODULE anharmonic
                                          ! of temperature (constant entropy)
   REAL(DP), ALLOCATABLE :: el_comp_s(:,:,:) ! elastic compliances as a function
                                          ! of temperature (constant entropy)
+  REAL(DP), ALLOCATABLE :: el_cons_d_t(:,:,:) ! elastic constants as a function
+                                         ! of temperature (constant T, D)
+  REAL(DP), ALLOCATABLE :: el_comp_d_t(:,:,:) ! elastic compliances as a 
+                                         ! function of temperature 
+                                         ! (constant T, D)
+  REAL(DP), ALLOCATABLE :: el_cons_d_s(:,:,:) ! elastic constants as a function
+                                         ! of temperature (constant entropy)
   REAL(DP), ALLOCATABLE :: macro_el_s(:,:) ! macroscopic elasticity as a 
                                            ! function of t (from el_cons_s)
   REAL(DP), ALLOCATABLE :: macro_el_t(:,:) ! macroscopic elasticity as a 
+                                           ! function of t (from el_cons_t)
+  REAL(DP), ALLOCATABLE :: macro_el_d_t(:,:) ! macroscopic elasticity as a 
                                            ! function of t (from el_cons_t)
   REAL(DP), ALLOCATABLE :: v_s(:,:)        ! the sound velocities from
                                            ! macro_el_s: vp, vb, vg
@@ -584,8 +597,15 @@ MODULE anharmonic
                                          ! tensor as a function of temperature 
   REAL(DP), ALLOCATABLE :: epsilon_infty_t(:,:,:) ! epsilon infinity as a 
                                          ! function of temperature 
+  REAL(DP), ALLOCATABLE :: epsilon_zerom1_t(:,:,:) ! inverse of epsilon zero 
+                                         ! as a function of temperature 
   REAL(DP), ALLOCATABLE :: zeu_t(:,:,:,:)! Born effective charge as a 
                                          ! function of temperature 
+  REAL(DP), ALLOCATABLE :: pyro_t(:,:)   ! Pyroelectric tensor
+                                         ! function of temperature 
+  REAL(DP), ALLOCATABLE :: piezo_pyro_t(:,:)   ! Pyroelectric tensor
+                                         ! function of temperature 
+                                         ! (piezoelectric contribution)
 !
 !  The parameters of the interpolation neglecting the electronic exitation
 !  contribution
@@ -659,6 +679,7 @@ MODULE anharmonic_pt
   REAL(DP), ALLOCATABLE :: vmin_pt(:,:)  ! the volume at the minimum
   REAL(DP), ALLOCATABLE :: b0_pt(:,:)    ! bulk modulus for all T from EOS
   REAL(DP), ALLOCATABLE :: b0_ec_pt(:,:) ! bulk modulus for all T from EC
+  REAL(DP), ALLOCATABLE :: b0_ec_d_pt(:,:) ! bulk modulus for all T from EC
   REAL(DP), ALLOCATABLE :: b01_pt(:,:)   ! pressure derivative of b0
   REAL(DP), ALLOCATABLE :: b02_pt(:,:)   ! second pressure derivative of b0
   REAL(DP), ALLOCATABLE :: emin_pt(:,:)  ! Gibbs energy at the minimum
@@ -711,9 +732,12 @@ MODULE anharmonic_pt
                                              ! - isothermal ones
   REAL(DP), ALLOCATABLE :: el_cons_pt(:,:,:,:)   ! isothermal elast. cons.
   REAL(DP), ALLOCATABLE :: el_comp_pt(:,:,:,:)   ! isothermal elast. comp.
+  REAL(DP), ALLOCATABLE :: el_cons_d_pt(:,:,:,:)   ! isothermal elast. cons.
+  REAL(DP), ALLOCATABLE :: el_comp_d_pt(:,:,:,:)   ! isothermal elast. comp.
   REAL(DP), ALLOCATABLE :: el_cons_s_pt(:,:,:,:) ! isoentropic elast. cons.
   REAL(DP), ALLOCATABLE :: el_comp_s_pt(:,:,:,:) ! isoentropic elast. comp.
   REAL(DP), ALLOCATABLE :: macro_el_pt(:,:,:)    ! macroscopic elasticity
+  REAL(DP), ALLOCATABLE :: macro_el_d_pt(:,:,:)    ! macroscopic elasticity
   REAL(DP), ALLOCATABLE :: macro_el_s_pt(:,:,:)  ! isoentropic macroscopic ela.
   REAL(DP), ALLOCATABLE :: debye_macro_el_pt(:,:)  ! isothermal debye temper.
   REAL(DP), ALLOCATABLE :: debye_macro_el_s_pt(:,:)  ! adiabatic debye temper.
@@ -728,6 +752,9 @@ MODULE anharmonic_pt
                                          ! a function of temperature 
   REAL(DP), ALLOCATABLE :: epsilon_infty_pt(:,:,:,:) ! epsilon infinity as a 
                                          ! function of temperature several p
+  REAL(DP), ALLOCATABLE :: epsilon_zerom1_pt(:,:,:,:) ! inverse of epsilon zero 
+                                         ! as a function of temperature  
+                                         ! several p
   REAL(DP), ALLOCATABLE :: zeu_pt(:,:,:,:,:) ! Born effective charge as a 
                                          ! function of temperature several p
 
@@ -753,6 +780,7 @@ MODULE ph_freq_anharmonic_pt
   REAL(DP), ALLOCATABLE :: vminf_pt(:,:)  ! the volume at the minimum
   REAL(DP), ALLOCATABLE :: b0f_pt(:,:)    ! bulk modulus for all T from EOS
   REAL(DP), ALLOCATABLE :: b0f_ec_pt(:,:) ! bulk modulus for all T from EC
+  REAL(DP), ALLOCATABLE :: b0f_ec_d_pt(:,:) ! bulk modulus for all T from EC
   REAL(DP), ALLOCATABLE :: b01f_pt(:,:)   ! pressure derivative of b0
   REAL(DP), ALLOCATABLE :: b02f_pt(:,:)   ! second pressure derivative of b0
   REAL(DP), ALLOCATABLE :: eminf_pt(:,:)  ! Gibbs energy at the minimum
@@ -806,9 +834,12 @@ MODULE ph_freq_anharmonic_pt
                                              ! - isothermal ones
   REAL(DP), ALLOCATABLE :: el_consf_pt(:,:,:,:)   ! isothermal elast. cons.
   REAL(DP), ALLOCATABLE :: el_compf_pt(:,:,:,:)   ! isothermal elast. comp.
+  REAL(DP), ALLOCATABLE :: el_consf_d_pt(:,:,:,:) ! isothermal elast. cons.
+  REAL(DP), ALLOCATABLE :: el_compf_d_pt(:,:,:,:) ! isothermal elast. comp.
   REAL(DP), ALLOCATABLE :: el_consf_s_pt(:,:,:,:) ! isoentropic elast. cons.
   REAL(DP), ALLOCATABLE :: el_compf_s_pt(:,:,:,:) ! isoentropic elast. comp.
   REAL(DP), ALLOCATABLE :: macro_elf_pt(:,:,:)    ! macroscopic elasticity
+  REAL(DP), ALLOCATABLE :: macro_elf_d_pt(:,:,:)    ! macroscopic elasticity
   REAL(DP), ALLOCATABLE :: macro_elf_s_pt(:,:,:)  ! isoentropic macroscopic ela.
   REAL(DP), ALLOCATABLE :: vf_pt(:,:,:)           ! isothermal sound speed
   REAL(DP), ALLOCATABLE :: vf_s_pt(:,:,:)         ! isoentropic sound speed
@@ -822,9 +853,12 @@ MODULE ph_freq_anharmonic_pt
   REAL(DP), ALLOCATABLE :: d_piezo_tensorf_pt(:,:,:,:) ! piezoelectric tensor as 
                                                   ! a function of temperature 
   REAL(DP), ALLOCATABLE :: epsilon_inftyf_pt(:,:,:,:) ! epsilon infinity as a 
-                                         ! function of pressure several T
+                                         ! function of temperature several p
+  REAL(DP), ALLOCATABLE :: epsilon_zerom1f_pt(:,:,:,:) ! inverse of epsilon 
+                                         ! zero as a function of temperature 
+                                         ! several p
   REAL(DP), ALLOCATABLE :: zeuf_pt(:,:,:,:,:) ! Born effective charge as a 
-                                         ! function of pressure at several T
+                                         ! function of temperature at several p
 
   REAL(DP), ALLOCATABLE :: celldmf_pt_p1(:,:,:)   ! crystal parameters at p+dp
   REAL(DP), ALLOCATABLE :: celldmf_pt_m1(:,:,:)   ! crystal parameters at p-dp
@@ -852,6 +886,7 @@ MODULE anharmonic_ptt
                                           ! for all P at T-deltat
   REAL(DP), ALLOCATABLE :: b0_ptt(:,:)    ! the bulk modulus for all P from EOS
   REAL(DP), ALLOCATABLE :: b0_ec_ptt(:,:) ! the bulk modulus for all P from EC
+  REAL(DP), ALLOCATABLE :: b0_ec_d_ptt(:,:) ! the bulk modulus for all P from EC
   REAL(DP), ALLOCATABLE :: b01_ptt(:,:)   ! the pressure derivative of b0
   REAL(DP), ALLOCATABLE :: b02_ptt(:,:)   ! the second pressure derivative 
                                           ! of b0
@@ -914,9 +949,12 @@ MODULE anharmonic_ptt
                                              ! - isothermal ones
   REAL(DP), ALLOCATABLE :: el_cons_ptt(:,:,:,:)    ! isothermal elast. cons.
   REAL(DP), ALLOCATABLE :: el_comp_ptt(:,:,:,:)    ! isothermal elast. comp.
+  REAL(DP), ALLOCATABLE :: el_cons_d_ptt(:,:,:,:)  ! isothermal elast. cons.
+  REAL(DP), ALLOCATABLE :: el_comp_d_ptt(:,:,:,:)  ! isothermal elast. comp.
   REAL(DP), ALLOCATABLE :: el_cons_s_ptt(:,:,:,:)  ! isoentropic elast. cons.
   REAL(DP), ALLOCATABLE :: el_comp_s_ptt(:,:,:,:)  ! isoentropic elast. comp.
   REAL(DP), ALLOCATABLE :: macro_el_ptt(:,:,:)     ! macroscopic elasticity
+  REAL(DP), ALLOCATABLE :: macro_el_d_ptt(:,:,:)     ! macroscopic elasticity
   REAL(DP), ALLOCATABLE :: macro_el_s_ptt(:,:,:)   ! isoentropic macros. ela.
   REAL(DP), ALLOCATABLE :: debye_macro_el_ptt(:,:) ! isothermal debye temp.
   REAL(DP), ALLOCATABLE :: debye_macro_el_s_ptt(:,:) ! isoentropic debye temp.
@@ -931,6 +969,8 @@ MODULE anharmonic_ptt
                                                   ! a function of pressure
   REAL(DP), ALLOCATABLE :: epsilon_infty_ptt(:,:,:,:) ! epsilon infinity as a 
                                          ! function of pressure several T
+  REAL(DP), ALLOCATABLE :: epsilon_zerom1_ptt(:,:,:,:) ! inverse epsilon zero 
+                                         ! as a function of pressure several T
   REAL(DP), ALLOCATABLE :: zeu_ptt(:,:,:,:,:) ! Born effective charge as a 
                                          ! function of pressure at several T
 
@@ -956,6 +996,8 @@ MODULE ph_freq_anharmonic_ptt
                                           ! for all P at T-deltat
   REAL(DP), ALLOCATABLE :: b0f_ptt(:,:)    ! the bulk modulus for all P from EOS
   REAL(DP), ALLOCATABLE :: b0f_ec_ptt(:,:) ! the bulk modulus for all P from EC
+  REAL(DP), ALLOCATABLE :: b0f_ec_d_ptt(:,:) ! the bulk modulus for all 
+                                           ! P from EC
   REAL(DP), ALLOCATABLE :: b01f_ptt(:,:)   ! the pressure derivative of b0
   REAL(DP), ALLOCATABLE :: b02f_ptt(:,:)   ! the second pressure derivative 
                                           ! of b0
@@ -1020,8 +1062,11 @@ MODULE ph_freq_anharmonic_ptt
   REAL(DP), ALLOCATABLE :: el_consf_ptt(:,:,:,:)    ! isothermal elast. cons.
   REAL(DP), ALLOCATABLE :: el_compf_ptt(:,:,:,:)    ! isothermal elast. comp.
   REAL(DP), ALLOCATABLE :: el_consf_s_ptt(:,:,:,:)  ! isoentropic elast. cons.
+  REAL(DP), ALLOCATABLE :: el_consf_d_ptt(:,:,:,:)    ! isothermal elast. cons.
+  REAL(DP), ALLOCATABLE :: el_compf_d_ptt(:,:,:,:)    ! isothermal elast. comp.
   REAL(DP), ALLOCATABLE :: el_compf_s_ptt(:,:,:,:)  ! isoentropic elast. comp.
   REAL(DP), ALLOCATABLE :: macro_elf_ptt(:,:,:)     ! macroscopic elasticity
+  REAL(DP), ALLOCATABLE :: macro_elf_d_ptt(:,:,:)   ! macroscopic elasticity
   REAL(DP), ALLOCATABLE :: macro_elf_s_ptt(:,:,:)   ! isoentropic macros. ela.
   REAL(DP), ALLOCATABLE :: vf_ptt(:,:,:)            ! isothermal sound speed
   REAL(DP), ALLOCATABLE :: vf_s_ptt(:,:,:)          ! isoentropic sound speed
@@ -1036,6 +1081,9 @@ MODULE ph_freq_anharmonic_ptt
                                                   ! a function of pressure 
   REAL(DP), ALLOCATABLE :: epsilon_inftyf_ptt(:,:,:,:) ! epsilon infinity as a 
                                          ! function of pressure several T
+  REAL(DP), ALLOCATABLE :: epsilon_zerom1f_ptt(:,:,:,:) ! inverse epsilon 
+                                         ! zero as a function of pressure 
+                                         ! several T
   REAL(DP), ALLOCATABLE :: zeuf_ptt(:,:,:,:,:) ! Born effective charge as a 
                                          ! function of pressure several T
 
@@ -1093,6 +1141,7 @@ MODULE ph_freq_anharmonic
   REAL(DP), ALLOCATABLE :: vminf_t(:)  ! the minimum volume 
   REAL(DP), ALLOCATABLE :: b0f_t(:)    ! the bulk modulus B from EOS
   REAL(DP), ALLOCATABLE :: b0f_ec_t(:) ! the bulk modulus B from EC
+  REAL(DP), ALLOCATABLE :: b0f_ec_d_t(:) ! the bulk modulus B from EC
   REAL(DP), ALLOCATABLE :: b01f_t(:)   ! pressure derivative of B
   REAL(DP), ALLOCATABLE :: b02f_t(:)   ! second pressure derivative of B
   REAL(DP), ALLOCATABLE :: free_e_minf_t(:) ! total free energy at the minimum
@@ -1147,6 +1196,8 @@ MODULE ph_freq_anharmonic
                                           ! temperature
   REAL(DP), ALLOCATABLE :: csmctf_t(:,:,:) ! difference of elastic constants
   REAL(DP), ALLOCATABLE :: bthsf_t(:,:,:)   ! thermal stress
+  REAL(DP), ALLOCATABLE :: csmctf_d_t(:,:,:) ! difference of elastic constants
+  REAL(DP), ALLOCATABLE :: bthsf_d_t(:,:,:)   ! thermal stress
   REAL(DP), ALLOCATABLE :: ggammaf_t(:,:,:) ! generalized average gruneisen 
                                           ! parameter
 
@@ -1200,11 +1251,20 @@ MODULE ph_freq_anharmonic
                                          ! of temperature
   REAL(DP), ALLOCATABLE :: el_consf_s(:,:,:) ! elastic constants as a function
                                          ! of temperature (constant entropy)
+  REAL(DP), ALLOCATABLE :: el_consf_d_t(:,:,:) ! elastic constants as a 
+                                          ! function of temperature (const. D)
+  REAL(DP), ALLOCATABLE :: el_compf_d_t(:,:,:) ! elastic compliances as a 
+                                         ! function of temperature (const D)
+  REAL(DP), ALLOCATABLE :: el_consf_d_s(:,:,:) ! elastic constants as a 
+                                         ! function of temperature (constant 
+                                         !                           entropy)
   REAL(DP), ALLOCATABLE :: el_compf_s(:,:,:) ! elastic compliances as a function
                                          ! of temperature (constant entropy)
   REAL(DP), ALLOCATABLE :: macro_elf_s(:,:) ! macroscopic elasticity as a 
                                             ! function of t (from el_consf_s)
   REAL(DP), ALLOCATABLE :: macro_elf_t(:,:) ! macroscopic elasticity as a 
+                                            ! function of t (from el_consf_t)
+  REAL(DP), ALLOCATABLE :: macro_elf_d_t(:,:) ! macroscopic elasticity as a 
                                             ! function of t (from el_consf_t)
   REAL(DP), ALLOCATABLE :: vf_s(:,:)        ! the sound velocities from
                                             ! macro_elf_s: vp, vb, vg
@@ -1229,8 +1289,15 @@ MODULE ph_freq_anharmonic
                                          ! tensor as a function of temperature 
   REAL(DP), ALLOCATABLE :: epsilon_inftyf_t(:,:,:) ! epsilon infinity 
                                          ! as a function of temperature 
+  REAL(DP), ALLOCATABLE :: epsilon_zerom1f_t(:,:,:) ! inverse epsilon zero
+                                         ! as a function of temperature 
   REAL(DP), ALLOCATABLE :: zeuf_t(:,:,:,:) ! Born effective cgarge
                                          ! as a function of temperature 
+  REAL(DP), ALLOCATABLE :: pyrof_t(:,:) ! pyroelectric tensor
+                                         ! as a function of temperature 
+  REAL(DP), ALLOCATABLE :: piezo_pyrof_t(:,:) ! pyroelectric tensor
+                                         ! as a function of temperature 
+                                         ! (piezoelectric contribution)
 
   REAL(DP), ALLOCATABLE :: celldmf_t_p1(:,:)! the celldm at the pressure+dp
                                            ! as a function of T
@@ -1593,6 +1660,10 @@ MODULE control_atomic_pos
                                         ! pressure and temperature (requires
                                         ! a constraint iconstr_internal)
 
+  REAL(DP), ALLOCATABLE :: dtau_duint(:,:,:) ! Change of atomic position 
+                                        ! for a change of internal parameter
+                                        ! all geometries
+
 END MODULE control_atomic_pos
 !
 !----------------------------------------------------------------------------
@@ -1633,11 +1704,21 @@ MODULE control_elastic_constants
                                 ! temperature available in some approximation
   LOGICAL :: lelasticf=.FALSE.  ! elastic constants as a function of pressure
                                 ! available in some approximation
+  LOGICAL :: lelastic_d=.FALSE.   ! elastic constants as a function of &
+                                ! temperature available in some approximation
+  LOGICAL :: lelasticf_d=.FALSE.  ! elastic constants as a function of pressure
+                                ! available in some approximation
   LOGICAL :: lelastic_p=.FALSE. ! elastic constants as a function of pressure
                                 ! available
   LOGICAL :: lelastic_pt=.FALSE. ! elastic constants as a function of 
                                 ! temperature for a few pressures available
   LOGICAL :: lelastic_ptt=.FALSE. ! elastic constants as a function of 
+                                ! pressure for a few temperatures available
+  LOGICAL :: lelastic_d_p=.FALSE. ! elastic constants as a function of pressure
+                                ! available
+  LOGICAL :: lelastic_d_pt=.FALSE. ! elastic constants as a function of 
+                                ! temperature for a few pressures available
+  LOGICAL :: lelastic_d_ptt=.FALSE. ! elastic constants as a function of 
                                 ! pressure for a few temperatures available
                                 !
   LOGICAL :: el_cons_available=.FALSE.  ! when this flag becomes true it
@@ -1668,6 +1749,12 @@ MODULE control_elastic_constants
   LOGICAL :: lelasticf_pt=.FALSE. ! elastic constants as a function of 
                                 ! temperature for a few pressures available
   LOGICAL :: lelasticf_ptt=.FALSE. ! elastic constants as a function of 
+                                ! pressure for a few temperatures available
+  LOGICAL :: lelasticf_d_p=.FALSE. ! elastic constants as a function of 
+                                ! temperature for a few pressures available
+  LOGICAL :: lelasticf_d_pt=.FALSE. ! elastic constants as a function of 
+                                ! temperature for a few pressures available
+  LOGICAL :: lelasticf_d_ptt=.FALSE. ! elastic constants as a function of 
                                 ! pressure for a few temperatures available
                                 !
   REAL(DP), ALLOCATABLE :: el_con_geo(:,:,:)  ! the elastic constants at
@@ -1795,6 +1882,34 @@ MODULE control_piezoelectric_tensor
 !
   USE kinds,  ONLY : DP
 
+  LOGICAL :: lpiezo=.FALSE.     ! piezoelectric tensor e written on file
+ 
+  LOGICAL :: lpiezof=.FALSE.    ! piezoelectric tensorf e written on file
+
+  LOGICAL :: lpiezo_d=.FALSE.   ! piezoelectric tensor d written on file
+
+  LOGICAL :: lpiezof_d=.FALSE.  ! piezoelectric tensorf d written on file
+
+  LOGICAL :: lpiezo_p=.FALSE.   ! piezoelectric tensor as a function of pressure
+                                ! available
+  LOGICAL :: lpiezo_d_p=.FALSE. ! piezoelectric tensor as a function of pressure
+                                ! available
+  LOGICAL :: lpiezo_pt=.FALSE.  ! piezoelectric tensor as a function of 
+                                ! temperature for a few pressures available
+  LOGICAL :: lpiezof_pt=.FALSE. ! piezoelectric tensor as a function of 
+                                ! temperature for a few pressures available
+  LOGICAL :: lpiezo_d_pt=.FALSE. ! piezoelectric tensor as a function of 
+                                ! temperature for a few pressures available
+  LOGICAL :: lpiezof_d_pt=.FALSE. ! piezoelectric tensor as a function of 
+                                ! temperature for a few pressures available
+  LOGICAL :: lpiezo_ptt=.FALSE. ! piezoelectric tensor as a function of 
+                                ! pressure for a few temperatures available
+  LOGICAL :: lpiezof_ptt=.FALSE. ! piezoelectric tensor as a function of 
+                                ! pressure for a few temperatures available
+  LOGICAL :: lpiezo_d_ptt=.FALSE. ! piezoelectric tensor as a function of 
+                                ! pressure for a few temperatures available
+  LOGICAL :: lpiezof_d_ptt=.FALSE. ! piezoelectric tensor as a function of 
+                                ! pressure for a few temperatures available
   LOGICAL :: piezo_available=.FALSE.  ! when this flag becomes true it
                                 ! means that the piezoelectric tensor has been
                                 ! read from file and is available
@@ -1803,13 +1918,24 @@ MODULE control_piezoelectric_tensor
                                 ! means that the piezoelectric tensor for each 
                                 ! geometry is available and can be 
                                 ! interpolated at each temperature
-  LOGICAL :: lpiezo=.FALSE.     ! piezoelectric tensor e written on file
- 
-  LOGICAL :: lpiezof=.FALSE.    ! piezoelectric tensorf e written on file
-
-  LOGICAL :: lpiezo_d=.FALSE.     ! piezoelectric tensor d written on file
- 
-  LOGICAL :: lpiezof_d=.FALSE.    ! piezoelectric tensorf d written on file
+  LOGICAL :: piezo_qha_available=.FALSE.  ! when this flag becomes true it
+                                ! means that the piezoelectric tensor has been
+                                ! read from file in the anhar directory for
+                                ! one geometry
+  LOGICAL :: piezof_qha_available=.FALSE.  ! when this flag becomes true it
+                                ! means that the piezoelectric tensor has been
+                                ! read from file in the anhar directory for
+                                ! one geometry
+  LOGICAL :: piezo_qha_geo_available=.FALSE.  ! when this flag becomes true it
+                                ! means that the piezoelectric tensor for each 
+                                ! geometry has been read from the anhar
+                                ! directory and can be interpolated at each 
+                                ! pressure and temperature
+  LOGICAL :: piezof_qha_geo_available=.FALSE.  ! when this flag becomes true it
+                                ! means that the piezoelectric tensor for each 
+                                ! geometry has been read from the anhar
+                                ! directory and can be interpolated at each 
+                                ! pressure and temperature
 
   REAL(DP), ALLOCATABLE :: g_piezo_tensor_geo(:,:,:) ! the improper 
                                 ! piezoelectric tensor at each geometry
@@ -1822,29 +1948,13 @@ MODULE control_piezoelectric_tensor
   REAL(DP), ALLOCATABLE :: polar0_geo(:,:) ! the polarization of each
                                 ! unperturbed geometry
 
-  LOGICAL :: lpiezo_pt=.FALSE.     ! piezoelectric tensor pt written on file
- 
-  LOGICAL :: lpiezof_pt=.FALSE.    ! piezoelectric tensorf pt written on file
-
-  LOGICAL :: lpiezo_d_pt=.FALSE.   ! piezoelectric tensor d written on file
- 
-  LOGICAL :: lpiezof_d_pt=.FALSE.  ! piezoelectric tensorf d written on file
-
-  LOGICAL :: lpiezo_ptt=.FALSE.     ! piezoelectric tensor ptt written on file
- 
-  LOGICAL :: lpiezof_ptt=.FALSE.    ! piezoelectric tensorf ptt written on file
-
-  LOGICAL :: lpiezo_d_ptt=.FALSE.     ! piezoelectric tensor ptt written on file
- 
-  LOGICAL :: lpiezof_d_ptt=.FALSE.    ! piezoelectric tensorf ptt written on file
-
   LOGICAL :: decompose_piezo       ! if .TRUE. the code try to write the
                                    ! piezoelectric tensor as a sum of a 
                                    ! clamped ion and a ionic terms.
   REAL(DP), ALLOCATABLE :: piezo_zeu_geo(:,:,:,:) ! the Born effective charge
                                    ! of each equilibrium geometry.
  
-  REAL(DP), ALLOCATABLE :: dtau_dint(:,:,:,:,:) ! the derivative of tau with
+  REAL(DP), ALLOCATABLE :: dtau_dint_pt(:,:,:,:,:) ! the derivative of tau with
                                    ! respect to the internal parameters
                                    ! for each strain type.
   REAL(DP), ALLOCATABLE :: dint_depsilon_geo(:,:,:) ! the derivative of 
@@ -1857,6 +1967,64 @@ MODULE control_piezoelectric_tensor
                                 ! relaxation term of the
                                 ! piezoelectric tensor at each geometry
 
+  INTEGER :: fndos_pt           ! number of qha piezoelectric tensors 
+                                ! found on file
+                                ! free energy computed from phonon dos
+
+  INTEGER :: fnph_pt            ! number of qha piezoelectric tensors found 
+                                ! on file free energy computed from direct 
+                                ! integral
+
+  INTEGER :: f_geodos_pt        ! the first geometry that has qha pt
+
+  INTEGER :: f_geoph_pt         ! the first geometry that has qha pt
+
+  LOGICAL, ALLOCATABLE :: found_dos_pt(:) ! for each geometry it is true if
+                                ! qha piezoelectric tensor has been found
+  LOGICAL, ALLOCATABLE :: found_ph_pt(:) ! for each geometry it is true if
+                                ! qha piezoelectric tensor have been found
+
+  LOGICAL :: doberry=.TRUE.     ! set it to .FALSE. when computing phonons
+                                ! of each distorted configurationion
+END MODULE
+!
+!----------------------------------------------------------------------------
+MODULE control_dielectric_constant
+!----------------------------------------------------------------------------
+!
+  USE kinds,  ONLY : DP
+
+
+  LOGICAL :: epsilonm1_geo_available=.FALSE.  ! when this flag becomes true it
+                                ! means that the inverse of the static
+                                ! dielectric constant for each 
+                                ! geometry is available and can be 
+                                ! interpolated at each temperature
+
+  LOGICAL :: epsilon_zero_geo_available=.FALSE.  ! when this flag 
+                                ! becomes true it
+                                ! means that the static
+                                ! dielectric constant for each 
+                                ! geometry is available and can be 
+                                ! interpolated at each temperature
+
+  LOGICAL :: lepsilon_zerom1=.FALSE.  ! inverse of the static dielectric 
+                                ! constant on file
+ 
+  LOGICAL :: lepsilon_zerom1f=.FALSE.    ! inverse of the static dielectric
+                                ! constant on file
+
+  LOGICAL :: lepsilon_zerom1_pt=.FALSE.  ! inverse of the static dielectric 
+                                ! constant on file
+ 
+  LOGICAL :: lepsilon_zerom1f_pt=.FALSE.    ! inverse of the static dielectric
+                                ! constant on file
+
+  LOGICAL :: lepsilon_zerom1_ptt=.FALSE.  ! inverse of the static dielectric 
+                                ! constant on file
+ 
+  LOGICAL :: lepsilon_zerom1f_ptt=.FALSE.    ! inverse of the static dielectric
+                                ! constant on file
 
 END MODULE
 !
@@ -1904,7 +2072,18 @@ MODULE control_epsilon_infty
                               ! on file
 
 END MODULE
+
+!----------------------------------------------------------------------------
+MODULE control_pyroelectric_tensor
+!----------------------------------------------------------------------------
   !
+  USE kinds,  ONLY : DP
+
+  LOGICAL :: lpyro=.FALSE.     ! pyroelectric tensor written on file
+ 
+  LOGICAL :: lpyrof=.FALSE.    ! pyroelectric tensorf written on file
+
+END MODULE control_pyroelectric_tensor
 !----------------------------------------------------------------------------
 MODULE control_conv
 !----------------------------------------------------------------------------

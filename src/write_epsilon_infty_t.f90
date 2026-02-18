@@ -38,6 +38,7 @@ USE data_files, ONLY : flanhar
 USE temperature, ONLY : ntemp, temp
 IMPLICIT NONE
 CHARACTER(LEN=256) :: fileepsilon
+CHARACTER(LEN=80) :: astring
 INTEGER :: igeo, ibrav, nvar, ndata
 REAL(DP), ALLOCATABLE :: x(:,:), f(:)
 TYPE(poly1), ALLOCATABLE :: pt_p1(:,:)
@@ -117,8 +118,9 @@ IF (ltherm_dos) THEN
                pt_p4, poly_degree_elc, epsilon_infty_t)
    lepsilon_infty=.TRUE.
    fileepsilon='anhar_files/'//TRIM(flanhar)//'.dielec'
-   CALL write_epsilon_infty_on_file(temp, ntemp, ibrav, code_group, &
-                               epsilon_infty_t, fileepsilon, 0)
+   astring="#    dielectric constants adimensional"
+   CALL write_epsilon_infty_on_file(temp, ntemp,  &
+                               epsilon_infty_t, astring, fileepsilon, 0)
 ENDIF
 
 IF (ltherm_freq) THEN
@@ -126,8 +128,9 @@ IF (ltherm_freq) THEN
                pt_p4, poly_degree_elc, epsilon_inftyf_t)
    lepsilon_inftyf=.TRUE.
    fileepsilon='anhar_files/'//TRIM(flanhar)//'.dielec_ph'
-   CALL write_epsilon_infty_on_file(temp, ntemp, ibrav, code_group, &
-                                    epsilon_inftyf_t, fileepsilon, 0)
+   astring="#    dielectric constants adimensional"
+   CALL write_epsilon_infty_on_file(temp, ntemp,  &
+                              epsilon_inftyf_t, astring, fileepsilon, 0)
 ENDIF
 
 DEALLOCATE(x)
@@ -182,6 +185,7 @@ USE data_files, ONLY : flanhar
 USE temperature, ONLY : ntemp, temp
 
 IMPLICIT NONE
+CHARACTER(LEN=80) :: astring
 CHARACTER(LEN=256) :: fileepsilon
 INTEGER :: igeo, ibrav, nvar, ndata
 REAL(DP), ALLOCATABLE :: x(:,:), f(:)
@@ -270,8 +274,9 @@ IF (ltherm_dos) THEN
       lepsilon_infty_pt=.TRUE.
       fileepsilon='anhar_files/'//TRIM(flanhar)//'.dielec_press'
       CALL add_value(fileepsilon, press(ipress))
-      CALL write_epsilon_infty_on_file(temp, ntemp, ibrav, code_group, &
-           epsilon_infty_pt(:,:,:,ipressp), fileepsilon, 0)
+      astring="#    dielectric constants adimensional"
+      CALL write_epsilon_infty_on_file(temp, ntemp,  &
+           epsilon_infty_pt(:,:,:,ipressp), astring, fileepsilon, 0)
    ENDDO
 ENDIF
 
@@ -284,8 +289,9 @@ IF (ltherm_freq) THEN
       lepsilon_inftyf_pt=.TRUE.
       fileepsilon='anhar_files/'//TRIM(flanhar)//'.dielec_ph_press'
       CALL add_value(fileepsilon, press(ipress))
-      CALL write_epsilon_infty_on_file(temp, ntemp, ibrav, code_group, &
-           epsilon_inftyf_pt(:,:,:,ipressp), fileepsilon, 0)
+      astring="#    dielectric constants adimensional"
+      CALL write_epsilon_infty_on_file(temp, ntemp,  &
+           epsilon_inftyf_pt(:,:,:,ipressp), astring, fileepsilon, 0)
    ENDDO
 ENDIF
 
@@ -342,6 +348,7 @@ USE polynomial, ONLY : poly1, poly2, poly3, poly4, init_poly, clean_poly
 USE data_files, ONLY : flanhar
 USE temperature, ONLY : ntemp, temp
 IMPLICIT NONE
+CHARACTER(LEN=80) :: astring
 CHARACTER(LEN=256) :: fileepsilon
 INTEGER :: igeo, ibrav, nvar, ndata
 REAL(DP), ALLOCATABLE :: x(:,:), f(:)
@@ -431,8 +438,9 @@ IF (ltherm_dos) THEN
       lepsilon_infty_ptt=.TRUE.
       fileepsilon='anhar_files/'//TRIM(flanhar)//'.dielec_temp'
       CALL add_value(fileepsilon, temp(itemp))
-      CALL write_epsilon_infty_on_file(press, npress, ibrav, code_group, &
-           epsilon_infty_ptt(:,:,:,itempp), fileepsilon, 2)
+      astring="#    dielectric constants adimensional"
+      CALL write_epsilon_infty_on_file(press, npress,  &
+           epsilon_infty_ptt(:,:,:,itempp), astring, fileepsilon, 2)
    ENDDO
 ENDIF
 
@@ -445,8 +453,9 @@ IF (ltherm_freq) THEN
       lepsilon_inftyf_ptt=.TRUE.
       fileepsilon='anhar_files/'//TRIM(flanhar)//'.dielec_ph_temp'
       CALL add_value(fileepsilon, temp(itemp))
-      CALL write_epsilon_infty_on_file(press, npress, ibrav, code_group, &
-           epsilon_inftyf_ptt(:,:,:,itempp), fileepsilon, 2)
+      astring="#    dielectric constants adimensional"
+      CALL write_epsilon_infty_on_file(press, npress, &
+           epsilon_inftyf_ptt(:,:,:,itempp), astring, fileepsilon, 2)
    ENDDO
 ENDIF
 

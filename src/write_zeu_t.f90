@@ -93,7 +93,7 @@ DO na=1, nat
       DO j=1,3
          IF (ABS(zeu_geo(i,j,na,1))>1D-7) THEN
             WRITE(stdout,'(/,5x,"Fitting Z^*(",i4,",",i4,&
-                              &",i4)")') i, j, na
+                              &",",i4,")")') i, j, na
             DO idata=1,ndata
                f(idata)=zeu_geo(i,j,na,idata)
             END DO

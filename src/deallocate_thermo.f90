@@ -37,9 +37,11 @@ SUBROUTINE deallocate_thermo()
                              cp_t, b0_s, alpha_t, beta_t, gamma_t,          &
                              celldm_t, alpha_anis_t, cpmce_anis, bfact_t,   &
                              bths_t, ggamma_t, el_cons_t, el_comp_t,        &
+                             bths_d_t, csmct_d_t, el_cons_d_s,              &
                              el_cons_s, el_comp_s, macro_el_t, macro_el_s,  &
                              v_t, v_s, el_con_geo_t, e_piezo_tensor_t,      &
                              d_piezo_tensor_t, epsilon_infty_t, zeu_t,      &
+                             epsilon_zerom1_t, pyro_t, piezo_pyro_t,        &
                              vmin_noe_t, b0_noe_t, b01_noe_t, b02_noe_t,    &
                              free_e_min_noe_t, a_noe_t, ce_noe_t, cv_noe_t, &
                              cp_noe_t, b0_noe_s, beta_noe_t, gamma_noe_t,   &
@@ -51,7 +53,9 @@ SUBROUTINE deallocate_thermo()
                              celldm_noe_t_p1, celldm_noe_t_m1, b0_ec_t,     &
                              b0_ec_s, debye_macro_el_t, debye_macro_el_s,   &
                              dyde_t, uint_t, tau_t, uint_zsisa_t,           &
-                             tau_zsisa_t, alpha_int_t, alpha_int_zsisa_t
+                             tau_zsisa_t, alpha_int_t, alpha_int_zsisa_t,   &
+                             el_cons_d_t, el_comp_d_t, macro_el_d_t,        &
+                             b0_ec_d_t
   USE anharmonic_pt,  ONLY : vmin_pt, b0_pt, b01_pt, b02_pt, emin_pt,       &
                              ce_pt, cv_pt, cp_pt, b0_s_pt, beta_pt,         &
                              gamma_pt, free_ener_pt, ener_pt, entr_pt,      &
@@ -62,11 +66,12 @@ SUBROUTINE deallocate_thermo()
                              macro_el_s_pt, v_pt, v_s_pt,                   &
                              e_piezo_tensor_pt, d_piezo_tensor_pt,          &
                              epsilon_infty_pt, zeu_pt,                      &
+                             epsilon_zerom1_pt, b0_ec_pt,                   &
                              celldm_pt_p1, celldm_pt_m1,                    &
                              debye_macro_el_pt, debye_macro_el_s_pt, uint_pt,&
                              tau_pt, uint_zsisa_pt, tau_zsisa_pt,           &
-                             alpha_int_pt, alpha_int_zsisa_pt
-
+                             alpha_int_pt, alpha_int_zsisa_pt, el_cons_d_pt, &
+                             el_comp_d_pt, macro_el_d_pt, b0_ec_d_pt
   USE ph_freq_anharmonic_pt, ONLY : vminf_pt, b0f_pt, b01f_pt, b02f_pt,     &
                              eminf_pt, densityf_pt, celldmf_pt, enerf_pt,   &  
                              free_enerf_pt, entrf_pt, cef_pt, cvf_pt,       &
@@ -75,11 +80,14 @@ SUBROUTINE deallocate_thermo()
                              cpmcef_anis_pt, el_consf_s_pt, el_compf_s_pt,  &
                              e_piezo_tensorf_pt, d_piezo_tensorf_pt,        &
                              epsilon_inftyf_pt, zeuf_pt,                    &
+                             epsilon_zerom1f_pt,                            &
                              bthsf_pt, ggammaf_pt, csmctf_pt, macro_elf_pt, &
                              macro_elf_s_pt, vf_pt, vf_s_pt, b0f_ec_pt,     &
                              debye_macro_elf_pt, debye_macro_elf_s_pt,      &
                              uintf_pt, tauf_pt, uintf_zsisa_pt,             &
-                             tauf_zsisa_pt, alphaf_int_pt, alphaf_int_zsisa_pt
+                             tauf_zsisa_pt, alphaf_int_pt,                  &
+                             alphaf_int_zsisa_pt, el_consf_d_pt,            &
+                             el_compf_d_pt, macro_elf_d_pt, b0f_ec_d_pt
   USE anharmonic_ptt, ONLY : vmin_ptt, b0_ptt, b01_ptt, b02_ptt, emin_ptt,  &
                              ce_ptt, cv_ptt, cp_ptt, beta_ptt, b0_s_ptt,    &
                              celldm_ptt, gamma_ptt, el_cons_ptt,            &
@@ -87,6 +95,7 @@ SUBROUTINE deallocate_thermo()
                              macro_el_ptt, macro_el_s_ptt, v_ptt, v_s_ptt,  &
                              e_piezo_tensor_ptt, d_piezo_tensor_ptt,        &
                              epsilon_infty_ptt, zeu_ptt,                    &
+                             epsilon_zerom1_ptt,                            &
                              celldm_ptt_p1, celldm_ptt_m1, emin_ptt_p1,     &
                              emin_ptt_m1, vmin_ptt_p1, vmin_ptt_m1,         &
                              alpha_anis_ptt, density_ptt, cpmce_anis_ptt,   &
@@ -95,13 +104,15 @@ SUBROUTINE deallocate_thermo()
                              debye_macro_el_s_ptt, uint_ptt, tau_ptt,       &
                              uint_zsisa_ptt, tau_zsisa_ptt, alpha_int_ptt,  &
                              alpha_int_zsisa_ptt, uint_ptt_p1, uint_ptt_m1, &
-                             tau_ptt_p1, tau_ptt_m1
+                             tau_ptt_p1, tau_ptt_m1, el_cons_d_ptt,         &
+                             el_comp_d_ptt, macro_el_d_ptt, b0_ec_d_ptt
   USE ph_freq_anharmonic_ptt,  ONLY : vminf_ptt, b0f_ptt, b01f_ptt, b02f_ptt,&
                              eminf_ptt, celldmf_ptt, eminf_ptt_p1,           &
                              eminf_ptt_m1, celldmf_ptt_p1, celldmf_ptt_m1,  &
                              el_consf_ptt, e_piezo_tensorf_ptt,             &
+                             el_compf_ptt, macro_elf_ptt,                   &
                              d_piezo_tensorf_ptt, epsilon_inftyf_ptt,       &
-                             zeuf_ptt,                                      &
+                             zeuf_ptt, epsilon_zerom1f_ptt,                 &
                              vminf_ptt_p1, vminf_ptt_m1, densityf_ptt,      &
                              enerf_ptt, entrf_ptt, cef_ptt,                 &
                              cvf_ptt, cpf_ptt, b0f_s_ptt, betaf_ptt,        &
@@ -110,7 +121,8 @@ SUBROUTINE deallocate_thermo()
                              uintf_ptt, tauf_ptt, uintf_zsisa_ptt,          &
                              tauf_zsisa_ptt, alphaf_int_ptt,                &
                              alphaf_int_zsisa_ptt, uintf_ptt_p1, uintf_ptt_m1,&
-                             tauf_ptt_p1, tauf_ptt_m1
+                             tauf_ptt_p1, tauf_ptt_m1, el_consf_d_ptt,      &
+                             el_compf_d_ptt, macro_elf_d_ptt, b0f_ec_d_ptt
   USE anharmonic_vt,  ONLY : press_vt, press_vtt
   USE ph_freq_anharmonic_vt,  ONLY : pressf_vt, pressf_vtt
   USE el_anharmonic, ONLY :  vmine_t, b0e_t, b01e_t, b02e_t, free_e_mine_t, &
@@ -125,6 +137,7 @@ SUBROUTINE deallocate_thermo()
                              alphaf_t, betaf_t, gammaf_t, celldmf_t,        &
                              alphaf_anis_t, cpmcef_anis, bfactf_t,          &
                              bthsf_t, ggammaf_t, el_consf_t, el_compf_t,    &
+                             bthsf_d_t, csmctf_d_t, el_consf_d_s,           &
                              el_consf_s, el_compf_s, macro_elf_s,           &
                              macro_elf_t, vf_t, vf_s, el_conf_geo_t,        &
                              densityf_t, csmctf_t, p1tf_t, p2tf_t, p3tf_t,  &
@@ -133,11 +146,14 @@ SUBROUTINE deallocate_thermo()
                              vminf_noe_t, densityf_noe_t, b0f_noe_t,        &
                              b01f_noe_t, b02f_noe_t, e_piezo_tensorf_t,     &
                              d_piezo_tensorf_t, epsilon_inftyf_t, zeuf_t,   &
+                             epsilon_zerom1f_t, pyrof_t, piezo_pyrof_t,     &
                              free_enerf_noe_t, enerf_noe_t, entropyf_noe_t, &
                              cef_noe_t, cvf_noe_t, b0f_ec_t, b0f_ec_s,      &
                              debye_macro_elf_t, debye_macro_elf_s, dydef_t, &
                              uintf_t, tauf_t, uintf_zsisa_t, tauf_zsisa_t,  &
-                             alphaf_int_t, alphaf_int_zsisa_t
+                             alphaf_int_t, alphaf_int_zsisa_t,              &
+                             el_consf_d_t, el_compf_d_t, macro_elf_d_t,     &
+                             b0f_ec_d_t
   USE grun_anharmonic,  ONLY : betab, alpha_an_g, cp_grun_t, cv_grun_t,     &
                              ce_grun_t, b0_grun_s,                          &
                              grun_gamma_t, poly_grun, poly_grun_red,        &
@@ -171,7 +187,8 @@ SUBROUTINE deallocate_thermo()
                              epsil_y, min_y_t, dyde, tau_save_ec, &
                              el_con_at_geo
   USE control_piezoelectric_tensor, ONLY : e_piezo_tensor_relax_geo, &
-                                           e_piezo_tensor_fi_geo
+                             e_piezo_tensor_fi_geo, found_dos_pt,    &
+                             found_ph_pt
   USE control_pressure, ONLY : press_plot, ipress_plot
   USE uniform_pressure, ONLY : omega_p, density_p, celldm_p, p2_p, p4_p
   USE control_atomic_pos, ONLY : uint0, uint_eq, tau_eq, p2_eq, p4_eq, &
@@ -220,6 +237,8 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (no_ph_eos) )       DEALLOCATE(no_ph_eos) 
   IF ( ALLOCATED (found_dos_ec) )    DEALLOCATE(found_dos_ec) 
   IF ( ALLOCATED (found_ph_ec) )     DEALLOCATE(found_ph_ec) 
+  IF ( ALLOCATED (found_dos_pt) )    DEALLOCATE(found_dos_pt) 
+  IF ( ALLOCATED (found_ph_pt) )     DEALLOCATE(found_ph_pt) 
   IF ( ALLOCATED (dynmat_on_file) )  DEALLOCATE(dynmat_on_file) 
   IF ( ALLOCATED (vmin_t) )          DEALLOCATE(vmin_t) 
   IF ( ALLOCATED (ke) )              DEALLOCATE(ke) 
@@ -287,6 +306,7 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (vmin_t) )          DEALLOCATE(vmin_t) 
   IF ( ALLOCATED (b0_t) )            DEALLOCATE(b0_t) 
   IF ( ALLOCATED (b0_ec_t) )         DEALLOCATE(b0_ec_t) 
+  IF ( ALLOCATED (b0_ec_d_t) )       DEALLOCATE(b0_ec_d_t) 
   IF ( ALLOCATED (b01_t) )           DEALLOCATE(b01_t) 
   IF ( ALLOCATED (b02_t) )           DEALLOCATE(b02_t) 
   IF ( ALLOCATED (free_e_min_t) )    DEALLOCATE(free_e_min_t) 
@@ -324,12 +344,18 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (csmct_t) )         DEALLOCATE(csmct_t) 
   IF ( ALLOCATED (bths_t) )          DEALLOCATE(bths_t) 
   IF ( ALLOCATED (ggamma_t) )        DEALLOCATE(ggamma_t) 
+  IF ( ALLOCATED (csmct_d_t) )       DEALLOCATE(csmct_d_t) 
+  IF ( ALLOCATED (bths_d_t) )        DEALLOCATE(bths_d_t) 
 
   IF ( ALLOCATED (el_cons_t) )       DEALLOCATE(el_cons_t)
   IF ( ALLOCATED (el_comp_t) )       DEALLOCATE(el_comp_t)
   IF ( ALLOCATED (el_cons_s) )       DEALLOCATE(el_cons_s)
+  IF ( ALLOCATED (el_cons_d_t) )     DEALLOCATE(el_cons_d_t)
+  IF ( ALLOCATED (el_comp_d_t) )     DEALLOCATE(el_comp_d_t)
+  IF ( ALLOCATED (el_cons_d_s) )     DEALLOCATE(el_cons_d_s)
   IF ( ALLOCATED (el_comp_s) )       DEALLOCATE(el_comp_s)
   IF ( ALLOCATED (macro_el_t) )      DEALLOCATE(macro_el_t)
+  IF ( ALLOCATED (macro_el_d_t) )    DEALLOCATE(macro_el_d_t)
   IF ( ALLOCATED (macro_el_s) )      DEALLOCATE(macro_el_s)
   IF ( ALLOCATED (debye_macro_el_t) ) DEALLOCATE(debye_macro_el_t)
   IF ( ALLOCATED (debye_macro_el_s) ) DEALLOCATE(debye_macro_el_s)
@@ -341,7 +367,10 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (e_piezo_tensor_t) ) DEALLOCATE(e_piezo_tensor_t)
   IF ( ALLOCATED (d_piezo_tensor_t) ) DEALLOCATE(d_piezo_tensor_t)
   IF ( ALLOCATED (epsilon_infty_t) ) DEALLOCATE(epsilon_infty_t)
+  IF ( ALLOCATED (epsilon_zerom1_t) ) DEALLOCATE(epsilon_zerom1_t)
   IF ( ALLOCATED (zeu_t) )           DEALLOCATE(zeu_t)
+  IF ( ALLOCATED (pyro_t) )           DEALLOCATE(pyro_t)
+  IF ( ALLOCATED (piezo_pyro_t) )     DEALLOCATE(piezo_pyro_t)
 
   IF ( ALLOCATED (vmin_noe_t) )       DEALLOCATE(vmin_noe_t) 
   IF ( ALLOCATED (density_noe_t) )    DEALLOCATE(density_noe_t) 
@@ -385,6 +414,7 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (vmin_ptt_m1) )     DEALLOCATE(vmin_ptt_m1) 
   IF ( ALLOCATED (b0_ptt) )          DEALLOCATE(b0_ptt) 
   IF ( ALLOCATED (b0_ec_ptt) )       DEALLOCATE(b0_ec_ptt) 
+  IF ( ALLOCATED (b0_ec_d_ptt) )     DEALLOCATE(b0_ec_d_ptt) 
   IF ( ALLOCATED (b01_ptt) )         DEALLOCATE(b01_ptt) 
   IF ( ALLOCATED (b02_ptt) )         DEALLOCATE(b02_ptt) 
   IF ( ALLOCATED (emin_ptt) )        DEALLOCATE(emin_ptt) 
@@ -424,9 +454,12 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (ggamma_ptt) )      DEALLOCATE(ggamma_ptt) 
   IF ( ALLOCATED (el_cons_ptt) )     DEALLOCATE(el_cons_ptt)
   IF ( ALLOCATED (el_comp_ptt) )     DEALLOCATE(el_comp_ptt)
+  IF ( ALLOCATED (el_cons_d_ptt) )   DEALLOCATE(el_cons_d_ptt)
+  IF ( ALLOCATED (el_comp_d_ptt) )   DEALLOCATE(el_comp_d_ptt)
   IF ( ALLOCATED (el_cons_s_ptt) )   DEALLOCATE(el_cons_s_ptt)
   IF ( ALLOCATED (el_comp_s_ptt) )   DEALLOCATE(el_comp_s_ptt)
   IF ( ALLOCATED (macro_el_ptt) )    DEALLOCATE(macro_el_ptt)
+  IF ( ALLOCATED (macro_el_d_ptt) )  DEALLOCATE(macro_el_d_ptt)
   IF ( ALLOCATED (macro_el_s_ptt) )  DEALLOCATE(macro_el_s_ptt)
   IF ( ALLOCATED (v_ptt) )           DEALLOCATE(v_ptt)
   IF ( ALLOCATED (v_s_ptt) )         DEALLOCATE(v_s_ptt)
@@ -435,6 +468,7 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (e_piezo_tensor_ptt) ) DEALLOCATE(e_piezo_tensor_ptt)
   IF ( ALLOCATED (d_piezo_tensor_ptt) ) DEALLOCATE(d_piezo_tensor_ptt)
   IF ( ALLOCATED (epsilon_infty_ptt) ) DEALLOCATE(epsilon_infty_ptt)
+  IF ( ALLOCATED (epsilon_zerom1_ptt) ) DEALLOCATE(epsilon_zerom1_ptt)
   IF ( ALLOCATED (zeu_ptt) )           DEALLOCATE(zeu_ptt)
 
   IF ( ALLOCATED (vminf_ptt) )        DEALLOCATE(vminf_ptt) 
@@ -442,6 +476,7 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (vminf_ptt_m1) )     DEALLOCATE(vminf_ptt_m1) 
   IF ( ALLOCATED (b0f_ptt) )          DEALLOCATE(b0f_ptt) 
   IF ( ALLOCATED (b0f_ec_ptt) )       DEALLOCATE(b0f_ec_ptt) 
+  IF ( ALLOCATED (b0f_ec_d_ptt) )     DEALLOCATE(b0f_ec_d_ptt) 
   IF ( ALLOCATED (b01f_ptt) )         DEALLOCATE(b01f_ptt) 
   IF ( ALLOCATED (b02f_ptt) )         DEALLOCATE(b02f_ptt) 
   IF ( ALLOCATED (eminf_ptt) )        DEALLOCATE(eminf_ptt) 
@@ -451,9 +486,15 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (celldmf_ptt_p1) )   DEALLOCATE(celldmf_ptt_p1) 
   IF ( ALLOCATED (celldmf_ptt_m1) )   DEALLOCATE(celldmf_ptt_m1) 
   IF ( ALLOCATED (el_consf_ptt) )     DEALLOCATE(el_consf_ptt) 
+  IF ( ALLOCATED (el_compf_ptt) )     DEALLOCATE(el_compf_ptt) 
+  IF ( ALLOCATED (el_consf_d_ptt) )   DEALLOCATE(el_consf_d_ptt) 
+  IF ( ALLOCATED (el_compf_d_ptt) )   DEALLOCATE(el_compf_d_ptt) 
+  IF ( ALLOCATED (macro_elf_ptt) )    DEALLOCATE(macro_elf_ptt) 
+  IF ( ALLOCATED (macro_elf_d_ptt) )  DEALLOCATE(macro_elf_d_ptt) 
   IF ( ALLOCATED (e_piezo_tensorf_ptt) ) DEALLOCATE(e_piezo_tensorf_ptt) 
   IF ( ALLOCATED (d_piezo_tensorf_ptt) ) DEALLOCATE(d_piezo_tensorf_ptt) 
   IF ( ALLOCATED (epsilon_inftyf_ptt) ) DEALLOCATE(epsilon_inftyf_ptt) 
+  IF ( ALLOCATED (epsilon_zerom1f_ptt) ) DEALLOCATE(epsilon_zerom1f_ptt) 
   IF ( ALLOCATED (zeuf_ptt) )           DEALLOCATE(zeuf_ptt) 
 
   IF ( ALLOCATED (enerf_ptt) )        DEALLOCATE(enerf_ptt) 
@@ -516,9 +557,14 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (ggamma_pt) )        DEALLOCATE(ggamma_pt)
   IF ( ALLOCATED (el_cons_pt) )       DEALLOCATE(el_cons_pt)
   IF ( ALLOCATED (el_comp_pt) )       DEALLOCATE(el_comp_pt)
+  IF ( ALLOCATED (el_cons_d_pt) )     DEALLOCATE(el_cons_d_pt)
+  IF ( ALLOCATED (el_comp_d_pt) )     DEALLOCATE(el_comp_d_pt)
   IF ( ALLOCATED (el_cons_s_pt) )     DEALLOCATE(el_cons_s_pt)
   IF ( ALLOCATED (el_comp_s_pt) )     DEALLOCATE(el_comp_s_pt)
   IF ( ALLOCATED (macro_el_pt) )      DEALLOCATE(macro_el_pt)
+  IF ( ALLOCATED (macro_el_d_pt) )    DEALLOCATE(macro_el_d_pt)
+  IF ( ALLOCATED (b0_ec_pt) )         DEALLOCATE(b0_ec_pt)
+  IF ( ALLOCATED (b0_ec_d_pt) )       DEALLOCATE(b0_ec_d_pt)
   IF ( ALLOCATED (macro_el_s_pt) )    DEALLOCATE(macro_el_s_pt)
   IF ( ALLOCATED (v_pt) )             DEALLOCATE(v_pt)
   IF ( ALLOCATED (v_s_pt) )           DEALLOCATE(v_s_pt)
@@ -527,6 +573,7 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (e_piezo_tensor_pt) ) DEALLOCATE(e_piezo_tensor_pt)
   IF ( ALLOCATED (d_piezo_tensor_pt) ) DEALLOCATE(d_piezo_tensor_pt)
   IF ( ALLOCATED (epsilon_infty_pt) ) DEALLOCATE(epsilon_infty_pt)
+  IF ( ALLOCATED (epsilon_zerom1_pt) ) DEALLOCATE(epsilon_zerom1_pt)
   IF ( ALLOCATED (zeu_pt) )           DEALLOCATE(zeu_pt)
 
   IF ( ALLOCATED (emp_free_ener_pt) ) DEALLOCATE(emp_free_ener_pt)
@@ -538,6 +585,7 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (vminf_pt) )         DEALLOCATE(vminf_pt) 
   IF ( ALLOCATED (b0f_pt) )           DEALLOCATE(b0f_pt) 
   IF ( ALLOCATED (b0f_ec_pt) )        DEALLOCATE(b0f_ec_pt) 
+  IF ( ALLOCATED (b0f_ec_d_pt) )      DEALLOCATE(b0f_ec_d_pt) 
   IF ( ALLOCATED (b01f_pt) )          DEALLOCATE(b01f_pt) 
   IF ( ALLOCATED (b02f_pt) )          DEALLOCATE(b02f_pt) 
   IF ( ALLOCATED (eminf_pt) )         DEALLOCATE(eminf_pt) 
@@ -568,9 +616,12 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (ggammaf_pt) )       DEALLOCATE(ggammaf_pt)
   IF ( ALLOCATED (el_consf_pt) )      DEALLOCATE(el_consf_pt)
   IF ( ALLOCATED (el_compf_pt) )      DEALLOCATE(el_compf_pt)
+  IF ( ALLOCATED (el_consf_d_pt) )    DEALLOCATE(el_consf_d_pt)
+  IF ( ALLOCATED (el_compf_d_pt) )    DEALLOCATE(el_compf_d_pt)
   IF ( ALLOCATED (el_consf_s_pt) )    DEALLOCATE(el_consf_s_pt)
   IF ( ALLOCATED (el_compf_s_pt) )    DEALLOCATE(el_compf_s_pt)
   IF ( ALLOCATED (macro_elf_pt) )     DEALLOCATE(macro_elf_pt)
+  IF ( ALLOCATED (macro_elf_d_pt) )   DEALLOCATE(macro_elf_d_pt)
   IF ( ALLOCATED (macro_elf_s_pt) )   DEALLOCATE(macro_elf_s_pt)
   IF ( ALLOCATED (vf_pt) )            DEALLOCATE(vf_pt)
   IF ( ALLOCATED (vf_s_pt) )          DEALLOCATE(vf_s_pt)
@@ -579,6 +630,7 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (e_piezo_tensorf_pt) ) DEALLOCATE(e_piezo_tensorf_pt)
   IF ( ALLOCATED (d_piezo_tensorf_pt) ) DEALLOCATE(d_piezo_tensorf_pt)
   IF ( ALLOCATED (epsilon_inftyf_pt) ) DEALLOCATE(epsilon_inftyf_pt)
+  IF ( ALLOCATED (epsilon_zerom1f_pt) ) DEALLOCATE(epsilon_zerom1f_pt)
   IF ( ALLOCATED (zeuf_pt) )           DEALLOCATE(zeuf_pt)
 
   IF ( ALLOCATED (emp_free_enerf_pt) ) DEALLOCATE(emp_free_enerf_pt)
@@ -629,6 +681,7 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (vminf_t) )          DEALLOCATE(vminf_t) 
   IF ( ALLOCATED (b0f_t) )            DEALLOCATE(b0f_t) 
   IF ( ALLOCATED (b0f_ec_t) )         DEALLOCATE(b0f_ec_t) 
+  IF ( ALLOCATED (b0f_ec_d_t) )       DEALLOCATE(b0f_ec_d_t) 
   IF ( ALLOCATED (b01f_t) )           DEALLOCATE(b01f_t) 
   IF ( ALLOCATED (b02f_t) )           DEALLOCATE(b02f_t) 
   IF ( ALLOCATED (free_e_minf_t) )    DEALLOCATE(free_e_minf_t) 
@@ -640,6 +693,7 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (e_piezo_tensor_t) ) DEALLOCATE(e_piezo_tensor_t)
   IF ( ALLOCATED (d_piezo_tensor_t) ) DEALLOCATE(d_piezo_tensor_t)
   IF ( ALLOCATED (epsilon_infty_t) )  DEALLOCATE(epsilon_infty_t)
+  IF ( ALLOCATED (epsilon_zerom1_t) )  DEALLOCATE(epsilon_zerom1_t)
   IF ( ALLOCATED (zeu_t) )            DEALLOCATE(zeu_t)
 
 
@@ -670,13 +724,19 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (csmctf_t) )         DEALLOCATE(csmctf_t) 
   IF ( ALLOCATED (bthsf_t) )          DEALLOCATE(bthsf_t) 
   IF ( ALLOCATED (ggammaf_t) )        DEALLOCATE(ggammaf_t) 
+  IF ( ALLOCATED (csmctf_d_t) )       DEALLOCATE(csmctf_d_t) 
+  IF ( ALLOCATED (bthsf_d_t) )        DEALLOCATE(bthsf_d_t) 
 
   IF ( ALLOCATED (el_consf_t) )       DEALLOCATE(el_consf_t)
   IF ( ALLOCATED (el_compf_t) )       DEALLOCATE(el_compf_t)
   IF ( ALLOCATED (el_consf_s) )       DEALLOCATE(el_consf_s)
+  IF ( ALLOCATED (el_consf_d_t) )     DEALLOCATE(el_consf_d_t)
+  IF ( ALLOCATED (el_compf_d_t) )     DEALLOCATE(el_compf_d_t)
+  IF ( ALLOCATED (el_consf_d_s) )     DEALLOCATE(el_consf_d_s)
   IF ( ALLOCATED (el_compf_s) )       DEALLOCATE(el_compf_s)
   IF ( ALLOCATED (macro_elf_s) )      DEALLOCATE(macro_elf_s)
   IF ( ALLOCATED (macro_elf_t) )      DEALLOCATE(macro_elf_t)
+  IF ( ALLOCATED (macro_elf_d_t) )    DEALLOCATE(macro_elf_d_t)
   IF ( ALLOCATED (vf_t) )             DEALLOCATE(vf_t)
   IF ( ALLOCATED (vf_s) )             DEALLOCATE(vf_s)
   IF ( ALLOCATED (debye_macro_elf_t) ) DEALLOCATE(debye_macro_elf_t)
@@ -686,7 +746,10 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (e_piezo_tensorf_t) ) DEALLOCATE(e_piezo_tensorf_t)
   IF ( ALLOCATED (d_piezo_tensorf_t) ) DEALLOCATE(d_piezo_tensorf_t)
   IF ( ALLOCATED (epsilon_inftyf_t) ) DEALLOCATE(epsilon_inftyf_t)
+  IF ( ALLOCATED (epsilon_zerom1f_t) ) DEALLOCATE(epsilon_zerom1f_t)
   IF ( ALLOCATED (zeuf_t) )           DEALLOCATE(zeuf_t)
+  IF ( ALLOCATED (pyrof_t) )          DEALLOCATE(pyrof_t)
+  IF ( ALLOCATED (piezo_pyrof_t) )    DEALLOCATE(piezo_pyrof_t)
 
   IF ( ALLOCATED (vminf_noe_t) )      DEALLOCATE(vminf_noe_t) 
   IF ( ALLOCATED (b0f_noe_t) )        DEALLOCATE(b0f_noe_t) 

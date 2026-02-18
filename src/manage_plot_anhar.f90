@@ -69,10 +69,16 @@ IMPLICIT NONE
 IF (what=='mur_lc_t') THEN
    CALL plot_elastic_t(0,.TRUE.)
    CALL plot_elastic_t(1,.TRUE.)
+   CALL plot_elastic_d_t1(0,.FALSE.)
+   CALL plot_elastic_d_t1(1,.FALSE.)
    CALL plot_elastic_pt(0,.TRUE.)
    CALL plot_elastic_pt(1,.TRUE.)
+   CALL plot_elastic_d_pt(0,.TRUE.)
+   CALL plot_elastic_d_pt(1,.TRUE.)
    CALL plot_elastic_ptt(0,.TRUE., .FALSE.)
    CALL plot_elastic_ptt(1,.TRUE., .FALSE.)
+   CALL plot_elastic_d_ptt(0,.TRUE., .FALSE.)
+   CALL plot_elastic_d_ptt(1,.TRUE., .FALSE.)
    CALL plot_elastic_ptt(0,.FALSE., .TRUE.)
    CALL plot_elastic_ptt(1,.FALSE., .TRUE.)
 
@@ -100,6 +106,7 @@ IF (what=='mur_lc_t') THEN
    CALL plot_piezo_d_pt()
    CALL plot_piezo_ptt()
    CALL plot_piezo_d_ptt()
+   CALL plot_pyro_t(0)
 ENDIF
 
 RETURN

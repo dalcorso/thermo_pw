@@ -93,7 +93,7 @@ SUBROUTINE thermo_readin()
                                    stype, lcm_ec, lzsisa, lfp, old_ec,      &
                                    stypec, iconstr_internal_ec, nint_var_ec, &
                                    int_ngeo_ec, int_step_ngeo_ec, max_nint_var
-  USE control_piezoelectric_tensor, ONLY : decompose_piezo
+  USE control_piezoelectric_tensor, ONLY : decompose_piezo, doberry
   USE control_xrdp,         ONLY : lambda, flxrdp, flpsxrdp, lformf, smin, &
                                    smax, nspoint, flformf, flpsformf, lcm, &
                                    lxrdp, lambda_elem
@@ -288,6 +288,7 @@ SUBROUTINE thermo_readin()
                             nppl,                           &
 !   scf_piezoelectric_tensor
                             decompose_piezo,                &
+                            doberry,                        &
 !
 !   mur_lc
 !
@@ -558,6 +559,7 @@ SUBROUTINE thermo_readin()
 
   nppl=21
   decompose_piezo = .FALSE.
+  doberry = .TRUE.
 
   ngeo=0
   step_ngeo(1) = 0.05_DP

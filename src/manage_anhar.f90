@@ -17,6 +17,8 @@ USE control_thermo,        ONLY : ltherm_dos, ltherm_freq, ltherm_glob, &
 USE control_pressure,      ONLY : npress_plot, press, npress, ipress_plot 
 USE control_elastic_constants, ONLY : el_cons_qha_available, &
                                   el_consf_qha_available
+USE control_piezoelectric_tensor, ONLY : piezo_qha_available, &
+                                  piezof_qha_available
 USE initial_conf,          ONLY : ibrav_save
 USE control_eldos,         ONLY : lel_free_energy, hot_electrons
 USE control_emp_free_ener, ONLY : add_empirical, emp_ener, emp_free_ener, &
@@ -326,11 +328,17 @@ CALL check_el_cons_qha()
 !
 IF (.NOT.(el_cons_qha_available.OR.el_consf_qha_available)) &
                                                 CALL check_el_cons()
+
+CALL check_piezo_tensor_qha()
 !
-!  If the elastic constants are on file and the user allows it, the code 
-!  computes the elastic constants as a function of temperature interpolating 
-!  at the crystal parameters found in the quadratic/quartic fit
+!  If not found search those at T=0 K in the elastic_constants directory
 !
+IF (.NOT.(piezo_qha_available.OR.piezof_qha_available)) &
+                                                CALL check_piezo_tensor()
+
+CALL build_epsilon_zerom1()
+
+CALL build_el_cons_d()
 
 IF (lgeo_from_file) THEN
    IF (ltherm_dos) THEN
@@ -466,6 +474,23 @@ ENDIF
 
 CALL set_elastic_constants_t()
 
+CALL set_piezo_tensor_t()
+
+CALL set_epsilon_infty_t()
+
+CALL set_zeu_t()
+
+CALL set_epsilonm1_t()
+!
+!  Now build the elastic constant at constant electric displacement
+!
+CALL set_elastic_constants_d_t()
+!
+!  Now compute the pyroelectric tensor if there are all the needed quantities
+!  Require iconstr_internal
+!
+CALL set_pyro_t()
+
 IF (ltherm_dos) THEN
    CALL write_anhar_anis()
    CALL write_anhar_anis_pt()
@@ -506,8 +531,14 @@ CALL write_grun_anharmonic()
 !
 CALL manage_plot_anhar()
 IF (lgeo_from_file) CALL manage_plot_anhar_anis()
-
+!
+!  Plot elastic constants when what='mur_lc_t
+!
 CALL manage_plot_elastic()
+!
+!  Plot piezoelectric tensor when what='mur_lc_t'
+!
+CALL manage_plot_piezo()
 !
 !   summarize on output the main anharmonic quantities 
 !
@@ -527,19 +558,21 @@ USE control_pressure,      ONLY : npress, npress_plot
 USE control_thermo,        ONLY : ltherm_dos, ltherm_freq, lgruneisen_gen
 USE control_elastic_constants, ONLY : el_cons_qha_available, &
                                   el_consf_qha_available
+USE control_piezoelectric_tensor, ONLY : piezo_qha_available, &
+                                         piezof_qha_available
 USE control_gen_gruneisen, ONLY : ggrun_recipe
 USE control_atomic_pos,    ONLY : linternal_thermo
 USE control_eldos,         ONLY : lel_free_energy
-USE thermodynamics,        ONLY : ph_free_ener_eos, uint_geo_eos_t
-USE anharmonic,            ONLY : celldm_t, uint_t, tau_t
-USE ph_freq_anharmonic,    ONLY : celldmf_t, uintf_t, tauf_t
-USE anharmonic_pt,         ONLY : celldm_pt, uint_pt, tau_pt
-USE ph_freq_anharmonic_pt, ONLY : celldmf_pt, uintf_pt, tauf_pt
-USE anharmonic_ptt,        ONLY : celldm_ptt, uint_ptt, tau_ptt
-USE ph_freq_anharmonic_ptt, ONLY : celldmf_ptt, uintf_ptt, tauf_ptt
+USE thermodynamics,        ONLY : ph_free_ener_eos
+USE anharmonic,            ONLY : celldm_t
+USE ph_freq_anharmonic,    ONLY : celldmf_t
+USE anharmonic_pt,         ONLY : celldm_pt
+USE ph_freq_anharmonic_pt, ONLY : celldmf_pt
+USE anharmonic_ptt,        ONLY : celldm_ptt 
+USE ph_freq_anharmonic_ptt, ONLY : celldmf_ptt
 USE el_thermodynamics,     ONLY : el_free_ener, el_ener, el_entr, el_ce,      &
                                   el_free_ener_eos, elf_free_ener_eos
-USE ph_freq_thermodynamics, ONLY : phf_free_ener_eos, uintf_geo_eos_t
+USE ph_freq_thermodynamics, ONLY : phf_free_ener_eos
 USE data_files,            ONLY : fleltherm
 USE internal_files_names,  ONLY : flfrq_thermo, flvec_thermo
 USE io_global,             ONLY : stdout
@@ -793,29 +826,60 @@ DEALLOCATE(phf)
 !
 CALL check_el_cons_qha()
 !
-!  If not found search those at T=0 in the elastic_constants directory
+!  If not found search those at T=0 K in the elastic_constants directory
 !
 IF (.NOT.(el_cons_qha_available.OR.el_consf_qha_available)) &
                                                 CALL check_el_cons()
-CALL check_piezo_tensor()
+!
+!  Check if the piezoelectric tensor is on file. 
+!
+CALL check_piezo_tensor_qha()
+!
+!  If not found search those at T=0 K in the elastic_constants directory
+!
+IF (.NOT.(piezo_qha_available.OR.piezof_qha_available)) &
+                                                CALL check_piezo_tensor()
+
+CALL build_epsilon_zerom1()
 
 CALL build_el_cons_d()
 !
-!  If the elastic constants are on file and the user allows it, the code 
-!  computes the elastic constants as a function of temperature interpolating 
+!  If the elastic constants, piezoelectric tensor, dielectric constant and
+!  born effective charges are on file, the code computes the these
+!  quantities as a function of temperature/pressure interpolating 
 !  at the crystal parameters found in the quadratic/quartic fit
 !
 CALL set_elastic_constants_t()
-
+!
+!  interpolate the piezoelectric tensor
+!
 CALL set_piezo_tensor_t()
-
+!
+!  interpolate the dielectric tensor
+!
 CALL set_epsilon_infty_t()
-
+!
+!  interpolate the born effective charge
+!
 CALL set_zeu_t()
+!
+!  First set the inverse of epsilon_0
+!
+CALL set_epsilonm1_t()
+!
+!  Now build the elastic constant at constant electric displacement
+!
+CALL set_elastic_constants_d_t()
+!
+!  Here compute the pyroelectric coefficient
+!
+CALL set_pyro_t()
+!
 
 IF (ltherm_dos) THEN
 !
 !  calculates and writes several anharmonic quantities at the input pressure
+!  and at selected temperatures/pressures
 !
    CALL write_anhar()
    CALL write_anhar_aux()

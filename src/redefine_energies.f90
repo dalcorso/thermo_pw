@@ -364,8 +364,6 @@ TYPE(poly2) :: p2, p2c
 TYPE(poly4) :: p4, p4c
 
 nvar=1
-ALLOCATE(ene(nmove))
-ALLOCATE(y(nmove))
 CALL init_poly(nvar,p2)
 CALL init_poly(nvar,p4)
 
@@ -374,6 +372,8 @@ jwork=0     ! run on previous energy index
 DO istep=1, nstep_ec
    DO igeo=1, ngeo_strain
       IF (stype(istep)) THEN
+         ALLOCATE(ene(nmove))
+         ALLOCATE(y(nmove))
          DO imov=1, nmove
             jwork=jwork+1
             ene(imov)=energy_geo(jwork)
@@ -405,6 +405,8 @@ DO istep=1, nstep_ec
          epsilon_geo_eff(:,:,iwork)=epsilon_geo(:,:,jwork)   
          min_y_t(1,igeo,istep)=xmin(1)
          epsil_y(igeo,istep,igeom)=epsil_geo(jwork)
+         DEALLOCATE(y)
+         DEALLOCATE(ene)
       ELSEIF (stypec(istep)) THEN
          ALLOCATE(yv(nint_var_ec(istep), ninternal_ec(istep)))
          ALLOCATE(ene_v(ninternal_ec(istep)))
@@ -437,8 +439,8 @@ DO istep=1, nstep_ec
             xmin_v=0.0_DP
             CALL evaluate_fit_quartic(nint_var_ec(istep),xmin_v,emin,p4c)
          ELSE
-            CALL fit_multi_quadratic(nmove,nint_var_ec(istep),lsolve,&
-                                                              yv,ene_v,p2c)
+            CALL fit_multi_quadratic(ninternal_ec(istep),nint_var_ec(istep),&
+                              lsolve, yv,ene_v,p2c)
             CALL find_quadratic_extremum(nint_var_ec(istep),xmin_v,emin,p2c)
             CALL find_quartic_extremum(nint_var_ec(istep),xmin_v,emin,p4c)
          ENDIF
@@ -462,8 +464,6 @@ DO istep=1, nstep_ec
 ENDDO
 nwork_eff=iwork
 
-DEALLOCATE(ene)
-DEALLOCATE(y)
 CALL clean_poly(p2)
 CALL clean_poly(p4)
 

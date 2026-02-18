@@ -390,6 +390,7 @@ SUBROUTINE check_geometry_el_cons_exist(iwork, part)
   CALL mp_bcast(el_con_ibrav_geo(iwork), ionode_id, intra_image_comm)
   CALL mp_bcast(el_con_celldm_geo(:,iwork), ionode_id, intra_image_comm)
   CALL mp_bcast(el_con_omega_geo(iwork), ionode_id, intra_image_comm)
+  CALL mp_bcast(el_con_at_geo(:,:,iwork), ionode_id, intra_image_comm)
   CALL mp_bcast(el_con_tau_crys_geo(:,:,iwork), ionode_id, intra_image_comm)
   CALL mp_bcast(el_con_tau_geo(:,:,iwork), ionode_id, intra_image_comm)
 

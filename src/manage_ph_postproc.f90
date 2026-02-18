@@ -16,11 +16,12 @@ SUBROUTINE manage_ph_postproc(igeom)
 !
 USE kinds,            ONLY : DP
 USE constants,        ONLY : amu_ry, ry_to_cmm1
-USE thermo_mod,       ONLY : z_geo, freq_geo, omega_geo, epsilon_zero_geo
+USE thermo_mod,       ONLY : z_geo, freq_geo, omega_geo, epsilon_zero_geo, what
 USE control_thermo,   ONLY : ltherm, ltherm_dos, ltherm_freq, set_internal_path
 USE ifc,              ONLY : has_zstar, epsil_ifc, zeu
 USE ions_base,        ONLY : nat, ityp, amass
 USE control_epsilon_infty, ONLY : lepsilon_infty_geo, lzeu_geo
+USE ph_freq_thermodynamics, ONLY : ph_freq_save
 USE thermo_mod,       ONLY : epsilon_infty_geo, zeu_geo
 USE control_paths,    ONLY : disp_nqs
 USE control_phrun,    ONLY : auxdyn
@@ -99,13 +100,14 @@ IF (ltherm) THEN
             omega_geo(igeom), epsilon_zero_geo(1,1,igeom))
       DEALLOCATE(z)
       DEALLOCATE(w2)
-   ENDIF
-   filename='elastic_constants/'//TRIM(fl_dielectric)//'.g'//&
+      filename='elastic_constants/'//TRIM(fl_dielectric)//'.g'//&
                                               TRIM(int_to_char(igeom))
-   IF (my_image_id==root_image) &
-      CALL write_dielectric_properties_to_file(filename, nat, &
+      IF (my_image_id==root_image) &
+         CALL write_dielectric_properties_to_file(filename, nat, &
              epsilon_infty_geo(1,1,igeom), zeu_geo(1,1,1,igeom) )
+   ENDIF
 
+   IF (what/='mur_lc_t') DEALLOCATE(ph_freq_save(igeom)%nu)
 ENDIF
 
 CALL clean_ifc_variables()

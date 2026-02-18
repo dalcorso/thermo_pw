@@ -1522,7 +1522,7 @@ lgruneisen_gen: If .TRUE. phonons are computed only in a reduced set of
                 free energy with respect to crystal parameters are
                 evaluated by finite differences.
                 Default: .FALSE.
-ggrun_recipe:   the degree of the polynomial used to fit the free energy
+ggrun_recipe  : the degree of the polynomial used to fit the free energy
                 for the general Gruneisen theory
                 1 linear polynomial (requires 2 nvar + 1 phonons)
                 2 quadratic polynomial (requires 3^nvar phonons)
@@ -1531,13 +1531,16 @@ ggrun_recipe:   the degree of the polynomial used to fit the free energy
                 For energy the polynomial degree is 2 or 4
                 controlled by the lquartic variable.
                 Default: 2
-icenter_grun    The reference geometry to compute phonons. The 3**nvar,
+icenter_grun  : The reference geometry to compute phonons. The 3**nvar,
                 nvar*(nvar+3)/2+1 or the 2 * nvar + 1 geometries are
                 calculated starting from this.
                 The user must check that this point is not on the border
                 of the grid.
                 Default: Integer, the point of coordinates (ngeo(i)+1)/2
                 in each direction (transformed into an integer).
+njump         : the geometries for the generalized Gruneisen method are 
+                chosen each njump geometries of the grid in each direction.  
+                Default: Integer, 1
 flfrc         : file where the interatomic force constants are 
                 written.
                 Default: character(len=*) 'output_frc.dat.g1'

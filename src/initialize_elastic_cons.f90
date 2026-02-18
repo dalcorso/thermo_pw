@@ -50,7 +50,9 @@ SUBROUTINE initialize_elastic_cons( ngeom, nwork )
 !  
 !  
 USE kinds,             ONLY : DP
-USE thermo_mod,        ONLY : ibrav_geo, celldm_geo, at_geo, tau_geo, uint_geo
+USE thermo_mod,        ONLY : ibrav_geo, celldm_geo, at_geo, tau_geo, &
+                              uint_geo, freq_geo, z_geo, epsilon_zero_geo, &
+                              epsilon_zerom1_geo
 USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, rot_mat, &
                                elastic_algorithm,                          &
                                el_con_ibrav_geo, el_con_celldm_geo,        &
@@ -369,6 +371,10 @@ ALLOCATE( uint_geo(max_nint_var,nwork) )
 ALLOCATE( tau_acc(3,nat,nwork) )
 ALLOCATE( min_y(max_nint_var,ngeo_strain,21,ngeom))
 ALLOCATE( epsil_y(ngeo_strain,21,ngeom))
+ALLOCATE( epsilon_zero_geo(3,3,nwork) )
+ALLOCATE( epsilon_zerom1_geo(3,3,nwork) )
+ALLOCATE( freq_geo(3*nat,nwork) )
+ALLOCATE( z_geo(3*nat,3*nat,nwork) )
 
 IF (ngeom==1) THEN
    IF (.NOT. ALLOCATED(el_con_ibrav_geo)) ALLOCATE(el_con_ibrav_geo(1))

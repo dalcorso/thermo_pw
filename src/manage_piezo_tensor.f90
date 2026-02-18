@@ -225,7 +225,7 @@ USE control_elastic_constants, ONLY : ngeom, ngeo_strain, nint_var_ec, &
 USE control_piezoelectric_tensor, ONLY : e_piezo_tensor_relax_geo, &
                                          e_piezo_tensor_fi_geo,    &
                                          piezo_zeu_geo,            &
-                                         dtau_dint, dint_depsilon_geo
+                                         dtau_dint_pt, dint_depsilon_geo
 USE piezoelectric_tensor, ONLY: e_piezo_tensor, compute_relax_piezo,   &
                                 print_piezo_tensor, e_piezo_tensor_fi, &
                                 read_piezo_tensor_fi
@@ -299,7 +299,7 @@ CALL compute_relax_piezo(ibrav_save, code_group_save, nat, max_nint_var,   &
                          nint_var_ec, nstep,                               &
                          e_piezo_tensor_relax_geo(1,1,igeom),              &
                          piezo_zeu_geo(1,1,1,igeom),                       &
-                         dtau_dint(1,1,1,1,igeom),                         &
+                         dtau_dint_pt(1,1,1,1,igeom),                         &
                          dint_depsilon_geo(1,1,igeom))
 !
 !  put the correct units on the ionic contribution

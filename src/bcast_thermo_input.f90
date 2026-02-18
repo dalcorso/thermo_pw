@@ -33,7 +33,7 @@ SUBROUTINE bcast_thermo_input()
   USE control_pressure, ONLY : pressure, pmin, pmax, deltap, npress_plot
   USE control_conv,    ONLY : nke, deltake, nkeden, deltakeden,               &
                               nnk, deltank, nsigma, deltasigma
-  USE control_gen_gruneisen, ONLY : ggrun_recipe, icenter_grun
+  USE control_gen_gruneisen, ONLY : ggrun_recipe, icenter_grun, njump
   USE control_bands,   ONLY : emin_input, emax_input, nbnd_bands, lsym,       &
                               enhance_plot
   USE control_paths,   ONLY : q_in_band_form, q_in_cryst_coord, q2d,          &
@@ -59,7 +59,7 @@ SUBROUTINE bcast_thermo_input()
                               stype, move_at, lcm_ec, lzsisa, lfp, old_ec,   &
                               stypec, iconstr_internal_ec, nint_var_ec,      &
                               int_ngeo_ec, int_step_ngeo_ec
-  USE control_piezoelectric_tensor, ONLY : decompose_piezo
+  USE control_piezoelectric_tensor, ONLY : decompose_piezo, doberry
   USE piezoelectric_tensor, ONLY : nppl
   USE control_qe,       ONLY : force_band_calculation, use_ph_images, many_k
   USE many_k_mod,       ONLY : memgpu
@@ -144,6 +144,7 @@ SUBROUTINE bcast_thermo_input()
 !
   CALL mp_bcast( ggrun_recipe, meta_ionode_id, world_comm )
   CALL mp_bcast( icenter_grun, meta_ionode_id, world_comm )
+  CALL mp_bcast( njump, meta_ionode_id, world_comm )
 !
 !  scf_bands
 !
@@ -288,6 +289,7 @@ SUBROUTINE bcast_thermo_input()
 !  scf_piezoelectric_tensor
 !
   CALL mp_bcast( decompose_piezo, meta_ionode_id, world_comm )
+  CALL mp_bcast( doberry, meta_ionode_id, world_comm )
 !
 !  mur_lc
 !

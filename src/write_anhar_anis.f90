@@ -15,6 +15,7 @@ SUBROUTINE write_anhar_anis()
 USE kinds,          ONLY : DP
 USE thermo_mod,     ONLY : lcubic
 USE control_mur,    ONLY : lmurn
+USE control_atomic_pos, ONLY : linterpolate_tau
 USE ions_base,      ONLY : nat
 USE temperature,    ONLY : ntemp, temp
 USE thermo_sym,     ONLY : laue
@@ -25,12 +26,15 @@ USE anharmonic,     ONLY : alpha_anis_t, vmin_t, b0_t, celldm_t, beta_t, &
                            bths_t, ggamma_t, el_cons_s, el_comp_s, &
                            macro_el_t, macro_el_s, v_t, v_s, density_t, &
                            csmct_t, debye_macro_el_t, debye_macro_el_s, &
-                           uint_t, uint_zsisa_t, alpha_int_t, alpha_int_zsisa_t
+                           uint_t, uint_zsisa_t, alpha_int_t,           &
+                           alpha_int_zsisa_t, bths_d_t, csmct_d_t,      &
+                           el_cons_d_s, el_cons_d_t
 USE initial_conf,   ONLY : ibrav_save
 USE control_eldos,  ONLY : lel_free_energy
 USE control_atomic_pos, ONLY : linternal_thermo, linterpolate_tau, &
                                nint_var
 USE control_elastic_constants, ONLY : lelastic
+USE control_piezoelectric_tensor, ONLY : lpiezo
 USE elastic_constants, ONLY : compute_elastic_compliances, &
                               write_el_cons_on_file, print_macro_elasticity, &
                               write_macro_el_on_file, print_sound_velocities,& 
@@ -77,6 +81,8 @@ ELSE
    CALL compute_alpha_anis(celldm_t, alpha_anis_t, temp, ntemp, ibrav_save)
    IF (linternal_thermo) CALL compute_alpha_internal(uint_t, alpha_int_t, &
                                                       nint_var, temp, ntemp)
+   IF (linterpolate_tau) CALL compute_alpha_internal(uint_zsisa_t, &
+                                    alpha_int_zsisa_t, nint_var, temp, ntemp)
 ENDIF
 
 IF (lelastic) THEN
@@ -90,6 +96,14 @@ IF (lelastic) THEN
 
    CALL isoentropic_elastic_constants(vmin_t,bths_t,cv_t,temp,csmct_t,ntemp)
    el_cons_s=el_cons_t + csmct_t
+
+   IF (lpiezo) THEN
+      CALL thermal_stress(el_cons_d_t,alpha_anis_t,bths_d_t,ntemp)
+      CALL isoentropic_elastic_constants(vmin_t,bths_d_t,cv_t,temp,&
+                              csmct_d_t,ntemp)
+      el_cons_d_s=el_cons_d_t + csmct_d_t
+   ENDIF
+
    DO itemp=2, ntemp-1
       CALL compute_elastic_compliances(el_cons_s(:,:,itemp), &
                                                    el_comp_s(:,:,itemp))
@@ -197,6 +211,17 @@ IF (lelastic) THEN
    CALL add_pressure(filename)
    CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue, el_cons_s, &
                                                   b0_ec_s, filename, 0)
+!
+!
+!   Here the elastic constants at constant entropy and constants
+!   electric displacement
+!
+   IF (lpiezo) THEN
+      filename='anhar_files/'//TRIM(flanhar)//'.el_cons_d_s'
+      CALL add_pressure(filename)
+      CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue, el_cons_d_s, &
+                                                     b0_ec_s, filename, 0)
+   ENDIF
 !
 !  and here the elastic compliances
 !
@@ -718,6 +743,7 @@ USE kinds,          ONLY : DP
 USE ions_base,      ONLY : nat
 USE thermo_mod,     ONLY : lcubic
 USE control_mur,    ONLY : lmurn
+USE control_atomic_pos, ONLY : linterpolate_tau
 USE temperature,    ONLY : ntemp, temp
 USE thermo_mod,     ONLY : ibrav_geo
 USE thermo_sym,     ONLY : laue
@@ -732,8 +758,10 @@ USE ph_freq_anharmonic, ONLY : alphaf_anis_t, vminf_t, b0f_t, celldmf_t, &
                                densityf_t, csmctf_t, b0f_ec_s, &
                                debye_macro_elf_t, debye_macro_elf_s, &
                                uintf_t, uintf_zsisa_t, alphaf_int_t, &
-                               alphaf_int_zsisa_t
+                               alphaf_int_zsisa_t, bthsf_d_t, csmctf_d_t, &
+                               el_consf_d_s, el_consf_d_t
 USE control_elastic_constants, ONLY : lelasticf
+USE control_piezoelectric_tensor, ONLY : lpiezof
 USE control_atomic_pos,        ONLY : linternal_thermo, nint_var, &
                                linterpolate_tau
 USE elastic_constants, ONLY : compute_elastic_compliances, &
@@ -785,6 +813,8 @@ ELSE
                                                              ibrav_save)
    IF (linternal_thermo) CALL compute_alpha_internal(uintf_t, &
                                        alphaf_int_t, nint_var, temp, ntemp)
+   IF (linterpolate_tau)  CALL compute_alpha_internal(uintf_zsisa_t, &
+                                 alphaf_int_zsisa_t, nint_var, temp, ntemp)
 ENDIF
 
 IF (lelasticf) THEN
@@ -798,6 +828,12 @@ IF (lelasticf) THEN
    CALL isoentropic_elastic_constants(vminf_t,bthsf_t,cvf_t,temp,csmctf_t,&
                                                                      ntemp)
    el_consf_s=el_consf_t + csmctf_t
+   IF (lpiezof) THEN
+      CALL thermal_stress(el_consf_d_t,alphaf_anis_t,bthsf_d_t,ntemp)
+      CALL isoentropic_elastic_constants(vminf_t,bthsf_d_t,cvf_t,temp,&
+                              csmctf_d_t,ntemp)
+      el_consf_d_s=el_consf_d_t + csmctf_d_t
+   ENDIF
    DO itemp=2, ntemp-1
       CALL compute_elastic_compliances(el_consf_s(:,:,itemp), &
                                                         el_compf_s(:,:,itemp))
@@ -901,6 +937,15 @@ IF (lelasticf) THEN
    CALL add_pressure(filename)
    CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, el_consf_s, b0f_ec_s, &
                                                               filename, 0)
+!
+!   Here the elastic constants at constant entropy
+!
+   IF (lpiezof) THEN
+      filename='anhar_files/'//TRIM(flanhar)//'.el_cons_d_s_ph'
+      CALL add_pressure(filename)
+      CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, el_consf_d_s, &
+           b0f_ec_s, filename, 0)
+   ENDIF
 !
 !   and here the elastic compliances at constant entropy
 !
@@ -2481,7 +2526,7 @@ INTEGER, INTENT(IN) :: nint_var, ntemp, flag
 REAL(DP), INTENT(IN) :: uint_t(nint_var,ntemp), temp(ntemp), &
                         alpha_int_t(nint_var, ntemp)
 CHARACTER(LEN=*), INTENT(IN) :: filename
-CHARACTER(LEN=256) :: label, label1, label2
+CHARACTER(LEN=256) :: label, label1, label2, aux_lab
 INTEGER :: itemp, iu_therm, ivar, inde(nint_var)
 INTEGER :: find_free_unit
 
@@ -2499,15 +2544,15 @@ ENDDO
 
 OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
 
-!IF (nint_var==1) THEN
-!    WRITE(iu_therm,'("# ",a,"    uint(1)     alpha_int(1) ")' ) TRIM(label)
-!ELSE
-    WRITE(label1, '(5("       uint(",i3,")     "))') (inde(ivar),&
-                                                      ivar=1,nint_var)
-    WRITE(label2, '(5("     alpha_int(",i3,")  "))') (inde(ivar),&
-                                                      ivar=1,nint_var)
-    WRITE(iu_therm,'("# ",a,a,a)' ) TRIM(label), TRIM(label1), TRIM(label2)
-!ENDIF
+label1=''
+label2=''
+DO ivar=1, nint_var
+   WRITE(aux_lab, '("uint(",i3,")")') inde(ivar)
+   label1= TRIM(label1)//'          '//TRIM(aux_lab)
+   WRITE(aux_lab, '("alpha_int(",i3,")")') inde(ivar)
+   label2= TRIM(label2)//'          '//TRIM(aux_lab)
+ENDDO
+WRITE(iu_therm,'("# ",a,a,a)' ) TRIM(label), TRIM(label1), TRIM(label2)
 DO itemp = 1, ntemp
    WRITE(iu_therm, '(e12.5,20e20.9)') temp(itemp), (uint_t(ivar,itemp), &
                ivar=1, nint_var), (alpha_int_t(ivar,itemp), ivar=1, nint_var)
@@ -2517,6 +2562,55 @@ CLOSE(iu_therm)
 
 RETURN
 END SUBROUTINE write_uint_anis
+!
+!-----------------------------------------------------------------------
+SUBROUTINE write_only_uint(uint_t, max_nint_var, nint_var, temp, & 
+                                                  ntemp, filename, flag)
+!-----------------------------------------------------------------------
+!
+!  This routine writes on file the internal degrees of freedom, as a function
+!  temperature (flag=0) or of pressure (flag=1)
+!
+USE kinds, ONLY : DP
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: nint_var, ntemp, flag, max_nint_var
+REAL(DP), INTENT(IN) :: uint_t(max_nint_var,ntemp), temp(ntemp)
+CHARACTER(LEN=*), INTENT(IN) :: filename
+CHARACTER(LEN=256) :: label, label1
+CHARACTER(LEN=6) :: int_to_char
+INTEGER :: itemp, iu_therm, ivar, inde(nint_var)
+INTEGER :: find_free_unit
+
+iu_therm=find_free_unit()
+
+IF (flag==0) THEN
+   label='T (K)   '
+ELSE
+   label='p (kbar)'
+ENDIF
+
+DO ivar=1, nint_var
+   inde(ivar)=ivar
+ENDDO
+
+OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
+
+label1=''
+DO ivar=1,nint_var
+   label1=TRIM(label1)//"       uint("//TRIM(int_to_char(inde(ivar)))//")"
+ENDDO
+                                                      
+WRITE(iu_therm,'("# ",a,a)' ) TRIM(label), TRIM(label1)
+
+DO itemp = 1, ntemp
+   WRITE(iu_therm, '(e12.5,20e20.9)') temp(itemp), (uint_t(ivar,itemp), &
+               ivar=1, nint_var)
+END DO
+
+CLOSE(iu_therm)
+
+RETURN
+END SUBROUTINE write_only_uint
 !
 !-----------------------------------------------------------------------
 SUBROUTINE read_alpha_anis_lmurn(ibrav, celldm_t, alpha_t, temp, ntemp, &
@@ -4371,3 +4465,47 @@ SUBROUTINE fit_free_energyf_noe_gruneisen_gen()
   RETURN
   !
 END SUBROUTINE fit_free_energyf_noe_gruneisen_gen
+!
+!-----------------------------------------------------------------------
+SUBROUTINE read_uint_anis(uint_t, alpha_int_t, nint_var, temp, ntemp, filename)
+!-----------------------------------------------------------------------
+!
+!  This routine reads from file the internal degrees of freedom and their
+!  associated thermal expansion, as a function temperature (flag=0) or of 
+!  pressure (flag=1)
+!
+USE kinds,     ONLY : DP
+USE io_global, ONLY : meta_ionode, meta_ionode_id
+USE mp_world,  ONLY : world_comm
+USE mp,        ONLY : mp_bcast
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: nint_var, ntemp
+REAL(DP), INTENT(IN) :: temp(ntemp)
+REAL(DP), INTENT(INOUT) :: uint_t(nint_var,ntemp), alpha_int_t(nint_var, ntemp)
+CHARACTER(LEN=*), INTENT(IN) :: filename
+REAL(DP) :: rdum
+INTEGER :: itemp, iu_therm, ivar
+INTEGER :: find_free_unit
+
+iu_therm=find_free_unit()
+
+IF (meta_ionode) THEN
+   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
+
+   READ(iu_therm,* ) 
+
+   DO itemp = 1, ntemp
+      READ(iu_therm, '(e12.5,20e20.9)') rdum, (uint_t(ivar,itemp), &
+               ivar=1, nint_var), (alpha_int_t(ivar,itemp), ivar=1, nint_var)
+      IF (ABS(rdum-temp(itemp))>1.D-8) &
+         CALL errore('read_uint_anis','wrong temperature',1)
+   ENDDO
+   CLOSE(iu_therm)
+ENDIF
+CALL mp_bcast(uint_t, meta_ionode_id, world_comm)
+CALL mp_bcast(alpha_int_t, meta_ionode_id, world_comm)
+
+RETURN
+END SUBROUTINE read_uint_anis
+!

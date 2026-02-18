@@ -1,4 +1,5 @@
 !
+! Copyright (C) 2026 Andrea Dal Corso for the stype and stypec treatment
 ! Copyright (C) 2019 Cristiano Malica and Andrea Dal Corso
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
@@ -115,7 +116,8 @@ DO igeom=1, ngeom
          epsilon_geo_loc(:,:,:)=epsilon_geo(:,:,base_ind+1:base_ind+work_base)
          CALL redefine_energies_qua_t(free_energy_geo, epsilon_geo_loc, &
                        epsil_geo(base_ind+1), work_base, free_energy_geo_eff, &
-                       epsilon_geo_eff, work_base_eff, igeom, itemp)
+                       epsilon_geo_eff, min_y_t(1,1,1,igeom,itemp), &
+                       work_base_eff, igeom)
          CALL compute_elastic_constants_ene(free_energy_geo_eff,  &
                             epsilon_geo_eff, work_base_eff, ngeo_strain, &
                             ibrav_save, laue, el_con_omega_geo(igeom), &
@@ -131,7 +133,8 @@ DO igeom=1, ngeom
          epsilon_geo_loc(:,:,:)=epsilon_geo(:,:,base_ind+1:base_ind+work_base)
          CALL redefine_energies_qua_t(free_energy_geo, epsilon_geo_loc, &
                        epsil_geo(base_ind+1), work_base, free_energy_geo_eff, &
-                       epsilon_geo_eff, work_base_eff, igeom, itemp)
+                       epsilon_geo_eff, min_y_t(1,1,1,igeom,itemp), &
+                       work_base_eff, igeom)
          CALL compute_elastic_constants_ene(free_energy_geo_eff, &
                          epsilon_geo_eff, work_base_eff, ngeo_strain, & 
                          ibrav_save, laue, el_con_omega_geo(igeom), &
@@ -191,3 +194,4 @@ ENDIF
 
 RETURN
 END SUBROUTINE manage_elastic_cons_qha
+

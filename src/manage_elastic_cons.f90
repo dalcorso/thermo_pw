@@ -72,8 +72,12 @@ energy_geo=energy_geo / nproc_image
 !  of all geometries
 !
 lreturn=.FALSE.
-DO iwork=1,nwork
-   lreturn=lreturn.OR.(ABS(energy_geo(iwork))<1.D-10)
+work_base=nwork/ngeom
+DO igeom=start_geometry_qha, last_geometry_qha
+   base_ind=(igeom-1)*work_base
+   DO iwork=base_ind+1,base_ind+work_base
+      lreturn=lreturn.OR.(ABS(energy_geo(iwork))<1.D-10)
+   ENDDO
 ENDDO
 IF (lreturn) RETURN
 
