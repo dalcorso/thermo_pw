@@ -105,9 +105,9 @@ IF (rank==1) THEN
 ELSEIF(rank==2) THEN
    CALL rotate_tensors2(rot, 1, tensor2, rtensor2, 1) 
 ELSEIF(rank==3) THEN
-   CALL to_voigt3( tensor3v, tensor3, .FALSE. )
+   CALL to_voigt3( tensor3v, tensor3, 1.0_DP, .FALSE. )
    CALL rotate_tensors3(rot, 1, tensor3, rtensor3, 1) 
-   CALL to_voigt3( tensor3v, tensor3, .FALSE. )
+   CALL to_voigt3( tensor3v, tensor3, 1.0_DP, .FALSE. )
 
    WRITE(stdout,'(/,5x,"Rotated tensor of rank 3")') 
    DO ipol=1,3

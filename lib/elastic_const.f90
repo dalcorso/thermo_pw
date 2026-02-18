@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!---------------------------------------------------------------------------
 MODULE elastic_constants
+!---------------------------------------------------------------------------
 !
 !   this module contains the support routines for the calculation
 !   of the elastic constant
@@ -33,7 +35,9 @@ MODULE elastic_constants
 !
 !   Some array to simplify dealing with elastic constants
 !
-  CHARACTER(LEN=6) :: ect_names(21)
+  INTEGER, PARAMETER :: ec_elements=21
+
+  CHARACTER(LEN=6) :: ect_names(ec_elements)
 
   DATA  ect_names / &
          'C_{11}', 'C_{12}', 'C_{13}', 'C_{14}', 'C_{15}', 'C_{16}', &
@@ -43,7 +47,7 @@ MODULE elastic_constants
                                                  'C_{55}', 'C_{56}', & 
                                                            'C_{66}'  /
                             
-  CHARACTER(LEN=6) :: ecm_names(21)
+  CHARACTER(LEN=6) :: ecm_names(ec_elements)
 
   DATA  ecm_names / &
          'S_{11', 'S_{12}', 'S_{13}', 'S_{14}', 'S_{15}', 'S_{16}',  &
@@ -58,7 +62,7 @@ MODULE elastic_constants
   DATA  ec_laue_code / 32, 29, 23, 19, 25, 27, 25, 27, 22, 18, 20, &
                        16, 16, 2 /
 
-  INTEGER  :: ec_present(21, ec_types)
+  INTEGER  :: ec_present(ec_elements, ec_types)
 
   DATA ec_present / &
        1,2,0,0,0,0, 0,0,0,0,0, 0,0,0,0, 3,0,0, 0,0, 0, & ! 1  O_h
@@ -105,7 +109,8 @@ MODULE elastic_constants
                                          ! and ibrav parameter
          ece_to_ecd,                &    ! transform constant E field EC to
                                          ! constant D field EC
-         ec_present, ecm_names, ect_names ! auxiliary variables
+         ec_present, ecm_names, ect_names, & ! auxiliary variables
+         ec_elements
         
 
 
@@ -3323,7 +3328,7 @@ ENDIF
 
 RETURN
 END SUBROUTINE write_sound_on_file
-
+!
 !-------------------------------------------------------------------------
 SUBROUTINE ece_to_ecd(e_piezo_tensor, epsilonm1_zero, ce, cd)
 !-------------------------------------------------------------------------
@@ -3350,13 +3355,7 @@ INTEGER :: ipol, jpol, kpol, lpol, mpol, npol
 REAL(DP) :: fact
 REAL(DP) :: e_piezo_aux(3,3,3), ce_aux(3,3,3,3), cd_aux(3,3,3,3)
 
-CALL to_voigt3(e_piezo_tensor, e_piezo_aux, 2.0_DP, .FALSE.)
-
-DO ipol=1,3
-   DO jpol=1,3
-      WRITE(6,*) ipol, jpol, (e_piezo_aux(ipol,jpol,kpol), kpol=1,3)
-   ENDDO
-ENDDO
+CALL to_voigt3(e_piezo_tensor, e_piezo_aux, 1.0_DP, .FALSE.)
 
 CALL to_voigt4(ce, ce_aux, .FALSE.)
 !

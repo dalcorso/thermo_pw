@@ -134,20 +134,21 @@ RETURN
 END SUBROUTINE read_dielectric_properties_from_file
 !
 !-------------------------------------------------------------------------
-SUBROUTINE write_epsilon_infty_on_file(temp, ntemp, ibrav, code_group, &
-                                  epsilon_infty_t, filename, iflag)
+SUBROUTINE write_epsilon_infty_on_file(temp, ntemp, epsilon_infty_t, &
+                                       astring, filename, iflag)
 !-------------------------------------------------------------------------
 !
-!  iflag=0 writes the piezoelectric tensor as a function of temperature
-!  iflag=2 writes the piezoelectric tensor as a function of pressure
+!  iflag=0 writes the dielectric constant as a function of temperature
+!  iflag=2 writes the dielectric constant as a function of pressure
 !
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : meta_ionode, meta_ionode_id, stdout
 USE mp_world,   ONLY : world_comm
 USE mp,         ONLY : mp_bcast
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: ntemp, ibrav, code_group, iflag
+INTEGER, INTENT(IN) :: ntemp, iflag
 REAL(DP), INTENT(IN) :: temp(ntemp), epsilon_infty_t(3,3,ntemp)
+CHARACTER(LEN=*), INTENT(IN) :: astring
 CHARACTER(LEN=*), INTENT(IN) :: filename
 
 INTEGER :: itemp, iu_epsilon, ios
@@ -172,7 +173,7 @@ ENDIF
 
 IF (meta_ionode) THEN
 
-   WRITE(iu_epsilon,'("#    dielectric constants adimensional")')
+   WRITE(iu_epsilon,'(a)') astring
    WRITE(iu_epsilon,'("#",5x, a7, 13x, " e_11 ", 13x, " e_12",  &
                       &13x, " e_13", 13x, " e_22", 13x, " e_23",&
                       &13x, " e_33")') label

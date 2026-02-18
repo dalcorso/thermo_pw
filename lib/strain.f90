@@ -267,6 +267,8 @@ rotcr(3,3)=1.0_DP/sqrt3
 !  set the epsilon_voigt
 !
 CALL set_strain(strain_code,epsil,epsilon_voigt)
+ibrav_strain=0
+celldm_strain=0.0_DP
 IF (ibrav==14 .OR. flag) RETURN
 
 IF (ibrav==1) THEN
