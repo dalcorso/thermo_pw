@@ -2,18 +2,18 @@ The examples in this directory illustrate the use of thermo_pw to make the
 following calculations:
 
 example01: 
-what = scf       : a single scf calculation to determine the total energy.
+what = 'scf'       : a single scf calculation to determine the total energy.
 ngeo = 1           If calculated with several images, only the root image
                    does the calculation. The others remain idle.
 
 example02: 
-what = scf_bands : a band structure calculation after a scf calculation.
+what = 'scf_bands' : a band structure calculation after a scf calculation.
 ngeo = 1           This calculation produces a band structure plot.
                    If calculated with several images, only the root image
                    does the calculation. The others remain idle.
 
 example03:
-what = scf_ph    : a phonon calculation at a single q after a scf run.
+what = 'scf_ph'    : a phonon calculation at a single q after a scf run.
 ngeo = 1           This calculation computes only the frequencies and
                    displacements at a given q.
                    When calculated with several images, only the root image
@@ -24,7 +24,7 @@ ngeo = 1           This calculation computes only the frequencies and
                    
 
 example04:
-what = scf_disp  : a phonon dispersion calculation after a scf run.
+what = 'scf_disp'  : a phonon dispersion calculation after a scf run.
 ngeo = 1           This calculation produces a plot of the phonon dispersions,
                    a plot of the phonon density of states, and plots of 
                    the vibrational energy, free energy, entropy, and constant 
@@ -36,7 +36,7 @@ ngeo = 1           This calculation produces a plot of the phonon dispersions,
                    (adding on all q).
 
 example05:
-what = mur_lc    : equilibrium lattice constant via Murnaghan equation.
+what = 'mur_lc'    : equilibrium lattice constant via Murnaghan equation.
 ngeo = # of geom.  Presently only celldm(1) is changed. All the ratios and
                    angles are kept constant.
                    This calculation produces a plot of the energy as a 
@@ -48,7 +48,7 @@ ngeo = # of geom.  Presently only celldm(1) is changed. All the ratios and
                    asynchronously and cooperate to calculate each geometry.
 
 example06:
-what = mur_lc_b  : This example computes all as above and produces a
+what = 'mur_lc_bands'  : This example computes all as above and produces a
 ngeo = # of geom.  plot of the band structure at the equilibrium lattice 
                    constant.
                    If calculated with several images each image run 
@@ -56,8 +56,8 @@ ngeo = # of geom.  plot of the band structure at the equilibrium lattice
                    The bands are calculated by only one image.
 
 example07:
-what = mur_lc_ph : This example computes all as in example05 and produces also
-ngeo = # of geom.  the frequencies and displacements at a single q at the 
+what = 'mur_lc_ph' : This example computes all as in example05 and produces 
+ngeo = # of geom.  also the frequencies and displacements at a single q at the 
                    minimum of the Murnaghan.
                    If calculated with several images each image runs 
                    asynchronously and calculates a different geometry.
@@ -66,7 +66,7 @@ ngeo = # of geom.  the frequencies and displacements at a single q at the
                    asynchronously each one computing a different representation.
 
 example08:
-what = mur_lc_disp : This examples computes all as in example05 and
+what = 'mur_lc_disp' : This examples computes all as in example05 and
 ngeo = # of geom.    a phonon dispersion at the minimum of the Murnaghan. 
                      The vibrational energy, free energy, entropy, and 
                      constant volume specific heat can be plotted at the
@@ -78,7 +78,7 @@ ngeo = # of geom.    a phonon dispersion at the minimum of the Murnaghan.
                      asynchronously each one computing a different representation.
 
 example09:
-what = mur_lc_t  : This example computes a phonon dispersion at each lattice
+what = 'mur_lc_t'  : This example computes a phonon dispersion at each lattice
 ngeo = # of geom.  constant and allows the calculation of the zero-point 
                    energy contribution to the lattice constant and to the 
                    bulk modulus and, using the quasi harmonic approximation,
@@ -101,7 +101,7 @@ ngeo = # of geom.  constant and allows the calculation of the zero-point
                    resynchronized before changing geometry.
 
 example10:
-what = scf_ke  : this example computes the total energy for several values
+what = 'scf_ke'  : this example computes the total energy for several values
 ngeo=1           of the kinetic energy cut-off of the wavefunctions and of the
                  charge density. The two can be specified independently or
                  a calculation at fixed dual or for several dual can be
@@ -110,70 +110,71 @@ ngeo=1           of the kinetic energy cut-off of the wavefunctions and of the
                  images.
 
 example11:
-what = scf_nk : this example computes the total energy for several values
+what = 'scf_nk' : this example computes the total energy for several values
                 of the k point mesh. One can specify the number of nk, and
                 the step between the first nk written on the input of pw.x
                 and the others. If this is a metal also the number of values
                 of the smearing degauss can be specified.
 
 example12:
-what=plot_bz : this example plots the Brillouin zone of Si and the standard
+what='plot_bz' : this example plots the Brillouin zone of Si and the standard
                path. It produces only the asymptote script. If you have the
                asymptote package installed, use lasymptote=.true. to produce 
                the pdf file, or give the command asy -V asy_tmp.asy to see 
                the Brillouin zone on the screen.
 
 example13:
-what=mur_lc_elastic_constants : this example computes the elastic constants 
+what='mur_lc_elastic_constants' : this example computes the elastic constants 
                of silicon at the minimum of the Murnaghan equation. The
                atoms are relaxed for e44 strains.
 
 example14:
-what=scf_dos : this example computes the electron density of states 
+what='scf_dos' : this example computes the electron density of states 
                of silicon. The LDA bands and eigenfunctions are read by
                epsilon_tpw.x to calculate the frequency dependent
                dielectric constant of silicon (neglecting local fields).
 
 example15:
-what=scf_ph : this example computes the frequency dependent
+what='scf_ph' : this example computes the frequency dependent
               dielectric constant of silicon (neglecting local fields)
               using the non-self-consistent Sternheimer equation without
               sums over the empty bands. 
 
 example16:
-what=scf_ph : this example computes the frequency dependent
+what='scf_ph' : this example computes the frequency dependent
               dielectric constant of silicon within the TD-DFPT,
               using the self-consistent Sternheimer equation.
 
 example17:
-what=scf_ph : this example computes the inverse of the frequency dependent
+what='scf_ph' : this example computes the inverse of the frequency dependent
               dielectric constant of aluminum at a given q within the TD-DFPT,
               using the self-consistent Sternheimer equation.
 
 example18:
-what=scf_dos : this example computes the electron density of states of aluminum
+what='scf_dos' : this example computes the electron density of states of 
+              aluminum
               and writes on file the electronic thermodynamic properties
               of a gas of independent electrons with the same density of
               states. (experimental)
 
 example19:
-what=scf_2d_bands : this example shows how to plot a projected density of 
+what='scf_2d_bands' : this example shows how to plot a projected density of 
              states (PBS) on a surface and the band structure of a slab on 
              top of the PBS.
 
 example20:
-what=scf_ph : this example computes the frequency dependent
+what='scf_ph' : this example computes the frequency dependent
               dielectric constant of silicon within the TD-DFPT,
               using a Lanczos chain.
 
 example21:
-what=scf_ph : this example computes the inverse of the frequency dependent
+what='scf_ph' : this example computes the inverse of the frequency dependent
               dielectric constant of aluminum at a given q within the TD-DFPT,
               using a Lanczos chain.
 
 example22:
-what=elastic_constants_geo:
-what=mur_lc_t: this example computes the elastic constants on the
+what='elastic_constants_geo':
+what='mur_lc_t': this example computes the elastic constants on the
               same set of geometries that would be used with what='mur_lc_t'.
               The files with elastic constants are then used in another run
               to modify the behavior of what='mur_lc_t' and to calculate
@@ -181,8 +182,8 @@ what=mur_lc_t: this example computes the elastic constants on the
               "quasi-static approximation". Run run_example first and 
               run_example_mur_lc_t second.
 example23:
-what=elastic_constants_geo:
-what=mur_lc_t: this example computes the elastic constants as a function
+what='elastic_constants_geo':
+what='mur_lc_t': this example computes the elastic constants as a function
               of temperature within the 'quasi-harmonic approximation' by
               doing the second derivatives of the Helmholtz free energy
               with respect to strain. The files with elastic constants are
@@ -192,9 +193,9 @@ what=mur_lc_t: this example computes the elastic constants as a function
               Run run_example first and run_example_mur_lc_t second.
 
 example24:
-what=mur_lc:  
+what='mur_lc':  
 lel_free_energy=.TRUE. 
-what=mur_lc_t
+what='mur_lc_t'
 lel_free_energy=.TRUE. 
               this example computes the lattice constant of Al as a function
               of temperature keeping into account the contribution to the
@@ -204,3 +205,10 @@ lel_free_energy=.TRUE.
               reads the files with the electronic properties and adds
               to the electron and phonon free energy the one of the electron
               exitations before computing the anharmonic properties.
+example25:
+what='scf_piezoelectric_tensor':  
+              this example computes the piezoelectric tensor of zincblend
+              AlAs at one equilibrium geometry. It makes self consistent 
+              calculations for four distorted geometries and for each one 
+              of them it makes three Berry phase calculations. 
+              Finally it collects all the results and computes e_{14}.

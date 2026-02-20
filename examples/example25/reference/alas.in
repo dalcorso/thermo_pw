@@ -1,0 +1,26 @@
+ &control
+    calculation = 'scf'
+    restart_mode='from_scratch',
+    prefix='alas',
+    pseudo_dir = '/home/espresso/pslibrary.1.0.0/pz/PSEUDOPOTENTIALS/',
+    outdir='/scratch/RUNNING_QE/q-e-qe-7.5/tempdir/'
+    forc_conv_thr = 4.d-5
+ /
+ &system
+   ibrav=  2, 
+   celldm(1) =10.50, 
+   nat=  2, 
+   ntyp= 2,
+   ecutwfc =16.0
+ /
+ &electrons
+    conv_thr =  1.0d-12
+ /
+ATOMIC_SPECIES
+ Al  26.98  Al.pz-vbc.UPF
+ As  74.92  As.pz-bhs.UPF
+ATOMIC_POSITIONS (alat)
+ Al 0.00 0.00 0.00
+ As 0.25 0.25 0.25
+K_POINTS {automatic}
+ 4 4 4 0 0 0

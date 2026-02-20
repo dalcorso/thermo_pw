@@ -119,7 +119,7 @@ If you use it, \thermo\ writes on output \texttt{ibrav},
 the same cell and stops.
 You can just cut and paste these quantities in the input of \texttt{pw.x}
 or you can set the flag \texttt{find\_ibrav=.TRUE.} in the \thermo\ input
-and \thermo\ will make the conversion for you before runnig the job. 
+and \thermo\ will make the conversion for you before running the job. 
 After setting the correct
 \texttt{ibrav} and \texttt{celldm}, \thermo\ might still tell you
 that the Bravais lattice is not compatible with the point group. This
@@ -598,6 +598,114 @@ absorption coefficient. Both quantities can be plotted as a function of
 the frequency or of the wavelength.
 
 \newpage
+
+{\color{coral}\section{How do I calculate the piezoelectric tensor?}}
+\color{black}
+To compute the piezoelectric tensor, use the 
+\texttt{what ='scf\_piezo-} \texttt{electric\_tensor'} option 
+(see example25). This option
+calls \texttt{pw.x} to perform Berry phase polarization calculations 
+over a set of distorted structures, using the input geometry as 
+the equilibrium reference. The code then calculates the derivatives 
+of the polarization with respect to strain to determine the 
+piezoelectric tensor components. If you need the code to first determine 
+the energy-minimum geometry, use 
+\texttt{what='mur\_lc\_piezoelectric\_tensor'}. 
+Additionally, you can 
+compute the clamped-ion version of the tensor by setting 
+\texttt{clamped\_ions=.TRUE.}. 
+Unlike the full calculation, this requires a specific multi-step workflow 
+to ensure the internal coordinates are handled correctly.
+Before running the piezoelectric calculation, you must determine 
+the relaxed atomic positions for each equilibrium configuration.
+Perform a preliminary run using \texttt{what='mur\_lc'}.
+This step generates the necessary atomic position files in the
+\texttt{restart} directory.
+Once the relaxation run is complete, you must manually move the data:
+Copy the generated atomic position files into the \texttt{restart} 
+directory of the piezoelectric calculation.
+To tell the code to strain these pre-calculated positions during 
+the piezoelectric run, activate the following flag in your input:
+\texttt{ltau\_el\_cons\_from\_file=.TRUE.}.
+
+\newpage
+
+{\color{coral}\section{How do I calculate the pyroelectric tensor?}}
+\color{black}
+To compute the pyroelectric tensor, use the \texttt{what = 'mur\_lc\_t'} 
+option. This calculation is triggered when the code identifies three 
+files in the \texttt{anhar\_files} directory: the temperature-dependent 
+piezoelectric tensor, and the internal coordinates as a function of 
+temperature computed by both Full Free Energy Minimization (FFEM) and 
+ZSISA. Note that identifying the specific internal coordinates for your 
+solid requires custom coding; please refer to the user's manual for 
+further instructions on this implementation.
+
+\newpage
+
+{\color{coral}\section{How do I calculate the internal coordinates as
+a function of temperature?}}
+\color{black}
+
+To compute internal coordinates versus temperature, set 
+\texttt{what='mur} \texttt{\_lc\_t'} and activate the interpolation flag 
+by setting \texttt{linterpolate\_tau =.TRUE.}.
+Before running the calculation, you must identify the internal 
+coordinates for your specific solid. This requires a custom routine 
+that maps atomic positions to internal coordinate vectors (and vice versa).
+The code currently includes pre-programmed routines for wurtzite and 
+trigonally distorted zincblende structures. You must modify the 
+\texttt{internal\_to\_tau} routine located in the file 
+\texttt{set\_tau\_acc.f90}.
+Assign a unique integer to \texttt{iconstr\_internal} 
+(ensure it is not already in use) and set this value in the 
+\texttt{thermo\_control} namelist. If your internal vector is 
+multidimensional, define its size using the \texttt{nint\_var} variable.
+The output depends on which thermodynamic approximation you wish to use:
+ZSISA is default, FFEM is obtained with \texttt{linternal\_thermo = .TRUE.}.
+
+\newpage
+
+{\color{coral}\section{How do I calculate the piezoelectric tensor as 
+a function of temperature?}}
+\color{black}
+This calculation is performed within the quasi-static approximation. 
+To execute it, use \texttt{what = 'mur\_lc\_t'}. 
+The code requires the piezoelectric tensors for each geometry generated 
+by the \texttt{what='mur\_lc\_t'} run. You have two options for 
+providing these files: Place the files in the \texttt{elastic\_constants/} 
+directory. If the tensors were generated using FFEM, you may instead copy 
+them directly into the \texttt{anhar\_files} directory.
+Once the calculation is complete, the code will generate files containing 
+the piezoelectric tensor values interpolated for each temperature 
+(and pressure) point in the \texttt{anhar\_files} directory and plots them.
+
+\newpage
+
+{\color{coral}\section{How do I calculate the piezoelectric tensor 
+for each geometry?}}
+\color{black}
+To compute the piezoelectric tensor across various geometries, set 
+\texttt{what='piezoelectric\_tensor\_geo'}.
+When this option is active, the code performs the following steps:
+It uses the equilibrium geometries previously identified by 
+\texttt{what='mur\_lc\_t'} as a baseline to generate a set of 
+distorted configurations. It computes the Berry phase for each 
+distorted structure and it calculates the piezoelectric tensor for 
+every equilibrium geometry.
+The resulting files are saved in the \texttt{elastic\_constants/} directory.
+If you want to account for internal coordinate relaxation using FFEM, 
+you can refine the calculation with additional variables.
+Use \texttt{stypec}, \texttt{iconstr\_internal\_ec}, and 
+\texttt{nint\_var\_ec} (refer to the User’s Manual for specific 
+mapping values) and set the flag \texttt{use\_free\_energy=.TRUE.}.
+This workflow produces a piezoelectric tensor where internal coordinates 
+are optimized via FFEM after strain. These files are saved in the 
+\texttt{anhar\_files} directory and are ready to be interpolated 
+across your temperature (and/or pressure) range.
+
+\newpage
+
 {\color{coral}\section{Which is the meaning of the colors in
 the electronic bands and phonon dispersions plots?}}
 \color{black}
@@ -689,18 +797,5 @@ in the \texttt{INPUT\_THERMO} namelist.
 $n_0$ is not used and can be set to any integer value.
 
 \newpage
-
-{\color{coral}\section{How do I compute the piezoelectric tensor?}}
-\color{black}
-Use \texttt{what='scf\_piezoelectric\_tensor'}.
-With this option \thermo\ calls 
-\texttt{pw.x} and the berry phase calculation of the polarization for
-a set of distorted structures, taking as equilibrium configuration
-the geometry given in the \texttt{pw.x} input.
-Finally it calculates the derivatives of the polarization with
-respect to strain and finds the piezoelectric tensor components.
-Using \texttt{what='mur\_lc\_piezoelectric\_tensor'} the code 
-calculates the equilibrium geometry that minimizes the energy
-and takes it as the equilibrium configuration.
 
 \end{document}
