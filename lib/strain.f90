@@ -197,7 +197,7 @@ ELSEIF (strain_code=='GH') THEN
 ELSEIF (strain_code=='GI') THEN
    epsilon_voigt(4) = epsil
    epsilon_voigt(6) = epsil
-ELSEIF (strain_code=='HI') THEN
+ELSEIF (strain_code=='IH') THEN
    epsilon_voigt(5) = epsil
    epsilon_voigt(6) = epsil
 ELSE
