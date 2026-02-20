@@ -257,7 +257,7 @@ SELECT CASE (laue)
                strain_list(10) = 'CG'
                strain_list(11) = 'DG'
                strain_list(12) = 'EG'
-               strain_list(13) = 'HI'
+               strain_list(13) = 'IH'
             ELSE
 !
 !   b unique
@@ -308,7 +308,7 @@ SELECT CASE (laue)
             strain_list(18) = 'EI'
             strain_list(19) = 'GH'
             strain_list(20) = 'IH'
-            strain_list(21) = 'IG'
+            strain_list(21) = 'GI'
          END IF
       ELSE
          CALL errore('initialize_elastic_cons',&
