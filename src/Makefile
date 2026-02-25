@@ -125,6 +125,7 @@ plot_multi_energy.o \
 plot_mur.o \
 plot_optical_const.o \
 plot_piezo_t.o \
+plot_pyro_t.o \
 plot_phdos.o \
 plot_thermo.o \
 plot_xrdp.o \

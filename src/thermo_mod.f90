@@ -757,6 +757,11 @@ MODULE anharmonic_pt
                                          ! several p
   REAL(DP), ALLOCATABLE :: zeu_pt(:,:,:,:,:) ! Born effective charge as a 
                                          ! function of temperature several p
+  REAL(DP), ALLOCATABLE :: pyro_pt(:,:,:)   ! Pyroelectric tensor
+                                         ! function of temperature 
+  REAL(DP), ALLOCATABLE :: piezo_pyro_pt(:,:,:)   ! Pyroelectric tensor
+                                         ! function of temperature 
+                                         ! (piezoelectric contribution)
 
   REAL(DP), ALLOCATABLE :: celldm_pt_p1(:,:,:)   ! crystal parameters at p+dp
   REAL(DP), ALLOCATABLE :: celldm_pt_m1(:,:,:)   ! crystal parameters at p-dp
@@ -859,6 +864,11 @@ MODULE ph_freq_anharmonic_pt
                                          ! several p
   REAL(DP), ALLOCATABLE :: zeuf_pt(:,:,:,:,:) ! Born effective charge as a 
                                          ! function of temperature at several p
+  REAL(DP), ALLOCATABLE :: pyrof_pt(:,:,:)   ! Pyroelectric tensor
+                                         ! function of temperature 
+  REAL(DP), ALLOCATABLE :: piezo_pyrof_pt(:,:,:)   ! Pyroelectric tensor
+                                         ! function of temperature 
+                                         ! (piezoelectric contribution)
 
   REAL(DP), ALLOCATABLE :: celldmf_pt_p1(:,:,:)   ! crystal parameters at p+dp
   REAL(DP), ALLOCATABLE :: celldmf_pt_m1(:,:,:)   ! crystal parameters at p-dp
@@ -928,6 +938,14 @@ MODULE anharmonic_ptt
                                           ! each temperature 
   REAL(DP), ALLOCATABLE :: tau_zsisa_ptt(:,:,:,:)! ZSISA atomic coordinates at 
                                           ! each temperature 
+  REAL(DP), ALLOCATABLE :: uint_zsisa_ptt_p1(:,:,:)! QHA internal parameter at 
+                                          ! each pressure at T+Delta T
+  REAL(DP), ALLOCATABLE :: tau_zsisa_ptt_p1(:,:,:,:)! QHA atomic coordinates at
+                                          ! each pressure at T+Delta T
+  REAL(DP), ALLOCATABLE :: uint_zsisa_ptt_m1(:,:,:)! QHA internal parameter at 
+                                          ! each pressure at T-Delta T
+  REAL(DP), ALLOCATABLE :: tau_zsisa_ptt_m1(:,:,:,:)! QHA atomic coordinates at
+                                          ! each pressure at T-Delta T
   REAL(DP), ALLOCATABLE :: alpha_int_zsisa_ptt(:,:,:) ! ZSISA internal 
                                           ! thermal expansion
 !
@@ -973,6 +991,11 @@ MODULE anharmonic_ptt
                                          ! as a function of pressure several T
   REAL(DP), ALLOCATABLE :: zeu_ptt(:,:,:,:,:) ! Born effective charge as a 
                                          ! function of pressure at several T
+  REAL(DP), ALLOCATABLE :: pyro_ptt(:,:,:)   ! Pyroelectric tensor
+                                         ! function of pressure
+  REAL(DP), ALLOCATABLE :: piezo_pyro_ptt(:,:,:)   ! Pyroelectric tensor
+                                         ! function of pressure
+                                         ! (piezoelectric contribution)
 
 END MODULE anharmonic_ptt
 !----------------------------------------------------------------------------
@@ -1039,6 +1062,14 @@ MODULE ph_freq_anharmonic_ptt
                                             ! at each temperature 
   REAL(DP), ALLOCATABLE :: tauf_zsisa_ptt(:,:,:,:)! ZSISA atomic coordinates 
                                             ! for each temperature 
+  REAL(DP), ALLOCATABLE :: uintf_zsisa_ptt_p1(:,:,:)! QHA internal parameter at 
+                                          ! each pressure at T+Delta T
+  REAL(DP), ALLOCATABLE :: tauf_zsisa_ptt_p1(:,:,:,:)! QHA atomic coordinates at
+                                          ! each pressure at T+Delta T
+  REAL(DP), ALLOCATABLE :: uintf_zsisa_ptt_m1(:,:,:)! QHA internal parameter at 
+                                          ! each pressure at T-Delta T
+  REAL(DP), ALLOCATABLE :: tauf_zsisa_ptt_m1(:,:,:,:)! QHA atomic coordinates at
+                                          ! each pressure at T-Delta T
   REAL(DP), ALLOCATABLE :: alphaf_int_zsisa_ptt(:,:,:) ! ZSISA internal 
                                              ! thermal 
                                              ! expansion at each temperature
@@ -1086,7 +1117,11 @@ MODULE ph_freq_anharmonic_ptt
                                          ! several T
   REAL(DP), ALLOCATABLE :: zeuf_ptt(:,:,:,:,:) ! Born effective charge as a 
                                          ! function of pressure several T
-
+  REAL(DP), ALLOCATABLE :: pyrof_ptt(:,:,:)   ! Pyroelectric tensor
+                                         ! function of pressure
+  REAL(DP), ALLOCATABLE :: piezo_pyrof_ptt(:,:,:)   ! Pyroelectric tensor
+                                         ! function of pressure
+                                         ! (piezoelectric contribution)
 END MODULE ph_freq_anharmonic_ptt
 !
 !----------------------------------------------------------------------------
@@ -2083,6 +2118,15 @@ MODULE control_pyroelectric_tensor
  
   LOGICAL :: lpyrof=.FALSE.    ! pyroelectric tensorf written on file
 
+  LOGICAL :: lpyro_pt=.FALSE.  ! pyroelectric tensor pt written on file
+ 
+  LOGICAL :: lpyrof_pt=.FALSE. ! pyroelectric tensorf pt written on file
+
+  LOGICAL :: lpyro_ptt=.FALSE. ! pyroelectric tensor ptt written on file
+ 
+  LOGICAL :: lpyrof_ptt=.FALSE.! pyroelectric tensorf ptt written on file
+
+  
 END MODULE control_pyroelectric_tensor
 !----------------------------------------------------------------------------
 MODULE control_conv

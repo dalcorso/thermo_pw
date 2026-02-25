@@ -19,7 +19,10 @@ USE anharmonic_pt,      ONLY : celldm_pt, uint_pt, tau_pt, uint_zsisa_pt, &
 USE anharmonic_ptt,     ONLY : celldm_ptt, uint_ptt, tau_ptt,             &
                                uint_zsisa_ptt, tau_zsisa_ptt,             &
                                uint_ptt_p1, uint_ptt_m1,                  &
-                               tau_ptt_p1, tau_ptt_m1
+                               tau_ptt_p1, tau_ptt_m1,                    &
+                               uint_zsisa_ptt_p1, uint_zsisa_ptt_m1,      &
+                               tau_zsisa_ptt_p1, tau_zsisa_ptt_m1,        &
+                               celldm_ptt_p1, celldm_ptt_m1
 USE control_pressure,   ONLY : npress_plot
 USE control_atomic_pos, ONLY : linternal_thermo, linterpolate_tau
 
@@ -34,11 +37,13 @@ IF (linternal_thermo) THEN
    ENDDO
    DO itempp=1,ntemp_plot
       itemp=itemp_plot(itempp)
-      CALL interpolate_uint_ptt(celldm_ptt(1,1,itempp), &
-                      uint_geo_eos_t, uint_ptt(1,1,itempp), &
-                      tau_ptt(1,1,1,itempp), uint_ptt_p1(1,1,itempp), &
+      CALL interpolate_uint_ptt(celldm_ptt(1,1,itempp),                  &
+                      uint_geo_eos_t, uint_ptt(1,1,itempp),              &
+                      tau_ptt(1,1,1,itempp), uint_ptt_p1(1,1,itempp),    &
                       tau_ptt_p1(1,1,1,itempp), uint_ptt_m1(1,1,itempp), &
-                      tau_ptt_m1(1,1,1,itempp), itemp)
+                      tau_ptt_m1(1,1,1,itempp),                          &
+                      celldm_ptt_p1(1,1,itempp),                         &
+                      celldm_ptt_m1(1,1,itempp), itemp)
    ENDDO
 ELSEIF (linterpolate_tau) THEN
    CALL interpolate_uint(celldm_t, uint_geo_eos, &
@@ -48,8 +53,15 @@ ELSEIF (linterpolate_tau) THEN
                    uint_zsisa_pt(1,1,ipressp), tau_zsisa_pt(1,1,1,ipressp))
    ENDDO
    DO itempp=1,ntemp_plot
-      CALL interpolate_uint_zptt(celldm_ptt(1,1,itempp), uint_geo_eos, &
-               uint_zsisa_ptt(1,1,itempp), tau_zsisa_ptt(1,1,1,itempp))
+      CALL interpolate_uint_z1ptt(celldm_ptt(1,1,itempp),       &
+                      uint_geo_eos, uint_zsisa_ptt(1,1,itempp), &
+                      tau_zsisa_ptt(1,1,1,itempp),              &
+                      uint_zsisa_ptt_p1(1,1,itempp),            &
+                      tau_zsisa_ptt_p1(1,1,1,itempp),           &
+                      uint_zsisa_ptt_m1(1,1,itempp),            &
+                      tau_zsisa_ptt_m1(1,1,1,itempp),           &
+                      celldm_ptt_p1(1,1,itempp),                &
+                      celldm_ptt_m1(1,1,itempp))
    ENDDO
 ENDIF
 
@@ -70,7 +82,11 @@ USE ph_freq_anharmonic_pt,  ONLY : celldmf_pt, uintf_pt, tauf_pt,     &
 USE ph_freq_anharmonic_ptt, ONLY : celldmf_ptt, uintf_ptt, tauf_ptt,  &
                                    uintf_zsisa_ptt, tauf_zsisa_ptt,   &
                                    uintf_ptt_p1, uintf_ptt_m1,        &
-                                   tauf_ptt_p1, tauf_ptt_m1
+                                   tauf_ptt_p1, tauf_ptt_m1,          &
+                                   uintf_zsisa_ptt, tauf_zsisa_ptt,   &
+                                   uintf_zsisa_ptt_p1, uintf_zsisa_ptt_m1,  &
+                                   tauf_zsisa_ptt_p1, tauf_zsisa_ptt_m1, &
+                                   celldmf_ptt_p1, celldmf_ptt_m1
 USE control_pressure,       ONLY : npress_plot
 USE control_atomic_pos,     ONLY : linternal_thermo, linterpolate_tau
 
@@ -85,11 +101,13 @@ IF (linternal_thermo) THEN
    ENDDO
    DO itempp=1,ntemp_plot
       itemp=itemp_plot(itempp)
-      CALL interpolate_uint_ptt(celldmf_ptt(1,1,itempp), &
-                      uintf_geo_eos_t, uintf_ptt(1,1,itempp), &
-                      tauf_ptt(1,1,1,itempp), uintf_ptt_p1(1,1,itempp), &
+      CALL interpolate_uint_ptt(celldmf_ptt(1,1,itempp),                   &
+                      uintf_geo_eos_t, uintf_ptt(1,1,itempp),              &
+                      tauf_ptt(1,1,1,itempp), uintf_ptt_p1(1,1,itempp),    & 
                       tauf_ptt_p1(1,1,1,itempp), uintf_ptt_m1(1,1,itempp), &
-                      tauf_ptt_m1(1,1,1,itempp), itemp)
+                      tauf_ptt_m1(1,1,1,itempp),                           &
+                      celldmf_ptt_p1(1,1,itempp),                           &
+                      celldmf_ptt_m1(1,1,itempp), itemp)
    ENDDO
 ELSEIF (linterpolate_tau) THEN
    CALL interpolate_uint(celldmf_t, uint_geo_eos, &
@@ -99,8 +117,17 @@ ELSEIF (linterpolate_tau) THEN
                    uintf_zsisa_pt(1,1,ipressp), tauf_zsisa_pt(1,1,1,ipressp))
    ENDDO
    DO itempp=1,ntemp_plot
-      CALL interpolate_uint_zptt(celldmf_ptt(1,1,itempp), uint_geo_eos, &
-            uintf_zsisa_ptt(1,1,itempp), tauf_zsisa_ptt(1,1,1,itempp))
+      CALL interpolate_uint_z1ptt(celldmf_ptt(1,1,itempp),      &
+                      uint_geo_eos,                             &
+                      uintf_zsisa_ptt(1,1,itempp),              &
+                      tauf_zsisa_ptt(1,1,1,itempp),             &
+                      uintf_zsisa_ptt_p1(1,1,itempp),           &
+                      tauf_zsisa_ptt_p1(1,1,1,itempp),          &
+                      uintf_zsisa_ptt_m1(1,1,itempp),           &
+                      tauf_zsisa_ptt_m1(1,1,1,itempp),          &
+                      celldmf_ptt_p1(1,1,itempp),                &
+                      celldmf_ptt_m1(1,1,itempp))
+
    ENDDO
 ENDIF
 

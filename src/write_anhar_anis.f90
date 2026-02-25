@@ -1309,6 +1309,9 @@ DO ipressp=1, npress_plot
                      alpha_anis_pt(:,:,ipressp), temp, ntemp, ibrav_save)
       IF (linternal_thermo) CALL compute_alpha_internal(uint_pt(:,:,ipressp),&
                              alpha_int_pt(:,:,ipressp), nint_var, temp, ntemp)
+      IF (linterpolate_tau) CALL compute_alpha_internal(                     &
+                uint_zsisa_pt(:,:,ipressp), alpha_int_zsisa_pt(:,:,ipressp), &
+                nint_var, temp, ntemp)
    ENDIF
 
    CALL interpolate_e0(vmin_pt(:,ipressp), celldm_pt(:,:,ipressp), ph_e0, e0)
@@ -1598,6 +1601,9 @@ DO ipressp=1, npress_plot
       IF (linternal_thermo) CALL compute_alpha_internal(&
                uintf_pt(:,:,ipressp), alphaf_int_pt(:,:,ipressp), &
                nint_var, temp, ntemp)
+      IF (linterpolate_tau) CALL compute_alpha_internal(                     &
+                uintf_zsisa_pt(:,:,ipressp), alphaf_int_zsisa_pt(:,:,ipressp),&
+                nint_var, temp, ntemp)
    ENDIF
    IF (lelasticf_pt) THEN
       CALL isostress_heat_capacity(vminf_pt(:,ipressp), &
@@ -1827,7 +1833,7 @@ USE anharmonic_ptt, ONLY : vmin_ptt, vmin_ptt_p1, vmin_ptt_m1, &
                            entr_ptt, csmct_ptt, debye_macro_el_ptt, &
                            debye_macro_el_s_ptt, uint_ptt, uint_zsisa_ptt, &
                            alpha_int_ptt, alpha_int_zsisa_ptt, uint_ptt_p1, &
-                           uint_ptt_m1
+                           uint_ptt_m1, uint_zsisa_ptt_p1, uint_zsisa_ptt_m1
 USE el_anharmonic,  ONLY : el_ce_ptt
 USE initial_conf,   ONLY : ibrav_save
 USE control_eldos,  ONLY : lel_free_energy
@@ -1902,6 +1908,11 @@ DO itempp=1, ntemp_plot
                 uint_ptt(:,:,itempp), uint_ptt_p1(:,:,itempp),             &
                 uint_ptt_m1(:,:,itempp), alpha_int_ptt(:,:,itempp),        &
                                                      press, npress, itemp)
+      IF (linterpolate_tau) CALL compute_alpha_internal_p(                  &
+                uint_zsisa_ptt(:,:,itempp), uint_zsisa_ptt_p1(:,:,itempp),  &
+                uint_zsisa_ptt_m1(:,:,itempp),                              &
+                alpha_int_zsisa_ptt(:,:,itempp),                            &
+                press, npress, itemp)
    ENDIF
    IF (lelastic_ptt) THEN
       CALL isostress_heat_capacity(vmin_ptt(:,itempp),               &
@@ -2133,7 +2144,10 @@ USE ph_freq_anharmonic_ptt, ONLY : vminf_ptt, vminf_ptt_p1, vminf_ptt_m1, &
                            macro_elf_ptt, eminf_ptt, vf_ptt, vf_s_ptt,    &
                            densityf_ptt, csmctf_ptt,                      &
                            debye_macro_elf_ptt, debye_macro_elf_s_ptt,    &
-                           uintf_ptt, uintf_zsisa_ptt
+                           uintf_ptt, uintf_zsisa_ptt, uintf_ptt_p1,      &
+                           uintf_ptt_m1, alphaf_int_ptt,                  &
+                           alphaf_int_zsisa_ptt, uintf_zsisa_ptt_p1,      &
+                           uintf_zsisa_ptt_m1 
 USE el_anharmonic,  ONLY : el_cef_ptt
 USE anharmonic,     ONLY : alpha_int_t
 USE control_eldos,  ONLY : lel_free_energy
@@ -2204,6 +2218,15 @@ DO itempp=1, ntemp_plot
       CALL compute_alpha_anis_p(celldmf_ptt(:,:,itempp), &
                      celldmf_ptt_p1(:,:,itempp), celldmf_ptt_m1(:,:,itempp), &
                      alphaf_anis_ptt(:,:,itempp), press, npress, ibrav_save)
+      IF (linternal_thermo) CALL compute_alpha_internal_p(                 &
+                uintf_ptt(:,:,itempp), uintf_ptt_p1(:,:,itempp),             &
+                uintf_ptt_m1(:,:,itempp), alphaf_int_ptt(:,:,itempp),        &
+                                                     press, npress, itemp)
+      IF (linterpolate_tau) CALL compute_alpha_internal_p(                  &
+                uintf_zsisa_ptt(:,:,itempp), uintf_zsisa_ptt_p1(:,:,itempp),  &
+                uintf_zsisa_ptt_m1(:,:,itempp),                              &
+                alphaf_int_zsisa_ptt(:,:,itempp),                           &
+                press, npress, itemp)
    ENDIF
    IF (lelasticf_ptt) THEN
       CALL isostress_heat_capacity(vminf_ptt(:,itempp),                &
@@ -2290,15 +2313,17 @@ DO itempp=1, ntemp_plot
       IF (linternal_thermo) THEN
          filename='anhar_files/'//TRIM(flanhar)//'.uint_ph_temp'
          CALL add_value(filename,temp(itemp))
-         CALL write_uint_anis(uintf_ptt(:,:,itempp), alpha_int_t, nint_var, press, &
+         CALL write_uint_anis(uintf_ptt(:,:,itempp), &
+                    alphaf_int_ptt(:,:,itempp), nint_var, press, &
                                                      npress, filename, 1 )
       ENDIF
 
       IF (linterpolate_tau) THEN
          filename='anhar_files/'//TRIM(flanhar)//'.uint_zsisa_ph_temp'
          CALL add_value(filename,temp(itemp))
-         CALL write_uint_anis(uintf_zsisa_ptt(:,:,itempp), alpha_int_t, nint_var, press, &
-                                                     npress, filename, 1 )
+         CALL write_uint_anis(uintf_zsisa_ptt(:,:,itempp),      &
+                              alphaf_int_zsisa_ptt(:,:,itempp), &
+                              nint_var, press, npress, filename, 1 )
       ENDIF
 !
 !   here auxiliary quantities calculated from the phonon dos
@@ -2527,6 +2552,7 @@ REAL(DP), INTENT(IN) :: uint_t(nint_var,ntemp), temp(ntemp), &
                         alpha_int_t(nint_var, ntemp)
 CHARACTER(LEN=*), INTENT(IN) :: filename
 CHARACTER(LEN=256) :: label, label1, label2, aux_lab
+CHARACTER(LEN=6) :: int_to_char
 INTEGER :: itemp, iu_therm, ivar, inde(nint_var)
 INTEGER :: find_free_unit
 
@@ -2547,9 +2573,9 @@ OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
 label1=''
 label2=''
 DO ivar=1, nint_var
-   WRITE(aux_lab, '("uint(",i3,")")') inde(ivar)
+   aux_lab= "uint("//TRIM(int_to_char(inde(ivar)))//")"
    label1= TRIM(label1)//'          '//TRIM(aux_lab)
-   WRITE(aux_lab, '("alpha_int(",i3,")")') inde(ivar)
+   aux_lab= "alpha_int("//TRIM(int_to_char(inde(ivar)))//")"
    label2= TRIM(label2)//'          '//TRIM(aux_lab)
 ENDDO
 WRITE(iu_therm,'("# ",a,a,a)' ) TRIM(label), TRIM(label1), TRIM(label2)
@@ -2688,7 +2714,7 @@ IF (meta_ionode) THEN
       ENDDO
    ELSEIF (ibrav==12 .OR. ibrav==13) THEN
       READ(iu_therm,*) 
-      DO itemp = 1, ntemp
+      DO itemp = 1, ntemp-1
          READ(iu_therm, '(e12.5,4e17.9)') temp(itemp), celldm_t(1,itemp), &
                                                        celldm_t(2,itemp), &
                                                        celldm_t(3,itemp), &
@@ -2696,7 +2722,7 @@ IF (meta_ionode) THEN
       END DO
    ELSEIF (ibrav==-12 .OR. ibrav==-13) THEN
       READ(iu_therm,*) 
-      DO itemp = 1, ntemp
+      DO itemp = 1, ntemp-1
          READ(iu_therm, '(e12.5,4e17.9)') temp(itemp), celldm_t(1,itemp), &
                                                        celldm_t(2,itemp), &
                                                        celldm_t(3,itemp), &
@@ -2704,7 +2730,7 @@ IF (meta_ionode) THEN
       END DO
    ELSEIF (ibrav==14) THEN
       READ(iu_therm, *)
-      DO itemp = 1, ntemp
+      DO itemp = 1, ntemp-1
          READ(iu_therm, '(e12.5,6e15.7)') temp(itemp), celldm_t(1,itemp), &
                                                        celldm_t(2,itemp), &
                                                        celldm_t(3,itemp), &
@@ -2830,6 +2856,7 @@ ENDDO
 
 RETURN
 END SUBROUTINE compute_alpha_internal
+!
 !
 !-----------------------------------------------------------------------
 SUBROUTINE compute_alpha_internal_p(uint_ptt, uint_ptt_p1, uint_ptt_m1,  & 

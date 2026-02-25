@@ -107,6 +107,8 @@ IF (what=='mur_lc_t') THEN
    CALL plot_piezo_ptt()
    CALL plot_piezo_d_ptt()
    CALL plot_pyro_t(0)
+   CALL plot_pyro_pt(0)
+   CALL plot_pyro_ptt(2)
 ENDIF
 
 RETURN

@@ -242,8 +242,8 @@ IMPLICIT NONE
 
 IF (piezo_qha_geo_available.OR.piezof_qha_geo_available) THEN
    CALL write_pyro_t_qha()
-!   CALL write_pyro_pt_qha()
-!   CALL write_pyro_ptt_qha()
+   CALL write_pyro_pt_qha()
+   CALL write_pyro_ptt_qha()
 ENDIF
 
 RETURN
