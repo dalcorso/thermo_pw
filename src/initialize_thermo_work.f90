@@ -386,7 +386,6 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            ltherm = .TRUE.
            lev_syn_2=.TRUE.
            tot_ngeo=nwork
-           tot_ngeo_eos=tot_ngeo
            start_geometry=MAX(1,start_geometry_save)
            last_geometry=MIN(nwork, last_geometry_save)
            start_geometry1=start_geometry

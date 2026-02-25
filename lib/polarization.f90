@@ -235,6 +235,13 @@ SUBROUTINE write_pyro_on_file(temp, ntemp, pyro_t, piezo_pyro_t, &
 !  iflag=0 writes the pyroelectricity as a function of temperature
 !  iflag=2 writes the pyroelectricity as a function of pressure
 !
+!  The format of the file is 
+!  Temperature      p_1     p_2     p_3     pp_1     pp_2     pp_3
+!  or
+!  Pressure         p_1     p_2     p_3     pp_1     pp_2     pp_3
+!  where p is the primary contribution to the pyroelectric tensor
+!  and pp is the secondary contribution (due to piezoelectricity).
+!
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : meta_ionode, meta_ionode_id, stdout
 USE mp_world,   ONLY : world_comm
@@ -265,14 +272,11 @@ ELSE
 ENDIF
 
 IF (meta_ionode) THEN
-
-   WRITE(iu_pyro,'(a)') astring
-   WRITE(iu_pyro,'("#    multiply by 0.57214766E+02 to have it in C/m^2")')
-   WRITE(iu_pyro,'(a)') astring
-   WRITE(iu_pyro,'("#",5x, a7, 13x, " p_1 ", 13x, " p_2",          &
-                      &13x, " p_3", 13x, " pp_1", 13x, " pp_2",    &
-                      &13x, " pp_3")') label
-
+   WRITE(iu_pyro,'(a)') TRIM(astring)
+   WRITE(iu_pyro,'("#    multiply by 0.57214766E+02 to have it in C/m^2/K")')
+   WRITE(iu_pyro,'("#",5x, a7, 14x, " p_1 ", 14x, " p_2",          &
+                      &14x, " p_3", 14x, " pp_1", 14x, " pp_2",    &
+                      &14x, " pp_3")') label
    DO itemp=2,ntemp-1
       WRITE(iu_pyro,'(e16.8,6e20.12)') temp(itemp),                &
            pyro_t(1,itemp), pyro_t(2,itemp), pyro_t(3,itemp),      &
