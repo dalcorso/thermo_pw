@@ -496,7 +496,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            CALL initialize_mur_qha(ngeom)
            IF (start_geometry_qha<1) start_geometry_qha=1
            IF (last_geometry_qha>ngeom) last_geometry_qha=ngeom
-           CALL set_piezo_tensor_work(ngeom, nwork)
+           CALL initialize_piezo_tensor(ngeom, nwork)
            !
            !  Check that start_geometry and last geometry are within the
            !  range of computed geometries otherwise disregard them
@@ -623,7 +623,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            CALL set_unperturbed_geometry(ngeom)
            start_geometry_qha=1
            last_geometry_qha=1
-           CALL set_piezo_tensor_work(1,nwork) 
+           CALL initialize_piezo_tensor(1,nwork) 
            start_geometry=MAX(1, start_geometry_save)
            last_geometry=MIN(nwork, last_geometry_save)
            ALLOCATE(energy_geo(nwork))

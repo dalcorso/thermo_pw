@@ -6,7 +6,7 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !------------------------------------------------------------------------
-SUBROUTINE set_piezo_tensor_work( ngeom, nwork )
+SUBROUTINE initialize_piezo_tensor( ngeom, nwork )
 !------------------------------------------------------------------------
 USE kinds,               ONLY : DP
 USE cell_base,           ONLY : ibrav
@@ -184,6 +184,7 @@ work_base= nstep_tot * ngeo_strain
 
 nstep_ec= nstep
 CALL allocate_piezo(nwork)
+
 ALLOCATE( epsilon_voigt(6, nwork) )
 ALLOCATE( epsilon_geo(3, 3, nwork) )
 ALLOCATE( epsil_geo(nwork) )
@@ -338,4 +339,4 @@ IF (decompose_piezo) THEN
 ENDIF
 
 RETURN
-END SUBROUTINE set_piezo_tensor_work
+END SUBROUTINE initialize_piezo_tensor

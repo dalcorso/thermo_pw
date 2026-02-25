@@ -69,6 +69,7 @@ generalized_phdos.o \
 generate_k_along_lines_kz.o \
 geometry_file.o \
 initialize_elastic_cons.o \
+initialize_piezo_tensor.o \
 initialize_thermo_work.o \
 interpolate_atomic_positions.o \
 interpolate_bfact.o \
@@ -154,7 +155,6 @@ set_fft_mesh.o \
 set_files_names.o \
 set_k_points.o \
 set_paths_disp.o \
-set_piezo_tensor_work.o \
 set_tau_acc.o \
 set_temperature.o \
 set_thermo_work_todo.o \
