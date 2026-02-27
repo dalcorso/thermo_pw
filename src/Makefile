@@ -179,6 +179,7 @@ write_e_omega.o \
 write_el_thermo.o \
 write_elastic_t.o \
 write_elastic_t_qha.o \
+write_epsilon_zero.o \
 write_piezo_t_qha.o \
 write_pyro_t_qha.o \
 write_epsilon_infty_t.o \

@@ -12,11 +12,7 @@ USE kinds,               ONLY : DP
 USE cell_base,           ONLY : ibrav
 USE ions_base,           ONLY : nat, ityp, amass
 USE thermo_mod,          ONLY : ibrav_geo, celldm_geo, tau_geo, at_geo, &
-                                uint_geo, iwho, epsilon_infty_geo,      &
-                                zeu_geo, freq_geo, z_geo,               &
-                                epsilon_zero_geo, epsilon_zerom1_geo,   &
-                                omega_geo
-USE control_epsilon_infty, ONLY : lzeu_geo, lepsilon_infty_geo
+                                uint_geo, iwho, omega_geo
 USE control_thermo,      ONLY : ltau_from_file
 USE initial_conf,        ONLY : ibrav_save
 USE equilibrium_conf,    ONLY : celldm0, tau0_crys
@@ -200,17 +196,9 @@ ALLOCATE( uint_geo(max_nint_var,nwork) )
 ALLOCATE( tau_acc(3,nat,nwork) )
 ALLOCATE( min_y(max_nint_var,ngeo_strain,21,ngeom) )
 ALLOCATE( epsil_y(ngeo_strain,21,ngeom) )
-ALLOCATE( epsilon_infty_geo(3,3,nwork) )
-ALLOCATE( zeu_geo(3,3,nat,nwork) )
-ALLOCATE( lepsilon_infty_geo(nwork) )
-ALLOCATE( lzeu_geo(nwork) )
-lepsilon_infty_geo=.FALSE.
-lzeu_geo=.FALSE.
-ALLOCATE( epsilon_zero_geo(3,3,nwork) )
-ALLOCATE( epsilon_zerom1_geo(3,3,nwork) ) 
-ALLOCATE( freq_geo(3*nat,nwork) )
-ALLOCATE( z_geo(3*nat,3*nat,nwork) )
 ALLOCATE( omega_geo(nwork) )
+
+CALL allocate_ph_gamma(nwork)
 
 IF (ngeom==1) THEN
    IF (.NOT. ALLOCATED(el_con_ibrav_geo)) ALLOCATE(el_con_ibrav_geo(1))

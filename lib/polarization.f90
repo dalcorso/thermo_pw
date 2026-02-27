@@ -10,10 +10,13 @@ MODULE polarization_vector
 !---------------------------------------------------------------------------
 !
 !   this module contains the support routines for the calculation
-!   of the polarization. Presently it contains only routines to read
-!   and write the polarization on file.
-!   It contains also a routine that computes the contribution
-!   to the pyroelectric tensor due to the piezoelectric tensor
+!   of the polarization. Presently it contains: 
+!   Routines to read and write the polarization on file;
+!   A routine that computes the primary pyroelectric tensor making
+!   the product of the effective charges and the derivative of the
+!   internal parameters with respect to temperature at clamped lattice.
+!   A routine that computes the secondary pyroelectric tensor
+!   due to piezoelectricity and thermal expansion. 
 !
   USE kinds, ONLY : DP
   USE io_global, ONLY : stdout

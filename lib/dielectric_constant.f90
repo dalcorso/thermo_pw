@@ -27,15 +27,16 @@ CONTAINS
 !
 !-------------------------------------------------------------------------
 SUBROUTINE write_dielectric_properties_to_file(filename, nat, epsilon_infty, &
-                                                           zeu)
+                                                epsilon_zero, zeu)
 !-------------------------------------------------------------------------
 !
 !  This routine writes the dielectric constant and the zeu effective
 !  charge on file. These files can be read as the dielectric properties
 !  of the equilibrium configurations.
 !
-!  The file contains the 3x3 matrix of the dielectric constant
-!  The 3x3xnat file of the zeu Born effective charges for all atoms
+!  The file contains the 3x3 matrix of the high-frequency dielectric constant,
+!  the 3x3xnat file of the zeu Born effective charges for all atoms
+!  and the 3x3 matrix of the static dielectric constant
 !  The name of the file that contains these quantities is gives as 
 !  input.
 !
@@ -46,7 +47,7 @@ USE mp,        ONLY : mp_bcast
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: nat
 CHARACTER(LEN=*), INTENT(IN) :: filename
-REAL(DP), INTENT(IN) :: epsilon_infty(3,3), zeu(3,3,nat)
+REAL(DP), INTENT(IN) :: epsilon_infty(3,3), epsilon_zero(3,3), zeu(3,3,nat)
 
 INTEGER :: find_free_unit
 INTEGER :: outunit, ios, ipol, jpol, na
@@ -72,6 +73,11 @@ IF (ionode) THEN
          WRITE(outunit,'(6e19.10)') (zeu(ipol,jpol,na), jpol=1,3)
       ENDDO
    ENDDO
+   WRITE(outunit,*)
+   WRITE(outunit,'("Dielectric constant epsilon_zero")')
+   DO ipol=1,3
+      WRITE(outunit,'(3e19.10)') (epsilon_zero(ipol,jpol), jpol=1,3)
+   ENDDO
    CLOSE(outunit)
 ENDIF
 
@@ -80,7 +86,7 @@ END SUBROUTINE write_dielectric_properties_to_file
 !
 !-------------------------------------------------------------------------
 SUBROUTINE read_dielectric_properties_from_file(filename, nat, epsilon_infty, &
-                                                           zeu)
+                                                epsilon_zero, zeu)
 !-------------------------------------------------------------------------
 !
 !  This routine writes the dielectric constant and the zeu effective
@@ -99,7 +105,7 @@ USE mp,        ONLY : mp_bcast
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: nat
 CHARACTER(LEN=*), INTENT(IN) :: filename
-REAL(DP), INTENT(OUT) :: epsilon_infty(3,3), zeu(3,3,nat)
+REAL(DP), INTENT(OUT) :: epsilon_infty(3,3), epsilon_zero(3,3), zeu(3,3,nat)
 
 INTEGER :: find_free_unit
 INTEGER :: outunit, ios, ipol, jpol, na
@@ -125,10 +131,15 @@ IF (ionode) THEN
          READ(outunit,*) (zeu(ipol,jpol,na), jpol=1,3)
       ENDDO
    ENDDO
+   READ(outunit,*)
+   DO ipol=1,3
+      READ(outunit,*) (epsilon_zero(ipol,jpol), jpol=1,3)
+   ENDDO
    CLOSE(outunit)
 ENDIF
 CALL mp_bcast(zeu,ionode_id,intra_image_comm)
 CALL mp_bcast(epsilon_infty,ionode_id,intra_image_comm)
+CALL mp_bcast(epsilon_zero,ionode_id,intra_image_comm)
 
 RETURN
 END SUBROUTINE read_dielectric_properties_from_file

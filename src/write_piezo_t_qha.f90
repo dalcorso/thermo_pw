@@ -9,14 +9,14 @@
 SUBROUTINE write_piezo_t_qha()
 !---------------------------------------------------------------------------
 !
-!  This routine interpolates the temperature dependent quasi harmonic 
+!  This routine interpolates the temperature dependent FFEM
 !  piezoelectric tensor at the crystal parameters that minimize the Helmholtz 
 !  (or Gibbs) free energy at temperature T.
 !
 !
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : stdout
-USE thermo_mod, ONLY : ibrav_geo, celldm_geo, omega_geo, celldm_geo_eos
+USE thermo_mod, ONLY : omega_geo_eos, celldm_geo_eos
 USE thermo_sym, ONLY : code_group_save
 USE initial_conf, ONLY : ibrav_save
 USE control_mur, ONLY : lmurn
@@ -44,7 +44,7 @@ USE mp_world,    ONLY : world_comm
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filepiezo
-INTEGER :: igeo, ibrav, nvar, ndata, jdata
+INTEGER :: igeo, nvar, ndata, jdata
 REAL(DP), ALLOCATABLE :: x(:,:), f(:), xfit(:), x1(:,:)
 REAL(DP) :: compute_omega_geo
 TYPE(poly1) :: pt_p1
@@ -55,12 +55,8 @@ TYPE(poly4) :: pt_p4
 INTEGER :: i, j, idata, itemp, startt, lastt, pdelc_dos, pdelc_ph
 INTEGER :: compute_nwork 
 
-ibrav=ibrav_geo(1)
-IF (lmurn) THEN
-   nvar=1
-ELSE
-   nvar=crystal_parameters(ibrav)
-ENDIF
+nvar=crystal_parameters(ibrav_save)
+IF (lmurn) nvar=1
 
 ndata=compute_nwork()
 
@@ -76,15 +72,15 @@ CALL divide(world_comm, ntemp, startt, lastt)
 IF (lmurn) THEN
    IF (lgeo_from_file) THEN
       DO idata=1,ndata
-         x(1,idata)=omega_geo(idata)
+         x(1,idata)=omega_geo_eos(idata)
       ENDDO
    ELSE
       DO idata=1,ndata
-         x(1,idata)=celldm_geo(1,idata)
+         x(1,idata)=celldm_geo_eos(1,idata)
       ENDDO
    ENDIF
 ELSE
-   CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo_eos)
+   CALL set_x_from_celldm(ibrav_save, nvar, ndata, x, celldm_geo_eos)
 ENDIF
 
 e_piezo_tensor_t=0.0_DP
@@ -101,9 +97,9 @@ DO itemp=startt,lastt
    
    IF (piezo_qha_geo_available.AND.ltherm_dos) THEN
       IF (lgeo_from_file) THEN
-         xfit(1)=compute_omega_geo(ibrav, celldm_t(:,itemp))
+         xfit(1)=compute_omega_geo(ibrav_save, celldm_t(:,itemp))
       ELSE
-         CALL compress_celldm(celldm_t(:,itemp),xfit,nvar,ibrav)
+         CALL compress_celldm(celldm_t(:,itemp),xfit,nvar,ibrav_save)
       ENDIF
       f=0.0_DP
       DO i=1,3
@@ -156,9 +152,9 @@ DO itemp=startt,lastt
 
    IF (piezof_qha_geo_available.AND.ltherm_freq) THEN
       IF (lgeo_from_file) THEN
-         xfit(1)=compute_omega_geo(ibrav, celldmf_t(:,itemp))
+         xfit(1)=compute_omega_geo(ibrav_save, celldmf_t(:,itemp))
       ELSE
-         CALL compress_celldm(celldmf_t(:,itemp),xfit,nvar,ibrav)
+         CALL compress_celldm(celldmf_t(:,itemp),xfit,nvar,ibrav_save)
       ENDIF
       f=0.0_DP
       DO i=1,3
@@ -247,7 +243,7 @@ SUBROUTINE write_piezo_pt_qha()
 !
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : stdout
-USE thermo_mod, ONLY : ibrav_geo, celldm_geo, omega_geo, celldm_geo_eos
+USE thermo_mod, ONLY : omega_geo_eos, celldm_geo_eos
 USE thermo_sym, ONLY : code_group_save
 USE initial_conf, ONLY : ibrav_save
 USE control_pressure, ONLY : npress_plot, ipress_plot, press
@@ -278,7 +274,7 @@ USE mp_world,    ONLY : world_comm
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filepiezo
-INTEGER :: igeo, ibrav, nvar, ndata, jdata
+INTEGER :: igeo, nvar, ndata, jdata
 REAL(DP), ALLOCATABLE :: x(:,:), f(:), xfit(:), x1(:,:)
 REAL(DP) :: compute_omega_geo
 TYPE(poly1) :: pt_p1
@@ -292,12 +288,8 @@ INTEGER :: compute_nwork
 
 IF (npress_plot==0) RETURN
 
-ibrav=ibrav_geo(1)
-IF (lmurn) THEN
-   nvar=1
-ELSE
-   nvar=crystal_parameters(ibrav)
-ENDIF
+nvar=crystal_parameters(ibrav_save)
+IF (lmurn) nvar=1
 
 ndata=compute_nwork()
 
@@ -313,15 +305,15 @@ CALL divide(world_comm, ntemp, startt, lastt)
 IF (lmurn) THEN
    IF (lgeo_from_file) THEN
       DO idata=1,ndata
-         x(1,idata)=omega_geo(idata)
+         x(1,idata)=omega_geo_eos(idata)
       ENDDO
    ELSE
       DO idata=1,ndata
-         x(1,idata)=celldm_geo(1,idata)
+         x(1,idata)=celldm_geo_eos(1,idata)
       ENDDO
    ENDIF
 ELSE
-   CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo_eos)
+   CALL set_x_from_celldm(ibrav_save, nvar, ndata, x, celldm_geo_eos)
 ENDIF
 
 e_piezo_tensor_pt=0.0_DP
@@ -342,9 +334,10 @@ DO ipressp=1,npress_plot
          IF (itemp==1.OR.itemp==ntemp) CYCLE
    
          IF (lgeo_from_file) THEN
-            xfit(1)=compute_omega_geo(ibrav, celldm_pt(:,itemp,ipressp))
+            xfit(1)=compute_omega_geo(ibrav_save, celldm_pt(:,itemp,ipressp))
          ELSE
-            CALL compress_celldm(celldm_pt(:,itemp,ipressp),xfit,nvar,ibrav)
+            CALL compress_celldm(celldm_pt(:,itemp,ipressp),xfit,nvar,&
+                                                                   ibrav_save)
          ENDIF
          f=0.0_DP
          DO i=1,3
@@ -409,10 +402,10 @@ DO ipressp=1,npress_plot
          IF (itemp==1.OR.itemp==ntemp) CYCLE
    
          IF (lgeo_from_file) THEN
-            xfit(1)=compute_omega_geo(ibrav, celldmf_pt(:,itemp,ipressp))
+            xfit(1)=compute_omega_geo(ibrav_save, celldmf_pt(:,itemp,ipressp))
          ELSE
             CALL compress_celldm(celldmf_pt(:,itemp,ipressp),xfit,&
-                                                              nvar,ibrav)
+                                                        nvar,ibrav_save)
          ENDIF
          f=0.0_DP
          DO i=1,3
@@ -490,7 +483,7 @@ SUBROUTINE write_piezo_ptt_qha()
 !
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : stdout
-USE thermo_mod, ONLY : ibrav_geo, celldm_geo, omega_geo, celldm_geo_eos
+USE thermo_mod, ONLY : omega_geo_eos, celldm_geo_eos
 USE thermo_sym, ONLY : code_group_save
 USE initial_conf, ONLY : ibrav_save
 USE control_mur, ONLY : lmurn
@@ -521,7 +514,7 @@ USE mp_world,    ONLY : world_comm
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filepiezo
-INTEGER :: igeo, ibrav, nvar, ndata, jdata
+INTEGER :: igeo, nvar, ndata, jdata
 REAL(DP), ALLOCATABLE :: x(:,:), f(:), xfit(:), x1(:,:)
 REAL(DP) :: compute_omega_geo
 TYPE(poly1) :: pt_p1
@@ -535,12 +528,9 @@ INTEGER :: compute_nwork
 
 IF (ntemp_plot==0) RETURN
 
-ibrav=ibrav_geo(1)
-IF (lmurn) THEN
-   nvar=1
-ELSE
-   nvar=crystal_parameters(ibrav)
-ENDIF
+nvar=crystal_parameters(ibrav_save)
+IF (lmurn) nvar=1
+
 ndata=compute_nwork()
 
 ALLOCATE(x(nvar,ndata))
@@ -553,15 +543,15 @@ CALL divide(world_comm, npress, startp, lastp)
 IF (lmurn) THEN
    IF (lgeo_from_file) THEN
       DO idata=1,ndata
-         x(1,idata)=omega_geo(idata)
+         x(1,idata)=omega_geo_eos(idata)
       ENDDO
    ELSE
       DO idata=1,ndata
-         x(1,idata)=celldm_geo(1,idata)
+         x(1,idata)=celldm_geo_eos(1,idata)
       ENDDO
    ENDIF
 ELSE
-   CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo_eos)
+   CALL set_x_from_celldm(ibrav_save, nvar, ndata, x, celldm_geo_eos)
 ENDIF
 
 e_piezo_tensor_ptt=0.0_DP
@@ -580,10 +570,10 @@ DO itempp=1,ntemp_plot
       DO ipress=startp,lastp
          IF (ipress==1.OR.ipress==npress) CYCLE
          IF (lgeo_from_file) THEN
-            xfit(1)=compute_omega_geo(ibrav, celldm_ptt(:,ipress,itempp))
+            xfit(1)=compute_omega_geo(ibrav_save, celldm_ptt(:,ipress,itempp))
          ELSE
             CALL compress_celldm(celldm_ptt(:,ipress,itempp),xfit,&
-                                                              nvar,ibrav)
+                                                          nvar,ibrav_save)
          ENDIF
          f=0.0_DP
          DO i=1,3
@@ -643,10 +633,10 @@ DO itempp=1,ntemp_plot
       DO ipress=startp,lastp
          IF (ipress==1.OR.ipress==npress) CYCLE
          IF (lgeo_from_file) THEN
-            xfit(1)=compute_omega_geo(ibrav, celldmf_ptt(:,ipress,itempp))
+            xfit(1)=compute_omega_geo(ibrav_save, celldmf_ptt(:,ipress,itempp))
          ELSE
             CALL compress_celldm(celldmf_ptt(:,ipress,itempp),xfit,&
-                                                               nvar,ibrav)
+                                                         nvar,ibrav_save)
          ENDIF
          f=0.0_DP
          DO i=1,3

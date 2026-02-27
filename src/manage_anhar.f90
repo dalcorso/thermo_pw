@@ -336,8 +336,6 @@ CALL check_piezo_tensor_qha()
 IF (.NOT.(piezo_qha_available.OR.piezof_qha_available)) &
                                                 CALL check_piezo_tensor()
 
-CALL build_epsilon_zerom1()
-
 CALL build_el_cons_d()
 
 IF (lgeo_from_file) THEN
@@ -840,12 +838,10 @@ CALL check_piezo_tensor_qha()
 IF (.NOT.(piezo_qha_available.OR.piezof_qha_available)) &
                                                 CALL check_piezo_tensor()
 
-CALL build_epsilon_zerom1()
-
 CALL build_el_cons_d()
 !
 !  If the elastic constants, piezoelectric tensor, dielectric constant and
-!  born effective charges are on file, the code computes the these
+!  born effective charges are on file, the code computes these
 !  quantities as a function of temperature/pressure interpolating 
 !  at the crystal parameters found in the quadratic/quartic fit
 !
@@ -859,7 +855,7 @@ CALL set_piezo_tensor_t()
 !
 CALL set_epsilon_infty_t()
 !
-!  interpolate the born effective charge
+!  interpolate the born effective charges
 !
 CALL set_zeu_t()
 !

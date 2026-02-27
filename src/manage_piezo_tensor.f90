@@ -239,7 +239,7 @@ INTEGER, INTENT(IN) :: nwork, igeom
 
 INTEGER :: work_base, nstep, base_ind, igeo_strain, istep, iwork, na, ipol, &
            ivar, times, i
-REAL(DP) :: polar0_geo(3), epsilon_infty(3,3)
+REAL(DP) :: polar0_geo(3), epsilon_infty(3,3), epsilon_zero(3,3)
 CHARACTER(LEN=6) :: int_to_char
 CHARACTER(LEN=256) :: filepiezo
 CHARACTER(LEN=80) :: label
@@ -291,7 +291,7 @@ filepiezo='elastic_constants/'//TRIM(fl_dielectric)//'.g'//&
                                               TRIM(int_to_char(igeom))
 IF (my_image_id==root_image) &
    CALL read_dielectric_properties_from_file(filepiezo, nat, epsilon_infty, &
-                                         piezo_zeu_geo(1,1,1,igeom))
+                         epsilon_zero, piezo_zeu_geo(1,1,1,igeom))
 !
 !  and computes the ionic contribution to the piezoelectric tensor
 !

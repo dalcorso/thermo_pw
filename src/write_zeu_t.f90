@@ -16,9 +16,8 @@ SUBROUTINE write_zeu_t( )
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : stdout
 USE ions_base,  ONLY : nat
-USE thermo_mod, ONLY : ibrav_geo, celldm_geo, omega_geo, celldm_geo_eos, &
-                       zeu_geo
-USE thermo_sym, ONLY : laue
+USE thermo_mod, ONLY : omega_geo_eos, celldm_geo_eos, zeu_geo
+USE initial_conf, ONLY : ibrav_save
 USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
 
 USE linear_surfaces, ONLY : fit_multi_linear
@@ -39,7 +38,7 @@ USE data_files, ONLY : flanhar
 USE temperature, ONLY : ntemp, temp
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filezeu
-INTEGER :: igeo, ibrav, nvar, ndata
+INTEGER :: igeo, nvar, ndata
 REAL(DP), ALLOCATABLE :: x(:,:), f(:)
 TYPE(poly1), ALLOCATABLE :: pt_p1(:,:,:)
 TYPE(poly2), ALLOCATABLE :: pt_p2(:,:,:)
@@ -48,8 +47,7 @@ TYPE(poly4), ALLOCATABLE :: pt_p4(:,:,:)
 INTEGER :: i, j, na, idata, itemp
 INTEGER :: compute_nwork
 
-ibrav=ibrav_geo(1)
-nvar=crystal_parameters(ibrav)
+nvar=crystal_parameters(ibrav_save)
 IF (lmurn) nvar=1
 
 ndata=compute_nwork()
@@ -77,15 +75,15 @@ ENDDO
 IF (lmurn) THEN
    IF (lgeo_from_file) THEN
       DO idata=1,ndata
-         x(1,idata)=omega_geo(idata)
+         x(1,idata)=omega_geo_eos(idata)
       ENDDO
    ELSE
       DO idata=1,ndata
-         x(1,idata)=celldm_geo(1,idata)
+         x(1,idata)=celldm_geo_eos(1,idata)
       ENDDO
    ENDIF
 ELSE
-   CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo_eos)
+   CALL set_x_from_celldm(ibrav_save, nvar, ndata, x, celldm_geo_eos)
 ENDIF
 
 DO na=1, nat
@@ -118,19 +116,20 @@ ENDDO
 !          dependent geometry 
 !
 IF (ltherm_dos) THEN
-   CALL interpolate_zeu(celldm_t, nvar, nat, ibrav, pt_p1, pt_p2, pt_p3, &
+   CALL interpolate_zeu(celldm_t, nvar, nat, ibrav_save, pt_p1, pt_p2, pt_p3, &
                pt_p4, poly_degree_elc, zeu_t)
    lzeu=.TRUE.
    filezeu='anhar_files/'//TRIM(flanhar)//'.zeu'
-   CALL write_zeu_on_file(temp, ntemp, nat, ibrav, code_group, zeu_t, filezeu, 0)
+   CALL write_zeu_on_file(temp, ntemp, nat, ibrav_save, code_group, &
+                                                   zeu_t, filezeu, 0)
 ENDIF
 
 IF (ltherm_freq) THEN
-   CALL interpolate_zeu(celldmf_t, nvar, nat, ibrav, pt_p1, pt_p2, pt_p3,&
+   CALL interpolate_zeu(celldmf_t, nvar, nat, ibrav_save, pt_p1, pt_p2, pt_p3,&
                         pt_p4, poly_degree_elc, zeuf_t)
    lzeuf=.TRUE.
    filezeu='anhar_files/'//TRIM(flanhar)//'.zeu_ph'
-   CALL write_zeu_on_file(temp, ntemp, nat, ibrav, code_group, &
+   CALL write_zeu_on_file(temp, ntemp, nat, ibrav_save, code_group, &
                                                    zeuf_t, filezeu, 0)
 ENDIF
 
@@ -161,14 +160,14 @@ SUBROUTINE write_zeu_pt( )
 !
 !  This routine writes on file the Born effective charges as a function of
 !  temperature interpolating them at the structure that minimizes the
-!  Helmholtz (or Gibbs) free energy at temperature T. This routine
-!  does this for selected pressures.
+!  Helmholtz (or Gibbs) free energy at temperature T for several 
+!  pressures p.
 !
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : stdout
 USE ions_base,  ONLY : nat
-USE thermo_mod, ONLY : ibrav_geo, celldm_geo, omega_geo, celldm_geo_eos, &
-                       zeu_geo
+USE thermo_mod, ONLY : omega_geo_eos, celldm_geo_eos, zeu_geo
+USE initial_conf, ONLY : ibrav_save
 USE rap_point_group, ONLY : code_group
 USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
 
@@ -184,14 +183,14 @@ USE control_mur,    ONLY : lmurn
 USE control_pressure, ONLY : npress_plot, ipress_plot, press
 USE control_thermo, ONLY : ltherm_dos, ltherm_freq, lgeo_from_file
 USE anharmonic_pt,     ONLY : celldm_pt, zeu_pt
-USE ph_freq_anharmonic_pt,     ONLY : celldmf_pt, zeuf_pt
+USE ph_freq_anharmonic_pt,  ONLY : celldmf_pt, zeuf_pt
 USE polynomial, ONLY : poly1, poly2, poly3, poly4, init_poly, clean_poly
 USE data_files, ONLY : flanhar
 USE temperature, ONLY : ntemp, temp
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filezeu
-INTEGER :: igeo, ibrav, nvar, ndata
+INTEGER :: igeo, nvar, ndata
 REAL(DP), ALLOCATABLE :: x(:,:), f(:)
 TYPE(poly1), ALLOCATABLE :: pt_p1(:,:,:)
 TYPE(poly2), ALLOCATABLE :: pt_p2(:,:,:)
@@ -202,11 +201,10 @@ INTEGER :: compute_nwork
 
 IF (npress_plot==0) RETURN
 
-ibrav=ibrav_geo(1)
 IF (lmurn) THEN
    nvar=1
 ELSE
-   nvar=crystal_parameters(ibrav)
+   nvar=crystal_parameters(ibrav_save)
 ENDIF
 
 ndata=compute_nwork()
@@ -233,15 +231,15 @@ ENDDO
 IF (lmurn) THEN
    IF (lgeo_from_file) THEN
       DO idata=1, ndata
-         x(1,idata)=omega_geo(idata)
+         x(1,idata)=omega_geo_eos(idata)
       ENDDO
    ELSE
       DO idata=1, ndata
-         x(1,idata)=celldm_geo(1,idata)
+         x(1,idata)=celldm_geo_eos(1,idata)
       ENDDO
    ENDIF
 ELSE
-   CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo_eos)
+   CALL set_x_from_celldm(ibrav_save, nvar, ndata, x, celldm_geo_eos)
 ENDIF
 
 DO na=1,nat
@@ -276,13 +274,13 @@ ENDDO
 IF (ltherm_dos) THEN
    DO ipressp=1, npress_plot
       ipress=ipress_plot(ipressp)
-      CALL interpolate_zeu(celldm_pt(:,:,ipressp), nvar, nat, ibrav, &
+      CALL interpolate_zeu(celldm_pt(:,:,ipressp), nvar, nat, ibrav_save, &
            pt_p1, pt_p2, pt_p3, pt_p4, poly_degree_elc, &
            zeu_pt(:,:,:,:,ipressp))
       lzeu_pt=.TRUE.
       filezeu='anhar_files/'//TRIM(flanhar)//'.zeu_press'
       CALL add_value(filezeu, press(ipress))
-      CALL write_zeu_on_file(temp, ntemp, nat, ibrav, code_group, &
+      CALL write_zeu_on_file(temp, ntemp, nat, ibrav_save, code_group, &
            zeu_pt(:,:,:,:,ipressp), filezeu, 0)
    ENDDO
 ENDIF
@@ -290,13 +288,13 @@ ENDIF
 IF (ltherm_freq) THEN
    DO ipressp=1, npress_plot
       ipress=ipress_plot(ipressp)
-      CALL interpolate_zeu(celldmf_pt(:,:,ipressp), nvar, nat, ibrav, &
+      CALL interpolate_zeu(celldmf_pt(:,:,ipressp), nvar, nat, ibrav_save, &
            pt_p1, pt_p2, pt_p3, pt_p4, poly_degree_elc, &
            zeuf_pt(:,:,:,:,ipressp))
       lzeuf_pt=.TRUE.
       filezeu='anhar_files/'//TRIM(flanhar)//'.zeu_ph_press'
       CALL add_value(filezeu, press(ipress))
-      CALL write_zeu_on_file(temp, ntemp, nat, ibrav, code_group, &
+      CALL write_zeu_on_file(temp, ntemp, nat, ibrav_save, code_group, &
            zeuf_pt(:,:,:,:,ipressp), filezeu, 0)
    ENDDO
 ENDIF
@@ -329,15 +327,14 @@ SUBROUTINE write_zeu_ptt( )
 !
 !  This routine writes on file the Born effective charges as a function of
 !  pressure intepolating it at the crystal structure that minimizes the
-!  Helmholtz (or Gibbs) free energy at temperature T. It does
-!  this at selected temperatures.
+!  Helmholtz (or Gibbs) free energy at pressure p for several temperatures
+!  T. 
 !
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : stdout
 USE ions_base,  ONLY : nat
-USE thermo_mod, ONLY : ibrav_geo, celldm_geo, omega_geo, celldm_geo_eos, &
-                       zeu_geo
-
+USE thermo_mod, ONLY : omega_geo_eos, celldm_geo_eos, zeu_geo
+USE initial_conf, ONLY : ibrav_save
 USE rap_point_group, ONLY : code_group
 USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
 
@@ -357,10 +354,10 @@ USE ph_freq_anharmonic_ptt,  ONLY : celldmf_ptt, zeuf_ptt
 USE control_mur, ONLY : lmurn
 USE polynomial, ONLY : poly1, poly2, poly3, poly4, init_poly, clean_poly
 USE data_files, ONLY : flanhar
-USE temperature, ONLY : ntemp, temp
+USE temperature, ONLY : temp
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filezeu
-INTEGER :: igeo, ibrav, nvar, ndata
+INTEGER :: igeo, nvar, ndata
 REAL(DP), ALLOCATABLE :: x(:,:), f(:)
 TYPE(poly1), ALLOCATABLE :: pt_p1(:,:,:)
 TYPE(poly2), ALLOCATABLE :: pt_p2(:,:,:)
@@ -371,12 +368,8 @@ INTEGER :: compute_nwork
 
 IF (ntemp_plot==0) RETURN
 
-ibrav=ibrav_geo(1)
-IF (lmurn) THEN
-   nvar=1
-ELSE
-   nvar=crystal_parameters(ibrav)
-ENDIF
+nvar=crystal_parameters(ibrav_save)
+IF (lmurn) nvar=1
 
 ndata=compute_nwork()
 ALLOCATE(x(nvar,ndata))
@@ -402,15 +395,15 @@ ENDDO
 IF (lmurn) THEN
    IF (lgeo_from_file) THEN
       DO idata=1, ndata
-         x(1,idata)=omega_geo(idata)
+         x(1,idata)=omega_geo_eos(idata)
       ENDDO
    ELSE
       DO idata=1, ndata
-         x(1,idata)=celldm_geo(1,idata)
+         x(1,idata)=celldm_geo_eos(1,idata)
       ENDDO
    ENDIF
 ELSE
-   CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo_eos)
+   CALL set_x_from_celldm(ibrav_save, nvar, ndata, x, celldm_geo_eos)
 ENDIF
 
 DO na=1,nat
@@ -446,12 +439,12 @@ ENDDO
 IF (ltherm_dos) THEN
    DO itempp=1, ntemp_plot
       itemp=itemp_plot(itempp)
-      CALL interpolate_zeu_p(celldm_ptt(:,:,itempp), nvar, nat, ibrav, &
+      CALL interpolate_zeu_p(celldm_ptt(:,:,itempp), nvar, nat, ibrav_save, &
          pt_p1, pt_p2, pt_p3, pt_p4, poly_degree_elc, zeu_ptt(:,:,:,:,itempp))
       lzeu_ptt=.TRUE.
       filezeu='anhar_files/'//TRIM(flanhar)//'.zeu_temp'
       CALL add_value(filezeu, temp(itemp))
-      CALL write_zeu_on_file(press, npress, nat, ibrav, code_group, &
+      CALL write_zeu_on_file(press, npress, nat, ibrav_save, code_group, &
            zeu_ptt(:,:,:,:,itempp), filezeu, 2)
    ENDDO
 ENDIF
@@ -459,13 +452,13 @@ ENDIF
 IF (ltherm_freq) THEN
    DO itempp=1, ntemp_plot
       itemp=itemp_plot(itempp)
-      CALL interpolate_zeu_p(celldmf_ptt(:,:,itempp), nvar, nat, ibrav, &
+      CALL interpolate_zeu_p(celldmf_ptt(:,:,itempp), nvar, nat, ibrav_save, &
            pt_p1, pt_p2, pt_p3, pt_p4, poly_degree_elc, &
            zeuf_ptt(:,:,:,:,itempp))
       lzeuf_ptt=.TRUE.
       filezeu='anhar_files/'//TRIM(flanhar)//'.zeu_ph_temp'
       CALL add_value(filezeu, temp(itemp))
-      CALL write_zeu_on_file(press, npress, nat, ibrav, code_group, &
+      CALL write_zeu_on_file(press, npress, nat, ibrav_save, code_group, &
                         zeuf_ptt(:,:,:,:,itempp), filezeu, 2)
    ENDDO
 ENDIF

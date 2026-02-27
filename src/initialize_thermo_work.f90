@@ -18,12 +18,11 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   !  lpwscf, lstress, lberry, lphonon
   !
   USE kinds,          ONLY : DP
-  USE thermo_mod,     ONLY : what, energy_geo, ef_geo, celldm_geo, ibrav_geo, &
-                             omega_geo, tot_ngeo, no_ph, start_geometry,    &
+  USE thermo_mod,     ONLY : what, omega_geo, energy_geo, ef_geo, &
+                             celldm_geo, ibrav_geo, &
+                             tot_ngeo, no_ph, start_geometry,    &
                              last_geometry, iwho, tau_geo, at_geo, &
-                             tot_ngeo_eos, no_ph_eos, uint_geo,    &
-                             epsilon_infty_geo, zeu_geo, freq_geo, z_geo, &
-                             epsilon_zero_geo, epsilon_zerom1_geo
+                             tot_ngeo_eos, no_ph_eos, uint_geo
   USE control_thermo, ONLY : lpwscf, lpwband, lphonon, lev_syn_1, lev_syn_2, &
                              lph, lef, lpwscf_syn_1, lbands_syn_1, lq2r,   &
                              ltherm, lconv_ke_test, lconv_nk_test,    &
@@ -54,7 +53,6 @@ SUBROUTINE initialize_thermo_work(nwork, part)
                                    e_piezo_tensor_fi_geo,                   &
                                    d_piezo_tensor_geo, polar0_geo,          &
                                    found_dos_pt, found_ph_pt, doberry
-  USE control_epsilon_infty,        ONLY : lepsilon_infty_geo, lzeu_geo
   USE temperature,   ONLY : ntemp
   USE control_eldos, ONLY : lel_free_energy
   USE gvecw,          ONLY : ecutwfc
@@ -126,20 +124,13 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            tot_ngeo_eos=tot_ngeo
            ALLOCATE(no_ph(tot_ngeo))
            ALLOCATE(no_ph_eos(tot_ngeo))
-           ALLOCATE(epsilon_infty_geo(3,3,tot_ngeo))
-           ALLOCATE(zeu_geo(3,3,nat,tot_ngeo))
-           ALLOCATE(lepsilon_infty_geo(tot_ngeo))
-           ALLOCATE(lzeu_geo(tot_ngeo))
            ALLOCATE(omega_geo(tot_ngeo))
+           CALL allocate_ph_gamma(tot_ngeo)
+
            omega_geo(1)=omega_save
-           lepsilon_infty_geo=.FALSE.
-           lzeu_geo=.FALSE.
-           ALLOCATE(epsilon_zero_geo(3,3,tot_ngeo))
-           ALLOCATE(epsilon_zerom1_geo(3,3,tot_ngeo))
-           ALLOCATE(freq_geo(3*nat,tot_ngeo))
-           ALLOCATE(z_geo(3*nat,3*nat,tot_ngeo))
            no_ph(1)=.FALSE.
            no_ph_eos(1)=.FALSE.
+
            IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
            IF (meta_ionode) ios = f_mkdir_safe( 'dynamical_matrices' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
@@ -150,17 +141,8 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            tot_ngeo_eos=tot_ngeo
            ALLOCATE(no_ph(tot_ngeo))
            ALLOCATE(no_ph_eos(tot_ngeo))
-           ALLOCATE(epsilon_infty_geo(3,3,tot_ngeo))
-           ALLOCATE(zeu_geo(3,3,nat,tot_ngeo))
-           ALLOCATE(lepsilon_infty_geo(tot_ngeo))
-           ALLOCATE(lzeu_geo(tot_ngeo))
-           lepsilon_infty_geo=.FALSE.
-           lzeu_geo=.FALSE.
-           ALLOCATE(epsilon_zero_geo(3,3,tot_ngeo))
-           ALLOCATE(epsilon_zerom1_geo(3,3,tot_ngeo))
-           ALLOCATE(freq_geo(3*nat,tot_ngeo))
-           ALLOCATE(z_geo(3*nat,3*nat,tot_ngeo))
            ALLOCATE(omega_geo(tot_ngeo))
+           CALL allocate_ph_gamma(tot_ngeo)
            omega_geo(1)=omega_save
            no_ph(1)=.FALSE.
            no_ph_eos(1)=.FALSE.
@@ -333,6 +315,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            CALL allocate_thermodynamics()
            IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'dynamical_matrices' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
            IF (meta_ionode) ios = f_mkdir_safe( 'phdisp_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
@@ -450,6 +433,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            ALLOCATE(no_ph(tot_ngeo))
            ALLOCATE(no_ph_eos(tot_ngeo))
            IF (lel_free_energy) ALLOCATE(ef_geo(tot_ngeo))
+           CALL allocate_ph_gamma(tot_ngeo)
            energy_geo=0.0_DP
            no_ph=.FALSE.
            no_ph_eos=.FALSE.
@@ -581,13 +565,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
              nwork=tot_ngeo
         CASE ('scf_elastic_constants', 'mur_lc_elastic_constants')
 
-           IF (ALLOCATED(ibrav_geo))  DEALLOCATE(ibrav_geo)
-           IF (ALLOCATED(celldm_geo)) DEALLOCATE(celldm_geo)
-           IF (ALLOCATED(at_geo))     DEALLOCATE(at_geo)
-           IF (ALLOCATED(tau_geo))    DEALLOCATE(tau_geo)
-           IF (ALLOCATED(uint_geo))   DEALLOCATE(uint_geo)
-           IF (ALLOCATED(energy_geo)) DEALLOCATE(energy_geo)
-           IF (ALLOCATED(omega_geo))  DEALLOCATE(omega_geo)
+           CALL deallocate_basic_variables()
 !
 !     initialise_elastic_cons allocates ibrav_geo and celldm_geo
 !
@@ -612,13 +590,8 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            do_punch=.FALSE.
            CALL allocate_debye()
         CASE ('scf_piezoelectric_tensor', 'mur_lc_piezoelectric_tensor')
-           IF (ALLOCATED(energy_geo)) DEALLOCATE(energy_geo)
-           IF (ALLOCATED(ibrav_geo)) DEALLOCATE(ibrav_geo)
-           IF (ALLOCATED(celldm_geo)) DEALLOCATE(celldm_geo)
-           IF (ALLOCATED(at_geo)) DEALLOCATE(at_geo)
-           IF (ALLOCATED(tau_geo)) DEALLOCATE(tau_geo)
-           IF (ALLOCATED(omega_geo)) DEALLOCATE(omega_geo)
-           IF (ALLOCATED(uint_geo)) DEALLOCATE(uint_geo)
+
+           CALL deallocate_basic_variables()
            iwho=2
            CALL set_unperturbed_geometry(ngeom)
            start_geometry_qha=1
@@ -636,8 +609,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            lpiezoelectric_tensor=.TRUE.
            do_punch=.TRUE.
         CASE ('scf_polarization', 'mur_lc_polarization')
-           IF (ALLOCATED(energy_geo)) DEALLOCATE(energy_geo)
-           IF (ALLOCATED(omega_geo)) DEALLOCATE(omega_geo)
+           CALL deallocate_basic_variables()
            nwork=1
            lpolarization=.TRUE.
            CALL allocate_piezo(nwork)
@@ -1157,11 +1129,9 @@ SUBROUTINE initialize_mur(nwork)
 USE kinds,         ONLY : DP
 USE thermo_mod,    ONLY : ibrav_geo, ngeo, celldm_geo, energy_geo, ef_geo, &
                           omega_geo, at_geo, tau_geo, tot_ngeo_eos, iwho,  &
-                          uint_geo, epsilon_infty_geo, zeu_geo, z_geo,     &
-                          freq_geo, epsilon_zero_geo, epsilon_zerom1_geo
+                          uint_geo
 USE control_atomic_pos, ONLY : linternal_thermo, nint_var, ninternal, &
                                int_ngeo, p2_eq, p4_eq, tau_p, uint_p
-USE control_epsilon_infty, ONLY : lepsilon_infty_geo, lzeu_geo
 USE ions_base,     ONLY : nat
 USE control_vol,   ONLY : nvol, vmin_input, vmax_input, deltav
 USE initial_conf,  ONLY : ibrav_save
@@ -1192,24 +1162,9 @@ IF (linternal_thermo) then
    ENDDO
    nwork=nwork*ninternal
 ENDIF
-ALLOCATE(ibrav_geo(nwork))
-ALLOCATE(celldm_geo(6,nwork))
-ALLOCATE(at_geo(3,3,nwork))
-ALLOCATE(energy_geo(nwork))
-ALLOCATE(ef_geo(nwork))
-ALLOCATE(tau_geo(3,nat,nwork))
-ALLOCATE(omega_geo(nwork))
-ALLOCATE(epsilon_infty_geo(3,3,nwork))
-ALLOCATE(zeu_geo(3,3,nat,nwork))
-ALLOCATE(lepsilon_infty_geo(nwork))
-ALLOCATE(lzeu_geo(nwork))
-ALLOCATE(epsilon_zero_geo(3,3,nwork))
-ALLOCATE(epsilon_zerom1_geo(3,3,nwork))
-ALLOCATE(freq_geo(3*nat,nwork))
-ALLOCATE(z_geo(3*nat,3*nat,nwork))
-ALLOCATE(uint_geo(nint_var,nwork))
-lepsilon_infty_geo=.FALSE.
-lzeu_geo=.FALSE.
+CALL allocate_basic_variables(nwork)
+CALL allocate_ph_gamma(nwork)
+
 CALL set_celldm_geo(celldm_geo, nwork)
 IF (linternal_thermo) THEN
    CALL set_tau_geo(ibrav_geo, celldm_geo, tau_geo, at_geo, uint_geo, &
@@ -1298,12 +1253,14 @@ iwho=2
 ninternal=1
 IF (lgeo_from_file) CALL read_geometry_file(ngeo)
 nwork=compute_nwork()
+
 ALLOCATE(el_con_ibrav_geo(nwork))
 ALLOCATE(el_con_celldm_geo(6,nwork))
 ALLOCATE(el_con_at_geo(3,3,nwork))
 ALLOCATE(el_con_omega_geo(nwork))
 ALLOCATE(el_con_tau_crys_geo(3,nat,nwork))
 ALLOCATE(el_con_tau_geo(3,nat,nwork))
+
 IF (ltau_el_cons_from_file) THEN
 !
 !  read from file geometry and atomic coordinates
@@ -1956,3 +1913,71 @@ ENDIF
 
 RETURN
 END SUBROUTINE dtau_dinternal
+
+!------------------------------------------------------------------------
+SUBROUTINE allocate_ph_gamma(nwork)
+!------------------------------------------------------------------------
+USE ions_base, ONLY : nat
+USE thermo_mod, ONLY : epsilon_infty_geo, zeu_geo, freq_geo, z_geo, &
+                       epsilon_zero_geo, epsilon_zerom1_geo
+USE control_epsilon_infty, ONLY : lzeu_geo, lepsilon_infty_geo
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: nwork
+
+ALLOCATE( epsilon_infty_geo(3,3,nwork) )
+ALLOCATE( zeu_geo(3,3,nat,nwork) )
+ALLOCATE( lepsilon_infty_geo(nwork) )
+ALLOCATE( lzeu_geo(nwork) )
+ALLOCATE( epsilon_zero_geo(3,3,nwork) )
+ALLOCATE( epsilon_zerom1_geo(3,3,nwork) )
+ALLOCATE( freq_geo(3*nat,nwork) )
+ALLOCATE( z_geo(3*nat,3*nat,nwork) )
+
+lepsilon_infty_geo=.FALSE.
+lzeu_geo=.FALSE.
+
+RETURN
+END SUBROUTINE allocate_ph_gamma
+!
+!--------------------------------------------------------------------------
+SUBROUTINE allocate_basic_variables(nwork)
+!--------------------------------------------------------------------------
+!
+USE ions_base, ONLY : nat
+USE control_atomic_pos, ONLY : nint_var
+USE thermo_mod, ONLY : ibrav_geo, celldm_geo, at_geo, energy_geo, &
+                       ef_geo, uint_geo, tau_geo, omega_geo
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: nwork
+
+ALLOCATE(ibrav_geo(nwork))
+ALLOCATE(celldm_geo(6,nwork))
+ALLOCATE(at_geo(3,3,nwork))
+ALLOCATE(energy_geo(nwork))
+ALLOCATE(ef_geo(nwork))
+ALLOCATE(uint_geo(nint_var,nwork))
+ALLOCATE(tau_geo(3,nat,nwork))
+ALLOCATE(omega_geo(nwork))
+
+RETURN
+END SUBROUTINE allocate_basic_variables
+!
+!-------------------------------------------------------------------------
+SUBROUTINE deallocate_basic_variables()
+!-------------------------------------------------------------------------
+!
+USE thermo_mod, ONLY : ibrav_geo, celldm_geo, at_geo, energy_geo, &
+                       ef_geo, uint_geo, tau_geo, omega_geo
+IMPLICIT NONE
+
+IF (ALLOCATED(ibrav_geo))  DEALLOCATE(ibrav_geo)
+IF (ALLOCATED(celldm_geo)) DEALLOCATE(celldm_geo)
+IF (ALLOCATED(at_geo))     DEALLOCATE(at_geo)
+IF (ALLOCATED(energy_geo)) DEALLOCATE(energy_geo)
+IF (ALLOCATED(ef_geo))     DEALLOCATE(ef_geo)
+IF (ALLOCATED(uint_geo))   DEALLOCATE(uint_geo)
+IF (ALLOCATED(tau_geo))    DEALLOCATE(tau_geo)
+IF (ALLOCATED(omega_geo))  DEALLOCATE(omega_geo)
+
+RETURN
+END SUBROUTINE deallocate_basic_variables

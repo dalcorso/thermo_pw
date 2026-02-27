@@ -330,11 +330,8 @@ INTEGER :: compute_nwork
 IF (npress_plot==0) RETURN
 
 ibrav=ibrav_geo(1)
-IF (lmurn) THEN
-   nvar=1
-ELSE
-   nvar=crystal_parameters(ibrav)
-ENDIF
+nvar=crystal_parameters(ibrav)
+IF (lmurn) nvar=1
 
 ndata=compute_nwork()
 
@@ -614,11 +611,9 @@ INTEGER :: compute_nwork
 IF (ntemp_plot==0) RETURN
 
 ibrav=ibrav_geo(1)
-IF (lmurn) THEN
-   nvar=1
-ELSE
-   nvar=crystal_parameters(ibrav)
-ENDIF
+nvar=crystal_parameters(ibrav)
+IF (lmurn) nvar=1
+
 ndata=compute_nwork()
 
 ALLOCATE(x(nvar,ndata))

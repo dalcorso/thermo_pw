@@ -15,8 +15,8 @@ SUBROUTINE write_epsilon_infty_t( )
 !
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : stdout
-USE thermo_mod, ONLY : ibrav_geo, celldm_geo, omega_geo, celldm_geo_eos, &
-                       epsilon_infty_geo
+USE thermo_mod, ONLY : omega_geo_eos, celldm_geo_eos, epsilon_infty_geo
+USE initial_conf, ONLY : ibrav_save
 USE thermo_sym, ONLY : laue
 USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
 
@@ -32,14 +32,13 @@ USE control_thermo, ONLY : ltherm_dos, ltherm_freq, lgeo_from_file
 USE control_mur,    ONLY : lmurn
 USE anharmonic,     ONLY : celldm_t, epsilon_infty_t
 USE ph_freq_anharmonic, ONLY : celldmf_t, epsilon_inftyf_t
-USE rap_point_group, ONLY : code_group
 USE polynomial, ONLY : poly1, poly2, poly3, poly4, init_poly, clean_poly
 USE data_files, ONLY : flanhar
 USE temperature, ONLY : ntemp, temp
 IMPLICIT NONE
 CHARACTER(LEN=256) :: fileepsilon
 CHARACTER(LEN=80) :: astring
-INTEGER :: igeo, ibrav, nvar, ndata
+INTEGER :: igeo, nvar, ndata
 REAL(DP), ALLOCATABLE :: x(:,:), f(:)
 TYPE(poly1), ALLOCATABLE :: pt_p1(:,:)
 TYPE(poly2), ALLOCATABLE :: pt_p2(:,:)
@@ -48,8 +47,7 @@ TYPE(poly4), ALLOCATABLE :: pt_p4(:,:)
 INTEGER :: i, j, idata, itemp
 INTEGER :: compute_nwork
 
-ibrav=ibrav_geo(1)
-nvar=crystal_parameters(ibrav)
+nvar=crystal_parameters(ibrav_save)
 IF (lmurn) nvar=1
 
 ndata=compute_nwork()
@@ -75,15 +73,15 @@ ENDDO
 IF (lmurn) THEN
    IF (lgeo_from_file) THEN
       DO idata=1,ndata
-         x(1,idata)=omega_geo(idata)
+         x(1,idata)=omega_geo_eos(idata)
       ENDDO
    ELSE
       DO idata=1,ndata
-         x(1,idata)=celldm_geo(1,idata)
+         x(1,idata)=celldm_geo_eos(1,idata)
       ENDDO
    ENDIF
 ELSE
-   CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo_eos)
+   CALL set_x_from_celldm(ibrav_save, nvar, ndata, x, celldm_geo_eos)
 ENDIF
 
 DO i=1,3
@@ -114,8 +112,8 @@ ENDDO
 !          dependent geometry 
 !
 IF (ltherm_dos) THEN
-   CALL interpolate_epsilon_infty(celldm_t, nvar, ibrav, pt_p1, pt_p2, pt_p3, &
-               pt_p4, poly_degree_elc, epsilon_infty_t)
+   CALL interpolate_epsilon_infty(celldm_t, nvar, ibrav_save, &
+               pt_p1, pt_p2, pt_p3, pt_p4, poly_degree_elc, epsilon_infty_t)
    lepsilon_infty=.TRUE.
    fileepsilon='anhar_files/'//TRIM(flanhar)//'.dielec'
    astring="#    dielectric constants adimensional"
@@ -124,8 +122,8 @@ IF (ltherm_dos) THEN
 ENDIF
 
 IF (ltherm_freq) THEN
-   CALL interpolate_epsilon_infty(celldmf_t, nvar, ibrav, pt_p1, pt_p2, pt_p3,&
-               pt_p4, poly_degree_elc, epsilon_inftyf_t)
+   CALL interpolate_epsilon_infty(celldmf_t, nvar, ibrav_save, &
+               pt_p1, pt_p2, pt_p3, pt_p4, poly_degree_elc, epsilon_inftyf_t)
    lepsilon_inftyf=.TRUE.
    fileepsilon='anhar_files/'//TRIM(flanhar)//'.dielec_ph'
    astring="#    dielectric constants adimensional"
@@ -157,14 +155,13 @@ SUBROUTINE write_epsilon_infty_pt( )
 !
 !  This routine writes on file the dielectric constant as a function of
 !  temperature interpolating them at the structure that minimizes the
-!  Helmholtz (or Gibbs) free energy at temperature T. This routine
-!  does this for selected pressures.
+!  Helmholtz (or Gibbs) free energy at temperature T at several 
+!  pressures p. 
 !
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : stdout
-USE thermo_mod, ONLY : ibrav_geo, celldm_geo, omega_geo, celldm_geo_eos, &
-                       epsilon_infty_geo
-USE rap_point_group, ONLY : code_group
+USE thermo_mod, ONLY : omega_geo_eos, celldm_geo_eos, epsilon_infty_geo
+USE initial_conf, ONLY : ibrav_save
 USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
 
 USE linear_surfaces, ONLY : fit_multi_linear
@@ -187,7 +184,7 @@ USE temperature, ONLY : ntemp, temp
 IMPLICIT NONE
 CHARACTER(LEN=80) :: astring
 CHARACTER(LEN=256) :: fileepsilon
-INTEGER :: igeo, ibrav, nvar, ndata
+INTEGER :: igeo, nvar, ndata
 REAL(DP), ALLOCATABLE :: x(:,:), f(:)
 TYPE(poly1), ALLOCATABLE :: pt_p1(:,:)
 TYPE(poly2), ALLOCATABLE :: pt_p2(:,:)
@@ -198,12 +195,8 @@ INTEGER :: compute_nwork
 
 IF (npress_plot==0) RETURN
 
-ibrav=ibrav_geo(1)
-IF (lmurn) THEN
-   nvar=1
-ELSE
-   nvar=crystal_parameters(ibrav)
-ENDIF
+nvar=crystal_parameters(ibrav_save)
+IF (lmurn) nvar=1
 
 ndata=compute_nwork()
 ALLOCATE(x(nvar,ndata))
@@ -227,15 +220,15 @@ ENDDO
 IF (lmurn) THEN
    IF (lgeo_from_file) THEN
       DO idata=1, ndata
-         x(1,idata)=omega_geo(idata)
+         x(1,idata)=omega_geo_eos(idata)
       ENDDO
    ELSE
       DO idata=1, ndata
-         x(1,idata)=celldm_geo(1,idata)
+         x(1,idata)=celldm_geo_eos(1,idata)
       ENDDO
    ENDIF
 ELSE
-   CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo_eos)
+   CALL set_x_from_celldm(ibrav_save, nvar, ndata, x, celldm_geo_eos)
 ENDIF
 
 DO i=1,3
@@ -268,8 +261,8 @@ ENDDO
 IF (ltherm_dos) THEN
    DO ipressp=1, npress_plot
       ipress=ipress_plot(ipressp)
-      CALL interpolate_epsilon_infty(celldm_pt(:,:,ipressp), nvar, ibrav, &
-           pt_p1, pt_p2, pt_p3, pt_p4, poly_degree_elc, &
+      CALL interpolate_epsilon_infty(celldm_pt(:,:,ipressp), nvar,   &
+           ibrav_save,  pt_p1, pt_p2, pt_p3, pt_p4, poly_degree_elc, &
            epsilon_infty_pt(:,:,:,ipressp))
       lepsilon_infty_pt=.TRUE.
       fileepsilon='anhar_files/'//TRIM(flanhar)//'.dielec_press'
@@ -283,8 +276,8 @@ ENDIF
 IF (ltherm_freq) THEN
    DO ipressp=1, npress_plot
       ipress=ipress_plot(ipressp)
-      CALL interpolate_epsilon_infty(celldmf_pt(:,:,ipressp), nvar, ibrav, &
-           pt_p1, pt_p2, pt_p3, pt_p4, poly_degree_elc, &
+      CALL interpolate_epsilon_infty(celldmf_pt(:,:,ipressp), nvar,         &
+                   ibrav_save, pt_p1, pt_p2, pt_p3, pt_p4, poly_degree_elc, &
            epsilon_inftyf_pt(:,:,:,ipressp))
       lepsilon_inftyf_pt=.TRUE.
       fileepsilon='anhar_files/'//TRIM(flanhar)//'.dielec_ph_press'
@@ -319,15 +312,13 @@ SUBROUTINE write_epsilon_infty_ptt( )
 !
 !  This routine writes on file the dielectric constant as a function of
 !  pressure intepolating it at the crystal structure that minimizes the
-!  Helmholtz (or Gibbs) free energy at temperature T. It does
-!  this at selected temperatures.
+!  Helmholtz (or Gibbs) free energy at pressure p at several 
+!  temperatures T.
 !
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : stdout
-USE thermo_mod, ONLY : ibrav_geo, celldm_geo, omega_geo, celldm_geo_eos, &
-                       epsilon_infty_geo
-
-USE rap_point_group, ONLY : code_group
+USE thermo_mod, ONLY : omega_geo_eos, celldm_geo_eos, epsilon_infty_geo
+USE initial_conf, ONLY : ibrav_save
 USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
 
 USE linear_surfaces, ONLY : fit_multi_linear
@@ -350,7 +341,7 @@ USE temperature, ONLY : ntemp, temp
 IMPLICIT NONE
 CHARACTER(LEN=80) :: astring
 CHARACTER(LEN=256) :: fileepsilon
-INTEGER :: igeo, ibrav, nvar, ndata
+INTEGER :: igeo, nvar, ndata
 REAL(DP), ALLOCATABLE :: x(:,:), f(:)
 TYPE(poly1), ALLOCATABLE :: pt_p1(:,:)
 TYPE(poly2), ALLOCATABLE :: pt_p2(:,:)
@@ -361,12 +352,8 @@ INTEGER :: compute_nwork
 
 IF (ntemp_plot==0) RETURN
 
-ibrav=ibrav_geo(1)
-IF (lmurn) THEN
-   nvar=1
-ELSE
-   nvar=crystal_parameters(ibrav)
-ENDIF
+nvar=crystal_parameters(ibrav_save)
+IF (lmurn) nvar=1
 
 ndata=compute_nwork()
 ALLOCATE(x(nvar,ndata))
@@ -390,15 +377,15 @@ ENDDO
 IF (lmurn) THEN
    IF (lgeo_from_file) THEN
       DO idata=1, ndata
-         x(1,idata)=omega_geo(idata)
+         x(1,idata)=omega_geo_eos(idata)
       ENDDO
    ELSE
       DO idata=1, ndata
-         x(1,idata)=celldm_geo(1,idata)
+         x(1,idata)=celldm_geo_eos(1,idata)
       ENDDO
    ENDIF
 ELSE
-   CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo_eos)
+   CALL set_x_from_celldm(ibrav_save, nvar, ndata, x, celldm_geo_eos)
 ENDIF
 
 DO i=1,3
@@ -432,8 +419,8 @@ ENDDO
 IF (ltherm_dos) THEN
    DO itempp=1, ntemp_plot
       itemp=itemp_plot(itempp)
-      CALL interpolate_epsilon_infty_p(celldm_ptt(:,:,itempp), nvar, ibrav, &
-           pt_p1, pt_p2, pt_p3, pt_p4, poly_degree_elc, &
+      CALL interpolate_epsilon_infty_p(celldm_ptt(:,:,itempp), nvar, &
+           ibrav_save, pt_p1, pt_p2, pt_p3, pt_p4, poly_degree_elc,  &
            epsilon_infty_ptt(:,:,:,itempp))
       lepsilon_infty_ptt=.TRUE.
       fileepsilon='anhar_files/'//TRIM(flanhar)//'.dielec_temp'
@@ -447,8 +434,8 @@ ENDIF
 IF (ltherm_freq) THEN
    DO itempp=1, ntemp_plot
       itemp=itemp_plot(itempp)
-      CALL interpolate_epsilon_infty_p(celldmf_ptt(:,:,itempp), nvar, ibrav, &
-           pt_p1, pt_p2, pt_p3, pt_p4, poly_degree_elc, &
+      CALL interpolate_epsilon_infty_p(celldmf_ptt(:,:,itempp), nvar,     &
+                 ibrav_save, pt_p1, pt_p2, pt_p3, pt_p4, poly_degree_elc, &
            epsilon_inftyf_ptt(:,:,:,itempp))
       lepsilon_inftyf_ptt=.TRUE.
       fileepsilon='anhar_files/'//TRIM(flanhar)//'.dielec_ph_temp'

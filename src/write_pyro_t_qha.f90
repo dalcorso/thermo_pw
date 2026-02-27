@@ -25,7 +25,6 @@ USE control_piezoelectric_tensor, ONLY : lpiezo, lpiezof
 USE control_pyroelectric_tensor, ONLY : lpyro, lpyrof
 USE polarization_vector, ONLY : write_pyro_on_file, compute_pyro, &
                                 piezo_pyro
-USE equilibrium_conf, ONLY : celldm0, omega0
 USE anharmonic, ONLY : e_piezo_tensor_t, uint_t, pyro_t, piezo_pyro_t, &
                        alpha_anis_t, zeu_t, alpha_int_t, celldm_t, &
                        uint_zsisa_t, alpha_int_zsisa_t
@@ -42,12 +41,10 @@ USE mp_world,    ONLY : world_comm
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filepyro, filename
 CHARACTER(LEN=80) :: astring
-INTEGER :: igeo, nvar, ndata, jdata
 REAL(DP) :: alpha_t(3,3), omega, alpha_aux(6)
 REAL(DP) :: compute_omega_geo
 
-INTEGER :: i, j, idata, itemp, ipol, jpol, startt, lastt
-INTEGER :: compute_nwork 
+INTEGER :: itemp, startt, lastt
 
 ALLOCATE(dtau_duint(3,nat,max_nint_var))
 
@@ -165,7 +162,7 @@ USE ph_freq_anharmonic_pt, ONLY : e_piezo_tensorf_pt, uintf_pt, pyrof_pt, &
                                piezo_pyrof_pt, alphaf_anis_pt,            & 
                                zeuf_pt, alphaf_int_pt, celldmf_pt,        &
                                uintf_zsisa_pt, alphaf_int_zsisa_pt
-USE data_files, ONLY : flanhar
+USE data_files,  ONLY : flanhar
 USE temperature, ONLY : ntemp, temp
 USE voigt,       ONLY : to_voigt2
 USE mp,          ONLY : mp_sum
@@ -174,13 +171,10 @@ USE mp_world,    ONLY : world_comm
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filepyro, filename
 CHARACTER(LEN=80) :: astring
-INTEGER :: igeo, nvar, ndata, jdata
 REAL(DP) :: alpha_t(3,3), omega, alpha_aux(6)
 REAL(DP) :: compute_omega_geo
-REAL(DP), ALLOCATABLE :: x(:,:), f(:), xfit(:), x1(:,:)
 
-INTEGER :: i, j, idata, itemp, startt, lastt, ipressp, ipress
-INTEGER :: compute_nwork 
+INTEGER :: itemp, startt, lastt, ipressp, ipress
 
 ALLOCATE(dtau_duint(3,nat,max_nint_var))
 pyro_pt=0.0_DP
@@ -294,7 +288,7 @@ USE io_global,  ONLY : stdout
 USE initial_conf, ONLY : ibrav_save
 USE ions_base,  ONLY : nat
 USE control_thermo, ONLY : ltherm_dos, ltherm_freq
-USE control_pressure, ONLY : ipress_plot, npress_plot, press
+USE control_pressure, ONLY : ipress_plot, npress_plot, press, npress
 USE control_piezoelectric_tensor, ONLY : lpiezo_ptt, lpiezof_ptt
 USE control_pyroelectric_tensor, ONLY : lpyro_ptt, lpyrof_ptt
 USE control_atomic_pos, ONLY : dtau_duint, iconstr_internal, &
@@ -310,8 +304,7 @@ USE ph_freq_anharmonic_ptt, ONLY : e_piezo_tensorf_ptt, uintf_ptt, pyrof_ptt, &
                                zeuf_ptt, alphaf_int_ptt, celldmf_ptt,       &
                                uintf_zsisa_ptt, alphaf_int_zsisa_ptt
 USE data_files, ONLY : flanhar
-USE temperature, ONLY : ntemp, temp, ntemp_plot, itemp_plot
-USE control_pressure, ONLY : npress
+USE temperature, ONLY : temp, ntemp_plot, itemp_plot
 USE voigt,       ONLY : to_voigt2
 USE mp,          ONLY : mp_sum
 USE mp_world,    ONLY : world_comm
@@ -319,12 +312,10 @@ USE mp_world,    ONLY : world_comm
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filepyro, filename
 CHARACTER(LEN=80) :: astring
-INTEGER :: igeo, nvar, ndata, jdata
 REAL(DP) :: alpha_t(3,3), omega, alpha_aux(6)
 REAL(DP) :: compute_omega_geo
 
-INTEGER :: i, j, idata, itemp, startp, lastp, itempp, ipress
-INTEGER :: compute_nwork 
+INTEGER :: itemp, startp, lastp, itempp, ipress
 
 ALLOCATE(dtau_duint(3,nat,max_nint_var))
 pyro_ptt=0.0_DP

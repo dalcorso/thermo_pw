@@ -15,30 +15,19 @@ SUBROUTINE manage_ph_postproc(igeom)
 !  thermodynamic quantities.
 !
 USE kinds,            ONLY : DP
-USE constants,        ONLY : amu_ry, ry_to_cmm1
-USE thermo_mod,       ONLY : z_geo, freq_geo, omega_geo, epsilon_zero_geo, what
+USE thermo_mod,       ONLY : what
 USE control_thermo,   ONLY : ltherm, ltherm_dos, ltherm_freq, set_internal_path
-USE ifc,              ONLY : has_zstar, epsil_ifc, zeu
-USE ions_base,        ONLY : nat, ityp, amass
-USE control_epsilon_infty, ONLY : lepsilon_infty_geo, lzeu_geo
 USE ph_freq_thermodynamics, ONLY : ph_freq_save
-USE thermo_mod,       ONLY : epsilon_infty_geo, zeu_geo
 USE control_paths,    ONLY : disp_nqs
 USE control_phrun,    ONLY : auxdyn
 USE control_atomic_pos, ONLY : linterpolate_tau
-USE data_files,       ONLY : fl_dielectric
-USE dielectric_constant, ONLY : write_dielectric_properties_to_file, &
-                                polar_mode_permittivity_tpw
-USE mp_images,          ONLY : my_image_id, root_image
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: igeom
 
 CHARACTER(LEN=256) :: filedata, filerap, fileout, gnu_filename, filenameps, &
-                      filepbs, filename
+                      filepbs
 CHARACTER(LEN=6) :: int_to_char
-COMPLEX(DP), ALLOCATABLE :: z(:,:)
-REAL(DP), ALLOCATABLE :: w2(:)
 INTEGER :: imode, na, nta, ipol, jpol
 !
 !   Compute the interatomic force constants from the dynamical matrices
@@ -74,38 +63,8 @@ IF (ltherm) THEN
       CALL write_thermo(igeom)
    ENDIF
    CALL plot_thermo()
-   IF (has_zstar) THEN
-      epsilon_infty_geo(:,:,igeom)=epsil_ifc(:,:)
-      zeu_geo(:,:,:,igeom)=zeu(:,:,:)
-      lepsilon_infty_geo(igeom)=.TRUE.
-      lzeu_geo(igeom)=.TRUE.
 !
-!   Compute epsilon_zero. The routine requires the displacement
-!
-      ALLOCATE(w2(3*nat))
-      ALLOCATE(z(3*nat,3*nat))
-      DO imode = 1, 3*nat
-         DO na = 1,nat
-            nta = ityp(na)
-            DO ipol = 1,3
-               z((na-1)*3+ipol,imode) = z_geo((na-1)*3+ipol,imode,igeom)/ &
-                                    SQRT(amu_ry*amass(nta))
-            ENDDO
-         ENDDO
-         w2(imode)=SIGN((freq_geo(imode,igeom) /  RY_TO_CMM1)**2, &
-                                               freq_geo(imode,igeom) )
-      ENDDO
-      CALL polar_mode_permittivity_tpw( nat, epsilon_infty_geo(1,1,igeom), &
-            z, zeu_geo(1,1,1,igeom), w2,         &
-            omega_geo(igeom), epsilon_zero_geo(1,1,igeom))
-      DEALLOCATE(z)
-      DEALLOCATE(w2)
-      filename='elastic_constants/'//TRIM(fl_dielectric)//'.g'//&
-                                              TRIM(int_to_char(igeom))
-      IF (my_image_id==root_image) &
-         CALL write_dielectric_properties_to_file(filename, nat, &
-             epsilon_infty_geo(1,1,igeom), zeu_geo(1,1,1,igeom) )
-   ENDIF
+   CALL write_epsilon_zero(igeom)
 
    IF (what/='mur_lc_t') DEALLOCATE(ph_freq_save(igeom)%nu)
 ENDIF
