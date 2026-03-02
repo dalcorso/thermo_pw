@@ -1856,7 +1856,7 @@ SELECT CASE (laue)
 !  C_35
 !
       base_data = 16*ngeo_strain+1
-      CALL el_cons_ij_ene(1, 1, 'C_35', ngeo_strain, &
+      CALL el_cons_ij_ene(3, 3, 'C_35', ngeo_strain, &
              epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
 
       press=- alpha(2) / omega
@@ -1869,7 +1869,7 @@ SELECT CASE (laue)
 !  C_34
 !
       base_data = 17*ngeo_strain+1
-      CALL el_cons_ij_ene(1, 1, 'C_34', ngeo_strain, &
+      CALL el_cons_ij_ene(3, 3, 'C_34', ngeo_strain, &
              epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
 
       press=- alpha(2) / omega
