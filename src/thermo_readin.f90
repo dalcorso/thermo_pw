@@ -43,7 +43,7 @@ SUBROUTINE thermo_readin()
                                    flpgrun, fl_el_cons, flpband, flvec,    &
                                    flepsilon, floptical, fleldos, fleltherm, &
                                    fldosfrq, flelanhar, flgeom, fl_piezo,  &
-                                   fl_polar, fl_dielectric
+                                   fl_polar, fl_dielectric, fl_piezom
   USE temperature,          ONLY : tmin, tmax, deltat, ntemp, ntemp_plot,  &
                                    temp_plot_=>temp_plot, itemp_plot,      &
                                    sigma_ry_=>sigma_ry
@@ -266,6 +266,7 @@ SUBROUTINE thermo_readin()
                             poly_degree,                    &
                             fl_el_cons,                     &
                             fl_piezo,                       &
+                            fl_piezom,                      &
                             fl_dielectric,                  &
                             fl_polar,                       &
                             lcm_ec,                         &
@@ -531,6 +532,7 @@ SUBROUTINE thermo_readin()
   poly_degree=0
   fl_el_cons='output_el_cons.dat'
   fl_piezo='output_piezo.dat'
+  fl_piezom='output_piezomag.dat'
   fl_dielectric='output_dielectric.dat'
   fl_polar='output_polar.dat'
   nmove=5

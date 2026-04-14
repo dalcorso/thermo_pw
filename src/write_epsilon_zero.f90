@@ -14,7 +14,8 @@ USE thermo_mod,       ONLY : z_geo, freq_geo, omega_geo, epsilon_zero_geo, &
                              epsilon_infty_geo, zeu_geo, epsilon_zerom1_geo
 USE ions_base,        ONLY : nat, ityp, amass
 USE ifc,              ONLY : has_zstar, epsil_ifc, zeu
-USE control_epsilon_infty, ONLY : lepsilon_infty_geo, lzeu_geo
+USE control_epsilon_infty, ONLY : lepsilon_infty_geo, lzeu_geo, &
+                                  lepsilon_zero_geo
 USE dielectric_constant, ONLY : write_dielectric_properties_to_file, &
                                 polar_mode_permittivity_tpw
 USE matrix_inversion, ONLY : invmat
@@ -73,5 +74,7 @@ IF (my_image_id==root_image) &
              epsilon_infty_geo(1,1,igeom), epsilon_zero_geo(1,1,igeom),  &
              zeu_geo(1,1,1,igeom) )
 
+
+lepsilon_zero_geo(igeom)=.TRUE.
 RETURN
 END SUBROUTINE write_epsilon_zero

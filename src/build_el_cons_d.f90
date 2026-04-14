@@ -8,24 +8,20 @@
 SUBROUTINE build_el_cons_d()
   !-----------------------------------------------------------------------
   !
-  !  This routine computes the inverse of the dielectric constant and
-  !  if the piezoelectric tensor for all geometries is available
-  !  and the elastic constants calculated at constan E
-  !  are available, it computes the elastic constant at
-  !  constant D.
-  !
+  !  If the inverse of the dielectric constant, the piezoelectric tensor 
+  !  and the elastic constants calculated at constant E
+  !  are available for a certain number of geometries, it computes 
+  !  the elastic constants at constant D for these geometries.
   !
   USE kinds,             ONLY : DP
   USE thermo_mod,        ONLY : epsilon_zerom1_geo
   USE io_global,         ONLY : stdout
-
-  USE control_piezoelectric_tensor, ONLY : piezo_available,  &
-                                        piezo_geo_available, &
-                                        e_piezo_tensor_geo
-
-  USE control_elastic_constants, ONLY : el_con_geo, el_con_d_geo, &
-                      el_cons_available, el_cons_geo_available, el_con_geo, &
-                      frozen_ions
+  USE control_epsilon_infty, ONLY : epsilon_infty_geo_available
+  USE control_piezoelectric_tensor, ONLY : piezo_available,                 &
+                                piezo_geo_available, e_piezo_tensor_geo
+  USE control_elastic_constants, ONLY : el_con_geo, el_con_d_geo,           &
+                                el_cons_available, el_cons_geo_available,   &
+                                el_con_geo, frozen_ions
   USE elastic_constants, ONLY : ece_to_ecd, print_elastic_constants
 
   USE thermo_mod,        ONLY : tot_ngeo
@@ -35,6 +31,7 @@ SUBROUTINE build_el_cons_d()
   !
   IF (.NOT.(piezo_available).AND..NOT.(piezo_geo_available)) RETURN
   IF (.NOT.(el_cons_available).AND..NOT.(el_cons_geo_available)) RETURN
+  IF (.NOT.(epsilon_infty_geo_available)) RETURN
   
   DO igeom=1,tot_ngeo
      CALL ece_to_ecd(e_piezo_tensor_geo(1,1,igeom), &

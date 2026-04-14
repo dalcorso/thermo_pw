@@ -20,12 +20,12 @@ USE thermo_mod,        ONLY : energy_geo, tot_ngeo_eos
 USE control_elastic_constants, ONLY : ngeo_strain, ngeom,                 &
                               work_base, el_con_omega_geo,                &
                               start_geometry_qha, last_geometry_qha,      &
-                              lelastic, lelasticf, all_geometry_done_geo, &
+                              all_geometry_done_geo, &
                               epsil_geo, min_y_t, el_con_at_geo,          &
                               el_con_celldm_geo, el_con_omega_geo,        &
                               min_yf_t, nstep_ec, nint_var_ec, stypec
 USE initial_conf,      ONLY : ibrav_save
-USE thermo_sym,        ONLY : code_group_save
+USE thermo_sym,        ONLY : code_group_save, code_group_ext_save
 USE control_atomic_pos, ONLY : max_nint_var
 USE elastic_constants, ONLY : epsilon_geo, el_con, el_compliances,         &
                               compute_elastic_constants_ene,               &
@@ -113,7 +113,9 @@ DO itemp = startt, lastt
 
          CALL compute_proper_piezo_tensor(tot_b_phase_eff,               &
               epsilon_geo_eff, work_base_eff, ngeo_strain,               &
-              ibrav_save, code_group_save, el_con_at_geo(:,:,igeom) )
+              ibrav_save, code_group_save, code_group_ext_save,          &
+              el_con_at_geo(:,:,igeom) )
+
          e_piezo_tensor=e_piezo_tensor * el_con_celldm_geo(1,igeom) / &
                                            el_con_omega_geo(igeom)
          label="Proper total piezoelectric tensor gamma_ij [ C/m^2 ]"
@@ -140,8 +142,8 @@ DO itemp = startt, lastt
 
          CALL compute_proper_piezo_tensor(tot_b_phase_eff,               &
               epsilon_geo_eff, work_base_eff, ngeo_strain,               &
-              ibrav_save, code_group_save, el_con_at_geo(:,:,igeom) )
-
+              ibrav_save, code_group_save, code_group_ext_save,          &
+              el_con_at_geo(:,:,igeom) )
 
          e_piezo_tensor=e_piezo_tensor * el_con_celldm_geo(1,igeom) / &
                                            el_con_omega_geo(igeom)
@@ -164,8 +166,8 @@ DO igeom=start_geometry_qha, last_geometry_qha
                              '.e_piezo', filename, igeom)
       lpiezo=.TRUE.
       CALL write_piezo_tensor_on_file(temp, ntemp, ibrav_save,          &
-                       code_group_save, e_piezo_tensor_eos_t(:,:,:,igeom),  &
-                                              filename, 0, 1)
+               code_group_save, code_group_ext_save, &
+               e_piezo_tensor_eos_t(:,:,:,igeom), filename, 0, 1)
       DO istep=1, nstep_ec
          DO igeo=1, ngeo_strain
             IF (stypec(istep)) THEN
@@ -189,8 +191,8 @@ DO igeom=start_geometry_qha, last_geometry_qha
       filename=TRIM(filename)//'_ph'
       lpiezof=.TRUE.
       CALL write_piezo_tensor_on_file(temp, ntemp, ibrav_save,               &
-                       code_group_save, e_piezo_tensorf_eos_t(:,:,:,igeom),  &
-                                              filename, 0, 1)
+                       code_group_save, code_group_ext_save,                 &
+                       e_piezo_tensorf_eos_t(:,:,:,igeom), filename, 0, 1)
       DO istep=1, nstep_ec
          DO igeo=1, ngeo_strain
             IF (stypec(istep)) THEN

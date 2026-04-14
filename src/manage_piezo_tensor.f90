@@ -13,7 +13,7 @@ USE kinds,                ONLY : DP
 USE initial_conf,         ONLY : ibrav_save
 USE constants,            ONLY : electron_si, bohr_radius_si
 USE thermo_mod,           ONLY : energy_geo
-USE thermo_sym,           ONLY : code_group_save
+USE thermo_sym,           ONLY : code_group_save, code_group_ext_save
 USE control_elastic_constants, ONLY : ngeo_strain, frozen_ions, epsil_geo, &
                                  el_con_ibrav_geo, el_con_celldm_geo,      &
                                  el_con_at_geo, el_con_celldm_geo,         &
@@ -64,20 +64,13 @@ REAL(DP) :: fact
 CALL mp_sum(energy_geo, world_comm)
 energy_geo=energy_geo / nproc_image
 !
-!  the elastic constants are calculated here if we have the energies
+!  the piezoelectric tensor is calculated here if we have the energies
 !  of all geometries
 !
-lreturn=.FALSE.
-work_base = nwork / ngeom
-DO igeom=start_geometry_qha,last_geometry_qha
-   base_ind=(igeom-1)*work_base
-   DO iwork=1,work_base
-      lreturn=lreturn.OR.(ABS(energy_geo(base_ind+iwork))<1.D-10)
-   ENDDO
-ENDDO
+CALL check_for_early_return(energy_geo, nwork, ngeom, lreturn)
 IF (lreturn) RETURN
 !
-!  First collect the polarization among all images
+!  First collect the polarization and the Berry phase among all images
 !
 CALL mp_sum(polar_strain, world_comm)
 polar_strain=polar_strain / nproc_image
@@ -124,7 +117,8 @@ DO igeom=start_geometry_qha, last_geometry_qha
 !
    CALL compute_improper_piezo_tensor(polar_strain_eff(:,base_ind+1), &
                 epsilon_geo_eff(:,:,base_ind+1), work_base_eff, ngeo_strain, &
-                ibrav_save, code_group_save)
+                ibrav_save, code_group_save, code_group_ext_save)
+
    g_piezo_tensor_geo(:,:,igeom)=g_piezo_tensor(:,:)
 
    label="Improper total piezoelectric tensor gamma_ij [ 10^{-2} e/(a.u.)^2 ]"
@@ -136,7 +130,8 @@ DO igeom=start_geometry_qha, last_geometry_qha
 
    CALL proper_improper_piezo(polar0_geo(:,igeom), g_piezo_tensor, &
                                                       eg_piezo_tensor, -1)
-   CALL clean_piezo_tensor(eg_piezo_tensor, ibrav_save, code_group_save)
+   CALL clean_piezo_tensor(eg_piezo_tensor, ibrav_save, code_group_save, &
+                                                    code_group_ext_save)
 
    eg_piezo_tensor_geo(:,:,igeom)=eg_piezo_tensor(:,:)
 
@@ -150,9 +145,10 @@ DO igeom=start_geometry_qha, last_geometry_qha
 !
 !  and then the proper one (this can be compared with experiments)
 !
-   CALL compute_proper_piezo_tensor(tot_b_phase_eff(:,base_ind+1),  &
+   CALL compute_proper_piezo_tensor(tot_b_phase_eff(:,base_ind+1),      &
            epsilon_geo_eff(:,:,base_ind+1), work_base_eff, ngeo_strain, &
-           ibrav_save, code_group_save, el_con_at_geo(:,:,igeom) )
+           ibrav_save, code_group_save, code_group_ext_save,            &
+           el_con_at_geo(:,:,igeom) )
 
    e_piezo_tensor=e_piezo_tensor * el_con_celldm_geo(1,igeom) / &
                                            el_con_omega_geo(igeom)

@@ -787,7 +787,7 @@ USE kinds, ONLY : DP
 USE thermo_mod, ONLY : uint_geo
 USE control_elastic_constants, ONLY : ngeom, nstep_ec, ngeo_strain,     &
                                       stype, nmove, atom_step, min_y,   &
-                                      epsil_y, lfp, start_geometry_qha, &
+                                      epsil_y, start_geometry_qha, &
                                       last_geometry_qha, ninternal_ec,  &
                                       nint_var_ec, stypec
 USE quadratic_surfaces,       ONLY : fit_multi_quadratic, &
@@ -989,13 +989,10 @@ USE kinds, ONLY : DP
 USE thermo_mod, ONLY : uint_geo
 USE control_elastic_constants, ONLY : nstep_ec, ngeo_strain,            &
                                       stype, nmove, atom_step,          &
-                                      epsil_y, lfp, start_geometry_qha, &
+                                      epsil_y, start_geometry_qha, &
                                       last_geometry_qha, ninternal_ec,  &
                                       nint_var_ec, stypec, max_nint_var
-USE quadratic_surfaces,       ONLY : fit_multi_quadratic, &
-                                     find_quadratic_extremum
 USE quartic_surfaces,         ONLY : fit_multi_quartic, &
-                                     find_quartic_extremum, &
                                      evaluate_fit_quartic
 USE control_quartic_energy,  ONLY : lsolve
 USE polynomial, ONLY : poly4, clean_poly, init_poly
@@ -1125,3 +1122,177 @@ ENDDO
 
 RETURN
 END SUBROUTINE redefine_polar_qha_t
+
+!------------------------------------------------------------------------
+SUBROUTINE redefine_mag(mag_strain, nwork, mag_strain_eff, epsil_geo, &
+                                                          epsil_geo_eff)
+!------------------------------------------------------------------------
+!
+! This routine is used when the piezomagnetic tensor is calculated by
+! moving atoms in some strain types. It receives the list of magnetization 
+! and remove all the magnetizations that correspond to the same strain 
+! but different atomic positions and substitutes them with the 
+! magnetization at the minimum. To obtain it, it fits the magnetization 
+! as a function of the atomic positions with a second order polynomial 
+! and finds the minimum.
+!
+USE kinds, ONLY : DP
+USE thermo_mod, ONLY : uint_geo
+USE control_elastic_constants, ONLY : ngeom, nstep_ec, ngeo_strain,     &
+                                      stype, nmove, atom_step, min_y,   &
+                                      epsil_y, start_geometry_qha, &
+                                      last_geometry_qha, ninternal_ec,  &
+                                      nint_var_ec, stypec
+USE quartic_surfaces,         ONLY : fit_multi_quartic, &
+                                     evaluate_fit_quartic
+USE control_quartic_energy,  ONLY : lsolve
+USE polynomial, ONLY : poly4, clean_poly, init_poly
+IMPLICIT NONE
+
+INTEGER, INTENT(IN)   :: nwork
+REAL(DP), INTENT(IN)  :: mag_strain(3,nwork)
+REAL(DP), INTENT(OUT) :: mag_strain_eff(3,nwork)
+REAL(DP), INTENT(IN)  :: epsil_geo(nwork)
+REAL(DP), INTENT(OUT) :: epsil_geo_eff(nwork)
+
+INTEGER :: igeom, istep, igeo, iwork, jwork, imov, ivar, ipol
+REAL(DP) :: mag(3)
+REAL(DP), ALLOCATABLE :: y(:), yv(:,:), mstrain(:,:)
+TYPE(poly4) :: p4(3)
+
+
+
+iwork=0     ! run on current energy index
+jwork=0     ! run on previous energy index
+!
+!  Increase the iwork and jwork for the geometries not computed
+!
+DO igeom=1, start_geometry_qha-1
+   DO istep=1, nstep_ec
+      DO igeo=1, ngeo_strain
+         IF (stype(istep)) THEN
+            DO imov=1, nmove
+               jwork=jwork+1
+            ENDDO
+         ELSEIF (stypec(istep)) THEN
+            DO imov=1, ninternal_ec(istep)
+               jwork=jwork+1
+            ENDDO
+         ELSE
+            jwork=jwork+1
+         ENDIF
+         iwork=iwork+1
+      ENDDO
+   ENDDO
+ENDDO
+
+DO igeom=start_geometry_qha, last_geometry_qha
+   DO istep=1, nstep_ec
+      DO igeo=1, ngeo_strain
+         IF (stype(istep)) THEN
+            ALLOCATE(mstrain(nmove,3))
+            ALLOCATE(y(nmove))
+            DO ipol=1,3
+               CALL init_poly(1,p4(ipol))
+            ENDDO
+            DO imov=1, nmove
+               jwork=jwork+1
+               DO ipol=1,3 
+                  mstrain(imov,ipol)=mag_strain(ipol,jwork)
+               ENDDO
+!
+!  y is the displacement (in a.u.) of the atom with respect to the uniformely
+!  strained position
+!
+               y(imov)=(imov-(nmove+1.0_DP)/2.0_DP)*atom_step(istep)
+            ENDDO
+!          
+!           Fit the data with a quartic and evaluate them at the minimum
+!           of the internal parameter that should be already available.
+!
+            DO ipol=1,3
+               CALL fit_multi_quartic(nmove,1,lsolve,y,mstrain(1,ipol),p4(ipol))
+               CALL evaluate_fit_quartic(1,min_y(1,igeo,istep,igeom),mag(ipol),&
+                                                       p4(ipol))
+            ENDDO
+            iwork=iwork+1
+            mag_strain_eff(iwork,:)= mag(:)
+            epsil_geo_eff(iwork)=epsil_geo(jwork)
+            DO ipol=1,3
+               CALL clean_poly(p4(ipol))
+            ENDDO
+            DEALLOCATE(mstrain)
+            DEALLOCATE(y)
+         ELSEIF (stypec(istep)) THEN
+            ALLOCATE(yv(nint_var_ec(istep),ninternal_ec(istep)))
+            ALLOCATE(mstrain(ninternal_ec(istep),3))
+            DO ipol=1,3
+               CALL init_poly(nint_var_ec(istep),p4(ipol))
+            ENDDO
+            DO imov=1, ninternal_ec(istep)
+               jwork=jwork+1
+               DO ipol=1,3 
+                  mstrain(imov,ipol)=mag_strain(ipol,jwork)
+               ENDDO
+!
+!  y is the displacement (in a.u.) of the atom with respect to the uniformely
+!  strained position
+!
+               DO ivar=1,nint_var_ec(istep)
+                  yv(ivar, imov)= uint_geo(ivar, jwork)
+               ENDDO
+!              WRITE(6,*) yv(ivar, imov), ene(imov)
+            ENDDO
+!
+!   fit the polarization and the berry phase with a quartic and interpolate
+!   at the internal parameter at the minimum energy (already available)
+!
+            DO ipol=1,3
+               CALL fit_multi_quartic(ninternal_ec(istep),nint_var_ec(istep),&
+                                   lsolve,yv,mstrain(1,ipol),p4(ipol))
+               CALL evaluate_fit_quartic(nint_var_ec(istep),               &
+                    min_y(1:nint_var_ec(istep),igeo,istep,igeom),mag(ipol),&
+                                                               p4(ipol))
+            ENDDO
+            iwork=iwork+1
+            mag_strain_eff(:,iwork)=mag(:)
+            epsil_geo_eff(iwork)=epsil_geo(jwork)
+            DEALLOCATE(mstrain)
+            DEALLOCATE(yv)
+            DO ipol=1,3
+               CALL clean_poly(p4(ipol))
+            ENDDO
+         ELSE
+            jwork=jwork+1
+            iwork=iwork+1
+            mag_strain_eff(:,iwork)=mag_strain(:,jwork)
+            epsil_geo_eff(iwork)=epsil_geo(jwork)
+         ENDIF
+      ENDDO
+   ENDDO
+ENDDO
+!
+!  Increase the iwork and jwork for the geometries not computed
+!
+DO igeom=last_geometry_qha+1, ngeom
+   DO istep=1, nstep_ec
+      DO igeo=1, ngeo_strain
+         IF (stype(istep)) THEN
+            DO imov=1, nmove
+               jwork=jwork+1
+            ENDDO
+         ELSEIF (stypec(istep)) THEN
+            DO imov=1, ninternal_ec(istep)
+               jwork=jwork+1
+            ENDDO
+         ELSE
+            jwork=jwork+1
+         ENDIF
+         iwork=iwork+1
+      ENDDO
+   ENDDO
+ENDDO
+
+
+RETURN
+END SUBROUTINE redefine_mag

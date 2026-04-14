@@ -23,7 +23,7 @@ SUBROUTINE bcast_thermo_input()
                               flpgrun, flenergy, flprojlayer, flpbs, flvec,   &
                               flepsilon, fleldos, fleltherm, fldosfrq,        &
                               fl_el_cons, flelanhar, flgeom, fl_piezo,        &
-                              fl_polar, fl_dielectric
+                              fl_polar, fl_dielectric, fl_piezom
   USE postscript_files, ONLY : flpsband, flpsdisp, flpsdos,                   &
                               flpstherm,  flpsanhar, flpsmur, flpskeconv,     &
                               flpsnkconv, flpsgrun, flpsenergy, flpsepsilon,  &
@@ -366,6 +366,7 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( flpsanhar, meta_ionode_id, world_comm )
   CALL mp_bcast( flgeom, meta_ionode_id, world_comm )
   CALL mp_bcast( fl_piezo, meta_ionode_id, world_comm )
+  CALL mp_bcast( fl_piezom, meta_ionode_id, world_comm )
   CALL mp_bcast( fl_dielectric, meta_ionode_id, world_comm )
   CALL mp_bcast( fl_polar, meta_ionode_id, world_comm )
 !

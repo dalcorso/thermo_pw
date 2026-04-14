@@ -14,15 +14,17 @@ SUBROUTINE run_iwork(iwork, part, iq, irr, igeom)
 ! and copy the output of pw.x in the variables of thermo_pw.
 !
 USE control_thermo,       ONLY : lpwscf, lpwband, lstress, lphonon, lberry, &
-                                 lef, geometry, all_geometries_together
+                                 lef, lmag, geometry, all_geometries_together
 USE control_qe,           ONLY : use_ph_images
 USE control_phrun,        ONLY : auxdyn
 USE thermo_mod,           ONLY : energy_geo, ef_geo, iwho, tau_geo
 USE elastic_constants,    ONLY : sigma_geo
 USE piezoelectric_tensor, ONLY : polar_strain, tot_b_phase, nppl
+USE piezomagnetic_tensor, ONLY : mag_strain
 USE control_piezoelectric_tensor, ONLY : decompose_piezo
 USE ener,                 ONLY : etot, ef
 USE force_mod,            ONLY : sigma
+USE noncollin_module,     ONLY : magtot_nc
 USE ions_base,            ONLY : tau, nat
 USE freq_ph,              ONLY : fpol
 USE io_global,            ONLY : stdout
@@ -61,6 +63,7 @@ IF (lpwscf(iwork).OR.lpwband(iwork)) THEN
    IF (run) THEN
       CALL do_pwscf(exit_status, lpwscf(iwork))
       IF (lpwscf(iwork)) energy_geo(iwork)=etot
+      IF (lmag(iwork)) mag_strain(1:3,iwork) = magtot_nc(1:3)
       IF (lef(iwork)) ef_geo(iwork)=ef
       IF (lstress(iwork)) sigma_geo(:,:,iwork)=sigma(:,:)
       IF (lberry(iwork)) CALL do_berry(exit_status, polar_strain(1,iwork), &

@@ -15,7 +15,7 @@ SUBROUTINE manage_syn_2(nwork)
 USE kinds, ONLY : DP
 USE control_elastic_constants, ONLY : ngeom
 USE control_thermo,   ONLY : lelastic_const, lpiezoelectric_tensor, &
-                             lpolarization
+                             lpiezomagnetic_tensor, lpolarization
 USE control_eldos,    ONLY : lel_free_energy
 
 IMPLICIT NONE
@@ -29,6 +29,8 @@ IF (lel_free_energy) CALL manage_el_free_energy()
 IF (lelastic_const) CALL manage_elastic_cons(nwork, 1)
 !
 IF (lpiezoelectric_tensor) CALL manage_piezo_tensor(nwork, ngeom)
+!
+IF (lpiezomagnetic_tensor) CALL manage_piezom_tensor(nwork, ngeom)
 !
 IF (lpolarization) CALL manage_polarization(nwork)
 

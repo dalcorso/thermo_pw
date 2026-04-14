@@ -35,7 +35,7 @@ USE anharmonic,     ONLY : celldm_t, e_piezo_tensor_t, d_piezo_tensor_t, &
                            el_comp_t
 USE ph_freq_anharmonic, ONLY : celldmf_t, e_piezo_tensorf_t, &
                                d_piezo_tensorf_t, el_compf_t
-USE rap_point_group, ONLY : code_group
+USE thermo_sym, ONLY : code_group_save, code_group_ext_save
 USE polynomial, ONLY : poly1, poly2, poly3, poly4, init_poly, clean_poly
 USE data_files, ONLY : flanhar
 USE temperature, ONLY : ntemp, temp
@@ -119,14 +119,14 @@ IF (ltherm_dos) THEN
                pt_p2, pt_p3, pt_p4, poly_degree_elc, e_piezo_tensor_t)
    lpiezo=.TRUE.
    filepiezo='anhar_files/'//TRIM(flanhar)//'.e_piezo'
-   CALL write_piezo_tensor_on_file(temp, ntemp, ibrav_save, code_group, &
-                               e_piezo_tensor_t, filepiezo, 0, 1)
+   CALL write_piezo_tensor_on_file(temp, ntemp, ibrav_save, code_group_save, &
+                      code_group_ext_save, e_piezo_tensor_t, filepiezo, 0, 1)
    CALL compute_d_piezo_tensor_t(e_piezo_tensor_t,el_comp_t,d_piezo_tensor_t,&
                                 ntemp)
    lpiezo_d=.TRUE.
    filepiezo='anhar_files/'//TRIM(flanhar)//'.d_piezo'
-   CALL write_piezo_tensor_on_file(temp, ntemp, ibrav_save, code_group, &
-                               d_piezo_tensor_t, filepiezo, 0, 2)
+   CALL write_piezo_tensor_on_file(temp, ntemp, ibrav_save, code_group_save, &
+                      code_group_ext_save, d_piezo_tensor_t, filepiezo, 0, 2)
 ENDIF
 
 IF (ltherm_freq) THEN
@@ -134,14 +134,14 @@ IF (ltherm_freq) THEN
               pt_p1, pt_p2, pt_p3, pt_p4, poly_degree_elc, e_piezo_tensorf_t)
    lpiezof=.TRUE.
    filepiezo='anhar_files/'//TRIM(flanhar)//'.e_piezo_ph'
-   CALL write_piezo_tensor_on_file(temp, ntemp, ibrav_save, code_group, &
-                                    e_piezo_tensorf_t, filepiezo, 0, 1)
+   CALL write_piezo_tensor_on_file(temp, ntemp, ibrav_save, code_group_save, &
+                 code_group_ext_save, e_piezo_tensorf_t, filepiezo, 0, 1)
    CALL compute_d_piezo_tensor_t(e_piezo_tensorf_t,el_compf_t,&
                                              d_piezo_tensorf_t,ntemp)
    lpiezof_d=.TRUE.
    filepiezo='anhar_files/'//TRIM(flanhar)//'.d_piezo_ph'
-   CALL write_piezo_tensor_on_file(temp, ntemp, ibrav_save, code_group, &
-                               d_piezo_tensorf_t, filepiezo, 0, 2)
+   CALL write_piezo_tensor_on_file(temp, ntemp, ibrav_save, code_group_save, &
+              code_group_ext_save, d_piezo_tensorf_t, filepiezo, 0, 2)
 ENDIF
 
 DEALLOCATE(x)
@@ -334,7 +334,7 @@ USE kinds,      ONLY : DP
 USE io_global,  ONLY : stdout
 USE thermo_mod, ONLY : omega_geo_eos, celldm_geo_eos
 USE initial_conf, ONLY : ibrav_save
-USE rap_point_group, ONLY : code_group
+USE thermo_sym, ONLY : code_group_save, code_group_ext_save
 USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
 
 USE linear_surfaces, ONLY : fit_multi_linear
@@ -442,7 +442,8 @@ IF (ltherm_dos) THEN
       lpiezo_pt=.TRUE.
       filepiezo='anhar_files/'//TRIM(flanhar)//'.e_piezo_press'
       CALL add_value(filepiezo, press(ipress))
-      CALL write_piezo_tensor_on_file(temp, ntemp, ibrav_save, code_group, &
+      CALL write_piezo_tensor_on_file(temp, ntemp, ibrav_save, &
+           code_group_save, code_group_ext_save, &
            e_piezo_tensor_pt(:,:,:,ipressp), filepiezo, 0, 1)
       CALL compute_d_piezo_tensor_t(e_piezo_tensor_pt(:,:,:,ipressp), &
            el_comp_pt(:,:,:,ipressp),d_piezo_tensor_pt(:,:,:,ipressp), ntemp)
@@ -450,7 +451,8 @@ IF (ltherm_dos) THEN
       filepiezo='anhar_files/'//TRIM(flanhar)//'.d_piezo_press'
       CALL add_value(filepiezo, press(ipress))
 
-      CALL write_piezo_tensor_on_file(temp, ntemp, ibrav_save, code_group, &
+      CALL write_piezo_tensor_on_file(temp, ntemp, ibrav_save, &
+           code_group_save, code_group_ext_save,               &
            d_piezo_tensor_pt(:,:,:,ipressp), filepiezo, 0, 2)
    ENDDO
 ENDIF
@@ -458,20 +460,22 @@ ENDIF
 IF (ltherm_freq) THEN
    DO ipressp=1, npress_plot
       ipress=ipress_plot(ipressp)
-      CALL interpolate_piezo_tensor(celldmf_pt(:,:,ipressp), nvar, &
+      CALL interpolate_piezo_tensor(celldmf_pt(:,:,ipressp), nvar,  &
            ibrav_save, pt_p1, pt_p2, pt_p3, pt_p4, poly_degree_elc, &
            e_piezo_tensorf_pt(:,:,:,ipressp))
       lpiezof_pt=.TRUE.
       filepiezo='anhar_files/'//TRIM(flanhar)//'.e_piezo_ph_press'
       CALL add_value(filepiezo, press(ipress))
-      CALL write_piezo_tensor_on_file(temp, ntemp, ibrav_save, code_group, &
+      CALL write_piezo_tensor_on_file(temp, ntemp, ibrav_save,      &
+           code_group_save, code_group_ext_save,                    &
            e_piezo_tensorf_pt(:,:,:,ipressp), filepiezo, 0, 1)
       CALL compute_d_piezo_tensor_t(e_piezo_tensorf_pt(:,:,:,ipressp), &
            el_compf_pt(:,:,:,ipressp),d_piezo_tensorf_pt(:,:,:,ipressp), ntemp)
       lpiezof_d_pt=.TRUE.
       filepiezo='anhar_files/'//TRIM(flanhar)//'.d_piezo_ph_press'
       CALL add_value(filepiezo, press(ipress))
-      CALL write_piezo_tensor_on_file(temp, ntemp, ibrav_save, code_group, &
+      CALL write_piezo_tensor_on_file(temp, ntemp, ibrav_save,      &
+           code_group_save, code_group_ext_save, &
            d_piezo_tensorf_pt(:,:,:,ipressp), filepiezo, 0, 2)
    ENDDO
 ENDIF
@@ -507,7 +511,7 @@ USE kinds,      ONLY : DP
 USE io_global,  ONLY : stdout
 USE thermo_mod, ONLY : omega_geo_eos, celldm_geo_eos
 USE initial_conf, ONLY : ibrav_save
-USE rap_point_group, ONLY : code_group
+USE thermo_sym, ONLY : code_group_save, code_group_ext_save
 USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
 
 USE linear_surfaces, ONLY : fit_multi_linear
@@ -617,14 +621,16 @@ IF (ltherm_dos) THEN
       lpiezo_ptt=.TRUE.
       filepiezo='anhar_files/'//TRIM(flanhar)//'.e_piezo_temp'
       CALL add_value(filepiezo, temp(itemp))
-      CALL write_piezo_tensor_on_file(press, npress, ibrav_save, code_group, &
+      CALL write_piezo_tensor_on_file(press, npress, ibrav_save, &
+           code_group_save, code_group_ext_save, &
            e_piezo_tensor_ptt(:,:,:,itempp), filepiezo, 2, 1)
       CALL compute_d_piezo_tensor_t(e_piezo_tensor_ptt(:,:,:,itempp), &
            el_comp_ptt(:,:,:,itempp),d_piezo_tensor_ptt(:,:,:,itempp), npress)
       lpiezo_d_ptt=.TRUE.
       filepiezo='anhar_files/'//TRIM(flanhar)//'.d_piezo_temp'
       CALL add_value(filepiezo, temp(itemp))
-      CALL write_piezo_tensor_on_file(press, npress, ibrav_save, code_group, &
+      CALL write_piezo_tensor_on_file(press, npress, ibrav_save, &
+           code_group_save, code_group_ext_save,                 &
            d_piezo_tensor_ptt(:,:,:,itempp), filepiezo, 2, 2)
    ENDDO
 ENDIF
@@ -638,14 +644,16 @@ IF (ltherm_freq) THEN
       lpiezof_ptt=.TRUE.
       filepiezo='anhar_files/'//TRIM(flanhar)//'.e_piezo_ph_temp'
       CALL add_value(filepiezo, temp(itemp))
-      CALL write_piezo_tensor_on_file(press, npress, ibrav_save, code_group, &
+      CALL write_piezo_tensor_on_file(press, npress, ibrav_save, &
+           code_group_save, code_group_ext_save, &
            e_piezo_tensorf_ptt(:,:,:,itempp), filepiezo, 2, 1)
       CALL compute_d_piezo_tensor_t(e_piezo_tensorf_ptt(:,:,:,itempp), &
            el_compf_ptt(:,:,:,itempp),d_piezo_tensorf_ptt(:,:,:,itempp), npress)
       lpiezof_d_ptt=.TRUE.
       filepiezo='anhar_files/'//TRIM(flanhar)//'.d_piezo_ph_temp'
       CALL add_value(filepiezo, temp(itemp))
-      CALL write_piezo_tensor_on_file(press, npress, ibrav_save, code_group, &
+      CALL write_piezo_tensor_on_file(press, npress, ibrav_save, &
+           code_group_save, code_group_ext_save,                 &
            d_piezo_tensorf_ptt(:,:,:,itempp), filepiezo, 2, 2)
    ENDDO
 ENDIF

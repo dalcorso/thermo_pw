@@ -15,7 +15,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   !  In addition to the variables that control the run it allocates, for
   !  the tasks that require it:
   !  ibrav_geo, celldm_geo, at_geo, omega_geo, energy_geo
-  !  lpwscf, lstress, lberry, lphonon
+  !  lpwscf, lstress, lberry, lphonon, lmag
   !
   USE kinds,          ONLY : DP
   USE thermo_mod,     ONLY : what, omega_geo, energy_geo, ef_geo, &
@@ -27,9 +27,10 @@ SUBROUTINE initialize_thermo_work(nwork, part)
                              lph, lef, lpwscf_syn_1, lbands_syn_1, lq2r,   &
                              ltherm, lconv_ke_test, lconv_nk_test,    &
                              lstress, lelastic_const, lpiezoelectric_tensor, &
+                             lpiezomagnetic_tensor, &
                              lberry, lpolarization, lpart2_pw, do_scf_relax, &
                              ldos_syn_1, ltherm_dos, ltherm_freq, after_disp, &
-                             lectqha, ltau_from_file, lpiezotqha
+                             lectqha, ltau_from_file, lpiezotqha, lmag
   USE control_pwrun,  ONLY : do_punch
   USE control_conv,   ONLY : nke, ke, deltake, nkeden, deltakeden, keden, &
                              nnk, nk_test, deltank, nsigma, sigma_test,   &  
@@ -53,6 +54,8 @@ SUBROUTINE initialize_thermo_work(nwork, part)
                                    e_piezo_tensor_fi_geo,                   &
                                    d_piezo_tensor_geo, polar0_geo,          &
                                    found_dos_pt, found_ph_pt, doberry
+  USE control_piezomagnetic_tensor, ONLY : piezom_tensor_geo, &
+                                   mag0_geo
   USE temperature,   ONLY : ntemp
   USE control_eldos, ONLY : lel_free_energy
   USE gvecw,          ONLY : ecutwfc
@@ -225,7 +228,10 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            lpart2_pw=.TRUE.
            tot_ngeo=1
            tot_ngeo_eos=tot_ngeo
-           IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
+        CASE ('scf_piezomagnetic_tensor')
+           lpart2_pw=.TRUE.
+           tot_ngeo=1
+           tot_ngeo_eos=tot_ngeo
         CASE ('scf_polarization') 
            lpart2_pw=.TRUE.
            tot_ngeo=1
@@ -335,6 +341,20 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
         CASE ('mur_lc_piezoelectric_tensor') 
+           do_punch=.FALSE.
+           lev_syn_1=.TRUE.
+           lpwscf_syn_1=do_scf_relax
+           CALL initialize_mur(nwork)
+           last_geometry1=nwork
+           start_geometry=MAX(1, start_geometry_save)
+           last_geometry=MIN(nwork, last_geometry_save)
+           lpart2_pw=.TRUE.
+           tot_ngeo=1
+           tot_ngeo_eos=tot_ngeo
+           IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
+        CASE ('mur_lc_piezomagnetic_tensor') 
            do_punch=.FALSE.
            lev_syn_1=.TRUE.
            lpwscf_syn_1=do_scf_relax
@@ -608,6 +628,22 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            energy_geo=0.0_DP
            lpiezoelectric_tensor=.TRUE.
            do_punch=.TRUE.
+        CASE ('scf_piezomagnetic_tensor', 'mur_lc_piezomagnetic_tensor')
+
+           CALL deallocate_basic_variables()
+           iwho=2
+           CALL set_unperturbed_geometry(ngeom)
+           start_geometry_qha=1
+           last_geometry_qha=1
+           CALL initialize_piezom_tensor(1,nwork) 
+           start_geometry=MAX(1, start_geometry_save)
+           last_geometry=MIN(nwork, last_geometry_save)
+           ALLOCATE(energy_geo(nwork))
+           ALLOCATE(mag0_geo(3,ngeom))
+           ALLOCATE(piezom_tensor_geo(3,6,ngeom))
+           energy_geo=0.0_DP
+           lpiezomagnetic_tensor=.TRUE.
+           do_punch=.TRUE.
         CASE ('scf_polarization', 'mur_lc_polarization')
            CALL deallocate_basic_variables()
            nwork=1
@@ -639,12 +675,14 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   ALLOCATE( lef(nwork) )
   ALLOCATE( lstress(nwork) )
   ALLOCATE( lberry(nwork) )
+  ALLOCATE( lmag(nwork) )
   ALLOCATE( lphonon(nwork) )
   lpwscf  = .FALSE.
   lpwband = .FALSE.
   lef = .FALSE.
   lstress = .FALSE.
   lberry  = .FALSE.
+  lmag  = .FALSE.
   lphonon = .FALSE.
 
   IF (part == 1) THEN
@@ -662,6 +700,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               'mur_lc_t',                    &
               'mur_lc_elastic_constants',    &
               'mur_lc_piezoelectric_tensor', &
+              'mur_lc_piezomagnetic_tensor', &
               'mur_lc_polarization' )
            DO iwork=start_geometry1,last_geometry1
               lpwscf(iwork)=.TRUE.
@@ -744,6 +783,11 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            DO iwork=start_geometry,last_geometry
               lpwscf(iwork)=.TRUE.
               lberry(iwork)=.TRUE.
+           ENDDO
+        CASE ('scf_piezomagnetic_tensor', 'mur_lc_piezomagnetic_tensor')
+           DO iwork=start_geometry,last_geometry
+              lpwscf(iwork)=.TRUE.
+              lmag(iwork)=.TRUE.
            ENDDO
         CASE('piezoelectric_tensor_geo') 
            CALL initialize_flags_for_ph(nwork)
@@ -1920,21 +1964,25 @@ SUBROUTINE allocate_ph_gamma(nwork)
 USE ions_base, ONLY : nat
 USE thermo_mod, ONLY : epsilon_infty_geo, zeu_geo, freq_geo, z_geo, &
                        epsilon_zero_geo, epsilon_zerom1_geo
-USE control_epsilon_infty, ONLY : lzeu_geo, lepsilon_infty_geo
+USE control_epsilon_infty, ONLY : lzeu_geo, lepsilon_infty_geo, &
+                                  lepsilon_zero_geo
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: nwork
 
 ALLOCATE( epsilon_infty_geo(3,3,nwork) )
 ALLOCATE( zeu_geo(3,3,nat,nwork) )
-ALLOCATE( lepsilon_infty_geo(nwork) )
-ALLOCATE( lzeu_geo(nwork) )
 ALLOCATE( epsilon_zero_geo(3,3,nwork) )
 ALLOCATE( epsilon_zerom1_geo(3,3,nwork) )
 ALLOCATE( freq_geo(3*nat,nwork) )
 ALLOCATE( z_geo(3*nat,3*nat,nwork) )
 
+ALLOCATE( lepsilon_infty_geo(nwork) )
+ALLOCATE( lzeu_geo(nwork) )
+ALLOCATE( lepsilon_zero_geo(nwork) )
+
 lepsilon_infty_geo=.FALSE.
 lzeu_geo=.FALSE.
+lepsilon_zero_geo=.FALSE.
 
 RETURN
 END SUBROUTINE allocate_ph_gamma

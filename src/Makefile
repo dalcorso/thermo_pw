@@ -28,6 +28,7 @@ check_dynmat_all_geo_on_file.o \
 check_el_cons.o \
 check_el_cons_qha.o \
 check_existence.o \
+check_for_early_return.o \
 check_file_exists.o \
 check_initial_status_all_geo.o \
 check_thermo_all_geo.o \
@@ -70,6 +71,7 @@ generate_k_along_lines_kz.o \
 geometry_file.o \
 initialize_elastic_cons.o \
 initialize_piezo_tensor.o \
+initialize_piezom_tensor.o \
 initialize_thermo_work.o \
 interpolate_atomic_positions.o \
 interpolate_bfact.o \
@@ -92,6 +94,7 @@ manage_energy_minimum.o \
 manage_hot_electrons.o \
 manage_piezo_tensor.o \
 manage_piezo_tensor_qha.o \
+manage_piezom_tensor.o \
 manage_plot_anhar.o \
 manage_ph.o \
 manage_ph_all_geometries.o \
