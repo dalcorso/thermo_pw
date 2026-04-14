@@ -33,17 +33,19 @@ MODULE polarization_vector
 
   DATA  py_names / 'p_{1} ', 'p_{2} ', 'p_{3} ' /
 
-  INTEGER, PARAMETER :: py_types=10
+  INTEGER, PARAMETER :: py_types=12
 
   INTEGER :: py_code_group(py_types)  ! code of the point group for each type
-  DATA  py_code_group /  1, 3, 4, 5, 6, 7, 12, 13, 14, 15 /
+  DATA  py_code_group /  1, 3, 3, 4, 4, 5, 6, 7, 12, 13, 14, 15 /
 
   INTEGER  :: py_present(py_elements, py_types)
 
   DATA py_present / &
        1,2,3, & ! 1  C_1
-       1,0,3, & ! 3  C_s
-       0,2,0, & ! 4  C_2
+       1,0,3, & ! 3  C_s  ! b unique
+       1,2,0, & ! 3  C_s  ! c unique 
+       0,2,0, & ! 4  C_2  ! b unique
+       0,0,3, & ! 4  C_2  ! c unique
        0,0,3, & ! 5  C_3
        0,0,3, & ! 6  C_4
        0,0,3, & ! 7  C_6
@@ -112,10 +114,7 @@ END SUBROUTINE write_polarization
 SUBROUTINE read_polarization(filename,polar,berry_phase)
 !-------------------------------------------------------------------------
 !
-!  This routine writes the Berry phase and the polarization on file.
-!  It must be called after computing the polarization
-!  It saves: 
-!  the spontaneous polarization of the current geometry
+!  This routine reads the Berry phase and the polarization from file.
 !
 USE io_global, ONLY : ionode, ionode_id
 USE mp_images, ONLY : intra_image_comm
@@ -292,10 +291,10 @@ RETURN
 END SUBROUTINE write_pyro_on_file
 !
 !-----------------------------------------------------------------------
-FUNCTION get_py_type(code_group)
+FUNCTION get_py_type(code_group, ibrav)
 !-----------------------------------------------------------------------
 INTEGER :: get_py_type
-INTEGER, INTENT(IN) :: code_group
+INTEGER, INTENT(IN) :: code_group, ibrav
 
 INTEGER :: itype, aux_type
 
@@ -304,7 +303,24 @@ DO itype=1,py_types
    IF (py_code_group(itype)==code_group) aux_type=itype
 ENDDO
 IF (aux_type==0) CALL errore('get_py_type','code_group not available',1)
-
+!
+!  for code group 3 (C_s) and 4 (C_2) we must distinguish if the 
+!  monoclinic lattice is b unique or c unique
+!
+IF (code_group==3) THEN
+   IF (ibrav < 0) THEN 
+      aux_type=2
+   ELSE
+      aux_type=3
+   ENDIF
+ENDIF
+IF (code_group==4) THEN
+   IF (ibrav < 0) THEN 
+      aux_type=4
+   ELSE
+      aux_type=5
+   ENDIF
+ENDIF
 get_py_type=aux_type
 RETURN
 END FUNCTION get_py_type
