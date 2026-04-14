@@ -559,19 +559,27 @@ and the electronic thermodynamic properties obtained in the first
 step in the \texttt{therm\_files} directory.
 
 \newpage
-{\color{coral}\section{How do I calculate the temperature dependent
-elastic constants of a solid relaxing the internal degree of freedom?}}
-\color{black}
-This is possible only within the ZSISA approximation. This
-means that for each value of the crystal parameters the ions are
-relaxed (with \texttt{frozen\_ions=.FALSE.}) to their $T=0$ K equilibrium
-positions. The phonons (and the free energy) are computed only in this
-configuration.
-For solids in which internal relaxations are described by one degree of 
-freedom, it is possible to compute the phonons (and the free energy) for
-several values of this parameter. The free energy as a function of this
-parameter is then minimized at each strain and each temperature 
-(See the parameter \texttt{stype} in \texttt{what='scf\_elastic\_constants'}).
+{\color{coral}\section{How do I calculate temperature-dependent elastic 
+constants while relaxing internal degrees of freedom?}}
+
+This calculation is performed within the ZSISA approximation
+when \texttt{what='scf\_elastic\_constants'}, 
+\texttt{what='mur\_lc\_elastic\_constants'}, or
+\texttt{what='elastic\_constants\_geo'}.
+For a given set of crystal parameters, ions are relaxed to their 
+$0$ K equilibrium positions (using \texttt{frozen\_ions=.FALSE.}), 
+and phonons-along with the resulting free energy-are computed 
+specifically for that configuration.
+
+For systems where internal relaxations involve only a few degrees of 
+freedom (currently limited to a maximum of $3$), you can compute the 
+phonons and free energy across a grid of these parameters. The code 
+then minimizes the free energy with respect to these parameters 
+for every set of crystal parameters and for each temperature (FFEM).
+To move a single atom in one direction: Use \texttt{stype} and related 
+input variables.
+To utilize internal degrees of freedom: Use \texttt{stypec} and related
+input variables. 
 
 \newpage
 {\color{coral}\section{How do I calculate the frequency dependent dielectric
@@ -610,7 +618,7 @@ the equilibrium reference. The code then calculates the derivatives
 of the polarization with respect to strain to determine the 
 piezoelectric tensor components. If you need the code to first determine 
 the energy-minimum geometry, use 
-\texttt{what='mur\_lc\_piezoelectric\_tensor'}. 
+\texttt{what='mur\_lc\_piezoelectric\_tensor'}.
 Additionally, you can 
 compute the clamped-ion version of the tensor by setting 
 \texttt{clamped\_ions=.TRUE.}. 
@@ -618,7 +626,8 @@ Unlike the full calculation, this requires a specific multi-step workflow
 to ensure the internal coordinates are handled correctly.
 Before running the piezoelectric calculation, you must determine 
 the relaxed atomic positions for each equilibrium configuration.
-Perform a preliminary run using \texttt{what='mur\_lc'}.
+Perform a preliminary run using \texttt{what='scf'} or 
+\texttt{what='mur\_lc'}.
 This step generates the necessary atomic position files in the
 \texttt{restart} directory.
 Once the relaxation run is complete, you must manually move the data:
@@ -689,7 +698,7 @@ To compute the piezoelectric tensor across various geometries, set
 \texttt{what='piezoelectric\_tensor\_geo'}.
 When this option is active, the code performs the following steps:
 It uses the equilibrium geometries previously identified by 
-\texttt{what='mur\_lc\_t'} as a baseline to generate a set of 
+\texttt{what='mur\_lc'} as a baseline to generate a set of 
 distorted configurations. It computes the Berry phase for each 
 distorted structure and it calculates the piezoelectric tensor for 
 every equilibrium geometry.
@@ -703,6 +712,22 @@ This workflow produces a piezoelectric tensor where internal coordinates
 are optimized via FFEM after strain. These files are saved in the 
 \texttt{anhar\_files} directory and are ready to be interpolated 
 across your temperature (and/or pressure) range.
+
+\newpage
+{\color{coral}\section{How do I calculate temperature-dependent 
+elastic constants at constant electric displacement?}}
+\color{black}
+
+To perform this calculation, use the option \texttt{what='mur\_lc\_t'}. 
+The elastic constants are calculated provided the following 
+data files are available for enough geometries to allow interpolation:
+The elastic constants at a constant electric field ({\bf E});
+The piezoelectric tensor; The dielectric properties.
+The code looks for the elastic constants and piezoelectric tensor 
+in the \texttt{anhar\_files} directory (if computed via QHA or FFEM) 
+or the \texttt{elastic\_constants} directory (if computed only at $0$ K). 
+If data exists in both locations, the code prioritizes the files 
+in \texttt{anhar\_files}.
 
 \newpage
 

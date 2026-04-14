@@ -328,7 +328,10 @@ CALL check_el_cons_qha()
 !
 IF (.NOT.(el_cons_qha_available.OR.el_consf_qha_available)) &
                                                 CALL check_el_cons()
-
+!
+!  Check if the piezoelectric tensor is on file. 
+!  First look for the ones calculated with FFEM.
+!
 CALL check_piezo_tensor_qha()
 !
 !  If not found search those at T=0 K in the elastic_constants directory
