@@ -72,11 +72,11 @@ MODULE piezoelectric_tensor
          'd_{21}', 'd_{22}', 'd_{23}', 'd_{24}', 'd_{25}', 'd_{26}', &
          'd_{31}', 'd_{32}', 'd_{33}', 'd_{34}', 'd_{35}', 'd_{36}' /
 
-  INTEGER, PARAMETER :: pt_types=20
+  INTEGER, PARAMETER :: pt_types=24
 
   INTEGER :: pt_code_group(pt_types)  ! code of the point group for each type
-  DATA  pt_code_group / 30, 28, 26, 24, 21, 17, 15, 14, 13, 12, 11, 10, &
-                         9, 8, 7, 6, 5, 4, 3, 1 /
+  DATA  pt_code_group / 30, 28, 26, 24, 21, 21, 17, 15, 14, 13, 13, 12, &
+                         11, 10, 9, 8, 7, 6, 5, 4, 4, 3, 3, 1 /
 
   INTEGER  :: pt_present(pt_elements, pt_types)
 
@@ -85,21 +85,25 @@ MODULE piezoelectric_tensor
        0,0,0,1,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, & ! 28  T
        0,0,0,2,3,0, 0,0,0,0,0,0, 1,0,0,0,0,4, & ! 26  S_4
        0,0,0,1,0,0, 0,0,0,0,0,0, 0,0,0,0,0,2, & ! 24  D_2d
-       1,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, & ! 21  D_3h
+       1,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, & ! 21  D_3h 106 m perp x2
+       0,0,0,0,0,0, 0,1,0,0,0,0, 0,0,0,0,0,0, & ! 21  D_3h 107 m perp x1
        1,0,0,0,0,0, 0,2,0,0,0,0, 0,0,0,0,0,0, & ! 17  C_3h
        0,0,0,0,3,0, 0,0,0,0,0,0, 1,0,2,0,0,0, & ! 15  C_6v
        0,0,0,0,3,0, 0,0,0,0,0,0, 1,0,2,0,0,0, & ! 14  C_4v
-       0,0,0,0,4,0, 0,1,0,0,0,0, 2,0,3,0,0,0, & ! 13  C_3v
+       0,0,0,0,4,0, 0,1,0,0,0,0, 2,0,3,0,0,0, & ! 13  C_3v 72  m perp x1
+       1,0,0,0,4,0, 0,0,0,0,0,0, 2,0,3,0,0,0, & ! 13  C_3v 73  m perp x2
        0,0,0,0,4,0, 0,0,0,5,0,0, 1,2,3,0,0,0, & ! 12  C_2v
        0,0,0,1,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, & ! 11  D_6
        0,0,0,1,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, & ! 10  D_4
        1,0,0,2,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, & !  9  D_3
        0,0,0,1,0,0, 0,0,0,0,2,0, 0,0,0,0,0,3, & !  8  D_2
-       0,0,0,2,3,0, 0,0,0,0,0,0, 1,0,0,0,0,0, & !  7  C_6
+       0,0,0,3,4,0, 0,0,0,0,0,0, 1,0,2,0,0,0, & !  7  C_6
        0,0,0,3,4,0, 0,0,0,0,0,0, 1,0,2,0,0,0, & !  6  C_4
        1,0,0,5,6,0, 0,2,0,0,0,0, 3,0,4,0,0,0, & !  5  C_3
-       0,0,0,4,0,5, 1,2,3,0,6,0, 0,0,0,7,0,8, & !  4  C_2
-       1,2,3,0,4,0, 0,0,0,5,0,6, 7,8,9,0,10,0, & !  3  C_s
+       0,0,0,4,0,5, 1,2,3,0,6,0, 0,0,0,7,0,8, & !  4  C_2 b-unique
+       0,0,0,4,5,0, 0,0,0,6,7,0, 1,2,3,0,0,8, & !  4  C_2 c-unique
+       1,2,3,0,4,0, 0,0,0,5,0,6, 7,8,9,0,10,0, & !  3  C_s b-unique
+       1,2,3,0,0,4, 5,6,7,0,0,8, 0,0,0,9,10,0, & !  3  C_s c-unique
        1,2,3,4,5,6, 7,8,9,10,11,12, 13,14,15,16,17,18 / !  1  C_1
 
   PUBLIC g_piezo_tensor, polar_strain, compute_improper_piezo_tensor, &
@@ -114,6 +118,7 @@ MODULE piezoelectric_tensor
          read_piezo_tensor, write_piezo_tensor_on_file,   &
          read_piezo_tensor_from_file,                     &
          read_piezo_tensor_fi,                            &
+         set_piezo_strain_list,                           &
          pt_names, ptd_names, pt_types, pt_present,       &
          pt_code_group, get_pt_type, compute_relax_piezo, &
          e_piezo_tensor_fi, eg_piezo_tensor_fi,           &
@@ -392,20 +397,26 @@ exists=.TRUE.
 
 RETURN
 END SUBROUTINE read_piezo_tensor_fi
+!
 !---------------------------------------------------------------------------
 SUBROUTINE compute_improper_piezo_tensor(polar_geo, epsil_geo, nwork, &
-                                ngeo, ibrav, code_group)
+                                ngeo, ibrav, code_group, code_group_ext)
 !---------------------------------------------------------------------------
 !
-!  This routine computes the piezoelectric tensor g_{\alpha,m} by fitting the 
+!  This routine computes the piezoelectric tensor g_{i,m} (i=1,..,3,
+!  m=1,...,6) by fitting the 
 !  polarization strain relation with a second order polynomial. This is 
-!  calculated on the basis of the solid point group.
-!  The polarization enters in units of e/bohr^2
+!  calculated on the basis of the solid point group. For C_3v and D_3h
+!  we need also the extended code group because the mirror can be
+!  perpendicular to x or to y.
+!  The polarization enters in units of e/bohr^2. 
+!  On output we have the improper piezoelectric tensor in the array
+!  g_piezo_tensor
 !
 !
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: polar_geo(3,nwork), epsil_geo(3,3,nwork)
-INTEGER, INTENT(IN) :: ngeo, ibrav, code_group, nwork
+INTEGER, INTENT(IN) :: ngeo, ibrav, code_group, code_group_ext, nwork
 INTEGER :: i, j, igeo, alpha, ind, mn
 LOGICAL :: check_group_ibrav
 
@@ -418,37 +429,50 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
 !
 !  C_s   Monoclinic
 !
-!        WRITE(stdout,'(5x,"( g11  g12  g13   .   d15   .  )")') 
-!        WRITE(stdout,'(5x,"(  .    .    .   g24   .   d26 )")') 
-!        WRITE(stdout,'(5x,"( g31  g32  g33   .   d35   .  )")') 
+!        b-unique
+!
+!        WRITE(stdout,'(5x,"( g11  g12  g13   .   g15   .  )")') 
+!        WRITE(stdout,'(5x,"(  .    .    .   g24   .   g26 )")') 
+!        WRITE(stdout,'(5x,"( g31  g32  g33   .   g35   .  )")') 
 !
         CALL piezo_ij(1, 1, ngeo, epsil_geo, polar_geo )
         CALL piezo_ij(1, 2, ngeo, epsil_geo(1,1,ngeo+1), polar_geo(1,ngeo+1) )
-        CALL piezo_ij(1, 3, ngeo, epsil_geo(1,1,2*ngeo+1), polar_geo(1,2*ngeo+1) )
-        CALL piezo_ij(2, 6, ngeo, epsil_geo(1,1,5*ngeo+1), polar_geo(1,5*ngeo+1) )
+        CALL piezo_ij(1, 3, ngeo, epsil_geo(1,1,2*ngeo+1), &
+                                                       polar_geo(1,2*ngeo+1) )
+        CALL piezo_ij(2, 6, ngeo, epsil_geo(1,1,5*ngeo+1), &
+                                                       polar_geo(1,5*ngeo+1) )
+        CALL piezo_ij(3, 5, ngeo, epsil_geo(1,1,4*ngeo+1), &
+                                                       polar_geo(1,4*ngeo+1) )
 
-        IF (ibrav==-12) THEN
-
-           CALL piezo_ij(3, 1, ngeo, epsil_geo(1,1,1), polar_geo(1,1))
-           CALL piezo_ij(3, 2, ngeo, epsil_geo(1,1,ngeo+1), polar_geo(1,ngeo+1))
+        IF (ibrav==-12.OR.ibrav==-13) THEN
+!
+!   b-unique
+!
+           CALL piezo_ij(3, 1, ngeo, epsil_geo, polar_geo)
+           CALL piezo_ij(3, 2, ngeo, epsil_geo(1,1,ngeo+1), &
+                                     polar_geo(1,ngeo+1))
            CALL piezo_ij(3, 3, ngeo, epsil_geo(1,1,2*ngeo+1), &
                                      polar_geo(1,2*ngeo+1))
            CALL piezo_ij(2, 4, ngeo, epsil_geo(1,1,3*ngeo+1), &
                                      polar_geo(1,3*ngeo+1))
            CALL piezo_ij(1, 5, ngeo, epsil_geo(1,1,4*ngeo+1), &
                                      polar_geo(1,4*ngeo+1))
-           CALL piezo_ij(3, 5, ngeo, epsil_geo(1,1,4*ngeo+1), &
-                                     polar_geo(1,4*ngeo+1))
 
         ELSE
-!                WRITE(stdout,'(5x,"( d11  d12  d13   .    .   d16 )")') 
-!                WRITE(stdout,'(5x,"( d21  d22  d23   .    .   d26 )")') 
-!                WRITE(stdout,'(5x,"(  .    .    .   d16  d26   .  )")') 
+!
+!    c-unique
+!
+!                WRITE(stdout,'(5x,"( g11  g12  g13   .    .   g16 )")') 
+!                WRITE(stdout,'(5x,"( g21  g22  g23   .    .   g26 )")') 
+!                WRITE(stdout,'(5x,"(  .    .    .   g34  g35   .  )")') 
 !
            CALL piezo_ij(2, 1, ngeo, epsil_geo(1,1,1), polar_geo(1,1))
-           CALL piezo_ij(2, 2, ngeo, epsil_geo(1,1,ngeo+1), polar_geo(1,ngeo+1))
+           CALL piezo_ij(2, 2, ngeo, epsil_geo(1,1,ngeo+1), &
+                                            polar_geo(1,ngeo+1))
            CALL piezo_ij(2, 3, ngeo, epsil_geo(1,1,2*ngeo+1), &
                                             polar_geo(1,2*ngeo+1))
+           CALL piezo_ij(3, 4, ngeo, epsil_geo(1,1,3*ngeo+1), &
+                                            polar_geo(1,3*ngeo+1))
            CALL piezo_ij(1, 6, ngeo, epsil_geo(1,1,5*ngeo+1), &
                                             polar_geo(1,5*ngeo+1))
 
@@ -457,78 +481,116 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
 !
 !  C_2   Monoclinic
 !
-        CALL piezo_ij(1, 4, ngeo, epsil_geo(1,1,3*ngeo+1), polar_geo(1,3*ngeo+1))
-        CALL piezo_ij(2, 5, ngeo, epsil_geo(1,1,4*ngeo+1), polar_geo(1,4*ngeo+1))
-        CALL piezo_ij(3, 6, ngeo, epsil_geo(1,1,5*ngeo+1), polar_geo(1,5*ngeo+1))
+        CALL piezo_ij(1, 4, ngeo, epsil_geo(1,1,3*ngeo+1), & 
+                                                  polar_geo(1,3*ngeo+1))
+        CALL piezo_ij(2, 5, ngeo, epsil_geo(1,1,4*ngeo+1), &
+                                                  polar_geo(1,4*ngeo+1))
+        CALL piezo_ij(3, 6, ngeo, epsil_geo(1,1,5*ngeo+1), &
+                                                  polar_geo(1,5*ngeo+1))
 
-        IF (ibrav==-12) THEN
-!            WRITE(stdout,'(5x,"(  .    .    .   d14   .   d16 )")') 
-!            WRITE(stdout,'(5x,"( d21  d22  d23   .   d25   .  )")') 
-!            WRITE(stdout,'(5x,"(  .    .    .   d34   .   d36 )")') 
+        IF (ibrav==-12.OR.ibrav==-13) THEN
+!
+!    b-unique
+!
+!            WRITE(stdout,'(5x,"(  .    .    .   g14   .   g16 )")') 
+!            WRITE(stdout,'(5x,"( g21  g22  g23   .   g25   .  )")') 
+!            WRITE(stdout,'(5x,"(  .    .    .   g34   .   g36 )")') 
 
-           CALL piezo_ij(2, 1, ngeo, epsil_geo(1,1,1), polar_geo(1,1))
-           CALL piezo_ij(2, 2, ngeo, epsil_geo(1,1,ngeo+1), polar_geo(1,ngeo+1))
+           CALL piezo_ij(2, 1, ngeo, epsil_geo, polar_geo)
+           CALL piezo_ij(2, 2, ngeo, epsil_geo(1,1,ngeo+1), &
+                                                     polar_geo(1,ngeo+1))
            CALL piezo_ij(2, 3, ngeo, epsil_geo(1,1,2*ngeo+1), &
                                                      polar_geo(1,2*ngeo+1))
-           CALL piezo_ij(1, 6, ngeo, epsil_geo(1,1,5*ngeo+1), &
-                                                     polar_geo(1,5*ngeo+1))
            CALL piezo_ij(3, 4, ngeo, epsil_geo(1,1,3*ngeo+1), &
                                                      polar_geo(1,3*ngeo+1))
+           CALL piezo_ij(1, 6, ngeo, epsil_geo(1,1,5*ngeo+1), &
+                                                     polar_geo(1,5*ngeo+1))
         ELSE
-!            WRITE(stdout,'(5x,"(  .    .    .   d14  d15   .  )")') 
-!            WRITE(stdout,'(5x,"(  .    .    .   d24  d25   .  )")') 
-!            WRITE(stdout,'(5x,"( d31  d32  d33   .    .   d36 )")') 
 !
-            CALL piezo_ij(3, 1, ngeo, epsil_geo(1,1,1), polar_geo(1,1))
-            CALL piezo_ij(3, 2, ngeo, epsil_geo(1,1,ngeo+1), polar_geo(1,ngeo+1))
+!    c-unique
+!
+!            WRITE(stdout,'(5x,"(  .    .    .   g14  g15   .  )")') 
+!            WRITE(stdout,'(5x,"(  .    .    .   g24  g25   .  )")') 
+!            WRITE(stdout,'(5x,"( g31  g32  g33   .    .   g36 )")') 
+!
+            CALL piezo_ij(3, 1, ngeo, epsil_geo, polar_geo)
+            CALL piezo_ij(3, 2, ngeo, epsil_geo(1,1,ngeo+1),   &
+                                      polar_geo(1,ngeo+1))
             CALL piezo_ij(3, 3, ngeo, epsil_geo(1,1,2*ngeo+1), &
                                       polar_geo(1,2*ngeo+1))
-            CALL piezo_ij(1, 5, ngeo, epsil_geo(1,1,4*ngeo+1), &
-                                      polar_geo(1,4*ngeo+1))
             CALL piezo_ij(2, 4, ngeo, epsil_geo(1,1,3*ngeo+1), &
                                       polar_geo(1,3*ngeo+1))
+            CALL piezo_ij(1, 5, ngeo, epsil_geo(1,1,4*ngeo+1), &
+                                      polar_geo(1,4*ngeo+1))
 
          ENDIF
 
+      CASE(5) 
+!
+!   C_3
+!
+!            WRITE(stdout,'(5x,"( g11 -g11   .   g14  g15 -g22 )")') 
+!            WRITE(stdout,'(5x,"(-g22  g22   .   g15 -g14 -g11 )")') 
+!            WRITE(stdout,'(5x,"( g31 -g31  g33   .    .    .  )")') 
+!
+            CALL piezo_ij(1, 1, ngeo, epsil_geo, polar_geo)
+            g_piezo_tensor(1,2) = -g_piezo_tensor(1,1)
+            g_piezo_tensor(2,6) = -g_piezo_tensor(1,1)
+            CALL piezo_ij(2, 1, ngeo, epsil_geo, polar_geo)
+            g_piezo_tensor(2,2) = -g_piezo_tensor(2,1)
+            g_piezo_tensor(1,6) =  g_piezo_tensor(2,1)
+            CALL piezo_ij(3, 1, ngeo, epsil_geo, polar_geo)
+            g_piezo_tensor(3,2) = -g_piezo_tensor(3,1)
+            CALL piezo_ij(3, 3, ngeo, epsil_geo(1,1,ngeo+1),  & 
+                                                    polar_geo(1,ngeo+1))
+            CALL piezo_ij(1, 4, ngeo, epsil_geo(1,1,2*ngeo+1), &
+                                                   polar_geo(1,2*ngeo+1))
+            g_piezo_tensor(2,5) = -g_piezo_tensor(1,4)
+            CALL piezo_ij(2, 4, ngeo, epsil_geo(1,1,2*ngeo+1), &
+                                                   polar_geo(1,2*ngeo+1))
+            g_piezo_tensor(1,5) = -g_piezo_tensor(2,4)
       CASE(6,7)
 !
 !  C_4, tetragonal, C_6 hexagonal
 !
-!             WRITE(stdout,'(5x,"(  .    .    .   d14  d15   .  )")') 
-!             WRITE(stdout,'(5x,"(  .    .    .   d24 -d14   .  )")') 
-!             WRITE(stdout,'(5x,"( d31  d31  d33   .    .    .  )")') 
+!             WRITE(stdout,'(5x,"(  .    .    .   g14  g15   .  )")') 
+!             WRITE(stdout,'(5x,"(  .    .    .   g15 -g14   .  )")') 
+!             WRITE(stdout,'(5x,"( g31  g31  g33   .    .    .  )")') 
 !
-        CALL piezo_ij(3, 1, ngeo, epsil_geo(1,1,1), polar_geo(1,1))
+        CALL piezo_ij(3, 1, ngeo, epsil_geo, polar_geo)
         g_piezo_tensor(3,2) = g_piezo_tensor(3,1)
         CALL piezo_ij(3, 3, ngeo, epsil_geo(1,1,ngeo+1), polar_geo(1,ngeo+1))
-        CALL piezo_ij(1, 4, ngeo, epsil_geo(1,1,2*ngeo+1), polar_geo(1,2*ngeo+1))
+        CALL piezo_ij(1, 4, ngeo, epsil_geo(1,1,2*ngeo+1), &
+                                                       polar_geo(1,2*ngeo+1))
         g_piezo_tensor(2,5) = -g_piezo_tensor(1,4)
-        CALL piezo_ij(2, 4, ngeo, epsil_geo(1,1,2*ngeo+1), polar_geo(1,2*ngeo+1))
-        CALL piezo_ij(1, 5, ngeo, epsil_geo(1,1,3*ngeo+1), polar_geo(1,3*ngeo+1))
+        CALL piezo_ij(2, 4, ngeo, epsil_geo(1,1,2*ngeo+1), &
+                                                       polar_geo(1,2*ngeo+1))
+        g_piezo_tensor(1,5) = g_piezo_tensor(2,4)
 
      CASE(8)
 !
 !  D_2 (222) Orthorombic
 !
-!         WRITE(stdout,'(5x,"(  .    .    .   d14   .    .  )")') 
-!         WRITE(stdout,'(5x,"(  .    .    .    .   d25   .  )")') 
-!         WRITE(stdout,'(5x,"(  .    .    .    .    .   d36 )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .   g14   .    .  )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .    .   g25   .  )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .    .    .   g36 )")') 
 
-        CALL piezo_ij(1, 4, ngeo, epsil_geo(1,1,1), polar_geo(1,1))
+        CALL piezo_ij(1, 4, ngeo, epsil_geo, polar_geo)
         CALL piezo_ij(2, 5, ngeo, epsil_geo(1,1,ngeo+1), polar_geo(1,ngeo+1))
-        CALL piezo_ij(3, 6, ngeo, epsil_geo(1,1,2*ngeo+1), polar_geo(1,2*ngeo+1))
+        CALL piezo_ij(3, 6, ngeo, epsil_geo(1,1,2*ngeo+1), &
+                                                       polar_geo(1,2*ngeo+1))
 
       CASE(9)
 !
 ! D_3  Trigonal 
 !
-!         WRITE(stdout,'(5x,"( d11 -d11   .   d14   .    .  )")') 
-!         WRITE(stdout,'(5x,"(  .    .    .    .  -d14 2d11 )")') 
+!         WRITE(stdout,'(5x,"( g11 -g11   .   g14   .    .  )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .    .  -g14 -g11 )")') 
 !         WRITE(stdout,'(5x,"(  .    .    .    .    .    .  )")') 
 
         CALL piezo_ij(1, 1, ngeo, epsil_geo, polar_geo)
         g_piezo_tensor(1,2) = -g_piezo_tensor(1,1)
-        g_piezo_tensor(2,6) = 2.0_DP * g_piezo_tensor(1,1)
+        g_piezo_tensor(2,6) = -g_piezo_tensor(1,1)
         CALL piezo_ij(1, 4, ngeo, epsil_geo(1,1,ngeo+1), polar_geo(1,ngeo+1))
         g_piezo_tensor(2,5) = -g_piezo_tensor(1,4)
 
@@ -536,94 +598,135 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
 !
 ! D_4  tetragonal, D_6 hexagonal
 !
-!         WRITE(stdout,'(/,5x,"(  .    .    .   d14   .    .  )")') 
-!         WRITE(stdout,'(5x,"(  .    .    .    .  -d14   .  )")') 
+!         WRITE(stdout,'(/,5x,"(  .    .    .   g14   .    .  )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .    .  -g14   .  )")') 
 !         WRITE(stdout,'(5x,"(  .    .    .    .    .    .  )")') 
 
-        CALL piezo_ij(1, 4, ngeo, epsil_geo(1,1,1), polar_geo(1,1))
+        CALL piezo_ij(1, 4, ngeo, epsil_geo, polar_geo)
         g_piezo_tensor(2,5) = -g_piezo_tensor(1,4)
 
      CASE(12)
 !
 ! C_2v  Orthorombic
 !
-!         WRITE(stdout,'(5x,"(  .    .    .    .   d15   .  )")') 
-!         WRITE(stdout,'(5x,"(  .    .    .   d24   .    .  )")') 
-!         WRITE(stdout,'(5x,"( d31  d32  d33   .    .    .  )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .    .   g15   .  )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .   g24   .    .  )")') 
+!         WRITE(stdout,'(5x,"( g31  g32  g33   .    .    .  )")') 
 
-        CALL piezo_ij(3, 1, ngeo, epsil_geo(1,1,1), polar_geo(1,1))
+        CALL piezo_ij(3, 1, ngeo, epsil_geo, polar_geo)
         CALL piezo_ij(3, 2, ngeo, epsil_geo(1,1,ngeo+1), polar_geo(1,ngeo+1))
-        CALL piezo_ij(3, 3, ngeo, epsil_geo(1,1,2*ngeo+1), polar_geo(1,2*ngeo+1))
-        CALL piezo_ij(2, 4, ngeo, epsil_geo(1,1,3*ngeo+1), polar_geo(1,3*ngeo+1))
-        CALL piezo_ij(1, 5, ngeo, epsil_geo(1,1,4*ngeo+1), polar_geo(1,4*ngeo+1))
-
+        CALL piezo_ij(3, 3, ngeo, epsil_geo(1,1,2*ngeo+1), &
+                                                       polar_geo(1,2*ngeo+1))
+        CALL piezo_ij(2, 4, ngeo, epsil_geo(1,1,3*ngeo+1), &
+                                                       polar_geo(1,3*ngeo+1))
+        CALL piezo_ij(1, 5, ngeo, epsil_geo(1,1,4*ngeo+1), &
+                                                       polar_geo(1,4*ngeo+1))
      CASE(13)
 !
-! C_3v  Trigonal. Assuming m perpendicular to x1
+! C_3v  Trigonal. 
 !
-!         WRITE(stdout,'(5x,"(  .    .    .    .   d15 -d21 )")') 
-!         WRITE(stdout,'(5x,"( d21 -d21   .   d15   .    .  )")') 
-!         WRITE(stdout,'(5x,"( d31  d31  d33   .    .    .  )")') 
+        IF (code_group_ext==72) THEN
 !
-        CALL piezo_ij(2, 1, ngeo, epsil_geo(1,1,1), polar_geo(1,1))
-        g_piezo_tensor(2,2) = -g_piezo_tensor(2,1)
-        g_piezo_tensor(1,6) = g_piezo_tensor(2,2)
-        CALL piezo_ij(3, 1, ngeo, epsil_geo(1,1,1), polar_geo(1,1))
+!         m perpendicular to x1
+!
+!         WRITE(stdout,'(5x,"(  .    .    .    .   g15  g21 )")') 
+!         WRITE(stdout,'(5x,"( g21 -g21   .   g15   .    .  )")') 
+!         WRITE(stdout,'(5x,"( g31  g31  g33   .    .    .  )")') 
+!
+           CALL piezo_ij(2, 1, ngeo, epsil_geo, polar_geo)
+           g_piezo_tensor(2,2) = -g_piezo_tensor(2,1)
+           g_piezo_tensor(1,6) = g_piezo_tensor(2,1)
+        ELSEIF (code_group_ext==73) THEN
+!
+!         m perpendicular to x2
+!
+!         WRITE(stdout,'(5x,"( g11 -g11   .    .   g15   .  )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .   g15   .  -g11 )")') 
+!         WRITE(stdout,'(5x,"( g31  g31  g33   .    .    .  )")') 
+!
+           CALL piezo_ij(1, 1, ngeo, epsil_geo, polar_geo)
+           g_piezo_tensor(1,2) = -g_piezo_tensor(1,1)
+           g_piezo_tensor(2,6) = -g_piezo_tensor(1,1)
+        ENDIF 
+
+        CALL piezo_ij(3, 1, ngeo, epsil_geo, polar_geo)
         g_piezo_tensor(3,2) = g_piezo_tensor(3,1)
         CALL piezo_ij(3, 3, ngeo, epsil_geo(1,1,ngeo+1), polar_geo(1,ngeo+1))
-        CALL piezo_ij(1, 5, ngeo, epsil_geo(1,1,2*ngeo+1), polar_geo(1,2*ngeo+1))
+        CALL piezo_ij(1, 5, ngeo, epsil_geo(1,1,2*ngeo+1), &
+                                                       polar_geo(1,2*ngeo+1))
         g_piezo_tensor(2,4) = g_piezo_tensor(1,5)
-
+        !
      CASE(14,15)
 !
 ! C_4v tetragonal, C_6v hexagonal
 !
-!         WRITE(stdout,'(5x,"(  .    .    .    .   d15   .  )")') 
-!         WRITE(stdout,'(5x,"(  .    .    .   d15   .    .  )")') 
-!         WRITE(stdout,'(5x,"( d31  d31  d33   .    .    .  )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .    .   g15   .  )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .   g15   .    .  )")') 
+!         WRITE(stdout,'(5x,"( g31  g31  g33   .    .    .  )")') 
 
-        CALL piezo_ij(3, 1, ngeo, epsil_geo(1,1,1), polar_geo(1,1))
+        CALL piezo_ij(3, 1, ngeo, epsil_geo, polar_geo)
+!
+!   The first strain is of the form (epsilon,epsilon,0,0,0,0) to keep the
+!   cell tetragonal or hexagonal. Hence the factor 0.5.
+!
         g_piezo_tensor(3,1) = g_piezo_tensor(3,1) * 0.5_DP
         g_piezo_tensor(3,2) = g_piezo_tensor(3,1)
         CALL piezo_ij(3, 3, ngeo, epsil_geo(1,1,ngeo+1), polar_geo(1,ngeo+1))
-        CALL piezo_ij(1, 5, ngeo, epsil_geo(1,1,2*ngeo+1), polar_geo(1,2*ngeo+1))
+        CALL piezo_ij(1, 5, ngeo, epsil_geo(1,1,2*ngeo+1), &
+                                                       polar_geo(1,2*ngeo+1))
         g_piezo_tensor(2,4) = g_piezo_tensor(1,5)
 
      CASE(17)
 !
 ! C_3h hexagonal
 !
-!             WRITE(stdout,'(5x,"( d11 -d11   .    .    .  -d12 )")') 
-!             WRITE(stdout,'(5x,"( d12 -d12   .    .    .   d11 )")') 
+!             WRITE(stdout,'(5x,"( g11 -g11   .    .    .   g21 )")') 
+!             WRITE(stdout,'(5x,"( g21 -g21   .    .    .  -g11 )")') 
 !             WRITE(stdout,'(5x,"(  .    .    .    .    .    .  )")') 
 
-        CALL piezo_ij(1, 1, ngeo, epsil_geo(1,1,1), polar_geo(1,1))
+        CALL piezo_ij(1, 1, ngeo, epsil_geo, polar_geo)
         g_piezo_tensor(1,2) = -g_piezo_tensor(1,1)
-        g_piezo_tensor(2,6) = g_piezo_tensor(1,1)
-        CALL piezo_ij(2, 1, ngeo, epsil_geo(1,1,1), polar_geo(1,1))
+        g_piezo_tensor(2,6) = -g_piezo_tensor(1,1)
+        CALL piezo_ij(2, 1, ngeo, epsil_geo, polar_geo)
         g_piezo_tensor(2,2) = -g_piezo_tensor(2,1)
-        g_piezo_tensor(1,6) = -g_piezo_tensor(2,1)
+        g_piezo_tensor(1,6) = g_piezo_tensor(2,1)
 
       CASE(21)
 !
 ! D_3h hexagonal
 !
-!             WRITE(stdout,'(5x,"(  .    .    .    .    .  -d21 )")') 
-!             WRITE(stdout,'(5x,"( d21 -d21   .    .    .    .  )")') 
+         IF (code_group_ext==107) THEN
+!
+!      mirror perpendicular to x1
+!     
+!             WRITE(stdout,'(5x,"(  .    .    .    .    .   g21 )")') 
+!             WRITE(stdout,'(5x,"( g21 -g21   .    .    .    .  )")') 
 !             WRITE(stdout,'(5x,"(  .    .    .    .    .    .  )")') 
-        CALL piezo_ij(2, 1, ngeo, epsil_geo(1,1,1), polar_geo(1,1))
-        g_piezo_tensor(2,2) = -g_piezo_tensor(2,1)
-        g_piezo_tensor(1,6) = -g_piezo_tensor(1,2)
-
+!
+            CALL piezo_ij(2, 1, ngeo, epsil_geo, polar_geo)
+            g_piezo_tensor(2,2) = -g_piezo_tensor(2,1)
+            g_piezo_tensor(1,6) = g_piezo_tensor(2,1)
+!
+         ELSEIF (code_group_ext==106) THEN
+!
+!      mirror perpendicular to x2
+!     
+!             WRITE(stdout,'(5x,"( g11 -g11   .    .    .    .  )")') 
+!             WRITE(stdout,'(5x,"(  .    .    .    .    .  -g11 )")') 
+!             WRITE(stdout,'(5x,"(  .    .    .    .    .    .  )")') 
+           CALL piezo_ij(1, 1, ngeo, epsil_geo, polar_geo)
+           g_piezo_tensor(1,2) = -g_piezo_tensor(1,1)
+           g_piezo_tensor(2,6) = -g_piezo_tensor(1,1)
+        ENDIF
      CASE(24)
 !
 ! D_2d tetragonal: axis 2 || x1
 !
-!         WRITE(stdout,'(5x,"(  .    .    .   d14   .    .  )")') 
-!         WRITE(stdout,'(5x,"(  .    .    .    .   d14   .  )")') 
-!         WRITE(stdout,'(5x,"(  .    .    .    .    .   d36 )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .   g14   .    .  )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .    .   g14   .  )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .    .    .   g36 )")') 
 
-        CALL piezo_ij(1, 4, ngeo, epsil_geo(1,1,1), polar_geo(1,1))
+        CALL piezo_ij(1, 4, ngeo, epsil_geo, polar_geo)
         g_piezo_tensor(2,5) = g_piezo_tensor(1,4)
         CALL piezo_ij(3, 6, ngeo, epsil_geo(1,1,ngeo+1), polar_geo(1,ngeo+1))
 
@@ -631,31 +734,34 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
 !
 ! S_4 tetragonal
 !
-!        WRITE(stdout,'(5x,"(  .    .    .   d14  d15   .  )")') 
-!        WRITE(stdout,'(5x,"(  .    .    .  -d15  d14   .  )")') 
-!        WRITE(stdout,'(5x,"( d31 -d31   .    .    .   d36 )")') 
+!        WRITE(stdout,'(5x,"(  .    .    .   g14  g15   .  )")') 
+!        WRITE(stdout,'(5x,"(  .    .    .  -g15  g14   .  )")') 
+!        WRITE(stdout,'(5x,"( g31 -g31   .    .    .   g36 )")') 
 
+        CALL piezo_ij(3, 1, ngeo, epsil_geo, polar_geo)
+        g_piezo_tensor(3,2) = -g_piezo_tensor(3,1)
         CALL piezo_ij(1, 4, ngeo, epsil_geo(1,1,ngeo+1), polar_geo(1,ngeo+1))
         g_piezo_tensor(2,5) = g_piezo_tensor(1,4)
-        CALL piezo_ij(3, 1, ngeo, epsil_geo(1,1,1), polar_geo(1,1))
-        g_piezo_tensor(3,2) = -g_piezo_tensor(3,1)
-        CALL piezo_ij(1, 5, ngeo, epsil_geo(1,1,2*ngeo+1), polar_geo(1,2*ngeo+1))
-        g_piezo_tensor(2,4) = -g_piezo_tensor(1,5)
-        CALL piezo_ij(3, 6, ngeo, epsil_geo(1,1,3*ngeo+1), polar_geo(1,3*ngeo+1))
+        CALL piezo_ij(2, 4, ngeo, epsil_geo(1,1,ngeo+1), polar_geo(1,ngeo+1))
+        g_piezo_tensor(1,5) = -g_piezo_tensor(2,4)
+        CALL piezo_ij(3, 6, ngeo, epsil_geo(1,1,2*ngeo+1), &
+                                                       polar_geo(1,2*ngeo+1))
 
      CASE(28,30)
 !
 ! T, T_d cubic
 !
-!             WRITE(stdout,'(5x,"(  .    .    .   d14   .    .  )")') 
-!             WRITE(stdout,'(5x,"(  .    .    .    .   d14   .  )")') 
-!             WRITE(stdout,'(5x,"(  .    .    .    .    .   d14 )")') 
+!             WRITE(stdout,'(5x,"(  .    .    .   g14   .    .  )")') 
+!             WRITE(stdout,'(5x,"(  .    .    .    .   g14   .  )")') 
+!             WRITE(stdout,'(5x,"(  .    .    .    .    .   g14 )")') 
 !
         CALL piezo_ij(1, 4, ngeo, epsil_geo, polar_geo)
         g_piezo_tensor(2,5) = g_piezo_tensor(1,4)
         g_piezo_tensor(3,6) = g_piezo_tensor(1,4)
      CASE(31)
-
+!
+!  O All components vanish. We do nothing.
+!
      CASE DEFAULT
 !
 !  C_1 
@@ -684,13 +790,14 @@ END SUBROUTINE compute_improper_piezo_tensor
 
 !---------------------------------------------------------------------------
 SUBROUTINE compute_proper_piezo_tensor(tot_b_phase, epsil_geo, nwork, ngeo, &
-                                           ibrav, code_group, at)
+                                       ibrav, code_group, code_group_ext, at)
 !---------------------------------------------------------------------------
 !
-!  This routine computes the proper piezoelectric tensor e_{\alpha,m} by 
+!  This routine computes the proper piezoelectric tensor e_{i,m} 
+!  (i=1,...,3, m=1,...,6) by 
 !  fitting the total berry phase strain relation with a second order 
 !  polynomial and computing its derivative with respect to strain. 
-!  Finally the proper piezoelectric tensor is computed from Eq.24 of
+!  Finally the proper piezoelectric tensor must be computed from Eq.24 of
 !  D. Vanderbilt Jour. of Phys. and Chemistry of Solids 61, 147 (2000).
 !  This is calculated on the basis of the solid point group.
 !
@@ -698,7 +805,7 @@ SUBROUTINE compute_proper_piezo_tensor(tot_b_phase, epsil_geo, nwork, ngeo, &
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: tot_b_phase(3,nwork), epsil_geo(3,3,nwork), &
                         at(3,3)
-INTEGER, INTENT(IN) :: ngeo, ibrav, code_group, nwork
+INTEGER, INTENT(IN) :: ngeo, ibrav, code_group, code_group_ext, nwork
 INTEGER :: i, j, igeo, alpha, ind, mn
 LOGICAL :: check_group_ibrav
 
@@ -711,18 +818,27 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
 !
 !  C_s   Monoclinic
 !
-!        WRITE(stdout,'(5x,"( g11  g12  g13   .   d15   .  )")') 
-!        WRITE(stdout,'(5x,"(  .    .    .   g24   .   d26 )")') 
-!        WRITE(stdout,'(5x,"( g31  g32  g33   .   d35   .  )")') 
-!
         CALL piezo_ij_bp(1, 1, ngeo, epsil_geo, tot_b_phase, at )
-        CALL piezo_ij_bp(1, 2, ngeo, epsil_geo(1,1,ngeo+1), tot_b_phase(1,ngeo+1), at )
-        CALL piezo_ij_bp(1, 3, ngeo, epsil_geo(1,1,2*ngeo+1), tot_b_phase(1,2*ngeo+1), at )
-        CALL piezo_ij_bp(2, 6, ngeo, epsil_geo(1,1,5*ngeo+1), tot_b_phase(1,5*ngeo+1), at )
+        CALL piezo_ij_bp(1, 2, ngeo, epsil_geo(1,1,ngeo+1), &
+                                                 tot_b_phase(1,ngeo+1), at )
+        CALL piezo_ij_bp(1, 3, ngeo, epsil_geo(1,1,2*ngeo+1), &
+                                                 tot_b_phase(1,2*ngeo+1), at )
+        CALL piezo_ij_bp(3, 5, ngeo, epsil_geo(1,1,4*ngeo+1), &
+                                                 tot_b_phase(1,4*ngeo+1), at)
+        CALL piezo_ij_bp(2, 6, ngeo, epsil_geo(1,1,5*ngeo+1), &
+                                                 tot_b_phase(1,5*ngeo+1), at )
 
-        IF (ibrav==-12) THEN
+        IF (ibrav==-12.OR.ibrav==-13) THEN
+!
+!   b-unique the mirror is perpendicular to x2 axis.
+!
+!
+!        WRITE(stdout,'(5x,"( e11  e12  e13   .   e15   .  )")') 
+!        WRITE(stdout,'(5x,"(  .    .    .   e24   .   e26 )")') 
+!        WRITE(stdout,'(5x,"( e31  e32  e33   .   e35   .  )")') 
+!
 
-           CALL piezo_ij_bp(3, 1, ngeo, epsil_geo(1,1,1), tot_b_phase(1,1), at)
+           CALL piezo_ij_bp(3, 1, ngeo, epsil_geo, tot_b_phase, at)
            CALL piezo_ij_bp(3, 2, ngeo, epsil_geo(1,1,ngeo+1), &
                                                  tot_b_phase(1,ngeo+1),at)
            CALL piezo_ij_bp(3, 3, ngeo, epsil_geo(1,1,2*ngeo+1), &
@@ -731,19 +847,22 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
                                      tot_b_phase(1,3*ngeo+1), at)
            CALL piezo_ij_bp(1, 5, ngeo, epsil_geo(1,1,4*ngeo+1), &
                                      tot_b_phase(1,4*ngeo+1), at)
-           CALL piezo_ij_bp(3, 5, ngeo, epsil_geo(1,1,4*ngeo+1), &
-                                     tot_b_phase(1,4*ngeo+1), at)
 
         ELSE
-!                WRITE(stdout,'(5x,"( d11  d12  d13   .    .   d16 )")') 
-!                WRITE(stdout,'(5x,"( d21  d22  d23   .    .   d26 )")') 
-!                WRITE(stdout,'(5x,"(  .    .    .   d16  d26   .  )")') 
 !
-           CALL piezo_ij_bp(2, 1, ngeo, epsil_geo(1,1,1), tot_b_phase(1,1), at)
+!    c-unique. The mirror is perpendicular to x3
+!
+!                WRITE(stdout,'(5x,"( e11  e12  e13   .    .   e16 )")') 
+!                WRITE(stdout,'(5x,"( e21  e22  e23   .    .   e26 )")') 
+!                WRITE(stdout,'(5x,"(  .    .    .   e34  e35   .  )")') 
+!
+           CALL piezo_ij_bp(2, 1, ngeo, epsil_geo, tot_b_phase, at)
            CALL piezo_ij_bp(2, 2, ngeo, epsil_geo(1,1,ngeo+1), &
                            tot_b_phase(1,ngeo+1), at)
            CALL piezo_ij_bp(2, 3, ngeo, epsil_geo(1,1,2*ngeo+1), &
                                             tot_b_phase(1,2*ngeo+1), at)
+           CALL piezo_ij_bp(3, 4, ngeo, epsil_geo(1,1,3*ngeo+1), &
+                                            tot_b_phase(1,3*ngeo+1), at)
            CALL piezo_ij_bp(1, 6, ngeo, epsil_geo(1,1,5*ngeo+1), &
                                             tot_b_phase(1,5*ngeo+1), at)
 
@@ -759,10 +878,13 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
         CALL piezo_ij_bp(3, 6, ngeo, epsil_geo(1,1,5*ngeo+1), &
                                               tot_b_phase(1,5*ngeo+1), at)
 
-        IF (ibrav==-12) THEN
-!            WRITE(stdout,'(5x,"(  .    .    .   d14   .   d16 )")') 
-!            WRITE(stdout,'(5x,"( d21  d22  d23   .   d25   .  )")') 
-!            WRITE(stdout,'(5x,"(  .    .    .   d34   .   d36 )")') 
+        IF (ibrav==-12.OR.ibrav==-13) THEN
+!
+!   b-unique. The C_2 axis is x2.
+!
+!            WRITE(stdout,'(5x,"(  .    .    .   e14   .   e16 )")') 
+!            WRITE(stdout,'(5x,"( e21  e22  e23   .   e25   .  )")') 
+!            WRITE(stdout,'(5x,"(  .    .    .   e34   .   e36 )")') 
 
            CALL piezo_ij_bp(2, 1, ngeo, epsil_geo(1,1,1), &
                                               tot_b_phase(1,1), at)
@@ -775,13 +897,16 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
            CALL piezo_ij_bp(3, 4, ngeo, epsil_geo(1,1,3*ngeo+1), &
                                               tot_b_phase(1,3*ngeo+1), at)
         ELSE
-!            WRITE(stdout,'(5x,"(  .    .    .   d14  d15   .  )")') 
-!            WRITE(stdout,'(5x,"(  .    .    .   d24  d25   .  )")') 
-!            WRITE(stdout,'(5x,"( d31  d32  d33   .    .   d36 )")') 
 !
-            CALL piezo_ij_bp(3, 1, ngeo, epsil_geo(1,1,1), &
+!   c-unique. The C_2 axis if x3.
+!
+!            WRITE(stdout,'(5x,"(  .    .    .   e14  e15   .  )")') 
+!            WRITE(stdout,'(5x,"(  .    .    .   e24  e25   .  )")') 
+!            WRITE(stdout,'(5x,"( e31  e32  e33   .    .   e36 )")') 
+!
+            CALL piezo_ij_bp(3, 1, ngeo, epsil_geo(1,1,1),        &
                                                tot_b_phase(1,1), at)
-            CALL piezo_ij_bp(3, 2, ngeo, epsil_geo(1,1,ngeo+1), &
+            CALL piezo_ij_bp(3, 2, ngeo, epsil_geo(1,1,ngeo+1),   &
                                                tot_b_phase(1,ngeo+1), at)
             CALL piezo_ij_bp(3, 3, ngeo, epsil_geo(1,1,2*ngeo+1), &
                                       tot_b_phase(1,2*ngeo+1), at)
@@ -792,33 +917,56 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
 
          ENDIF
 
+      CASE(5) 
+!
+!   C_3
+!
+!            WRITE(stdout,'(5x,"( e11 -e11   .   e14  e15 -e22 )")') 
+!            WRITE(stdout,'(5x,"(-e22  e22   .   e15 -e14 -e11 )")') 
+!            WRITE(stdout,'(5x,"( e31 -e31  e33   .    .    .  )")') 
+!
+            CALL piezo_ij_bp(1, 1, ngeo, epsil_geo, tot_b_phase, at)
+            e_piezo_tensor(1,2) = -e_piezo_tensor(1,1)
+            e_piezo_tensor(2,6) = -e_piezo_tensor(1,1)
+            CALL piezo_ij_bp(2, 1, ngeo, epsil_geo, tot_b_phase, at)
+            e_piezo_tensor(2,2) = -e_piezo_tensor(2,1)
+            e_piezo_tensor(1,6) =  e_piezo_tensor(2,1)
+            CALL piezo_ij_bp(3, 1, ngeo, epsil_geo, tot_b_phase, at)
+            e_piezo_tensor(3,2) = -e_piezo_tensor(3,1)
+            CALL piezo_ij_bp(3, 3, ngeo, epsil_geo(1,1,ngeo+1),  & 
+                                             tot_b_phase(1,ngeo+1), at)
+            CALL piezo_ij_bp(1, 4, ngeo, epsil_geo(1,1,2*ngeo+1), &
+                                             tot_b_phase(1,2*ngeo+1), at)
+            e_piezo_tensor(2,5) = -e_piezo_tensor(1,4)
+            CALL piezo_ij_bp(2, 4, ngeo, epsil_geo(1,1,2*ngeo+1), &
+                                             tot_b_phase(1,2*ngeo+1), at)
+            e_piezo_tensor(1,5) = e_piezo_tensor(2,4)
+
       CASE(6,7)
 !
 !  C_4, tetragonal, C_6 hexagonal
 !
-!             WRITE(stdout,'(5x,"(  .    .    .   d14  d15   .  )")') 
-!             WRITE(stdout,'(5x,"(  .    .    .   d24 -d14   .  )")') 
-!             WRITE(stdout,'(5x,"( d31  d31  d33   .    .    .  )")') 
+!             WRITE(stdout,'(5x,"(  .    .    .   e14  e15   .  )")') 
+!             WRITE(stdout,'(5x,"(  .    .    .   e15 -e14   .  )")') 
+!             WRITE(stdout,'(5x,"( e31  e31  e33   .    .    .  )")') 
 !
-        CALL piezo_ij_bp(3, 1, ngeo, epsil_geo(1,1,1), tot_b_phase(1,1), at)
-        g_piezo_tensor(3,2) = g_piezo_tensor(3,1)
+        CALL piezo_ij_bp(3, 1, ngeo, epsil_geo, tot_b_phase, at)
+        e_piezo_tensor(3,2) = e_piezo_tensor(3,1)
         CALL piezo_ij_bp(3, 3, ngeo, epsil_geo(1,1,ngeo+1), &
                                                 tot_b_phase(1,ngeo+1), at)
         CALL piezo_ij_bp(1, 4, ngeo, epsil_geo(1,1,2*ngeo+1), &
                                                 tot_b_phase(1,2*ngeo+1), at)
-        g_piezo_tensor(2,5) = -g_piezo_tensor(1,4)
+        e_piezo_tensor(2,5) = -e_piezo_tensor(1,4)
         CALL piezo_ij_bp(2, 4, ngeo, epsil_geo(1,1,2*ngeo+1), &
                                                 tot_b_phase(1,2*ngeo+1), at)
-        CALL piezo_ij_bp(1, 5, ngeo, epsil_geo(1,1,3*ngeo+1), &
-                                                tot_b_phase(1,3*ngeo+1), at)
-
+        e_piezo_tensor(1,5) = e_piezo_tensor(2,4)
      CASE(8)
 !
 !  D_2 (222) Orthorombic
 !
-!         WRITE(stdout,'(5x,"(  .    .    .   d14   .    .  )")') 
-!         WRITE(stdout,'(5x,"(  .    .    .    .   d25   .  )")') 
-!         WRITE(stdout,'(5x,"(  .    .    .    .    .   d36 )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .   e14   .    .  )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .    .   e25   .  )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .    .    .   e36 )")') 
 
         CALL piezo_ij_bp(1, 4, ngeo, epsil_geo(1,1,1), tot_b_phase(1,1), at)
         CALL piezo_ij_bp(2, 5, ngeo, epsil_geo(1,1,ngeo+1), &
@@ -830,35 +978,35 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
 !
 ! D_3  Trigonal 
 !
-!         WRITE(stdout,'(5x,"( d11 -d11   .   d14   .    .  )")') 
-!         WRITE(stdout,'(5x,"(  .    .    .    .  -d14 2d11 )")') 
+!         WRITE(stdout,'(5x,"( e11 -e11   .   e14   .    .  )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .    .  -e14 -e11 )")') 
 !         WRITE(stdout,'(5x,"(  .    .    .    .    .    .  )")') 
 
         CALL piezo_ij_bp(1, 1, ngeo, epsil_geo, tot_b_phase, at)
-        g_piezo_tensor(1,2) = -g_piezo_tensor(1,1)
-        g_piezo_tensor(2,6) = 2.0_DP * g_piezo_tensor(1,1)
+        e_piezo_tensor(1,2) = -e_piezo_tensor(1,1)
+        e_piezo_tensor(2,6) = -e_piezo_tensor(1,1)
         CALL piezo_ij_bp(1, 4, ngeo, epsil_geo(1,1,ngeo+1), &
                                             tot_b_phase(1,ngeo+1), at)
-        g_piezo_tensor(2,5) = -g_piezo_tensor(1,4)
+        e_piezo_tensor(2,5) = -e_piezo_tensor(1,4)
 
      CASE(10,11)
 !
 ! D_4  tetragonal, D_6 hexagonal
 !
-!         WRITE(stdout,'(/,5x,"(  .    .    .   d14   .    .  )")') 
-!         WRITE(stdout,'(5x,"(  .    .    .    .  -d14   .  )")') 
+!         WRITE(stdout,'(/,5x,"(  .    .    .   e14   .    .  )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .    .  -e14   .  )")') 
 !         WRITE(stdout,'(5x,"(  .    .    .    .    .    .  )")') 
 
         CALL piezo_ij_bp(1, 4, ngeo, epsil_geo(1,1,1), tot_b_phase(1,1), at)
-        g_piezo_tensor(2,5) = -g_piezo_tensor(1,4)
+        e_piezo_tensor(2,5) = -e_piezo_tensor(1,4)
 
      CASE(12)
 !
 ! C_2v  Orthorombic
 !
-!         WRITE(stdout,'(5x,"(  .    .    .    .   d15   .  )")') 
-!         WRITE(stdout,'(5x,"(  .    .    .   d24   .    .  )")') 
-!         WRITE(stdout,'(5x,"( d31  d32  d33   .    .    .  )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .    .   e15   .  )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .   e24   .    .  )")') 
+!         WRITE(stdout,'(5x,"( e31  e32  e33   .    .    .  )")') 
 
         CALL piezo_ij_bp(3, 1, ngeo, epsil_geo(1,1,1), tot_b_phase(1,1), at)
         CALL piezo_ij_bp(3, 2, ngeo, epsil_geo(1,1,ngeo+1), &
@@ -872,32 +1020,50 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
 
      CASE(13)
 !
-! C_3v  Trigonal. Assuming m perpendicular to x1
+! C_3v  Trigonal. 
 !
-!         WRITE(stdout,'(5x,"(  .    .    .    .   d15 -d21 )")') 
-!         WRITE(stdout,'(5x,"( d21 -d21   .   d15   .    .  )")') 
-!         WRITE(stdout,'(5x,"( d31  d31  d33   .    .    .  )")') 
+        IF (code_group_ext==72) THEN
 !
-        CALL piezo_ij_bp(2, 1, ngeo, epsil_geo(1,1,1), tot_b_phase(1,1), at)
-        e_piezo_tensor(2,2) = -e_piezo_tensor(2,1)
-        e_piezo_tensor(1,6) = e_piezo_tensor(2,2)
-        CALL piezo_ij_bp(3, 1, ngeo, epsil_geo(1,1,1), tot_b_phase(1,1), at)
+!         m perpendicular to x1
+!
+!         WRITE(stdout,'(5x,"(  .    .    .    .   e15  e21 )")') 
+!         WRITE(stdout,'(5x,"( e21 -e21   .   e15   .    .  )")') 
+!         WRITE(stdout,'(5x,"( e31  e31  e33   .    .    .  )")') 
+!
+           CALL piezo_ij_bp(2, 1, ngeo, epsil_geo, tot_b_phase, at)
+           e_piezo_tensor(2,2) = -e_piezo_tensor(2,1)
+           e_piezo_tensor(1,6) = e_piezo_tensor(2,1)
+
+       ELSEIF (code_group_ext==73) THEN
+!
+!         m perpendicular to x2
+!
+!         WRITE(stdout,'(5x,"( e11 -e11   .    .   e15   .  )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .   e15   .  -e11 )")') 
+!         WRITE(stdout,'(5x,"( e31  e31  e33   .    .    .  )")') 
+!
+          CALL piezo_ij_bp(1, 1, ngeo, epsil_geo, tot_b_phase, at)
+          e_piezo_tensor(1,2) = -e_piezo_tensor(1,1)
+          e_piezo_tensor(2,6) = -e_piezo_tensor(1,1)
+
+        ENDIF
+        CALL piezo_ij_bp(3, 1, ngeo, epsil_geo, tot_b_phase, at)
         e_piezo_tensor(3,2) = e_piezo_tensor(3,1)
         CALL piezo_ij_bp(3, 3, ngeo, epsil_geo(1,1,ngeo+1), &
-                                                  tot_b_phase(1,ngeo+1), at)
+                                               tot_b_phase(1,ngeo+1), at)
         CALL piezo_ij_bp(1, 5, ngeo, epsil_geo(1,1,2*ngeo+1), &
-                                                  tot_b_phase(1,2*ngeo+1), at)
+                                                tot_b_phase(1,2*ngeo+1), at)
         e_piezo_tensor(2,4) = e_piezo_tensor(1,5)
 
      CASE(14,15)
 !
 ! C_4v tetragonal, C_6v hexagonal
 !
-!         WRITE(stdout,'(5x,"(  .    .    .    .   d15   .  )")') 
-!         WRITE(stdout,'(5x,"(  .    .    .   d15   .    .  )")') 
-!         WRITE(stdout,'(5x,"( d31  d31  d33   .    .    .  )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .    .   e15   .  )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .   e15   .    .  )")') 
+!         WRITE(stdout,'(5x,"( e31  e31  e33   .    .    .  )")') 
 
-        CALL piezo_ij_bp(3, 1, ngeo, epsil_geo(1,1,1), tot_b_phase(1,1), at)
+        CALL piezo_ij_bp(3, 1, ngeo, epsil_geo, tot_b_phase, at)
         e_piezo_tensor(3,1) = e_piezo_tensor(3,1) * 0.5_DP
         e_piezo_tensor(3,2) = e_piezo_tensor(3,1)
         CALL piezo_ij_bp(3, 3, ngeo, epsil_geo(1,1,ngeo+1), &
@@ -910,37 +1076,54 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
 !
 ! C_3h hexagonal
 !
-!             WRITE(stdout,'(5x,"( d11 -d11   .    .    .  -d12 )")') 
-!             WRITE(stdout,'(5x,"( d12 -d12   .    .    .   d11 )")') 
+!             WRITE(stdout,'(5x,"( e11 -e11   .    .    .   e12 )")') 
+!             WRITE(stdout,'(5x,"( e12 -e12   .    .    .  -e11 )")') 
 !             WRITE(stdout,'(5x,"(  .    .    .    .    .    .  )")') 
 
-        CALL piezo_ij_bp(1, 1, ngeo, epsil_geo(1,1,1), tot_b_phase(1,1), at)
+        CALL piezo_ij_bp(1, 1, ngeo, epsil_geo, tot_b_phase, at)
         e_piezo_tensor(1,2) = -e_piezo_tensor(1,1)
-        e_piezo_tensor(2,6) = e_piezo_tensor(1,1)
-        CALL piezo_ij_bp(2, 1, ngeo, epsil_geo(1,1,1), tot_b_phase(1,1), at)
+        e_piezo_tensor(2,6) = -e_piezo_tensor(1,1)
+        CALL piezo_ij_bp(2, 1, ngeo, epsil_geo, tot_b_phase, at)
         e_piezo_tensor(2,2) = -e_piezo_tensor(2,1)
-        e_piezo_tensor(1,6) = -e_piezo_tensor(2,1)
+        e_piezo_tensor(1,6) = e_piezo_tensor(2,1)
 
       CASE(21)
 !
 ! D_3h hexagonal
 !
-!             WRITE(stdout,'(5x,"(  .    .    .    .    .  -d21 )")') 
-!             WRITE(stdout,'(5x,"( d21 -d21   .    .    .    .  )")') 
-!             WRITE(stdout,'(5x,"(  .    .    .    .    .    .  )")') 
-        CALL piezo_ij_bp(2, 1, ngeo, epsil_geo(1,1,1), tot_b_phase(1,1), at)
-        e_piezo_tensor(2,2) = -e_piezo_tensor(2,1)
-        e_piezo_tensor(1,6) = -e_piezo_tensor(1,2)
+       IF (code_group_ext==107) THEN
+!
+!     mirror perpendicular to x1
+!
+!         WRITE(stdout,'(5x,"(  .    .    .    .    .   e21 )")') 
+!         WRITE(stdout,'(5x,"( e21 -e21   .    .    .    .  )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .    .    .    .  )")') 
+!
+          CALL piezo_ij_bp(2, 1, ngeo, epsil_geo, tot_b_phase, at)
+          e_piezo_tensor(2,2) = -e_piezo_tensor(2,1)
+          e_piezo_tensor(1,6) =  e_piezo_tensor(2,1)
+       ELSEIF (code_group_ext==106) THEN
+!
+!     mirror perpendicular to x2
+!
+!         WRITE(stdout,'(5x,"( e11 -e11   .    .    .    .  )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .    .    .  -e11 )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .    .    .    .  )")') 
+!
+          CALL piezo_ij_bp(1, 1, ngeo, epsil_geo, tot_b_phase, at)
+          e_piezo_tensor(1,2) = -e_piezo_tensor(1,1)
+          e_piezo_tensor(2,6) = -e_piezo_tensor(1,1)
+       ENDIF
 
      CASE(24)
 !
 ! D_2d tetragonal: axis 2 || x1
 !
-!         WRITE(stdout,'(5x,"(  .    .    .   d14   .    .  )")') 
-!         WRITE(stdout,'(5x,"(  .    .    .    .   d14   .  )")') 
-!         WRITE(stdout,'(5x,"(  .    .    .    .    .   d36 )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .   e14   .    .  )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .    .   e14   .  )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .    .    .   e36 )")') 
 
-        CALL piezo_ij_bp(1, 4, ngeo, epsil_geo(1,1,1), tot_b_phase(1,1), at)
+        CALL piezo_ij_bp(1, 4, ngeo, epsil_geo, tot_b_phase, at)
         e_piezo_tensor(2,5) = e_piezo_tensor(1,4)
         CALL piezo_ij_bp(3, 6, ngeo, epsil_geo(1,1,ngeo+1), &
                            tot_b_phase(1,ngeo+1), at)
@@ -949,34 +1132,36 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
 !
 ! S_4 tetragonal
 !
-!        WRITE(stdout,'(5x,"(  .    .    .   d14  d15   .  )")') 
-!        WRITE(stdout,'(5x,"(  .    .    .  -d15  d14   .  )")') 
-!        WRITE(stdout,'(5x,"( d31 -d31   .    .    .   d36 )")') 
+!        WRITE(stdout,'(5x,"(  .    .    .   e14  e15   .  )")') 
+!        WRITE(stdout,'(5x,"(  .    .    .  -e15  e14   .  )")') 
+!        WRITE(stdout,'(5x,"( e31 -e31   .    .    .   e36 )")') 
 
+        CALL piezo_ij_bp(3, 1, ngeo, epsil_geo, tot_b_phase, at)
+        e_piezo_tensor(3,2) = -e_piezo_tensor(3,1)
         CALL piezo_ij_bp(1, 4, ngeo, epsil_geo(1,1,ngeo+1), &
                                                tot_b_phase(1,ngeo+1), at)
         e_piezo_tensor(2,5) = e_piezo_tensor(1,4)
-        CALL piezo_ij_bp(3, 1, ngeo, epsil_geo(1,1,1), tot_b_phase(1,1), at)
-        e_piezo_tensor(3,2) = -e_piezo_tensor(3,1)
-        CALL piezo_ij_bp(1, 5, ngeo, epsil_geo(1,1,2*ngeo+1), &
-                                                   tot_b_phase(1,2*ngeo+1), at)
-        e_piezo_tensor(2,4) = -e_piezo_tensor(1,5)
-        CALL piezo_ij_bp(3, 6, ngeo, epsil_geo(1,1,3*ngeo+1), &
-                                             tot_b_phase(1,3*ngeo+1), at)
+        CALL piezo_ij_bp(2, 4, ngeo, epsil_geo(1,1,ngeo+1), &
+                                                   tot_b_phase(1,ngeo+1), at)
+        e_piezo_tensor(1,5) = -e_piezo_tensor(2,4)
+        CALL piezo_ij_bp(3, 6, ngeo, epsil_geo(1,1,2*ngeo+1), &
+                                             tot_b_phase(1,2*ngeo+1), at)
 
      CASE(28,30)
 !
 ! T, T_d cubic
 !
-!             WRITE(stdout,'(5x,"(  .    .    .   d14   .    .  )")') 
-!             WRITE(stdout,'(5x,"(  .    .    .    .   d14   .  )")') 
-!             WRITE(stdout,'(5x,"(  .    .    .    .    .   d14 )")') 
+!             WRITE(stdout,'(5x,"(  .    .    .   e14   .    .  )")') 
+!             WRITE(stdout,'(5x,"(  .    .    .    .   e14   .  )")') 
+!             WRITE(stdout,'(5x,"(  .    .    .    .    .   e14 )")') 
 !
         CALL piezo_ij_bp(1, 4, ngeo, epsil_geo, tot_b_phase, at)
         e_piezo_tensor(2,5) = e_piezo_tensor(1,4)
         e_piezo_tensor(3,6) = e_piezo_tensor(1,4)
      CASE(31)
-
+!
+!  O cubic. In this case all components vanish.
+!
      CASE DEFAULT
 !
 !  C_1 
@@ -1004,7 +1189,7 @@ RETURN
 END SUBROUTINE compute_proper_piezo_tensor
 
 !---------------------------------------------------------------------------
-SUBROUTINE clean_piezo_tensor(piezo, ibrav, code_group)
+SUBROUTINE clean_piezo_tensor(piezo, ibrav, code_group, code_group_ext)
 !---------------------------------------------------------------------------
 !
 ! This routine receives a piezoelectric tensor and a point group
@@ -1013,7 +1198,7 @@ SUBROUTINE clean_piezo_tensor(piezo, ibrav, code_group)
 !
 IMPLICIT NONE
 REAL(DP), INTENT(INOUT) :: piezo(3,6)
-INTEGER, INTENT(IN) ::  ibrav, code_group
+INTEGER, INTENT(IN) ::  ibrav, code_group, code_group_ext
 INTEGER :: i, j, igeo, alpha, ind, mn
 LOGICAL :: check_group_ibrav
 
@@ -1027,32 +1212,38 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
 !
 !  C_s   Monoclinic
 !
-!        WRITE(stdout,'(5x,"( g11  g12  g13   .   d15   .  )")') 
-!        WRITE(stdout,'(5x,"(  .    .    .   g24   .   d26 )")') 
-!        WRITE(stdout,'(5x,"( g31  g32  g33   .   d35   .  )")') 
-!
         epiezo(1,1)=piezo(1,1)
         epiezo(1,2)=piezo(1,2)
         epiezo(1,3)=piezo(1,3)
         epiezo(2,6)=piezo(2,6)
-        IF (ibrav==-12) THEN
-
+        epiezo(3,5)=piezo(3,5)
+        IF (ibrav==-12.OR.ibrav==-13) THEN
+!
+!   b-unique
+!
+!        WRITE(stdout,'(5x,"( g11  g12  g13   .   d15   .  )")') 
+!        WRITE(stdout,'(5x,"(  .    .    .   g24   .   d26 )")') 
+!        WRITE(stdout,'(5x,"( g31  g32  g33   .   d35   .  )")') 
+!
            epiezo(3,1)=piezo(3,1)
            epiezo(3,2)=piezo(3,2)
            epiezo(3,3)=piezo(3,3)
            epiezo(2,4)=piezo(2,4)
            epiezo(1,5)=piezo(1,5)
-           epiezo(3,5)=piezo(3,5)
 
         ELSE
-!                WRITE(stdout,'(5x,"( d11  d12  d13   .    .   d16 )")') 
-!                WRITE(stdout,'(5x,"( d21  d22  d23   .    .   d26 )")') 
-!                WRITE(stdout,'(5x,"(  .    .    .   d16  d26   .  )")') 
+!
+!    c-unique
+!
+!          WRITE(stdout,'(5x,"( e11  e12  e13   .    .   e16 )")') 
+!          WRITE(stdout,'(5x,"( e21  e22  e23   .    .   e26 )")') 
+!          WRITE(stdout,'(5x,"(  .    .    .   e34  e35   .  )")') 
 !
            epiezo(2,1)=piezo(2,1)
            epiezo(2,2)=piezo(2,2)
            epiezo(2,3)=piezo(2,3)
            epiezo(1,6)=piezo(1,6)
+           epiezo(3,4)=piezo(3,4)
 
         ENDIF
      CASE(4)
@@ -1063,20 +1254,26 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
         epiezo(2,5)=piezo(2,5)
         epiezo(3,6)=piezo(3,6)
 
-        IF (ibrav==-12) THEN
-!            WRITE(stdout,'(5x,"(  .    .    .   d14   .   d16 )")') 
-!            WRITE(stdout,'(5x,"( d21  d22  d23   .   d25   .  )")') 
-!            WRITE(stdout,'(5x,"(  .    .    .   d34   .   d36 )")') 
-
+        IF (ibrav==-12.OR.ibrav==-13) THEN
+!
+!    b-unique
+!
+!          WRITE(stdout,'(5x,"(  .    .    .   e14   .   e16 )")') 
+!          WRITE(stdout,'(5x,"( e21  e22  e23   .   e25   .  )")') 
+!          WRITE(stdout,'(5x,"(  .    .    .   e34   .   e36 )")') 
+!
            epiezo(2,1)=piezo(2,1)
            epiezo(2,2)=piezo(2,2)
            epiezo(2,3)=piezo(2,3)
            epiezo(1,6)=piezo(1,6)
            epiezo(3,4)=piezo(3,4)
         ELSE
-!            WRITE(stdout,'(5x,"(  .    .    .   d14  d15   .  )")') 
-!            WRITE(stdout,'(5x,"(  .    .    .   d24  d25   .  )")') 
-!            WRITE(stdout,'(5x,"( d31  d32  d33   .    .   d36 )")') 
+!
+!    c-unique
+!
+!            WRITE(stdout,'(5x,"(  .    .    .   e14  e15   .  )")') 
+!            WRITE(stdout,'(5x,"(  .    .    .   e24  e25   .  )")') 
+!            WRITE(stdout,'(5x,"( e31  e32  e33   .    .   e36 )")') 
 !
            epiezo(3,1)=piezo(3,1)
            epiezo(3,2)=piezo(3,2)
@@ -1084,30 +1281,51 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
            epiezo(1,5)=piezo(1,5)
            epiezo(2,4)=piezo(2,4)
          ENDIF
+     CASE(5)
+!
+!   C_3
+!
+!            WRITE(stdout,'(5x,"( e11 -e11   .   e14  e15 -e22 )")') 
+!            WRITE(stdout,'(5x,"(-e22  e22   .   e15 -e14 -e11 )")') 
+!            WRITE(stdout,'(5x,"( e31 -e31  e33   .    .    .  )")') 
+!
+           epiezo(1,1)=piezo(1,1)
+           epiezo(1,2)=piezo(1,2)
+           epiezo(1,4)=piezo(1,4)
+           epiezo(1,5)=piezo(1,5)
+           epiezo(1,6)=piezo(1,6)
+           epiezo(2,1)=piezo(2,1)
+           epiezo(2,2)=piezo(2,2)
+           epiezo(2,4)=piezo(2,4)
+           epiezo(2,5)=piezo(2,5)
+           epiezo(2,6)=piezo(2,6)
+           epiezo(3,1)=piezo(3,1)
+           epiezo(3,2)=piezo(3,2)
+           epiezo(3,3)=piezo(3,3)
 
       CASE(6,7)
 !
 !  C_4, tetragonal, C_6 hexagonal
 !
-!             WRITE(stdout,'(5x,"(  .    .    .   d14  d15   .  )")') 
-!             WRITE(stdout,'(5x,"(  .    .    .   d24 -d14   .  )")') 
-!             WRITE(stdout,'(5x,"( d31  d31  d33   .    .    .  )")') 
+!             WRITE(stdout,'(5x,"(  .    .    .   e14  e15   .  )")') 
+!             WRITE(stdout,'(5x,"(  .    .    .   e15 -e14   .  )")') 
+!             WRITE(stdout,'(5x,"( e31  e31  e33   .    .    .  )")') 
 !
         epiezo(3,1)=piezo(3,1)
         epiezo(3,2)=piezo(3,2)
         epiezo(3,3)=piezo(3,3)
         epiezo(1,4)=piezo(1,4)
-        epiezo(2,5)=piezo(2,5)
-        epiezo(2,4)=piezo(2,4)
         epiezo(1,5)=piezo(1,5)
+        epiezo(2,4)=piezo(2,4)
+        epiezo(2,5)=piezo(2,5)
 
      CASE(8)
 !
 !  D_2 (222) Orthorombic
 !
-!         WRITE(stdout,'(5x,"(  .    .    .   d14   .    .  )")') 
-!         WRITE(stdout,'(5x,"(  .    .    .    .   d25   .  )")') 
-!         WRITE(stdout,'(5x,"(  .    .    .    .    .   d36 )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .   e14   .    .  )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .    .   e25   .  )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .    .    .   e36 )")') 
 
         epiezo(1,4)=piezo(1,4)
         epiezo(2,5)=piezo(2,5)
@@ -1118,7 +1336,7 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
 ! D_3  Trigonal 
 !
 !         WRITE(stdout,'(5x,"( d11 -d11   .   d14   .    .  )")') 
-!         WRITE(stdout,'(5x,"(  .    .    .    .  -d14 2d11 )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .    .  -d14 -d11 )")') 
 !         WRITE(stdout,'(5x,"(  .    .    .    .    .    .  )")') 
 
         epiezo(1,1)=piezo(1,1)
@@ -1131,8 +1349,8 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
 !
 ! D_4  tetragonal, D_6 hexagonal
 !
-!         WRITE(stdout,'(/,5x,"(  .    .    .   d14   .    .  )")') 
-!         WRITE(stdout,'(5x,"(  .    .    .    .  -d14   .  )")') 
+!         WRITE(stdout,'(/,5x,"(  .    .    .   e14   .    .  )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .    .  -e14   .  )")') 
 !         WRITE(stdout,'(5x,"(  .    .    .    .    .    .  )")') 
 
         epiezo(1,4)=piezo(1,4)
@@ -1154,15 +1372,29 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
 
      CASE(13)
 !
-! C_3v  Trigonal. Assuming m perpendicular to x1
+! C_3v  Trigonal. 
+        IF (code_group_ext==72) THEN
 !
-!         WRITE(stdout,'(5x,"(  .    .    .    .   d15 -d21 )")') 
-!         WRITE(stdout,'(5x,"( d21 -d21   .   d15   .    .  )")') 
-!         WRITE(stdout,'(5x,"( d31  d31  d33   .    .    .  )")') 
+!         m perpendicular to x1
 !
-        epiezo(2,1)=piezo(2,1)
-        epiezo(2,2)=piezo(2,2)
-        epiezo(1,6)=piezo(1,6)
+!         WRITE(stdout,'(5x,"(  .    .    .    .   e15  e21 )")') 
+!         WRITE(stdout,'(5x,"( e21 -e21   .   e15   .    .  )")') 
+!         WRITE(stdout,'(5x,"( e31  e31  e33   .    .    .  )")') 
+!
+           epiezo(2,1)=piezo(2,1)
+           epiezo(2,2)=piezo(2,2)
+           epiezo(1,6)=piezo(1,6)
+        ELSEIF (code_group_ext==73) THEN
+!
+!         m perpendicular to x2
+!
+!          WRITE(stdout,'(5x,"( e11 -e11   .    .   e15   .  )")') 
+!          WRITE(stdout,'(5x,"(  .    .    .   e15   .  -e11 )")') 
+!          WRITE(stdout,'(5x,"( e31  e31  e33   .    .    .  )")') 
+           epiezo(1,1)=piezo(1,1)
+           epiezo(1,2)=piezo(1,2)
+           epiezo(2,6)=piezo(2,6)
+        ENDIF
         epiezo(3,1)=piezo(3,1)
         epiezo(3,2)=piezo(3,2)
         epiezo(3,3)=piezo(3,3)
@@ -1173,9 +1405,9 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
 !
 ! C_4v tetragonal, C_6v hexagonal
 !
-!         WRITE(stdout,'(5x,"(  .    .    .    .   d15   .  )")') 
-!         WRITE(stdout,'(5x,"(  .    .    .   d15   .    .  )")') 
-!         WRITE(stdout,'(5x,"( d31  d31  d33   .    .    .  )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .    .   e15   .  )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .   e15   .    .  )")') 
+!         WRITE(stdout,'(5x,"( e31  e31  e33   .    .    .  )")') 
 
         epiezo(3,1)=piezo(3,1)
         epiezo(3,2)=piezo(3,2)
@@ -1187,8 +1419,8 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
 !
 ! C_3h hexagonal
 !
-!             WRITE(stdout,'(5x,"( d11 -d11   .    .    .  -d12 )")') 
-!             WRITE(stdout,'(5x,"( d12 -d12   .    .    .   d11 )")') 
+!             WRITE(stdout,'(5x,"( e11 -e11   .    .    .   e21 )")') 
+!             WRITE(stdout,'(5x,"( e21 -e21   .    .    .  -e11 )")') 
 !             WRITE(stdout,'(5x,"(  .    .    .    .    .    .  )")') 
 
         epiezo(1,1)=piezo(1,1)
@@ -1202,21 +1434,33 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
 !
 ! D_3h hexagonal
 !
-!             WRITE(stdout,'(5x,"(  .    .    .    .    .  -d21 )")') 
-!             WRITE(stdout,'(5x,"( d21 -d21   .    .    .    .  )")') 
+         IF (code_group_ext==107) THEN
+!
+!             WRITE(stdout,'(5x,"(  .    .    .    .    .  -e21 )")') 
+!             WRITE(stdout,'(5x,"( e21 -e21   .    .    .    .  )")') 
 !             WRITE(stdout,'(5x,"(  .    .    .    .    .    .  )")') 
-        epiezo(2,1)=piezo(2,1)
-        epiezo(2,2)=piezo(2,2)
-        epiezo(1,6)=piezo(1,6)
-
+!
+            epiezo(2,1)=piezo(2,1)
+            epiezo(2,2)=piezo(2,2)
+            epiezo(1,6)=piezo(1,6)
+         ELSEIF (code_group_ext==106) THEN
+!
+!             WRITE(stdout,'(5x,"( e11 -e11   .    .    .    .  )")') 
+!             WRITE(stdout,'(5x,"(  .    .    .    .    .  -e11 )")') 
+!             WRITE(stdout,'(5x,"(  .    .    .    .    .    .  )")') 
+!
+            epiezo(1,1)=piezo(1,1)
+            epiezo(1,2)=piezo(1,2)
+            epiezo(2,6)=piezo(2,6)
+         ENDIF
      CASE(24)
 !
 ! D_2d tetragonal: axis 2 || x1
 !
-!         WRITE(stdout,'(5x,"(  .    .    .   d14   .    .  )")') 
-!         WRITE(stdout,'(5x,"(  .    .    .    .   d14   .  )")') 
-!         WRITE(stdout,'(5x,"(  .    .    .    .    .   d36 )")') 
-
+!         WRITE(stdout,'(5x,"(  .    .    .   e14   .    .  )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .    .   e14   .  )")') 
+!         WRITE(stdout,'(5x,"(  .    .    .    .    .   e36 )")') 
+!
         epiezo(1,4)=piezo(1,4)
         epiezo(2,5)=piezo(2,5)
         epiezo(3,6)=piezo(3,6)
@@ -1225,9 +1469,9 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
 !
 ! S_4 tetragonal
 !
-!        WRITE(stdout,'(5x,"(  .    .    .   d14  d15   .  )")') 
-!        WRITE(stdout,'(5x,"(  .    .    .  -d15  d14   .  )")') 
-!        WRITE(stdout,'(5x,"( d31 -d31   .    .    .   d36 )")') 
+!        WRITE(stdout,'(5x,"(  .    .    .   e14  e15   .  )")') 
+!        WRITE(stdout,'(5x,"(  .    .    .  -e15  e14   .  )")') 
+!        WRITE(stdout,'(5x,"( e31 -e31   .    .    .   e36 )")') 
 
         epiezo(1,4)=piezo(1,4)
         epiezo(2,5)=piezo(2,5)
@@ -1241,15 +1485,17 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
 !
 ! T, T_d cubic
 !
-!             WRITE(stdout,'(5x,"(  .    .    .   d14   .    .  )")') 
-!             WRITE(stdout,'(5x,"(  .    .    .    .   d14   .  )")') 
-!             WRITE(stdout,'(5x,"(  .    .    .    .    .   d14 )")') 
+!             WRITE(stdout,'(5x,"(  .    .    .   e14   .    .  )")') 
+!             WRITE(stdout,'(5x,"(  .    .    .    .   e14   .  )")') 
+!             WRITE(stdout,'(5x,"(  .    .    .    .    .   e14 )")') 
 !
         epiezo(1,4)=piezo(1,4)
         epiezo(2,5)=piezo(2,5)
         epiezo(3,6)=piezo(3,6)
      CASE(31)
-
+!
+!  O cubic group. In this case all elements vanish.
+!
      CASE DEFAULT
 !
 !  C_1 
@@ -1322,6 +1568,11 @@ SUBROUTINE piezo_ij_bp(ialpha, mn, ngeo, epsil_geo, tot_b_phase, at)
 ! alat and divided by the volume of the umperturbed unit cell to have 
 ! it in e/bohr**2.
 !
+! This routine differs from piezo_ij because it makes the strain
+! derivative of the Berry phase and sets the e_piezo_tensor with the
+! proper piezoelectric tensor. Note that in input the at are the 
+! direct lattice vectors of the unperturbed lattice.
+!
 USE kinds, ONLY : DP
 USE polyfit_mod, ONLY : polyfit
 USE voigt, ONLY : voigt_extract_indices
@@ -1349,6 +1600,8 @@ DO ipol=1,3 ! loop on the three components in the crystal basis
    CALL polyfit( x, y, ngeo, alpha, m1-1 )
    polar_at(ipol)=alpha(2)
 ENDDO
+!
+!
 e_piezo_tensor(ialpha,mn) = polar_at(1)*at(ialpha,1) + &
                             polar_at(2)*at(ialpha,2) + &
                             polar_at(3)*at(ialpha,3)
@@ -1356,7 +1609,7 @@ e_piezo_tensor(ialpha,mn) = polar_at(1)*at(ialpha,1) + &
 !  The piezoelectric tensor relates the polarization to the strain in voigt
 !  notation. Since e_23 = 0.5 e_4, e_13 = 0.5 e_5, e_12 = 0.5 e_6 we have
 !  to divide by 2 the elements of the piezoelectric tensor calculated with 
-!  off diagonal strain components
+!  off diagonal strain components (See piezo_ij for a longer explanation).
 !
 IF (m /= n) e_piezo_tensor(ialpha, mn) = e_piezo_tensor(ialpha, mn) * 0.5_DP
 WRITE(stdout,'(/,20x,40("-"),/)')
@@ -1399,31 +1652,19 @@ INTEGER, INTENT(IN) :: code_group, ibrav, ngeo_strain
 INTEGER :: nstrain
 
 SELECT CASE (code_group) 
-   CASE (2,16,18,19,20,22,23,25,27,29,32) 
+   CASE (2,16,18,19,20,22,23,25,27,29,31,32) 
       nstrain=0
-   CASE (3)
+   CASE (5,6,7)
 !
-!  C_s   Monoclinic
+!  C_3, trigonal, C_4, tetragonal, C_6 hexagonal
 !
-      WRITE(stdout,'(/,5x,"It requires five strains: e1, e2, e3, e4, and e5")')
-      nstrain=5
-   CASE (4)
-!
-!  C_2   Monoclinic
-!
-      WRITE(stdout,'(/,5x,"It requires all six strains")')
-      nstrain=6
-   CASE (6,7)
-!
-!  C_4, tetragonal, C_6 hexagonal
-!
-      WRITE(stdout,'(/,5x,"It requires four strains: e1, e3, e4, and e5")')
-      nstrain=4
+      WRITE(stdout,'(/,5x,"It requires three strains: e1, e3, and e4")')
+      nstrain=3
    CASE (8)
 !
 !  D_2 (222) Orthorombic
 !
-      WRITE(stdout,'(/,5x,"It requires two strains: e4, e5, and e6")')
+      WRITE(stdout,'(/,5x,"It requires three strains: e4, e5, and e6")')
       nstrain=3
    CASE (9)
 !
@@ -1446,8 +1687,7 @@ SELECT CASE (code_group)
       nstrain=5
    CASE (13,14,15)
 !
-! C_3v  Trigonal. Assuming m perpendicular to x1
-! C_4v tetragonal, C_6v hexagonal
+! C_3v  Trigonal, C_4v tetragonal, C_6v hexagonal
 !
       WRITE(stdout,'(/,5x,"It requires three strain: e1, e3, and e4 ")')
       nstrain=3
@@ -1468,12 +1708,10 @@ SELECT CASE (code_group)
 ! S_4 tetragonal
 !
       WRITE(stdout,'(/,5x,"It requires three strains: e1, e4, and e6")')
-      nstrain=1
-   CASE (31)
-      nstrain=0
-   CASE DEFAULT
+      nstrain=3
+   CASE DEFAULT  ! CASE(1,3,4)
 !
-!  C_1 
+!  C_1, C_s, C_2 
 !
       WRITE(stdout,'(/,5x,"It requires all six strains")')
       nstrain=6
@@ -1644,7 +1882,7 @@ END SUBROUTINE proper_improper_piezo
 !
 !-------------------------------------------------------------------------
 SUBROUTINE write_piezo_tensor_on_file(temp, ntemp, ibrav, code_group, &
-                                  e_piezo_tensor_t, filename, iflag, iwhat)
+                    code_group_ext, e_piezo_tensor_t, filename, iflag, iwhat)
 !-------------------------------------------------------------------------
 !
 !  iflag=0 writes the piezoelectric tensor as a function of temperature
@@ -1657,7 +1895,7 @@ USE io_global,  ONLY : meta_ionode, meta_ionode_id, stdout
 USE mp_world,   ONLY : world_comm
 USE mp,         ONLY : mp_bcast
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: ntemp, ibrav, code_group, iflag, iwhat
+INTEGER, INTENT(IN) :: ntemp, ibrav, code_group, code_group_ext, iflag, iwhat
 REAL(DP), INTENT(IN) :: temp(ntemp), e_piezo_tensor_t(3,6,ntemp)
 CHARACTER(LEN=*), INTENT(IN) :: filename
 
@@ -1710,7 +1948,7 @@ IF (meta_ionode) THEN
          ENDIF
 
          DO itemp=2,ntemp-1
-            WRITE(iu_piezo,'(e16.8,5e20.12)') temp(itemp),  &
+            WRITE(iu_piezo,'(e16.8,e20.12)') temp(itemp),  &
                 e_piezo_tensor_t(1,4,itemp)
          ENDDO
       CASE(26)
@@ -1726,7 +1964,7 @@ IF (meta_ionode) THEN
          ENDIF
 
          DO itemp=2,ntemp-1
-            WRITE(iu_piezo,'(e16.8,5e20.12)') temp(itemp),  &
+            WRITE(iu_piezo,'(e16.8,4e20.12)') temp(itemp),  &
                 e_piezo_tensor_t(3,1,itemp),                &  
                 e_piezo_tensor_t(1,4,itemp),                &
                 e_piezo_tensor_t(1,5,itemp),                &
@@ -1745,7 +1983,7 @@ IF (meta_ionode) THEN
          ENDIF
 
          DO itemp=2,ntemp-1
-            WRITE(iu_piezo,'(e16.8,5e20.12)') temp(itemp),  &
+            WRITE(iu_piezo,'(e16.8,2e20.12)') temp(itemp),  &
                 e_piezo_tensor_t(1,4,itemp),                &  
                 e_piezo_tensor_t(3,6,itemp)                
          ENDDO
@@ -1753,16 +1991,29 @@ IF (meta_ionode) THEN
 !
 !   D_3h
 !
-         IF (iwhat==1) THEN
-            WRITE(iu_piezo,'("#",5x, a7, 13x, " e_11 ")') label
-         ELSE
-            WRITE(iu_piezo,'("#",5x, a7, 13x, " d_11 ")') label
-         ENDIF
+         IF (code_group_ext==107) THEN
+            IF (iwhat==1) THEN
+               WRITE(iu_piezo,'("#",5x, a7, 13x, " e_22 ")') label
+            ELSE
+               WRITE(iu_piezo,'("#",5x, a7, 13x, " d_22 ")') label
+            ENDIF
 
-         DO itemp=2,ntemp-1
-            WRITE(iu_piezo,'(e16.8,5e20.12)') temp(itemp),  &
-                e_piezo_tensor_t(1,1,itemp)                
-         ENDDO
+            DO itemp=2,ntemp-1
+               WRITE(iu_piezo,'(e16.8,e20.12)') temp(itemp),  &
+                   e_piezo_tensor_t(2,2,itemp)                
+            ENDDO
+         ELSEIF (code_group_ext==106) THEN
+            IF (iwhat==1) THEN
+               WRITE(iu_piezo,'("#",5x, a7, 13x, " e_11 ")') label
+            ELSE
+               WRITE(iu_piezo,'("#",5x, a7, 13x, " d_11 ")') label
+            ENDIF
+
+            DO itemp=2,ntemp-1
+               WRITE(iu_piezo,'(e16.8,e20.12)') temp(itemp),  &
+                   e_piezo_tensor_t(1,1,itemp)                
+            ENDDO
+         ENDIF
       CASE(17)
 !
 !   C_3h
@@ -1776,7 +2027,7 @@ IF (meta_ionode) THEN
          ENDIF
 
          DO itemp=2,ntemp-1
-            WRITE(iu_piezo,'(e16.8,5e20.12)') temp(itemp),  &
+            WRITE(iu_piezo,'(e16.8,2e20.12)') temp(itemp),  &
                 e_piezo_tensor_t(1,1,itemp),                &  
                 e_piezo_tensor_t(2,2,itemp)                
          ENDDO
@@ -1793,29 +2044,48 @@ IF (meta_ionode) THEN
                   & 13x, "     d_33 ", 13x, "     d_15 ")') label
          ENDIF
          DO itemp=2,ntemp-1
-            WRITE(iu_piezo,'(e16.8,5e20.12)') temp(itemp),  &
-                e_piezo_tensor_t(3,1,itemp), e_piezo_tensor_t(3,3,itemp), &
+            WRITE(iu_piezo,'(e16.8,3e20.12)') temp(itemp),  &
+                e_piezo_tensor_t(3,1,itemp),                &
+                e_piezo_tensor_t(3,3,itemp),                &
                 e_piezo_tensor_t(1,5,itemp)
          ENDDO
       CASE(13)
 !
 !   C_3v
 !
-         IF (iwhat==1) THEN
-            WRITE(iu_piezo,'("#",5x, a7, 13x, " e_22 ", &
-                   &13x, " e_31 ", 13x, " e_33 ", 13x, " e_15 ")') label
-         ELSE
-            WRITE(iu_piezo,'("#",5x, a7, 13x, " d_22 ", &
+         IF (code_group_ext==72) THEN
+            IF (iwhat==1) THEN
+               WRITE(iu_piezo,'("#",5x, a7, 13x, " e_22 ", &
+                      &13x, " e_31 ", 13x, " e_33 ", 13x, " e_15 ")') label
+            ELSE
+               WRITE(iu_piezo,'("#",5x, a7, 13x, " d_22 ", &
                    &13x, " d_31 ", 13x, " d_33 ", 13x, " d_15 ")') label
-         ENDIF
+            ENDIF
 
-         DO itemp=2,ntemp-1
-            WRITE(iu_piezo,'(e16.8,5e20.12)') temp(itemp),  &
-                e_piezo_tensor_t(2,2,itemp),                &  
-                e_piezo_tensor_t(3,1,itemp),                &  
-                e_piezo_tensor_t(3,3,itemp),                &  
-                e_piezo_tensor_t(1,5,itemp)                
-         ENDDO
+            DO itemp=2,ntemp-1
+               WRITE(iu_piezo,'(e16.8,4e20.12)') temp(itemp),  &
+                  e_piezo_tensor_t(2,2,itemp),                &  
+                  e_piezo_tensor_t(3,1,itemp),                &  
+                  e_piezo_tensor_t(3,3,itemp),                &  
+                  e_piezo_tensor_t(1,5,itemp)                
+            ENDDO
+         ELSEIF (code_group_ext==73) THEN
+            IF (iwhat==1) THEN
+               WRITE(iu_piezo,'("#",5x, a7, 13x, " e_11 ", &
+                      &13x, " e_31 ", 13x, " e_33 ", 13x, " e_15 ")') label
+            ELSE
+               WRITE(iu_piezo,'("#",5x, a7, 13x, " d_11 ", &
+                   &13x, " d_31 ", 13x, " d_33 ", 13x, " d_15 ")') label
+            ENDIF
+
+            DO itemp=2,ntemp-1
+               WRITE(iu_piezo,'(e16.8,4e20.12)') temp(itemp),  &
+                  e_piezo_tensor_t(1,1,itemp),                 &  
+                  e_piezo_tensor_t(3,1,itemp),                 &  
+                  e_piezo_tensor_t(3,3,itemp),                 &  
+                  e_piezo_tensor_t(1,5,itemp)                
+            ENDDO
+         ENDIF
       CASE(12)
 !
 !   C_2v
@@ -1849,7 +2119,7 @@ IF (meta_ionode) THEN
          ENDIF
 
          DO itemp=2,ntemp-1
-            WRITE(iu_piezo,'(e16.8,5e20.12)') temp(itemp),  &
+            WRITE(iu_piezo,'(e16.8,e20.12)') temp(itemp),  &
                 e_piezo_tensor_t(1,4,itemp)                
          ENDDO
 
@@ -1864,7 +2134,7 @@ IF (meta_ionode) THEN
          ENDIF
 
          DO itemp=2,ntemp-1
-            WRITE(iu_piezo,'(e16.8,5e20.12)') temp(itemp),  &
+            WRITE(iu_piezo,'(e16.8,2e20.12)') temp(itemp),  &
                 e_piezo_tensor_t(1,1,itemp),                &  
                 e_piezo_tensor_t(1,4,itemp)
          ENDDO
@@ -1880,31 +2150,28 @@ IF (meta_ionode) THEN
                    &13x, " d_25 ", 13x, " d_36 ")') label
          ENDIF
          DO itemp=2,ntemp-1
-            WRITE(iu_piezo,'(e16.8,5e20.12)') temp(itemp),  &
+            WRITE(iu_piezo,'(e16.8,3e20.12)') temp(itemp),  &
                 e_piezo_tensor_t(1,4,itemp),                &  
                 e_piezo_tensor_t(2,5,itemp),                &  
                 e_piezo_tensor_t(3,6,itemp)  
          ENDDO
       CASE(6,7)
 !
-!  C_6  C_4
+!  C_4  C_6
 !
          IF (iwhat==1) THEN
             WRITE(iu_piezo,'("#",5x, a7, 13x, " e_31 ", &
-                   &13x, " e_33 ", 13x, " e_14 ", 13x, " e_15 ",&
-                   &13x, " e_24 ")') label
+                   &13x, " e_33 ", 13x, " e_14 ", 13x, " e_15 ")') label
          ELSE
             WRITE(iu_piezo,'("#",5x, a7, 13x, " d_31 ", &
-                   &13x, " d_33 ", 13x, " d_14 ", 13x, " d_15 ",&
-                   &13x, " d_24 ")') label
+                   &13x, " d_33 ", 13x, " d_14 ", 13x, " d_15 ")') label
          ENDIF
          DO itemp=2,ntemp-1
-            WRITE(iu_piezo,'(e16.8,5e20.12)') temp(itemp),  &
+            WRITE(iu_piezo,'(e16.8,4e20.12)') temp(itemp),  &
                 e_piezo_tensor_t(3,1,itemp),                &  
                 e_piezo_tensor_t(3,3,itemp),                &  
                 e_piezo_tensor_t(1,4,itemp),                &  
-                e_piezo_tensor_t(1,5,itemp),                & 
-                e_piezo_tensor_t(2,4,itemp)  
+                e_piezo_tensor_t(1,5,itemp)
          ENDDO
       CASE(5)
 !
@@ -1912,24 +2179,32 @@ IF (meta_ionode) THEN
 !
          IF (iwhat==1) THEN
             WRITE(iu_piezo,'("#",5x, a7, 13x, " e_11 ", &
-                   &13x, " e_22 ", 13x, " e_31 ", 13x, " e_33 ")') label
+                   &13x, " e_22 ", 13x, " e_31 ", 13x, " e_33 ", &
+                   &13x, " e_14 ", 13x, " e_15 ")') label
          ELSE
             WRITE(iu_piezo,'("#",5x, a7, 13x, " d_11 ", &
-                   &13x, " d_22 ", 13x, " d_31 ", 13x, " d_33 ")') label
+                   &13x, " d_22 ", 13x, " d_31 ", 13x, " d_33 ",&
+                   &13x, " d_14 ", 13x, " d_15 ")') label
          ENDIF
 
          DO itemp=2,ntemp-1
-            WRITE(iu_piezo,'(e16.8,5e20.12)') temp(itemp),  &
+            WRITE(iu_piezo,'(e16.8,6e20.12)') temp(itemp),  &
                 e_piezo_tensor_t(1,1,itemp),                &  
                 e_piezo_tensor_t(2,2,itemp),                &  
                 e_piezo_tensor_t(3,1,itemp),                &  
-                e_piezo_tensor_t(3,3,itemp)  
+                e_piezo_tensor_t(3,3,itemp),                &
+                e_piezo_tensor_t(1,4,itemp),                &
+                e_piezo_tensor_t(1,5,itemp)
+  
          ENDDO
       CASE(4)
 !
 !   C_2
 !
-         IF (ibrav==-12) THEN
+         IF (ibrav==-12.OR.ibrav==-13) THEN
+!
+!   b-unique
+!
             IF (iwhat==1) THEN
                WRITE(iu_piezo,'("#",5x, a7, 13x, " e_21 ", &
                    &13x, " e_22 ", 13x, " e_23 ", 13x, " e_14 ", &
@@ -1944,7 +2219,7 @@ IF (meta_ionode) THEN
             ENDIF
 
             DO itemp=2,ntemp-1
-               WRITE(iu_piezo,'(e16.8,5e20.12)') temp(itemp),  &
+               WRITE(iu_piezo,'(e16.8,8e20.12)') temp(itemp),  &
                    e_piezo_tensor_t(2,1,itemp),                &  
                    e_piezo_tensor_t(2,2,itemp),                &  
                    e_piezo_tensor_t(2,3,itemp),                &  
@@ -1955,27 +2230,30 @@ IF (meta_ionode) THEN
                    e_piezo_tensor_t(3,6,itemp)  
             ENDDO
          ELSE
+!
+!   c-unique
+!
             IF (iwhat==1) THEN
-               WRITE(iu_piezo,'("#",5x, a7, 13x, " e_21 ", &
-                   &13x, " e_22 ", 13x, " e_23 ", 13x, " e_14 ", &
-                   &13x, " e_15 ", 13x, " e_25 ", 13x, " e_24 ", &
+               WRITE(iu_piezo,'("#",5x, a7, 13x, " e_31 ", &
+                   &13x, " e_32 ", 13x, " e_33 ", 13x, " e_14 ", &
+                   &13x, " e_15 ", 13x, " e_24 ", 13x, " e_25 ", &
                    &13x, " e_36 ")') label
             ELSE
-               WRITE(iu_piezo,'("#",5x, a7, 13x, " d_21 ", &
-                   &13x, " d_22 ", 13x, " d_23 ", 13x, " d_14 ", &
-                   &13x, " d_15 ", 13x, " d_25 ", 13x, " d_24 ", &
+               WRITE(iu_piezo,'("#",5x, a7, 13x, " d_31 ", &
+                   &13x, " d_32 ", 13x, " d_33 ", 13x, " d_14 ", &
+                   &13x, " d_15 ", 13x, " d_24 ", 13x, " d_25 ", &
                    &13x, " d_36 ")') label
 
             ENDIF
             DO itemp=2,ntemp-1
-               WRITE(iu_piezo,'(e16.8,5e20.12)') temp(itemp),  &
-                   e_piezo_tensor_t(2,1,itemp),                &  
-                   e_piezo_tensor_t(2,2,itemp),                &  
-                   e_piezo_tensor_t(2,3,itemp),                &  
+               WRITE(iu_piezo,'(e16.8,8e20.12)') temp(itemp),  &
+                   e_piezo_tensor_t(3,1,itemp),                &  
+                   e_piezo_tensor_t(3,2,itemp),                &  
+                   e_piezo_tensor_t(3,3,itemp),                &  
                    e_piezo_tensor_t(1,4,itemp),                &  
                    e_piezo_tensor_t(1,5,itemp),                &  
-                   e_piezo_tensor_t(2,5,itemp),                &  
                    e_piezo_tensor_t(2,4,itemp),                &  
+                   e_piezo_tensor_t(2,5,itemp),                &  
                    e_piezo_tensor_t(3,6,itemp)  
             ENDDO
          ENDIF
@@ -1983,32 +2261,62 @@ IF (meta_ionode) THEN
 !
 !   C_s
 !
-         IF (iwhat==1) THEN
-            WRITE(iu_piezo,'("#",5x, a7, 13x, " e_11 ",             &
-                   &13x, " e_12 ", 13x, " e_13 ", 13x, " e_15",  &
-                   &13x, " e_24 ", 13x, " e_26 ", 13x, " e_31 ", &
-                   &13x, " e_32 ", 13x, " e_33 ", 13x, " e_35 ")') label
+         IF (ibrav==-12.OR.ibrav==-13) THEN
+!
+!   b-unique
+!
+            IF (iwhat==1) THEN
+               WRITE(iu_piezo,'("#",5x, a7, 13x, " e_11 ",             &
+                      &13x, " e_12 ", 13x, " e_13 ", 13x, " e_15",  &
+                      &13x, " e_24 ", 13x, " e_26 ", 13x, " e_31 ", &
+                      &13x, " e_32 ", 13x, " e_33 ", 13x, " e_35 ")') label
+            ELSE
+               WRITE(iu_piezo,'("#",5x, a7, 13x, " d_11 ",             &
+                      &13x, " d_12 ", 13x, " d_13 ", 13x, " d_15",  &
+                      &13x, " d_24 ", 13x, " d_26 ", 13x, " d_31 ", &
+                      &13x, " d_32 ", 13x, " d_33 ", 13x, " d_35 ")') label
+            ENDIF
+
+            DO itemp=2,ntemp-1
+               WRITE(iu_piezo,'(e16.8,10e20.12)') temp(itemp),  &
+                   e_piezo_tensor_t(1,1,itemp),                &  
+                   e_piezo_tensor_t(1,2,itemp),                &  
+                   e_piezo_tensor_t(1,3,itemp),                &  
+                   e_piezo_tensor_t(1,5,itemp),                &  
+                   e_piezo_tensor_t(2,4,itemp),                &  
+                   e_piezo_tensor_t(2,6,itemp),                &  
+                   e_piezo_tensor_t(3,1,itemp),                &  
+                   e_piezo_tensor_t(3,2,itemp),                &
+                   e_piezo_tensor_t(3,3,itemp),                &
+                   e_piezo_tensor_t(3,5,itemp)  
+            ENDDO
          ELSE
-            WRITE(iu_piezo,'("#",5x, a7, 13x, " d_11 ",             &
-                   &13x, " d_12 ", 13x, " d_13 ", 13x, " d_15",  &
-                   &13x, " d_24 ", 13x, " d_26 ", 13x, " d_31 ", &
-                   &13x, " d_32 ", 13x, " d_33 ", 13x, " d_35 ")') label
+            IF (iwhat==1) THEN
+               WRITE(iu_piezo,'("#",5x, a7, 13x, " e_11 ",             &
+                      &13x, " e_12 ", 13x, " e_13 ", 13x, " e_16",  &
+                      &13x, " e_21 ", 13x, " e_22 ", 13x, " e_23 ", &
+                      &13x, " e_26 ", 13x, " e_34 ", 13x, " e_35 ")') label
+            ELSE
+               WRITE(iu_piezo,'("#",5x, a7, 13x, " d_11 ",             &
+                      &13x, " d_12 ", 13x, " d_13 ", 13x, " d_16",  &
+                      &13x, " d_21 ", 13x, " d_22 ", 13x, " d_23 ", &
+                      &13x, " d_26 ", 13x, " d_34 ", 13x, " d_35 ")') label
+            ENDIF
+
+            DO itemp=2,ntemp-1
+               WRITE(iu_piezo,'(e16.8,10e20.12)') temp(itemp),  &
+                   e_piezo_tensor_t(1,1,itemp),                &  
+                   e_piezo_tensor_t(1,2,itemp),                &  
+                   e_piezo_tensor_t(1,3,itemp),                &  
+                   e_piezo_tensor_t(1,6,itemp),                &  
+                   e_piezo_tensor_t(2,1,itemp),                &  
+                   e_piezo_tensor_t(2,2,itemp),                &  
+                   e_piezo_tensor_t(2,3,itemp),                &  
+                   e_piezo_tensor_t(2,6,itemp),                &
+                   e_piezo_tensor_t(3,4,itemp),                &
+                   e_piezo_tensor_t(3,5,itemp)  
+            ENDDO
          ENDIF
-
-         DO itemp=2,ntemp-1
-            WRITE(iu_piezo,'(e16.8,5e20.12)') temp(itemp),  &
-                e_piezo_tensor_t(1,1,itemp),                &  
-                e_piezo_tensor_t(1,2,itemp),                &  
-                e_piezo_tensor_t(1,3,itemp),                &  
-                e_piezo_tensor_t(1,5,itemp),                &  
-                e_piezo_tensor_t(2,4,itemp),                &  
-                e_piezo_tensor_t(2,6,itemp),                &  
-                e_piezo_tensor_t(3,1,itemp),                &  
-                e_piezo_tensor_t(3,2,itemp),                &
-                e_piezo_tensor_t(3,3,itemp),                &
-                e_piezo_tensor_t(3,5,itemp)  
-         ENDDO
-
       CASE DEFAULT
          IF (iwhat==1) THEN
             WRITE(iu_piezo,'("#",5x, a7, 13x, " e_11 ",             &
@@ -2029,7 +2337,7 @@ IF (meta_ionode) THEN
          ENDIF
 
          DO itemp=2,ntemp-1
-            WRITE(iu_piezo,'(e16.8,21e20.12)') temp(itemp), &
+            WRITE(iu_piezo,'(e16.8,18e20.12)') temp(itemp), &
                   e_piezo_tensor_t(1,1,itemp), e_piezo_tensor_t(1,2,itemp), &
                   e_piezo_tensor_t(1,3,itemp), e_piezo_tensor_t(1,4,itemp), &
                   e_piezo_tensor_t(1,5,itemp), e_piezo_tensor_t(1,6,itemp), &
@@ -2049,7 +2357,7 @@ END SUBROUTINE write_piezo_tensor_on_file
 !
 !-------------------------------------------------------------------------
 SUBROUTINE read_piezo_tensor_from_file(temp, ntemp, ibrav, code_group, &
-                                  e_piezo_tensor_t, filename)
+                             code_group_ext, e_piezo_tensor_t, filename)
 !-------------------------------------------------------------------------
 !
 ! This routine reads a file with the temperature (or pressure) and
@@ -2061,7 +2369,7 @@ USE io_global,  ONLY : meta_ionode, meta_ionode_id, stdout
 USE mp_world,   ONLY : world_comm
 USE mp,         ONLY : mp_bcast
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: ntemp, ibrav, code_group
+INTEGER, INTENT(IN) :: ntemp, ibrav, code_group, code_group_ext
 REAL(DP), INTENT(IN) :: temp(ntemp)
 REAL(DP), INTENT(INOUT) :: e_piezo_tensor_t(3,6,ntemp)
 CHARACTER(LEN=*), INTENT(IN) :: filename
@@ -2134,11 +2442,21 @@ IF (meta_ionode) THEN
 !
          READ(iu_piezo,*)
 
-         DO itemp=2,ntemp-1
-            READ(iu_piezo,*) rdum, e_piezo_tensor_t(1,1,itemp)                
-            IF (ABS(rdum-temp(itemp))>1D-5) &
-               CALL errore('read_piezo_from_file','incorrect temperature', 1)
-         ENDDO
+         IF (code_group_ext==107) THEN
+            DO itemp=2,ntemp-1
+               READ(iu_piezo,*) rdum, e_piezo_tensor_t(2,2,itemp)                
+               IF (ABS(rdum-temp(itemp))>1D-5) &
+                  CALL errore('read_piezo_from_file',&
+                                        'incorrect temperature', 1)
+            ENDDO
+         ELSEIF (code_group_ext==106) THEN
+            DO itemp=2,ntemp-1
+               READ(iu_piezo,*) rdum, e_piezo_tensor_t(1,1,itemp)                
+               IF (ABS(rdum-temp(itemp))>1D-5) &
+                  CALL errore('read_piezo_from_file',&
+                                        'incorrect temperature', 1)
+            ENDDO
+         ENDIF
       CASE(17)
 !
 !   C_3h
@@ -2169,14 +2487,27 @@ IF (meta_ionode) THEN
 !
          READ(iu_piezo,*)
 
-         DO itemp=2,ntemp-1
-            READ(iu_piezo,*) rdum, e_piezo_tensor_t(2,2,itemp),  &  
-                e_piezo_tensor_t(3,1,itemp),                &  
-                e_piezo_tensor_t(3,3,itemp),                &  
-                e_piezo_tensor_t(1,5,itemp)                
-            IF (ABS(rdum-temp(itemp))>1D-5) &
-               CALL errore('read_piezo_from_file','incorrect temperature', 1)
-         ENDDO
+         IF (code_group_ext==72) THEN
+            DO itemp=2,ntemp-1
+               READ(iu_piezo,*) rdum, e_piezo_tensor_t(2,2,itemp),  &  
+                   e_piezo_tensor_t(3,1,itemp),                &  
+                   e_piezo_tensor_t(3,3,itemp),                &  
+                   e_piezo_tensor_t(1,5,itemp)                
+               IF (ABS(rdum-temp(itemp))>1D-5) &
+                  CALL errore('read_piezo_from_file',&
+                                      'incorrect temperature', 1)
+            ENDDO
+         ELSEIF (code_group_ext==73) THEN
+            DO itemp=2,ntemp-1
+               READ(iu_piezo,*) rdum, e_piezo_tensor_t(1,1,itemp),  &  
+                   e_piezo_tensor_t(3,1,itemp),                &  
+                   e_piezo_tensor_t(3,3,itemp),                &  
+                   e_piezo_tensor_t(1,5,itemp)                
+               IF (ABS(rdum-temp(itemp))>1D-5) &
+                  CALL errore('read_piezo_from_file',&
+                                      'incorrect temperature', 1)
+            ENDDO
+         ENDIF
       CASE(12)
 !
 !   C_2v
@@ -2229,9 +2560,9 @@ IF (meta_ionode) THEN
             IF (ABS(rdum-temp(itemp))>1D-5) &
                CALL errore('read_piezo_from_file','incorrect temperature', 1)
          ENDDO
-      CASE(6, 7)
+      CASE(6,7)
 !
-!   C_6 C_4
+!   C_6, C_4
 !
          READ(iu_piezo,*)
 
@@ -2239,8 +2570,7 @@ IF (meta_ionode) THEN
             READ(iu_piezo,*) rdum, e_piezo_tensor_t(3,1,itemp),     &  
                 e_piezo_tensor_t(3,3,itemp),                &  
                 e_piezo_tensor_t(1,4,itemp),                &  
-                e_piezo_tensor_t(1,5,itemp),                &
-                e_piezo_tensor_t(2,4,itemp)  
+                e_piezo_tensor_t(1,5,itemp)
             IF (ABS(rdum-temp(itemp))>1D-5) &
                CALL errore('read_piezo_from_file','incorrect temperature', 1)
          ENDDO
@@ -2254,7 +2584,9 @@ IF (meta_ionode) THEN
             READ(iu_piezo,*) rdum, e_piezo_tensor_t(1,1,itemp),  &  
                 e_piezo_tensor_t(2,2,itemp),                &  
                 e_piezo_tensor_t(3,1,itemp),                &  
-                e_piezo_tensor_t(3,3,itemp)  
+                e_piezo_tensor_t(3,3,itemp),                &  
+                e_piezo_tensor_t(1,4,itemp),                &  
+                e_piezo_tensor_t(1,5,itemp) 
             IF (ABS(rdum-temp(itemp))>1D-5) &
                CALL errore('read_piezo_from_file','incorrect temperature', 1)
          ENDDO
@@ -2264,7 +2596,7 @@ IF (meta_ionode) THEN
 !
          READ(iu_piezo,*)
 
-         IF (ibrav==-12) THEN
+         IF (ibrav==-12.OR.ibrav==-13) THEN
             DO itemp=2,ntemp-1
                READ(iu_piezo,*) rdum,                       &
                 e_piezo_tensor_t(2,1,itemp),                &  
@@ -2281,13 +2613,13 @@ IF (meta_ionode) THEN
          ELSE
             DO itemp=2,ntemp-1
                READ(iu_piezo,*) rdum,                       &
-                e_piezo_tensor_t(2,1,itemp),                &  
-                e_piezo_tensor_t(2,2,itemp),                &  
-                e_piezo_tensor_t(2,3,itemp),                &  
+                e_piezo_tensor_t(3,1,itemp),                &  
+                e_piezo_tensor_t(3,2,itemp),                &  
+                e_piezo_tensor_t(3,3,itemp),                &  
                 e_piezo_tensor_t(1,4,itemp),                &  
                 e_piezo_tensor_t(1,5,itemp),                &  
-                e_piezo_tensor_t(2,5,itemp),                &  
                 e_piezo_tensor_t(2,4,itemp),                &  
+                e_piezo_tensor_t(2,5,itemp),                &  
                 e_piezo_tensor_t(3,6,itemp)  
                 IF (ABS(rdum-temp(itemp))>1D-5) &
                    CALL errore('read_piezo_from_file','incorrect temperature',1)
@@ -2300,20 +2632,40 @@ IF (meta_ionode) THEN
 !
          READ(iu_piezo,*)
 
-         DO itemp=2,ntemp-1
-            READ(iu_piezo,*) rdum, e_piezo_tensor_t(1,1,itemp),  &  
-                e_piezo_tensor_t(1,2,itemp),                &  
-                e_piezo_tensor_t(1,3,itemp),                &  
-                e_piezo_tensor_t(1,5,itemp),                &  
-                e_piezo_tensor_t(2,4,itemp),                &  
-                e_piezo_tensor_t(2,6,itemp),                &  
-                e_piezo_tensor_t(3,1,itemp),                &  
-                e_piezo_tensor_t(3,2,itemp),                &
-                e_piezo_tensor_t(3,3,itemp),                &
-                e_piezo_tensor_t(3,5,itemp)  
-                IF (ABS(rdum-temp(itemp))>1D-5) &
-                   CALL errore('read_piezo_from_file','incorrect temperature',1)
-         ENDDO
+         IF (ibrav==-12.OR.ibrav==-13) THEN
+            DO itemp=2,ntemp-1
+               READ(iu_piezo,*) rdum, e_piezo_tensor_t(1,1,itemp),  &  
+                   e_piezo_tensor_t(1,2,itemp),                &  
+                   e_piezo_tensor_t(1,3,itemp),                &  
+                   e_piezo_tensor_t(1,5,itemp),                &  
+                   e_piezo_tensor_t(2,4,itemp),                &  
+                   e_piezo_tensor_t(2,6,itemp),                &  
+                   e_piezo_tensor_t(3,1,itemp),                &  
+                   e_piezo_tensor_t(3,2,itemp),                &
+                   e_piezo_tensor_t(3,3,itemp),                &
+                   e_piezo_tensor_t(3,5,itemp)  
+                   IF (ABS(rdum-temp(itemp))>1D-5) &
+                      CALL errore('read_piezo_from_file',      &
+                                  'incorrect temperature',1)
+            ENDDO
+         ELSE
+            DO itemp=2,ntemp-1
+               READ(iu_piezo,*) rdum, e_piezo_tensor_t(1,1,itemp),  &  
+                   e_piezo_tensor_t(1,2,itemp),                &  
+                   e_piezo_tensor_t(1,3,itemp),                &  
+                   e_piezo_tensor_t(1,6,itemp),                &  
+                   e_piezo_tensor_t(2,1,itemp),                &  
+                   e_piezo_tensor_t(2,2,itemp),                &  
+                   e_piezo_tensor_t(2,3,itemp),                &  
+                   e_piezo_tensor_t(2,6,itemp),                &
+                   e_piezo_tensor_t(3,4,itemp),                &
+                   e_piezo_tensor_t(3,5,itemp)  
+                   IF (ABS(rdum-temp(itemp))>1D-5) &
+                      CALL errore('read_piezo_from_file',      &
+                                  'incorrect temperature',1)
+            ENDDO
+
+         ENDIF
 
       CASE DEFAULT
          READ(iu_piezo,*)
@@ -2334,7 +2686,8 @@ IF (meta_ionode) THEN
          ENDDO
    END SELECT
    CLOSE(iu_piezo)
-   CALL expand_piezo_tensor(e_piezo_tensor_t, code_group, ibrav, ntemp, temp)
+   CALL expand_piezo_tensor(e_piezo_tensor_t, code_group, code_group_ext, &
+                                                          ibrav, ntemp, temp)
 ENDIF
 CALL mp_bcast(e_piezo_tensor_t, meta_ionode_id, world_comm) 
 
@@ -2342,8 +2695,8 @@ RETURN
 END SUBROUTINE read_piezo_tensor_from_file
 
 !-------------------------------------------------------------------------
-SUBROUTINE expand_piezo_tensor(e_piezo_tensor_t, code_group, ibrav, &
-                                                       ntemp, temp)
+SUBROUTINE expand_piezo_tensor(e_piezo_tensor_t, code_group, &
+                           code_group_ext, ibrav, ntemp, temp)
 !-------------------------------------------------------------------------
 !
 ! This routine reconstruct the complete piezoelectric tensor from the
@@ -2351,7 +2704,7 @@ SUBROUTINE expand_piezo_tensor(e_piezo_tensor_t, code_group, ibrav, &
 !
 USE kinds,      ONLY : DP
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: ntemp, ibrav, code_group
+INTEGER, INTENT(IN) :: ntemp, ibrav, code_group, code_group_ext
 REAL(DP), INTENT(IN) :: temp(ntemp)
 REAL(DP), INTENT(INOUT) :: e_piezo_tensor_t(3,6,ntemp)
 
@@ -2393,10 +2746,17 @@ SELECT CASE (code_group)
 !
 !   D_3h
 !
-         DO itemp=2,ntemp-1
-            e_piezo_tensor_t(2,2,itemp)=-e_piezo_tensor_t(2,1,itemp)
-            e_piezo_tensor_t(1,6,itemp)=-e_piezo_tensor_t(2,1,itemp)
-         ENDDO
+         IF (code_group_ext==107) THEN
+            DO itemp=2,ntemp-1
+               e_piezo_tensor_t(2,1,itemp)=-e_piezo_tensor_t(2,2,itemp)
+               e_piezo_tensor_t(1,6,itemp)=-e_piezo_tensor_t(2,2,itemp)
+            ENDDO
+         ELSEIF(code_group_ext==106) THEN
+            DO itemp=2,ntemp-1
+               e_piezo_tensor_t(1,2,itemp)=-e_piezo_tensor_t(1,1,itemp)
+               e_piezo_tensor_t(2,6,itemp)=-e_piezo_tensor_t(1,1,itemp)
+            ENDDO
+         ENDIF
    CASE(17)
 !
 !   C_3h
@@ -2405,8 +2765,8 @@ SELECT CASE (code_group)
          DO itemp=2,ntemp-1
             e_piezo_tensor_t(1,2,itemp)=-e_piezo_tensor_t(1,1,itemp)
             e_piezo_tensor_t(2,1,itemp)=-e_piezo_tensor_t(2,2,itemp)
-            e_piezo_tensor_t(1,6,itemp)= e_piezo_tensor_t(2,2,itemp)
-            e_piezo_tensor_t(2,6,itemp)= e_piezo_tensor_t(1,1,itemp)
+            e_piezo_tensor_t(1,6,itemp)=-e_piezo_tensor_t(2,2,itemp)
+            e_piezo_tensor_t(2,6,itemp)=-e_piezo_tensor_t(1,1,itemp)
          ENDDO
    CASE(14,15)
 !
@@ -2421,12 +2781,21 @@ SELECT CASE (code_group)
 !   C_3v
 !
 
+      IF (code_group_ext==72) THEN
          DO itemp=2,ntemp-1
-            e_piezo_tensor_t(1,2,itemp)=-e_piezo_tensor_t(2,2,itemp)
-            e_piezo_tensor_t(1,6,itemp)= e_piezo_tensor_t(2,2,itemp)
+            e_piezo_tensor_t(2,1,itemp)=-e_piezo_tensor_t(2,2,itemp)
+            e_piezo_tensor_t(1,6,itemp)=-e_piezo_tensor_t(2,2,itemp)
             e_piezo_tensor_t(3,2,itemp)= e_piezo_tensor_t(3,1,itemp)
             e_piezo_tensor_t(2,4,itemp)= e_piezo_tensor_t(1,5,itemp)
          ENDDO
+      ELSEIF (code_group_ext==73) THEN
+         DO itemp=2,ntemp-1
+            e_piezo_tensor_t(1,2,itemp)=-e_piezo_tensor_t(1,1,itemp)
+            e_piezo_tensor_t(2,6,itemp)=-e_piezo_tensor_t(1,1,itemp)
+            e_piezo_tensor_t(3,2,itemp)= e_piezo_tensor_t(3,1,itemp)
+            e_piezo_tensor_t(2,4,itemp)= e_piezo_tensor_t(1,5,itemp)
+         ENDDO
+      ENDIF
    CASE(12)
 !
 !   C_2v ! all elements are independent
@@ -2448,8 +2817,8 @@ SELECT CASE (code_group)
 
          DO itemp=2,ntemp-1
             e_piezo_tensor_t(1,2,itemp)=-e_piezo_tensor_t(1,1,itemp)
+            e_piezo_tensor_t(2,6,itemp)=-e_piezo_tensor_t(1,1,itemp)
             e_piezo_tensor_t(2,5,itemp)=-e_piezo_tensor_t(1,4,itemp)
-            e_piezo_tensor_t(2,6,itemp)=2.0_DP*e_piezo_tensor_t(1,1,itemp)
          ENDDO
    CASE(8)
 !
@@ -2462,45 +2831,169 @@ SELECT CASE (code_group)
          DO itemp=2,ntemp-1
             e_piezo_tensor_t(3,2,itemp)= e_piezo_tensor_t(3,1,itemp)
             e_piezo_tensor_t(2,5,itemp)=-e_piezo_tensor_t(1,4,itemp)
+            e_piezo_tensor_t(2,4,itemp)= e_piezo_tensor_t(1,5,itemp)
          ENDDO
    CASE(5)
 !
 !   C_3
 !
-!      To be checked it does not exist in previous routines
-!
-!         DO itemp=2,ntemp-1
-!            WRITE(iu_piezo,'(e16.8,5e20.12)') temp(itemp),  &
-!                e_piezo_tensor_t(1,1,itemp),                &  
-!                e_piezo_tensor_t(2,2,itemp),                &  
-!                e_piezo_tensor_t(3,1,itemp),                &  
-!                e_piezo_tensor_t(3,3,itemp)  
-!         ENDDO
+         DO itemp=2,ntemp-1
+            e_piezo_tensor_t(1,2,itemp)=-e_piezo_tensor_t(1,1,itemp)
+            e_piezo_tensor_t(2,6,itemp)=-e_piezo_tensor_t(1,1,itemp)
+            e_piezo_tensor_t(2,1,itemp)=-e_piezo_tensor_t(2,2,itemp)
+            e_piezo_tensor_t(1,6,itemp)=-e_piezo_tensor_t(2,2,itemp)
+            e_piezo_tensor_t(3,2,itemp)= e_piezo_tensor_t(3,1,itemp)
+            e_piezo_tensor_t(2,5,itemp)=-e_piezo_tensor_t(1,4,itemp)
+            e_piezo_tensor_t(2,4,itemp)= e_piezo_tensor_t(1,5,itemp)
+         ENDDO
 
-   CASE(4)
+   CASE DEFAULT ! CASE(1,3,4)
 !
-!   C_2
-!
-          ! all elements are independent
-
-   CASE(3)
-!
-!   C_s   ! to be checked
-!
-
-   CASE DEFAULT
 !     No symmetry in the default case
 !
 END SELECT
 
 RETURN
 END SUBROUTINE expand_piezo_tensor
+!
+!------------------------------------------------------------------------
+SUBROUTINE set_piezo_strain_list(code_group, ibrav, strain_list, nstep)
+!------------------------------------------------------------------------
+!
+!  This routines sets the number of strain types and the list of strains 
+!  that must be imposed to calculate the piezoelectric tensor in each 
+!  point group.
+!
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: code_group, ibrav
+CHARACTER(LEN=2), INTENT(OUT) :: strain_list(6)
+INTEGER, INTENT(OUT) :: nstep
+LOGICAL :: check_group_ibrav
 
+IF (check_group_ibrav(code_group, ibrav)) THEN
+   SELECT CASE (code_group)
+     CASE(2,16,18,19,20,22,23,25,27,29,31,32)
+!
+!  Point groups with inversion, the piezoelectric tensor vanishes
+!  C_i, C_2h, C_4h, C_6h, D_2h, D_4h, D_6h, D_3d, S_6, T_h, O_h
+!  The tensor vanishes also in O (31).
+!
+        nstep=0
+
+     CASE(5,6,7)
+!
+! C_3, C_4, C_6
+!
+        nstep = 3
+        strain_list(1) = 'C '
+        strain_list(2) = 'E '
+        strain_list(3) = 'I '
+
+     CASE(8)
+!
+!   D_2
+!
+        nstep = 3
+        strain_list(1) = 'I '
+        strain_list(2) = 'H '
+        strain_list(3) = 'G '
+
+     CASE(9)
+!
+!   D_3
+!
+        nstep = 2
+        strain_list(1) = 'C '
+        strain_list(2) = 'I '
+
+     CASE(10,11,28,30)
+!
+!  D_4, D_6, T, T_d
+!
+        nstep = 1
+        strain_list(1) = 'I '
+
+     CASE(12)
+!
+!   C_2v
+!
+        nstep = 5
+        strain_list(1) = 'C '
+        strain_list(2) = 'D '
+        strain_list(3) = 'E '
+        strain_list(4) = 'I '
+        strain_list(5) = 'H '
+
+     CASE(13)
+!
+!   C_3v
+!
+        nstep = 3
+        strain_list(1) = 'C '
+        strain_list(2) = 'E '
+        strain_list(3) = 'H '
+
+     CASE(14,15)
+!
+!   C_4v, C_6v
+!
+        nstep = 3
+        strain_list(1) = 'B '
+        strain_list(2) = 'E '
+        strain_list(3) = 'H '
+
+     CASE(17,21)
+!
+!  C_3h, D_3h
+!
+        nstep=1
+        strain_list(1) = 'C '
+     CASE(24)
+!
+!  D_2d
+!
+        nstep = 2
+        strain_list(1) = 'I '
+        strain_list(2) = 'G '
+     CASE(26)
+!
+!  S_4
+!
+        nstep = 3 
+        strain_list(1) = 'C '
+        strain_list(2) = 'I '
+        strain_list(3) = 'G '
+
+     CASE DEFAULT   ! CASE(1,3,4)
+!
+!  This is valid for C_1,  C_s, C_2 
+!
+        nstep = 6 
+        strain_list(1) = 'C '
+        strain_list(2) = 'D '
+        strain_list(3) = 'E '
+        strain_list(4) = 'I '
+        strain_list(5) = 'H '
+        strain_list(6) = 'G '
+   END SELECT
+ELSE
+   nstep = 6
+   strain_list(1) = 'C '
+   strain_list(2) = 'D '
+   strain_list(3) = 'E '
+   strain_list(4) = 'I '
+   strain_list(5) = 'H '
+   strain_list(6) = 'G '
+ENDIF
+
+RETURN
+END SUBROUTINE set_piezo_strain_list
+!
 !-----------------------------------------------------------------------
-FUNCTION get_pt_type(code_group)
+FUNCTION get_pt_type(code_group, code_group_ext, ibrav)
 !-----------------------------------------------------------------------
 INTEGER :: get_pt_type
-INTEGER, INTENT(IN) :: code_group
+INTEGER, INTENT(IN) :: code_group, code_group_ext, ibrav
 
 INTEGER :: itype, aux_type
 
@@ -2508,8 +3001,54 @@ aux_type=0
 DO itype=1,pt_types
    IF (pt_code_group(itype)==code_group) aux_type=itype
 ENDDO
-IF (aux_type==0) CALL errore('get_pt_type','code_group not available',1)
+!
+!  Special cases
+!
+IF (code_group==3) THEN
+!
+! C_s b-unique or c-unique
+!
+   IF (ibrav==-12.OR.ibrav==-13) THEN
+      aux_type=22
+   ELSEIF (ibrav==12.OR.ibrav==13) THEN
+      aux_type=23
+   ENDIF
+ENDIF
 
+IF (code_group==4) THEN
+!
+! C_2 b-unique or c-unique
+!
+   IF (ibrav==-12.OR.ibrav==-13) THEN
+      aux_type=20
+   ELSEIF (ibrav==12.OR.ibrav==13) THEN
+      aux_type=21
+   ENDIF
+ENDIF
+
+IF (code_group==13) THEN
+!
+!  C_3v mirror perpendicular to x1 or to x2
+!
+   IF (code_group_ext==72) THEN
+      aux_type=10
+   ELSEIF (code_group_ext==73) THEN
+      aux_type=11
+   ENDIF
+ENDIF
+
+IF (code_group==21) THEN
+!
+!  D_3h mirror perpendicular to x1 or to x2
+!
+   IF (code_group_ext==106) THEN
+      aux_type=5
+   ELSEIF (code_group_ext==107) THEN
+      aux_type=6
+   ENDIF
+ENDIF
+
+IF (aux_type==0) CALL errore('get_pt_type','code_group not available',1)
 get_pt_type=aux_type
 RETURN
 END FUNCTION get_pt_type
@@ -2519,7 +3058,10 @@ SUBROUTINE compute_relax_piezo(ibrav, code_group, nat, max_nint_var, &
                                nint_var_ec, stypes, piezo_relax,     &
                                zeu_eq, dtau_dint, duint_depsilon)
 !-------------------------------------------------------------------------
-
+!
+!  This routine is still quite experimental. It works only for the
+!  C_{6v}, C_{4v} point groups. 
+!
 USE kinds, ONLY : DP
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ibrav, code_group, nat, max_nint_var, stypes

@@ -24,7 +24,7 @@ MODULE nye
 
   PUBLIC print_vectors_shape, print_tensor2_shape, print_piezo_shape, &
          print_el_cons_shape, print_b_fact_shape, thermal_gnuplot_name, &
-         needed_tensor2
+         needed_tensor2, print_piezom_shape
 
 CONTAINS
 
@@ -256,23 +256,26 @@ END SUBROUTINE needed_tensor2
 
 
 !--------------------------------------------------------------------
-SUBROUTINE print_piezo_shape(code_group, ibrav)
+SUBROUTINE print_piezo_shape(code_group, code_group_ext, ibrav)
 !--------------------------------------------------------------------
 
 USE io_global, ONLY : stdout
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: code_group, ibrav
+INTEGER, INTENT(IN) :: code_group, code_group_ext, ibrav
+CHARACTER(LEN=11) :: group_name
 
 INTEGER :: code_group_
 
 code_group_=code_group
 IF (ibrav==0) code_group_=0
 
+IF (code_group_>0) &
+   WRITE(stdout,'(/,5x,"Point group ",a)') TRIM(group_name(code_group_)) 
 SELECT CASE (code_group_) 
 
    CASE(2,16,18,19,20,22,23,25,27,29,32) 
-       WRITE(stdout,'(/,5x,"Solid with inversion symmetry.")') 
-       WRITE(stdout,'(5x,"Third-rank tensors, such as the piezoelectic&
+       WRITE(stdout,'(/,5x,"Point group with inversion symmetry.")') 
+       WRITE(stdout,'(5x,"Polar third-rank tensors, such as the piezoelectic&
                      & tensor, vanish.")')
    CASE(3)
 !
@@ -302,12 +305,21 @@ SELECT CASE (code_group_)
          WRITE(stdout,'(  5x,"( g31  g32  g33   .    .   g66 )")') 
       ENDIF
 
+   CASE(5)
+!
+!   C_3 trigonal
+!
+      WRITE(stdout,'(5x,"( g11 -g11   .   g14  g15 -g22 )")') 
+      WRITE(stdout,'(5x,"(-g22  g22   .   g15 -g14 -g11 )")') 
+      WRITE(stdout,'(5x,"( g31 -g31  g33   .    .    .  )")') 
+!
+
    CASE(6,7)
 !
 !  C_4, tetragonal, C_6 hexagonal
 !
       WRITE(stdout,'(/,5x,"(  .    .    .   g14  g15   .  )")') 
-      WRITE(stdout,'(  5x,"(  .    .    .   g24 -g14   .  )")') 
+      WRITE(stdout,'(  5x,"(  .    .    .   g15 -g14   .  )")') 
       WRITE(stdout,'(  5x,"( g31  g31  g33   .    .    .  )")') 
 
    CASE(8)
@@ -323,7 +335,7 @@ SELECT CASE (code_group_)
 ! D_3  Trigonal 
 !
       WRITE(stdout,'(/,5x,"( g11 -g11   .   g14   .    .  )")') 
-      WRITE(stdout,'(  5x,"(  .    .    .    .  -g14 2g11 )")') 
+      WRITE(stdout,'(  5x,"(  .    .    .    .  -g14 -g11 )")') 
       WRITE(stdout,'(  5x,"(  .    .    .    .    .    .  )")') 
 
    CASE(10,11)
@@ -344,11 +356,24 @@ SELECT CASE (code_group_)
 
    CASE(13)
 !
-! C_3v  Trigonal. Assuming m perpendicular to x1
+! C_3v  Trigonal.  
 !
-      WRITE(stdout,'(/,5x,"(  .    .    .    .   g15 -g21 )")') 
-      WRITE(stdout,'(  5x,"( g21 -g21   .   g15   .    .  )")') 
-      WRITE(stdout,'(  5x,"( g31  g31  g33   .    .    .  )")') 
+      IF (code_group_ext==72) THEN
+!
+! m perpendicular to x1
+!
+         WRITE(stdout,'(/,5x,"(  .    .    .    .   g15 -g21 )")') 
+         WRITE(stdout,'(  5x,"( g21 -g21   .   g15   .    .  )")') 
+         WRITE(stdout,'(  5x,"( g31  g31  g33   .    .    .  )")') 
+      ELSEIF (code_group_ext==73) THEN
+!
+! m perpendicular to x2
+!
+!
+         WRITE(stdout,'(5x,"( g11 -g11   .    .   g15   .  )")') 
+         WRITE(stdout,'(5x,"(  .    .    .   g15   .  -g11 )")') 
+         WRITE(stdout,'(5x,"( g31  g31  g33   .    .    .  )")') 
+      ENDIF
 
    CASE(14,15)
 !
@@ -362,17 +387,30 @@ SELECT CASE (code_group_)
 !
 ! C_3h hexagonal
 !
-      WRITE(stdout,'(/,5x,"( g11 -g11   .    .    .  -g12 )")') 
-      WRITE(stdout,'(  5x,"( g12 -g12   .    .    .   g11 )")') 
+      WRITE(stdout,'(/,5x,"( g11 -g11   .    .    .   g21 )")') 
+      WRITE(stdout,'(  5x,"( g21 -g21   .    .    .   g11 )")') 
       WRITE(stdout,'(  5x,"(  .    .    .    .    .    .  )")') 
 
    CASE(21)
 !
 ! D_3h hexagonal
 !
-      WRITE(stdout,'(/,5x,"(  .    .    .    .    .  -g12 )")') 
-      WRITE(stdout,'(  5x,"( g12 -g12   .    .    .    .  )")') 
-      WRITE(stdout,'(  5x,"(  .    .    .    .    .    .  )")') 
+      IF (code_group_ext==107) THEN
+!
+!      mirror perpendicular to x1
+!     
+         WRITE(stdout,'(/,5x,"(  .    .    .    .    .   g21 )")') 
+         WRITE(stdout,'(  5x,"( g21 -g21   .    .    .    .  )")') 
+         WRITE(stdout,'(  5x,"(  .    .    .    .    .    .  )")') 
+
+      ELSEIF (code_group_ext==106) THEN
+!
+!      mirror perpendicular to x2
+!     
+         WRITE(stdout,'(5x,"( g11 -g11   .    .    .    .  )")') 
+         WRITE(stdout,'(5x,"(  .    .    .    .    .  -g11 )")') 
+         WRITE(stdout,'(5x,"(  .    .    .    .    .    .  )")') 
+      ENDIF
 
    CASE(24)
 !
@@ -413,6 +451,204 @@ END SELECT
 
 RETURN
 END SUBROUTINE print_piezo_shape
+!
+!--------------------------------------------------------------------
+SUBROUTINE print_piezom_shape(code_group, code_group_ext, ibrav)
+!--------------------------------------------------------------------
+
+USE io_global, ONLY : stdout
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: code_group, code_group_ext, ibrav
+CHARACTER(LEN=11) :: group_name
+
+INTEGER :: code_group_
+
+code_group_=code_group
+IF (ibrav==0) code_group_=0
+
+IF (code_group_>0) &
+   WRITE(stdout,'(/,5x,"B Birss point group ",a)') &
+                                 TRIM(group_name(code_group_)) 
+SELECT CASE (code_group_) 
+
+   CASE(2,16,18,19,20,22,23,25,27,29,32) 
+       WRITE(stdout,'(/,5x,"B Birss group with inversion symmetry.")') 
+       WRITE(stdout,'(5x,"Axial third-rank tensors, such as the &
+                     & piezomagnetic tensor, vanish.")')
+   CASE(3)
+!
+!  C_s   Monoclinic
+!
+      IF (ibrav==-12.OR.ibrav==-13) THEN
+         WRITE(stdout,'(/,5x,"( h11  h12  h13   .   h15   .  )")') 
+         WRITE(stdout,'(  5x,"(  .    .    .   h24   .   h26 )")') 
+         WRITE(stdout,'(  5x,"( h31  h32  h33   .   h35   .  )")') 
+      ELSE
+         WRITE(stdout,'(/,5x,"( h11  h12  h13   .    .   h16 )")') 
+         WRITE(stdout,'(  5x,"( h21  h22  h23   .    .   h26 )")') 
+         WRITE(stdout,'(  5x,"(  .    .    .   h16  h26   .  )")') 
+      ENDIF
+
+   CASE(4)
+!
+!  C_2   Monoclinic
+!
+      IF (ibrav==-12.OR.ibrav==-13) THEN
+         WRITE(stdout,'(/,5x,"(  .    .    .   h14   .   h16 )")') 
+         WRITE(stdout,'(  5x,"( h21  h22  h23   .   h25   .  )")') 
+         WRITE(stdout,'(  5x,"(  .    .    .   h34   .   h36 )")') 
+      ELSE
+         WRITE(stdout,'(/,5x,"(  .    .    .   h14  h15   .  )")') 
+         WRITE(stdout,'(  5x,"(  .    .    .   h24  h25   .  )")') 
+         WRITE(stdout,'(  5x,"( h31  h32  h33   .    .   h66 )")') 
+      ENDIF
+
+   CASE(5)
+!
+!   C_3 trigonal
+!
+      WRITE(stdout,'(5x,"( h11 -h11   .   h14  h15 -h22 )")') 
+      WRITE(stdout,'(5x,"(-h22  h22   .   h15 -h14 -h11 )")') 
+      WRITE(stdout,'(5x,"( h31 -h31  h33   .    .    .  )")') 
+!
+
+   CASE(6,7)
+!
+!  C_4, tetragonal, C_6 hexagonal
+!
+      WRITE(stdout,'(/,5x,"(  .    .    .   h14  h15   .  )")') 
+      WRITE(stdout,'(  5x,"(  .    .    .   h15 -h14   .  )")') 
+      WRITE(stdout,'(  5x,"( h31  h31  h33   .    .    .  )")') 
+
+   CASE(8)
+!
+!  D_2 (222) Orthorombic
+!
+      WRITE(stdout,'(/,5x,"(  .    .    .   h14   .    .  )")') 
+      WRITE(stdout,'(5x,"(  .    .    .    .   h25   .  )")') 
+      WRITE(stdout,'(5x,"(  .    .    .    .    .   h36 )")') 
+
+   CASE(9)
+!
+! D_3  Trigonal 
+!
+      WRITE(stdout,'(/,5x,"( h11 -h11   .   h14   .    .  )")') 
+      WRITE(stdout,'(  5x,"(  .    .    .    .  -h14 -h11 )")') 
+      WRITE(stdout,'(  5x,"(  .    .    .    .    .    .  )")') 
+
+   CASE(10,11)
+!
+! D_4  tetragonal, D_6 hexagonal
+!
+      WRITE(stdout,'(/,5x,"(  .    .    .   h14   .    .  )")') 
+      WRITE(stdout,'(  5x,"(  .    .    .    .  -h14   .  )")') 
+      WRITE(stdout,'(  5x,"(  .    .    .    .    .    .  )")') 
+
+   CASE(12)
+!
+! C_2v  Orthorombic
+!
+      WRITE(stdout,'(/,5x,"(  .    .    .    .   h15   .  )")') 
+      WRITE(stdout,'(  5x,"(  .    .    .   h24   .    .  )")') 
+      WRITE(stdout,'(  5x,"( h31  h32  h33   .    .    .  )")') 
+
+   CASE(13)
+!
+! C_3v  Trigonal.  
+!
+      IF (code_group_ext==72) THEN
+!
+! m perpendicular to x1
+!
+         WRITE(stdout,'(/,5x,"(  .    .    .    .   h15 -h21 )")') 
+         WRITE(stdout,'(  5x,"( h21 -h21   .   h15   .    .  )")') 
+         WRITE(stdout,'(  5x,"( h31  h31  h33   .    .    .  )")') 
+      ELSEIF (code_group_ext==73) THEN
+!
+! m perpendicular to x2
+!
+!
+         WRITE(stdout,'(5x,"( h11 -h11   .    .   h15   .  )")') 
+         WRITE(stdout,'(5x,"(  .    .    .   h15   .  -h11 )")') 
+         WRITE(stdout,'(5x,"( h31  h31  h33   .    .    .  )")') 
+      ENDIF
+
+   CASE(14,15)
+!
+! C_4v tetragonal, C_6v hexagonal
+!
+      WRITE(stdout,'(/,5x,"(  .    .    .    .   h15   .  )")') 
+      WRITE(stdout,'(  5x,"(  .    .    .   h15   .    .  )")') 
+      WRITE(stdout,'(  5x,"( h31  h31  h33   .    .    .  )")') 
+
+   CASE(17)
+!
+! C_3h hexagonal
+!
+      WRITE(stdout,'(/,5x,"( h11 -h11   .    .    .   h21 )")') 
+      WRITE(stdout,'(  5x,"( h21 -h21   .    .    .   h11 )")') 
+      WRITE(stdout,'(  5x,"(  .    .    .    .    .    .  )")') 
+
+   CASE(21)
+!
+! D_3h hexagonal
+!
+      IF (code_group_ext==107) THEN
+!
+!      mirror perpendicular to x1
+!     
+         WRITE(stdout,'(/,5x,"(  .    .    .    .    .   h21 )")') 
+         WRITE(stdout,'(  5x,"( h21 -h21   .    .    .    .  )")') 
+         WRITE(stdout,'(  5x,"(  .    .    .    .    .    .  )")') 
+
+      ELSEIF (code_group_ext==106) THEN
+!
+!      mirror perpendicular to x2
+!     
+         WRITE(stdout,'(5x,"( h11 -h11   .    .    .    .  )")') 
+         WRITE(stdout,'(5x,"(  .    .    .    .    .  -h11 )")') 
+         WRITE(stdout,'(5x,"(  .    .    .    .    .    .  )")') 
+      ENDIF
+
+   CASE(24)
+!
+! D_2d tetragonal: axis 2 || x1
+!
+      WRITE(stdout,'(/,5x,"(  .    .    .   h14   .    .  )")') 
+      WRITE(stdout,'(  5x,"(  .    .    .    .   h14   .  )")') 
+      WRITE(stdout,'(  5x,"(  .    .    .    .    .   h34 )")') 
+
+   CASE(26)
+!
+! S_4 tetragonal
+!
+      WRITE(stdout,'(/,5x,"(  .    .    .   h14  h15   .  )")') 
+      WRITE(stdout,'(  5x,"(  .    .    .  -h15  h14   .  )")') 
+      WRITE(stdout,'(  5x,"( h31 -h31   .    .    .   h36 )")') 
+
+   CASE(28,30)
+!
+! T, T_d cubic
+!
+      WRITE(stdout,'(/,5x,"(  .    .    .   h14   .    .  )")') 
+      WRITE(stdout,'(  5x,"(  .    .    .    .   h14   .  )")') 
+      WRITE(stdout,'(  5x,"(  .    .    .    .    .   h14 )")') 
+
+   CASE(31)
+      WRITE(stdout,'(/,5x,"B Birss group with O symmetry. The &
+                             &piezomagnetic tensor vanishes")')
+   CASE DEFAULT
+!
+!  C_1 
+!
+      WRITE(stdout,'(/,5x,"No symmetry or ibrav=0")')
+      WRITE(stdout,'(/,5x,"( h11  h12  h13  h14  h15  h16 )")') 
+      WRITE(stdout,'(  5x,"( h21  h22  h23  h24  h25  h26 )")') 
+      WRITE(stdout,'(  5x,"( h31  h32  h33  h34  h35  h36 )")') 
+END SELECT
+
+RETURN
+END SUBROUTINE print_piezom_shape
 
 !--------------------------------------------------------------------
 SUBROUTINE print_el_cons_shape(laue, ibrav)
