@@ -20,7 +20,7 @@ SUBROUTINE set_fft_mesh()
   USE cell_base,          ONLY : ibrav, at, bg, alat, tpiba, tpiba2
   USE gvect,              ONLY : gcutm
   USE fft_base,           ONLY : dfftp, dffts
-  USE thermo_sym,         ONLY : fft_fact
+  USE symm_base,          ONLY : fft_fact
   USE gvecs,              ONLY : doublegrid, gcutms, dual
   USE gvecw,              ONLY : ecutwfc
   USE mp_bands,           ONLY : intra_bgrp_comm

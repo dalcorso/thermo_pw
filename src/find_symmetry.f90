@@ -7,7 +7,7 @@
 !
 !
 !----------------------------------------------------------------------------
-SUBROUTINE find_symmetry(fft_fact)
+SUBROUTINE find_symmetry()
   !----------------------------------------------------------------------------
   !
   ! This routine is a stripped version of setup that calls only the
@@ -34,19 +34,20 @@ SUBROUTINE find_symmetry(fft_fact)
   USE gvecs,              ONLY : doublegrid, gcutms, dual
   USE gvecw,              ONLY : ecutwfc
   USE symm_base,          ONLY : s, t_rev, irt, nrot, nsym, invsym, nosym, &
-                                 set_sym_bl, find_sym, allfrac, remove_sym
+                                 set_sym_bl, find_sym, allfrac, remove_sym, &
+                                 fft_fact
   USE noncollin_module, ONLY : m_loc, noncolin, i_cons, npol, angle1, angle2, &
-                               domag, lspinorb
+                               domag, lspinorb, colin_mag
+  USE control_flags,    ONLY : use_spinflip, symm_by_label
   USE lsda_mod,         ONLY : starting_magnetization, nspin
   USE mp_bands,         ONLY : intra_bgrp_comm
   !
   IMPLICIT NONE
-  INTEGER, INTENT(IN) :: fft_fact(3)
   INTEGER :: na, nmax
   LOGICAL :: magnetic_sym
   !
 
-  magnetic_sym=noncolin.AND.domag
+
   ALLOCATE( m_loc( 3, nat ) )
   m_loc=0.0_DP
   ! time reversal operation is set up to 0 by default
@@ -100,6 +101,23 @@ SUBROUTINE find_symmetry(fft_fact)
         CALL errore( 'find_symmetry', 'this i_cons requires a non colinear run', 1 )
   END IF
   !
+  !  set the magnetic symmetry flag
+  !
+  magnetic_sym=noncolin.AND.domag
+  ! set colin_mag.
+  IF (symm_by_label .AND. nspin == 2 .AND. (ANY ( ABS( &
+                         starting_magnetization(1:ntyp) ) > 1.D-6)) ) THEN
+    IF (use_spinflip) THEN
+       colin_mag = 2
+    ELSE
+       colin_mag = 1
+    END IF
+  ELSE IF (symm_by_label) THEN
+     colin_mag = 0
+  END IF
+  WRITE(6,*) 'inside find symmetry magnetic_sym', magnetic_sym, colin_mag
+  FLUSH(6)
+  !
   ! ... Set the units in real and reciprocal space
   !
   tpiba  = 2.D0 * pi / alat
@@ -119,6 +137,16 @@ SUBROUTINE find_symmetry(fft_fact)
      gcutms = gcutm
      !
   END IF
+  !
+  !  ... generate transformation matrices for the crystal point group
+  !  ... First we generate all the symmetry matrices of the Bravais lattice
+  !
+  CALL set_sym_bl ( )
+  !
+  !
+  ! ... eliminate rotations that are not symmetry operations
+  !
+  CALL find_sym ( nat, tau, ityp, magnetic_sym, m_loc )
   !
   ! ... calculate dimensions of the FFT grid
   !
@@ -156,18 +184,6 @@ SUBROUTINE find_symmetry(fft_fact)
      dffts%nr2=nmax
      dffts%nr3=nmax
   ENDIF
-  !
-  !  ... generate transformation matrices for the crystal point group
-  !  ... First we generate all the symmetry matrices of the Bravais lattice
-  !
-  CALL set_sym_bl ( )
-  !
-  !
-  ! ... eliminate rotations that are not symmetry operations
-  !
-  CALL find_sym ( nat, tau, ityp, magnetic_sym, m_loc )
-
-  IF ( .NOT. allfrac ) CALL remove_sym ( dfftp%nr1, dfftp%nr2, dfftp%nr3 )
 
   DEALLOCATE(m_loc)
   IF (ALLOCATED(irt)) DEALLOCATE(irt)
