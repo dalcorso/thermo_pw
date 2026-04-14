@@ -16,54 +16,84 @@ MODULE magnetic_point_group
   PRIVATE
   SAVE
 
-  PUBLIC find_mag_group_code, mag_group_name, magnetic_type, is_mag_group, &
-         find_mag_group_code_ext, set_mag_group_subgroup, &
+  INTEGER :: a_birss_code_group(122), b_birss_code_group(122)
+
+  DATA a_birss_code_group /  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, &  ! 10
+                            11, 12, 13, 14, 15, 16, 17, 18, 19, 20, &  ! 20
+                            21, 22, 23, 24, 25, 26, 27, 28, 29, 30, &  ! 30
+                            31, 32,  1,  2,  3,  4,  5,  6,  7,  8, &  ! 40
+                             9, 10, 11, 12, 13, 14, 15, 16, 17, 18, &  ! 50
+                            19, 20, 21, 22, 23, 24, 25, 26, 27, 28, &  ! 60
+                            29, 30, 31, 32,  1,  3,  4,  4, 16,  3, &  ! 70
+                            12,  8, 12, 12, 20,  8, 26,  6, 18,  6, &  ! 80
+                            26, 24, 14, 24, 10, 14, 10, 24, 14, 22, &  ! 90
+                            24, 22, 10,  5, 13,  9, 13,  9, 25, 17, &  ! 100
+                             7, 19,  7, 17, 21, 15, 21, 11, 11, 15, &  ! 110
+                            21, 15, 21, 23, 23, 11, 28, 30, 31, 30, &  ! 120
+                            32, 31 /
+
+  DATA b_birss_code_group /  1,  1,  4,  4,  5,  6,  7,  8,  9, 10, &  ! 10
+                            11,  8,  9, 10, 11,  4,  7,  6,  7,  8, &  ! 20
+                            11, 10, 11, 10,  9,  6,  5, 28, 28, 28, &  ! 30
+                            31, 31,  1,  2,  3,  4,  5,  6,  7,  8, &  ! 40
+                             9, 10, 11, 12, 13, 14, 15, 16, 17, 18, &  ! 50
+                            19, 20, 21, 22, 23, 24, 25, 26, 27, 28, &  ! 60
+                            29, 30, 31, 32,  2,  3,  3, 16,  3, 16, &  ! 70
+                            12, 12, 12, 20, 12, 20, 26, 26, 26, 18, &  ! 80
+                            18, 24, 14, 24, 14, 24, 24, 14, 22, 24, &  ! 90
+                            22, 14, 22, 27, 13, 13, 25, 25, 13, 17, &  ! 100
+                            17, 17, 19, 19, 21, 15, 21, 15, 21, 21, &  ! 110
+                            15, 23, 23, 21, 15, 23, 29, 30, 30, 32, &  ! 120
+                            30, 32 /
+
+  PUBLIC find_mag_code_group, mag_group_name, magnetic_type, is_mag_group, &
+         find_mag_code_group_ext, set_mag_group_subgroup, &
          set_mag_group_subgroup_ext, mag_group_index_from_ext, &
-         find_group_subgroup_ext
+         find_group_subgroup_ext, a_birss_code_group, b_birss_code_group, &
+         find_a_birss_ext_code, find_b_birss_ext_code
 
 CONTAINS
 
 !--------------------------------------------------------------------
-SUBROUTINE find_mag_group_code(group_code,subgroup_code,mag_code)
+SUBROUTINE find_mag_code_group(group_code,subgroup_code,mag_code)
 !--------------------------------------------------------------------
 !
 ! This routine receives the codes of a group and of a subgroup and
 ! gives the code of the magnetic group that corresponds to them.
 ! The magnetic codes are the following:
 !
-!
-!    1               C_1 (11')  DP        2              C_i (-11')  DP
-!    3               C_s (m1')  DP        4               C_2 (21')  DP
-!    5               C_3 (31')  DP        6               C_4 (41')  DP
-!    7               C_6 (61')  DP        8             D_2 (2221')  DP
-!    9              D_3 (321')  DP       10             D_4 (4221')  DP
-!   11             D_6 (6221')  DP       12            C_2v (mm21')  DP
-!   13             C_3v (3m1')  DP       14            C_4v (4mm1')  DP
-!   15            C_6v (6mm1')  DP       16            C_2h (2/m1')  DP
-!   17             C_3h (-61')  DP       18            C_4h (4/m1')  DP
-!   19            C_6h (6/m1')  DP       20            D_2h (mmm1')  DP
-!   21           D_3h (-62m1')  DP       22          D_4h (4/mmm1')  DP
-!   23          D_6h (6/mmm1')  DP       24           D_2d (-42m1')  DP
-!   25            D_3d (-3m1')  DP       26              S_4 (-41')  DP
-!   27              S_6 (-31')  DP       28                  T (23)  DP
-!   29             T_h (m-31')  DP       30            T_d (-43m1')  DP
-!   31               O (4321')  DP       32            O_h (m-3m1')  DP
-!   33            C_1(C_1) (1)  F        34           C_i(C_i) (-1)  F 
-!   35            C_s(C_s) (m)  F        36            C_2(C_2) (2)  F 
-!   37            C_3(C_3) (3)  F        38            C_4(C_4) (4)  F 
-!   39            C_6(C_6) (6)  F        40          D_2(D_2) (222)  AF
-!   41           D_3(D_3) (32)  AF       42          D_4(D_4) (422)  AF
-!   43          D_6(D_6) (622)  AF       44        C_2v(C_2v) (mm2)  AF
-!   45         C_3v(C_3v) (3m)  AF       46        C_4v(C_4v) (4mm)  AF
-!   47        C_6v(C_6v) (6mm)  AF       48        C_2h(C_2h) (2/m)  F 
-!   49         C_3h(C_3h) (-6)  F        50        C_4h(C_4h) (4/m)  F 
-!   51        C_6h(C_3h) (6/m)  F        52        D_2h(D_2h) (mmm)  AF
-!   53       D_3h(D_3h) (-62m)  AF       54      D_4h(D_4h) (4/mmm)  AF
-!   55      D_6h(D_6h) (6/mmm)  AF       56       D_2d(D_2d) (-42m)  AF
-!   57        D_3d(D_3d) (-3m)  AF       58           S_4(S_4) (-4)  F 
-!   59           S_6(S_6) (-3)  F        60               T(T) (23)  AF
-!   61          T_h(T_h) (m-3)  AF       62         T_d(T_d) (-43m)  AF
-!   63              O(O) (432)  AF       64         O_h(O_h) (m-3m)  AF
+!   1             C_1(C_1) (1)  F        2            C_i(C_i) (-1)  F 
+!   3             C_s(C_s) (m)  F        4             C_2(C_2) (2)  F 
+!   5             C_3(C_3) (3)  F        6             C_4(C_4) (4)  F 
+!   7             C_6(C_6) (6)  F        8           D_2(D_2) (222)  AF
+!   9            D_3(D_3) (32)  AF       10          D_4(D_4) (422)  AF
+!   11          D_6(D_6) (622)  AF       12        C_2v(C_2v) (mm2)  AF
+!   13         C_3v(C_3v) (3m)  AF       14        C_4v(C_4v) (4mm)  AF
+!   15        C_6v(C_6v) (6mm)  AF       16        C_2h(C_2h) (2/m)  F 
+!   17         C_3h(C_3h) (-6)  F        18        C_4h(C_4h) (4/m)  F 
+!   19        C_6h(C_3h) (6/m)  F        20        D_2h(D_2h) (mmm)  AF
+!   21       D_3h(D_3h) (-62m)  AF       22      D_4h(D_4h) (4/mmm)  AF
+!   23      D_6h(D_6h) (6/mmm)  AF       24       D_2d(D_2d) (-42m)  AF
+!   25        D_3d(D_3d) (-3m)  AF       26           S_4(S_4) (-4)  F 
+!   27           S_6(S_6) (-3)  F        28               T(T) (23)  AF
+!   29          T_h(T_h) (m-3)  AF       30         T_d(T_d) (-43m)  AF
+!   31              O(O) (432)  AF       32         O_h(O_h) (m-3m)  AF
+!   33               C_1 (11')  DP       34              C_i (-11')  DP
+!   35               C_s (m1')  DP       36               C_2 (21')  DP
+!   37               C_3 (31')  DP       38               C_4 (41')  DP
+!   39               C_6 (61')  DP       40             D_2 (2221')  DP
+!   41              D_3 (321')  DP       42             D_4 (4221')  DP
+!   43             D_6 (6221')  DP       44            C_2v (mm21')  DP
+!   45             C_3v (3m1')  DP       46            C_4v (4mm1')  DP
+!   47            C_6v (6mm1')  DP       48            C_2h (2/m1')  DP
+!   49             C_3h (-61')  DP       50            C_4h (4/m1')  DP
+!   51            C_6h (6/m1')  DP       52            D_2h (mmm1')  DP
+!   53           D_3h (-62m1')  DP       54          D_4h (4/mmm1')  DP
+!   55          D_6h (6/mmm1')  DP       56           D_2d (-42m1')  DP
+!   57            D_3d (-3m1')  DP       58              S_4 (-41')  DP
+!   59              S_6 (-31')  DP       60                  T (23)  DP
+!   61             T_h (m-31')  DP       62            T_d (-43m1')  DP
+!   63               O (4321')  DP       64            O_h (m-3m1')  DP
 !   65          C_i(C_1) (-1')  AF       66           C_2(C_1) (2')  F 
 !   67           C_s(C_1) (m')  F        68        C_2h(C_2) (2/m')  AF
 !   69       C_2h(C_i) (2'/m')  F        70        C_2h(C_s) (2'/m)  AF
@@ -72,7 +102,7 @@ SUBROUTINE find_mag_group_code(group_code,subgroup_code,mag_code)
 !   75      D_2h(C_2h) (m'm'm)  F        76      D_2h(D_2) (m'm'm')  AF
 !   77           C_4(C_2) (4')  AF       78          S_4(C_2) (-4')  AF
 !   79       C_4h(C_2h) (4'/m)  AF       80        C_4h(C_4) (4/m')  AF
-!   81       C_4h(S_4) (4'/m')  AF       82        D_4(D_2) (4'2'2)  AF
+!   81       C_4h(S_4) (4'/m')  AF       82        D_4(D_2)  (4'22)  AF
 !   83        D_4(C_4) (42'2')  F        84      C_4v(C_2v) (4'm'm)  AF
 !   85       C_4v(C_4) (4m'm')  F        86     D_2d(C_2v) (-4'2'm)  AF
 !   87      D_2d(D_2) (-4'2m')  AF       88      D_2d(S_4) (-42'm')  F 
@@ -105,19 +135,20 @@ INTEGER :: mag_code_tab(32,32)
 INTEGER :: group(58), subgroup(58), icode
 
 IF (group_code<1.OR.group_code>32.OR.subgroup_code<0.OR.&
-    subgroup_code>32) CALL errore('find_mag_group_code',&
+    subgroup_code>32) CALL errore('find_mag_code_group',&
           'group or subgroup codes out of range',1)
 
 CALL set_mag_group_subgroup(group,subgroup)
 mag_code_tab=0
 IF (subgroup_code==group_code) THEN
 !
-!   This is the case of the gray groups, time reversal is an element of
+!   This is the case of magnetic groups without time reversal operation
 !   the group
    mag_code=group_code 
 ELSEIF (subgroup_code==0) THEN
 !
-!  These are the groups without any time reversal operation
+!  These are the gray groups where time reversal is an operation 
+!  of the group
 !
    mag_code=group_code+32
 ELSE
@@ -131,7 +162,7 @@ ELSE
 ENDIF
 
 RETURN
-END SUBROUTINE find_mag_group_code
+END SUBROUTINE find_mag_code_group
 
 !--------------------------------------------------------------------
 FUNCTION mag_group_name(code)
@@ -143,23 +174,7 @@ CHARACTER(LEN=21) :: mag_group_name
 
 CHARACTER(LEN=21) :: gname(122)
 
-data gname /  "C_1 (11')            ", "C_i (-11')           ", &
-              "C_s (m1')            ", "C_2 (21')            ", &
-              "C_3 (31')            ", "C_4 (41')            ", &
-              "C_6 (61')            ", "D_2 (2221')          ", &
-              "D_3 (321')           ", "D_4 (4221')          ", &
-              "D_6 (6221')          ", "C_2v (mm21')         ", &
-              "C_3v (3m1')          ", "C_4v (4mm1')         ", &
-              "C_6v (6mm1')         ", "C_2h (2/m1')         ", &
-              "C_3h (-61')          ", "C_4h (4/m1')         ", &
-              "C_6h (6/m1')         ", "D_2h (mmm1')         ", &
-              "D_3h (-62m1')        ", "D_4h (4/mmm1')       ", &
-              "D_6h (6/mmm1')       ", "D_2d (-42m1')        ", &
-              "D_3d (-3m1')         ", "S_4 (-41')           ", &
-              "S_6 (-31')           ", "T (23)               ", &
-              "T_h (m-31')          ", "T_d (-43m1')         ", &
-              "O (4321')            ", "O_h (m-3m1')         ", &
-              "C_1(C_1) (1)         ", "C_i(C_i) (-1)        ", &
+data gname /  "C_1(C_1) (1)         ", "C_i(C_i) (-1)        ", &
               "C_s(C_s) (m)         ", "C_2(C_2) (2)         ", &
               "C_3(C_3) (3)         ", "C_4(C_4) (4)         ", &
               "C_6(C_6) (6)         ", "D_2(D_2) (222)       ", &
@@ -175,6 +190,22 @@ data gname /  "C_1 (11')            ", "C_i (-11')           ", &
               "S_6(S_6) (-3)        ", "T(T) (23)            ", &
               "T_h(T_h) (m-3)       ", "T_d(T_d) (-43m)      ", &
               "O(O) (432)           ", "O_h(O_h) (m-3m)      ", &
+              "C_1 (11')            ", "C_i (-11')           ", &
+              "C_s (m1')            ", "C_2 (21')            ", &
+              "C_3 (31')            ", "C_4 (41')            ", &
+              "C_6 (61')            ", "D_2 (2221')          ", &
+              "D_3 (321')           ", "D_4 (4221')          ", &
+              "D_6 (6221')          ", "C_2v (mm21')         ", &
+              "C_3v (3m1')          ", "C_4v (4mm1')         ", &
+              "C_6v (6mm1')         ", "C_2h (2/m1')         ", &
+              "C_3h (-61')          ", "C_4h (4/m1')         ", &
+              "C_6h (6/m1')         ", "D_2h (mmm1')         ", &
+              "D_3h (-62m1')        ", "D_4h (4/mmm1')       ", &
+              "D_6h (6/mmm1')       ", "D_2d (-42m1')        ", &
+              "D_3d (-3m1')         ", "S_4 (-41')           ", &
+              "S_6 (-31')           ", "T (23)               ", &
+              "T_h (m-31')          ", "T_d (-43m1')         ", &
+              "O (4321')            ", "O_h (m-3m1')         ", &
               "C_i(C_1) (-1')       ", "C_2(C_1) (2')        ", &
               "C_s(C_1) (m')        ", "C_2h(C_2) (2/m')     ", &
               "C_2h(C_i) (2'/m')    ", "C_2h(C_s) (2'/m)     ", &
@@ -183,7 +214,7 @@ data gname /  "C_1 (11')            ", "C_i (-11')           ", &
               "D_2h(C_2h) (m'm'm)   ", "D_2h(D_2) (m'm'm')   ", &
               "C_4(C_2) (4')        ", "S_4(C_2) (-4')       ", &
               "C_4h(C_2h) (4'/m)    ", "C_4h(C_4) (4/m')     ", &
-              "C_4h(S_4) (4'/m')    ", "D_4(D_2) (4'2'2)     ", &
+              "C_4h(S_4) (4'/m')    ", "D_4(D_2) (4'22)      ", &
               "D_4(C_4) (42'2')     ", "C_4v(C_2v) (4'm'm)   ", &
               "C_4v(C_4) (4m'm')    ", "D_2d(C_2v) (-4'2'm)  ", &
               "D_2d(D_2) (-4'2m')   ", "D_2d(S_4) (-42'm')   ", &
@@ -220,13 +251,13 @@ CHARACTER(LEN=2) :: magnetic_type
 
 CHARACTER(LEN=2) :: mtype(122)
 
-data mtype  / "DP", "DP", "DP", "DP", "DP", "DP", "DP", "DP", "DP", "DP", &
+data mtype  / "F ", "F ", "F ", "F ", "F ", "F ", "F ", "AF", "AF", "AF", &
+              "AF", "AF", "AF", "AF", "AF", "F ", "F ", "F ", "F ", "AF", &
+              "AF", "AF", "AF", "AF", "AF", "F ", "F ", "AF", "AF", "AF", &
+              "AF", "AF", "DP", "DP", "DP", "DP", "DP", "DP", "DP", "DP", &
               "DP", "DP", "DP", "DP", "DP", "DP", "DP", "DP", "DP", "DP", &
               "DP", "DP", "DP", "DP", "DP", "DP", "DP", "DP", "DP", "DP", &
-              "DP", "DP", "F ", "F ", "F ", "F ", "F ", "F ", "F ", "AF", &
-              "AF", "AF", "AF", "AF", "AF", "AF", "AF", "F ", "F ", "F ", &
-              "F ", "AF", "AF", "AF", "AF", "AF", "AF", "F ", "F ", "AF", &
-              "AF", "AF", "AF", "AF", "AF", "F ", "F ", "AF", "F ", "AF", &
+              "DP", "DP", "DP", "DP", "AF", "F ", "F ", "AF", "F ", "AF", &
               "F ", "F ", "F ", "AF", "F ", "AF", "AF", "AF", "AF", "AF", &
               "AF", "AF", "F ", "AF", "F ", "AF", "AF", "F ", "AF", "AF", &
               "AF", "F ", "AF", "AF", "F ", "F ", "AF", "AF", "F ", "AF", &
@@ -405,7 +436,7 @@ RETURN
 END SUBROUTINE set_mag_group_subgroup_ext
 
 !--------------------------------------------------------------------
-SUBROUTINE find_mag_group_code_ext(group_code_ext,subgroup_code_ext, &
+SUBROUTINE find_mag_code_group_ext(group_code_ext,subgroup_code_ext, &
                                     mag_code_ext)
 !--------------------------------------------------------------------
 !
@@ -733,9 +764,10 @@ SUBROUTINE find_mag_group_code_ext(group_code_ext,subgroup_code_ext, &
 !   316   588        O_h(T_d) (m'-3m)  AF  136   O_h (m-3m)   134   T_d (-43m) 
 !   317   589        O_h(O) (m'-3'm')  AF  136   O_h (m-3m)   135   O   (432)  
 !
-!   magnetic codes from 1 to 136 are reserved to the gray groups, while
-!   the codes from 137 to 272 are reserved to groups with no time reversal
-!   operation. In the first case the magnetic code is the one of the group,
+!   magnetic codes from 1 to 136 are reserved to the groups with no
+!   time reversal, while  the codes from 137 to 272 are reserved to 
+!   nonmagnetic gray groups. 
+!   In the first case the magnetic code is the one of the group,
 !   while in the second case it is 136 + the code of the group.
 !
 !   F means ferro or ferri-magnetic, AF means antiferromagnetic point
@@ -752,7 +784,7 @@ INTEGER :: mag_code_tab_ext(136,136)
 INTEGER :: group_ext(317), subgroup_ext(317), icode
 
 IF (group_code_ext<1.OR.group_code_ext>136.OR.subgroup_code_ext<0.OR.&
-    subgroup_code_ext>136) CALL errore('find_mag_group_code_ext',&
+    subgroup_code_ext>136) CALL errore('find_mag_code_group_ext',&
           'group or subgroup codes out of range',1)
 
 CALL set_mag_group_subgroup_ext(group_ext,subgroup_ext)
@@ -760,13 +792,12 @@ mag_code_tab_ext=0
 mag_code_ext=0
 IF (subgroup_code_ext==group_code_ext) THEN
 !
-!   This is the case of the gray groups, time reversal is an element of
-!   the group
-
+!   This is the case of the groups without the time reversal operation
+!
    mag_code_ext=group_code_ext
 ELSEIF (subgroup_code_ext==0) THEN
 !
-!  These are the groups without any time reversal operation
+!  These are the Gray groups that contains the time reversal operator 
 !
    mag_code_ext=group_code_ext+136
 ELSE
@@ -781,7 +812,7 @@ ENDIF
 
 
 RETURN
-END SUBROUTINE find_mag_group_code_ext
+END SUBROUTINE find_mag_code_group_ext
 
 !--------------------------------------------------------------------
 SUBROUTINE find_group_subgroup_ext(group_code_ext,subgroup_code_ext, &
@@ -791,8 +822,8 @@ SUBROUTINE find_group_subgroup_ext(group_code_ext,subgroup_code_ext, &
 !  This routine recieve the extended code of a magnetic group 
 !  (between 1 and 589) and sets the extended code of the group and of the 
 !  extended code of the invariant subgroup that define the magnetic group. 
-!  For gray groups the code of the group and of the subgroups are equal, 
 !  for groups that do not contain any operation combined with time reversal 
+!  the code of the group and of the subgroups are equal. For Gray groups
 !  the code of the subgroup is conventionally set to zero.
 !
 IMPLICIT NONE
@@ -843,12 +874,134 @@ ELSE
    subgroup_code=0
 ENDIF
 
-CALL find_mag_group_code(group_code,subgroup_code,mag_code)
+CALL find_mag_code_group(group_code,subgroup_code,mag_code)
 mag_group_index_from_ext=mag_code
 
 RETURN
 END FUNCTION mag_group_index_from_ext
 
+
+!--------------------------------------------------------------------
+SUBROUTINE find_a_birss_ext_code( nsym, sr, t_rev, a_birss_ext_code)
+!--------------------------------------------------------------------
+!
+! This routine finds the a_birss group from the magnetic point group
+! and then finds its extended code
+! The group is found substituting time reversal with inversion and
+! finding the resulting extended group code 
+!
+USE point_group, ONLY : find_group_tags, find_group_ext
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: nsym, t_rev(48)
+INTEGER, INTENT(OUT) :: a_birss_ext_code
+REAL(DP), INTENT(IN) :: sr(3,3,48)
+
+REAL(DP) :: sr_aux(3,3,48)
+INTEGER :: new_nsym, isym, jsym
+INTEGER :: group_tags(48), new_group_tags(48)
+LOGICAL :: found
+!
+!  copy the symmetry matrices in the auxiliary memory
+!
+sr_aux=sr
+!
+!  all operations that require time reversal are multiplied by inversion
+!
+DO isym=1, nsym
+   IF (t_rev(isym)==1) sr_aux(:,:, isym)= -sr_aux(:,:,isym)
+ENDDO
+!
+CALL find_group_tags(nsym, sr_aux, group_tags)
+!
+! remove the symmetries that appear twice
+!
+new_nsym=0
+DO isym=1, nsym
+   found=.FALSE.
+   DO jsym=1,new_nsym
+      IF (group_tags(isym)==new_group_tags(jsym)) found=.TRUE.
+   ENDDO
+   IF (.NOT.found) THEN
+      new_nsym=new_nsym+1
+      new_group_tags(new_nsym)=group_tags(isym)
+   ENDIF
+ENDDO
+!
+! and the code of the resulting group is found
+!
+CALL find_group_ext(new_group_tags, new_nsym, a_birss_ext_code)
+
+RETURN
+END SUBROUTINE find_a_birss_ext_code
+
+!--------------------------------------------------------------------
+SUBROUTINE find_b_birss_ext_code( nsym, sr, t_rev, b_birss_ext_code)
+!--------------------------------------------------------------------
+!
+! This routine finds the b_birss group from the magnetic point group
+! and then finds its extended code.
+! The group is found with the usual rules:
+! 1) proper operations without time reversal: unchanged
+! 2) improper operations without time reversal: multiplied by inversion
+! 3) time reversal with a proper operation substituted by inversion
+! 4) time reversal with an improper operation discarded
+! The extended group code of the resulting group is in output
+!
+USE point_group, ONLY : find_group_tags, find_group_ext
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: nsym, t_rev(48)
+INTEGER, INTENT(OUT) :: b_birss_ext_code
+REAL(DP), INTENT(IN) :: sr(3,3,48)
+
+REAL(DP) :: sr_aux(3,3,48)
+INTEGER :: new_nsym, isym, jsym
+INTEGER :: group_tags(48), new_group_tags(48)
+LOGICAL :: found
+!
+!  copy the symmetry matrices in the auxiliary memory
+!
+sr_aux=sr
+!
+!  find which operations we have in the group
+!
+CALL find_group_tags(nsym, sr_aux, group_tags)
+!
+!  rules for finding b_birss are applied. group_tags(isym)<33 means 
+!  proper operation
+!
+DO isym=1, nsym
+   IF (group_tags(isym)<33.AND.t_rev(isym)==0) CYCLE
+   IF (group_tags(isym)>32.AND.t_rev(isym)==1) CYCLE
+   IF (group_tags(isym)>32.AND.t_rev(isym)==0) sr_aux(:,:,isym)=&
+                                              -sr_aux(:,:,isym)
+   IF (group_tags(isym)<33.AND.t_rev(isym)==1) sr_aux(:,:,isym)=&
+                                              -sr_aux(:,:,isym)
+ENDDO
+!
+! and the group tags of the resulting group is found
+!
+CALL find_group_tags(nsym, sr_aux, group_tags)
+!
+! remove the symmetries that appear twice
+!
+new_nsym=0
+DO isym=1, nsym
+   found=.FALSE.
+   DO jsym=1,new_nsym
+      IF (group_tags(isym)==new_group_tags(jsym)) found=.TRUE.
+   ENDDO
+   IF (.NOT.found) THEN
+      new_nsym=new_nsym+1
+      new_group_tags(new_nsym)=group_tags(isym)
+   ENDIF
+ENDDO
+!
+! and find the extended group code
+!
+CALL find_group_ext(new_group_tags, new_nsym, b_birss_ext_code)
+
+RETURN
+END SUBROUTINE find_b_birss_ext_code
 
 END MODULE magnetic_point_group
 
