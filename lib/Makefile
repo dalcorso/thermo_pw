@@ -36,6 +36,7 @@ optical.o \
 ph_freq_module.o \
 phdos_module.o \
 piezoelectric_tensor.o \
+piezomagnetic_tensor.o \
 point_group.o \
 polarization.o \
 polyfit.o \
