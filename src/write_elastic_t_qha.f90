@@ -25,7 +25,8 @@ USE quadratic_surfaces, ONLY : fit_multi_quadratic, evaluate_fit_quadratic
 USE cubic_surfaces,   ONLY : fit_multi_cubic, evaluate_fit_cubic
 USE quartic_surfaces, ONLY : fit_multi_quartic, evaluate_fit_quartic
 USE control_elastic_constants, ONLY : el_cons_qha_geo_available, &
-                             el_consf_qha_geo_available, lelastic, lelasticf, &
+                             el_consf_qha_geo_available,         &
+                             lelastic_qha, lelasticf_qha,        &
                              found_ph_ec, found_dos_ec, fnph_ec, fndos_ec, &
                              f_geodos_ec, f_geoph_ec
 USE lattices,       ONLY : compress_celldm, crystal_parameters
@@ -233,11 +234,11 @@ IF (ltherm_dos) THEN
    CALL mp_sum(el_comp_t, world_comm)
    CALL mp_sum(b0_ec_t, world_comm)
    CALL mp_sum(macro_el_t, world_comm)
-   lelastic=.TRUE.
-   filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons'
+   lelastic_qha=.TRUE.
+   filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_qha'
    CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, el_cons_t, b0_ec_t, &
                                                        filelastic, 0)
-   filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp'
+   filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp_qha'
    CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, el_comp_t, b0_ec_t, & 
                                                        filelastic, 1)
 ENDIF
@@ -247,12 +248,12 @@ IF (ltherm_freq) THEN
    CALL mp_sum(el_compf_t, world_comm)
    CALL mp_sum(b0f_ec_t, world_comm)
    CALL mp_sum(macro_elf_t, world_comm)
-   lelasticf=.TRUE.
-   filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_ph'
+   lelasticf_qha=.TRUE.
+   filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_qha_ph'
    CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, el_consf_t, b0f_ec_t, &
                                                           filelastic, 0)
 
-   filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp_ph'
+   filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp_qha_ph'
    CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, el_compf_t, b0f_ec_t, &
                                                            filelastic,1)
 ENDIF
@@ -291,10 +292,9 @@ USE quadratic_surfaces, ONLY : fit_multi_quadratic, evaluate_fit_quadratic
 USE cubic_surfaces,   ONLY : fit_multi_cubic, evaluate_fit_cubic
 USE quartic_surfaces, ONLY : fit_multi_quartic, evaluate_fit_quartic
 USE control_elastic_constants, ONLY : el_cons_qha_geo_available, &
-                             el_consf_qha_geo_available, lelastic_pt, &
-                             lelasticf, lelasticf_pt, &
-                             found_ph_ec, found_dos_ec, fnph_ec, fndos_ec, &
-                             f_geodos_ec, f_geoph_ec
+                             el_consf_qha_geo_available, lelastic_pt_qha, &
+                             lelasticf_pt_qha, found_ph_ec, found_dos_ec, &
+                             fnph_ec, fndos_ec, f_geodos_ec, f_geoph_ec
 USE lattices,       ONLY : compress_celldm
 USE elastic_constants, ONLY : el_con, el_compliances, write_el_cons_on_file, &
                               compute_elastic_compliances, &
@@ -449,12 +449,12 @@ DO ipressp=1,npress_plot
       CALL mp_sum(el_comp_pt(:,:,:,ipressp), world_comm)
       CALL mp_sum(b0_ec_pt(:,ipressp), world_comm)
       CALL mp_sum(macro_el_pt(:,:,ipressp), world_comm)
-      lelastic_pt=.TRUE.
-      filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_press'
+      lelastic_pt_qha=.TRUE.
+      filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_qha_press'
       CALL add_value(filelastic, press(ipress))
       CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, &
               el_cons_pt(1,1,1,ipressp), b0_ec_pt(1,ipressp), filelastic, 0)
-      filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp_press'
+      filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp_qha_press'
       CALL add_value(filelastic, press(ipress))
       CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, &
               el_comp_pt(1,1,1,ipressp), b0_ec_pt(1,ipressp), filelastic, 1)
@@ -532,12 +532,12 @@ DO ipressp=1,npress_plot
       CALL mp_sum(el_compf_pt(:,:,:,ipressp), world_comm)
       CALL mp_sum(b0f_ec_pt(:,ipressp), world_comm)
       CALL mp_sum(macro_elf_pt(:,:,ipressp), world_comm)
-      lelasticf_pt=.TRUE.
-      filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_ph_press'
+      lelasticf_pt_qha=.TRUE.
+      filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_qha_ph_press'
       CALL add_value(filelastic, press(ipress))
       CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, &
               el_consf_pt(1,1,1,ipressp), b0f_ec_pt(1,ipressp), filelastic, 0)
-      filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp_ph_press'
+      filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp_qha_ph_press'
       CALL add_value(filelastic, press(ipress))
       CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, &
               el_compf_pt(1,1,1,ipressp), b0f_ec_pt(1,ipressp), filelastic, 1)
@@ -572,10 +572,9 @@ USE quadratic_surfaces, ONLY : fit_multi_quadratic, evaluate_fit_quadratic
 USE cubic_surfaces,   ONLY : fit_multi_cubic, evaluate_fit_cubic
 USE quartic_surfaces, ONLY : fit_multi_quartic, evaluate_fit_quartic
 USE control_elastic_constants, ONLY : el_cons_qha_geo_available, &
-                             el_consf_qha_geo_available, lelastic_ptt, &
-                             lelasticf, lelasticf_ptt, &
-                             found_ph_ec, found_dos_ec, fnph_ec, fndos_ec, &
-                             f_geodos_ec, f_geoph_ec
+                             el_consf_qha_geo_available, lelastic_ptt_qha, &
+                             lelasticf_ptt_qha, found_ph_ec, found_dos_ec, &
+                             fnph_ec, fndos_ec, f_geodos_ec, f_geoph_ec
 USE lattices,       ONLY : compress_celldm
 USE elastic_constants, ONLY : el_con, el_compliances, write_el_cons_on_file, &
                               compute_elastic_compliances, &
@@ -724,12 +723,12 @@ DO itempp=1,ntemp_plot
       CALL mp_sum(el_comp_ptt(:,:,:,itempp), world_comm)
       CALL mp_sum(b0_ec_ptt(:,itempp), world_comm)
       CALL mp_sum(macro_el_ptt(:,:,itempp), world_comm)
-      lelastic_ptt=.TRUE.
-      filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_temp'
+      lelastic_ptt_qha=.TRUE.
+      filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_qha_temp'
       CALL add_value(filelastic, temp(itemp))
       CALL write_el_cons_on_file(press, npress, ibrav, laue, &
               el_cons_ptt(1,1,1,itempp), b0_ec_ptt(1,itempp), filelastic, 2)
-      filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp_temp'
+      filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp_qha_temp'
       CALL add_value(filelastic, temp(itemp))
       CALL write_el_cons_on_file(press, npress, ibrav, laue, &
               el_comp_ptt(1,1,1,itempp), b0_ec_ptt(1,itempp), filelastic, 3)
@@ -803,12 +802,12 @@ DO itempp=1,ntemp_plot
       CALL mp_sum(el_compf_ptt(:,:,:,itempp), world_comm)
       CALL mp_sum(b0f_ec_ptt(:,itempp), world_comm)
       CALL mp_sum(macro_elf_ptt(:,:,itempp), world_comm)
-      lelasticf_ptt=.TRUE.
-      filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_ph_temp'
+      lelasticf_ptt_qha=.TRUE.
+      filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_qha_ph_temp'
       CALL add_value(filelastic, temp(itemp))
       CALL write_el_cons_on_file(press, npress, ibrav, laue, &
               el_consf_ptt(1,1,1,itempp), b0f_ec_ptt(1,itempp), filelastic, 2)
-      filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp_ph_temp'
+      filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp_qha_ph_temp'
       CALL add_value(filelastic, temp(itemp))
       CALL write_el_cons_on_file(press, npress, ibrav, laue, &
               el_compf_ptt(1,1,1,itempp), b0f_ec_ptt(1,itempp), filelastic, 3)
@@ -840,7 +839,8 @@ USE quadratic_surfaces, ONLY : fit_multi_quadratic, evaluate_fit_quadratic
 USE cubic_surfaces,   ONLY : fit_multi_cubic, evaluate_fit_cubic
 USE quartic_surfaces, ONLY : fit_multi_quartic, evaluate_fit_quartic
 USE control_elastic_constants, ONLY : el_cons_qha_geo_available, &
-                             el_consf_qha_geo_available, lelastic, lelasticf, &
+                             el_consf_qha_geo_available, lelastic_qha, &
+                             lelasticf_qha, &
                              found_ph_ec, found_dos_ec, fnph_ec, fndos_ec, &
                              f_geodos_ec, f_geoph_ec, dyde
 USE lattices,       ONLY : compress_celldm, crystal_parameters
@@ -929,7 +929,7 @@ DO itemp=startt,lastt
          CALL evaluate_fit_linear(nvar,xfit,dyde_t(istep,itemp),ec_p1)
          CALL clean_poly(ec_p1)
       ELSE
-         CALL errore('write_elastic_t_qha','wrong poly_degree_elc',1)
+         CALL errore('write_dyde_t_qha','wrong poly_degree_elc',1)
       ENDIF
    ENDIF
 
@@ -968,21 +968,21 @@ DO itemp=startt,lastt
          CALL evaluate_fit_linear(nvar,xfit,dydef_t(istep,itemp), ec_p1)
          CALL clean_poly(ec_p1)
       ELSE
-         CALL errore('write_elastic_t_qha','wrong poly_degree_elc',1)
+         CALL errore('write_dyde_t_qha','wrong poly_degree_elc',1)
       ENDIF
    ENDIF
 ENDDO
 !
 IF (ltherm_dos) THEN
    CALL mp_sum(dyde_t(istep,:), world_comm)
-   lelastic=.TRUE.
+   lelastic_qha=.TRUE.
    filelastic='anhar_files/'//TRIM(flanhar)//'.int_rel.'//int_to_char(istep)
    CALL write_dyde_on_file(temp, ntemp, dyde_t, vmin_t, istep, filelastic)
 ENDIF
 !
 IF (ltherm_freq) THEN
    CALL mp_sum(dydef_t(istep,:), world_comm)
-   lelasticf=.TRUE.
+   lelasticf_qha=.TRUE.
    filelastic='anhar_files/'//TRIM(flanhar)//'.int_relf.'//int_to_char(istep)
    CALL write_dyde_on_file(temp, ntemp, dydef_t, vminf_t, istep, filelastic)
 ENDIF
@@ -1043,9 +1043,10 @@ USE elastic_constants, ONLY : write_el_cons_on_file,       &
                               compute_elastic_compliances, &
                               print_macro_elasticity,      &
                               ece_to_ecd
-USE control_elastic_constants, ONLY : lelastic, lelasticf, lelastic_d, &
-                               lelasticf_d
+USE control_elastic_constants, ONLY : lelastic_qha, lelasticf_qha, &
+                               lelastic_d_qha, lelasticf_d_qha
 USE control_piezoelectric_tensor, ONLY : lpiezo, lpiezof
+USE control_dielectric_constant, ONLY : lepsilon_zerom1, lepsilon_zerom1f
 USE anharmonic, ONLY : b0_ec_d_t, macro_el_d_t, el_cons_d_t, el_comp_d_t, &
                        e_piezo_tensor_t, epsilon_zerom1_t, el_cons_t
 USE ph_freq_anharmonic, ONLY : b0f_ec_d_t, macro_elf_d_t, el_consf_d_t, &
@@ -1077,7 +1078,7 @@ CALL divide(world_comm, ntemp, startt, lastt)
 DO itemp=startt,lastt
    IF (itemp==1.OR.itemp==ntemp) CYCLE
    
-   IF (lelastic.AND.lpiezo.AND.ltherm_dos) THEN
+   IF (lelastic_qha.AND.lpiezo.AND.lepsilon_zerom1.AND.ltherm_dos) THEN
       CALL ece_to_ecd(e_piezo_tensor_t(1,1,itemp), &
                      epsilon_zerom1_t(1,1,itemp), &
                      el_cons_t(1,1,itemp), el_cons_d_t(1,1,itemp))
@@ -1088,7 +1089,7 @@ DO itemp=startt,lastt
       b0f_ec_d_t(itemp)=(macro_elf_d_t(1,itemp)+macro_elf_d_t(5,itemp))*0.5_DP
    END IF
 
-   IF (lelasticf.AND.lpiezof.AND.ltherm_freq) THEN
+   IF (lelasticf_qha.AND.lpiezof.AND.lepsilon_zerom1f.AND.ltherm_freq) THEN
       CALL ece_to_ecd(e_piezo_tensorf_t(1,1,itemp),                       &
                      epsilon_zerom1f_t(1,1,itemp),                        &
                      el_consf_t(1,1,itemp), el_consf_d_t(1,1,itemp))
@@ -1105,11 +1106,11 @@ IF (ltherm_dos) THEN
    CALL mp_sum(el_cons_d_t, world_comm)
    CALL mp_sum(el_comp_d_t, world_comm)
    CALL mp_sum(b0_ec_d_t, world_comm)
-   lelastic_d=.TRUE.
-   filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_d'
+   lelastic_d_qha=.TRUE.
+   filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_d_qha'
    CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue, el_cons_d_t, &
                                        b0_ec_d_t, filelastic, 0) 
-   filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp_d'
+   filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp_d_qha'
    CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue, el_comp_d_t, &
                                        b0_ec_d_t, filelastic, 0) 
 ENDIF
@@ -1118,12 +1119,12 @@ IF (ltherm_freq) THEN
    CALL mp_sum(el_consf_d_t, world_comm)
    CALL mp_sum(el_compf_d_t, world_comm)
    CALL mp_sum(b0f_ec_d_t, world_comm)
-   lelasticf_d=.TRUE.
-   filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_d_ph'
+   lelasticf_d_qha=.TRUE.
+   filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_d_qha_ph'
    CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue, el_consf_d_t, &
                                        b0f_ec_d_t, filelastic, 0) 
 
-   filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp_d_ph'
+   filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp_d_qha_ph'
    CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue, el_compf_d_t, &
                                        b0f_ec_d_t, filelastic, 0) 
 ENDIF
@@ -1152,9 +1153,11 @@ USE elastic_constants, ONLY : write_el_cons_on_file,       &
                               compute_elastic_compliances, &
                               print_macro_elasticity,      &
                               ece_to_ecd
-USE control_elastic_constants, ONLY : lelastic_pt, lelasticf_pt,         &
-                                      lelastic_d_pt, lelasticf_d_pt
+USE control_elastic_constants, ONLY : lelastic_pt_qha, lelasticf_pt_qha,   &
+                                      lelastic_d_pt_qha, lelasticf_d_pt_qha
 USE control_piezoelectric_tensor, ONLY : lpiezo_pt, lpiezof_pt
+USE control_dielectric_constant,  ONLY : lepsilon_zerom1_pt,             &
+                                         lepsilon_zerom1f_pt
 USE anharmonic_pt, ONLY : b0_ec_d_pt, macro_el_d_pt, el_cons_d_pt,       &
                           el_comp_d_pt, e_piezo_tensor_pt,               &
                           epsilon_zerom1_pt, el_cons_pt                  
@@ -1190,7 +1193,8 @@ DO ipressp=1,npress_plot
 
    DO itemp=startt,lastt
       IF (itemp==1.OR.itemp==ntemp) CYCLE
-      IF (lelastic_pt.AND.lpiezo_pt.AND.ltherm_dos) THEN
+      IF (lelastic_pt_qha.AND.lpiezo_pt.AND.lepsilon_zerom1_pt &
+                                                     .AND.ltherm_dos) THEN
          CALL ece_to_ecd(e_piezo_tensor_pt(1,1,itemp,ipressp), &
                      epsilon_zerom1_pt(1,1,itemp,ipressp),     &
                      el_cons_pt(1,1,itemp,ipressp),            &
@@ -1204,7 +1208,8 @@ DO ipressp=1,npress_plot
                                   macro_elf_d_pt(5,itemp,ipressp))*0.5_DP
       ENDIF
 
-      IF (lelasticf_pt.AND.lpiezof_pt.AND.ltherm_freq) THEN
+      IF (lelasticf_pt_qha.AND.lpiezof_pt.AND.lepsilon_zerom1f_pt &
+                                                      .AND.ltherm_freq) THEN
          CALL ece_to_ecd(e_piezo_tensorf_pt(1,1,itemp,ipressp),           &
                      epsilon_zerom1f_pt(1,1,itemp,ipressp),               &
                      el_consf_pt(1,1,itemp,ipressp),                      &
@@ -1223,13 +1228,13 @@ DO ipressp=1,npress_plot
       CALL mp_sum(el_cons_d_pt(:,:,:,ipressp), world_comm)
       CALL mp_sum(el_comp_d_pt(:,:,:,ipressp), world_comm)
       CALL mp_sum(b0_ec_d_pt(:,ipressp), world_comm)
-      lelastic_d_pt=.TRUE.
-      filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_d_press'
+      lelastic_d_pt_qha=.TRUE.
+      filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_d_qha_press'
       CALL add_value(filelastic, press(ipress))
       CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue,       &
                         el_cons_d_pt(:,:,:,ipressp),                  &
                         b0_ec_d_pt(:,ipressp), filelastic, 0) 
-      filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp_d_press'
+      filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp_d_qha_press'
       CALL add_value(filelastic, press(ipress))
       CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue,       &
                         el_comp_d_pt(:,:,:,ipressp),                  &
@@ -1240,14 +1245,14 @@ DO ipressp=1,npress_plot
       CALL mp_sum(el_consf_d_pt(:,:,:,ipressp), world_comm)
       CALL mp_sum(el_compf_d_pt(:,:,:,ipressp), world_comm)
       CALL mp_sum(b0f_ec_d_pt(:,ipressp), world_comm)
-      lelasticf_d_pt=.TRUE.
-      filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_d_ph_press'
+      lelasticf_d_pt_qha=.TRUE.
+      filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_d_qha_ph_press'
       CALL add_value(filelastic, press(ipress))
       CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue,   &
                           el_consf_d_pt(:,:,:,ipressp),           &
                           b0f_ec_d_pt(:,ipressp), filelastic, 0) 
 
-      filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp_d_ph_press'
+      filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp_d_qha_ph_press'
       CALL add_value(filelastic, press(ipress))
       CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue,   &
                           el_compf_d_pt(:,:,:,ipressp),           &
@@ -1277,9 +1282,11 @@ USE elastic_constants, ONLY : write_el_cons_on_file,       &
                               compute_elastic_compliances, &
                               print_macro_elasticity,      &
                               ece_to_ecd
-USE control_elastic_constants, ONLY : lelastic_ptt, lelasticf_ptt,       & 
-                                      lelastic_d_ptt, lelasticf_d_ptt
+USE control_elastic_constants, ONLY : lelastic_ptt_qha, lelasticf_ptt_qha,  & 
+                                      lelastic_d_ptt_qha, lelasticf_d_ptt_qha
 USE control_piezoelectric_tensor, ONLY : lpiezo_ptt, lpiezof_ptt
+USE control_dielectric_constant,  ONLY : lepsilon_zerom1_ptt,            &
+                                         lepsilon_zerom1f_ptt
 USE anharmonic_ptt, ONLY : b0_ec_d_ptt, macro_el_d_ptt, el_cons_d_ptt,   &
                           el_comp_d_ptt, e_piezo_tensor_ptt,             &
                           epsilon_zerom1_ptt, el_cons_ptt                  
@@ -1314,7 +1321,8 @@ DO itempp=1,ntemp_plot
 
    DO ipress=startp,lastp
       IF (ipress==1.OR.ipress==npress) CYCLE
-      IF (lelastic_ptt.AND.lpiezo_ptt.AND.ltherm_dos) THEN
+      IF (lelastic_ptt_qha.AND.lpiezo_ptt.AND.lepsilon_zerom1_ptt.AND.&
+                                                             ltherm_dos) THEN
          CALL ece_to_ecd(e_piezo_tensor_ptt(1,1,ipress,itempp), &
                      epsilon_zerom1_ptt(1,1,ipress,itempp),     &
                      el_cons_ptt(1,1,ipress,itempp),            &
@@ -1329,7 +1337,8 @@ DO itempp=1,ntemp_plot
                                   macro_el_d_ptt(5,ipress,itempp))*0.5_DP
       ENDIF
 
-      IF (lelasticf_ptt.AND.lpiezof_ptt.AND.ltherm_freq) THEN
+      IF (lelasticf_ptt_qha.AND.lpiezof_ptt.AND.lepsilon_zerom1f_ptt&
+                                                   .AND.ltherm_freq) THEN
          CALL ece_to_ecd(e_piezo_tensorf_ptt(1,1,ipress,itempp),           &
                      epsilon_zerom1f_ptt(1,1,ipress,itempp),               &
                      el_consf_ptt(1,1,ipress,itempp),                      &
@@ -1348,13 +1357,13 @@ DO itempp=1,ntemp_plot
       CALL mp_sum(el_cons_d_ptt(:,:,:,itempp), world_comm)
       CALL mp_sum(el_comp_d_ptt(:,:,:,itempp), world_comm)
       CALL mp_sum(b0_ec_d_ptt(:,itempp), world_comm)
-      lelastic_d_ptt=.TRUE.
-      filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_d_temp'
+      lelastic_d_ptt_qha=.TRUE.
+      filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_d_qha_temp'
       CALL add_value(filelastic, temp(itemp))
       CALL write_el_cons_on_file(press, npress, ibrav_save, laue,       &
                         el_cons_d_ptt(:,:,:,itempp),                  &
                         b0_ec_d_ptt(:,itempp), filelastic, 2) 
-      filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp_d_temp'
+      filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp_d_qha_temp'
       CALL add_value(filelastic, temp(itemp))
       CALL write_el_cons_on_file(press, npress, ibrav_save, laue,       &
                         el_comp_d_ptt(:,:,:,itempp),                  &
@@ -1365,14 +1374,14 @@ DO itempp=1,ntemp_plot
       CALL mp_sum(el_consf_d_ptt(:,:,:,itempp), world_comm)
       CALL mp_sum(el_compf_d_ptt(:,:,:,itempp), world_comm)
       CALL mp_sum(b0f_ec_d_ptt(:,itempp), world_comm)
-      lelasticf_d_ptt=.TRUE.
-      filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_d_ph_temp'
+      lelasticf_d_ptt_qha=.TRUE.
+      filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_d_qha_ph_temp'
       CALL add_value(filelastic, temp(itemp))
       CALL write_el_cons_on_file(press, npress, ibrav_save, laue,   &
                           el_consf_d_ptt(:,:,:,itempp),           &
                           b0f_ec_d_ptt(:,itempp), filelastic, 2) 
 
-      filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp_d_ph_temp'
+      filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp_d_qha_ph_temp'
       CALL add_value(filelastic, temp(itemp))
       CALL write_el_cons_on_file(press, npress, ibrav_save, laue,   &
                           el_compf_d_ptt(:,:,:,itempp),           &

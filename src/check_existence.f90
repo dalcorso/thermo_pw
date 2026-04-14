@@ -20,12 +20,13 @@ SUBROUTINE check_existence(iwork, part, run)
   USE kinds,           ONLY : DP
   USE constants,       ONLY : ry_kbar
 
-  USE control_thermo,  ONLY : lstress, lberry
+  USE control_thermo,  ONLY : lstress, lberry, lmag
 
   USE thermo_mod,      ONLY : energy_geo
   USE elastic_constants, ONLY : sigma_geo
   USE polarization_vector, ONLY : mod_tot
   USE piezoelectric_tensor, ONLY : polar_strain, tot_b_phase
+  USE piezomagnetic_tensor, ONLY : mag_strain
 
   USE io_global,       ONLY : ionode, ionode_id, stdout
   USE mp_images,       ONLY : intra_image_comm
@@ -40,7 +41,7 @@ SUBROUTINE check_existence(iwork, part, run)
   INTEGER  :: find_free_unit
   CHARACTER(LEN=6) :: int_to_char
   CHARACTER(LEN=256) :: filename
-  REAL(DP) :: energy, stress(3,3), polar(3), tot_b_ph(3)
+  REAL(DP) :: energy, stress(3,3), polar(3), tot_b_ph(3), magtot_nc(3)
   LOGICAL :: exst
   run=.TRUE.
   
@@ -81,6 +82,11 @@ SUBROUTINE check_existence(iwork, part, run)
                  ENDDO
               ENDIF
            END IF
+           IF (lmag(iwork)) THEN
+              WRITE(stdout,'(5x,"Magnetization (Bohr magneton)")')
+              READ(iu_ene,*) (magtot_nc(ipol),ipol=1,3)
+              WRITE(stdout,'(3f15.7)') (magtot_nc(ipol),ipol=1,3)
+           ENDIF
         ELSE
            WRITE(stdout,'(5x,"Stress (kbar)")')
            DO ipol=1,3
@@ -111,6 +117,10 @@ SUBROUTINE check_existence(iwork, part, run)
         CALL mp_bcast(tot_b_ph, ionode_id, intra_image_comm)
         tot_b_phase(:,iwork)=tot_b_ph(:)
      END IF
+     IF (lmag(iwork)) THEN
+        CALL mp_bcast(magtot_nc, ionode_id, intra_image_comm)
+        mag_strain(:,iwork)=magtot_nc(:)
+     ENDIF
   END IF
 
   RETURN
@@ -123,11 +133,12 @@ SUBROUTINE save_existence(iwork, part)
 !  This routine saves on file the total energy, and
 !  possibly the stress of a self-consistent run. 
 !
-  USE control_thermo,  ONLY : lstress, lberry
+  USE control_thermo,  ONLY : lstress, lberry, lmag
 
   USE thermo_mod,      ONLY : energy_geo, what
   USE elastic_constants, ONLY : sigma_geo
   USE piezoelectric_tensor, ONLY : polar_strain, tot_b_phase
+  USE piezomagnetic_tensor, ONLY : mag_strain
 
   USE ener,            ONLY : etot
   USE force_mod,       ONLY : sigma
@@ -161,6 +172,9 @@ SUBROUTINE save_existence(iwork, part)
         IF (lberry(iwork)) THEN
            WRITE(iu_ene,*) (polar_strain(ipol,iwork), ipol=1,3)
            WRITE(iu_ene,*) (tot_b_phase(ipol,iwork), ipol=1,3)
+        ENDIF
+        IF (lmag(iwork)) THEN
+           WRITE(iu_ene,*) (mag_strain(ipol,iwork),ipol=1,3)
         ENDIF
      ELSE
         WRITE(iu_ene,*) etot

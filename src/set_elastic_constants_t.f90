@@ -30,8 +30,9 @@ USE control_elastic_constants, ONLY : el_cons_available,                 &
                                   el_cons_qha_available,                 &
                                   el_cons_qha_geo_available,             &
                                   el_consf_qha_available,                &
-                                  el_consf_qha_geo_available, lelastic,  &
-                                  lelasticf, stype
+                                  el_consf_qha_geo_available, lelastic_qsa,  &
+                                  lelasticf_qsa, lelastic_qha, &
+                                  lelasticf_qha, stype
 IMPLICIT NONE
 
 INTEGER :: itemp, istep
@@ -65,14 +66,14 @@ ELSEIF(el_cons_qha_available.OR.el_consf_qha_available) THEN
          el_cons_t(:,:,itemp)=el_cons_t(:,:,2)
          el_comp_t(:,:,itemp)=el_comp_t(:,:,2)
       ENDDO
-      lelastic=.TRUE.
+      lelastic_qsa=.TRUE.
    ENDIF
    IF (ltherm_freq.AND.el_consf_qha_available) THEN
       DO itemp=1,ntemp
          el_consf_t(:,:,itemp)=el_consf_t(:,:,2)
          el_compf_t(:,:,itemp)=el_compf_t(:,:,2)
       ENDDO
-      lelasticf=.TRUE.
+      lelasticf_qha=.TRUE.
    ENDIF
 ELSEIF(el_cons_available) THEN
    b0=macro_el(5)
@@ -84,8 +85,8 @@ ELSEIF(el_cons_available) THEN
       el_consf_t(:,:,itemp)=el_con(:,:)
       el_compf_t(:,:,itemp)=el_compliances(:,:)
    ENDDO
-   lelastic=.TRUE.
-   lelasticf=.TRUE.
+   lelastic_qsa=.TRUE.
+   lelasticf_qsa=.TRUE.
 ENDIF
 
 RETURN
@@ -192,7 +193,15 @@ SUBROUTINE set_elastic_constants_d_t()
 USE control_piezoelectric_tensor, ONLY : piezo_geo_available,       &
                                          piezo_qha_geo_available,   &
                                          piezof_qha_geo_available
+USE control_elastic_constants,    ONLY : el_cons_qha_available,     &
+                                         el_consf_qha_available
+USE control_epsilon_infty,        ONLY : epsilon_infty_geo_available
+
 IMPLICIT NONE
+
+IF (.NOT.(piezo_qha_geo_available).AND..NOT.(piezof_qha_geo_available)) RETURN
+IF (.NOT.(el_cons_qha_available).AND..NOT.(el_consf_qha_available)) RETURN
+IF (.NOT.(epsilon_infty_geo_available)) RETURN
 
 IF (piezo_qha_geo_available.OR.piezof_qha_geo_available) THEN
    CALL write_elastic_constants_d_t_qha()

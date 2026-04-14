@@ -181,7 +181,7 @@ SUBROUTINE check_piezo_tensor_qha()
                                            found_dos_pt, found_ph_pt,  &
                                            fndos_pt, fnph_pt, f_geoph_pt, &
                                            f_geodos_pt
-  USE thermo_sym,        ONLY : code_group_save
+  USE thermo_sym,        ONLY : code_group_save, code_group_ext_save
   USE control_thermo,    ONLY : ltherm_dos, ltherm_freq 
   USE data_files,        ONLY : flanhar 
   USE thermo_mod,        ONLY : tot_ngeo, no_ph
@@ -210,7 +210,7 @@ SUBROUTINE check_piezo_tensor_qha()
         !  The loop on temperatures is inside read_piezo_tensor_from_file
         !
         CALL read_piezo_tensor_from_file(temp, ntemp, ibrav, code_group_save, &
-                  e_piezo_tensor_eos_t(:,:,:,igeo), filepiezo)
+             code_group_ext_save, e_piezo_tensor_eos_t(:,:,:,igeo), filepiezo)
 
         found_dos_pt(igeo)=.TRUE.
 
@@ -233,7 +233,8 @@ SUBROUTINE check_piezo_tensor_qha()
         ! The loop on temperatures is inside read_piezo_tensor_from_file
         !
         CALL read_piezo_tensor_from_file(temp, ntemp, ibrav, code_group_save, &
-                  e_piezo_tensorf_eos_t(:,:,:,igeo), filepiezo)
+                  code_group_ext_save, e_piezo_tensorf_eos_t(:,:,:,igeo), &
+                  filepiezo)
       
         found_ph_pt(igeo)=.TRUE.
 

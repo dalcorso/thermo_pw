@@ -18,7 +18,8 @@ USE thermo_mod,        ONLY : energy_geo, tot_ngeo
 USE control_elastic_constants, ONLY : ngeo_strain, elcpvar, ngeom, &
                               work_base, el_con_omega_geo,         &
                               start_geometry_qha, last_geometry_qha, &
-                              lelastic, lelasticf, all_geometry_done_geo, &
+                              lelastic_qha, lelasticf_qha, &
+                              all_geometry_done_geo, &
                               epsil_geo, min_y_t, stype, old_ec
 USE initial_conf,      ONLY : ibrav_save
 USE thermo_sym,        ONLY : laue
@@ -148,32 +149,32 @@ DO igeom=1, ngeom
    IF (ltherm_dos) THEN
       CALL mp_sum(el_cons_t, world_comm)
       CALL compute_el_comp_t(el_cons_t,el_comp_t,b0_t)
-      CALL add_geometry_number('anhar_files/', TRIM(flanhar)//'.el_cons', &
+      CALL add_geometry_number('anhar_files/', TRIM(flanhar)//'.el_cons_qha', &
                                               filelastic, igeom)
       CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue, el_cons_t, &
                                               b0_t, filelastic, 0)
-      CALL add_geometry_number('anhar_files/', TRIM(flanhar)//'.el_comp', &
+      CALL add_geometry_number('anhar_files/', TRIM(flanhar)//'.el_comp_qha', &
                                               filelastic, igeom)
       CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue, el_comp_t, &
                                               b0_t, filelastic, 1)
-      lelastic=.TRUE.
+      lelastic_qha=.TRUE.
    ENDIF
 
    IF (ltherm_freq) THEN
       CALL mp_sum(el_consf_t, world_comm)
       CALL compute_el_comp_t(el_consf_t,el_compf_t,b0f_t)
-      CALL add_geometry_number('anhar_files/', TRIM(flanhar)//'.el_cons', &
+      CALL add_geometry_number('anhar_files/', TRIM(flanhar)//'.el_cons_qha', &
                                 filelastic, igeom)
       filelastic=TRIM(filelastic)//'_ph'
       CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue, el_consf_t, &
                                                     b0f_t, filelastic, 0)
 
-      CALL add_geometry_number('anhar_files/', TRIM(flanhar)//'.el_comp', &
+      CALL add_geometry_number('anhar_files/', TRIM(flanhar)//'.el_comp_qha', &
                                 filelastic, igeom)
       filelastic=TRIM(filelastic)//'_ph'
       CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue, el_compf_t, &
                                                     b0f_t, filelastic, 1)
-      lelasticf=.TRUE.
+      lelasticf_qha=.TRUE.
    ENDIF
 ENDDO
 IF (ANY(stype)) THEN

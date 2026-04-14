@@ -33,7 +33,7 @@ USE initial_conf,   ONLY : ibrav_save
 USE control_eldos,  ONLY : lel_free_energy
 USE control_atomic_pos, ONLY : linternal_thermo, linterpolate_tau, &
                                nint_var
-USE control_elastic_constants, ONLY : lelastic
+USE control_elastic_constants, ONLY : lelastic_qsa, lelastic_qha
 USE control_piezoelectric_tensor, ONLY : lpiezo
 USE elastic_constants, ONLY : compute_elastic_compliances, &
                               write_el_cons_on_file, print_macro_elasticity, &
@@ -48,12 +48,16 @@ USE io_global,      ONLY : meta_ionode, stdout
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
+CHARACTER(LEN=3) :: ext
 REAL(DP), ALLOCATABLE :: celldm_t_(:,:), temp_(:)
 INTEGER :: itemp, iu_therm, ierr
 INTEGER :: find_free_unit
-
+LOGICAL :: lelastic
 REAL(DP) :: e0
 
+lelastic=lelastic_qsa.OR.lelastic_qha
+ext='qsa'
+IF (lelastic_qha) ext='qha'
 IF (lmurn.AND..NOT.lcubic) THEN
 !
 !  In this case we can use this routine, but a file with the thermal
@@ -207,7 +211,7 @@ IF (lelastic) THEN
 !
 !   Here the elastic constants at constant entropy
 !
-   filename='anhar_files/'//TRIM(flanhar)//'.el_cons_s'
+   filename='anhar_files/'//TRIM(flanhar)//'.el_cons_s_'//ext
    CALL add_pressure(filename)
    CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue, el_cons_s, &
                                                   b0_ec_s, filename, 0)
@@ -217,7 +221,7 @@ IF (lelastic) THEN
 !   electric displacement
 !
    IF (lpiezo) THEN
-      filename='anhar_files/'//TRIM(flanhar)//'.el_cons_d_s'
+      filename='anhar_files/'//TRIM(flanhar)//'.el_cons_d_s_'//ext
       CALL add_pressure(filename)
       CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue, el_cons_d_s, &
                                                      b0_ec_s, filename, 0)
@@ -225,38 +229,38 @@ IF (lelastic) THEN
 !
 !  and here the elastic compliances
 !
-   filename='anhar_files/'//TRIM(flanhar)//'.el_comp_s'
+   filename='anhar_files/'//TRIM(flanhar)//'.el_comp_s_'//ext
    CALL add_pressure(filename)
    CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue, el_comp_s, &
                                                      b0_ec_s, filename, 1)
 !
 !   Isothermal macro-elasticity variables
 !
-   filename='anhar_files/'//TRIM(flanhar)//'.macro_el'
+   filename='anhar_files/'//TRIM(flanhar)//'.macro_el_'//ext
    CALL add_pressure(filename)
    CALL write_macro_el_on_file(temp, ntemp, macro_el_t, filename, 0)
 !
 !   Adiabatic macro-elasticity variables
 !
-   filename='anhar_files/'//TRIM(flanhar)//'.macro_el_s'
+   filename='anhar_files/'//TRIM(flanhar)//'.macro_el_s_'//ext
    CALL add_pressure(filename)
    CALL write_macro_el_on_file(temp, ntemp, macro_el_s, filename, 0)
 !
 !   Isothermal sound velocities
 !
-   filename='anhar_files/'//TRIM(flanhar)//'.sound_vel'
+   filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_'//ext
    CALL add_pressure(filename)
    CALL write_sound_on_file(temp, ntemp, v_t, filename, 0)
 !
 !   Adiabatic sound velocities
 !
-   filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_s'
+   filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_s_'//ext
    CALL add_pressure(filename)
    CALL write_sound_on_file(temp, ntemp, v_s, filename, 0)
 !
 !   debye temperatures derived from sound velocities
 !
-   filename='anhar_files/'//TRIM(flanhar)//'.macro_el_debye'
+   filename='anhar_files/'//TRIM(flanhar)//'.macro_el_debye_'//ext
    CALL add_pressure(filename)
    CALL write_debye_on_file(temp, ntemp, debye_macro_el_t, debye_macro_el_s, &
                                                               filename, 0)
@@ -760,7 +764,7 @@ USE ph_freq_anharmonic, ONLY : alphaf_anis_t, vminf_t, b0f_t, celldmf_t, &
                                uintf_t, uintf_zsisa_t, alphaf_int_t, &
                                alphaf_int_zsisa_t, bthsf_d_t, csmctf_d_t, &
                                el_consf_d_s, el_consf_d_t
-USE control_elastic_constants, ONLY : lelasticf
+USE control_elastic_constants, ONLY : lelasticf_qha, lelasticf_qsa
 USE control_piezoelectric_tensor, ONLY : lpiezof
 USE control_atomic_pos,        ONLY : linternal_thermo, nint_var, &
                                linterpolate_tau
@@ -778,13 +782,18 @@ USE io_global,      ONLY : meta_ionode, stdout
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
+CHARACTER(LEN=3) :: ext
 INTEGER :: itemp, iu_therm, ierr
 INTEGER :: find_free_unit, ibrav
 REAL(DP) :: compute_omega_geo, el_con_t(6,6,ntemp)
+LOGICAL :: lelasticf
 
 REAL(DP) :: e0 
 REAL(DP), ALLOCATABLE :: celldm_t_(:,:), temp_(:)
 
+lelasticf=lelasticf_qha.OR.lelasticf_qsa
+ext='qsa'
+IF (lelasticf_qha) ext='qha'
 IF (lmurn.AND..NOT.lcubic) THEN
 !
 !  In this case we can use this routine, but a file with the thermal
@@ -894,21 +903,21 @@ IF (meta_ionode) THEN
 !
 !   the heat capacities
 !
-      filename="anhar_files/"//TRIM(flanhar)//'.heat_ph'
+      filename="anhar_files/"//TRIM(flanhar)//'.heat_'//ext//'_ph'
       CALL add_pressure(filename)
 
       CALL write_heat_anhar(temp, cef_t, cvf_t, cpf_t, ntemp, filename)
 !
 !   Here the thermal stresses
 !
-      filename='anhar_files/'//TRIM(flanhar)//'.tstress_ph'
+      filename='anhar_files/'//TRIM(flanhar)//'.tstress_'//ext//'_ph'
       CALL add_pressure(filename)
       CALL write_thermal_stress(temp, bthsf_t, ntemp, filename)
 !
 !   Here the average Gruneisen paramater and the quantities that contribute
 !   to it
 !
-      filename='anhar_files/'//TRIM(flanhar)//'.gamma_ph'
+      filename='anhar_files/'//TRIM(flanhar)//'.gamma_'//ext//'_ph'
       CALL add_pressure(filename)
       CALL write_gamma_anharm(temp, gammaf_t, cvf_t, betaf_t, b0f_t, ntemp, &
                                                                  filename)
@@ -917,13 +926,13 @@ IF (meta_ionode) THEN
 !  anisotropic solids, using the thermal expansion tensor, as opposed
 !  to the volume thermal expansion used in the file aux
 !
-      filename='anhar_files/'//TRIM(flanhar)//'.heat_anis_ph'
+      filename='anhar_files/'//TRIM(flanhar)//'.heat_anis_'//ext//'_ph'
       CALL add_pressure(filename)
       CALL write_heat_anhar_anis(temp, cef_t, cvf_t, cpf_t, ntemp, filename)
 !
 !   Here the generalized Gruneisen parameters
 !
-      filename='anhar_files/'//TRIM(flanhar)//'.ggamma_ph'
+      filename='anhar_files/'//TRIM(flanhar)//'.ggamma_'//ext//'_ph'
       CALL add_pressure(filename)
       CALL write_generalized_gamma(temp, ggammaf_t, ntemp, filename)
    ENDIF
@@ -933,7 +942,7 @@ IF (lelasticf) THEN
 !
 !   Here the elastic constants at constant entropy
 !
-   filename='anhar_files/'//TRIM(flanhar)//'.el_cons_s_ph'
+   filename='anhar_files/'//TRIM(flanhar)//'.el_cons_s_'//ext//'_ph'
    CALL add_pressure(filename)
    CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, el_consf_s, b0f_ec_s, &
                                                               filename, 0)
@@ -941,7 +950,7 @@ IF (lelasticf) THEN
 !   Here the elastic constants at constant entropy
 !
    IF (lpiezof) THEN
-      filename='anhar_files/'//TRIM(flanhar)//'.el_cons_d_s_ph'
+      filename='anhar_files/'//TRIM(flanhar)//'.el_cons_d_s_'//ext//'_ph'
       CALL add_pressure(filename)
       CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, el_consf_d_s, &
            b0f_ec_s, filename, 0)
@@ -949,38 +958,38 @@ IF (lelasticf) THEN
 !
 !   and here the elastic compliances at constant entropy
 !
-   filename='anhar_files/'//TRIM(flanhar)//'.el_comp_s_ph'
+   filename='anhar_files/'//TRIM(flanhar)//'.el_comp_s_'//ext//'_ph'
    CALL add_pressure(filename)
    CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, el_compf_s, b0f_ec_s, &
                                                               filename, 1)
 !
 !   Isothermal macro-elasticity variables
 !
-   filename='anhar_files/'//TRIM(flanhar)//'.macro_el_ph'
+   filename='anhar_files/'//TRIM(flanhar)//'.macro_el_'//ext//'_ph'
    CALL add_pressure(filename)
    CALL write_macro_el_on_file(temp, ntemp, macro_elf_t, filename,0)
 !
 !   Adiabatic macro-elasticity variables
 !
-   filename='anhar_files/'//TRIM(flanhar)//'.macro_el_s_ph'
+   filename='anhar_files/'//TRIM(flanhar)//'.macro_el_s_'//ext//'_ph'
    CALL add_pressure(filename)
    CALL write_macro_el_on_file(temp, ntemp, macro_elf_s, filename,0)
 !
 !   Isothermal sound velocities
 !
-   filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_ph'
+   filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_'//ext//'_ph'
    CALL add_pressure(filename)
    CALL write_sound_on_file(temp, ntemp, vf_t, filename, 0)
 !
 !   Adiabatic sound velocities
 !
-   filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_s_ph'
+   filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_s_'//ext//'_ph'
    CALL add_pressure(filename)
    CALL write_sound_on_file(temp, ntemp, vf_s, filename, 0)
 !
 !   debye temperatures derived from sound velocities
 !
-   filename='anhar_files/'//TRIM(flanhar)//'.macro_el_debye_ph'
+   filename='anhar_files/'//TRIM(flanhar)//'.macro_el_debye_'//ext//'_ph'
    CALL add_pressure(filename)
    CALL write_debye_on_file(temp, ntemp, debye_macro_elf_t, &
                                          debye_macro_elf_s, filename, 0)
@@ -1251,7 +1260,7 @@ USE anharmonic_pt,  ONLY : alpha_anis_pt, vmin_pt, b0_pt, celldm_pt, beta_pt, &
                            debye_macro_el_pt, debye_macro_el_s_pt, uint_pt, &
                            uint_zsisa_pt, alpha_int_pt, alpha_int_zsisa_pt
 USE initial_conf,   ONLY : ibrav_save
-USE control_elastic_constants, ONLY : lelastic_pt
+USE control_elastic_constants, ONLY : lelastic_pt_qsa, lelastic_pt_qha
 USE control_pressure, ONLY : press, npress_plot, ipress_plot
 USE elastic_constants, ONLY : compute_elastic_compliances, &
                               write_el_cons_on_file, print_macro_elasticity, &
@@ -1267,13 +1276,18 @@ USE io_global,      ONLY : meta_ionode
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
+CHARACTER(LEN=3) :: ext
 INTEGER :: itemp, ipress, ipressp, iu_therm, ierr
 INTEGER :: find_free_unit
 REAL(DP) :: compute_omega_geo, aux(ntemp)
 REAL(DP), ALLOCATABLE :: celldm_t_(:,:), temp_(:)
+LOGICAL :: lelastic_pt
 
 REAL(DP) :: e0
 
+lelastic_pt=lelastic_pt_qsa.OR.lelastic_pt_qha
+ext='qsa'
+IF (lelastic_pt_qha) ext='qha'
 IF (lmurn.AND..NOT.lcubic) THEN
 !
 !  In this case we can use this routine, but a file with the thermal
@@ -1414,7 +1428,7 @@ DO ipressp=1, npress_plot
       !
       !   here the bulk modulus and the gruneisen parameter
       !
-         filename="anhar_files/"//TRIM(flanhar)//'.bulk_press'
+         filename="anhar_files/"//TRIM(flanhar)//'.bulk_'//ext//'_press'
          CALL add_value(filename,press(ipress))
 
          CALL write_bulk_anharm(temp, b0_pt(:,ipressp), b0_s_pt(:,ipressp), &
@@ -1422,7 +1436,7 @@ DO ipressp=1, npress_plot
 !
 !   the heat capacities
 !
-         filename="anhar_files/"//TRIM(flanhar)//'.heat_press'
+         filename="anhar_files/"//TRIM(flanhar)//'.heat_'//ext//'_press'
          CALL add_value(filename,press(ipress))
 
          CALL write_heat_anhar(temp, ce_pt(:,ipressp), cv_pt(:,ipressp), &
@@ -1432,14 +1446,14 @@ DO ipressp=1, npress_plot
 !  anisotropic solids, using the thermal expansion tensor, as opposed
 !  to the volume thermal expansion used in the file heat
 !
-         filename='anhar_files/'//TRIM(flanhar)//'.heat_anis.press'
+         filename='anhar_files/'//TRIM(flanhar)//'.heat_anis_'//ext//'_press'
          CALL add_value(filename,press(ipress))
          CALL write_heat_anhar_anis(temp, ce_pt(:,ipressp), cv_pt(:,ipressp),&
                                           cp_pt(:,ipressp), ntemp, filename)
 !
 !   Here the thermal stresses
 !
-         filename='anhar_files/'//TRIM(flanhar)//'.tstress_press'
+         filename='anhar_files/'//TRIM(flanhar)//'.tstress_'//ext//'_press'
          CALL add_value(filename,press(ipress))
          CALL write_thermal_stress(temp, bths_pt(:,:,:,ipressp), ntemp, &
                                                                   filename)
@@ -1447,14 +1461,14 @@ DO ipressp=1, npress_plot
 !   Here the average Gruneisen paramater and the quantities that contribute
 !   to it
 !
-         filename='anhar_files/'//TRIM(flanhar)//'.gamma_press'
+         filename='anhar_files/'//TRIM(flanhar)//'.gamma_'//ext//'_press'
          CALL add_value(filename,press(ipress))
          CALL write_gamma_anharm(temp, gamma_pt(:,ipressp), cv_pt(:,ipressp),&
                    beta_pt(:,ipressp), b0_pt(:,ipressp), ntemp, filename)
 !
 !   Here the generalized Gruneisen parameters
 !
-         filename='anhar_files/'//TRIM(flanhar)//'.ggamma_press'
+         filename='anhar_files/'//TRIM(flanhar)//'.ggamma_'//ext//'_press'
          CALL add_value(filename,press(ipress))
          CALL write_generalized_gamma(temp, ggamma_pt(:,:,:,ipressp), ntemp, &
                                                                   filename)
@@ -1464,7 +1478,7 @@ DO ipressp=1, npress_plot
 !
 !   Here the elastic constants at constant entropy
 !
-      filename='anhar_files/'//TRIM(flanhar)//'.el_cons_s_press'
+      filename='anhar_files/'//TRIM(flanhar)//'.el_cons_s_'//ext//'_press'
       CALL add_value(filename,press(ipress))
       CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue,          &
                  el_cons_s_pt(:,:,:,ipressp), b0_s_pt(:,ipressp), &
@@ -1472,40 +1486,40 @@ DO ipressp=1, npress_plot
 !
 !  and here the elastic compliances
 !
-      filename='anhar_files/'//TRIM(flanhar)//'.el_comp_s_press'
+      filename='anhar_files/'//TRIM(flanhar)//'.el_comp_s_'//ext//'_press'
       CALL add_value(filename,press(ipress))
       CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue, &
            el_comp_s_pt(:,:,:,ipressp), b0_s_pt(:,ipressp), filename, 1)
 !
 !   Isothermal macro-elasticity variables
 !
-      filename='anhar_files/'//TRIM(flanhar)//'.macro_el_press'
+      filename='anhar_files/'//TRIM(flanhar)//'.macro_el_'//ext//'_press'
       CALL add_value(filename,press(ipress))
       CALL write_macro_el_on_file(temp, ntemp, macro_el_pt(:,:,ipressp), &
                                                                filename, 0)
 !
 !   Adiabatic macro-elasticity variables
 !
-      filename='anhar_files/'//TRIM(flanhar)//'.macro_el_s_press'
+      filename='anhar_files/'//TRIM(flanhar)//'.macro_el_s_'//ext//'_press'
       CALL add_value(filename,press(ipress))
       CALL write_macro_el_on_file(temp, ntemp, macro_el_s_pt(:,:,ipressp), &
                                                                  filename, 0)
 !
 !   Isothermal sound velocities
 !
-      filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_press'
+      filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_'//ext//'_press'
       CALL add_value(filename,press(ipress))
       CALL write_sound_on_file(temp, ntemp, v_pt(:,:,ipressp), filename, 0)
 !
 !   Adiabatic sound velocities
 !
-      filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_s_press'
+      filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_s_'//ext//'_press'
       CALL add_value(filename,press(ipress))
       CALL write_sound_on_file(temp, ntemp, v_s_pt(:,:,ipressp), filename, 0)
 !
 !   debye temperatures derived from sound velocities
 !
-      filename='anhar_files/'//TRIM(flanhar)//'.macro_el_debye_press'
+      filename='anhar_files/'//TRIM(flanhar)//'.macro_el_debye_'//ext//'_press'
       CALL add_value(filename,press(ipress))
       CALL write_debye_on_file(temp, ntemp, debye_macro_el_pt(:,ipressp), &
                               debye_macro_el_s_pt(:,ipressp), filename, 0)
@@ -1545,7 +1559,7 @@ USE ph_freq_anharmonic_pt,  ONLY : alphaf_anis_pt, vminf_pt, b0f_pt,    &
 USE debye_module,   ONLY : compute_debye_temperature_macro_el, &
                            write_debye_on_file
 USE initial_conf,   ONLY : ibrav_save
-USE control_elastic_constants, ONLY : lelasticf_pt
+USE control_elastic_constants, ONLY : lelasticf_pt_qsa, lelasticf_pt_qha
 USE control_pressure, ONLY : press, npress_plot, ipress_plot
 USE elastic_constants, ONLY : compute_elastic_compliances, &
                               write_el_cons_on_file, print_macro_elasticity, &
@@ -1559,13 +1573,18 @@ USE io_global,      ONLY : meta_ionode
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
+CHARACTER(LEN=3) :: ext
 INTEGER :: itemp, ipress, ipressp, iu_therm, ierr
 INTEGER :: find_free_unit
 REAL(DP) :: compute_omega_geo, aux(ntemp)
+LOGICAL :: lelasticf_pt
 
 REAL(DP) :: e0
 REAL(DP), ALLOCATABLE :: celldm_t_(:,:), temp_(:)
 
+lelasticf_pt=lelasticf_pt_qsa.OR.lelasticf_pt_qha
+ext='qsa'
+IF (lelasticf_pt_qha) ext='qha'
 IF (lmurn.AND..NOT.lcubic) THEN
 !
 !  In this case we can use this routine, but a file with the thermal
@@ -1704,7 +1723,7 @@ DO ipressp=1, npress_plot
       !
       !   here the bulk modulus and the gruneisen parameter
       !
-         filename="anhar_files/"//TRIM(flanhar)//'.bulk_ph_press'
+         filename="anhar_files/"//TRIM(flanhar)//'.bulk_ph_'//ext//'_press'
          CALL add_value(filename,press(ipress))
 
          CALL write_bulk_anharm(temp, b0f_pt(:,ipressp), b0f_s_pt(:,ipressp), &
@@ -1712,7 +1731,7 @@ DO ipressp=1, npress_plot
 !
 !   the heat capacities
 !
-         filename="anhar_files/"//TRIM(flanhar)//'.heat_ph_press'
+         filename="anhar_files/"//TRIM(flanhar)//'.heat_ph_'//ext//'_press'
          CALL add_value(filename,press(ipress))
 
          CALL write_heat_anhar(temp, cef_pt(:,ipressp), cvf_pt(:,ipressp), &
@@ -1722,14 +1741,14 @@ DO ipressp=1, npress_plot
 !  anisotropic solids, using the thermal expansion tensor, as opposed
 !  to the volume thermal expansion used in the file heat
 !
-         filename='anhar_files/'//TRIM(flanhar)//'.heat_anis_ph.press'
+         filename='anhar_files/'//TRIM(flanhar)//'.heat_anis_'//ext//'_ph_press'
          CALL add_value(filename,press(ipress))
          CALL write_heat_anhar_anis(temp, cef_pt(:,ipressp), &
                        cvf_pt(:,ipressp), cpf_pt(:,ipressp), ntemp, filename)
 !
 !   Here the thermal stresses
 !
-         filename='anhar_files/'//TRIM(flanhar)//'.tstress_ph_press'
+         filename='anhar_files/'//TRIM(flanhar)//'.tstress_'//ext//'_ph_press'
          CALL add_value(filename,press(ipress))
          CALL write_thermal_stress(temp, bthsf_pt(:,:,:,ipressp), ntemp, &
                                                                   filename)
@@ -1737,7 +1756,7 @@ DO ipressp=1, npress_plot
 !   Here the average Gruneisen paramater and the quantities that contribute
 !   to it
 !
-         filename='anhar_files/'//TRIM(flanhar)//'.gamma_ph_press'
+         filename='anhar_files/'//TRIM(flanhar)//'.gamma_'//ext//'_ph_press'
          CALL add_value(filename,press(ipress))
          CALL write_gamma_anharm(temp, gammaf_pt(:,ipressp), &
                    cvf_pt(:,ipressp), betaf_pt(:,ipressp),   &
@@ -1745,7 +1764,7 @@ DO ipressp=1, npress_plot
 !
 !   Here the generalized Gruneisen parameters
 !
-         filename='anhar_files/'//TRIM(flanhar)//'.ggamma_ph_press'
+         filename='anhar_files/'//TRIM(flanhar)//'.ggamma_'//ext//'_ph_press'
          CALL add_value(filename,press(ipress))
          CALL write_generalized_gamma(temp, ggammaf_pt(:,:,:,ipressp), ntemp, &
                                                                   filename)
@@ -1755,7 +1774,7 @@ DO ipressp=1, npress_plot
 !
 !   Here the elastic constants at constant entropy
 !
-      filename='anhar_files/'//TRIM(flanhar)//'.el_cons_s_ph_press'
+      filename='anhar_files/'//TRIM(flanhar)//'.el_cons_s_'//ext//'_ph_press'
       CALL add_value(filename,press(ipress))
       CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue,          &
                  el_consf_s_pt(:,:,:,ipressp), b0f_s_pt(:,ipressp), &
@@ -1763,40 +1782,40 @@ DO ipressp=1, npress_plot
 !
 !  and here the elastic compliances
 !
-      filename='anhar_files/'//TRIM(flanhar)//'.el_comp_s_ph_press'
+      filename='anhar_files/'//TRIM(flanhar)//'.el_comp_s_'//ext//'_ph_press'
       CALL add_value(filename,press(ipress))
       CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue, &
            el_compf_s_pt(:,:,:,ipressp), b0f_s_pt(:,ipressp), filename, 1)
 !
 !   Isothermal macro-elasticity variables
 !
-      filename='anhar_files/'//TRIM(flanhar)//'.macro_el_ph_press'
+      filename='anhar_files/'//TRIM(flanhar)//'.macro_el_'//ext//'_ph_press'
       CALL add_value(filename,press(ipress))
       CALL write_macro_el_on_file(temp, ntemp, macro_elf_pt(:,:,ipressp), &
                                                                filename, 0)
 !
 !   Adiabatic macro-elasticity variables
 !
-      filename='anhar_files/'//TRIM(flanhar)//'.macro_el_s_ph_press'
+      filename='anhar_files/'//TRIM(flanhar)//'.macro_el_s_'//ext//'_ph_press'
       CALL add_value(filename,press(ipress))
       CALL write_macro_el_on_file(temp, ntemp, macro_elf_s_pt(:,:,ipressp), &
                                                                  filename, 0)
 !
 !   Isothermal sound velocities
 !
-      filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_ph_press'
+      filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_'//ext//'_ph_press'
       CALL add_value(filename,press(ipress))
       CALL write_sound_on_file(temp, ntemp, vf_pt(:,:,ipressp), filename, 0)
 !
 !   Adiabatic sound velocities
 !
-      filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_s_ph_press'
+      filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_s_'//ext//'_ph_press'
       CALL add_value(filename,press(ipress))
       CALL write_sound_on_file(temp, ntemp, vf_s_pt(:,:,ipressp), filename, 0)
 !
 !   debye temperatures derived from sound velocities
 !
-      filename='anhar_files/'//TRIM(flanhar)//'.macro_el_debye_ph_press'
+      filename='anhar_files/'//TRIM(flanhar)//'.macro_el_debye_'//ext//'_ph_press'
       CALL add_value(filename,press(ipress))
       CALL write_debye_on_file(temp, ntemp, debye_macro_elf_pt(:,ipressp), &
                             debye_macro_elf_s_pt(:,ipressp), filename, 0)
@@ -1837,7 +1856,7 @@ USE anharmonic_ptt, ONLY : vmin_ptt, vmin_ptt_p1, vmin_ptt_m1, &
 USE el_anharmonic,  ONLY : el_ce_ptt
 USE initial_conf,   ONLY : ibrav_save
 USE control_eldos,  ONLY : lel_free_energy
-USE control_elastic_constants, ONLY : lelastic_ptt
+USE control_elastic_constants, ONLY : lelastic_ptt_qsa, lelastic_ptt_qha
 USE control_pressure, ONLY : press, npress
 USE temperature,    ONLY : temp, ntemp_plot, itemp_plot
 USE elastic_constants, ONLY : compute_elastic_compliances, &
@@ -1862,8 +1881,9 @@ REAL(DP) :: compute_omega_geo, aux(npress)
 INTEGER  :: itempp, ipol, ierr
 REAL(DP) :: e0_p(npress)
 REAL(DP), ALLOCATABLE :: press_(:), celldm_p_(:,:)
-LOGICAL  :: subtract_el
+LOGICAL  :: subtract_el, lelastic_ptt
 
+lelastic_ptt=lelastic_ptt_qha.OR.lelastic_ptt_qsa
 IF (lmurn.AND..NOT.lcubic) THEN
 !
 !  In this case we can use this routine, but a file with the thermal
@@ -2152,7 +2172,7 @@ USE el_anharmonic,  ONLY : el_cef_ptt
 USE anharmonic,     ONLY : alpha_int_t
 USE control_eldos,  ONLY : lel_free_energy
 USE initial_conf,   ONLY : ibrav_save
-USE control_elastic_constants, ONLY : lelasticf_ptt
+USE control_elastic_constants, ONLY : lelasticf_ptt_qsa, lelasticf_ptt_qha
 USE control_pressure, ONLY : press, npress
 USE temperature,    ONLY : temp, ntemp_plot, itemp_plot
 USE elastic_constants, ONLY : compute_elastic_compliances, &
@@ -2170,6 +2190,7 @@ USE io_global,      ONLY : meta_ionode
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
+CHARACTER(LEN=3) :: ext
 INTEGER :: itemp, ipress, ipressp, iu_therm
 INTEGER :: find_free_unit
 REAL(DP) :: compute_omega_geo, aux(npress)
@@ -2177,7 +2198,11 @@ REAL(DP) :: compute_omega_geo, aux(npress)
 INTEGER  :: itempp, ipol, i, ierr
 REAL(DP) :: e0_p(npress)
 REAL(DP), ALLOCATABLE :: celldm_p_(:,:), press_(:)
-LOGICAL  :: subtract_el
+LOGICAL  :: subtract_el, lelasticf_ptt
+
+lelasticf_ptt=lelasticf_ptt_qsa.OR.lelasticf_ptt_qha
+ext='qsa'
+IF (lelasticf_ptt_qha) ext='qha'
 
 IF (lmurn.AND..NOT.lcubic) THEN
 !
@@ -2332,7 +2357,7 @@ DO itempp=1, ntemp_plot
       !
       !   here the bulk modulus and the gruneisen parameter
       !
-         filename="anhar_files/"//TRIM(flanhar)//'.bulk_ph_temp'
+         filename="anhar_files/"//TRIM(flanhar)//'.bulk_'//ext//'_ph_temp'
          CALL add_value(filename,temp(itemp))
 
          CALL write_bulk_anharm_ptt(press, b0f_ptt(:,itempp), &
@@ -2340,7 +2365,7 @@ DO itempp=1, ntemp_plot
 !
 !   the heat capacities
 !
-         filename="anhar_files/"//TRIM(flanhar)//'.heat_ph_temp'
+         filename="anhar_files/"//TRIM(flanhar)//'.heat_'//ext//'_ph_temp'
          CALL add_value(filename,temp(itemp))
 
          CALL write_heat_anhar_t(press, cef_ptt(:,itempp), cef_ptt(:,itempp), &
@@ -2351,14 +2376,14 @@ DO itempp=1, ntemp_plot
 !  anisotropic solids, using the thermal expansion tensor, as opposed
 !  to the volume thermal expansion used in the file heat
 !
-         filename='anhar_files/'//TRIM(flanhar)//'.heat_anis_ph.temp'
+         filename='anhar_files/'//TRIM(flanhar)//'.heat_anis_'//ext//'_ph.temp'
          CALL add_value(filename,temp(itemp))
          CALL write_heat_anhar_anis_p(press, cef_ptt(:,itempp), &
                cvf_ptt(:,itempp), cpf_ptt(:,itempp), npress, filename)
 !
 !   Here the thermal stresses
 !
-         filename='anhar_files/'//TRIM(flanhar)//'.tstress_ph_temp'
+         filename='anhar_files/'//TRIM(flanhar)//'.tstress_'//ext//'_ph_temp'
          CALL add_value(filename,temp(itemp))
          CALL write_thermal_stress_p(press, bthsf_ptt(:,:,:,ipressp), npress, &
                                                                   filename)
@@ -2366,7 +2391,7 @@ DO itempp=1, ntemp_plot
 !   Here the average Gruneisen paramater and the quantities that contribute
 !   to it
 !
-         filename='anhar_files/'//TRIM(flanhar)//'.gamma_ph_temp'
+         filename='anhar_files/'//TRIM(flanhar)//'.gamma_'//ext//'_ph_temp'
          CALL add_value(filename,temp(itemp))
          CALL write_gamma_anharm_t(press, gammaf_ptt(:,itempp), &
             cef_ptt(:,itempp), betaf_ptt(:,itempp), b0f_ptt(:,itempp), &
@@ -2374,7 +2399,7 @@ DO itempp=1, ntemp_plot
 !
 !   Here the generalized Gruneisen parameters
 !
-         filename='anhar_files/'//TRIM(flanhar)//'.ggamma_ph_temp'
+         filename='anhar_files/'//TRIM(flanhar)//'.ggamma_'//ext//'_ph_temp'
          CALL add_value(filename,temp(itemp))
          CALL write_generalized_gamma_p(press, ggammaf_ptt(:,:,:,itempp), &
                                                           ntemp, filename)
@@ -2384,7 +2409,7 @@ DO itempp=1, ntemp_plot
 !
 !   Here the elastic constants at constant entropy
 !
-      filename='anhar_files/'//TRIM(flanhar)//'.el_cons_s_ph_temp'
+      filename='anhar_files/'//TRIM(flanhar)//'.el_cons_s_'//ext//'_ph_temp'
       CALL add_value(filename,temp(itemp))
       CALL write_el_cons_on_file(press, npress, ibrav_save, laue,          &
                  el_consf_s_ptt(:,:,:,itempp), b0f_s_ptt(:,itempp), &
@@ -2392,40 +2417,41 @@ DO itempp=1, ntemp_plot
 !
 !  and here the elastic compliances
 !
-      filename='anhar_files/'//TRIM(flanhar)//'.el_comp_s_ph_temp'
+      filename='anhar_files/'//TRIM(flanhar)//'.el_comp_s_'//ext//'_ph_temp'
       CALL add_value(filename,temp(itemp))
       CALL write_el_cons_on_file(press, npress, ibrav_save, laue, &
            el_compf_s_ptt(:,:,:,itempp), b0f_s_ptt(:,itempp), filename, 3)
 !
 !   Isothermal macro-elasticity variables
 !
-      filename='anhar_files/'//TRIM(flanhar)//'.macro_el_ph_temp'
+      filename='anhar_files/'//TRIM(flanhar)//'.macro_el_'//ext//'_ph_temp'
       CALL add_value(filename,temp(itemp))
       CALL write_macro_el_on_file(press, npress, macro_elf_ptt(:,:,itempp), &
                                                                filename, 1)
 !
 !   Adiabatic macro-elasticity variables
 !
-      filename='anhar_files/'//TRIM(flanhar)//'.macro_el_s_ph_temp'
+      filename='anhar_files/'//TRIM(flanhar)//'.macro_el_s_'//ext//'_ph_temp'
       CALL add_value(filename,temp(itemp))
       CALL write_macro_el_on_file(press, npress, macro_elf_s_ptt(:,:,itempp), &
                                                                  filename, 1)
 !
 !   Isothermal sound velocities
 !
-      filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_ph_temp'
+      filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_'//ext//'_ph_temp'
       CALL add_value(filename,temp(itemp))
       CALL write_sound_on_file(press, npress, vf_ptt(:,:,itempp), filename, 1)
 !
 !   Adiabatic sound velocities
 !
-      filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_s_ph_temp'
+      filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_s_'//ext//'_ph_temp'
       CALL add_value(filename,temp(itemp))
       CALL write_sound_on_file(press, npress, vf_s_ptt(:,:,itempp), filename, 1)
 !
 !   debye temperatures derived from sound velocities
 !
-      filename='anhar_files/'//TRIM(flanhar)//'.macro_el_debye_ph_temp'
+      filename='anhar_files/'//TRIM(flanhar)//'.macro_el_debye_'//ext//&
+                                                               '_ph_temp'
       CALL add_value(filename,temp(itemp))
       CALL write_debye_on_file(press, npress, debye_macro_elf_ptt(:,itempp), &
                             debye_macro_elf_s_ptt(:,itempp), filename, 1)
@@ -2857,7 +2883,6 @@ ENDDO
 RETURN
 END SUBROUTINE compute_alpha_internal
 !
-!
 !-----------------------------------------------------------------------
 SUBROUTINE compute_alpha_internal_p(uint_ptt, uint_ptt_p1, uint_ptt_m1,  & 
             alpha_int_ptt, press, npress, itemp)
@@ -3274,7 +3299,8 @@ END SUBROUTINE write_generalized_gamma_p
 SUBROUTINE set_elastic_grun()
 !-----------------------------------------------------------------------
 !
-USE control_elastic_constants, ONLY : lelastic, lelasticf
+USE control_elastic_constants, ONLY : lelastic_qsa, lelasticf_qsa, &
+                                      lelastic_qha, lelasticf_qha
 USE grun_anharmonic,    ONLY : el_cons_grun_t, el_comp_grun_t, lelastic_grun
 USE temperature,        ONLY : ntemp
 USE anharmonic,         ONLY : el_cons_t, el_comp_t
@@ -3283,7 +3309,10 @@ USE ph_freq_anharmonic, ONLY : el_consf_t, el_compf_t
 IMPLICIT NONE
 
 INTEGER :: itemp
+LOGICAL :: lelastic, lelasticf
 
+lelastic=lelastic_qsa.OR.lelastic_qha
+lelasticf=lelasticf_qsa.OR.lelasticf_qha
 lelastic_grun=.FALSE.
 IF (lelasticf) THEN
    DO itemp=1, ntemp

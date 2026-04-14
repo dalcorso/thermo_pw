@@ -27,7 +27,8 @@ USE piezoelectric_tensor, ONLY : get_pt_type, pt_present, pt_names, &
                              pt_elements
 USE control_pressure, ONLY : pmin, pmax
 USE temperature,      ONLY : tmin, tmax
-USE rap_point_group,  ONLY : code_group
+USE thermo_sym,       ONLY : code_group_save, code_group_ext_save
+USE initial_conf,     ONLY : ibrav_save
 USE mp_images,        ONLY : root_image, my_image_id
 USE io_global,        ONLY : ionode
 
@@ -73,7 +74,7 @@ ELSE
 ENDIF
 
 fact= electron_si / (bohr_radius_si)**2
-piezo_type=get_pt_type(code_group)
+piezo_type=get_pt_type(code_group_save, code_group_ext_save, ibrav_save)
 unit=' (C/m^2)'
 DO ipt=1,pt_elements
    IF (pt_present(ipt, piezo_type)>0) THEN 
@@ -187,8 +188,8 @@ USE control_piezoelectric_tensor,  ONLY : lpiezo_pt, lpiezof_pt
 USE control_pressure, ONLY : pmin, pmax, npress_plot, ipress_plot, press
 USE temperature,      ONLY : tmin, tmax
 USE color_mod,        ONLY : color
-USE thermo_sym,       ONLY : laue
-USE rap_point_group,  ONLY : code_group
+USE thermo_sym,       ONLY : code_group_save, code_group_ext_save
+USE initial_conf,     ONLY : ibrav_save
 USE mp_images,        ONLY : root_image, my_image_id
 USE io_global,        ONLY : ionode
 
@@ -220,7 +221,7 @@ ELSE
 ENDIF
 CALL gnuplot_xlabel('T (K)', .FALSE.) 
 
-piezo_type=get_pt_type(code_group)
+piezo_type=get_pt_type(code_group_save, code_group_ext_save, ibrav_save)
 
 fact= electron_si / (bohr_radius_si)**2
 DO ipt=1,pt_elements
@@ -290,7 +291,8 @@ USE control_piezoelectric_tensor,  ONLY : lpiezo_ptt, lpiezof_ptt
 USE control_pressure, ONLY : pmin, pmax
 USE temperature,      ONLY : temp, ntemp_plot, itemp_plot
 USE color_mod,        ONLY : color
-USE rap_point_group,  ONLY : code_group
+USE thermo_sym,       ONLY : code_group_save, code_group_ext_save
+USE initial_conf,     ONLY : ibrav_save
 USE mp_images,        ONLY : root_image, my_image_id
 USE io_global,        ONLY : ionode
 
@@ -315,7 +317,7 @@ CALL gnuplot_write_header(filenameps, pmin*ry_kbar, pmax*ry_kbar, 0.0_DP, &
                               0.0_DP, 1.0_DP, flext ) 
 CALL gnuplot_xlabel('p (kbar)', .FALSE.) 
 
-pt_type=get_pt_type(code_group)
+pt_type=get_pt_type(code_group_save, code_group_ext_save, ibrav_save)
 fact= electron_si / (bohr_radius_si)**2
 DO ipt=1,pt_elements
    IF (pt_present(ipt, pt_type)>0) THEN 
@@ -384,7 +386,8 @@ USE piezoelectric_tensor, ONLY : get_pt_type, pt_present, ptd_names, &
                                  pt_elements
 USE control_pressure, ONLY : pmin, pmax
 USE temperature,      ONLY : tmin, tmax
-USE rap_point_group,  ONLY : code_group
+USE thermo_sym,       ONLY : code_group_save, code_group_ext_save
+USE initial_conf,     ONLY : ibrav_save
 USE mp_images,        ONLY : root_image, my_image_id
 USE io_global,        ONLY : ionode
 
@@ -430,7 +433,7 @@ ELSE
 ENDIF
 
 fact= electron_si / (bohr_radius_si)**2 * 1.D4
-piezo_type=get_pt_type(code_group)
+piezo_type=get_pt_type(code_group_save, code_group_ext_save, ibrav_save)
 unit=' (pC/N)'
 DO ipt=1,pt_elements
    IF (pt_present(ipt, piezo_type)>0) THEN 
@@ -476,8 +479,8 @@ USE control_piezoelectric_tensor,  ONLY : lpiezo_d_pt, lpiezof_d_pt
 USE control_pressure, ONLY : pmin, pmax, npress_plot, ipress_plot, press
 USE temperature,      ONLY : tmin, tmax
 USE color_mod,        ONLY : color
-USE thermo_sym,       ONLY : laue
-USE rap_point_group,  ONLY : code_group
+USE thermo_sym,       ONLY : code_group_save, code_group_ext_save
+USE initial_conf,     ONLY : ibrav_save
 USE mp_images,        ONLY : root_image, my_image_id
 USE io_global,        ONLY : ionode
 
@@ -509,7 +512,7 @@ ELSE
 ENDIF
 CALL gnuplot_xlabel('T (K)', .FALSE.) 
 
-piezo_type=get_pt_type(code_group)
+piezo_type=get_pt_type(code_group_save, code_group_ext_save, ibrav_save)
 
 fact= electron_si / (bohr_radius_si)**2 * 1.D4
 DO ipt=1,pt_elements
@@ -579,7 +582,8 @@ USE control_piezoelectric_tensor,  ONLY : lpiezo_d_ptt, lpiezof_d_ptt
 USE control_pressure, ONLY : pmin, pmax
 USE temperature,      ONLY : temp, ntemp_plot, itemp_plot
 USE color_mod,        ONLY : color
-USE rap_point_group,  ONLY : code_group
+USE thermo_sym,       ONLY : code_group_save, code_group_ext_save
+USE initial_conf,     ONLY : ibrav_save
 USE mp_images,        ONLY : root_image, my_image_id
 USE io_global,        ONLY : ionode
 
@@ -604,7 +608,8 @@ CALL gnuplot_write_header(filenameps, pmin*ry_kbar, pmax*ry_kbar, 0.0_DP, &
                               0.0_DP, 1.0_DP, flext ) 
 CALL gnuplot_xlabel('p (kbar)', .FALSE.) 
 
-pt_type=get_pt_type(code_group)
+pt_type=get_pt_type(code_group_save, code_group_ext_save, ibrav_save)
+
 fact= electron_si / (bohr_radius_si)**2 * 1.D4
 DO ipt=1,pt_elements
    IF (pt_present(ipt, pt_type)>0) THEN 

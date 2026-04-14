@@ -32,7 +32,7 @@ USE control_piezoelectric_tensor, ONLY : e_piezo_tensor_relax_geo,     &
                                          decompose_piezo, piezo_zeu_geo
 USE elastic_constants,   ONLY : epsilon_voigt, epsilon_geo, sigma_geo
 USE strain_mod,          ONLY : trans_epsilon, set_strain_adv
-USE piezoelectric_tensor, ONLY : allocate_piezo
+USE piezoelectric_tensor, ONLY : allocate_piezo, set_piezo_strain_list
 USE rap_point_group,     ONLY : code_group
 IMPLICIT NONE
 INTEGER, INTENT(IN)  :: ngeom
@@ -40,114 +40,12 @@ INTEGER, INTENT(OUT) :: nwork
 REAL(DP) :: epsilon_min, epsil, tot_mass, sumdisp
 INTEGER :: igeo, iwork, istep, nstep, nstep_tot, igeom, istart, na, ivar, &
            iwork_base, ipol, imove
-CHARACTER(LEN=2) :: strain_list(21)
-LOGICAL :: check_group_ibrav, flag
+CHARACTER(LEN=2) :: strain_list(6)
+LOGICAL :: flag
 REAL(DP) :: compute_omega_geo
 
 epsilon_min= - delta_epsilon * (ngeo_strain - 1) / 2.0_DP
-IF (check_group_ibrav(code_group, ibrav)) THEN
-   SELECT CASE (code_group)
-     CASE(2,16,18,19,20,22,23,25,27,29,32)
-!
-!  Point groups with inversion, the piezoelectric tensor vanishes
-!  C_i, C_2h, C_4h, C_6h, D_2h, D_4h, D_6h, D_3d, S_6, T_h, O_h
-!
-        nstep=0
-     CASE(6,7)
-!
-!   C_4, C_6
-!
-        nstep = 4
-        strain_list(1) = 'C '
-        strain_list(2) = 'E '
-        strain_list(3) = 'I '
-        strain_list(4) = 'H '
-
-     CASE(8)
-!
-!   D_2
-!
-        nstep = 3
-        strain_list(1) = 'I '
-        strain_list(2) = 'H '
-        strain_list(3) = 'G '
-
-     CASE(9)
-!
-!   D_3
-!
-        nstep = 2
-        strain_list(1) = 'C '
-        strain_list(2) = 'I '
-
-     CASE(10,11,28,30)
-!
-!  D_4, D_6, T, T_d
-!
-        nstep = 1
-        strain_list(1) = 'I '
-
-     CASE(12)
-!
-!   C_2v
-!
-        nstep = 5
-        strain_list(1) = 'C '
-        strain_list(2) = 'D '
-        strain_list(3) = 'E '
-        strain_list(4) = 'I '
-        strain_list(5) = 'H '
-
-     CASE(13,14,15)
-!
-!   C_3v, C_4v, C_6v
-!
-        nstep = 3
-        strain_list(1) = 'B '
-        strain_list(2) = 'E '
-        strain_list(3) = 'H '
-
-     CASE(17,21)
-!
-!  C_3h, D_3h
-!
-        nstep=1
-        strain_list(1) = 'C '
-     CASE(24)
-!
-!  D_2d
-!
-        nstep = 2
-        strain_list(1) = 'I '
-        strain_list(2) = 'H '
-     CASE(26)
-!
-!  S_4
-!
-        nstep = 4 
-        strain_list(1) = 'C '
-        strain_list(2) = 'I '
-        strain_list(3) = 'H '
-        strain_list(4) = 'G '
-
-     CASE DEFAULT
-        nstep = 6 
-        strain_list(1) = 'C '
-        strain_list(2) = 'D '
-        strain_list(3) = 'E '
-        strain_list(4) = 'I '
-        strain_list(5) = 'H '
-        strain_list(6) = 'G '
-   END SELECT
-ELSE
-   nstep = 6
-   strain_list(1) = 'C '
-   strain_list(2) = 'D '
-   strain_list(3) = 'E '
-   strain_list(4) = 'I '
-   strain_list(5) = 'H '
-   strain_list(6) = 'G '
-ENDIF
+CALL set_piezo_strain_list(code_group, ibrav, strain_list, nstep)
 !
 !  Compute the total number of perturbed geometries per unperturbed
 !  one not accounting for ngeo_strain, but accounting for the possibility

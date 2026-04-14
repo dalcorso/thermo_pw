@@ -25,7 +25,8 @@ USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,           &
 USE data_files,       ONLY : flanhar, fl_el_cons
 USE postscript_files, ONLY : flpsanhar
 USE initial_conf,     ONLY : ibrav_save
-USE control_elastic_constants,  ONLY : lelastic, lelasticf, lelastic_p
+USE control_elastic_constants,  ONLY : lelastic_qsa, lelasticf_qsa, &
+                                       lelastic_p, lelastic_qha, lelasticf_qha
 USE control_grun,     ONLY : lb0_t
 USE control_pressure, ONLY : pmin, pmax
 USE temperature,      ONLY : tmin, tmax
@@ -35,23 +36,33 @@ USE io_global,        ONLY : ionode
 
 IMPLICIT NONE
 INTEGER :: iflag
-LOGICAL :: with_s
+LOGICAL :: with_s, lelastic, lelasticf
 CHARACTER(LEN=256) :: gnu_filename, filenameps, filelastic, filelastic_s
 INTEGER :: ibrav
 INTEGER :: ierr, system
 
 IF ( my_image_id /= root_image ) RETURN
 
-IF (.NOT.(lelastic.OR.lelasticf.OR.lelastic_p).OR..NOT.lb0_t) RETURN
+IF (.NOT.(lelastic_qsa.OR.lelasticf_qsa.OR.lelastic_qha.OR.lelasticf_qha&
+           .OR.lelastic_p).OR..NOT.lb0_t) RETURN
 
 ibrav=ibrav_save
 
+lelastic=lelastic_qha.OR.lelastic_qsa
+lelasticf=lelasticf_qha.OR.lelasticf_qsa
 IF (MOD(iflag,2)==0) THEN
    IF (iflag==0) THEN
-      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_cons"
-      filenameps=TRIM(flpsanhar)//".el_cons"//TRIM(flext)
-      filelastic="anhar_files/"//TRIM(flanhar)//".el_cons"
-      filelastic_s="anhar_files/"//TRIM(flanhar)//".el_cons_s"
+      IF (lelastic_qha.OR.lelasticf_qha) THEN
+         gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_cons_qha"
+         filenameps=TRIM(flpsanhar)//".el_cons_qha"//TRIM(flext)
+         filelastic="anhar_files/"//TRIM(flanhar)//".el_cons_qha"
+         filelastic_s="anhar_files/"//TRIM(flanhar)//".el_cons_s_qha"
+      ELSE
+         gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_cons_qsa"
+         filenameps=TRIM(flpsanhar)//".el_cons_qsa"//TRIM(flext)
+         filelastic="anhar_files/"//TRIM(flanhar)//".el_cons_qsa"
+         filelastic_s="anhar_files/"//TRIM(flanhar)//".el_cons_s_qsa"
+      ENDIF
    ELSE
 !
 !  In this case plot the elastic constants as a function of pressure
@@ -63,10 +74,17 @@ IF (MOD(iflag,2)==0) THEN
    ENDIF
 ELSE
    IF (iflag==1) THEN
-      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_comp"
-      filenameps=TRIM(flpsanhar)//".el_comp"//TRIM(flext)
-      filelastic="anhar_files/"//TRIM(flanhar)//".el_comp"
-      filelastic_s="anhar_files/"//TRIM(flanhar)//".el_comp_s"
+      IF (lelastic_qha.OR.lelasticf_qha) THEN
+         gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_comp_qha"
+         filenameps=TRIM(flpsanhar)//".el_comp_qha"//TRIM(flext)
+         filelastic="anhar_files/"//TRIM(flanhar)//".el_comp_qha"
+         filelastic_s="anhar_files/"//TRIM(flanhar)//".el_comp_s_qha"
+      ELSE
+         gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_comp_qsa"
+         filenameps=TRIM(flpsanhar)//".el_comp_qsa"//TRIM(flext)
+         filelastic="anhar_files/"//TRIM(flanhar)//".el_comp_qsa"
+         filelastic_s="anhar_files/"//TRIM(flanhar)//".el_comp_s_qsa"
+      ENDIF
    ELSE
       gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_el_comp_p"
       filenameps=TRIM(flpsanhar)//".el_comp_p"//TRIM(flext)
@@ -564,7 +582,8 @@ USE data_files,       ONLY : flanhar, fl_el_cons
 USE elastic_constants, ONLY : get_ec_type, ec_present, ect_names, ecm_names, &
                               ec_elements
 USE postscript_files, ONLY : flpsanhar, flps_el_cons
-USE control_elastic_constants,  ONLY : lelastic, lelasticf, lelastic_p
+USE control_elastic_constants,  ONLY : lelastic_qsa, lelasticf_qsa, &
+                                       lelastic_qha, lelasticf_qha, lelastic_p
 USE control_grun,     ONLY : lb0_t
 USE control_pressure, ONLY : pmin, pmax
 USE temperature,      ONLY : tmin, tmax
@@ -574,23 +593,32 @@ USE io_global,        ONLY : ionode
 
 IMPLICIT NONE
 INTEGER :: iflag
-LOGICAL :: with_s
+LOGICAL :: with_s, lelastic, lelasticf
 CHARACTER(LEN=256) :: gnu_filename, filenameps, filelastic, filelastic_s
 INTEGER :: ibrav, ec_type, iec, ic, ic_last
 INTEGER :: ierr, system
 LOGICAL :: first, last
 
 IF ( my_image_id /= root_image ) RETURN
+lelastic=lelastic_qha.OR.lelastic_qsa
+lelasticf=lelasticf_qha.OR.lelasticf_qsa
 IF (.NOT.(lelastic.OR.lelasticf.OR.lelastic_p).OR..NOT.lb0_t) RETURN
 
 ibrav=ibrav_geo(1)
 
 IF (MOD(iflag,2)==0) THEN
    IF (iflag==0) THEN
-      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_cons"
-      filenameps=TRIM(flpsanhar)//".el_cons"//TRIM(flext)
-      filelastic="anhar_files/"//TRIM(flanhar)//".el_cons"
-      filelastic_s="anhar_files/"//TRIM(flanhar)//".el_cons_s"
+      IF (lelastic_qha.OR.lelasticf_qha) THEN
+         gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_cons_qha"
+         filenameps=TRIM(flpsanhar)//".el_cons_qha"//TRIM(flext)
+         filelastic="anhar_files/"//TRIM(flanhar)//".el_cons_qha"
+         filelastic_s="anhar_files/"//TRIM(flanhar)//".el_cons_s_qha"
+      ELSE
+         gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_cons_qsa"
+         filenameps=TRIM(flpsanhar)//".el_cons_qsa"//TRIM(flext)
+         filelastic="anhar_files/"//TRIM(flanhar)//".el_cons_qsa"
+         filelastic_s="anhar_files/"//TRIM(flanhar)//".el_cons_s_qsa"
+      ENDIF
    ELSE
 !
 !  In this case plot the elastic constants as a function of pressure
@@ -602,10 +630,17 @@ IF (MOD(iflag,2)==0) THEN
    ENDIF
 ELSE
    IF (iflag==1) THEN
-      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_comp"
-      filenameps=TRIM(flpsanhar)//".el_comp"//TRIM(flext)
-      filelastic="anhar_files/"//TRIM(flanhar)//".el_comp"
-      filelastic_s="anhar_files/"//TRIM(flanhar)//".el_comp_s"
+      IF (lelastic_qha.OR.lelasticf_qha) THEN
+         gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_comp_qha"
+         filenameps=TRIM(flpsanhar)//".el_comp_qha"//TRIM(flext)
+         filelastic="anhar_files/"//TRIM(flanhar)//".el_comp_qha"
+         filelastic_s="anhar_files/"//TRIM(flanhar)//".el_comp_s_qha"
+      ELSE
+         gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_comp_qsa"
+         filenameps=TRIM(flpsanhar)//".el_comp_qsa"//TRIM(flext)
+         filelastic="anhar_files/"//TRIM(flanhar)//".el_comp_qsa"
+         filelastic_s="anhar_files/"//TRIM(flanhar)//".el_comp_s_qsa"
+      ENDIF
    ELSE
       gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_el_comp_p"
       filenameps=TRIM(flps_el_cons)//".el_comp_p"//TRIM(flext)
@@ -723,7 +758,8 @@ USE data_files,       ONLY : flanhar, fl_el_cons
 USE elastic_constants, ONLY : get_ec_type, ec_present, ect_names, ecm_names, &
                               ec_elements
 USE postscript_files, ONLY : flpsanhar, flps_el_cons
-USE control_elastic_constants,  ONLY : lelastic_d, lelasticf_d, lelastic_d_p
+USE control_elastic_constants,  ONLY : lelastic_d_qha, lelasticf_d_qha, &
+                                       lelastic_d_p
 USE control_grun,     ONLY : lb0_t
 USE control_pressure, ONLY : pmin, pmax
 USE temperature,      ONLY : tmin, tmax
@@ -733,23 +769,32 @@ USE io_global,        ONLY : ionode
 
 IMPLICIT NONE
 INTEGER :: iflag
-LOGICAL :: with_s
+LOGICAL :: with_s, lelastic_d, lelasticf_d
 CHARACTER(LEN=256) :: gnu_filename, filenameps, filelastic, filelastic_s
 INTEGER :: ibrav, ec_type, iec, ic, ic_last
 INTEGER :: ierr, system
 LOGICAL :: first, last
 
 IF ( my_image_id /= root_image ) RETURN
+lelastic_d=lelastic_d_qha
+lelasticf_d=lelasticf_d_qha
 IF (.NOT.(lelastic_d.OR.lelasticf_d.OR.lelastic_d_p).OR..NOT.lb0_t) RETURN
 
 ibrav=ibrav_geo(1)
 
 IF (MOD(iflag,2)==0) THEN
    IF (iflag==0) THEN
-      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_cons_d"
-      filenameps=TRIM(flpsanhar)//".el_cons_d"//TRIM(flext)
-      filelastic="anhar_files/"//TRIM(flanhar)//".el_cons_d"
-      filelastic_s="anhar_files/"//TRIM(flanhar)//".el_cons_d_s"
+      IF (lelastic_d_qha.OR.lelasticf_d_qha) THEN
+         gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_cons_d_qha"
+         filenameps=TRIM(flpsanhar)//".el_cons_d_qha"//TRIM(flext)
+         filelastic="anhar_files/"//TRIM(flanhar)//".el_cons_d_qha"
+         filelastic_s="anhar_files/"//TRIM(flanhar)//".el_cons_d_s_qha"
+      ELSE
+         gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_cons_d_qsa"
+         filenameps=TRIM(flpsanhar)//".el_cons_d_qsa"//TRIM(flext)
+         filelastic="anhar_files/"//TRIM(flanhar)//".el_cons_d_qsa"
+         filelastic_s="anhar_files/"//TRIM(flanhar)//".el_cons_d_s_qsa"
+      ENDIF
    ELSE
 !
 !  In this case plot the elastic constants as a function of pressure
@@ -761,10 +806,17 @@ IF (MOD(iflag,2)==0) THEN
    ENDIF
 ELSE
    IF (iflag==1) THEN
-      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_comp_d"
-      filenameps=TRIM(flpsanhar)//".el_comp_d"//TRIM(flext)
-      filelastic="anhar_files/"//TRIM(flanhar)//".el_comp_d"
-      filelastic_s="anhar_files/"//TRIM(flanhar)//".el_comp_d_s"
+      IF (lelastic_d_qha.OR.lelasticf_d_qha) THEN
+         gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_comp_d_qha"
+         filenameps=TRIM(flpsanhar)//".el_comp_d_qha"//TRIM(flext)
+         filelastic="anhar_files/"//TRIM(flanhar)//".el_comp_d_qha"
+         filelastic_s="anhar_files/"//TRIM(flanhar)//".el_comp_d_s_qha"
+      ELSE
+         gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_comp_d_qsa"
+         filenameps=TRIM(flpsanhar)//".el_comp_d_qsa"//TRIM(flext)
+         filelastic="anhar_files/"//TRIM(flanhar)//".el_comp_d_qsa"
+         filelastic_s="anhar_files/"//TRIM(flanhar)//".el_comp_d_s_qsa"
+      ENDIF
    ELSE
       gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_el_comp_d_p"
       filenameps=TRIM(flps_el_cons)//".el_comp_d_p"//TRIM(flext)
@@ -882,7 +934,8 @@ USE data_files,       ONLY : flanhar, fl_el_cons
 USE elastic_constants, ONLY : get_ec_type, ec_present, ect_names, ecm_names, &
                              ec_elements
 USE postscript_files, ONLY : flpsanhar, flps_el_cons
-USE control_elastic_constants,  ONLY : lelastic, lelasticf, lelastic_p
+USE control_elastic_constants,  ONLY : lelastic_pt_qsa, lelasticf_pt_qsa, &
+                             lelastic_pt_qha, lelasticf_pt_qha, lelastic_p
 USE control_grun,     ONLY : lb0_t
 USE control_pressure, ONLY : pmin, pmax, npress_plot, ipress_plot, press
 USE temperature,      ONLY : tmin, tmax
@@ -893,25 +946,30 @@ USE io_global,        ONLY : ionode
 
 IMPLICIT NONE
 INTEGER :: iflag
-LOGICAL :: with_s
+LOGICAL :: with_s, lelastic, lelasticf
 CHARACTER(LEN=256) :: gnu_filename, filenameps, filelastic, filelastic_s, &
                       filelastic_ph, filelastic_s_ph, label
+CHARACTER(LEN=3) :: ext
 INTEGER :: ibrav, ec_type, iec, ic, ic_last, istep, ipressp, ipress
 INTEGER :: ierr, system
 LOGICAL :: first, last, first_step, last_step
 
 IF ( my_image_id /= root_image ) RETURN
+lelastic=lelastic_pt_qsa.OR.lelastic_pt_qha
+lelasticf=lelasticf_pt_qsa.OR.lelasticf_pt_qha
 IF (.NOT.(lelastic.OR.lelasticf.OR.lelastic_p).OR..NOT.lb0_t) RETURN
+ext='qsa'
+IF (lelastic_pt_qha.OR.lelasticf_pt_qha) ext='qha'
 IF (npress_plot==0) RETURN
 
 ibrav=ibrav_geo(1)
 
 IF (MOD(iflag,2)==0) THEN
-   gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_cons_p"
-   filenameps=TRIM(flpsanhar)//".el_cons_p"//TRIM(flext)
+   gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_cons_p_"//ext
+   filenameps=TRIM(flpsanhar)//".el_cons_p_"//ext//TRIM(flext)
 ELSE
-   gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_comp_p"
-   filenameps=TRIM(flpsanhar)//".el_comp_p"//TRIM(flext)
+   gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_comp_p_"//ext
+   filenameps=TRIM(flpsanhar)//".el_comp_p_"//ext//TRIM(flext)
 ENDIF
 CALL gnuplot_start(gnu_filename)
 
@@ -934,13 +992,17 @@ DO iec=1,ec_elements
             last_step=(ipressp==npress_plot)
             ipress=ipress_plot(ipressp)
             istep=MOD(istep,8)+1
-            filelastic="anhar_files/"//TRIM(flanhar)//'.el_cons_press'
+            filelastic="anhar_files/"//TRIM(flanhar)//'.el_cons_qha_'&
+                                                       //ext//'_press'
+            filelastic_s="anhar_files/"//TRIM(flanhar)//&
+                                              &'.el_cons_s_'//ext//'_press'
+            filelastic_ph="anhar_files/"//TRIM(flanhar)//&
+                                             &'.el_cons_'//ext//'_ph_press'
+            filelastic_s_ph="anhar_files/"//TRIM(flanhar)//&
+                                              &'.el_cons_s_'//ext//'_ph_press'
             CALL add_value(filelastic,press(ipress))
-            filelastic_s="anhar_files/"//TRIM(flanhar)//'.el_cons_s_press'
             CALL add_value(filelastic_s,press(ipress))
-            filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_ph_press'
             CALL add_value(filelastic_ph,press(ipress))
-            filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_s_ph_press'
             CALL add_value(filelastic_s_ph,press(ipress))
             IF (first_step) THEN
                CALL gnuplot_set_fact(1.0_DP, .FALSE.) 
@@ -975,13 +1037,17 @@ DO iec=1,ec_elements
             last_step=(ipressp==npress_plot)
             ipress=ipress_plot(ipressp)
             istep=MOD(istep,8)+1
-            filelastic="anhar_files/"//TRIM(flanhar)//'.el_comp_press'
+            filelastic="anhar_files/"//TRIM(flanhar)//'.el_comp_'&
+                                                         //ext//'_press'
+            filelastic_s="anhar_files/"//TRIM(flanhar)//&
+                                           &'.el_comp_s_'//ext//'_press'
+            filelastic_ph="anhar_files/"//TRIM(flanhar)//&
+                                          &'.el_comp_'//ext//'_ph_press'
+            filelastic_s_ph="anhar_files/"//TRIM(flanhar)//&
+                                        &'.el_comp_s_'//ext//'_ph_press'
             CALL add_value(filelastic,press(ipress))
-            filelastic_s="anhar_files/"//TRIM(flanhar)//'.el_comp_s_press'
             CALL add_value(filelastic_s,press(ipress))
-            filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_comp_ph_press'
             CALL add_value(filelastic_ph,press(ipress))
-            filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.el_comp_s_ph_press'
             CALL add_value(filelastic_s_ph,press(ipress))
             IF (first_step) THEN
                CALL gnuplot_set_fact(1.D3, .FALSE.) 
@@ -1020,22 +1086,37 @@ IF (MOD(iflag,2)==0) THEN
       last_step=(ipressp==npress_plot)
       ipress=ipress_plot(ipressp)
       istep=MOD(istep,8)+1
-      filelastic="anhar_files/"//TRIM(flanhar)//'.el_cons_press'
+      filelastic="anhar_files/"//TRIM(flanhar)//'.el_cons_'//ext//'_press'
+      filelastic_s="anhar_files/"//TRIM(flanhar)//&
+                                        &'.el_cons_s_'//ext//'_press'
+      filelastic_ph="anhar_files/"//TRIM(flanhar)//&
+                                             '.el_cons_'//ext//'_ph_press'
+      filelastic_s_ph="anhar_files/"//TRIM(flanhar)//&
+                                        &'.el_cons_s_'//ext//'_ph_press'
       CALL add_value(filelastic,press(ipress))
-      filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_ph_press'
+      CALL add_value(filelastic_s,press(ipress))
       CALL add_value(filelastic_ph,press(ipress))
+      CALL add_value(filelastic_s_ph,press(ipress))
       IF (first_step) THEN
          CALL gnuplot_set_fact(1.0_DP, .FALSE.) 
          WRITE(label,'("Bulk modulus B (kbar)")') 
          CALL gnuplot_ylabel(TRIM(label),.FALSE.)
       ENDIF
       IF (ltherm_dos) THEN
-         CALL gnuplot_write_file_mul_data(filelastic,1,2,color(istep), &
-                          first_step,(last_step.AND..NOT.ltherm_freq),.FALSE.)
+         CALL gnuplot_write_file_mul_data(filelastic,1,2,color(istep),  &
+                   first_step,(last_step.AND..NOT.ltherm_freq.AND.      &
+                                                   .NOT.with_s),.FALSE.)
+         IF (with_s) &
+             CALL gnuplot_write_file_mul_data(filelastic_s,1, &
+              2,color(istep),.FALSE.,(last_step.AND..NOT.ltherm_freq),.FALSE.)
       ENDIF
       IF (ltherm_freq) THEN
          CALL gnuplot_write_file_mul_data(filelastic_ph,1,2,color(istep), &
-                           (first_step.AND..NOT.ltherm_dos),last_step,.FALSE.)
+               (first_step.AND..NOT.ltherm_dos),                          &
+                                   (.NOT.with_s).AND.last_step,.FALSE.)
+         IF (with_s) &
+             CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,          &
+                              2,color(istep),.FALSE.,last_step,.FALSE.)
       ENDIF
    ENDDO
 ELSE
@@ -1044,22 +1125,37 @@ ELSE
       last_step=(ipressp==npress_plot)
       ipress=ipress_plot(ipressp)
       istep=MOD(istep,8)+1
-      filelastic="anhar_files/"//TRIM(flanhar)//'.el_comp_press'
+      filelastic="anhar_files/"//TRIM(flanhar)//'.el_comp_'//ext//'_press'
+      filelastic_s="anhar_files/"//TRIM(flanhar)//&
+                                        &'.el_comp_s_'//ext//'_press'
+      filelastic_ph="anhar_files/"//TRIM(flanhar)//&
+                                                '.el_comp_'//ext//'_ph_press'
+      filelastic_s_ph="anhar_files/"//TRIM(flanhar)//&
+                                        &'.el_comp_s_'//ext//'_ph_press'
       CALL add_value(filelastic,press(ipress))
-      filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_comp_ph_press'
+      CALL add_value(filelastic_s,press(ipress))
       CALL add_value(filelastic_ph,press(ipress))
+      CALL add_value(filelastic_s_ph,press(ipress))
       IF (first_step) THEN
          CALL gnuplot_set_fact(1.D3, .FALSE.) 
          WRITE(label,'("Compressibility K (Mbar^{-1})")') 
          CALL gnuplot_ylabel(TRIM(label),.FALSE.)
       ENDIF
       IF (ltherm_dos) THEN
-         CALL gnuplot_write_file_mul_data(filelastic,1,2,color(istep), &
-                          first_step,(last_step.AND..NOT.ltherm_freq),.FALSE.)
+         CALL gnuplot_write_file_mul_data(filelastic,1,2,color(istep),  &
+                   first_step,(last_step.AND..NOT.ltherm_freq.AND.      &
+                                                   .NOT.with_s),.FALSE.)
+         IF (with_s) &
+             CALL gnuplot_write_file_mul_data(filelastic_s,1, &
+              2,color(istep),.FALSE.,(last_step.AND..NOT.ltherm_freq),.FALSE.)
       ENDIF
       IF (ltherm_freq) THEN
          CALL gnuplot_write_file_mul_data(filelastic_ph,1,2,color(istep), &
-                          (first_step.AND..NOT.ltherm_dos),last_step,.FALSE.)
+               (first_step.AND..NOT.ltherm_dos),                          &
+                                   (.NOT.with_s).AND.last_step,.FALSE.)
+         IF (with_s) &
+             CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,          &
+                              2,color(istep),.FALSE.,last_step,.FALSE.)
       ENDIF
    ENDDO
 ENDIF
@@ -1071,9 +1167,10 @@ IF (MOD(iflag,2)==0.AND.(laue==32.OR.laue==29)) THEN
       last_step=(ipressp==npress_plot)
       ipress=ipress_plot(ipressp)
       istep=MOD(istep,8)+1
-      filelastic="anhar_files/"//TRIM(flanhar)//'.el_cons_press'
+      filelastic="anhar_files/"//TRIM(flanhar)//'.el_cons_'//ext//'_press'
+      filelastic_ph="anhar_files/"//TRIM(flanhar)//&
+                                             '.el_cons_'//ext//'_ph_press'
       CALL add_value(filelastic,press(ipress))
-      filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_ph_press'
       CALL add_value(filelastic_ph,press(ipress))
       IF (first_step) THEN
          CALL gnuplot_set_fact(1.0_DP, .FALSE.) 
@@ -1124,7 +1221,7 @@ USE data_files,       ONLY : flanhar, fl_el_cons
 USE elastic_constants, ONLY : get_ec_type, ec_present, ect_names, ecm_names, &
                             ec_elements
 USE postscript_files, ONLY : flpsanhar, flps_el_cons
-USE control_elastic_constants,  ONLY : lelastic_d_pt, lelasticf_d_pt, &
+USE control_elastic_constants,  ONLY : lelastic_d_pt_qha, lelasticf_d_pt_qha, &
                                        lelastic_d_p
 USE control_grun,     ONLY : lb0_t
 USE control_pressure, ONLY : pmin, pmax, npress_plot, ipress_plot, press
@@ -1139,22 +1236,28 @@ INTEGER :: iflag
 LOGICAL :: with_s
 CHARACTER(LEN=256) :: gnu_filename, filenameps, filelastic, filelastic_s, &
                       filelastic_ph, filelastic_s_ph, label
+CHARACTER(LEN=3) :: ext
 INTEGER :: ibrav, ec_type, iec, ic, ic_last, istep, ipressp, ipress
 INTEGER :: ierr, system
 LOGICAL :: first, last, first_step, last_step
 
 IF ( my_image_id /= root_image ) RETURN
-IF (.NOT.(lelastic_d_pt.OR.lelasticf_d_pt.OR.lelastic_d_p).OR..NOT.lb0_t) RETURN
+IF (.NOT.(lelastic_d_pt_qha.OR.lelasticf_d_pt_qha&
+                                    .OR.lelastic_d_p).OR..NOT.lb0_t) RETURN
 IF (npress_plot==0) RETURN
 
+ext='qsa'
+IF (lelastic_d_pt_qha.OR.lelasticf_d_pt_qha) ext='qha'
 ibrav=ibrav_geo(1)
 
 IF (MOD(iflag,2)==0) THEN
-   gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_cons_d_p"
-   filenameps=TRIM(flpsanhar)//".el_cons_d_p"//TRIM(flext)
+   gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_cons_d_"&
+                                                            //ext//"_p"
+   filenameps=TRIM(flpsanhar)//".el_cons_d_qha_p"//TRIM(flext)
 ELSE
-   gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_comp_d_p"
-   filenameps=TRIM(flpsanhar)//".el_comp_d_p"//TRIM(flext)
+   gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_comp_d_"&
+                                                               //ext//"_p"
+   filenameps=TRIM(flpsanhar)//".el_comp_d_"//ext//"_p"//TRIM(flext)
 ENDIF
 CALL gnuplot_start(gnu_filename)
 
@@ -1177,13 +1280,17 @@ DO iec=1,ec_elements
             last_step=(ipressp==npress_plot)
             ipress=ipress_plot(ipressp)
             istep=MOD(istep,8)+1
-            filelastic="anhar_files/"//TRIM(flanhar)//'.el_cons_d_press'
+            filelastic="anhar_files/"//TRIM(flanhar)//'.el_cons_d_'&
+                                                             //ext//'_press'
             CALL add_value(filelastic,press(ipress))
-            filelastic_s="anhar_files/"//TRIM(flanhar)//'.el_cons_d_s_press'
+            filelastic_s="anhar_files/"//TRIM(flanhar)//'.el_cons_d_s_'    & 
+                                                         //ext//'_press'
             CALL add_value(filelastic_s,press(ipress))
-            filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_d_ph_press'
+            filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_d_'     & 
+                                                         //ext//'_ph_press'
             CALL add_value(filelastic_ph,press(ipress))
-            filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_d_s_ph_press'
+            filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_d_s_' &
+                                                         //ext//'_ph_press'
             CALL add_value(filelastic_s_ph,press(ipress))
             IF (first_step) THEN
                CALL gnuplot_set_fact(1.0_DP, .FALSE.) 
@@ -1218,13 +1325,17 @@ DO iec=1,ec_elements
             last_step=(ipressp==npress_plot)
             ipress=ipress_plot(ipressp)
             istep=MOD(istep,8)+1
-            filelastic="anhar_files/"//TRIM(flanhar)//'.el_comp_d_press'
+            filelastic="anhar_files/"//TRIM(flanhar)//'.el_comp_d_'//ext&
+                                                                  //'_press'
             CALL add_value(filelastic,press(ipress))
-            filelastic_s="anhar_files/"//TRIM(flanhar)//'.el_comp_d_s_press'
+            filelastic_s="anhar_files/"//TRIM(flanhar)//'.el_comp_d_s_'//&
+                                                               ext//'_press'
             CALL add_value(filelastic_s,press(ipress))
-            filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_comp_d_ph_press'
+            filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_comp_d_'//&
+                                                             ext//'_ph_press'
             CALL add_value(filelastic_ph,press(ipress))
-            filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.el_comp_d_s_ph_press'
+            filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.el_comp_d_s_'&
+                                                           //ext//'_ph_press'
             CALL add_value(filelastic_s_ph,press(ipress))
             IF (first_step) THEN
                CALL gnuplot_set_fact(1.D3, .FALSE.) 
@@ -1263,9 +1374,10 @@ IF (MOD(iflag,2)==0) THEN
       last_step=(ipressp==npress_plot)
       ipress=ipress_plot(ipressp)
       istep=MOD(istep,8)+1
-      filelastic="anhar_files/"//TRIM(flanhar)//'.el_cons_d_press'
+      filelastic="anhar_files/"//TRIM(flanhar)//'.el_cons_d_'//ext//'_press'
       CALL add_value(filelastic,press(ipress))
-      filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_d_ph_press'
+      filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_d_'//&
+                                                            ext//'_ph_press'
       CALL add_value(filelastic_ph,press(ipress))
       IF (first_step) THEN
          CALL gnuplot_set_fact(1.0_DP, .FALSE.) 
@@ -1287,9 +1399,10 @@ ELSE
       last_step=(ipressp==npress_plot)
       ipress=ipress_plot(ipressp)
       istep=MOD(istep,8)+1
-      filelastic="anhar_files/"//TRIM(flanhar)//'.el_comp_d_press'
+      filelastic="anhar_files/"//TRIM(flanhar)//'.el_comp_d_'//ext//'_press'
       CALL add_value(filelastic,press(ipress))
-      filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_comp_d_ph_press'
+      filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_comp_d_'//&
+                                                            ext//'_ph_press'
       CALL add_value(filelastic_ph,press(ipress))
       IF (first_step) THEN
          CALL gnuplot_set_fact(1.D3, .FALSE.) 
@@ -1314,9 +1427,10 @@ IF (MOD(iflag,2)==0.AND.(laue==32.OR.laue==29)) THEN
       last_step=(ipressp==npress_plot)
       ipress=ipress_plot(ipressp)
       istep=MOD(istep,8)+1
-      filelastic="anhar_files/"//TRIM(flanhar)//'.el_cons_d_press'
+      filelastic="anhar_files/"//TRIM(flanhar)//'.el_cons_d_'//ext//'_press'
       CALL add_value(filelastic,press(ipress))
-      filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_d_ph_press'
+      filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_d_'&
+                                                          //ext//'_ph_press'
       CALL add_value(filelastic_ph,press(ipress))
       IF (first_step) THEN
          CALL gnuplot_set_fact(1.0_DP, .FALSE.) 
@@ -1370,7 +1484,9 @@ USE data_files,       ONLY : flanhar, fl_el_cons
 USE elastic_constants, ONLY : get_ec_type, ec_present, ect_names, ecm_names, &
                              ec_elements
 USE postscript_files, ONLY : flpsanhar, flps_el_cons
-USE control_elastic_constants,  ONLY : lelastic, lelasticf, lelastic_p
+USE control_elastic_constants,  ONLY : lelastic_ptt_qsa, lelasticf_ptt_qsa, &
+                                       lelastic_ptt_qha, lelasticf_ptt_qha, &
+                                       lelastic_p
 USE control_grun,     ONLY : lb0_t
 USE control_pressure, ONLY : pmin, pmax
 USE temperature,      ONLY : temp, ntemp_plot, itemp_plot
@@ -1386,9 +1502,15 @@ CHARACTER(LEN=256) :: gnu_filename, filenameps, filelastic, &
                       filelastic_ph, filelastic_s, filelastic_s_ph, label
 INTEGER :: ibrav, ec_type, iec, ic, ic_last, istep, itempp, itemp
 INTEGER :: ierr, system
-LOGICAL :: first, last, first_step, last_step
+LOGICAL :: first, last, first_step, last_step, lelastic, lelasticf
+CHARACTER(LEN=3) :: ext
 
 IF ( my_image_id /= root_image ) RETURN
+lelastic=lelastic_ptt_qha.OR.lelastic_ptt_qsa
+lelasticf=lelasticf_ptt_qha.OR.lelasticf_ptt_qsa
+ext='qsa'
+IF (lelastic_ptt_qha.OR.lelasticf_ptt_qha) ext='qha'
+
 IF (.NOT.(lelastic.OR.lelasticf.OR.lelastic_p).OR..NOT.lb0_t) RETURN
 IF (ntemp_plot==0) RETURN
 
@@ -1396,27 +1518,31 @@ ibrav=ibrav_geo(1)
 
 IF (MOD(iflag,2)==0) THEN
    IF (with_t) THEN
-      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_cons_t"
-      filenameps=TRIM(flpsanhar)//".el_cons_t"//TRIM(flext)
+      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_cons_t_"//ext
+      filenameps=TRIM(flpsanhar)//".el_cons_t_"//ext//TRIM(flext)
    ELSEIF (with_s) THEN
-      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_cons_s_t"
-      filenameps=TRIM(flpsanhar)//".el_cons_s_t"//TRIM(flext)
+      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_cons_s_t_"&
+                                                                        //ext
+      filenameps=TRIM(flpsanhar)//".el_cons_s_t_"//ext//TRIM(flext)
    ENDIF
    IF (with_t.AND.with_s) THEN
-      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_cons_st_t"
-      filenameps=TRIM(flpsanhar)//".el_cons_st_t"//TRIM(flext)
+      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)// &
+                                            "_anhar_el_cons_st_t_"//ext
+      filenameps=TRIM(flpsanhar)//".el_cons_st_t_"//ext//TRIM(flext)
    ENDIF
 ELSE
    IF (with_t) THEN
-      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_comp_t"
-      filenameps=TRIM(flpsanhar)//".el_comp_t"//TRIM(flext)
+      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_comp_t_"//ext
+      filenameps=TRIM(flpsanhar)//".el_comp_t_"//ext//TRIM(flext)
    ELSEIF(with_s) THEN
-      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_comp_s_t"
-      filenameps=TRIM(flpsanhar)//".el_comp_s_t"//TRIM(flext)
+      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//&
+                                                    "_anhar_el_comp_s_t_"//ext
+      filenameps=TRIM(flpsanhar)//".el_comp_s_t_"//ext//TRIM(flext)
    ENDIF
    IF (with_t.AND.with_s) THEN
-      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_comp_st_t"
-      filenameps=TRIM(flpsanhar)//".el_comp_st_t"//TRIM(flext)
+      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//&
+                                             "_anhar_el_comp_st_t_"//ext
+      filenameps=TRIM(flpsanhar)//".el_comp_st_t_"//ext//TRIM(flext)
    ENDIF
 ENDIF
 CALL gnuplot_start(gnu_filename)
@@ -1435,13 +1561,16 @@ DO iec=1,ec_elements
             last_step=(itempp==ntemp_plot)
             itemp=itemp_plot(itempp)
             istep=MOD(istep,8)+1
-            filelastic="anhar_files/"//TRIM(flanhar)//'.el_cons_temp'
+            filelastic="anhar_files/"//TRIM(flanhar)//'.el_cons_'//ext//'_temp'
+            filelastic_s="anhar_files/"//TRIM(flanhar)//&
+                                              '.el_cons_s_'//ext//'_temp'
+            filelastic_ph="anhar_files/"//TRIM(flanhar)//&
+                                              '.el_cons_'//ext//'_ph_temp'
+            filelastic_s_ph="anhar_files/"//TRIM(flanhar)//&
+                                              '.el_cons_s_'//ext//'_ph_temp'
             CALL add_value(filelastic,temp(itemp))
-            filelastic_s="anhar_files/"//TRIM(flanhar)//'.el_cons_s_temp'
             CALL add_value(filelastic_s,temp(itemp))
-            filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_ph_temp'
             CALL add_value(filelastic_ph,temp(itemp))
-            filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_s_ph_temp'
             CALL add_value(filelastic_s_ph,temp(itemp))
             IF (first_step) THEN
                CALL gnuplot_set_fact(1.0_DP, .FALSE.) 
@@ -1479,13 +1608,16 @@ DO iec=1,ec_elements
             last_step=(itempp==ntemp_plot)
             itemp=itemp_plot(itempp)
             istep=MOD(istep,8)+1
-            filelastic="anhar_files/"//TRIM(flanhar)//'.el_comp_temp'
+            filelastic="anhar_files/"//TRIM(flanhar)//'.el_comp_'//ext//'_temp'
+            filelastic_s="anhar_files/"//TRIM(flanhar)//&
+                                         '.el_comp_s_'//ext//'_temp'
+            filelastic_ph="anhar_files/"//TRIM(flanhar)//&
+                                         '.el_comp_'//ext//'_ph_temp'
+            filelastic_s_ph="anhar_files/"//TRIM(flanhar)//&
+                                         '.el_comp_s_'//ext//'_ph_temp'
             CALL add_value(filelastic,temp(itemp))
-            filelastic_s="anhar_files/"//TRIM(flanhar)//'.el_comp_s_temp'
             CALL add_value(filelastic_s,temp(itemp))
-            filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_comp_ph_temp'
             CALL add_value(filelastic_ph,temp(itemp))
-            filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.el_comp_s_ph_temp'
             CALL add_value(filelastic_s_ph,temp(itemp))
             IF (first_step) THEN
                CALL gnuplot_set_fact(1.D3, .FALSE.) 
@@ -1528,13 +1660,14 @@ IF (MOD(iflag,2)==0) THEN
       last_step=(itempp==ntemp_plot)
       itemp=itemp_plot(itempp)
       istep=MOD(istep,8)+1
-      filelastic="anhar_files/"//TRIM(flanhar)//'.el_cons_temp'
+      filelastic="anhar_files/"//TRIM(flanhar)//'.el_cons_'//ext//'_temp'
+      filelastic_s="anhar_files/"//TRIM(flanhar)//'.el_cons_s_'//ext//'_temp'
+      filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_'//ext//'_ph_temp'
+      filelastic_s_ph="anhar_files/"//TRIM(flanhar)//&
+                                             '.el_cons_s_'//ext//'_ph_temp'
       CALL add_value(filelastic,temp(itemp))
-      filelastic_s="anhar_files/"//TRIM(flanhar)//'.el_cons_s_temp'
       CALL add_value(filelastic_s,temp(itemp))
-      filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_ph_temp'
       CALL add_value(filelastic_ph,temp(itemp))
-      filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_s_ph_temp'
       CALL add_value(filelastic_s_ph,temp(itemp))
       IF (first_step) THEN
          CALL gnuplot_set_fact(1.0_DP, .FALSE.) 
@@ -1557,9 +1690,9 @@ IF (MOD(iflag,2)==0) THEN
                 (first_step.AND..NOT.ltherm_dos),(last_step.AND..NOT.with_s),&
                 .FALSE.)
          IF (with_s) &
-            CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,2,color(istep), &
-                (first_step.AND..NOT.ltherm_dos.AND..NOT.with_s),&
-                 last_step,.FALSE.)
+            CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,2,            &
+              color(istep), (first_step.AND..NOT.ltherm_dos.AND..NOT.with_t),&
+              last_step,.FALSE.)
       ENDIF
    ENDDO
 ELSE
@@ -1568,13 +1701,14 @@ ELSE
       last_step=(itempp==ntemp_plot)
       itemp=itemp_plot(itempp)
       istep=MOD(istep,8)+1
-      filelastic="anhar_files/"//TRIM(flanhar)//'.el_comp_temp'
+      filelastic="anhar_files/"//TRIM(flanhar)//'.el_comp_'//ext//'_temp'
+      filelastic_s="anhar_files/"//TRIM(flanhar)//'.el_comp_s_'//ext//'_temp'
+      filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_comp_'//ext//'_ph_temp'
+      filelastic_s_ph="anhar_files/"//TRIM(flanhar)//&
+                                          '.el_comp_s_'//ext//'_ph_temp'
       CALL add_value(filelastic,temp(itemp))
-      filelastic_s="anhar_files/"//TRIM(flanhar)//'.el_comp_s_temp'
       CALL add_value(filelastic_s,temp(itemp))
-      filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_comp_ph_temp'
       CALL add_value(filelastic_ph,temp(itemp))
-      filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.el_comp_s_ph_temp'
       CALL add_value(filelastic_s_ph,temp(itemp))
       IF (first_step) THEN
          CALL gnuplot_set_fact(1.D3, .FALSE.) 
@@ -1597,7 +1731,7 @@ ELSE
                 (first_step.AND..NOT.ltherm_dos),(last_step.AND..NOT.with_s),&
                                                                 .FALSE.)
          IF (with_s) &
-            CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,2,color(istep), &
+            CALL gnuplot_write_file_mul_data(filelastic_s_ph,1,2,color(istep),&
                 (first_step.AND..NOT.ltherm_dos.AND..NOT.with_t),&
                  last_step,.FALSE.)
       ENDIF
@@ -1611,13 +1745,14 @@ IF (MOD(iflag,2)==0.AND.(laue==32.OR.laue==29)) THEN
       last_step=(itempp==ntemp_plot)
       itemp=itemp_plot(itempp)
       istep=MOD(istep,8)+1
-      filelastic="anhar_files/"//TRIM(flanhar)//'.el_cons_temp'
+      filelastic="anhar_files/"//TRIM(flanhar)//'.el_cons_'//ext//'_temp'
+      filelastic_s="anhar_files/"//TRIM(flanhar)//'.el_cons_s_'//ext//'_temp'
+      filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_ph_'//ext//'_temp'
+      filelastic_s_ph="anhar_files/"//TRIM(flanhar)//&
+                                             '.el_cons_s_'//ext//'_ph_temp'
       CALL add_value(filelastic,temp(itemp))
-      filelastic_s="anhar_files/"//TRIM(flanhar)//'.el_cons_s_temp'
       CALL add_value(filelastic_s,temp(itemp))
-      filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_ph_temp'
       CALL add_value(filelastic_ph,temp(itemp))
-      filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_s_ph_temp'
       CALL add_value(filelastic_s_ph,temp(itemp))
       IF (first_step) THEN
          CALL gnuplot_set_fact(1.0_DP, .FALSE.) 
@@ -1684,8 +1819,8 @@ USE data_files,       ONLY : flanhar, fl_el_cons
 USE elastic_constants, ONLY : get_ec_type, ec_present, ect_names, ecm_names, &
                              ec_elements
 USE postscript_files, ONLY : flpsanhar, flps_el_cons
-USE control_elastic_constants,  ONLY : lelastic_d_ptt, lelasticf_d_ptt, &
-                                       lelastic_d_p
+USE control_elastic_constants,  ONLY : lelastic_d_ptt_qha, &
+                                       lelasticf_d_ptt_qha, lelastic_d_p
 USE control_grun,     ONLY : lb0_t
 USE control_pressure, ONLY : pmin, pmax
 USE temperature,      ONLY : temp, ntemp_plot, itemp_plot
@@ -1704,34 +1839,38 @@ INTEGER :: ierr, system
 LOGICAL :: first, last, first_step, last_step
 
 IF ( my_image_id /= root_image ) RETURN
-IF (.NOT.(lelastic_d_ptt.OR.lelasticf_d_ptt.OR.lelastic_d_p).OR..NOT.lb0_t) RETURN
+IF (.NOT.(lelastic_d_ptt_qha.OR.lelasticf_d_ptt_qha&
+                            .OR.lelastic_d_p).OR..NOT.lb0_t) RETURN
 IF (ntemp_plot==0) RETURN
 
 ibrav=ibrav_geo(1)
 
 IF (MOD(iflag,2)==0) THEN
    IF (with_t) THEN
-      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_cons_d_t"
-      filenameps=TRIM(flpsanhar)//".el_cons_d_t"//TRIM(flext)
+      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_cons_d_qha_t"
+      filenameps=TRIM(flpsanhar)//".el_cons_d_t_qha"//TRIM(flext)
    ELSEIF (with_s) THEN
-      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_cons_d_s_t"
-      filenameps=TRIM(flpsanhar)//".el_cons_d_s_t"//TRIM(flext)
+      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_cons_d_s_qha_t"
+      filenameps=TRIM(flpsanhar)//".el_cons_d_s_t_qha"//TRIM(flext)
    ENDIF
    IF (with_t.AND.with_s) THEN
-      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_cons_d_s_t"
-      filenameps=TRIM(flpsanhar)//".el_cons_d_s_t"//TRIM(flext)
+      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_cons_d_s_qha_t"
+      filenameps=TRIM(flpsanhar)//".el_cons_d_s_t_qha"//TRIM(flext)
    ENDIF
 ELSE
    IF (with_t) THEN
-      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_comp_d_t"
-      filenameps=TRIM(flpsanhar)//".el_comp_d_t"//TRIM(flext)
+      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//&
+                                    "_anhar_el_comp_d_t_qha"
+      filenameps=TRIM(flpsanhar)//".el_comp_d_t_qha"//TRIM(flext)
    ELSEIF(with_s) THEN
-      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_comp_d_s_t"
-      filenameps=TRIM(flpsanhar)//".el_comp_d_s_t"//TRIM(flext)
+      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//&
+                                    "_anhar_el_comp_d_s_qha_t"
+      filenameps=TRIM(flpsanhar)//".el_comp_d_s_t_qha"//TRIM(flext)
    ENDIF
    IF (with_t.AND.with_s) THEN
-      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_anhar_el_comp_d_s_t"
-      filenameps=TRIM(flpsanhar)//".el_comp_d_s_t"//TRIM(flext)
+      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//&
+                                    "_anhar_el_comp_d_s_qha_t"
+      filenameps=TRIM(flpsanhar)//".el_comp_d_st_t_qha"//TRIM(flext)
    ENDIF
 ENDIF
 CALL gnuplot_start(gnu_filename)
@@ -1750,13 +1889,13 @@ DO iec=1,ec_elements
             last_step=(itempp==ntemp_plot)
             itemp=itemp_plot(itempp)
             istep=MOD(istep,8)+1
-            filelastic="anhar_files/"//TRIM(flanhar)//'.el_cons_d_temp'
+            filelastic="anhar_files/"//TRIM(flanhar)//'.el_cons_d_qha_temp'
             CALL add_value(filelastic,temp(itemp))
-            filelastic_s="anhar_files/"//TRIM(flanhar)//'.el_cons_d_s_temp'
+            filelastic_s="anhar_files/"//TRIM(flanhar)//'.el_cons_d_s_qha_temp'
             CALL add_value(filelastic_s,temp(itemp))
-            filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_d_ph_temp'
+            filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_d_ph_qha_temp'
             CALL add_value(filelastic_ph,temp(itemp))
-            filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_d_s_ph_temp'
+            filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_d_s_qha_ph_temp'
             CALL add_value(filelastic_s_ph,temp(itemp))
             IF (first_step) THEN
                CALL gnuplot_set_fact(1.0_DP, .FALSE.) 
@@ -1794,13 +1933,13 @@ DO iec=1,ec_elements
             last_step=(itempp==ntemp_plot)
             itemp=itemp_plot(itempp)
             istep=MOD(istep,8)+1
-            filelastic="anhar_files/"//TRIM(flanhar)//'.el_comp_d_temp'
+            filelastic="anhar_files/"//TRIM(flanhar)//'.el_comp_d_qha_temp'
             CALL add_value(filelastic,temp(itemp))
-            filelastic_s="anhar_files/"//TRIM(flanhar)//'.el_comp_d_s_temp'
+            filelastic_s="anhar_files/"//TRIM(flanhar)//'.el_comp_d_s_qha_temp'
             CALL add_value(filelastic_s,temp(itemp))
-            filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_comp_d_ph_temp'
+            filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_comp_d_qha_ph_temp'
             CALL add_value(filelastic_ph,temp(itemp))
-            filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.el_comp_d_s_ph_temp'
+            filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.el_comp_d_s_qha_ph_temp'
             CALL add_value(filelastic_s_ph,temp(itemp))
             IF (first_step) THEN
                CALL gnuplot_set_fact(1.D3, .FALSE.) 
@@ -1843,13 +1982,13 @@ IF (MOD(iflag,2)==0) THEN
       last_step=(itempp==ntemp_plot)
       itemp=itemp_plot(itempp)
       istep=MOD(istep,8)+1
-      filelastic="anhar_files/"//TRIM(flanhar)//'.el_cons_d_temp'
+      filelastic="anhar_files/"//TRIM(flanhar)//'.el_cons_d_qha_temp'
       CALL add_value(filelastic,temp(itemp))
-      filelastic_s="anhar_files/"//TRIM(flanhar)//'.el_cons_d_s_temp'
+      filelastic_s="anhar_files/"//TRIM(flanhar)//'.el_cons_d_s_qha_temp'
       CALL add_value(filelastic_s,temp(itemp))
-      filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_d_ph_temp'
+      filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_d_qha_ph_temp'
       CALL add_value(filelastic_ph,temp(itemp))
-      filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_d_s_ph_temp'
+      filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_d_s_qha_ph_temp'
       CALL add_value(filelastic_s_ph,temp(itemp))
       IF (first_step) THEN
          CALL gnuplot_set_fact(1.0_DP, .FALSE.) 
@@ -1883,13 +2022,13 @@ ELSE
       last_step=(itempp==ntemp_plot)
       itemp=itemp_plot(itempp)
       istep=MOD(istep,8)+1
-      filelastic="anhar_files/"//TRIM(flanhar)//'.el_comp_d_temp'
+      filelastic="anhar_files/"//TRIM(flanhar)//'.el_comp_d_qha_temp'
       CALL add_value(filelastic,temp(itemp))
-      filelastic_s="anhar_files/"//TRIM(flanhar)//'.el_comp_d_s_temp'
+      filelastic_s="anhar_files/"//TRIM(flanhar)//'.el_comp_d_s_qha_temp'
       CALL add_value(filelastic_s,temp(itemp))
-      filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_comp_d_ph_temp'
+      filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_comp_d_qha_ph_temp'
       CALL add_value(filelastic_ph,temp(itemp))
-      filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.el_comp_d_s_ph_temp'
+      filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.el_comp_d_s_qha_ph_temp'
       CALL add_value(filelastic_s_ph,temp(itemp))
       IF (first_step) THEN
          CALL gnuplot_set_fact(1.D3, .FALSE.) 
@@ -1926,13 +2065,13 @@ IF (MOD(iflag,2)==0.AND.(laue==32.OR.laue==29)) THEN
       last_step=(itempp==ntemp_plot)
       itemp=itemp_plot(itempp)
       istep=MOD(istep,8)+1
-      filelastic="anhar_files/"//TRIM(flanhar)//'.el_cons_d_temp'
+      filelastic="anhar_files/"//TRIM(flanhar)//'.el_cons_d_qha_temp'
       CALL add_value(filelastic,temp(itemp))
-      filelastic_s="anhar_files/"//TRIM(flanhar)//'.el_cons_d_s_temp'
+      filelastic_s="anhar_files/"//TRIM(flanhar)//'.el_cons_d_s_qha_temp'
       CALL add_value(filelastic_s,temp(itemp))
-      filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_d_ph_temp'
+      filelastic_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_d_qha_ph_temp'
       CALL add_value(filelastic_ph,temp(itemp))
-      filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_d_s_ph_temp'
+      filelastic_s_ph="anhar_files/"//TRIM(flanhar)//'.el_cons_d_s_qha_ph_temp'
       CALL add_value(filelastic_s_ph,temp(itemp))
       IF (first_step) THEN
          CALL gnuplot_set_fact(1.0_DP, .FALSE.) 

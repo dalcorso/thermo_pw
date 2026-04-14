@@ -1539,6 +1539,7 @@ MODULE control_thermo
                           lef(:),     & ! if .true. save the fermi level 
                           lberry(:),  & ! if .true. this work requires 
                                         ! a berry_phase calculation
+                          lmag(:),    & ! if .true. save the magnetization
                           lstress(:), & ! if .true. this work computes stress
                           lphonon(:)    ! if .true. this work requires a phonon
 
@@ -1599,6 +1600,8 @@ MODULE control_thermo
   LOGICAL :: lelastic_const=.FALSE. ! if .true. compute elastic constants
   LOGICAL :: lpiezoelectric_tensor=.FALSE. ! if .true. compute the piezoelectric 
                                   ! tensor
+  LOGICAL :: lpiezomagnetic_tensor=.FALSE. ! if .true. compute the 
+                                  ! piezomagnetic tensor
   LOGICAL :: lpolarization=.FALSE. ! if .true. compute the piezoelectric 
   LOGICAL :: lph=.FALSE.    ! if .true. must calculate phonon
   LOGICAL :: ltherm=.FALSE. ! if .true. the thermodynamic properties are
@@ -1735,26 +1738,38 @@ MODULE control_elastic_constants
                                 ! that interpolates the elastic constants
                                 ! among different geometries
 
-  LOGICAL :: lelastic=.FALSE.   ! elastic constants as a function of &
-                                ! temperature available in some approximation
-  LOGICAL :: lelasticf=.FALSE.  ! elastic constants as a function of pressure
-                                ! available in some approximation
-  LOGICAL :: lelastic_d=.FALSE.   ! elastic constants as a function of &
-                                ! temperature available in some approximation
-  LOGICAL :: lelasticf_d=.FALSE.  ! elastic constants as a function of pressure
-                                ! available in some approximation
+  LOGICAL :: lelastic_qsa=.FALSE. ! elastic constants as a function of &
+                                ! temperature available in qsa
+  LOGICAL :: lelastic_qha=.FALSE. ! elastic constants as a function of &
+                                ! temperature available in qha
+  LOGICAL :: lelasticf_qsa=.FALSE.  ! elastic constants as a function of temp.
+                                ! available in qsa
+  LOGICAL :: lelasticf_qha=.FALSE.  ! elastic constants as a function of temp.
+                                ! available in qha
+  LOGICAL :: lelastic_d_qha=.FALSE.   ! elastic constants as a function of &
+                                ! temperature available in qsa
+  LOGICAL :: lelasticf_d_qha=.FALSE.  ! elastic constants as a function of temp.
+                                ! available in qha
   LOGICAL :: lelastic_p=.FALSE. ! elastic constants as a function of pressure
                                 ! available
-  LOGICAL :: lelastic_pt=.FALSE. ! elastic constants as a function of 
+  LOGICAL :: lelastic_pt_qsa=.FALSE. ! qsa elastic constants as a function of 
                                 ! temperature for a few pressures available
-  LOGICAL :: lelastic_ptt=.FALSE. ! elastic constants as a function of 
+  LOGICAL :: lelastic_pt_qha=.FALSE. ! qha elastic constants as a function of 
+                                ! temperature for a few pressures available
+  LOGICAL :: lelastic_ptt_qsa=.FALSE. ! elastic constants as a function of 
+                                ! pressure for a few temperatures available
+  LOGICAL :: lelastic_ptt_qha=.FALSE. ! elastic constants as a function of 
                                 ! pressure for a few temperatures available
   LOGICAL :: lelastic_d_p=.FALSE. ! elastic constants as a function of pressure
                                 ! available
-  LOGICAL :: lelastic_d_pt=.FALSE. ! elastic constants as a function of 
-                                ! temperature for a few pressures available
-  LOGICAL :: lelastic_d_ptt=.FALSE. ! elastic constants as a function of 
-                                ! pressure for a few temperatures available
+  LOGICAL :: lelastic_d_pt_qsa=.FALSE. ! qsa elastic constants as a function  
+                                ! of temperature for a few pressures available
+  LOGICAL :: lelastic_d_pt_qha=.FALSE. ! qha elastic constants as a function  
+                                ! of temperature for a few pressures available
+  LOGICAL :: lelastic_d_ptt_qsa=.FALSE. ! qsa elastic constants as a function 
+                                ! of pressure for a few temperatures available
+  LOGICAL :: lelastic_d_ptt_qha=.FALSE. ! qha elastic constants as a function  
+                                ! of pressure for a few temperatures available
                                 !
   LOGICAL :: el_cons_available=.FALSE.  ! when this flag becomes true it
                                 ! means that the elastic constant have been
@@ -1781,15 +1796,23 @@ MODULE control_elastic_constants
                                 ! true the QHA with BZ integration 
                                 ! elastic constants are available for 
                                 ! all geometries
-  LOGICAL :: lelasticf_pt=.FALSE. ! elastic constants as a function of 
+  LOGICAL :: lelasticf_pt_qsa=.FALSE. ! qsa elastic constants as a function of 
                                 ! temperature for a few pressures available
-  LOGICAL :: lelasticf_ptt=.FALSE. ! elastic constants as a function of 
-                                ! pressure for a few temperatures available
+  LOGICAL :: lelasticf_pt_qha=.FALSE. ! qha elastic constants as a function of 
+                                ! temperature for a few pressures available
+  LOGICAL :: lelasticf_ptt_qsa=.FALSE. ! qsa elastic constants as a function 
+                                ! of pressure for a few temperatures available
+  LOGICAL :: lelasticf_ptt_qha=.FALSE. ! qha elastic constants as a function 
+                                ! of pressure for a few temperatures available
   LOGICAL :: lelasticf_d_p=.FALSE. ! elastic constants as a function of 
                                 ! temperature for a few pressures available
-  LOGICAL :: lelasticf_d_pt=.FALSE. ! elastic constants as a function of 
-                                ! temperature for a few pressures available
-  LOGICAL :: lelasticf_d_ptt=.FALSE. ! elastic constants as a function of 
+  LOGICAL :: lelasticf_d_pt_qsa=.FALSE. ! qsa elastic constants as a function  
+                                ! of temperature for a few pressures available
+  LOGICAL :: lelasticf_d_pt_qha=.FALSE. ! qha elastic constants as a function 
+                                ! of temperature for a few pressures available
+  LOGICAL :: lelasticf_d_ptt_qsa=.FALSE. ! qsa elastic constants as a function 
+                                ! of pressure for a few temperatures available
+  LOGICAL :: lelasticf_d_ptt_qha=.FALSE. ! qha elastic constants as a function 
                                 ! pressure for a few temperatures available
                                 !
   REAL(DP), ALLOCATABLE :: el_con_geo(:,:,:)  ! the elastic constants at
@@ -2024,6 +2047,26 @@ MODULE control_piezoelectric_tensor
 END MODULE
 !
 !----------------------------------------------------------------------------
+MODULE control_piezomagnetic_tensor
+!----------------------------------------------------------------------------
+!
+  USE kinds,  ONLY : DP
+
+  LOGICAL :: lpiezom      ! if true the piezomagnetic tensor is calculated
+
+  REAL(DP), ALLOCATABLE :: mag_strain(:,:,:) ! the magnetization of each
+                                ! each strained geometry
+  REAL(DP), ALLOCATABLE :: piezom_tensor_geo(:,:,:) ! the 
+                                ! piezomagnetic tensor at each geometry
+  REAL(DP), ALLOCATABLE :: mag0_geo(:,:) ! the magnetization of each
+                                ! unperturbed geometry
+
+  REAL(DP), ALLOCATABLE :: piezo_zeum_geo(:,:,:,:) ! the dynamical magnetic  
+                                   ! charges of each equilibrium geometry.
+ 
+END MODULE
+!
+!----------------------------------------------------------------------------
 MODULE control_dielectric_constant
 !----------------------------------------------------------------------------
 !
@@ -2084,6 +2127,9 @@ MODULE control_epsilon_infty
 
   LOGICAL, ALLOCATABLE :: lzeu_geo(:) ! becomes true for 
                                 ! each geometry for which epsilon_infty exists
+
+  LOGICAL, ALLOCATABLE :: lepsilon_zero_geo(:) ! becomes true for 
+                                ! each geometry for which epsilon_zerom1 exists
 
   LOGICAL :: lepsilon_infty=.FALSE.   ! dielectric constant written on file
   LOGICAL :: lepsilon_inftyf=.FALSE.  ! dielectric constantf written on file
@@ -2681,6 +2727,8 @@ MODULE data_files
                                    ! written
   CHARACTER(LEN=256) :: fl_piezo  ! the file where the piezoelectric tensor is 
                                    ! written
+  CHARACTER(LEN=256) :: fl_piezom ! the file where the piezomagnetic tensor is 
+                                   ! written
   CHARACTER(LEN=256) :: fl_dielectric  ! the file where the dielectric
                                    ! constant and born effective charges are 
                                    ! written
@@ -2786,18 +2834,32 @@ MODULE thermo_sym
 !----------------------------------------------------------------------------
   USE kinds,  ONLY : DP
   !
-  ! ... The variables needed to control the symmetry plot
+  ! ... The variables needed to control the symmetry not available in QE
   !
   SAVE
   !
   INTEGER :: laue    ! The laue class of the solid
   INTEGER :: code_group_save ! the code of the point group of the unperturbed
                              ! solid
+  INTEGER :: code_group_ext_save ! the extended code of the point group
+                             !
   LOGICAL :: ibrav_group_consistent ! if .true., point group and bravais lattice are
                              ! consistent 
-  INTEGER :: fft_fact(3)     ! the factors that must be inside the fft
   INTEGER :: sg_number       ! the number of the space_group
   INTEGER :: aux_sg          ! the orientation of the space group
+ 
+  INTEGER :: a_birss_code    ! code of the A point group (defined in Birss
+                             ! for each magnetic point group)
+
+  INTEGER :: a_birss_ext_code ! code of the A point group (defined in Birss
+                             ! for each magnetic point group) extended code
+
+  INTEGER :: b_birss_code    ! code of the B point group (defined in Birss
+                             ! for each magnetic point group)
+                              
+  INTEGER :: b_birss_ext_code ! code of the B point group (defined in Birss
+                             ! for each magnetic point group) extended code
+  INTEGER :: mag_code        ! code of the magnetic point group (1-122)
 
 END MODULE thermo_sym
 

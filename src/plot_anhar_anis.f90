@@ -31,7 +31,8 @@ USE data_files,  ONLY : flanhar
 USE grun_anharmonic, ONLY : done_grun
 USE initial_conf,  ONLY : ibrav_save
 USE control_thermo,  ONLY : ltherm_dos, ltherm_freq
-USE control_elastic_constants, ONLY : lelastic, lelasticf
+USE control_elastic_constants, ONLY : lelastic_qsa, lelasticf_qsa, &
+                                      lelastic_qha, lelasticf_qha
 USE lattices,        ONLY : celldm_gnuplot_name, needed_celldm
 USE nye,             ONLY : thermal_gnuplot_name, needed_tensor2
 USE temperature,     ONLY : tmin, tmax, temp, ntemp_plot, itemp_plot
@@ -53,7 +54,7 @@ LOGICAL :: isoent_avail, noncubic, celldm_in_use(6), tensor2_in_use(6), &
 
 IF ( my_image_id /= root_image ) RETURN
 
-isoent_avail=lelastic.OR.lelasticf
+isoent_avail=lelastic_qsa.OR.lelasticf_qsa.OR.lelastic_qha.OR.lelasticf_qha
 gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_anhar_celldm'
 CALL add_pressure(gnu_filename)
 
@@ -282,7 +283,8 @@ USE data_files,  ONLY : flanhar
 USE grun_anharmonic, ONLY : done_grun
 USE initial_conf,  ONLY : ibrav_save
 USE control_thermo,  ONLY : ltherm_dos, ltherm_freq
-USE control_elastic_constants, ONLY : lelastic, lelasticf
+USE control_elastic_constants, ONLY : lelastic_qsa, lelasticf_qsa, &
+                                      lelastic_qha, lelasticf_qha
 USE control_pressure, ONLY : press
 USE lattices,        ONLY : celldm_gnuplot_name, needed_celldm
 USE nye,             ONLY : thermal_gnuplot_name, needed_tensor2
@@ -305,7 +307,7 @@ LOGICAL :: isoent_avail, noncubic, celldm_in_use(6), tensor2_in_use(6), &
 
 IF ( my_image_id /= root_image ) RETURN
 
-isoent_avail=lelastic.OR.lelasticf
+isoent_avail=lelastic_qsa.OR.lelasticf_qsa.OR.lelastic_qha.OR.lelasticf_qha
 gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_anhar_alpha'
 CALL add_pressure(gnu_filename)
 
@@ -781,7 +783,8 @@ USE gnuplot,          ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                              gnuplot_ylabel, &
                              gnuplot_xlabel, &
                              gnuplot_write_file_mul_data
-USE control_elastic_constants, ONLY : lelastic, lelasticf
+USE control_elastic_constants, ONLY : lelastic_qsa, lelasticf_qsa, &
+                                      lelastic_qha, lelasticf_qha
 USE gnuplot_color,    ONLY : gnuplot_set_greens
 USE data_files,       ONLY : flanhar
 USE temperature,      ONLY : tmin, tmax
@@ -790,17 +793,20 @@ USE io_global,        ONLY : ionode
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: gnu_filename, filename, psfilename, filenameph
+CHARACTER(LEN=3) :: ext
 INTEGER :: ierr, system, na
 
 IF ( my_image_id /= root_image ) RETURN
-IF (.NOT.(lelastic.OR.lelasticf)) RETURN
-
+IF (.NOT.(lelastic_qsa.OR.lelasticf_qsa.OR.lelastic_qha &
+                                       .OR.lelasticf_qha)) RETURN
+ext='qsa'
+IF (lelastic_qha.OR.lelasticf_qha) ext='qha'
 IF (.NOT.(ltherm_freq.OR.ltherm_dos)) RETURN
 
-gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_anhar_tstress'
+gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_anhar_tstress_'//ext
 CALL gnuplot_start(gnu_filename)
 
-psfilename=TRIM(flpsanhar)//'.tstress'//TRIM(flext)
+psfilename=TRIM(flpsanhar)//'.tstress_'//ext//TRIM(flext)
 IF (tmin ==1._DP) THEN
    CALL gnuplot_write_header(psfilename, 0.0_DP, tmax, 0.0_DP, 0.0_DP, &
                                                        1.0_DP, flext )
@@ -811,8 +817,8 @@ ENDIF
 CALL gnuplot_set_greens()
 CALL gnuplot_xlabel('T (K)', .FALSE.)
 
-filename='anhar_files/'//TRIM(flanhar)//'.tstress'
-filenameph='anhar_files/'//TRIM(flanhar)//'.tstress_ph'
+filename='anhar_files/'//TRIM(flanhar)//'.tstress'//ext
+filenameph='anhar_files/'//TRIM(flanhar)//'.tstress_'//ext//'_ph'
 !
 !   First the diagonal components
 !
@@ -890,7 +896,8 @@ USE gnuplot,          ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                              gnuplot_ylabel, &
                              gnuplot_xlabel, &
                              gnuplot_write_file_mul_data
-USE control_elastic_constants, ONLY : lelastic, lelasticf
+USE control_elastic_constants, ONLY : lelastic_qsa, lelasticf_qsa, &
+                                      lelastic_qha, lelasticf_qha
 USE gnuplot_color,    ONLY : gnuplot_set_greens
 USE data_files,       ONLY : flanhar
 USE temperature,      ONLY : tmin, tmax
@@ -899,16 +906,20 @@ USE io_global,        ONLY : ionode
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: gnu_filename, filename, psfilename, filenameph
+CHARACTER(LEN=3) :: ext
 INTEGER :: ierr, system, na
 
 IF ( my_image_id /= root_image ) RETURN
 IF (.NOT.(ltherm_freq.OR.ltherm_dos)) RETURN
-IF (.NOT.(lelastic.OR.lelasticf)) RETURN
+IF (.NOT.(lelastic_qsa.OR.lelasticf_qsa.OR.lelastic_qha.OR.lelasticf_qha)) &
+                                                                 RETURN
 
-gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_anhar_ggamma'
+ext='qsa'
+IF (lelastic_qha.OR.lelasticf_qha) ext='qha'
+gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_anhar_ggamma_'//ext
 CALL gnuplot_start(gnu_filename)
 
-psfilename=TRIM(flpsanhar)//'.ggamma'//TRIM(flext)
+psfilename=TRIM(flpsanhar)//'.ggamma_'//ext//TRIM(flext)
 IF (tmin ==1._DP) THEN
    CALL gnuplot_write_header(psfilename, 0.0_DP, tmax, 0.0_DP, 0.0_DP, &
                                                        1.0_DP, flext )
@@ -919,8 +930,8 @@ ENDIF
 CALL gnuplot_set_greens()
 CALL gnuplot_xlabel('T (K)', .FALSE.)
 
-filename='anhar_files/'//TRIM(flanhar)//'.ggamma'
-filenameph='anhar_files/'//TRIM(flanhar)//'.ggamma_ph'
+filename='anhar_files/'//TRIM(flanhar)//'.ggamma_'//ext
+filenameph='anhar_files/'//TRIM(flanhar)//'.ggamma_'//ext//'_ph'
 !
 !   First the diagonal components
 !

@@ -17,8 +17,8 @@ USE elastic_constants, ONLY : epsilon_geo, el_con,           &
                               compute_elastic_constants_ene, &
                               write_el_cons_on_file
 USE control_elastic_constants, ONLY : ngeo_strain, elcpvar, ngeom, &
-                           work_base, el_con_omega_geo, epsil_geo, lelastic,&
-                           old_ec
+                           work_base, el_con_omega_geo, epsil_geo, &
+                           lelastic_qha, old_ec
 USE anharmonic,        ONLY : el_cons_t, el_comp_t, b0_t
 USE control_quartic_energy, ONLY : poly_degree_elc
 USE linear_surfaces,   ONLY : evaluate_fit_linear
@@ -134,7 +134,7 @@ DEALLOCATE(p4)
 DEALLOCATE(free_ener)
 DEALLOCATE(epsilon_geo_loc)
 
-lelastic=.TRUE.
+lelastic_qha=.TRUE.
 ngeom=1
 CALL plot_elastic_t(0,.FALSE.)
 CALL plot_elastic_t(1,.FALSE.)

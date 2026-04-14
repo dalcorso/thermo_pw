@@ -25,9 +25,11 @@ USE postscript_files, ONLY : flpsanhar
 USE control_pyroelectric_tensor,  ONLY : lpyro, lpyrof
 USE polarization_vector, ONLY : get_py_type, py_present, py_names, py_types, &
                                 py_elements
+USE initial_conf,     ONLY : ibrav_save
 USE control_pressure, ONLY : pmin, pmax
 USE temperature,      ONLY : tmin, tmax
 USE rap_point_group,  ONLY : code_group
+USE initial_conf,     ONLY : ibrav_save
 USE mp_images,        ONLY : root_image, my_image_id
 USE io_global,        ONLY : ionode
 
@@ -73,7 +75,7 @@ ELSE
 ENDIF
 
 fact= electron_si * 1.D6 / (bohr_radius_si)**2
-pyro_type=get_py_type(code_group)
+pyro_type=get_py_type(code_group, ibrav_save)
 unit='x10^6 (C/m^2/K)'
 DO ipt=1,py_elements
    IF (py_present(ipt, pyro_type)>0) THEN 
@@ -118,6 +120,7 @@ USE postscript_files, ONLY : flpsanhar
 USE control_pyroelectric_tensor,  ONLY : lpyro_pt, lpyrof_pt
 USE polarization_vector, ONLY : get_py_type, py_present, py_names, py_types, &
                                 py_elements
+USE initial_conf,     ONLY : ibrav_save
 USE control_pressure, ONLY : pmin, pmax, press, npress_plot, ipress_plot
 USE control_thermo,   ONLY : ltherm_freq, ltherm_dos
 USE temperature,      ONLY : tmin, tmax
@@ -166,7 +169,7 @@ ELSE
 ENDIF
 
 fact= electron_si * 1.D6 / (bohr_radius_si)**2
-pyro_type=get_py_type(code_group)
+pyro_type=get_py_type(code_group, ibrav_save)
 aunit='x10^6 (C/m^2/K)'
 DO ipt=1,py_elements
    IF (py_present(ipt, pyro_type)>0) THEN 
@@ -241,6 +244,7 @@ USE postscript_files, ONLY : flpsanhar
 USE control_pyroelectric_tensor,  ONLY : lpyro_ptt, lpyrof_ptt
 USE polarization_vector, ONLY : get_py_type, py_present, py_names, py_types, &
                                 py_elements
+USE initial_conf,     ONLY : ibrav_save
 USE control_pressure, ONLY : pmin, pmax, deltap
 USE control_thermo,   ONLY : ltherm_freq, ltherm_dos
 USE temperature,      ONLY : tmin, tmax, temp, ntemp_plot, itemp_plot
@@ -289,7 +293,7 @@ ELSE
 ENDIF
 
 fact= electron_si * 1.D6 / (bohr_radius_si)**2
-pyro_type=get_py_type(code_group)
+pyro_type=get_py_type(code_group, ibrav_save)
 aunit='x10^6 (C/m^2/K)'
 DO ipt=1,py_elements
    IF (py_present(ipt, pyro_type)>0) THEN 

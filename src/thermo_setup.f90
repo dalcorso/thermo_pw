@@ -43,6 +43,9 @@ SUBROUTINE thermo_setup()
                                    lgruneisen_gen
   USE control_elastic_constants, ONLY : ngeo_strain, elastic_algorithm, &
                                   elcpvar, poly_degree, elalgen
+  USE magnetic_point_group, ONLY : find_mag_code_group, a_birss_code_group, &
+                                   b_birss_code_group, find_a_birss_ext_code, &
+                                   find_b_birss_ext_code
   USE control_eldos,        ONLY : deltae, ndose, lel_free_energy
   USE control_mur,          ONLY : lmurn
   USE control_pressure,     ONLY : pmin, pmax, deltap, npress_plot
@@ -64,7 +67,9 @@ SUBROUTINE thermo_setup()
                                    start_geometry_save, last_geometry_save
   USE initial_param,        ONLY : ecutwfc0, ecutrho0, ethr0
   USE equilibrium_conf,     ONLY : nr1_0, nr2_0, nr3_0
-  USE thermo_sym,           ONLY : code_group_save
+  USE thermo_sym,           ONLY : code_group_save, code_group_ext_save, &
+                                   mag_code, a_birss_code, b_birss_code, &
+                                   a_birss_ext_code, b_birss_ext_code
 !
 !   helper codes from the library
 !
@@ -85,11 +90,13 @@ SUBROUTINE thermo_setup()
   USE lsda_mod,             ONLY : nspin
   USE gvecw,                ONLY : ecutwfc
   USE gvect,                ONLY : ecutrho
-  USE symm_base,            ONLY : nosym
+  USE symm_base,            ONLY : nosym, nsym, sr, t_rev
   USE rap_point_group,      ONLY : code_group
+  USE point_group,          ONLY : find_group_tags, find_group_ext
   USE fft_base,             ONLY : dfftp
   USE klist,                ONLY : degauss, ltetra
   USE control_flags,        ONLY : ethr
+  USE noncollin_module,     ONLY : noncolin, domag
   USE gnuplot,              ONLY : determine_backspace
   USE io_global,            ONLY : stdout
   USE mp_images,            ONLY : nimage
@@ -98,11 +105,15 @@ SUBROUTINE thermo_setup()
   !
   IMPLICIT NONE
   !
-  INTEGER :: na, ia, ipol, jpol, igeo, nvar, ibrav_, code_group_ext
+  INTEGER :: na, ia, ipol, jpol, igeo, isym, nvar, ibrav_, code_group_ext
   REAL(DP), PARAMETER :: eps1=1D-8
-  REAL(DP) :: ur(3,3), global_s(3,3), rd_ht(3,3), celldm_(6), alat_save, zero
+  REAL(DP) :: ur(3,3), global_s(3,3), rd_ht(3,3), celldm_(6), alat_save, zero,&
+              sr_is(3,3,48)
   REAL(DP), ALLOCATABLE :: tau_aux(:,:)
   REAL(DP) :: compute_omega_geo
+  INTEGER :: group_tags(48), nsym_is, code_group_is
+  LOGICAL :: magnetic_sym
+  CHARACTER(LEN=11) :: gname_is
   !
   !
   with_asyn_images=(nimage>1)
@@ -154,9 +165,6 @@ SUBROUTINE thermo_setup()
     pmax=pmax/ry_kbar
     pmin=pmin/ry_kbar
     deltap=deltap/ry_kbar
-!
-!   here deal with ibrav=0. The code finds ibrav and celldm and
-!   writes them on output or change them and continue the calculation
 !
   IF (ibrav==0.AND..NOT.continue_zero_ibrav) THEN
      ALLOCATE(tau_aux(3,nat))
@@ -259,9 +267,8 @@ SUBROUTINE thermo_setup()
   tau_save_crys=tau_save
   CALL cryst_to_cart( nat, tau_save_crys, bg, -1 )
 !
-!  We now check the point group and the space group so that we can
-!  find the optimal fft mesh for the run. Save also the code group
-!  of the unpertubed configuration
+!  We now call the symmetry routines to find the fft mesh
+!  Save also the code group of the unpertubed configuration
 !
   CALL find_fft_fact()
 
@@ -270,6 +277,38 @@ SUBROUTINE thermo_setup()
   nr3_save=dfftp%nr3
 
   code_group_save=code_group
+!
+!  find the extended group code
+!
+  CALL find_group_tags(nsym, sr, group_tags)
+  CALL find_group_ext(group_tags, nsym, code_group_ext_save)
+!
+!   Here we deal with magnetic symmetry
+!
+  magnetic_sym = noncolin .AND. domag
+  mag_code=0
+  IF (magnetic_sym) THEN
+     nsym_is=0
+     DO isym=1,nsym
+        IF (t_rev(isym)==0) THEN
+           nsym_is=nsym_is+1
+           sr_is(:,:,nsym_is)=sr(:,:,isym)
+        ENDIF
+     ENDDO
+     !
+     !  find the subgroup of operation that do not require time reversal
+     !
+     CALL find_group( nsym_is, sr_is, gname_is, code_group_is )
+     CALL find_mag_code_group(code_group,code_group_is,mag_code)
+     a_birss_code = a_birss_code_group(mag_code)
+     b_birss_code = b_birss_code_group(mag_code)
+     CALL find_a_birss_ext_code(nsym, sr, t_rev, a_birss_ext_code)
+     CALL find_b_birss_ext_code(nsym, sr, t_rev, b_birss_ext_code)
+  ENDIF
+!
+!   here deal with ibrav=0. The code finds ibrav and celldm and
+!   writes them on output or change them and continue the calculation
+
   ecutwfc0=ecutwfc
   ecutrho0=ecutrho
   ethr0=ethr

@@ -45,22 +45,27 @@ SUBROUTINE thermo_summary()
 !  variables set by this routine
 !
   USE thermo_sym,           ONLY : laue, ibrav_group_consistent, sg_number, &
-                                   aux_sg
+                                   aux_sg, code_group_save, &
+                                   code_group_ext_save, mag_code, &
+                                   a_birss_code, b_birss_code, &
+                                   b_birss_ext_code
+  USE initial_conf,         ONLY : ibrav_save
 !
 !  library modules
 !
   USE space_groups,         ONLY : sg_name, find_space_group, sg_origin
   USE lattices,             ONLY : print_bravais_description
   USE point_group,          ONLY : find_group_info_ext
+  USE magnetic_point_group, ONLY : mag_group_name
   USE nye,                  ONLY : print_vectors_shape, print_tensor2_shape, &
                                    print_el_cons_shape, print_piezo_shape, &
-                                   print_b_fact_shape
+                                   print_b_fact_shape, print_piezom_shape
   USE elastic_constants,    ONLY : print_el_cons_info
   USE piezoelectric_tensor, ONLY : print_piezo_info
+  USE piezomagnetic_tensor, ONLY : print_piezom_info
 !
 !  pw modules and variables, set from input or in thermo_setup
 !
-  USE rap_point_group,      ONLY : code_group
   USE fft_base,             ONLY : dfftp
   USE noncollin_module,     ONLY : noncolin, domag
   USE cell_base,            ONLY : ibrav, at, bg, celldm, omega
@@ -81,7 +86,7 @@ SUBROUTINE thermo_summary()
   INTEGER :: laue_class, b_rest(nat)
   INTEGER :: find_free_unit
   INTEGER :: ierr, system
-  LOGICAL :: lpolar, lelc, lpiezo, check_group_ibrav
+  LOGICAL :: lpolar, lelc, lpiezo, lpiezom, check_group_ibrav, magnetic_sym
   CHARACTER(LEN=12)  :: spaceg_name
   CHARACTER(LEN=11)  :: gname, group_name
   CHARACTER(LEN=6)   :: int_to_char
@@ -93,6 +98,7 @@ SUBROUTINE thermo_summary()
 !
   lelc = .FALSE.
   lpiezo=.FALSE.
+  lpiezom=.FALSE.
   lpolar=.FALSE.
   WRITE(stdout,'(/)')
   SELECT CASE (TRIM(what))
@@ -165,6 +171,20 @@ SUBROUTINE thermo_summary()
           WRITE(stdout,'(5x,"for several geometries" )')
           IF (frozen_ions) WRITE(stdout,'(5x,"The ions are frozen" )')
           lpiezo = .TRUE.
+     CASE ('scf_piezomagnetic_tensor') 
+          WRITE(stdout,'(5x,"Computing the piezomagnetic tensor")')
+          IF (frozen_ions) WRITE(stdout,'(5x,"The ions are frozen" )')
+          lpiezom=.TRUE.
+     CASE ('mur_lc_piezomagnetic_tensor') 
+          WRITE(stdout,'(5x,"Computing the piezomagnetic tensor at the &
+                                  &minimum volume")')
+          IF (frozen_ions) WRITE(stdout,'(5x,"The ions are frozen" )')
+          lpiezom=.TRUE.
+     CASE ('piezomagnetic_tensor_geo') 
+          WRITE(stdout,'(5x,"Computing the piezomagnetic tensor")')
+          WRITE(stdout,'(5x,"for several geometries" )')
+          IF (frozen_ions) WRITE(stdout,'(5x,"The ions are frozen" )')
+          lpiezom=.TRUE.
      CASE ('scf_polarization') 
           WRITE(stdout,'(5x,"Computing the spontaneous polarization")')
           lpolar=.TRUE.
@@ -263,7 +283,7 @@ SUBROUTINE thermo_summary()
 ! they are compatibile, we use symmetry to reduce the number 
 ! of independent components of tensors
 !
-  ibrav_group_consistent=check_group_ibrav(code_group, ibrav)
+  ibrav_group_consistent=check_group_ibrav(code_group_save, ibrav)
 
   IF ( ibrav_group_consistent ) THEN
 
@@ -272,7 +292,7 @@ SUBROUTINE thermo_summary()
 
      WRITE(stdout,'(/,5x,"The point group",i4,1x,a," is compatible &
                            &with the Bravais lattice.")') code_group_ext, &
-                                    TRIM(group_name(code_group))
+                                    TRIM(group_name(code_group_save))
                                    
      WRITE(stdout,'(/,5x,"The rotation matrices with the order used inside &
                           &thermo_pw are:")') 
@@ -290,37 +310,69 @@ SUBROUTINE thermo_summary()
 
      CALL sg_name(sg_number, 1, spaceg_name)
      CALL sg_origin(sg_number, spaceg_name, at, s01, s02 ) 
+
 !
 !---------------------------------------------------------------------------
 !  Write information on the tensors to compute
 !
+     magnetic_sym=noncolin.AND.domag
+     IF (magnetic_sym) THEN
+        WRITE(stdout,'(5x,"Magnetic point group:", i5,2x, a)') mag_code, &
+                                      TRIM(mag_group_name(mag_code))
+        WRITE(stdout,'(5x,"Tensors even for time reversal reduced with:", &
+                                      &i5, " ", a)') &
+                                      code_group_save, &
+                                      group_name(code_group_save)
+        WRITE(stdout,'(5x,"Tensors odd for time reversal reduced with:")') 
+        WRITE(stdout,'(5x,"Polar tensors of odd rank and axial tensors &
+                                            of even rank:")') 
+        WRITE(stdout,'(5x,i5,2x, a)') a_birss_code, &
+                                      TRIM(group_name(a_birss_code))
+        WRITE(stdout,'(5x,"Polar tensors of even rank and axial tensors &
+                                            of odd rank:")') 
+        WRITE(stdout,'(5x,i5,2x,a)') b_birss_code, &
+                                      TRIM(group_name(b_birss_code))
+     ENDIF
+
 !  first rank tensors
 !
-     IF ( lpolar .OR. what=='plot_bz') CALL print_vectors_shape(code_group,&
-                                                                        ibrav)
+     IF ( lpolar .OR. what=='plot_bz') &
+               CALL print_vectors_shape(code_group_save, ibrav)
 !
 !   second rank tensors
 !
      IF (what=='mur_lc_t'.OR. what=='plot_bz') THEN
-        WRITE(stdout,'(/,5x, "Second-rank tensors, such as the dielectric")')
+        WRITE(stdout,'(/,5x, "Polar second-rank tensors, such as the &
+                           &dielectric")')
         WRITE(stdout,'(5x, "tensor or the thermal expansion, have the form:")')
         CALL print_tensor2_shape(ibrav)
      ENDIF
 !
-!  third rank tensor, such as the piezoelectric tensor
+!  third rank tensor, even for time reversal, such as the piezoelectric tensor
 !
      IF ( lpiezo .OR. what=='plot_bz') THEN
         WRITE(stdout,'(/,5x,"The piezoelectric tensor, defined as the &
                              &derivative of the polarization ")')
         WRITE(stdout,'(5x,"with respect to strain (in zero electric field) &
                                                                  &is:")')
-        CALL print_piezo_shape(code_group,ibrav)
-        CALL print_piezo_info(code_group,ibrav,ngeo_strain)
+        CALL print_piezo_shape(code_group_save,code_group_ext_save,ibrav)
+        CALL print_piezo_info(code_group_save,ibrav,ngeo_strain)
+     ENDIF
+!
+!  third rank tensor, odd for time reversal, such as the piezomagnetic tensor
+!
+     IF ( lpiezom .OR. what=='plot_bz') THEN
+        WRITE(stdout,'(/,5x,"The piezomagnetic tensor, defined as the &
+                             &derivative of the magnetization ")')
+        WRITE(stdout,'(5x,"with respect to strain (in zero magnetic field) &
+                                                                 &is:")')
+        CALL print_piezom_shape(b_birss_code,b_birss_ext_code,ibrav_save)
+        CALL print_piezom_info(b_birss_code,ibrav_save,ngeo_strain)
      ENDIF
 !
 !  Fourth rank tensors: elastic constants
 ! 
-    laue = laue_class(code_group)
+    laue = laue_class(code_group_save)
     WRITE(stdout,'(/,5x,"The Laue class is ", a)') group_name(laue)
 
     IF (lelc.OR.what=='plot_bz') THEN
@@ -351,13 +403,77 @@ SUBROUTINE thermo_summary()
 !  for first rank tensor one can still check for the existence
 !  of inversion symmetry
 !
-       SELECT CASE (code_group) 
+       SELECT CASE (code_group_save) 
           CASE(2,16,18,19,20,22,23,25,27,29,32) 
              WRITE(stdout,'(/,5x,"Solid with inversion symmetry.")')
-             WRITE(stdout,'(5x,"First-rank tensors, such as the spontaneous &
-                           &polarization, vanish.")')
+             WRITE(stdout,'(5x,"Polar first-rank tensors, such as the &
+                           &spontaneous polarization, vanish.")')
+          CASE(4,5,6,7,12,13,14,15)
+             WRITE(stdout,'(/,5x,"Solid with z as simmetry axis.")')
+             WRITE(stdout,'(5x,"Polar first-rank tensors, such as the &
+                           &spontaneous polarization (0,0,P) allowed.")')
+          CASE(3)
+             IF (ibrav==-12.OR.ibrav==-13) THEN
+                WRITE(stdout,'(/,5x,"Solid with a mirror perpendicular &
+                                                                   &to y.")')
+                WRITE(stdout,'(5x,"Polar first-rank tensors, such as the &
+                           &spontaneous polarization (P,0,P) allowed.")')
+             ELSEIF (ibrav==12.OR.ibrav==13) THEN
+                WRITE(stdout,'(/,5x,"Solid with a mirror perpendicular &
+                                                                   &to z.")')
+                WRITE(stdout,'(5x,"First-rank tensors, such as the &
+                           &spontaneous polarization (P,P,0) allowed.")')
+             ENDIF
+          CASE(8,9,10,11,17,21,28,30,31)
+             WRITE(stdout,'(/,5x,"Solid with two perpendicular axis.")')
+             WRITE(stdout,'(5x,"Polar first-rank tensors, such as the &
+                           &spontaneous polarization vanish.")')
+          CASE(26)
+             WRITE(stdout,'(/,5x,"Solid with an improper axis.")')
+             WRITE(stdout,'(5x,"Polar first-rank tensors, such as the &
+                           &spontaneous polarization vanish.")')
           CASE DEFAULT
              WRITE(stdout,'(/,5x,"Solid without inversion symmetry.")')
+       END SELECT
+    ENDIF
+
+    IF (magnetic_sym.AND.what=='plot_bz') THEN
+!
+!  for first rank tensor axial tensors one can still check for the existence
+!  of inversion symmetry in Birss B group.
+!
+       SELECT CASE (b_birss_code) 
+          CASE(2,16,18,19,20,22,23,25,27,29,32) 
+             WRITE(stdout,'(/,5x,"B Birss group with inversion symmetry.")')
+             WRITE(stdout,'(5x,"Axial first-rank tensors, such as the &
+                                &magnetization, vanish.")')
+          CASE(4,5,6,7,12,13,14,15)
+             WRITE(stdout,'(/,5x,"B Birss group with z as symmetry axis.")')
+             WRITE(stdout,'(5x,"Axial first-rank tensors, such as the  &
+                           &magnetization (0,0,M) allowed.")')
+          CASE(3)
+             IF (ibrav==-12.OR.ibrav==-13) THEN
+                WRITE(stdout,'(/,5x,"B Birss group with a mirror &
+                                               &perpendicular to y.")')
+                WRITE(stdout,'(5x,"Axial first-rank tensors, such as the &
+                           &magnetization (M,0,M) allowed.")')
+             ELSEIF (ibrav==12.OR.ibrav==13) THEN
+                WRITE(stdout,'(/,5x,"B Birss group with a mirror &
+                                                perpendicular to z.")')
+                WRITE(stdout,'(5x,"Axial first-rank tensors, such as the &
+                           &magnetization (M,M,0) allowed.")')
+             ENDIF
+          CASE(8,9,10,11,17,21,28,30,31)
+             WRITE(stdout,'(/,5x,"B Birss group with two perpendicular axis.")')
+             WRITE(stdout,'(5x,"Axial first-rank tensors, such as the &
+                           &magnetization vanish.")')
+          CASE(26)
+             WRITE(stdout,'(/,5x,"B Birss group with an improper axis.")')
+             WRITE(stdout,'(5x,"Axial first-rank tensors, such as the  &
+                           &magnetization vanishes.")')
+
+          CASE DEFAULT
+             WRITE(stdout,'(/,5x,"B Birss group without inversion symmetry.")')
        END SELECT
     ENDIF
 !
@@ -375,11 +491,13 @@ SUBROUTINE thermo_summary()
 !  third rank tensor
 !
     IF ( lpiezo .OR. what=='plot_bz') THEN
-       SELECT CASE (code_group) 
+       SELECT CASE (code_group_save) 
           CASE(2,16,18,19,20,22,23,25,27,29,32) 
-             CALL print_piezo_shape(code_group,ibrav)
+             CALL print_piezo_shape(code_group_save, code_group_ext_save, &
+                                                                   ibrav)
           CASE DEFAULT
-             CALL print_piezo_shape(code_group,ibrav)
+             CALL print_piezo_shape(code_group_save, code_group_ext_save, &
+                                                                   ibrav)
              WRITE(stdout,'(/,5x,"It requires all six strains")')
              WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
                        6*ngeo_strain
@@ -585,7 +703,6 @@ ELSE
    WRITE(stdout,'(5x,"computed tensor components")') 
 100 CONTINUE
 ENDIF
-IF (noncolin.AND.domag) check_group_ibrav=.FALSE.
 
 RETURN
 END FUNCTION check_group_ibrav
@@ -594,54 +711,25 @@ END FUNCTION check_group_ibrav
 SUBROUTINE find_fft_fact()
 !-----------------------------------------------------------------------
 !
-!  This routine finds the fft_fact that corresponds to the space group
-!  of the solid. It assumes that the tau and celldm are already known
+!  This routine calls all the routines that find the symmetry
+!  It assumes that the tau and celldm are already known
 !  It sets also the dimensions of the fft that correspond to the cut-off.
 !
-USE kinds,            ONLY : DP
-USE fft_base,         ONLY : dfftp
-USE cell_base,        ONLY : ibrav, at, bg
-USE thermo_sym,       ONLY : fft_fact, ibrav_group_consistent
 USE rap_point_group,  ONLY : code_group
-USE space_groups,     ONLY : find_space_group, set_fft_fact
-USE symm_base,        ONLY : nsym, sr, ft
-
+USE symm_base,        ONLY : nsym, sr
+!
 IMPLICIT NONE
-INTEGER :: sg_number
-INTEGER :: unique, trig, isym, aux_sg
-LOGICAL :: check_group_ibrav
-REAL(DP) :: s01(3), s02(3), ft_(3,48)
-CHARACTER(LEN=12) :: spaceg_name
 CHARACTER(LEN=11) :: gname
-
-dfftp%nr1=1536
-dfftp%nr2=1536
-dfftp%nr3=1536
-fft_fact=1
-CALL find_symmetry(fft_fact)
+!
+!  and set the size of the fft mesh if set from input
+!
+CALL clean_dfft()
+!
+!  then find the symmetries and the fft mesh
+!
+CALL find_symmetry()
 CALL find_group(nsym,sr,gname,code_group)
-ibrav_group_consistent=check_group_ibrav(code_group, ibrav)
-
-IF ( ibrav_group_consistent ) THEN
-   ft_(:,1:nsym)=-ft(:,1:nsym)
-   CALL find_space_group(ibrav, nsym, sr, ft_, at, bg, sg_number, aux_sg,&
-                                  s01, s02, .FALSE.)
-
-   IF (sg_number > 0) THEN
-      unique=0
-      trig=0
-      IF (ibrav==-12.OR.ibrav==-13) unique=1
-      IF (ibrav==5) trig=1
-      CALL set_fft_fact(sg_number, unique, trig, fft_fact)
-      CALL add_origin_fact(s01,fft_fact)
-      CALL clean_dfft()
-      CALL find_symmetry(fft_fact)
-   ENDIF
-ELSE
-   CALL clean_dfft()
-   CALL find_symmetry(fft_fact)
-ENDIF
-
+!
 RETURN
 END SUBROUTINE find_fft_fact
 
@@ -678,37 +766,3 @@ WRITE(stdout,*)
 
 RETURN
 END SUBROUTINE summarize_kpt
-
-!-----------------------------------------------------------------------
-SUBROUTINE add_origin_fact(s0,fft_fact)
-!-----------------------------------------------------------------------
-!
-!   This routine receives the origin shift in crystal coordinates
-!   and checks if the fft_factors contains the factors needed to represent
-!   the origin shift. If not it adds them to the factors.
-!
-USE kinds, ONLY : DP
-IMPLICIT NONE
-
-REAL(DP), INTENT(IN)   :: s0(3)
-INTEGER, INTENT(INOUT) :: fft_fact(3)
-
-INTEGER :: ipol, i
-!
-!  try only the factors 2, 3, 4, 5, 6, 7, 8
-!
-DO ipol=1,3
-   IF (ABS(s0(ipol)) > 1.D-8) THEN
-factors:   DO i=2,8
-         IF (fft_fact(ipol)==0 .OR. MOD(fft_fact(ipol),i)/=0) THEN
-            IF (ABS(s0(ipol)*i-NINT(s0(ipol)*i))< 1.D-6) THEN
-                fft_fact(ipol)= MAX(fft_fact(ipol),1)*i
-                EXIT factors
-            ENDIF
-         ENDIF
-      ENDDO  factors
-   ENDIF
-ENDDO
-
-RETURN
-END SUBROUTINE add_origin_fact
