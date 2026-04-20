@@ -115,8 +115,6 @@ SUBROUTINE find_symmetry()
   ELSE IF (symm_by_label) THEN
      colin_mag = 0
   END IF
-  WRITE(6,*) 'inside find symmetry magnetic_sym', magnetic_sym, colin_mag
-  FLUSH(6)
   !
   ! ... Set the units in real and reciprocal space
   !

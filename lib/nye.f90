@@ -22,9 +22,10 @@ MODULE nye
                                '{/Symbol a}_{zz}', '{/Symbol a}_{yz}',  &
                                '{/Symbol a}_{xz}', '{/Symbol a}_{xy}'   /
 
-  PUBLIC print_vectors_shape, print_tensor2_shape, print_piezo_shape, &
+  PUBLIC print_vectors_shape, print_polar_tensor2_shape, print_piezo_shape, &
          print_el_cons_shape, print_b_fact_shape, thermal_gnuplot_name, &
-         needed_tensor2, print_piezom_shape
+         needed_tensor2, print_piezom_shape, print_axial_vectors_shape,  &
+         print_axial_tensor2_shape
 
 CONTAINS
 
@@ -44,7 +45,7 @@ SELECT CASE (ibrav)
 !
       IF (code_group==29.OR. code_group==32) THEN
          WRITE(stdout,'(/,5x, "This solid has inversion symmetry.")')
-         WRITE(stdout,'(5x, "First-rank tensors, such as the &
+         WRITE(stdout,'(5x, "Rank-1 tensors, such as the &
                            &spontaneous polarization, vanish.")')
       ELSEIF (code_group==28.OR.code_group==30.OR.code_group==31) THEN
          WRITE(stdout,'(/,5x, "This solid has not inversion but, &
@@ -58,7 +59,7 @@ SELECT CASE (ibrav)
       IF (code_group==18.OR.code_group==22.OR.code_group==23&
                                                  .OR.code_group==25) THEN
          WRITE(stdout,'(/,5x, "This solid has inversion symmetry.")')
-         WRITE(stdout,'(5x, "First-rank tensors, such as the &
+         WRITE(stdout,'(5x, "Rank-1 tensors, such as the &
                                  &spontaneous polarization, vanish.")')
       ELSEIF (code_group==9.OR.code_group==10.OR.code_group==17.OR. &
                       code_group==21.OR.code_group==24.OR.code_group==26 ) THEN
@@ -67,7 +68,7 @@ SELECT CASE (ibrav)
          WRITE(stdout,'(5x, "the spontaneous polarization, vanish.")')
       ELSEIF (code_group==5.OR.code_group==6.OR.code_group==7.OR. &
                   code_group==13.OR.code_group==14.OR.code_group==15) THEN
-         WRITE(stdout,'(/,5x, "First-rank tensors, such as the &
+         WRITE(stdout,'(/,5x, "Rank-1 tensors, such as the &
                         &spontaneous polarization, have the form:")')
          WRITE(stdout,'(/,5x, "(  .   .   p3 )")')
       ENDIF
@@ -77,14 +78,14 @@ SELECT CASE (ibrav)
 !
       IF (code_group==20) THEN
          WRITE(stdout,'(/,5x, "This solid has inversion symmetry.")')
-         WRITE(stdout,'(5x, "First-rank tensors, such as the &
+         WRITE(stdout,'(5x, "Rank-1 tensors, such as the &
                             &spontaneous polarization, vanish.")')
       ELSEIF (code_group==8) THEN
          WRITE(stdout,'(/,5x, "This solid has not inversion but, &
                                    &first-rank tensors, such as ")')
          WRITE(stdout,'(5x, "the spontaneous polarization, vanish.")')
       ELSEIF (code_group==12) THEN
-         WRITE(stdout,'(/,5x, "First-rank tensors, such as the &
+         WRITE(stdout,'(/,5x, "Rank-1 tensors, such as the &
                       &spontaneous polarization, have the form:")')
          WRITE(stdout,'(/,5x, "(  .   .   p3 )")')
       ENDIF
@@ -94,14 +95,14 @@ SELECT CASE (ibrav)
 !
       IF (code_group==16) THEN
          WRITE(stdout,'(/,5x, "This solid has inversion symmetry.")')
-         WRITE(stdout,'(5x, "First-rank tensors, such as the &
+         WRITE(stdout,'(5x, "Rank-1 tensors, such as the &
                                  &spontaneous polarization, vanish.")')
       ELSEIF (code_group==4) THEN
-         WRITE(stdout,'(/,5x, "First-rank tensors, such as the &
+         WRITE(stdout,'(/,5x, "Rank-1 tensors, such as the &
                                &spontaneous polarization, have the form:")')
          WRITE(stdout,'(/,5x, "(  .   .   p3 )")')
       ELSEIF (code_group==3) THEN
-         WRITE(stdout,'(/,5x, "First-rank tensors, such as the &
+         WRITE(stdout,'(/,5x, "Rank-1 tensors, such as the &
                       &spontaneous polarization, have the form:")')
          WRITE(stdout,'(/,5x, "( p1   p2   . )")')
       ENDIF
@@ -111,14 +112,14 @@ SELECT CASE (ibrav)
 !
       IF (code_group==16) THEN
          WRITE(stdout,'(/,5x, "This solid has inversion symmetry.")')
-         WRITE(stdout,'(5x, "First-rank tensors, such as the &
+         WRITE(stdout,'(5x, "Rank-1 tensors, such as the &
                                  &spontaneous polarization, vanish.")')
       ELSEIF (code_group==4) THEN
-         WRITE(stdout,'(/,5x, "First-rank tensors, such as the &
+         WRITE(stdout,'(/,5x, "Rank-1 tensors, such as the &
                                &spontaneous polarization, have the form:")')
          WRITE(stdout,'(/,5x, "(  .   p2   .  )")')
       ELSEIF (code_group==3) THEN
-         WRITE(stdout,'(/,5x, "First-rank tensors, such as the &
+         WRITE(stdout,'(/,5x, "Rank-1 tensors, such as the &
                                &spontaneous polarization, have the form:")')
          WRITE(stdout,'(/,5x, "(  p1   .   p3 )")')
       ENDIF
@@ -128,10 +129,10 @@ SELECT CASE (ibrav)
 !
       IF (code_group==2) THEN
          WRITE(stdout,'(/,5x, "This solid has inversion symmetry.")')
-         WRITE(stdout,'(5x, "First-rank tensors, such as the &
+         WRITE(stdout,'(5x, "Rank-1 tensors, such as the &
                                  &spontaneous polarization, vanish.")')
       ELSEIF (code_group==1) THEN
-         WRITE(stdout,'(/,5x, "First-rank tensors, such as the &
+         WRITE(stdout,'(/,5x, "Rank-1 tensors, such as the &
                                &spontaneous polarization, have the form:")')
          WRITE(stdout,'(/,5x, "( p1   p2   p3 )")')
       ENDIF
@@ -140,9 +141,64 @@ END SELECT
 
 RETURN
 END SUBROUTINE print_vectors_shape
+!
+!--------------------------------------------------------------------
+SUBROUTINE print_axial_vectors_shape(code_group, ibrav)
+!--------------------------------------------------------------------
+
+USE io_global, ONLY : stdout
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: code_group, ibrav
+
+SELECT CASE (code_group)
+   CASE(2,16,18,19,20,22,23,25,27,29,32)  
+      WRITE(stdout,'(/,5x, "The B Birss group has inversion symmetry.")')
+      WRITE(stdout,'(5x, "Rank-1 axial tensors odd for time reversal,")')
+      WRITE(stdout,'(5x, "such as the magnetization, vanish.")')
+   CASE(1)  
+!
+!   C_1
+!
+      WRITE(stdout,'(5x, "The magnetization can have the following form: &
+                           &M = (m1, m2, m3)")') 
+     
+   CASE(3)  
+!
+!  C_s
+!
+      IF (ibrav==-12.OR.ibrav==-13) THEN
+         WRITE(stdout,'(5x, "The magnetization can have the following form: &
+                           &M = (., m2, .)")')
+      ELSEIF (ibrav==12.OR.ibrav==13) THEN
+         WRITE(stdout,'(5x, "The magnetization can have the following form: &
+                           &M = (., ., m3)")')
+      ENDIF
+   CASE(4)  
+!
+!  C_2
+!
+      IF (ibrav==-12.OR.ibrav==-13) THEN
+         WRITE(stdout,'(5x, "The magnetization can have the following form: &
+                           &M = (m1, ., m3)")')
+      ELSEIF (ibrav==12.OR.ibrav==13) THEN
+         WRITE(stdout,'(5x, "The magnetization can have the following form: &
+                           &M = (m1, m2, .)")')
+      ENDIF
+
+   CASE(5,6,7,12,13,14,15)  
+      WRITE(stdout,'(5x, "The magnetization can have the following form: &
+                           &M = (., ., m3)")')
+   
+   CASE DEFAULT 
+      WRITE(stdout,'(5x, "The magnetization has all zero components")')
+END SELECT
+
+RETURN
+END SUBROUTINE print_axial_vectors_shape
 
 !--------------------------------------------------------------------
-SUBROUTINE print_tensor2_shape(ibrav)
+SUBROUTINE print_polar_tensor2_shape(ibrav)
 !--------------------------------------------------------------------
 
 USE io_global, ONLY : stdout
@@ -198,7 +254,113 @@ SELECT CASE (ibrav)
 END SELECT
 
 RETURN
-END SUBROUTINE print_tensor2_shape
+END SUBROUTINE print_polar_tensor2_shape
+!
+!--------------------------------------------------------------------
+SUBROUTINE print_axial_tensor2_shape(ibrav,code_group)
+!--------------------------------------------------------------------
+!
+USE io_global, ONLY : stdout
+
+IMPLICIT NONE
+
+INTEGER, INTENT(IN) :: ibrav, code_group
+CHARACTER(LEN=11) :: group_name
+
+WRITE(stdout,'(/,5x,"Using point group ",a)') group_name(code_group)
+SELECT CASE (code_group)
+   CASE(2,16,18,19,20,22,23,25,27,29)
+     WRITE(stdout,'(/,5x,"Symmetry group has inversion. Axial vectors &
+                     &of rank 2 vanish")')
+   CASE(1)  
+!
+!   C_1
+!
+      WRITE(stdout,'(/,5x, "( a11  a12  a13 )")')
+      WRITE(stdout,'(  5x, "( a21  a22  a23 )")')
+      WRITE(stdout,'(  5x, "( a31  a32  a11 )")')
+   CASE(3)  
+!
+!  C_s
+!
+      WRITE(stdout,'(/,5x, "(  .    .   a13 )")')
+      WRITE(stdout,'(  5x, "(  .    .   a23 )")')
+      WRITE(stdout,'(  5x, "( a31  a32   .  )")')
+   CASE(5,6,7)  
+!
+!     C_3, C_4, C_6
+!
+      WRITE(stdout,'(/,5x, "( a11  a12   .  )")')
+      WRITE(stdout,'(  5x, "(-a12  a11   .  )")')
+      WRITE(stdout,'(  5x, "(  .    .   a33 )")')
+
+   CASE(4)  
+!
+!  C_4
+!
+      WRITE(stdout,'(/,5x, "( a11  a12   .  )")')
+      WRITE(stdout,'(  5x, "( a21  a22   .  )")')
+      WRITE(stdout,'(  5x, "(  .    .   a33 )")')
+   CASE(8)  
+!
+!  D_2
+!
+      WRITE(stdout,'(/,5x, "( a11   .    .  )")')
+      WRITE(stdout,'(  5x, "(  .   a22   .  )")')
+      WRITE(stdout,'(  5x, "(  .    .   a33 )")')
+   CASE(9,10,11)  
+!
+!   D_3, D_4, D_6
+!
+      WRITE(stdout,'(/,5x, "( a11   .    .  )")')
+      WRITE(stdout,'(  5x, "(  .   a11   .  )")')
+      WRITE(stdout,'(  5x, "(  .    .   a33 )")')
+
+   CASE(12)  
+!
+!   C_2v
+!
+      WRITE(stdout,'(/,5x, "(  .   a12   .  )")')
+      WRITE(stdout,'(  5x, "( a21   .    .  )")')
+      WRITE(stdout,'(  5x, "(  .    .    .  )")')
+
+   CASE(14,15)  
+!
+!   C_3v, C_4v, C_6v
+!
+      WRITE(stdout,'(/,5x, "(  .   a12   .  )")')
+      WRITE(stdout,'(  5x, "(-a12   .    .  )")')
+      WRITE(stdout,'(  5x, "(  .    .    .  )")')
+
+   CASE(24)  
+!
+!   D_2d
+!
+      WRITE(stdout,'(/,5x, "( a11   .    .  )")')
+      WRITE(stdout,'(  5x, "(  .  -a11   .  )")')
+      WRITE(stdout,'(  5x, "(  .    .    .  )")')
+
+   CASE(26)  
+!
+!   S_4 
+!
+      WRITE(stdout,'(/,5x, "( a11  a12   .  )")')
+      WRITE(stdout,'(  5x, "( a12 -a11   .  )")')
+      WRITE(stdout,'(  5x, "(  .    .   a33 )")')
+
+   CASE(28,30,31)  
+!
+!   T, O
+!
+      WRITE(stdout,'(/,5x, "( a11   .    .  )")')
+      WRITE(stdout,'(  5x, "(  .   a11   .  )")')
+      WRITE(stdout,'(  5x, "(  .    .   a11 )")')
+
+   CASE DEFAULT 
+END SELECT
+
+RETURN
+END SUBROUTINE print_axial_tensor2_shape
 
 !--------------------------------------------------------------------
 SUBROUTINE needed_tensor2(ibrav, tensor_in_use)

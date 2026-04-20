@@ -57,7 +57,10 @@ SUBROUTINE thermo_summary()
   USE lattices,             ONLY : print_bravais_description
   USE point_group,          ONLY : find_group_info_ext
   USE magnetic_point_group, ONLY : mag_group_name
-  USE nye,                  ONLY : print_vectors_shape, print_tensor2_shape, &
+  USE nye,                  ONLY : print_vectors_shape, &
+                                   print_axial_vectors_shape, &
+                                   print_polar_tensor2_shape, &
+                                   print_axial_tensor2_shape, &
                                    print_el_cons_shape, print_piezo_shape, &
                                    print_b_fact_shape, print_piezom_shape
   USE elastic_constants,    ONLY : print_el_cons_info
@@ -317,38 +320,50 @@ SUBROUTINE thermo_summary()
 !
      magnetic_sym=noncolin.AND.domag
      IF (magnetic_sym) THEN
-        WRITE(stdout,'(5x,"Magnetic point group:", i5,2x, a)') mag_code, &
+        WRITE(stdout,'(/,5x,"Magnetic point group: ", i3, 2x, a)') mag_code, &
                                       TRIM(mag_group_name(mag_code))
-        WRITE(stdout,'(5x,"Tensors even for time reversal reduced with:", &
-                                      &i5, " ", a)') &
-                                      code_group_save, &
-                                      group_name(code_group_save)
+        WRITE(stdout,'(5x,"Tensors even for time reversal reduced with: ", &
+                           & a)') group_name(code_group_save)
         WRITE(stdout,'(5x,"Tensors odd for time reversal reduced with:")') 
         WRITE(stdout,'(5x,"Polar tensors of odd rank and axial tensors &
-                                            of even rank:")') 
-        WRITE(stdout,'(5x,i5,2x, a)') a_birss_code, &
-                                      TRIM(group_name(a_birss_code))
+                           of even rank: ",a)') TRIM(group_name(a_birss_code))
         WRITE(stdout,'(5x,"Polar tensors of even rank and axial tensors &
-                                            of odd rank:")') 
-        WRITE(stdout,'(5x,i5,2x,a)') b_birss_code, &
-                                      TRIM(group_name(b_birss_code))
+                           of odd rank: ",a)') TRIM(group_name(b_birss_code))
      ENDIF
-
-!  first rank tensors
+!
+!   rank-1 polar tensors
 !
      IF ( lpolar .OR. what=='plot_bz') &
-               CALL print_vectors_shape(code_group_save, ibrav)
+        CALL print_vectors_shape(code_group_save, ibrav)
 !
-!   second rank tensors
+!
+!   rank-1 axial tensors
+!
+     IF ( magnetic_sym ) &
+        CALL print_axial_vectors_shape(code_group_save, ibrav)
+!
+!   second rank polar tensors
 !
      IF (what=='mur_lc_t'.OR. what=='plot_bz') THEN
-        WRITE(stdout,'(/,5x, "Polar second-rank tensors, such as the &
-                           &dielectric")')
+        WRITE(stdout,'(/,5x, "Polar rank-2 tensors, such as the dielectric")')
         WRITE(stdout,'(5x, "tensor or the thermal expansion, have the form:")')
-        CALL print_tensor2_shape(ibrav)
+        CALL print_polar_tensor2_shape(ibrav)
      ENDIF
 !
-!  third rank tensor, even for time reversal, such as the piezoelectric tensor
+!  axial rank-2 tensor:
+!
+    IF ((what=='scf_magnetoelectric_tensor'.OR. what=='plot_bz')&
+                                          .AND.magnetic_sym) THEN
+
+       WRITE(stdout,'(/,5x, "Axial rank-2 tensors odd for time reversal,")') 
+       WRITE(stdout,'(5x, "such as the magnetoelectric tensor, &
+                                                         &have the form:")')
+
+       CALL print_axial_tensor2_shape(ibrav_save, a_birss_code)
+    ENDIF
+!
+!  rank-3 polar tensors, even for time reversal, such as the piezoelectric 
+!  tensor
 !
      IF ( lpiezo .OR. what=='plot_bz') THEN
         WRITE(stdout,'(/,5x,"The piezoelectric tensor, defined as the &
@@ -359,9 +374,9 @@ SUBROUTINE thermo_summary()
         CALL print_piezo_info(code_group_save,ibrav,ngeo_strain)
      ENDIF
 !
-!  third rank tensor, odd for time reversal, such as the piezomagnetic tensor
+!  rank-3 tensor, odd for time reversal, such as the piezomagnetic tensor
 !
-     IF ( lpiezom .OR. what=='plot_bz') THEN
+     IF ( (lpiezom .OR. what=='plot_bz').AND.magnetic_sym) THEN
         WRITE(stdout,'(/,5x,"The piezomagnetic tensor, defined as the &
                              &derivative of the magnetization ")')
         WRITE(stdout,'(5x,"with respect to strain (in zero magnetic field) &
@@ -370,7 +385,7 @@ SUBROUTINE thermo_summary()
         CALL print_piezom_info(b_birss_code,ibrav_save,ngeo_strain)
      ENDIF
 !
-!  Fourth rank tensors: elastic constants
+!  Rank-4 polar tensors, even for time reversal: elastic constants
 ! 
     laue = laue_class(code_group_save)
     WRITE(stdout,'(/,5x,"The Laue class is ", a)') group_name(laue)
@@ -477,15 +492,28 @@ SUBROUTINE thermo_summary()
        END SELECT
     ENDIF
 !
-!  second rank tensor. All components are calculated
+!  second rank polar tensor. All components are calculated
 !
     IF (what=='mur_lc_t'.OR. what=='plot_bz') THEN
 
-       WRITE(stdout,'(/,5x, "All components of second order tensors such as")')
+       WRITE(stdout,'(/,5x, "All components of second order polar tensors &
+                                                                   &such as")')
        WRITE(stdout,'(5x, "the dielectric tensor or the thermal expansion are &
                                           &calculated:")')
 
-       CALL print_tensor2_shape(0)
+       CALL print_polar_tensor2_shape(0)
+    ENDIF
+!
+!  second axial rank tensor. All components are calculated
+!
+    IF ((what=='scf_magnetoelectric_tensor'.OR. what=='plot_bz')&
+                                          .AND.magnetic_sym) THEN
+
+       WRITE(stdout,'(/,5x, "All components of second order axial tensors &
+                                                               &such as")')
+       WRITE(stdout,'(5x, "the magnetoelectric tensor are calculated:")')
+
+       CALL print_axial_tensor2_shape(ibrav_save, a_birss_code)
     ENDIF
 !
 !  third rank tensor
