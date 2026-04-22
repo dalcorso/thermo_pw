@@ -1888,7 +1888,7 @@ SELECT CASE (laue)
       press=- alpha(2) / omega
       WRITE(stdout,'("-(S12+S23)",f15.8," kbar",f15.8," kbar")') &
                                           press*ry_kbar, -(s12+s23)*ry_kbar
-      el_con(5,6) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(5,5) &
+      el_con(5,6) = (0.25_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(5,5) &
                                                - el_con(6,6)) *0.5_DP
       el_con(6,5) = el_con(5,6)
 !
@@ -1901,7 +1901,7 @@ SELECT CASE (laue)
       press=- alpha(2) / omega
       WRITE(stdout,'("-(S23+S12)",f15.8," kbar",f15.8," kbar")') &
                                           press*ry_kbar, -(s23+s12)*ry_kbar
-      el_con(4,6) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(4,4) &
+      el_con(4,6) = (0.25_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(4,4) &
                                                - el_con(6,6)) *0.5_DP
       el_con(6,4) = el_con(4,6)
 !
@@ -1914,7 +1914,7 @@ SELECT CASE (laue)
       press=- alpha(2) / omega
       WRITE(stdout,'("-(S13+S23)",f15.8," kbar",f15.8," kbar")') &
                                           press*ry_kbar, -(s13+s23)*ry_kbar
-      el_con(4,5) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(4,4) &
+      el_con(4,5) = (0.25_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(4,4) &
                                                - el_con(5,5) ) * 0.5_DP
       el_con(5,4) = el_con(4,5)
 
