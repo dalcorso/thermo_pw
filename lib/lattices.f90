@@ -96,6 +96,14 @@ MODULE lattices
 !                  celldm parameters and produces a vector that define a
 !                  grid of crystal parameters
 !
+!  set_celldm    : receives a set of a, b, c, alpha, beta, gamma, and
+!                  a ibrav code and sets the celldm
+!
+!  compute_parameters : receives a set of at(3,3) and computes
+!                  a, b, c, alpha, beta, gamma. Assumes that the at 
+!                  are those of the conventional cell.
+!
+!
   USE kinds,      ONLY : DP
   !
   IMPLICIT NONE
@@ -122,7 +130,8 @@ MODULE lattices
          zone_border, same_star, is_compatible_group_ibrav,            &
          bravais_dir, print_bravais_description, crystal_parameters,   &
          compress_celldm, expand_celldm, compress_int_vect, needed_celldm, &
-         celldm_name, celldm_gnuplot_name, compress_ngeo
+         celldm_name, celldm_gnuplot_name, compress_ngeo, lattice_parameters, &
+         set_celldm
 
 CONTAINS
 
@@ -1994,5 +2003,86 @@ SELECT CASE (ibrav)
 END SELECT
 RETURN
 END SUBROUTINE needed_celldm
+
+!----------------------------------------------------------------------
+SUBROUTINE set_celldm(ibrav, a, b, c, alpha, beta, ggamma, celldm)
+!----------------------------------------------------------------------
+!
+!   This subroutine receives the lenghts of the vectors and their angle
+!   and for each Bravais lattice index it sets the corresponding 
+!   celldm
+!
+IMPLICIT NONE
+REAL(DP), INTENT(IN) :: a, b, c, alpha, beta, ggamma
+REAL(DP), INTENT(OUT) :: celldm(6)
+INTEGER, INTENT(IN) :: ibrav
+
+INTEGER :: nvar
+
+SELECT CASE (ibrav)
+   CASE(1,2,3)
+      celldm(1)=a
+   CASE(4,6,7)
+      celldm(1)=a
+      celldm(3)=c/a
+   CASE(5)
+      celldm(1)=a
+      celldm(4)=COS(alpha)
+   CASE(8,9,91,10,11)
+      celldm(1)=a
+      celldm(2)=b/a
+      celldm(3)=c/a
+   CASE(-12,-13)
+      celldm(1)=a
+      celldm(2)=b/a
+      celldm(3)=c/a
+      celldm(5)=COS(beta)
+   CASE(12,13)
+      celldm(1)=a
+      celldm(2)=b/a
+      celldm(3)=c/a
+      celldm(4)=COS(ggamma)
+   CASE DEFAULT
+      celldm(1)=a
+      celldm(2)=b/a
+      celldm(3)=c/a
+      celldm(4)=COS(alpha)
+      celldm(5)=COS(beta)
+      celldm(6)=COS(ggamma)
+END SELECT
+
+RETURN
+END SUBROUTINE set_celldm
+
+!--------------------------------------------------------------
+SUBROUTINE lattice_parameters(at, a, b, c, alpha, beta, ggamma)
+!--------------------------------------------------------------
+!
+! This routine receives the at (direct lattice vectors) and
+! give as output their lengths and angles among them.
+! Works only for conventional lattices (if you have a centered 
+! lattice call the routine compute_conventional to find the 
+! conventional lattice before calling this routine).
+!
+!
+   REAL(DP), INTENT(IN)  :: at(3,3)
+   REAL(DP), INTENT(OUT) :: a, b, c, alpha, beta, ggamma
+   REAL(DP) :: d12, d13, d23
+
+   a = SQRT(DOT_PRODUCT(at(:,1), at(:,1)))
+   b = SQRT(DOT_PRODUCT(at(:,2), at(:,2)))
+   c = SQRT(DOT_PRODUCT(at(:,3), at(:,3)))
+
+   d12 = DOT_PRODUCT(at(:,1),at(:,2))
+   d13 = DOT_PRODUCT(at(:,1),at(:,3))
+   d23 = DOT_PRODUCT(at(:,2),at(:,3))
+
+   ggamma = ACOS(d12/(a*b))
+   beta  = ACOS(d13/(a*c))
+   alpha = ACOS(d23/(b*c))
+
+   RETURN
+END SUBROUTINE lattice_parameters
+
 
 END MODULE lattices
