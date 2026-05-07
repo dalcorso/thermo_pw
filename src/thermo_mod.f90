@@ -207,6 +207,12 @@ MODULE control_mur
 
   REAL(DP), ALLOCATABLE :: p0(:) ! pressure versus volume at T=0 K
 
+  LOGICAL  :: save_distorted_energies ! if .TRUE. the code tries to guess the
+                               ! energies of the distorted configurations
+                               ! needed by elastic constants that do not 
+                               ! change the lattice from the interpolating
+                               ! polynomial
+
 END MODULE control_mur
 
 !----------------------------------------------------------------------------
@@ -1931,6 +1937,8 @@ MODULE control_elastic_constants
                                 ! 2  C E B  A H
 
   REAL(DP), ALLOCATABLE :: dyde(:,:,:,:) ! (nint_var_ec,21,ngeom,ntemp)
+
+  INTEGER :: with_same_lattice(21)
 
 END MODULE control_elastic_constants
 !

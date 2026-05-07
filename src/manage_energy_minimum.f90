@@ -20,7 +20,8 @@ USE thermo_mod,       ONLY : celldm_geo, omega_geo, central_geo, density, &
                              omega_geo_eos, energy_geo_eos, uint_geo_eos,   &
                              tau_geo_eos, tot_ngeo, tot_ngeo_eos, ibrav_geo, &
                              at_geo
-USE control_mur,      ONLY : vmin, b0, b01, b02, emin, lmurn
+USE control_mur,      ONLY : vmin, b0, b01, b02, emin, lmurn, &
+                             save_distorted_energies
 USE control_thermo,   ONLY : lgeo_from_file
 USE control_atomic_pos, ONLY : linternal_thermo, iconstr_internal, nint_var, &
                                tau_eq, linterpolate_tau
@@ -164,7 +165,13 @@ CALL compute_density(omega,density,.TRUE.)
 !  compute the xrdp at the minimum volume if required by the user
 !
 IF (lxrdp) CALL manage_xrdp(' ')
-
+!
+!  If requested from input, calculate the energy on the distorted
+!  configurations needed to elastic constants calculation from
+!  the polynomial interpolation
+!
+IF (save_distorted_energies) CALL energy_for_ec(nwork)
+!
 RETURN
 END SUBROUTINE manage_energy_minimum
 

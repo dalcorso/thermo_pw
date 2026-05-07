@@ -54,6 +54,7 @@ do_phonon_tpw.o \
 dos_sub.o \
 dynmatrix_tpw.o \
 empirical_free_energy.o \
+energy_for_ec.o \
 ev_mod.o \
 ev_sub.o \
 evaluate_celldm.o \

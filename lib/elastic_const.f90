@@ -110,7 +110,7 @@ MODULE elastic_constants
          ece_to_ecd,                &    ! transform constant E field EC to
                                          ! constant D field EC
          ec_present, ecm_names, ect_names, & ! auxiliary variables
-         ec_elements
+         ec_elements, set_strain_for_ec
         
 
 
@@ -3386,6 +3386,288 @@ ENDDO
 CALL to_voigt4(cd, cd_aux, .TRUE.)
 RETURN
 END SUBROUTINE ece_to_ecd
+!
+!-----------------------------------------------------------------------------
+SUBROUTINE set_strain_for_ec(strain_list, nstep, with_same_lattice, laue, &
+                                ibrav, old_ec, elalgen, elastic_algorithm)
+!-----------------------------------------------------------------------------
+!
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ibrav, old_ec, laue
+LOGICAL, INTENT(IN) :: elalgen
+INTEGER, INTENT(OUT) :: nstep, with_same_lattice(21)
+CHARACTER(LEN=2), INTENT(INOUT) :: strain_list(21)
+CHARACTER(LEN=12), INTENT(IN) :: elastic_algorithm
+
+nstep=0
+with_same_lattice(:)=0
+SELECT CASE (laue) 
+   CASE(29,32)
+!
+!  cubic system (T_h or O_h Laue classes)
+!
+      IF (ibrav==1.OR.ibrav==2.OR.ibrav==3) THEN    
+         IF (.NOT.elalgen) THEN
+            nstep = 2
+            strain_list(1) = 'E '
+            strain_list(2) = 'F3'
+            IF (ibrav==1) strain_list(2) = 'F '
+         ELSE
+            nstep = 3
+            strain_list(1) = 'A '
+            strain_list(2) = 'E '
+            strain_list(3) = 'F3'
+            IF (ibrav==1) strain_list(3) = 'F '
+            with_same_lattice(1)=1
+         ENDIF
+      ELSE
+         CALL errore('set_strain_for_ec',&
+                              'Incorrect lattice for cubic system',1)
+      ENDIF
+   CASE (19,23)
+!
+!  hexagonal system (C_6h or D_6h Laue classes)
+!
+      IF (ibrav==4) THEN    
+         IF (.NOT.elalgen) THEN
+            nstep = 3
+            strain_list(1) = 'C '
+            strain_list(2) = 'E '
+            strain_list(3) = 'H '
+            with_same_lattice(2)=1
+         ELSE
+            nstep = 5
+            strain_list(1) = 'C '
+            strain_list(2) = 'E '
+            strain_list(3) = 'B1'
+            with_same_lattice(2)=1
+            IF (old_ec==0) THEN
+               strain_list(4) = 'A '
+               with_same_lattice(4)=1
+            ELSEIF (old_ec==1) THEN
+               strain_list(4) = 'B '
+               with_same_lattice(4)=1
+            ELSEIF (old_ec==2) THEN
+               strain_list(3)='B '
+               strain_list(4)='A '
+               with_same_lattice(3)=1
+               with_same_lattice(4)=1
+            ENDIF
+            strain_list(5) = 'H '
+         ENDIF
+      ELSE
+         CALL errore('set_strain_for_ec',&
+                       'Incorrect lattice for hexagonal system',ibrav)
+      ENDIF
+   CASE (18,22)
+!
+!   tetragonal system, (C_4h or D_4h Laue classes)
+!
+      IF (ibrav==6.OR.ibrav==7) THEN
+         IF (.NOT.elalgen) THEN
+            nstep = 4
+            strain_list(1) = 'C '
+            strain_list(2) = 'E '
+            strain_list(3) = 'H '
+            strain_list(4) = 'G '
+            with_same_lattice(2)=1
+         ELSE
+            nstep = 6
+            strain_list(1) = 'E '
+            strain_list(2) = 'C '
+            strain_list(3) = 'B '
+            strain_list(4) = 'B1'
+            strain_list(5) = 'G '
+            strain_list(6) = 'H '
+            IF (laue==18) THEN
+               nstep = 7
+               strain_list(7) = 'CG'
+               IF (elastic_algorithm=='energy') nstep=0
+            ENDIF
+            with_same_lattice(1)=1
+            with_same_lattice(3)=1
+         ENDIF
+      ELSE
+         CALL errore('set_strain_for_ec',&
+                       'Incorrect lattice for tetragonal system',ibrav)
+      ENDIF
+   CASE (20)
+!
+!   orthorhombic system, (D_2h Laue class)
+!
+      IF (ibrav==8.OR.ibrav==9.OR.ibrav==10.OR.ibrav==11) THEN
+         IF (.NOT.elalgen) THEN
+            nstep = 6
+            strain_list(1) = 'C '
+            strain_list(2) = 'D '
+            strain_list(3) = 'E '
+            strain_list(4) = 'G '
+            strain_list(5) = 'H '
+            strain_list(6) = 'I '
+            with_same_lattice(1)=1
+            with_same_lattice(2)=1
+            with_same_lattice(3)=1
+         ELSE
+            nstep = 9
+            strain_list(1) = 'C '
+            strain_list(2) = 'D '
+            strain_list(3) = 'E '
+            strain_list(4) = 'B '
+            strain_list(5) = 'B1'
+            strain_list(6) = 'B2'
+            strain_list(7) = 'G '
+            strain_list(8) = 'H '
+            strain_list(9) = 'I '
+            with_same_lattice(1)=1
+            with_same_lattice(2)=1
+            with_same_lattice(3)=1
+            with_same_lattice(4)=1
+            with_same_lattice(5)=1
+            with_same_lattice(6)=1
+         ENDIF
+      ELSE
+         CALL errore('set_strain_for_ec',&
+                    'Incorrect lattice for orthorombic system',ibrav)
+      ENDIF
+   CASE (25,27)
+!
+!   D_3d and S_6 Trigonal system (hexagonal or trigonal lattice). 
+!
+      IF (ibrav==4.OR.ibrav==5) THEN
+         IF (.NOT.elalgen) THEN
+            nstep = 3
+            strain_list(1) = 'C '
+            strain_list(2) = 'E '
+            strain_list(3) = 'H '
+            IF (ibrav==5) strain_list(3) = 'I '
+            with_same_lattice(2)=1
+         ELSE
+            nstep = 6
+            strain_list(1) = 'C '
+            strain_list(2) = 'E '
+            strain_list(3) = 'B1'
+            strain_list(4) = 'A '
+            strain_list(5) = 'H '
+            strain_list(6) = 'CI'
+            IF (laue==27) THEN
+               nstep = 7
+               strain_list(7) = 'CG'
+            ENDIF
+            IF (elastic_algorithm=='energy') nstep=0
+            with_same_lattice(2)=1
+            with_same_lattice(4)=1
+         END IF
+      ELSE
+         CALL errore('set_strain_for_ec',&
+                    'Incorrect lattice for trigonal system',ibrav)
+      END IF
+   CASE (16)
+!
+!   C_2h. Monoclinic system. Only the standard or advanced algorithm 
+!         are available
+!
+      IF (ibrav==12.OR.ibrav==13.OR.ibrav==-12 &
+                                          .OR.ibrav==-13) THEN
+         ! both b and c-unique
+         IF (.NOT.elalgen) THEN
+            nstep = 6
+            strain_list(1) = 'C '
+            strain_list(2) = 'D '
+            strain_list(3) = 'E '
+            strain_list(4) = 'G '
+            strain_list(5) = 'H '
+            strain_list(6) = 'I '
+            with_same_lattice(1)=1
+            with_same_lattice(2)=1
+            with_same_lattice(3)=1
+            with_same_lattice(4)=1
+         ELSEIF (elastic_algorithm=='energy_std') THEN
+            nstep=13
+            strain_list(1) = 'C '
+            strain_list(2) = 'D '
+            strain_list(3) = 'E '
+            strain_list(4) = 'B '
+            strain_list(5) = 'B1'
+            strain_list(6) = 'B2'
+            strain_list(7) = 'G '
+            strain_list(8) = 'H '
+            strain_list(9) = 'I '
+            IF (ibrav>0) THEN
+!
+!   c unique
+!
+               strain_list(10) = 'CG'
+               strain_list(11) = 'DG'
+               strain_list(12) = 'EG'
+               strain_list(13) = 'IH'
+            ELSE
+!
+!   b unique
+!
+               strain_list(10) = 'CH'
+               strain_list(11) = 'DH'
+               strain_list(12) = 'EH'
+               strain_list(13) = 'GI'
+            ENDIF
+            with_same_lattice(1)=1
+            with_same_lattice(2)=1
+            with_same_lattice(3)=1
+            with_same_lattice(7)=1
+         END IF
+      ELSE
+         CALL errore('set_strain_for_ec',&
+                    'Incorrect lattice for monoclinic system',ibrav)
+      END IF
+
+   CASE (2)
+!
+!   C_i   Triclinic system. 
+!
+      IF (ibrav==14.OR.ibrav==0) THEN
+         IF (elastic_algorithm=='standard') THEN
+            nstep = 6
+            strain_list(1) = 'C '
+            strain_list(2) = 'D '
+            strain_list(3) = 'E '
+            strain_list(4) = 'G '
+            strain_list(5) = 'H '
+            strain_list(6) = 'I '
+            with_same_lattice(1:6)=1
+         ELSEIF (elastic_algorithm=='energy_std') THEN
+            nstep = 21
+            strain_list(1) = 'C '
+            strain_list(2) = 'D '
+            strain_list(3) = 'E '
+            strain_list(4) = 'B '
+            strain_list(5) = 'B1'
+            strain_list(6) = 'B2'
+            strain_list(7) = 'G '
+            strain_list(8) = 'H '
+            strain_list(9) = 'I '
+            strain_list(10) = 'CG'
+            strain_list(11) = 'CH'
+            strain_list(12) = 'CI'
+            strain_list(13) = 'DG'
+            strain_list(14) = 'DH'
+            strain_list(15) = 'DI'
+            strain_list(16) = 'EG'
+            strain_list(17) = 'EH'
+            strain_list(18) = 'EI'
+            strain_list(19) = 'GH'
+            strain_list(20) = 'IH'
+            strain_list(21) = 'GI'
+            with_same_lattice(1:21)=1
+         END IF
+      ELSE
+         CALL errore('set_strain_for_ec',&
+                    'Incorrect lattice for triclinic system',ibrav)
+      END IF
+   CASE DEFAULT
+      CALL errore('set_strain_for_ec','Laue class not available',1)
+END SELECT
+
+RETURN
+END SUBROUTINE set_strain_for_ec
 
 !-----------------------------------------------------------------------
 FUNCTION get_ec_type(laue, ibrav)
@@ -3436,5 +3718,7 @@ ENDIF
 get_ec_type=aux_type
 RETURN
 END FUNCTION get_ec_type
+
+
 
 END MODULE elastic_constants

@@ -2059,6 +2059,11 @@ ltau_from_file : if .TRUE. the atomic coordinates of each geometry
              directory calculated in a previous what='mur_lc' 
              calculation.
              Default : .FALSE.
+save_distorted_energy : if .TRUE. the code writes in restart directory
+             the energy files for all distorted geometries that 
+             do not change the lattice using the polynomial 
+             that interpolates the energy.
+             Default : .FALSE.
 flenergy   : name of the file that contains the energy in a 
              form that can be used by gnuplot to make contour 
              plots.

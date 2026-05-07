@@ -39,6 +39,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   USE control_atomic_pos, ONLY : max_nint_var, iconstr_internal
   USE initial_conf,   ONLY : ibrav_save, start_geometry_save,             &
                              last_geometry_save, omega_save
+  USE control_mur, ONLY : save_distorted_energies
   USE piezoelectric_tensor, ONLY : allocate_piezo
   USE control_elastic_constants, ONLY : rot_mat, ngeom, use_free_energy,   &
                                    elalgen, work_base, start_geometry_qha, &
@@ -256,6 +257,9 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            last_geometry1=nwork
            IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
+           IF (save_distorted_energies) THEN
+              IF (meta_ionode) ios = f_mkdir_safe( 'energy_dist' )
+           ENDIF
            IF (lel_free_energy) THEN
               IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
               IF (meta_ionode) ios = f_mkdir_safe( 'anhar_files' )
@@ -271,6 +275,9 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'band_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
+           IF (save_distorted_energies) THEN
+              IF (meta_ionode) ios = f_mkdir_safe( 'energy_dist' )
+           ENDIF
         CASE ('mur_lc_dos') 
            do_punch = .FALSE.
            lev_syn_1=.TRUE.
@@ -282,6 +289,9 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
+           IF (save_distorted_energies) THEN
+              IF (meta_ionode) ios = f_mkdir_safe( 'energy_dist' )
+           ENDIF
            CALL allocate_el_thermodynamics(1)
         CASE ('mur_lc_ph') 
            do_punch=.FALSE.
@@ -301,6 +311,9 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'dynamical_matrices' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
+           IF (save_distorted_energies) THEN
+              IF (meta_ionode) ios = f_mkdir_safe( 'energy_dist' )
+           ENDIF
         CASE ('mur_lc_disp')
            do_punch=.FALSE.
            lev_syn_1=.TRUE.
@@ -325,6 +338,9 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            IF (meta_ionode) ios = f_mkdir_safe( 'phdisp_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
+           IF (save_distorted_energies) THEN
+              IF (meta_ionode) ios = f_mkdir_safe( 'energy_dist' )
+           ENDIF
         CASE ('mur_lc_elastic_constants') 
            do_punch=.FALSE.
            lev_syn_1=.TRUE.
@@ -340,6 +356,9 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
+           IF (save_distorted_energies) THEN
+              IF (meta_ionode) ios = f_mkdir_safe( 'energy_dist' )
+           ENDIF
         CASE ('mur_lc_piezoelectric_tensor') 
            do_punch=.FALSE.
            lev_syn_1=.TRUE.
@@ -354,6 +373,9 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
+           IF (save_distorted_energies) THEN
+              IF (meta_ionode) ios = f_mkdir_safe( 'energy_dist' )
+           ENDIF
         CASE ('mur_lc_piezomagnetic_tensor') 
            do_punch=.FALSE.
            lev_syn_1=.TRUE.
@@ -368,6 +390,9 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
+           IF (save_distorted_energies) THEN
+              IF (meta_ionode) ios = f_mkdir_safe( 'energy_dist' )
+           ENDIF
         CASE ('mur_lc_polarization')
            do_punch=.FALSE.
            lev_syn_1=.TRUE.
@@ -381,6 +406,9 @@ SUBROUTINE initialize_thermo_work(nwork, part)
 !
 !    Here all the cases that compute the free energy and minimize it
 !
+           IF (save_distorted_energies) THEN
+              IF (meta_ionode) ios = f_mkdir_safe( 'energy_dist' )
+           ENDIF
         CASE ('mur_lc_t')
            lev_syn_1=.TRUE.
            CALL initialize_mur(nwork)
@@ -416,6 +444,9 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            IF (meta_ionode) ios = f_mkdir_safe( 'phdisp_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
+           IF (save_distorted_energies) THEN
+              IF (meta_ionode) ios = f_mkdir_safe( 'energy_dist' )
+           ENDIF
         CASE ('elastic_constants_geo')
            lectqha=.TRUE.
            lph=use_free_energy

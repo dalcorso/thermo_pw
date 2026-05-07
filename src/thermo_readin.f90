@@ -82,7 +82,7 @@ SUBROUTINE thermo_readin()
   USE control_ev,           ONLY : ieos
   USE control_conv,         ONLY : nke, deltake, nkeden, deltakeden, &
                                    nnk, deltank, nsigma, deltasigma
-  USE control_mur,          ONLY : lmurn
+  USE control_mur,          ONLY : lmurn, save_distorted_energies
   USE control_vol,          ONLY : vmin_input, vmax_input, deltav, nvol, &
                                    nvol_plot, ivol_plot_=>ivol_plot
   USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, &
@@ -305,6 +305,7 @@ SUBROUTINE thermo_readin()
                             lquartic, lsolve,               &
                             ltau_from_file,                 &
                             ltau_el_cons_from_file,         &
+                            save_distorted_energies,        &
                             flevdat,                        &
                             flpsmur,                        &
                             flps_el_cons,                   &
@@ -342,6 +343,7 @@ SUBROUTINE thermo_readin()
                             lgruneisen_gen,                 &
                             ggrun_recipe,                   &
                             icenter_grun,                   &
+                            njump,                          &
                             lhugoniot,                      &
                             lgeo_from_file,                 &
                             ltau_from_file,                 &
@@ -484,6 +486,7 @@ SUBROUTINE thermo_readin()
   lcm=.FALSE.
   ltau_from_file=.FALSE.
   ltau_el_cons_from_file=.FALSE.
+  save_distorted_energies=.FALSE.
   flformf='output_formf.dat'
   flpsformf='output_formf'
 

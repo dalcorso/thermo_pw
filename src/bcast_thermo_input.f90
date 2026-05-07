@@ -74,7 +74,7 @@ SUBROUTINE bcast_thermo_input()
                                      poly_degree_elc, lsolve
   USE control_vol,     ONLY : vmin_input, vmax_input, deltav, nvol, &
                               nvol_plot
-  USE control_mur,     ONLY : lmurn
+  USE control_mur,     ONLY : lmurn, save_distorted_energies
   USE control_ev,      ONLY : ieos
   USE control_energy_plot, ONLY : ncontours
   USE control_atomic_pos,  ONLY : linternal_thermo, &
@@ -309,6 +309,7 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( nvol_plot, meta_ionode_id, world_comm )
   CALL mp_bcast( lquartic, meta_ionode_id, world_comm )
   CALL mp_bcast( lsolve, meta_ionode_id, world_comm )
+  CALL mp_bcast( save_distorted_energies, meta_ionode_id, world_comm )
   CALL mp_bcast( flevdat, meta_ionode_id, world_comm )
   CALL mp_bcast( flpsmur, meta_ionode_id, world_comm )
   CALL mp_bcast( flps_el_cons, meta_ionode_id, world_comm )
