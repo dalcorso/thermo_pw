@@ -300,6 +300,15 @@ IF (ibrav==1) THEN
       rot(3,1)=1.0_DP/sqrt3
       rot(3,2)=1.0_DP/sqrt3
       rot(3,3)=1.0_DP/sqrt3
+   ELSEIF (strain_code=='G ') THEN
+      ibrav_strain = 12
+      den = SQRT(1.0_DP + epsil**2)
+      celldm_strain(1) = celldm(1)*den
+      celldm_strain(2) = 1.0_DP
+      celldm_strain(3) = 1.0_DP/den
+      celldm_strain(4) = 2.0_DP * epsil/ den / den
+      phi=-ATAN(epsil)
+      CALL set_rot_xyz(rot, 3, phi)
    ELSE
       CALL errore('set_strain_adv','strain not programmed',ibrav)
    ENDIF
@@ -333,6 +342,17 @@ ELSEIF(ibrav==2) THEN
       celldm_strain(1)=celldm(1)*SQRT(aepsilon)*0.5_DP
       celldm_strain(4) = (5.0_DP*epsil**2-6.0_DP*epsil+1.0_DP)/aepsilon
       rot=rotcr
+   ELSEIF (strain_code=='G ') THEN
+      ibrav_strain = 13
+      den= SQRT(2.0_DP*(1.0_DP + epsil**2) + 4.0_DP * epsil )
+      den1=SQRT(1.0_DP + epsil**2)
+      celldm_strain(1) = celldm(1) * den1
+      celldm_strain(2) = 0.5_DP * den/den1
+      celldm_strain(3) = 1.0_DP / den1
+      celldm_strain(4) = ( (1.0_DP + epsil**2)+ 2.0_DP*epsil) / den1 / den
+      phi=-ATAN(epsil)
+      CALL set_rot_xyz(rot, 3, phi)
+
 !   ELSEIF (strain_code=='G ') THEN
 !      ibrav_strain=13
 !      celldm_strain(1)=celldm(1)*SQRT(1.0_DP+epsil**2)
@@ -341,6 +361,16 @@ ELSEIF(ibrav==2) THEN
 !      celldm_strain(4) = (1.0_DP+epsil)/SQRT(2.0_DP*(1.0_DP+epsil**2))
 !      phi=ATAN(epsil)
 !      CALL set_rot_xyz(rot, 3, phi)
+   ELSEIF (strain_code=='H ') THEN
+      ibrav_strain=-13
+      den= SQRT(2.0_DP*(1.0_DP + epsil**2) + 4.0_DP * epsil)
+      den1=SQRT(1.0_DP + epsil**2)
+      celldm_strain(1) = celldm(1) * den1
+      celldm_strain(2) = 1.0 / den1
+      celldm_strain(3) = 0.5_DP*den/ den1
+      celldm_strain(5) = ( (1.0_DP + epsil**2)+2.0_DP*epsil ) / den1 / den
+      phi=-ATAN(epsil)
+      CALL set_rot_xyz(rot, 2, phi)
    ELSE
       CALL errore('set_strain_adv','strain not programmed',ibrav)
    ENDIF
@@ -370,6 +400,18 @@ ELSEIF (ibrav==3) THEN
       celldm_strain(1)=celldm(1)*SQRT(aepsilon)*0.5_DP
       celldm_strain(4)=-(4.0_DP*epsil+1.0_DP)/aepsilon
       rot=rotcr
+   ELSEIF (strain_code=='G ') THEN
+      ibrav_strain=13
+      den= SQRT(2.0_DP*(1.0_DP + epsil**2) - 4.0_DP * epsil )
+      den1= SQRT(1.0_DP + epsil**2)
+      celldm_strain(1) = celldm(1) * den
+      celldm_strain(2) = den1 / den
+      celldm_strain(3) = 1.0_DP / den
+      celldm_strain(4) = ( (1.0_DP + epsil**2)-&
+                           2.0_DP*epsil ) / den1 / den
+      phi=-ATAN((epsil - 1.0_DP) / &
+               (1.0_DP - epsil ))
+      CALL set_rot_xyz(rot, 3, phi)
    ELSE
       CALL errore('set_strain_adv','strain not programmed',ibrav)
    ENDIF
