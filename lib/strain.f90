@@ -192,14 +192,14 @@ ELSEIF (strain_code=='EI') THEN
    epsilon_voigt(3) = epsil
    epsilon_voigt(4) = epsil
 ELSEIF (strain_code=='GH') THEN
-   epsilon_voigt(4) = epsil
    epsilon_voigt(5) = epsil
+   epsilon_voigt(6) = epsil
 ELSEIF (strain_code=='GI') THEN
    epsilon_voigt(4) = epsil
    epsilon_voigt(6) = epsil
 ELSEIF (strain_code=='IH') THEN
+   epsilon_voigt(4) = epsil
    epsilon_voigt(5) = epsil
-   epsilon_voigt(6) = epsil
 ELSE
    WRITE(stdout,'(a2)') strain_code 
    CALL errore('set_strain','strain not programmed',1)
