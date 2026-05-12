@@ -1840,6 +1840,9 @@ MODULE control_elastic_constants
   REAL(DP), ALLOCATABLE :: el_con_omega_geo(:) ! the volume of each 
                                 ! unperturbed cell.
   REAL(DP), ALLOCATABLE :: epsil_geo(:) ! strain amplitude for each geometry
+
+  REAL(DP), ALLOCATABLE :: el_con_at_geo_adv(:,:,:,:) ! the at of each 
+                                ! unperturbed lattice. Advanced method.
                                 !
   INTEGER :: ngeom=1            ! the number of geometries
 

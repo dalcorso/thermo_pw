@@ -163,6 +163,7 @@ set_tau_acc.o \
 set_temperature.o \
 set_thermo_work_todo.o \
 set_work_for_elastic_const.o \
+set_work_for_piezo_tensor.o \
 simple_nonanal.o \
 simple_plot.o \
 summarize_anhar.o \

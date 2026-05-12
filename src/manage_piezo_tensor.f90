@@ -17,8 +17,10 @@ USE thermo_sym,           ONLY : code_group_save, code_group_ext_save
 USE control_elastic_constants, ONLY : ngeo_strain, frozen_ions, epsil_geo, &
                                  el_con_ibrav_geo, el_con_celldm_geo,      &
                                  el_con_at_geo, el_con_celldm_geo,         &
+                                 el_con_at_geo_adv,                        &
                                  el_con_omega_geo, epsil_geo,              &
-                                 start_geometry_qha, last_geometry_qha
+                                 start_geometry_qha, last_geometry_qha,    &
+                                 rot_mat, elastic_algorithm, nstep_ec
 
 USE control_piezoelectric_tensor, ONLY : g_piezo_tensor_geo, &
                                  eg_piezo_tensor_geo, e_piezo_tensor_geo, &
@@ -33,9 +35,11 @@ USE piezoelectric_tensor, ONLY : compute_improper_piezo_tensor, &
                                  compute_proper_piezo_tensor,     &
                                  compute_polarization_equil,      &
                                  proper_improper_piezo,           &
+                                 compute_piezo_p0,                &
                                  clean_piezo_tensor,              &  
                                  write_piezo_tensor
                                     
+USE rotate,               ONLY : rotate_vect
 USE elastic_constants,    ONLY : epsilon_geo, el_con, el_compliances, &
                                  read_elastic
 USE data_files,           ONLY : fl_el_cons, fl_piezo
@@ -49,10 +53,12 @@ IMPLICIT NONE
 INTEGER, INTENT(IN) :: nwork, ngeom
 LOGICAL :: exst
 
-INTEGER :: iwork, igeom, base_ind, work_base, work_base_eff, nwork_eff
+INTEGER :: iwork, igeom, base_ind, work_base, work_base_eff, nwork_eff, &
+           ipol, jpol, istep
 REAL(DP), ALLOCATABLE :: epsilon_geo_eff(:,:,:), energy_geo_eff(:), &
                          epsil_geo_eff(:), polar_strain_eff(:,:),   &
-                         tot_b_phase_eff(:,:) 
+                         tot_b_phase_eff(:,:), polar_strain_aux(:,:), &
+                         p0_piezo(:,:,:)
 CHARACTER(LEN=256) :: filepiezo, filelastic
 CHARACTER(LEN=80)  :: label
 CHARACTER(LEN=6)   :: int_to_char
@@ -79,9 +85,24 @@ tot_b_phase=tot_b_phase / nproc_image
 
 ALLOCATE(energy_geo_eff(nwork))
 ALLOCATE(epsilon_geo_eff(3,3,nwork))
+ALLOCATE(p0_piezo(3,6,nwork))
 ALLOCATE(epsil_geo_eff(nwork))
+ALLOCATE(polar_strain_aux(3,nwork))
 ALLOCATE(polar_strain_eff(3,nwork))
 ALLOCATE(tot_b_phase_eff(3,nwork))
+
+IF (elastic_algorithm=='advanced') THEN
+!
+!  Bring the polarization in the original reference system. For the 
+!  Berry phase is not necessary because it is on the crystal basis
+!  and the el_con_at_geo_adv are in the original reference system.
+!
+   polar_strain_aux(:,:)=polar_strain(:,:)
+   DO iwork=1,nwork
+      CALL rotate_vect(rot_mat(1,1,iwork), 1, polar_strain_aux(1,iwork), &
+                       polar_strain(1,iwork), -1)
+   ENDDO
+ENDIF
 
 CALL redefine_energies(energy_geo, epsilon_geo, epsil_geo, nwork,  &
                        energy_geo_eff, epsilon_geo_eff, nwork_eff)
@@ -90,6 +111,7 @@ work_base_eff = nwork_eff / ngeom
 
 CALL redefine_polar(polar_strain, tot_b_phase, nwork, polar_strain_eff, &
                     tot_b_phase_eff, epsil_geo, epsil_geo_eff)
+
 
 DO igeom=start_geometry_qha, last_geometry_qha
 
@@ -109,6 +131,11 @@ DO igeom=start_geometry_qha, last_geometry_qha
    CALL compute_polarization_equil(polar_strain_eff(:,base_ind+1), &
           epsil_geo_eff(base_ind+1), polar0_geo(:,igeom), work_base_eff, &
           ngeo_strain)
+!
+!  compute the difference between proper and improper piezoelectric tensor
+!
+   CALL compute_piezo_p0(polar0_geo(1,igeom),p0_piezo(1,1,igeom))
+
    WRITE(stdout,'(/,2x,76("-"))')
    WRITE(stdout,'(5x,"Computing the improper piezoelectric tensor")')
    WRITE(stdout,'(2x,76("-"),/)')
@@ -117,7 +144,8 @@ DO igeom=start_geometry_qha, last_geometry_qha
 !
    CALL compute_improper_piezo_tensor(polar_strain_eff(:,base_ind+1), &
                 epsilon_geo_eff(:,:,base_ind+1), work_base_eff, ngeo_strain, &
-                ibrav_save, code_group_save, code_group_ext_save)
+                ibrav_save, code_group_save, code_group_ext_save,     &
+                p0_piezo(1,1,igeom))
 
    g_piezo_tensor_geo(:,:,igeom)=g_piezo_tensor(:,:)
 
@@ -144,14 +172,21 @@ DO igeom=start_geometry_qha, last_geometry_qha
    WRITE(stdout,'(2x,76("-"),/)')
 !
 !  and then the proper one (this can be compared with experiments)
+!  First write the direct vectors.
 !
+!   DO istep=1,nstep_ec
+!      WRITE(stdout,'(/,5x,"Direct vectors used for step",i5)') istep
+!      DO ipol=1,3
+!         WRITE(stdout,'(3f15.6)') (el_con_at_geo_adv(jpol,ipol,istep,igeom), &
+!                                                                 jpol=1,3)
+!      ENDDO
+!   ENDDO
    CALL compute_proper_piezo_tensor(tot_b_phase_eff(:,base_ind+1),      &
            epsilon_geo_eff(:,:,base_ind+1), work_base_eff, ngeo_strain, &
            ibrav_save, code_group_save, code_group_ext_save,            &
-           el_con_at_geo(:,:,igeom) )
-
-   e_piezo_tensor=e_piezo_tensor * el_con_celldm_geo(1,igeom) / &
-                                           el_con_omega_geo(igeom)
+           el_con_at_geo_adv(1,1,1,igeom), nstep_ec )
+   
+   e_piezo_tensor=e_piezo_tensor / el_con_omega_geo(igeom)
    e_piezo_tensor_geo(:,:,igeom)=e_piezo_tensor(:,:)
    label="Proper total piezoelectric tensor gamma_ij [ 10^{-2} e/(a.u.)^2 ]"
    fact=100.0_DP
@@ -197,8 +232,10 @@ ENDDO
 DEALLOCATE(energy_geo_eff)
 DEALLOCATE(epsilon_geo_eff)
 DEALLOCATE(epsil_geo_eff)
+DEALLOCATE(polar_strain_aux)
 DEALLOCATE(polar_strain_eff)
 DEALLOCATE(tot_b_phase_eff)
+DEALLOCATE(p0_piezo)
 
 RETURN
 END SUBROUTINE manage_piezo_tensor

@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2014 Andrea Dal Corso 
+! Copyright (C) 2014-2026 Andrea Dal Corso 
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -122,7 +122,7 @@ MODULE piezoelectric_tensor
          pt_names, ptd_names, pt_types, pt_present,       &
          pt_code_group, get_pt_type, compute_relax_piezo, &
          e_piezo_tensor_fi, eg_piezo_tensor_fi,           &
-         d_piezo_tensor_fi
+         d_piezo_tensor_fi, compute_piezo_p0
 
 CONTAINS
 !
@@ -329,7 +329,7 @@ SUBROUTINE read_piezo_tensor_fi(filename, polar0_fi, exists)
 !-------------------------------------------------------------------------
 !
 !  This routine reads the piezoelectric tensor from file and
-!  save it in the auxiliary variable with the fi extension
+!  saves it in the auxiliary variable with the fi extension
 !
 USE io_global, ONLY : ionode, ionode_id
 USE constants, ONLY : electron_si, bohr_radius_si
@@ -400,7 +400,7 @@ END SUBROUTINE read_piezo_tensor_fi
 !
 !---------------------------------------------------------------------------
 SUBROUTINE compute_improper_piezo_tensor(polar_geo, epsil_geo, nwork, &
-                                ngeo, ibrav, code_group, code_group_ext)
+                         ngeo, ibrav, code_group, code_group_ext, p0_piezo)
 !---------------------------------------------------------------------------
 !
 !  This routine computes the piezoelectric tensor g_{i,m} (i=1,..,3,
@@ -415,9 +415,10 @@ SUBROUTINE compute_improper_piezo_tensor(polar_geo, epsil_geo, nwork, &
 !
 !
 IMPLICIT NONE
-REAL(DP), INTENT(IN) :: polar_geo(3,nwork), epsil_geo(3,3,nwork)
+REAL(DP), INTENT(IN) :: polar_geo(3,nwork), epsil_geo(3,3,nwork), &
+                        p0_piezo(3,6)
 INTEGER, INTENT(IN) :: ngeo, ibrav, code_group, code_group_ext, nwork
-INTEGER :: i, j, igeo, alpha, ind, mn
+INTEGER :: alpha, ind, mn
 LOGICAL :: check_group_ibrav
 
 WRITE(stdout,'(/,20x,40("-"),/)')
@@ -755,9 +756,29 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
 !             WRITE(stdout,'(5x,"(  .    .    .    .   g14   .  )")') 
 !             WRITE(stdout,'(5x,"(  .    .    .    .    .   g14 )")') 
 !
-        CALL piezo_ij(1, 4, ngeo, epsil_geo, polar_geo)
-        g_piezo_tensor(2,5) = g_piezo_tensor(1,4)
-        g_piezo_tensor(3,6) = g_piezo_tensor(1,4)
+!    This is for G strain  
+!
+!        CALL piezo_ij(3, 6, ngeo, epsil_geo, polar_geo)
+!        g_piezo_tensor(1,4) = g_piezo_tensor(3,6)
+!        g_piezo_tensor(2,5) = g_piezo_tensor(3,6)
+!
+!    This is for H strain
+!
+        CALL piezo_ij(2, 5, ngeo, epsil_geo, polar_geo)
+        g_piezo_tensor(1,4) = g_piezo_tensor(2,5)
+        g_piezo_tensor(3,6) = g_piezo_tensor(2,5)
+!
+!    This is for F3 strain
+!
+!  In this case we are computing g14-g15-g16 because we fit 
+!  P=(-g14+g15+g16)e as a function of -e. The last two terms should
+!  be zero by symmetry, but might have a contribution due to the 
+!  spontaneous polarization
+!
+!        CALL piezo_ij(1, 4, ngeo, epsil_geo, polar_geo)
+!        g_piezo_tensor(1,4) = g_piezo_tensor(1,4)+p0_piezo(1,5)+p0_piezo(1,6)
+!        g_piezo_tensor(2,5) = g_piezo_tensor(1,4)
+!        g_piezo_tensor(3,6) = g_piezo_tensor(1,4)
      CASE(31)
 !
 !  O All components vanish. We do nothing.
@@ -790,23 +811,29 @@ END SUBROUTINE compute_improper_piezo_tensor
 
 !---------------------------------------------------------------------------
 SUBROUTINE compute_proper_piezo_tensor(tot_b_phase, epsil_geo, nwork, ngeo, &
-                                       ibrav, code_group, code_group_ext, at)
+                       ibrav, code_group, code_group_ext, at, nstep)
 !---------------------------------------------------------------------------
 !
 !  This routine computes the proper piezoelectric tensor e_{i,m} 
 !  (i=1,...,3, m=1,...,6) by 
-!  fitting the total berry phase strain relation with a second order 
+!  fitting the total Berry phase strain relation with a second order 
 !  polynomial and computing its derivative with respect to strain. 
 !  Finally the proper piezoelectric tensor must be computed from Eq.24 of
 !  D. Vanderbilt Jour. of Phys. and Chemistry of Solids 61, 147 (2000).
 !  This is calculated on the basis of the solid point group.
+!  
+!  NB: The at vectors in input must be in a.u. (not in units of alat)
+!      They are the direct lattice vectors of the undistorted solid,
+!      calculated from those of the distorted solid for zero strain.
+!      They might depend on the strain type.
 !
 !
 IMPLICIT NONE
+INTEGER, INTENT(IN) :: nstep
 REAL(DP), INTENT(IN) :: tot_b_phase(3,nwork), epsil_geo(3,3,nwork), &
-                        at(3,3)
-INTEGER, INTENT(IN) :: ngeo, ibrav, code_group, code_group_ext, nwork
-INTEGER :: i, j, igeo, alpha, ind, mn
+                        at(3,3,nstep)
+INTEGER, INTENT(IN) :: ngeo, code_group, code_group_ext, nwork, ibrav
+INTEGER :: alpha, ind, mn
 LOGICAL :: check_group_ibrav
 
 WRITE(stdout,'(/,20x,40("-"),/)')
@@ -820,13 +847,13 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
 !
         CALL piezo_ij_bp(1, 1, ngeo, epsil_geo, tot_b_phase, at )
         CALL piezo_ij_bp(1, 2, ngeo, epsil_geo(1,1,ngeo+1), &
-                                                 tot_b_phase(1,ngeo+1), at )
+                                       tot_b_phase(1,ngeo+1), at(1,1,2) )
         CALL piezo_ij_bp(1, 3, ngeo, epsil_geo(1,1,2*ngeo+1), &
-                                                 tot_b_phase(1,2*ngeo+1), at )
+                                       tot_b_phase(1,2*ngeo+1), at(1,1,3) )
         CALL piezo_ij_bp(3, 5, ngeo, epsil_geo(1,1,4*ngeo+1), &
-                                                 tot_b_phase(1,4*ngeo+1), at)
+                                       tot_b_phase(1,4*ngeo+1), at(1,1,5) )
         CALL piezo_ij_bp(2, 6, ngeo, epsil_geo(1,1,5*ngeo+1), &
-                                                 tot_b_phase(1,5*ngeo+1), at )
+                                       tot_b_phase(1,5*ngeo+1), at(1,1,6) )
 
         IF (ibrav==-12.OR.ibrav==-13) THEN
 !
@@ -840,13 +867,13 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
 
            CALL piezo_ij_bp(3, 1, ngeo, epsil_geo, tot_b_phase, at)
            CALL piezo_ij_bp(3, 2, ngeo, epsil_geo(1,1,ngeo+1), &
-                                                 tot_b_phase(1,ngeo+1),at)
+                                     tot_b_phase(1,ngeo+1),at(1,1,2))
            CALL piezo_ij_bp(3, 3, ngeo, epsil_geo(1,1,2*ngeo+1), &
-                                     tot_b_phase(1,2*ngeo+1), at)
+                                     tot_b_phase(1,2*ngeo+1), at(1,1,3))
            CALL piezo_ij_bp(2, 4, ngeo, epsil_geo(1,1,3*ngeo+1), &
-                                     tot_b_phase(1,3*ngeo+1), at)
+                                     tot_b_phase(1,3*ngeo+1), at(1,1,4))
            CALL piezo_ij_bp(1, 5, ngeo, epsil_geo(1,1,4*ngeo+1), &
-                                     tot_b_phase(1,4*ngeo+1), at)
+                                     tot_b_phase(1,4*ngeo+1), at(1,1,5))
 
         ELSE
 !
@@ -858,13 +885,13 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
 !
            CALL piezo_ij_bp(2, 1, ngeo, epsil_geo, tot_b_phase, at)
            CALL piezo_ij_bp(2, 2, ngeo, epsil_geo(1,1,ngeo+1), &
-                           tot_b_phase(1,ngeo+1), at)
+                                        tot_b_phase(1,ngeo+1), at(1,1,2) )
            CALL piezo_ij_bp(2, 3, ngeo, epsil_geo(1,1,2*ngeo+1), &
-                                            tot_b_phase(1,2*ngeo+1), at)
+                                        tot_b_phase(1,2*ngeo+1), at(1,1,3) )
            CALL piezo_ij_bp(3, 4, ngeo, epsil_geo(1,1,3*ngeo+1), &
-                                            tot_b_phase(1,3*ngeo+1), at)
+                                        tot_b_phase(1,3*ngeo+1), at(1,1,4) )
            CALL piezo_ij_bp(1, 6, ngeo, epsil_geo(1,1,5*ngeo+1), &
-                                            tot_b_phase(1,5*ngeo+1), at)
+                                        tot_b_phase(1,5*ngeo+1), at(1,1,6) )
 
         ENDIF
      CASE(4)
@@ -872,11 +899,11 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
 !  C_2   Monoclinic
 !
         CALL piezo_ij_bp(1, 4, ngeo, epsil_geo(1,1,3*ngeo+1), &
-                                              tot_b_phase(1,3*ngeo+1), at)
+                                       tot_b_phase(1,3*ngeo+1), at(1,1,4))
         CALL piezo_ij_bp(2, 5, ngeo, epsil_geo(1,1,4*ngeo+1), &
-                                              tot_b_phase(1,4*ngeo+1), at)
+                                       tot_b_phase(1,4*ngeo+1), at(1,1,5))
         CALL piezo_ij_bp(3, 6, ngeo, epsil_geo(1,1,5*ngeo+1), &
-                                              tot_b_phase(1,5*ngeo+1), at)
+                                       tot_b_phase(1,5*ngeo+1), at(1,1,6))
 
         IF (ibrav==-12.OR.ibrav==-13) THEN
 !
@@ -886,16 +913,15 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
 !            WRITE(stdout,'(5x,"( e21  e22  e23   .   e25   .  )")') 
 !            WRITE(stdout,'(5x,"(  .    .    .   e34   .   e36 )")') 
 
-           CALL piezo_ij_bp(2, 1, ngeo, epsil_geo(1,1,1), &
-                                              tot_b_phase(1,1), at)
+           CALL piezo_ij_bp(2, 1, ngeo, epsil_geo, tot_b_phase, at)
            CALL piezo_ij_bp(2, 2, ngeo, epsil_geo(1,1,ngeo+1),   &       
-                                              tot_b_phase(1,ngeo+1), at)
+                                       tot_b_phase(1,ngeo+1), at(1,1,2) )
            CALL piezo_ij_bp(2, 3, ngeo, epsil_geo(1,1,2*ngeo+1), &
-                                              tot_b_phase(1,2*ngeo+1), at)
+                                       tot_b_phase(1,2*ngeo+1), at(1,1,3) )
            CALL piezo_ij_bp(1, 6, ngeo, epsil_geo(1,1,5*ngeo+1), &
-                                              tot_b_phase(1,5*ngeo+1), at)
+                                       tot_b_phase(1,5*ngeo+1), at(1,1,6) )
            CALL piezo_ij_bp(3, 4, ngeo, epsil_geo(1,1,3*ngeo+1), &
-                                              tot_b_phase(1,3*ngeo+1), at)
+                                       tot_b_phase(1,3*ngeo+1), at(1,1,4) )
         ELSE
 !
 !   c-unique. The C_2 axis if x3.
@@ -904,17 +930,15 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
 !            WRITE(stdout,'(5x,"(  .    .    .   e24  e25   .  )")') 
 !            WRITE(stdout,'(5x,"( e31  e32  e33   .    .   e36 )")') 
 !
-            CALL piezo_ij_bp(3, 1, ngeo, epsil_geo(1,1,1),        &
-                                               tot_b_phase(1,1), at)
+            CALL piezo_ij_bp(3, 1, ngeo, epsil_geo, tot_b_phase, at)
             CALL piezo_ij_bp(3, 2, ngeo, epsil_geo(1,1,ngeo+1),   &
-                                               tot_b_phase(1,ngeo+1), at)
+                                       tot_b_phase(1,ngeo+1), at(1,1,2) )
             CALL piezo_ij_bp(3, 3, ngeo, epsil_geo(1,1,2*ngeo+1), &
-                                      tot_b_phase(1,2*ngeo+1), at)
+                                       tot_b_phase(1,2*ngeo+1), at(1,1,3) )
             CALL piezo_ij_bp(1, 5, ngeo, epsil_geo(1,1,4*ngeo+1), &
-                                      tot_b_phase(1,4*ngeo+1), at)
+                                       tot_b_phase(1,4*ngeo+1), at(1,1,5) )
             CALL piezo_ij_bp(2, 4, ngeo, epsil_geo(1,1,3*ngeo+1), &
-                                      tot_b_phase(1,3*ngeo+1), at)
-
+                                       tot_b_phase(1,3*ngeo+1), at(1,1,4) )
          ENDIF
 
       CASE(5) 
@@ -934,12 +958,12 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
             CALL piezo_ij_bp(3, 1, ngeo, epsil_geo, tot_b_phase, at)
             e_piezo_tensor(3,2) = -e_piezo_tensor(3,1)
             CALL piezo_ij_bp(3, 3, ngeo, epsil_geo(1,1,ngeo+1),  & 
-                                             tot_b_phase(1,ngeo+1), at)
+                                       tot_b_phase(1,ngeo+1), at(1,1,2) )
             CALL piezo_ij_bp(1, 4, ngeo, epsil_geo(1,1,2*ngeo+1), &
-                                             tot_b_phase(1,2*ngeo+1), at)
+                                       tot_b_phase(1,2*ngeo+1), at(1,1,3) )
             e_piezo_tensor(2,5) = -e_piezo_tensor(1,4)
             CALL piezo_ij_bp(2, 4, ngeo, epsil_geo(1,1,2*ngeo+1), &
-                                             tot_b_phase(1,2*ngeo+1), at)
+                                       tot_b_phase(1,2*ngeo+1), at(1,1,3) )
             e_piezo_tensor(1,5) = e_piezo_tensor(2,4)
 
       CASE(6,7)
@@ -953,12 +977,12 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
         CALL piezo_ij_bp(3, 1, ngeo, epsil_geo, tot_b_phase, at)
         e_piezo_tensor(3,2) = e_piezo_tensor(3,1)
         CALL piezo_ij_bp(3, 3, ngeo, epsil_geo(1,1,ngeo+1), &
-                                                tot_b_phase(1,ngeo+1), at)
+                                       tot_b_phase(1,ngeo+1), at(1,1,2) )
         CALL piezo_ij_bp(1, 4, ngeo, epsil_geo(1,1,2*ngeo+1), &
-                                                tot_b_phase(1,2*ngeo+1), at)
+                                       tot_b_phase(1,2*ngeo+1), at(1,1,3) )
         e_piezo_tensor(2,5) = -e_piezo_tensor(1,4)
         CALL piezo_ij_bp(2, 4, ngeo, epsil_geo(1,1,2*ngeo+1), &
-                                                tot_b_phase(1,2*ngeo+1), at)
+                                       tot_b_phase(1,2*ngeo+1), at(1,1,3) )
         e_piezo_tensor(1,5) = e_piezo_tensor(2,4)
      CASE(8)
 !
@@ -968,12 +992,11 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
 !         WRITE(stdout,'(5x,"(  .    .    .    .   e25   .  )")') 
 !         WRITE(stdout,'(5x,"(  .    .    .    .    .   e36 )")') 
 
-        CALL piezo_ij_bp(1, 4, ngeo, epsil_geo(1,1,1), tot_b_phase(1,1), at)
+        CALL piezo_ij_bp(1, 4, ngeo, epsil_geo, tot_b_phase, at)
         CALL piezo_ij_bp(2, 5, ngeo, epsil_geo(1,1,ngeo+1), &
-                                                   tot_b_phase(1,ngeo+1), at)
+                                       tot_b_phase(1,ngeo+1), at(1,1,2) )
         CALL piezo_ij_bp(3, 6, ngeo, epsil_geo(1,1,2*ngeo+1), &
-                                                 tot_b_phase(1,2*ngeo+1), at)
-
+                                       tot_b_phase(1,2*ngeo+1), at(1,1,3) )
       CASE(9)
 !
 ! D_3  Trigonal 
@@ -986,9 +1009,8 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
         e_piezo_tensor(1,2) = -e_piezo_tensor(1,1)
         e_piezo_tensor(2,6) = -e_piezo_tensor(1,1)
         CALL piezo_ij_bp(1, 4, ngeo, epsil_geo(1,1,ngeo+1), &
-                                            tot_b_phase(1,ngeo+1), at)
+                                       tot_b_phase(1,ngeo+1), at(1,1,2) )
         e_piezo_tensor(2,5) = -e_piezo_tensor(1,4)
-
      CASE(10,11)
 !
 ! D_4  tetragonal, D_6 hexagonal
@@ -997,7 +1019,7 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
 !         WRITE(stdout,'(5x,"(  .    .    .    .  -e14   .  )")') 
 !         WRITE(stdout,'(5x,"(  .    .    .    .    .    .  )")') 
 
-        CALL piezo_ij_bp(1, 4, ngeo, epsil_geo(1,1,1), tot_b_phase(1,1), at)
+        CALL piezo_ij_bp(1, 4, ngeo, epsil_geo, tot_b_phase, at)
         e_piezo_tensor(2,5) = -e_piezo_tensor(1,4)
 
      CASE(12)
@@ -1008,15 +1030,15 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
 !         WRITE(stdout,'(5x,"(  .    .    .   e24   .    .  )")') 
 !         WRITE(stdout,'(5x,"( e31  e32  e33   .    .    .  )")') 
 
-        CALL piezo_ij_bp(3, 1, ngeo, epsil_geo(1,1,1), tot_b_phase(1,1), at)
+        CALL piezo_ij_bp(3, 1, ngeo, epsil_geo, tot_b_phase, at)
         CALL piezo_ij_bp(3, 2, ngeo, epsil_geo(1,1,ngeo+1), &
-                                                tot_b_phase(1,ngeo+1), at)
+                                       tot_b_phase(1,ngeo+1), at(1,1,2) )
         CALL piezo_ij_bp(3, 3, ngeo, epsil_geo(1,1,2*ngeo+1), &
-                                                tot_b_phase(1,2*ngeo+1), at)
+                                       tot_b_phase(1,2*ngeo+1), at(1,1,3) )
         CALL piezo_ij_bp(2, 4, ngeo, epsil_geo(1,1,3*ngeo+1), &
-                                                tot_b_phase(1,3*ngeo+1), at)
+                                       tot_b_phase(1,3*ngeo+1), at(1,1,4) )
         CALL piezo_ij_bp(1, 5, ngeo, epsil_geo(1,1,4*ngeo+1), &
-                                                tot_b_phase(1,4*ngeo+1), at)
+                                       tot_b_phase(1,4*ngeo+1), at(1,1,5) )
 
      CASE(13)
 !
@@ -1050,9 +1072,9 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
         CALL piezo_ij_bp(3, 1, ngeo, epsil_geo, tot_b_phase, at)
         e_piezo_tensor(3,2) = e_piezo_tensor(3,1)
         CALL piezo_ij_bp(3, 3, ngeo, epsil_geo(1,1,ngeo+1), &
-                                               tot_b_phase(1,ngeo+1), at)
+                                       tot_b_phase(1,ngeo+1), at(1,1,2) )
         CALL piezo_ij_bp(1, 5, ngeo, epsil_geo(1,1,2*ngeo+1), &
-                                                tot_b_phase(1,2*ngeo+1), at)
+                                       tot_b_phase(1,2*ngeo+1), at(1,1,3) )
         e_piezo_tensor(2,4) = e_piezo_tensor(1,5)
 
      CASE(14,15)
@@ -1067,11 +1089,10 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
         e_piezo_tensor(3,1) = e_piezo_tensor(3,1) * 0.5_DP
         e_piezo_tensor(3,2) = e_piezo_tensor(3,1)
         CALL piezo_ij_bp(3, 3, ngeo, epsil_geo(1,1,ngeo+1), &
-                                                  tot_b_phase(1,ngeo+1), at)
+                                       tot_b_phase(1,ngeo+1), at(1,1,2) )
         CALL piezo_ij_bp(1, 5, ngeo, epsil_geo(1,1,2*ngeo+1), &
-                                                  tot_b_phase(1,2*ngeo+1), at)
+                                       tot_b_phase(1,2*ngeo+1), at(1,1,3) )
         e_piezo_tensor(2,4) = e_piezo_tensor(1,5)
-
      CASE(17)
 !
 ! C_3h hexagonal
@@ -1085,7 +1106,7 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
         e_piezo_tensor(2,6) = -e_piezo_tensor(1,1)
         CALL piezo_ij_bp(2, 1, ngeo, epsil_geo, tot_b_phase, at)
         e_piezo_tensor(2,2) = -e_piezo_tensor(2,1)
-        e_piezo_tensor(1,6) = e_piezo_tensor(2,1)
+        e_piezo_tensor(1,6) =  e_piezo_tensor(2,1)
 
       CASE(21)
 !
@@ -1126,7 +1147,7 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
         CALL piezo_ij_bp(1, 4, ngeo, epsil_geo, tot_b_phase, at)
         e_piezo_tensor(2,5) = e_piezo_tensor(1,4)
         CALL piezo_ij_bp(3, 6, ngeo, epsil_geo(1,1,ngeo+1), &
-                           tot_b_phase(1,ngeo+1), at)
+                                       tot_b_phase(1,ngeo+1), at(1,1,2))
 
      CASE(26)
 !
@@ -1139,13 +1160,13 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
         CALL piezo_ij_bp(3, 1, ngeo, epsil_geo, tot_b_phase, at)
         e_piezo_tensor(3,2) = -e_piezo_tensor(3,1)
         CALL piezo_ij_bp(1, 4, ngeo, epsil_geo(1,1,ngeo+1), &
-                                               tot_b_phase(1,ngeo+1), at)
+                                       tot_b_phase(1,ngeo+1), at(1,1,2))
         e_piezo_tensor(2,5) = e_piezo_tensor(1,4)
         CALL piezo_ij_bp(2, 4, ngeo, epsil_geo(1,1,ngeo+1), &
-                                                   tot_b_phase(1,ngeo+1), at)
+                                       tot_b_phase(1,ngeo+1), at(1,1,2))
         e_piezo_tensor(1,5) = -e_piezo_tensor(2,4)
         CALL piezo_ij_bp(3, 6, ngeo, epsil_geo(1,1,2*ngeo+1), &
-                                             tot_b_phase(1,2*ngeo+1), at)
+                                       tot_b_phase(1,2*ngeo+1), at(1,1,3))
 
      CASE(28,30)
 !
@@ -1155,9 +1176,23 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
 !             WRITE(stdout,'(5x,"(  .    .    .    .   e14   .  )")') 
 !             WRITE(stdout,'(5x,"(  .    .    .    .    .   e14 )")') 
 !
-        CALL piezo_ij_bp(1, 4, ngeo, epsil_geo, tot_b_phase, at)
-        e_piezo_tensor(2,5) = e_piezo_tensor(1,4)
-        e_piezo_tensor(3,6) = e_piezo_tensor(1,4)
+!   This is for strain F3
+!
+!        CALL piezo_ij_bp(1, 4, ngeo, epsil_geo, tot_b_phase, at)
+!        e_piezo_tensor(2,5) = e_piezo_tensor(1,4)
+!        e_piezo_tensor(3,6) = e_piezo_tensor(1,4)
+!
+!   This is for strain G
+!
+!        CALL piezo_ij_bp(3, 6, ngeo, epsil_geo, tot_b_phase, at)
+!        e_piezo_tensor(1,4) = e_piezo_tensor(3,6)
+!        e_piezo_tensor(2,5) = e_piezo_tensor(3,6)
+!
+!   This is for strain H
+!
+        CALL piezo_ij_bp(2, 5, ngeo, epsil_geo, tot_b_phase, at)
+        e_piezo_tensor(1,4) = e_piezo_tensor(2,5)
+        e_piezo_tensor(3,6) = e_piezo_tensor(2,5)
      CASE(31)
 !
 !  O cubic. In this case all components vanish.
@@ -1170,7 +1205,7 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
            ind = ngeo * (mn-1)
            DO alpha=1,3
               CALL piezo_ij_bp(alpha, mn, ngeo, epsil_geo(1,1,ind+1), &
-                                             tot_b_phase(1,ind+1), at)
+                                        tot_b_phase(1,ind+1), at(1,1,mn))
            ENDDO
         ENDDO
   END SELECT
@@ -1179,7 +1214,7 @@ ELSE
       ind = ngeo * (mn-1)
       DO alpha=1,3
          CALL piezo_ij_bp(alpha, mn, ngeo, epsil_geo(1,1,ind+1), &
-                                        tot_b_phase(1,ind+1), at)
+                                        tot_b_phase(1,ind+1), at(1,1,mn))
       ENDDO
    ENDDO
 ENDIF
@@ -1528,7 +1563,7 @@ REAL(DP) :: x(ngeo), y(ngeo)
 mnin=mn
 CALL voigt_extract_indices(m,n,mnin)
 WRITE(stdout,'("Piezoelectric_tensor(",i1,",",i1,"): &
-                    &strain,    polarization")') ialpha, mn
+                    &strain       polarization")') ialpha, mn
 DO igeo=1,ngeo
    x(igeo)=epsil_geo(m,n,igeo)
    y(igeo)=polar_geo(ialpha,igeo)
@@ -1672,9 +1707,9 @@ SELECT CASE (code_group)
 !
       WRITE(stdout,'(/,5x,"It requires two strains: e1 and e4")')
       nstrain=2
-   CASE (10,11,28,30)
+   CASE (10,11)
 !
-! D_4  tetragonal, D_6 hexagonal, T, T_d cubic
+! D_4  tetragonal, D_6 hexagonal
 !
       WRITE(stdout,'(/,5x,"It requires one strain: e4")')
       nstrain=1
@@ -1709,6 +1744,22 @@ SELECT CASE (code_group)
 !
       WRITE(stdout,'(/,5x,"It requires three strains: e1, e4, and e6")')
       nstrain=3
+   CASE (28,30)
+!
+! T, T_d cubic
+!
+!    This is for F3 strain
+!
+!      WRITE(stdout,'(/,5x,"It requires one strain: (0,0,0,-e,e,e)")')
+!
+!    This is for G strain
+!
+!      WRITE(stdout,'(/,5x,"It requires one strain: e6")')
+!
+!    This is for H strain 
+!
+      WRITE(stdout,'(/,5x,"It requires one strain: e5")')
+      nstrain=1
    CASE DEFAULT  ! CASE(1,3,4)
 !
 !  C_1, C_s, C_2 
@@ -1790,95 +1841,104 @@ END SUBROUTINE compute_polarization_equil
 SUBROUTINE proper_improper_piezo(polar, piezo_in, piezo_out, dir)
 !--------------------------------------------------------------------------
 !
-! This routine receives the piezoelectric tensor piezo_in which
-! is in the proper or improper form and transforms it in the other
-! form using the formula
-! \tilde e_ijk = e_ijk + \delta_jk P_i - \delta_ij P_k
-! or the inverse
-! e_ijk = \tilde e_ijk - \delta_jk P_i + \delta_ij P_k
+! This routine receives the piezoelectric tensor piezo_in
+! which is in the proper or improper form and transforms it in the other
+! form using the formula (dir +1)
+! e_ijk = \tilde e_ijk - \delta_jk P_i + 0.5 * (\delta_ij P_k + \delta_{ik} P_j)
+! or the inverse (dir=-1)
+! \tilde e_ijk = e_ijk + \delta_jk P_i - 0.5 * (\delta_ij P_k + \delta_{ik} P_j)
 ! where P is the polarization, \tilde e_ijk is the proper piezoelectric
 ! tensor and e_ijk is the improper one. Piezo_in is the proper piezoelectric
-! tensor if dir=1 or the improper one if dir=-1. piezo_out is the
-! other tensor. Both tensors in input and output are 3x6 matrices in 
-! Voigt notation.
-! 
+! tensor if dir=1 or the improper one if dir=-1. piezo_out is the other 
+! tensor. Both tensors in input and output are 3x6 matrices in Voigt notation.
 !
 USE kinds, ONLY : DP
-USE voigt, ONLY : to_voigt3
 IMPLICIT NONE
 
 INTEGER, INTENT(IN) :: dir
 REAL(DP), INTENT(INOUT)  :: polar(3), piezo_in(3,6)
 REAL(DP), INTENT(OUT) ::  piezo_out(3,6)
 
-REAL(DP) :: piezo_in_aux(3,3,3), piezo_voigt_aux(3,6)
-INTEGER :: ipol, jpol, kpol, i, m
-
-
+INTEGER :: i, m
+!
+!   First calculate the correction: symmetric formula
+!
+CALL compute_piezo_p0(polar, piezo_out)
+!
+!  add or subtract from the original vector
+!
 IF (dir==1) THEN
 !
 !  from proper to improper
 !
-   piezo_voigt_aux(:,:)=piezo_in(:,:)
    DO i=1,3
-      DO m=3,6
-         piezo_voigt_aux(i,m)=piezo_in(i,m)*2.0_DP
-      ENDDO
-   ENDDO
-   CALL to_voigt3(piezo_voigt_aux, piezo_in_aux, 1.0_DP, .FALSE.)
-   DO ipol=1,3
-      DO jpol=1,3
-         DO kpol=1,3
-            IF (jpol==kpol) &
-               piezo_in_aux(ipol,jpol,kpol) = piezo_in_aux(ipol,jpol,kpol) &
-                                                             - polar(ipol)
-            IF (ipol==jpol) &
-               piezo_in_aux(ipol,jpol,kpol) = piezo_in_aux(ipol,jpol,kpol) &
-                                                             + polar(kpol)
-         ENDDO
-      ENDDO
-   ENDDO
-   CALL to_voigt3(piezo_out, piezo_in_aux, 1.0_DP, .TRUE.)
-   DO i=1,3
-      DO m=3,6
-         piezo_out(i,m)=piezo_out(i,m)*0.5_DP
+      DO m=1,6
+         piezo_out(i,m)=piezo_in(i,m) + piezo_out(i,m)
       ENDDO
    ENDDO
 ELSEIF (dir==-1) THEN
 !
 !  from improper to proper
 !
-   piezo_voigt_aux(:,:)=piezo_in(:,:)
    DO i=1,3
-      DO m=3,6
-         piezo_voigt_aux(i,m)=piezo_in(i,m)*2.0_DP
-      ENDDO
-   ENDDO
-   CALL to_voigt3(piezo_voigt_aux, piezo_in_aux, 1.0_DP, .FALSE.)
-   DO ipol=1,3
-      DO jpol=1,3
-         DO kpol=1,3
-            IF (jpol==kpol) &
-               piezo_in_aux(ipol,jpol,kpol) = piezo_in_aux(ipol,jpol,kpol) &
-                                                               + polar(ipol)
-            IF (ipol==jpol) &
-               piezo_in_aux(ipol,jpol,kpol) = piezo_in_aux(ipol,jpol,kpol) &
-                                                               - polar(kpol)
-         ENDDO
-      ENDDO
-   ENDDO
-   CALL to_voigt3(piezo_out, piezo_in_aux, 1.0_DP, .TRUE.)
-   DO i=1,3
-      DO m=3,6
-         piezo_out(i,m)=piezo_out(i,m)*0.5_DP
+      DO m=1,6
+         piezo_out(i,m)=piezo_in(i,m) - piezo_out(i,m)
       ENDDO
    ENDDO
 ELSE
-   CALL errore('proper_improper_piezo','wrong dir',1)
+   CALL errore('proper_improper_piezo','wrong direction',1)
 ENDIF
 
 RETURN
 END SUBROUTINE proper_improper_piezo
+
+!--------------------------------------------------------------------------
+SUBROUTINE compute_piezo_p0(polar, piezo_out)
+!--------------------------------------------------------------------------
+!
+! This routine receives the spontaneous polarization of a solid
+! and sets the 3x6 tensor that should be subtracted to the improper 
+! piezoelectric tensor to obtain the proper one.
+! We use the symmetric formula
+! \tilde e_ijk =  -\delta_jk P_i + 0.5 * (\delta_ij P_k + \delta_ik P_j)
+! where P is the polarization
+! piezo_out is the output correction tensor.  
+!
+USE kinds, ONLY : DP
+USE voigt, ONLY : to_voigt3
+IMPLICIT NONE
+
+REAL(DP), INTENT(INOUT)  :: polar(3)
+REAL(DP), INTENT(OUT) ::  piezo_out(3,6)
+
+REAL(DP) :: piezo_aux(3,3,3)
+INTEGER :: ipol, jpol, kpol
+!
+!  First compute the correction term in 3x3x3 form
+!
+piezo_aux=0.0_DP
+DO ipol=1,3
+   DO jpol=1,3
+      DO kpol=1,3
+         IF (jpol==kpol) &
+            piezo_aux(ipol,jpol,kpol) = piezo_aux(ipol,jpol,kpol) &
+                                                         - polar(ipol)
+         IF (ipol==jpol) &
+            piezo_aux(ipol,jpol,kpol) = piezo_aux(ipol,jpol,kpol) &
+                                                         + 0.5_DP*polar(kpol)
+         IF (ipol==kpol) &
+            piezo_aux(ipol,jpol,kpol) = piezo_aux(ipol,jpol,kpol) &
+                                                         + 0.5_DP*polar(jpol)
+      ENDDO
+   ENDDO
+ENDDO
+!
+!  then pass to the 3x6 Voigt notation
+!
+CALL to_voigt3(piezo_out, piezo_aux, 1.0_DP, .TRUE.)
+
+RETURN
+END SUBROUTINE compute_piezo_p0
 !
 !-------------------------------------------------------------------------
 SUBROUTINE write_piezo_tensor_on_file(temp, ntemp, ibrav, code_group, &
@@ -2906,13 +2966,12 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
         strain_list(1) = 'C '
         strain_list(2) = 'I '
 
-     CASE(10,11,28,30)
+     CASE(10,11)
 !
-!  D_4, D_6, T, T_d
+!  D_4, D_6
 !
         nstep = 1
         strain_list(1) = 'I '
-
      CASE(12)
 !
 !   C_2v
@@ -2964,6 +3023,14 @@ IF (check_group_ibrav(code_group, ibrav)) THEN
         strain_list(2) = 'I '
         strain_list(3) = 'G '
 
+     CASE(28,30)
+!
+!  T, T_d
+!
+        nstep = 1
+!        strain_list(1)= 'F3'
+!        strain_list(1)= 'G '
+        strain_list(1)= 'H '
      CASE DEFAULT   ! CASE(1,3,4)
 !
 !  This is valid for C_1,  C_s, C_2 

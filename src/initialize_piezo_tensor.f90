@@ -25,21 +25,26 @@ USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, epsil_geo,&
                                       nstep_ec, min_y, lcm_ec, epsil_y, old_ec,&
                                       stypec, int_ngeo_ec, int_step_ngeo_ec,&
                                       ninternal_ec, elastic_algorithm,     &
-                                      tau_acc, el_con_tau_crys_geo
+                                      tau_acc, el_con_tau_crys_geo,        &
+                                      el_con_omega_geo,                    &
+                                      el_con_at_geo, el_con_at_geo_adv
 USE control_piezoelectric_tensor, ONLY : e_piezo_tensor_relax_geo,     &
                                          e_piezo_tensor_fi_geo,        &
                                          dtau_dint_pt, dint_depsilon_geo, &
                                          decompose_piezo, piezo_zeu_geo
 USE elastic_constants,   ONLY : epsilon_voigt, epsilon_geo, sigma_geo
+USE rotate,              ONLY : rotate_vect
 USE strain_mod,          ONLY : trans_epsilon, set_strain_adv
 USE piezoelectric_tensor, ONLY : allocate_piezo, set_piezo_strain_list
 USE rap_point_group,     ONLY : code_group
 IMPLICIT NONE
 INTEGER, INTENT(IN)  :: ngeom
 INTEGER, INTENT(OUT) :: nwork
-REAL(DP) :: epsilon_min, epsil, tot_mass, sumdisp
+REAL(DP) :: epsilon_min, epsil, tot_mass, sumdisp, omega_dum, &
+            epsilon_voigt_dum(3,3), rot_mat_dum(3,3),         &
+            el_con_celldm_geo_adv(6), at_rot(3,3)
 INTEGER :: igeo, iwork, istep, nstep, nstep_tot, igeom, istart, na, ivar, &
-           iwork_base, ipol, imove
+           iwork_base, ipol, imove, el_con_ibrav_geo_adv, jpol
 CHARACTER(LEN=2) :: strain_list(6)
 LOGICAL :: flag
 REAL(DP) :: compute_omega_geo
@@ -95,6 +100,7 @@ ALLOCATE( tau_acc(3,nat,nwork) )
 ALLOCATE( min_y(max_nint_var,ngeo_strain,21,ngeom) )
 ALLOCATE( epsil_y(ngeo_strain,21,ngeom) )
 ALLOCATE( omega_geo(nwork) )
+ALLOCATE( el_con_at_geo_adv(3,3,nstep,ngeom) )
 
 CALL allocate_ph_gamma(nwork)
 
@@ -162,6 +168,35 @@ DO igeom=1, ngeom
          CALL set_tau_acc(celldm_geo(1,istart), tau_acc(1,1,istart), &
                   uint_geo(1,istart), ngeo_strain*ninternal_ec(istep), nat, &
                   nint_var_ec(istep), istep)
+      ENDIF
+      IF (.NOT.flag) THEN
+!
+!        In the advanced case the strained vectors are not those given
+!        by latgen for the unperturbed cell, but their linear combination. 
+!        In this case we need to use this linear combination at zero strain
+!        to convert the Berry phase in polarization.
+!
+         epsil=0.0_DP
+         CALL set_strain_adv(strain_list(istep), el_con_ibrav_geo(igeom),  &
+              el_con_celldm_geo(1,igeom), epsil, &
+              epsilon_voigt_dum, el_con_ibrav_geo_adv, &
+              el_con_celldm_geo_adv, rot_mat_dum, flag )
+         CALL latgen(el_con_ibrav_geo_adv, el_con_celldm_geo_adv, &
+                     el_con_at_geo_adv(1,1,istep,igeom),   &
+                     el_con_at_geo_adv(1,2,istep,igeom),   &
+                     el_con_at_geo_adv(1,3,istep,igeom),   &
+                     omega_dum)
+!
+!   We need to bring the direct vectors in the original coordinate system
+!
+         at_rot(:,:)=el_con_at_geo_adv(:,:,istep,igeom)
+         CALL rotate_vect(rot_mat_dum, 3, at_rot, &
+                          el_con_at_geo_adv(1,1,istep,igeom), -1)
+         IF (ABS(omega_dum-el_con_omega_geo(igeom))>1.D-5) &
+            CALL errore('initialize_piezo_tensor','Problem with volume',1)
+      ELSE
+         el_con_at_geo_adv(:,:,istep,igeom)=el_con_at_geo(:,:,igeom) *  &
+                                            el_con_celldm_geo(1,igeom)
       ENDIF
    ENDDO
 ENDDO

@@ -23,7 +23,8 @@ USE control_elastic_constants, ONLY : ngeo_strain, ngeom,                 &
                               all_geometry_done_geo, &
                               epsil_geo, min_y_t, el_con_at_geo,          &
                               el_con_celldm_geo, el_con_omega_geo,        &
-                              min_yf_t, nstep_ec, nint_var_ec, stypec
+                              min_yf_t, nstep_ec, nint_var_ec, stypec,    &
+                              el_con_at_geo_adv, nstep_ec
 USE initial_conf,      ONLY : ibrav_save
 USE thermo_sym,        ONLY : code_group_save, code_group_ext_save
 USE control_atomic_pos, ONLY : max_nint_var
@@ -114,10 +115,9 @@ DO itemp = startt, lastt
          CALL compute_proper_piezo_tensor(tot_b_phase_eff,               &
               epsilon_geo_eff, work_base_eff, ngeo_strain,               &
               ibrav_save, code_group_save, code_group_ext_save,          &
-              el_con_at_geo(:,:,igeom) )
+              el_con_at_geo_adv(1,1,1,igeom), nstep_ec )
 
-         e_piezo_tensor=e_piezo_tensor * el_con_celldm_geo(1,igeom) / &
-                                           el_con_omega_geo(igeom)
+         e_piezo_tensor=e_piezo_tensor / el_con_omega_geo(igeom)
          label="Proper total piezoelectric tensor gamma_ij [ C/m^2 ]"
          fact= electron_si / (bohr_radius_si)**2
          CALL print_piezo_tensor(e_piezo_tensor, fact, label, .FALSE.)
@@ -143,10 +143,9 @@ DO itemp = startt, lastt
          CALL compute_proper_piezo_tensor(tot_b_phase_eff,               &
               epsilon_geo_eff, work_base_eff, ngeo_strain,               &
               ibrav_save, code_group_save, code_group_ext_save,          &
-              el_con_at_geo(:,:,igeom) )
+              el_con_at_geo_adv(1,1,1,igeom), nstep_ec )
 
-         e_piezo_tensor=e_piezo_tensor * el_con_celldm_geo(1,igeom) / &
-                                           el_con_omega_geo(igeom)
+         e_piezo_tensor=e_piezo_tensor / el_con_omega_geo(igeom)
          label="Proper total piezoelectric tensor gamma_ij [ C/m^2 ]"
          fact= electron_si / (bohr_radius_si)**2
          CALL print_piezo_tensor(e_piezo_tensor, fact, label, .FALSE.)

@@ -194,7 +194,7 @@ SUBROUTINE deallocate_thermo()
                              epsil_geo, all_geometry_done_geo,     &
                              found_dos_ec, found_ph_ec, tau_acc, min_y, &
                              epsil_y, min_y_t, dyde, tau_save_ec, &
-                             el_con_at_geo
+                             el_con_at_geo, el_con_at_geo_adv
   USE control_piezoelectric_tensor, ONLY : e_piezo_tensor_relax_geo, &
                              e_piezo_tensor_fi_geo, found_dos_pt,    &
                              found_ph_pt
@@ -915,6 +915,7 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (el_con_tau_crys_geo) ) DEALLOCATE( el_con_tau_crys_geo )  
   IF ( ALLOCATED (el_con_tau_geo) )   DEALLOCATE( el_con_tau_geo )  
   IF ( ALLOCATED (el_con_omega_geo) ) DEALLOCATE( el_con_omega_geo )  
+  IF ( ALLOCATED (el_con_at_geo_adv) ) DEALLOCATE( el_con_at_geo_adv ) 
 
   IF ( ALLOCATED (p1tf_noe_t) )        DEALLOCATE(p1tf_noe_t)
   IF ( ALLOCATED (p2tf_noe_t) )        DEALLOCATE(p2tf_noe_t)
