@@ -1749,22 +1749,6 @@ the polarization is not subtracted.
 calculation where the atomic positions of the equilibrium configuration
 are calculated and written on file. \texttt{ltau\_el\_cons\_from\_file=.TRUE.}
 must be used.
-If the flag \texttt{decompose\_piezo} is set to .TRUE. and the output
-of a previous \texttt{frozen\_ions=.TRUE.} calculation is on file, this
-option prints also the decomposition of the piezoelectric tensor into a
-clamped-ion and ionic constributions. This calculation requires also
-the Born effective charges written inside a dynamical matrix at the
-$\Gamma$ point of the equilibrium configuration.
-If the clamped-ion term is not found on file only the ionic contribution
-is printed and the clamped ion term is deduced from the difference with
-the relaxed piezoelectric tensor. If the Born effective charges are
-not found on file only the derivative of the internal parameters with
-respect to strain are calculated. \texttt{decompose\_piezo} works
-only for the components of the piezoelectric tensor derived for the strain
-types for which the user specifies the constraint number.
-
-
-
 
 The input variable that controls this option is:
 \begin{verbatim}
@@ -1791,6 +1775,25 @@ of the polarization (improper piezoelectric tensor) or of the Berry phase
 (proper piezoelectric tensor) with respect to strain.
 For each strain type, the number of strains used to compute each derivative 
 is \texttt{ngeo\_strain}.\\
+If the flag \texttt{decompose\_piezo} is set to .TRUE. and the output
+of a previous \texttt{frozen\_ions=.TRUE.} calculation is on file, this
+option prints also the decomposition of the piezoelectric tensor into a
+clamped-ion and ionic constributions. This calculation requires also
+the Born effective charges written inside a dynamical matrix at the
+$\Gamma$ point of the equilibrium configuration.
+If the clamped-ion term is not found on file only the ionic contribution
+is printed and the clamped ion term is deduced from the difference with
+the relaxed piezoelectric tensor. If the Born effective charges are
+not found on file only the derivative of the internal parameters with
+respect to strain are calculated. \texttt{decompose\_piezo} works
+only for the components of the piezoelectric tensor derived for the strain
+types for which the user specifies the constraint number.
+
+The \texttt{what='scf\_piezoelectric\_tensor'} option supports the
+\texttt{standard} (default) and 
+\texttt{advanced} elastic algorithms with the same meaning as explained
+for the option \texttt{what='scf\_elastic\_constants}.
+
 The input variables that control this option are:
 \begin{verbatim}
 frozen_ions: if .TRUE. the piezoelectric tensor is calculated 
