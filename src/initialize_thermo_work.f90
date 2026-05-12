@@ -41,7 +41,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
                              last_geometry_save, omega_save
   USE control_mur, ONLY : save_distorted_energies
   USE piezoelectric_tensor, ONLY : allocate_piezo
-  USE control_elastic_constants, ONLY : rot_mat, ngeom, use_free_energy,   &
+  USE control_elastic_constants, ONLY : ngeom, use_free_energy,   &
                                    elalgen, work_base, start_geometry_qha, &
                                    last_geometry_qha, elastic_algorithm,   &
                                    el_con_omega_geo, el_con_geo,           &
@@ -229,10 +229,12 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            lpart2_pw=.TRUE.
            tot_ngeo=1
            tot_ngeo_eos=tot_ngeo
+           IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
         CASE ('scf_piezomagnetic_tensor')
            lpart2_pw=.TRUE.
            tot_ngeo=1
            tot_ngeo_eos=tot_ngeo
+           IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
         CASE ('scf_polarization') 
            lpart2_pw=.TRUE.
            tot_ngeo=1

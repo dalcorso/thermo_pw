@@ -34,7 +34,7 @@ USE io_global,        ONLY : stdout
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: iwork
 
-INTEGER  :: ivec, na, ipol, jpol, ibrav, irot
+INTEGER  :: ivec, ibrav
 REAL(DP), ALLOCATABLE :: tau_ocoord(:,:)
 REAL(DP) :: rd_ht(3,3), zero, celldm_(6)
 LOGICAL  :: trd_ht
