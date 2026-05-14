@@ -2929,7 +2929,7 @@ MODULE space_groups
         WRITE(stdout,'(/,5x,"Fractional translation shift and origin &
                        &shift in crystal coordinates")')
         WRITE(stdout,'(/,6x, "PGS",6x,"FT shift &
-          &                   &Origin shift",17x,"SGS",/)')
+          &                    Origin shift",17x,"SGS",/)')
         DO isym=1,nsym
            WRITE(stdout,'(1x,a8,i4,3f8.4,4x,3f8.4,a10,i4)') &
               TRIM(sym_label(group_desc(isym))), group_desc(isym), &
@@ -6182,6 +6182,7 @@ MODULE space_groups
         ENDIF
      CASE(63)
         IF (ftmod2 < 1.D-6) THEN
+           CALL find_mirror_type(iftpar2m,imirror)
            IF (imirror==1.OR.imirror==2) THEN
               sg_sym_out=168
            ELSEIF (imirror==3) THEN
@@ -6194,6 +6195,7 @@ MODULE space_groups
         ENDIF
      CASE(64)
         IF (ftmod2 < 1.D-6) THEN
+           CALL find_mirror_type(iftpar2m,imirror)
            IF (imirror==1.OR.imirror==2) THEN
               sg_sym_out=171
            ELSEIF (imirror==3) THEN
