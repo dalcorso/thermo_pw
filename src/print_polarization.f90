@@ -34,13 +34,13 @@ ENDIF
 WRITE(stdout,'(/,5x,"In cartesian coordinates the Berry phase polarization &
                      &of this solid is:")')
 fact=omega
-WRITE(stdout,'(/,5x,"P=(", 2(f10.5,","), f10.5, "   ) e bohr/Omega ")')  &
+WRITE(stdout,'(/,5x,"P=(", 2(f10.5,","), f10.5, "   ) e a_bohr/Omega ")')  &
                                                             polar(:)*fact
 WRITE(stdout,'(/,5x,"P=(", 2(f10.5,","), f10.5, "   ) e/(a.u.)^2")') &
                                    polar(:) 
 fact= electron_si / (bohr_radius_si)**2 
 WRITE(stdout,'(/,5x,"P=(", 2(f10.5,","), f10.5, "   ) C/m^2")') &
-                                                 polar(:) * fact
+                                                 polar(:) * fact 
 IF (flag) THEN
    WRITE(stdout,'(/,5x,"Please note that only differences of polarization")')
    WRITE(stdout,'(5x,"have physical meaning. If you know that this vector")')

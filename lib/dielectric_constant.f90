@@ -37,7 +37,7 @@ SUBROUTINE write_dielectric_properties_to_file(filename, nat, epsilon_infty, &
 !  The file contains the 3x3 matrix of the high-frequency dielectric constant,
 !  the 3x3xnat file of the zeu Born effective charges for all atoms
 !  and the 3x3 matrix of the static dielectric constant
-!  The name of the file that contains these quantities is gives as 
+!  The name of the file that contains these quantities is given as 
 !  input.
 !
 !
@@ -95,7 +95,7 @@ SUBROUTINE read_dielectric_properties_from_file(filename, nat, epsilon_infty, &
 !
 !  The file contains the 3x3 matrix of the dielectric constant
 !  The 3x3xnat file of the zeu Born effective charges for all atoms
-!  The name of the file that contains these quantities is gives as 
+!  The name of the file that contains these quantities is given as 
 !  input.
 !
 !

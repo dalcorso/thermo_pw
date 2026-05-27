@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!--------------------------------------------------------------------------
 MODULE nye
+!--------------------------------------------------------------------------
 !
 !   this module contains the support routines for the shape of tensors
 !   conventions, definitions, etc.
@@ -257,14 +259,14 @@ RETURN
 END SUBROUTINE print_polar_tensor2_shape
 !
 !--------------------------------------------------------------------
-SUBROUTINE print_axial_tensor2_shape(ibrav,code_group)
+SUBROUTINE print_axial_tensor2_shape(code_group)
 !--------------------------------------------------------------------
 !
 USE io_global, ONLY : stdout
 
 IMPLICIT NONE
 
-INTEGER, INTENT(IN) :: ibrav, code_group
+INTEGER, INTENT(IN) :: code_group
 CHARACTER(LEN=11) :: group_name
 
 WRITE(stdout,'(/,5x,"Using point group ",a)') group_name(code_group)

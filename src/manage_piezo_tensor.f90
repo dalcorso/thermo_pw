@@ -18,7 +18,7 @@ USE control_elastic_constants, ONLY : ngeo_strain, frozen_ions, epsil_geo, &
                                  el_con_ibrav_geo, el_con_celldm_geo,      &
                                  el_con_at_geo, el_con_celldm_geo,         &
                                  el_con_at_geo_adv,                        &
-                                 el_con_omega_geo, epsil_geo,              &
+                                 el_con_omega_geo,                         &
                                  start_geometry_qha, last_geometry_qha,    &
                                  rot_mat, elastic_algorithm, nstep_ec
 

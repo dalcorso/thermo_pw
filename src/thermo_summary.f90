@@ -359,7 +359,7 @@ SUBROUTINE thermo_summary()
        WRITE(stdout,'(5x, "such as the magnetoelectric tensor, &
                                                          &have the form:")')
 
-       CALL print_axial_tensor2_shape(ibrav_save, a_birss_code)
+       CALL print_axial_tensor2_shape(a_birss_code)
     ENDIF
 !
 !  rank-3 polar tensors, even for time reversal, such as the piezoelectric 
@@ -513,7 +513,7 @@ SUBROUTINE thermo_summary()
                                                                &such as")')
        WRITE(stdout,'(5x, "the magnetoelectric tensor are calculated:")')
 
-       CALL print_axial_tensor2_shape(ibrav_save, a_birss_code)
+       CALL print_axial_tensor2_shape(a_birss_code)
     ENDIF
 !
 !  third rank tensor
