@@ -242,6 +242,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
 !   here all the cases that require the determination of the minimization
 !   of the energy to find the equilibrium crystal parameters
 !
+           IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
         CASE ('mur_lc')
            lpart2_pw=lel_free_energy
            do_punch=lel_free_energy
@@ -405,6 +406,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            tot_ngeo=1
            IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
 !
 !    Here all the cases that compute the free energy and minimize it
 !
@@ -683,7 +685,11 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            lpolarization=.TRUE.
            CALL allocate_piezo(nwork)
            ALLOCATE(energy_geo(nwork))
+           ALLOCATE(ibrav_geo(nwork))
+           ALLOCATE(celldm_geo(6,nwork))
            ALLOCATE(omega_geo(nwork))
+           ibrav_geo(1)=ibrav_save
+           celldm_geo(:,1)=celldm0(:)
            do_punch=.TRUE.
         CASE ('polarization_geo')
            CALL initialize_mur(nwork)
