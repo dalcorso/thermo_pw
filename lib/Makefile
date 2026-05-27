@@ -28,6 +28,8 @@ lattices.o \
 linear_solvers.o \
 linear_surfaces.o \
 magnetic_point_group.o \
+magnetization.o \
+magnetoelectric_tensor.o \
 model_free_energy.o \
 mp_asyn.o \
 numerical_diff.o \
@@ -44,6 +46,7 @@ polynomial.o \
 quadratic_surfaces.o \
 quartic_surfaces.o \
 rotate.o \
+spherical_mod.o \
 space_groups.o \
 strain.o \
 thermodynamics.o \
