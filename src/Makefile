@@ -104,6 +104,7 @@ manage_ph_run.o \
 manage_ph_symmetry.o \
 manage_polarization.o \
 manage_surface_states.o \
+manage_thermal_read.o \
 manage_syn_1.o \
 manage_syn_2.o \
 manage_sync_pw.o \
