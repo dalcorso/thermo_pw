@@ -36,7 +36,8 @@ SUBROUTINE thermo_readin()
                                    set_internal_path, set_2d_path,         &
                                    all_geometries_together, max_seconds_tpw, &
                                    lhugoniot, lgeo_from_file, lgeo_to_file, &
-                                   ltau_from_file, ltau_el_cons_from_file
+                                   ltau_from_file, ltau_el_cons_from_file, &
+                                   only_anhar
   USE data_files,           ONLY : flevdat, flfrc, flfrq, fldos, fltherm,  &
                                    flanhar, filband, flkeconv, flenergy,   &
                                    flpbs, flprojlayer, flnkconv, flgrun,   &
@@ -349,6 +350,7 @@ SUBROUTINE thermo_readin()
                             ltau_from_file,                 &
                             ltau_el_cons_from_file,         &
                             lgeo_to_file,                   &
+                            only_anhar,                     &
                             poly_degree_grun,               &
                             flpgrun, flgrun, flpsgrun,      &
                             flanhar, flelanhar, flpsanhar,  &
@@ -514,6 +516,7 @@ SUBROUTINE thermo_readin()
   nq3_d=192
   phdos_sigma=2.0_DP
   after_disp=.FALSE.
+  only_anhar=.FALSE.
   fildyn=' '
   zasr='simple'
   ltherm_dos=.TRUE.

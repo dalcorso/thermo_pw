@@ -32,7 +32,7 @@ USE ph_freq_thermodynamics, ONLY : phf_free_ener
 USE el_thermodynamics, ONLY : el_ener, el_free_ener, el_entr, el_ce
 USE anharmonic,        ONLY : el_cons_t, el_comp_t, b0_t
 USE ph_freq_anharmonic,ONLY : el_consf_t, el_compf_t, b0f_t
-USE control_thermo,    ONLY : ltherm_dos, ltherm_freq
+USE control_thermo,    ONLY : ltherm_dos, ltherm_freq, only_anhar
 USE control_eldos,     ONLY : lel_free_energy
 USE temperature,       ONLY : ntemp, temp
 USE data_files,        ONLY : flanhar, fleltherm
@@ -50,7 +50,11 @@ CHARACTER(LEN=6) :: int_to_char
 LOGICAL :: all_geometry_done, all_el_free, exst, ldummy, check_file_exists, &
            all_found, run
 
-CALL check_all_geometries_done(all_geometry_done)
+IF (only_anhar) THEN
+   all_geometry_done=.TRUE.
+ELSE
+   CALL check_all_geometries_done(all_geometry_done)
+ENDIF
 !IF (.NOT.all_geometry_done) RETURN
 IF (lel_free_energy) THEN
    CALL check_all_el_free_ener_done(all_el_free)

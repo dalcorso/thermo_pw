@@ -13,7 +13,7 @@ USE kinds,                 ONLY : DP
 USE temperature,           ONLY : ntemp, temp, ntemp_plot, itemp_plot
 USE thermo_mod,            ONLY : tot_ngeo
 USE control_thermo,        ONLY : ltherm_dos, ltherm_freq, ltherm_glob, &
-                                  lgeo_from_file
+                                  lgeo_from_file, only_anhar
 USE control_pressure,      ONLY : npress_plot, press, npress, ipress_plot 
 USE control_elastic_constants, ONLY : el_cons_qha_available, &
                                   el_consf_qha_available
@@ -45,7 +45,11 @@ LOGICAL :: all_geometry_done, all_el_free, ldummy
 
 REAL(DP), ALLOCATABLE :: temp_(:), press_(:)
 
-CALL check_all_geometries_done(all_geometry_done)
+IF (only_anhar) THEN
+   all_geometry_done=.TRUE.
+ELSE
+   CALL check_all_geometries_done(all_geometry_done)
+ENDIF
 
 IF (.NOT.all_geometry_done) RETURN
 
@@ -504,29 +508,31 @@ IF (ltherm_freq) THEN
    CALL write_ph_freq_anhar_anis_ptt()
 ENDIF
 
-WRITE(stdout,'(/,2x,76("-"))')
-WRITE(stdout,'(5x,"Computing the anharmonic properties within ")')
-WRITE(stdout,'(5x,"the QHA approximation using Gruneisen parameters.")') 
-WRITE(stdout,'(2x,76("-"),/)')
+IF (.NOT.only_anhar) THEN
+   WRITE(stdout,'(/,2x,76("-"))')
+   WRITE(stdout,'(5x,"Computing the anharmonic properties within ")')
+   WRITE(stdout,'(5x,"the QHA approximation using Gruneisen parameters.")') 
+   WRITE(stdout,'(2x,76("-"),/)')
 !
 !    calculate and plot the Gruneisen parameters along the given path
 !
-CALL write_gruneisen_band(flfrq_thermo,flvec_thermo)
-CALL set_files_for_plot(3, flfrq_thermo, filedata, filerap, &
+   CALL write_gruneisen_band(flfrq_thermo,flvec_thermo)
+   CALL set_files_for_plot(3, flfrq_thermo, filedata, filerap, &
                                       fileout, gnu_filename, filenameps, filepbs)
-CALL plotband_sub(3, filedata, filerap, fileout, gnu_filename, filenameps, filepbs)
-CALL set_files_for_plot(4, flfrq_thermo, filedata, filerap,  &
+   CALL plotband_sub(3, filedata, filerap, fileout, gnu_filename, filenameps, filepbs)
+   CALL set_files_for_plot(4, flfrq_thermo, filedata, filerap,  &
                                        fileout, gnu_filename, filenameps, filepbs)
-CALL plotband_sub(4, filedata, filerap, fileout, gnu_filename, filenameps, filepbs)
+   CALL plotband_sub(4, filedata, filerap, fileout, gnu_filename, filenameps, filepbs)
 !
 !    fit the frequencies of the dos mesh with a polynomial
 !
-CALL fit_frequencies()
+   CALL fit_frequencies()
 !
 !    calculate the Gruneisen parameters and the anharmonic quantities
 !
-CALL set_volume_b0_grun()
-CALL write_grun_anharmonic()
+   CALL set_volume_b0_grun()
+   CALL write_grun_anharmonic()
+ENDIF
 !
 !   now plot all the computed quantities
 !
@@ -556,7 +562,8 @@ USE kinds,                 ONLY : DP
 USE thermo_mod,            ONLY : tot_ngeo, energy_geo, no_ph_eos
 USE temperature,           ONLY : ntemp, temp, ntemp_plot, itemp_plot
 USE control_pressure,      ONLY : npress, npress_plot
-USE control_thermo,        ONLY : ltherm_dos, ltherm_freq, lgruneisen_gen
+USE control_thermo,        ONLY : ltherm_dos, ltherm_freq, lgruneisen_gen, &
+                                  only_anhar
 USE control_elastic_constants, ONLY : el_cons_qha_available, &
                                   el_consf_qha_available
 USE control_piezoelectric_tensor, ONLY : piezo_qha_available, &
@@ -586,7 +593,15 @@ REAL(DP), ALLOCATABLE :: phf(:)
 LOGICAL :: all_geometry_done, all_el_free, ldummy
 INTEGER :: compute_nwork, nwork_eff
 
-CALL check_all_geometries_done(all_geometry_done)
+IF (only_anhar) THEN
+!
+!  If the code arrives here all free energies have been found, skip the
+!  check on the dynamical matrices
+!
+   all_geometry_done=.TRUE.
+ELSE
+   CALL check_all_geometries_done(all_geometry_done)
+ENDIF
 IF (.NOT.all_geometry_done) RETURN
 
 IF (lel_free_energy) THEN
@@ -796,6 +811,11 @@ IF (ltherm_freq) THEN
    CALL interpolate_harmonicf_pt()
    CALL interpolate_harmonicf_ptt()
 !
+!  Compute harmonic quantities for distorted configurations that do not
+!  modify the lattice parameter.
+!
+!   CALL free_energy_for_ec()
+!
 !  if there are internal degree of freedom interpolate them here
 !
    CALL interpolate_atomic_positionsf()
@@ -874,7 +894,6 @@ CALL set_elastic_constants_d_t()
 !
 CALL set_pyro_t()
 !
-
 IF (ltherm_dos) THEN
 !
 !  calculates and writes several anharmonic quantities at the input pressure
@@ -937,7 +956,7 @@ CALL manage_plot_piezo()
 !
 !    calculate and plot the Gruneisen parameters along the given path.
 !
-IF (ggrun_recipe>1.AND..NOT.linternal_thermo) THEN
+IF (ggrun_recipe>1.AND..NOT.linternal_thermo.AND..NOT.only_anhar) THEN
    WRITE(stdout,'(/,2x,76("-"))')
    WRITE(stdout,'(5x,"Computing the anharmonic properties within ")')
    WRITE(stdout,'(5x,"the QHA approximation using Gruneisen parameters.")')

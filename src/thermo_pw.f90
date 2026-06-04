@@ -30,7 +30,7 @@ PROGRAM thermo_pw
   ! ...
 
   USE control_thermo,   ONLY : lev_syn_2, lph, lpwscf_syn_1, lectqha, &
-                               lpiezotqha, lpart2_pw
+                               lpiezotqha, lpart2_pw, only_anhar
   !
   !  variables of pw or phonon used here
   !
@@ -115,6 +115,14 @@ PROGRAM thermo_pw
      CALL manage_syn_2(nwork)
      !
   ELSEIF (lph) THEN
+     IF (only_anhar) THEN
+     !
+     !  Here we skip completely the phonon calculation, but read from
+     !  file the vibrational energy, free energy, entropy and heat capacity
+     !  This must be required from input setting only_anhar=.TRUE.
+     !   
+        CALL manage_thermal_read()
+     ELSE
      !
      !   Here we make one or several phonon calculations, using 
      !   images and running asynchronously.
@@ -125,7 +133,9 @@ PROGRAM thermo_pw
      !   charges. The management of the phonon asynchronous work is made
      !   inside the manager.
      !
-     CALL manage_ph_run()
+
+        CALL manage_ph_run()
+     ENDIF
      ! 
      !   The stop_signal stops all the calculation after each image has
      !   terminated its task even if there are still tasks to do.

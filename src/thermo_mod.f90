@@ -1615,6 +1615,11 @@ MODULE control_thermo
   LOGICAL :: after_disp=.FALSE. ! if .true. dynamical matrix files are supposed
                             ! to be already on disk. fildyn must be read
                             ! from thermo_control.
+  LOGICAL :: only_anhar=.FALSE. ! if .true. only the files in the therm_files
+                            ! directory with the vibrational thermodynamic
+                            ! functions and the energy files in restart
+                            ! are read and used to compute the QHA 
+                            ! quantities.
   LOGICAL :: lq2r=.FALSE.   ! if .true. the interatomic force constants 
                             ! are calculated and the phonon are interpolated
 

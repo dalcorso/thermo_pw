@@ -17,7 +17,7 @@ SUBROUTINE bcast_thermo_input()
                               find_ibrav, all_geometries_together,            &
                               ltherm_glob, lhugoniot, lgeo_from_file,         &
                               lgeo_to_file, lgruneisen_gen, ltau_from_file,   &
-                              ltau_el_cons_from_file
+                              ltau_el_cons_from_file, only_anhar
   USE data_files,      ONLY : flevdat, flfrc, flfrq, fldos, fltherm, flanhar, &
                               filband, flkeconv, flnkconv, flgrun, flpband,   &
                               flpgrun, flenergy, flprojlayer, flpbs, flvec,   &
@@ -244,6 +244,7 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( nq3_d, meta_ionode_id, world_comm )
   CALL mp_bcast( phdos_sigma, meta_ionode_id, world_comm )
   CALL mp_bcast( after_disp, meta_ionode_id, world_comm )
+  CALL mp_bcast( only_anhar, meta_ionode_id, world_comm )
   CALL mp_bcast( fildyn, meta_ionode_id, world_comm )
   CALL mp_bcast( zasr, meta_ionode_id, world_comm )
   CALL mp_bcast( ltherm_dos, meta_ionode_id, world_comm )
