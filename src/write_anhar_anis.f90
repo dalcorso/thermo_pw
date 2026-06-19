@@ -66,7 +66,7 @@ IF (lmurn.AND..NOT.lcubic) THEN
 !
    filename='anhar_files/'//TRIM(flanhar)//'.celldm'
    CALL add_pressure(filename)
-   WRITE(stdout,'(5x,"Reading thermal expansion tensor from file",a)') &
+   WRITE(stdout,'(5x,"Reading thermal expansion tensor from file:",/,12x,a)') &
                       TRIM(filename)
    ALLOCATE(celldm_t_(6,ntemp))
    ALLOCATE(temp_(ntemp))
@@ -802,7 +802,7 @@ IF (lmurn.AND..NOT.lcubic) THEN
 !
    filename='anhar_files/'//TRIM(flanhar)//'.celldm_ph'
    CALL add_pressure(filename)
-   WRITE(stdout,'(5x,"Reading thermal expansion tensor from file",a)') &
+   WRITE(stdout,'(5x,"Reading thermal expansion tensor from file:",/,12x,a)') &
                       TRIM(filename)
    ALLOCATE(celldm_t_(6,ntemp))
    ALLOCATE(temp_(ntemp))

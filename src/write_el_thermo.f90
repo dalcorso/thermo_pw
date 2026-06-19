@@ -213,3 +213,60 @@ CALL destroy_eldos(eldos)
 
 RETURN
 END SUBROUTINE write_el_thermo
+!
+!-----------------------------------------------------------------------
+SUBROUTINE read_el_thermo(ntemp, temp, el_ener, el_free_ener, el_entropy, &
+                       el_ce, do_read, filetherm)
+!-----------------------------------------------------------------------
+!
+!  This routine reads a file that contains the harmonic thermodynamic
+!  quantities. It must be called by all processors, only the meta_ionode
+!  reads and broadcast the thermodynamic quantities.
+!  When with_eigen is true it reads also the atomic b factor.
+!
+USE kinds,            ONLY : DP
+USE ions_base,        ONLY : nat
+USE io_global,        ONLY : meta_ionode, meta_ionode_id
+USE control_thermo,   ONLY : with_eigen
+USE mp_world,         ONLY : world_comm
+USE mp,               ONLY : mp_bcast
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ntemp
+REAL(DP), INTENT(INOUT) :: temp(ntemp), el_ener(ntemp), el_free_ener(ntemp),&
+                           el_entropy(ntemp), el_ce(ntemp)
+LOGICAL, INTENT(OUT) :: do_read
+
+CHARACTER(LEN=*) :: filetherm
+CHARACTER(LEN=256) :: filename_loc
+INTEGER :: iu_therm, idum, itemp, na, find_free_unit
+LOGICAL :: check_file_exists
+CHARACTER(LEN=6) :: int_to_char
+
+do_read=.FALSE.
+IF ( check_file_exists(filetherm) ) do_read=.TRUE.
+IF (do_read) THEN
+   IF (meta_ionode) THEN
+      iu_therm=find_free_unit()
+      OPEN (UNIT=iu_therm, FILE=TRIM(filetherm), STATUS='old',&
+                                                     FORM='formatted')
+      DO idum=1,12
+         READ(iu_therm,*)
+      ENDDO
+      DO itemp = 1, ntemp
+         READ(iu_therm, '(e16.8,4e20.12)') temp(itemp), &
+                    el_ener(itemp), el_free_ener(itemp), &
+                    el_entropy(itemp), el_ce(itemp)
+      END DO
+      CLOSE(UNIT=iu_therm, STATUS='KEEP')
+   END IF
+   CALL mp_bcast(el_ener, meta_ionode_id, world_comm)
+   CALL mp_bcast(el_free_ener, meta_ionode_id, world_comm)
+   CALL mp_bcast(el_entropy, meta_ionode_id, world_comm)
+   CALL mp_bcast(el_ce, meta_ionode_id, world_comm)
+
+END IF
+
+RETURN
+END SUBROUTINE read_el_thermo
+

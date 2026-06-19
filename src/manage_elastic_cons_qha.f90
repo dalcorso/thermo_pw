@@ -63,7 +63,7 @@ IF (lel_free_energy) THEN
    DO igeom=1, tot_ngeo
       CALL set_el_files_names(igeom)
       filedata="therm_files/"//TRIM(fleltherm)
-      CALL read_thermo(ntemp, temp, el_ener(:,igeom),           &
+      CALL read_el_thermo(ntemp, temp, el_ener(:,igeom),           &
                        el_free_ener(:,igeom), el_entr(:,igeom), &
                        el_ce(:,igeom), ldummy, filedata)
    ENDDO

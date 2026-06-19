@@ -20,7 +20,7 @@ USE thermo_mod,     ONLY : tot_ngeo
 USE temperature,    ONLY : ntemp, temp
 USE thermodynamics, ONLY : ph_ener, ph_free_ener, ph_entropy, ph_ce, &
                            ph_e0, ph_t_debye, ph_b_fact, phdos_save, &
-                           gen_phdos_save
+                           gen_phdos_save, ph_e0
 USE control_thermo, ONLY : with_eigen
 USE control_debye,  ONLY : idebye
 USE data_files,     ONLY : fltherm
@@ -42,7 +42,8 @@ IF ( igeom < 1 .OR. igeom > tot_ngeo ) CALL errore('write_thermo', &
 
 filetherm='therm_files/'//TRIM(fltherm)
 CALL read_thermo(ntemp, temp, ph_ener(1,igeom), ph_free_ener(1,igeom), &
-                 ph_entropy(1,igeom), ph_ce(1,igeom), do_read, filetherm)
+                 ph_entropy(1,igeom), ph_ce(1,igeom), ph_e0(igeom), &
+                 do_read, filetherm)
 IF (with_eigen.AND.do_read) &
    CALL read_b_factor(ntemp, ph_b_fact(1,1,1,1,igeom),filetherm) 
 IF (do_read) RETURN
@@ -154,7 +155,8 @@ IF ( igeom < 1 .OR. igeom > tot_ngeo ) CALL errore('write_thermo', &
                                                'Too many geometries',1)
 filename='therm_files/'//TRIM(fltherm)//'_ph'
 CALL read_thermo(ntemp, temp, phf_ener(1,igeom), phf_free_ener(1,igeom), &
-                 phf_entropy(1,igeom), phf_ce(1,igeom), do_read, filename)
+                 phf_entropy(1,igeom), phf_ce(1,igeom), phf_e0(igeom),   &
+                 do_read, filename)
 IF (with_eigen.AND.do_read) &
    CALL read_b_factor(ntemp, phf_b_fact(1,1,1,1,igeom),filename)
 IF (do_read) RETURN
@@ -263,7 +265,7 @@ LOGICAL  :: do_read
 filename='therm_files/'//TRIM(fltherm)//'_debye.g'//TRIM(int_to_char(igeom))
 
 CALL read_thermo(ntemp, temp, deb_energy, deb_free_energy, deb_entropy, &
-                        deb_cv, do_read, filename)
+                        deb_cv, deb_e0, do_read, filename)
 IF (do_read) RETURN
 
 IF (my_image_id /= root_image) RETURN
@@ -430,7 +432,7 @@ END SUBROUTINE write_dw_info
 !
 !-----------------------------------------------------------------------
 SUBROUTINE read_thermo(ntemp, temp, ph_ener, ph_free_ener, ph_entropy, &
-                       ph_ce, do_read, filetherm)
+                       ph_ce, ph_e0, do_read, filetherm)
 !-----------------------------------------------------------------------
 !
 !  This routine reads a file that contains the harmonic thermodynamic
@@ -448,7 +450,7 @@ USE mp,               ONLY : mp_bcast
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ntemp
 REAL(DP), INTENT(INOUT) :: temp(ntemp), ph_ener(ntemp), ph_free_ener(ntemp),&
-                           ph_entropy(ntemp), ph_ce(ntemp)
+                           ph_entropy(ntemp), ph_ce(ntemp), ph_e0
 LOGICAL, INTENT(OUT) :: do_read
 
 CHARACTER(LEN=*) :: filetherm
@@ -464,7 +466,8 @@ IF (do_read) THEN
       iu_therm=find_free_unit()
       OPEN (UNIT=iu_therm, FILE=TRIM(filetherm), STATUS='old',&
                                                      FORM='formatted')
-      DO idum=1,12
+      READ(iu_therm,'(20x, f8.5)') ph_e0
+      DO idum=1,11
          READ(iu_therm,*)
       ENDDO
       DO itemp = 1, ntemp

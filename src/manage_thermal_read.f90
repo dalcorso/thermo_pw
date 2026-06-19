@@ -16,9 +16,9 @@ USE kinds,          ONLY : DP
 USE thermo_mod,     ONLY : start_geometry, last_geometry
 USE temperature,    ONLY : ntemp, temp
 USE thermodynamics, ONLY : ph_ener, ph_free_ener, ph_entropy, ph_ce,     &
-                           ph_b_fact
+                           ph_b_fact, ph_e0
 USE ph_freq_thermodynamics, ONLY : phf_ener, phf_free_ener, phf_entropy, &
-                           phf_ce, phf_b_fact
+                           phf_ce, phf_b_fact, phf_e0
 USE control_thermo, ONLY : with_eigen, ltherm_dos, ltherm_freq
 
 USE data_files,     ONLY : fltherm
@@ -35,7 +35,8 @@ IF (ltherm_dos) THEN
 
       filetherm='therm_files/'//TRIM(fltherm)//'.g'//TRIM(int_to_char(igeom))
       CALL read_thermo(ntemp, temp, ph_ener(1,igeom), ph_free_ener(1,igeom), &
-                    ph_entropy(1,igeom), ph_ce(1,igeom), do_read, filetherm)
+                    ph_entropy(1,igeom), ph_ce(1,igeom), ph_e0(igeom), &
+                                                        do_read, filetherm)
       IF (with_eigen.AND.do_read) &
          CALL read_b_factor(ntemp, ph_b_fact(1,1,1,1,igeom),filetherm) 
       IF (.NOT.do_read) CALL errore('manage_thermo_read','problem readin',&
@@ -48,7 +49,8 @@ IF (ltherm_freq) THEN
       filetherm='therm_files/'//TRIM(fltherm)//'.g'//&
                                 TRIM(int_to_char(igeom))//'_ph'
       CALL read_thermo(ntemp, temp, phf_ener(1,igeom), phf_free_ener(1,igeom),&
-                    phf_entropy(1,igeom), phf_ce(1,igeom), do_read, filetherm)
+                    phf_entropy(1,igeom), phf_ce(1,igeom), phf_e0(igeom), &
+                    do_read, filetherm)
       IF (with_eigen.AND.do_read) &
          CALL read_b_factor(ntemp, phf_b_fact(1,1,1,1,igeom),filetherm) 
       IF (.NOT.do_read) CALL errore('manage_thermo_read','problem readin ph',&
