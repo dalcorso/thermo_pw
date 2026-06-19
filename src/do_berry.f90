@@ -37,6 +37,7 @@ SUBROUTINE do_berry ( exit_status, polar, tot_b_phase, nppl )
   USE initial_conf,     ONLY : nosym_save
   USE initial_param,    ONLY : ethr0
   USE polarization_vector,  ONLY : mod_tot
+  USE control_qe,       ONLY : many_k
   USE symm_base,        ONLY : nosym
   USE bp,               ONLY : pdl_tot, nppstr, gdir, lberry
   !
@@ -69,18 +70,20 @@ SUBROUTINE do_berry ( exit_status, polar, tot_b_phase, nppl )
      !
      nosym=nosym_save
      !
-     CALL setup ()
+     CALL setup_tpw ()
      !
-     CALL init_run()
+     CALL init_run_tpw()
      !
      !
      ! ... band structure calculation and berry phase calculation
      !
-     CALL non_scf ()
+     IF (many_k) THEN
+        CALL non_scf_tpw()
+     ELSE
+        CALL non_scf_qe_tpw()
+     ENDIF    
      !
      !   this is the phase, electronic+ionic. 
-     !
-     !
      !   the routine bp_c_phase does not bring the total phase
      !   in the standard interval [-1,1) (mod 2) or [-1/2,1/2). We do
      !   it here otherwise the derivatives of polarization might explode.

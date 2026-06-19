@@ -2899,11 +2899,16 @@ MODULE space_groups
         WRITE(stdout,'(/,6x, "PGS",4x,"Fract. transl. (all)         &
                                & Fract. transl. (no shift)",3x,"SGS",/)')
         DO isym=1,nsym
+          IF (group_desc_sg(isym) > 0.AND.group_desc_sg(isym)<174) THEN
            WRITE(stdout,'(1x,a8,i4,3f8.4,4x,3f8.4,a10,i4)') &
               TRIM(sym_label(group_desc(isym))), group_desc(isym), &
               ft(1,isym), ft(2,isym), ft(3,isym), &
               ftpar(1,isym), ftpar(2,isym), ftpar(3,isym), &
               TRIM(sym_label_sg(group_desc_sg(isym))), group_desc_sg(isym) 
+            ELSE
+                 WRITE(stdout,*) 'problem with operation', isym, &
+                                                    group_desc_sg(isym)
+           ENDIF
         END DO
 
         IF (is_centered(ibrav)) THEN
@@ -2912,11 +2917,16 @@ MODULE space_groups
            WRITE(stdout,'(/,6x, "PGS",6x,"Fract. transl. (all)       &
                                & Fract. transl. (no shift)",3x,"SGS",/)')
            DO isym=1,nsym
+              IF (group_desc_sg(isym) > 0.AND.group_desc_sg(isym)<174) THEN
               WRITE(stdout,'(1x,a8,i4,3f8.4,4x,3f8.4,a10,i4)') &
                  TRIM(sym_label(group_desc(isym))), group_desc(isym), &
                  ftc(1,isym), ftc(2,isym), ftc(3,isym), &
                  ftparc(1,isym), ftparc(2,isym), ftparc(3,isym), &
                  TRIM(sym_label_sg(group_desc_sg(isym))), group_desc_sg(isym) 
+              ELSE
+                 WRITE(stdout,*) 'problem with operation', isym, &
+                                                  group_desc_sg(isym)
+              ENDIF
            END DO
         END IF
 
@@ -2931,11 +2941,16 @@ MODULE space_groups
         WRITE(stdout,'(/,6x, "PGS",6x,"FT shift &
           &                    Origin shift",17x,"SGS",/)')
         DO isym=1,nsym
+           IF (group_desc_sg(isym) > 0.AND.group_desc_sg(isym)<174) THEN
            WRITE(stdout,'(1x,a8,i4,3f8.4,4x,3f8.4,a10,i4)') &
               TRIM(sym_label(group_desc(isym))), group_desc(isym), &
               ftperp(1,isym), ftperp(2,isym), ftperp(3,isym), &
               s0(1,isym), s0(2,isym), s0(3,isym), &
               TRIM(sym_label_sg(group_desc_sg(isym))), group_desc_sg(isym) 
+              ELSE
+                 WRITE(stdout,*) 'problem with operation', isym, &
+                                                       group_desc_sg(isym)
+              ENDIF
         END DO
 
         IF (is_centered(ibrav)) THEN
@@ -2945,11 +2960,16 @@ MODULE space_groups
            WRITE(stdout,'(/,6x, "PGS",6x,"FT shift &
               &                   Origin shift",17x,"SGS",/)')
            DO isym=1,nsym
+           IF (group_desc_sg(isym) > 0.AND.group_desc_sg(isym)<174) THEN
               WRITE(stdout,'(1x,a8,i4,3f8.4,4x,3f8.4,a10,i4)') &
                  TRIM(sym_label(group_desc(isym))), group_desc(isym), &
                  ftperpc(1,isym), ftperpc(2,isym), ftperpc(3,isym), &
                  s0c(1,isym), s0c(2,isym), s0c(3,isym), &
                  TRIM(sym_label_sg(group_desc_sg(isym))), group_desc_sg(isym) 
+              ELSE
+                 WRITE(stdout,*) 'problem with operation', isym, &
+                                                          group_desc_sg(isym)
+              ENDIF
            END DO
         ENDIF
         WRITE(stdout,*)

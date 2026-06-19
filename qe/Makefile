@@ -107,6 +107,7 @@ many_k_ph.o \
 manage_mixing.o \
 mix_pot.o \
 nh_lanczos_step.o \
+non_scf_qe_tpw.o \
 non_scf_tpw.o \
 openfilq_tpw.o \
 orthogonalize_omega.o \
@@ -149,6 +150,7 @@ set_kplusq.o \
 set_kplusq_nc.o \
 set_kup_and_kdw.o \
 setup_tpw.o \
+small_g_g.o \
 solve_e_tpw.o \
 solve_e_fpolc.o \
 solve_eq.o \
