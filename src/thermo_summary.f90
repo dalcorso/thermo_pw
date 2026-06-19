@@ -11,7 +11,8 @@ SUBROUTINE thermo_summary()
   !
   !  This routine writes a summary of the input. It writes what will
   !  be calculated, a few information on the reference configuration
-  !  read in the pw.x input, it identifies the space group and writes the
+  !  read in the pw.x input, it identifies the space group (only in the 
+  !  nonmagnetic case) and writes the
   !  form of the physical tensor to calculate. When what='plot_bz', it 
   !  plots the Brillouin zone and gives information about the BZ path, 
   !  it writes an xsf file of the structure, and the X-ray power diffraction 
@@ -188,6 +189,20 @@ SUBROUTINE thermo_summary()
           WRITE(stdout,'(5x,"for several geometries" )')
           IF (frozen_ions) WRITE(stdout,'(5x,"The ions are frozen" )')
           lpiezom=.TRUE.
+     CASE ('scf_magnetic_susceptibility') 
+          WRITE(stdout,'(5x,"Computing the magnetic susceptibility")')
+          IF (frozen_ions) WRITE(stdout,'(5x,"The ions are frozen" )')
+     CASE ('mur_lc_magnetic_susceptibility') 
+          WRITE(stdout,'(5x,"Computing the magnetic susceptibility")')
+          WRITE(stdout,'(5x,"at the minimum of the volume")')
+          IF (frozen_ions) WRITE(stdout,'(5x,"The ions are frozen" )')
+     CASE ('scf_magnetoelectric_tensor') 
+          WRITE(stdout,'(5x,"Computing the magnetoelectric tensor")')
+          IF (frozen_ions) WRITE(stdout,'(5x,"The ions are frozen" )')
+     CASE ('mur_lc_magnetoelectric_tensor') 
+          WRITE(stdout,'(5x,"Computing the magnetoelectric tensor")')
+          WRITE(stdout,'(5x,"at the minimum of the volume")')
+          IF (frozen_ions) WRITE(stdout,'(5x,"The ions are frozen" )')
      CASE ('scf_polarization') 
           WRITE(stdout,'(5x,"Computing the spontaneous polarization")')
           lpolar=.TRUE.
@@ -288,6 +303,8 @@ SUBROUTINE thermo_summary()
 !
   ibrav_group_consistent=check_group_ibrav(code_group_save, ibrav)
 
+  magnetic_sym=noncolin.AND.domag
+
   IF ( ibrav_group_consistent ) THEN
 
      CALL find_group_info_ext(nsym, sr, code_group1, code_group_ext, &
@@ -308,17 +325,21 @@ SUBROUTINE thermo_summary()
 !
      ft_(:,1:nsym)=-ft(:,1:nsym)
 
-     CALL find_space_group(ibrav, nsym, sr, ft_, at, bg, sg_number, aux_sg, &
-                                                        s01,  s02, .TRUE.)
+     IF (.NOT.magnetic_sym) THEN
+        CALL find_space_group(ibrav, nsym, sr, ft_, at, bg, sg_number, &
+                             aux_sg, s01,  s02, .TRUE.)
 
-     CALL sg_name(sg_number, 1, spaceg_name)
-     CALL sg_origin(sg_number, spaceg_name, at, s01, s02 ) 
+        CALL sg_name(sg_number, 1, spaceg_name)
+        CALL sg_origin(sg_number, spaceg_name, at, s01, s02 ) 
+     ELSE
+        spaceg_name='Not known'
+        sg_number=1
+     ENDIF
 
 !
 !---------------------------------------------------------------------------
 !  Write information on the tensors to compute
 !
-     magnetic_sym=noncolin.AND.domag
      IF (magnetic_sym) THEN
         WRITE(stdout,'(/,5x,"Magnetic point group: ", i3, 2x, a)') mag_code, &
                                       TRIM(mag_group_name(mag_code))
@@ -349,10 +370,18 @@ SUBROUTINE thermo_summary()
         WRITE(stdout,'(5x, "tensor or the thermal expansion, have the form:")')
         CALL print_polar_tensor2_shape(ibrav)
      ENDIF
+     IF (what=='scf_magnetic_susceptibility'.OR. &
+         what=='mur_lc_magnetic_susceptibility'.OR. (what=='plot_bz' &
+         .AND. magnetic_sym)) THEN
+        WRITE(stdout,'(/,5x, "Polar rank-2 tensors, such as the magnetic")')
+        WRITE(stdout,'(5x, "susceptibility, have the form:")')
+        CALL print_polar_tensor2_shape(ibrav)
+     ENDIF
 !
 !  axial rank-2 tensor:
 !
-    IF ((what=='scf_magnetoelectric_tensor'.OR. what=='plot_bz')&
+    IF ((what=='scf_magnetoelectric_tensor'.OR.                     &
+         what=='mur_lc_magnetoelectric_tensor'.OR. what=='plot_bz') &
                                           .AND.magnetic_sym) THEN
 
        WRITE(stdout,'(/,5x, "Axial rank-2 tensors odd for time reversal,")') 
@@ -506,6 +535,7 @@ SUBROUTINE thermo_summary()
 !
 !  second axial rank tensor. All components are calculated
 !
+
     IF ((what=='scf_magnetoelectric_tensor'.OR. what=='plot_bz')&
                                           .AND.magnetic_sym) THEN
 
