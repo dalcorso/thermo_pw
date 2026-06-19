@@ -19,7 +19,8 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
 !  and irr_value is not used.
 !
   USE kinds,            ONLY : DP
-  USE thermo_mod,       ONLY : what, ibrav_geo, celldm_geo, ef_geo, tau_geo
+  USE thermo_mod,       ONLY : what, ibrav_geo, celldm_geo, ef_geo, tau_geo, &
+                               bfield_geo, angle1_geo, angle2_geo
   USE control_thermo,   ONLY : outdir_thermo, ltau_from_file
   USE control_elastic_constants, ONLY : frozen_ions, use_free_energy, ngeom, &
                                tau_acc, rot_mat, elastic_algorithm
@@ -27,7 +28,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
   USE control_conv,     ONLY : ke, keden, nk_test, sigma_test
   USE control_eldos,    ONLY : lel_free_energy
   USE initial_conf,     ONLY : ibrav_save, tau_save_crys
-  USE equilibrium_conf, ONLY : at0, tau0, celldm0
+  USE equilibrium_conf, ONLY : at0, tau0, celldm0, tau0_crys
 !
 !  the library modules
 !
@@ -42,6 +43,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
   USE control_flags,    ONLY : niter, lbands, tstress
   USE cell_base,        ONLY : cell_base_init, at
   USE ions_base,        ONLY : tau, nat
+  USE noncollin_module, ONLY : bfield, i_cons, angle1, angle2
   USE gvecw,            ONLY : ecutwfc
   USE gvect,            ONLY : ecutrho
   USE gvecs,            ONLY : dual
@@ -217,6 +219,27 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
            niter=electron_maxstep
            CALL set_work_for_relaxation(iwork)
            CALL set_work_for_piezo_tensor(iwork)
+        CASE ('scf_magnetic_susceptibility',           &
+              'mur_lc_magnetic_susceptibility',        &
+              'scf_magnetoelectric_tensor',            &
+              'mur_lc_magnetoelectric_tensor')
+           niter=electron_maxstep
+           bfield(:)=bfield_geo(:,iwork)
+           angle1(:)=angle1_geo(:,iwork)
+           angle2(:)=angle2_geo(:,iwork)
+           !
+           !  For all magnetic fields we start from the geometry given in
+           !  input or the one obtained after murneghan or read it from file
+           !  if requested by the user
+           !
+           IF (ltau_from_file) THEN
+              tau(:,:)=tau_geo(:,:,iwork)
+           ELSE
+              tau=tau0_crys
+              CALL cryst_to_cart( nat, tau, at, 1 )
+           ENDIF
+           CALL set_work_for_relaxation(iwork)
+           i_cons=4
         CASE ('scf_polarization','mur_lc_polarization')
 !
 !  Initialize the QE variables for the ionic relaxation. 

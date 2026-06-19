@@ -64,7 +64,9 @@ SUBROUTINE thermo_setup()
                                    nr1_save, nr2_save, nr3_save, &
                                    nosym_save, tau_save, tau_save_crys, &
                                    omega_save, at_save, atm_save, &
-                                   start_geometry_save, last_geometry_save
+                                   start_geometry_save, last_geometry_save, &
+                                   starting_magnetization_save,             &
+                                   angle1_save, angle2_save
   USE initial_param,        ONLY : ecutwfc0, ecutrho0, ethr0
   USE equilibrium_conf,     ONLY : nr1_0, nr2_0, nr3_0
   USE thermo_sym,           ONLY : code_group_save, code_group_ext_save, &
@@ -87,7 +89,7 @@ SUBROUTINE thermo_setup()
   USE ions_base,            ONLY : nat, tau, ntyp => nsp, ityp, amass, atm, &
                                    if_pos, zv
 
-  USE lsda_mod,             ONLY : nspin
+  USE lsda_mod,             ONLY : nspin, starting_magnetization
   USE gvecw,                ONLY : ecutwfc
   USE gvect,                ONLY : ecutrho
   USE symm_base,            ONLY : nosym, nsym, sr, t_rev
@@ -96,7 +98,7 @@ SUBROUTINE thermo_setup()
   USE fft_base,             ONLY : dfftp
   USE klist,                ONLY : degauss, ltetra
   USE control_flags,        ONLY : ethr
-  USE noncollin_module,     ONLY : noncolin, domag
+  USE noncollin_module,     ONLY : noncolin, domag, angle1, angle2
   USE gnuplot,              ONLY : determine_backspace
   USE io_global,            ONLY : stdout
   USE mp_images,            ONLY : nimage
@@ -304,6 +306,13 @@ SUBROUTINE thermo_setup()
      b_birss_code = b_birss_code_group(mag_code)
      CALL find_a_birss_ext_code(nsym, sr, t_rev, a_birss_ext_code)
      CALL find_b_birss_ext_code(nsym, sr, t_rev, b_birss_ext_code)
+!
+! Save here the starting magnetization and the starting angles of the input
+! configuration
+!
+     starting_magnetization_save(1:ntyp)=starting_magnetization(1:ntyp)
+     angle1_save(1:ntyp)=angle1(1:ntyp)
+     angle2_save(1:ntyp)=angle2(1:ntyp)
   ENDIF
 !
 !   here deal with ibrav=0. The code finds ibrav and celldm and
@@ -424,6 +433,22 @@ SUBROUTINE thermo_setup()
 !
      IF (ggrun_recipe==3) ALLOCATE(ind_rec3(nvar, (nvar*(nvar+3))/2+1))
   ENDIF
+
+  IF (what=='scf_magnetic_susceptibility' .OR. &
+                  what=='mur_lc_magnetic_susceptibility') THEN
+     IF (.NOT. (magnetic_sym)) &
+        CALL errore('thermo_setup','Magnetic susceptibility requires &
+                       &noncollinear magnetic calculation', 1)
+  ENDIF
+
+  IF (what=='scf_magnetoelectric_tensor' .OR. &
+                  what=='mur_lc_magnetoelectric_tensor') THEN
+     IF (.NOT. (magnetic_sym)) &
+        CALL errore('thermo_setup','Magnetoelectric tensor requires &
+                       &noncollinear magnetic calculation', 1)
+  ENDIF
+
+
 
   RETURN
   !

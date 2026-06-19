@@ -44,7 +44,8 @@ SUBROUTINE thermo_readin()
                                    flpgrun, fl_el_cons, flpband, flvec,    &
                                    flepsilon, floptical, fleldos, fleltherm, &
                                    fldosfrq, flelanhar, flgeom, fl_piezo,  &
-                                   fl_polar, fl_dielectric, fl_piezom
+                                   fl_polar, fl_dielectric, fl_piezom,     &
+                                   fl_magsusc, fl_magnetoelec
   USE temperature,          ONLY : tmin, tmax, deltat, ntemp, ntemp_plot,  &
                                    temp_plot_=>temp_plot, itemp_plot,      &
                                    sigma_ry_=>sigma_ry
@@ -76,6 +77,7 @@ SUBROUTINE thermo_readin()
   USE control_eldos,        ONLY : deltae, ndose, nk1_d, nk2_d, nk3_d, &
                                    k1_d, k2_d, k3_d, sigmae, legauss,  &
                                    lel_free_energy, hot_electrons
+  USE control_bfield,       ONLY : ngeo_b, delta_b, dm
   USE control_grun,         ONLY : grunmin_input, grunmax_input, &
                                    temp_ph, volume_ph, celldm_ph, lv0_t, &
                                    lb0_t
@@ -124,6 +126,7 @@ SUBROUTINE thermo_readin()
                                    calculation
   USE control_ph,           ONLY : xmldyn
   USE lsda_mod,             ONLY : lsda
+  USE noncollin_module,     ONLY : noncolin
   USE ifc,                  ONLY : zasr
   USE output,               ONLY : fildyn
   USE mp_world,             ONLY : world_comm, nproc, nnode
@@ -268,6 +271,8 @@ SUBROUTINE thermo_readin()
                             fl_el_cons,                     &
                             fl_piezo,                       &
                             fl_piezom,                      &
+                            fl_magsusc,                     &
+                            fl_magnetoelec,                 &
                             fl_dielectric,                  &
                             fl_polar,                       &
                             lcm_ec,                         &
@@ -291,6 +296,12 @@ SUBROUTINE thermo_readin()
 !   scf_piezoelectric_tensor
                             decompose_piezo,                &
                             doberry,                        &
+!
+!   scf_magnetic_susceptibility
+!
+                            ngeo_b,                         &
+                            delta_b,                        &
+                            dm,                             &
 !
 !   mur_lc
 !
@@ -324,6 +335,7 @@ SUBROUTINE thermo_readin()
                             grunmin_input, grunmax_input,   &
                             volume_ph, celldm_ph, temp_ph,  &
                             with_eigen,                     &
+                            only_anhar,                     &
                             ntemp_plot, temp_plot,          &
                             poly_degree_ph,                 &
                             poly_degree_thermo,             &
@@ -350,7 +362,6 @@ SUBROUTINE thermo_readin()
                             ltau_from_file,                 &
                             ltau_el_cons_from_file,         &
                             lgeo_to_file,                   &
-                            only_anhar,                     &
                             poly_degree_grun,               &
                             flpgrun, flgrun, flpsgrun,      &
                             flanhar, flelanhar, flpsanhar,  &
@@ -536,10 +547,15 @@ SUBROUTINE thermo_readin()
   elastic_algorithm='standard'
   delta_epsilon=0.005_DP
   poly_degree=0
+  ngeo_b=4
+  delta_b=0.0001
+  dm=0.005
   fl_el_cons='output_el_cons.dat'
   fl_piezo='output_piezo.dat'
   fl_piezom='output_piezomag.dat'
+  fl_magsusc='output_mag_susc.dat'
   fl_dielectric='output_dielectric.dat'
+  fl_magnetoelec='output_magnetoelectric.dat'
   fl_polar='output_polar.dat'
   nmove=5
   move_at=0
@@ -1067,8 +1083,8 @@ SUBROUTINE thermo_readin()
 !  here check the consistency of the input variables of thermo_pw with
 !  those of pw.x
 !
-  IF (what=='piezoelectric_tensor' .OR. what=='mur_lc_piezoelectric_tensor') &
-                                                                     THEN
+  IF (what=='scf_piezoelectric_tensor' .OR. &
+                            what=='mur_lc_piezoelectric_tensor') THEN
      IF (.NOT.frozen_ions .AND. (forc_conv_thr > 5.d-5)) THEN
         WRITE(stdout,'(/,5x,"Force_conv_thr is too large for computing the &
                           &piezoelectric tensor ")')

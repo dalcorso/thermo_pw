@@ -145,6 +145,10 @@ temperature. Atomic Debye-Waller factors as a function of temperature.
 
 \item Piezoelectric tensor at zero temperature at fixed geometry.
 
+\item Magnetic susceptibility at zero temperature at fixed geometry.
+
+\item Magnetoelectric tensor at zero temperature at fixed geometry.
+
 \item Fit of the total energy as a function of the lattice parameters with
 a quadratic or quartic polynomial and determination of equilibrium lattice 
 parameters. Murnaghan or (third or fourth order) Birch-Murnaghan fit. 
@@ -176,6 +180,10 @@ at the minimum of the total energy.
 
 \item Piezoelectric tensor at zero temperature at the minimum of the
 total energy.
+
+\item Magnetic susceptibility at the minimum of the total energy.
+
+\item Magnetoelectric tensor at the minimum of the total energy.
 
 \item Frozen ions and relaxed ions zero temperature elastic constants
 in a grid of geometries.
@@ -211,6 +219,10 @@ approximation.
 \item Isothermal and isoentropic elastic constants and 
 elastic compliances as a function of temperature within the 
 ``quasi-harmonic'' approximation.
+
+\item Piezoelectric tensor in a grid of geometries and interpolation at the 
+geometry that minimizes the free energy at a given temperature and pressure
+(``quasi-static'' approximation).
 
 \item Surface band structure identification and plot of the projected bulk
 band structure.
@@ -1757,8 +1769,6 @@ nppl: the number of k points per string. In the perpendicular
       of the pw.x code.
       Default: integer 21
 \end{verbatim}
-This feature is still experimental. Pools are not available with Berry 
-phase calculations.
 
 \newpage
 {\color{coral}\section{what='scf\_piezoelectric\_tensor'}}
@@ -1835,9 +1845,72 @@ the polarization induced by an external stress, as $d_{\alpha,m}=
 for a vanishing electric field. \\
 Number of tasks for this option: \texttt{ngeo\_strain} times the number of
 strain types. \\
-This feature is still experimental. Pools are not available for Berry phase
-calculations.
+Pools are not available for Berry phase calculations.
+\newpage
+
+{\color{coral}\section{what='scf\_magnetic\_susceptibility'}}
+\color{black}
+With this option the code calculates the magnetic susceptibility 
+($\chi^M_{\alpha,\beta}$ $\alpha=1,3,\beta=1,3$) of the solid. 
+It generates a mesh of \texttt{ngeo\_b} values of the magnetic field 
+for each direction required by symmetry and computes the magnetization. 
+
+For each magnetic field, it relaxes 
+the ions to their equilibrium positions when \texttt{frozen\_ions=.FALSE.} 
+or keeps them in the original positions when \texttt{frozen\_ions=.TRUE.}. 
+Finally it fits the 
+magnetization with a linear or cubic polynomial and extracts the 
+derivative with respect to the field.
+
+The input variables that control this option are:
+\begin{verbatim}
+frozen_ions: if .TRUE. the magnetic susceptibility is calculated 
+             keeping the ions frozen in the input configuration. 
+             Default: logical .FALSE.
+ngeo_b: the number of magnetic fields configurations used 
+             for each direction. 
+             Default: integer 4
+delta_b: the interval of magnetic field between two 
+             geometries. The magnetic field is given in Rydberg units. 
+             Default: real 0.002
+dm:          A vector of size dm is added to the starting magnetization
+             vector in the direction of the magnetic field to break symmetry.
+             Starting_magnetization goes from 0.0 to 1.0 so this dm is
+             in these units. We use the same dm for all atoms with nonzero
+             starting magnetization. Moreover only the initial angles 
+             of the magnetization are changed not its magnitude.
+             Default : real 0.002
+\end{verbatim}
+Number of tasks for this option: \texttt{ngeo\_b} times the number of
+directions that need to be studied. 
 %
+\newpage
+
+{\color{coral}\section{what='scf\_magnetoelectric\_tensor'}}
+\color{black}
+With this option the code calculates the magnetoelectric tensor
+($\alpha_{\alpha,\beta}$ $\alpha=1,3,\beta=1,3$) of the solid. 
+It generates a mesh of \texttt{ngeo\_b} values of the magnetic field 
+for each direction required by the magnetic point group and after 
+converging it computes the Berry phase polarization of the system. 
+Finally it makes the derivatives of the polarization with respect 
+to the magnetic field.
+
+For each magnetic field, it relaxes 
+the ions to their equilibrium positions when \texttt{frozen\_ions=.FALSE.} 
+or keeps them in the original positions when \texttt{frozen\_ions=.TRUE.}. 
+
+Therefore the resulting magnetoelectric tensor contains both the electronic
+and ionic contribution in the first case, or only the electronic contribution
+in the second case. When using \texttt{frozen\_ions=.TRUE.} it is important
+to calculate the equilibrium atomic positions and not use those strained
+from the \texttt{thermo\_pw} input using the flag
+\texttt{ltau\_el\_cons\_from\_file} (please check the use of this 
+flag in the \texttt{what='scf\_elastic\_constants'} option.
+
+To control the grid of magnetic fields used please see the 
+\texttt{what='scf\_magnetic\_susceptibility'} option.
+
 
 \newpage
 {\color{coral}\section{what='mur\_lc'}}
@@ -2062,10 +2135,12 @@ ltau_from_file : if .TRUE. the atomic coordinates of each geometry
              directory calculated in a previous what='mur_lc' 
              calculation.
              Default : .FALSE.
-save_distorted_energy : if .TRUE. the code writes in restart directory
-             the energy files for all distorted geometries that 
-             do not change the lattice using the polynomial 
-             that interpolates the energy.
+save_distorted_energies : if .TRUE. the code writes in energy_dist 
+             directory the energy files for all distorted geometries 
+             that do not change the lattice type using the polynomial 
+             that interpolates the energy. The distorted
+             geometries are the same as those generated by
+             what='elastic_constants_geo'.
              Default : .FALSE.
 flenergy   : name of the file that contains the energy in a 
              form that can be used by gnuplot to make contour 
@@ -2153,7 +2228,6 @@ needed for the \texttt{what='scf\_elastic\_constants'} option.
 As \texttt{what='scf\_polarization'} but the calculation is made at the
 geometry that corresponds to the minimum of the Murnaghan equation. The
 Murnaghan minimization is made as described for \texttt{what='mur\_lc'}.\\
-This feature is still experimental.
 
 \newpage
 {\color{coral}\section{what='mur\_lc\_piezoelectric\_tensor'}}
@@ -2162,7 +2236,20 @@ As \texttt{what='scf\_piezoelectric\_tensor'} but the calculation
 is made at the
 geometry that minimizes the energy. The
 energy minimization is made as described for \texttt{what='mur\_lc'}. \\
-This feature is still experimental.
+
+{\color{coral}\section{what='mur\_lc\_magnetic\_susceptibility'}}
+\color{black}
+As \texttt{what='scf\_magnetic\_susceptibility'} but the calculation 
+is made at the
+geometry that minimizes the energy. The
+energy minimization is made as described for \texttt{what='mur\_lc'}. \\
+
+{\color{coral}\section{what='mur\_lc\_magnetoelectric\_tensor'}}
+\color{black}
+As \texttt{what='scf\_magnetoelectric\_tensor'} but the calculation
+is made at the
+geometry that minimizes the energy. The
+energy minimization is made as described for \texttt{what='mur\_lc'}. \\
 
 \newpage
 {\color{coral}\section{what='mur\_lc\_t'}}
@@ -2419,6 +2506,13 @@ sigma_ry(nsigma): the value of the smearing for each directory restart.
 lhugoniot     : If .TRUE. the code plots T(p) and V(p) along the 
                 Hugoniot curve.
                 Default: .FALSE.
+save_distorted_energies : if .TRUE. the code writes in energy_dist directory
+                the thermodynamic functions for all distorted geometries that 
+                do not change the lattice type using a polynomial 
+                to interpolate the thermodynamic functions. The distorted 
+                geometries are the same as those generated by 
+                what='elastic_constants_geo'.
+                Default : .FALSE.
 flgrun        : file where the Gruneisen parameters are written. 
                 Default: character(len=*) 'output_pgrun.dat'
 flpgrun       : file where the Gruneisen parameters in a plotable 
@@ -2590,6 +2684,14 @@ ltau_from_file : if .TRUE. the atomic coordinates of each
              Be careful with this flag because frozen_phonon=.TRUE.
              might not work if the coordinates have been relaxed
              by a previous run.
+             Default : .FALSE.
+only_anhar : if .TRUE. the code reads only the files of the therm_files
+             directory that contain the thermodynamic functions and 
+             computes the QHA quantities. The energies in restart directory
+             need also to be present. The dynamical matrices instead are 
+             not necessary. The typical use of this flag is together with
+             the flag save_distorted_energies=.TRUE. in a previous 
+             what='mur_lc_t' calculation.
              Default : .FALSE.
 \end{verbatim}
 %\end{tcolorbox}

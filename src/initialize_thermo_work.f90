@@ -27,10 +27,11 @@ SUBROUTINE initialize_thermo_work(nwork, part)
                              lph, lef, lpwscf_syn_1, lbands_syn_1, lq2r,   &
                              ltherm, lconv_ke_test, lconv_nk_test,    &
                              lstress, lelastic_const, lpiezoelectric_tensor, &
-                             lpiezomagnetic_tensor, &
+                             lpiezomagnetic_tensor, lmag_susc, &
                              lberry, lpolarization, lpart2_pw, do_scf_relax, &
                              ldos_syn_1, ltherm_dos, ltherm_freq, after_disp, &
-                             lectqha, ltau_from_file, lpiezotqha, lmag
+                             lectqha, ltau_from_file, lpiezotqha, lmag, &
+                             lmagnetoelec
   USE control_pwrun,  ONLY : do_punch
   USE control_conv,   ONLY : nke, ke, deltake, nkeden, deltakeden, keden, &
                              nnk, nk_test, deltank, nsigma, sigma_test,   &  
@@ -55,14 +56,18 @@ SUBROUTINE initialize_thermo_work(nwork, part)
                                    e_piezo_tensor_fi_geo,                   &
                                    d_piezo_tensor_geo, polar0_geo,          &
                                    found_dos_pt, found_ph_pt, doberry
-  USE control_piezomagnetic_tensor, ONLY : piezom_tensor_geo, &
+  USE control_piezomagnetic_tensor, ONLY : piezom_tensor_geo, mag_strain,   &
                                    mag0_geo
+  USE magnetoelectric_tensor, ONLY : set_magnetic_field_for_mt
+  USE thermo_sym, ONLY : a_birss_code
+  USE magnetization_vector, ONLY : set_magnetic_field_for_ms, check_magn_susc
+  USE control_bfield, ONLY : delta_b, ngeo_b, dm
   USE temperature,   ONLY : ntemp
   USE control_eldos, ONLY : lel_free_energy
   USE gvecw,          ONLY : ecutwfc
   USE gvect,          ONLY : ecutrho
   USE control_quadratic_energy, ONLY : nvar
-  USE ions_base,      ONLY : nat
+  USE ions_base,      ONLY : nat, ntyp => nsp
   USE lattices,       ONLY : crystal_parameters
   USE start_k,        ONLY : nk1, nk2, nk3
   USE klist,          ONLY : degauss, lgauss, ltetra
@@ -73,10 +78,15 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   INTEGER, INTENT(OUT) :: nwork
   INTEGER, INTENT(IN)  :: part
 
-  INTEGER  :: igeom, igeom_qha, ike, iden, icount, ink, isigma, iwork, &
-              iwork_tot, start_geometry1, last_geometry1, istep, nstep, ios
-  INTEGER  :: count_energies, iq, irr, start_omega, i, j
-  REAL(DP) :: compute_omega_geo, dual, kev, kedenv
+  INTEGER  :: igeom, igeom_qha, ike, iden, icount, ink, isigma, iwork,  &
+              iwork_tot, start_geometry1, last_geometry1, istep, nstep, &
+              ios
+  INTEGER  :: count_energies, iq, irr, start_omega, igeo, jgeo, ityp, ind, &
+              jpol, mag_susc_nc, magnetoelec_nc
+  REAL(DP) :: compute_omega_geo, dual, kev, kedenv, bfield_min, mag(3), &
+              mag_sph(3), bmod
+
+  LOGICAL :: do_field(3)
 !
 !  here initialize the work to do and sets to true the flags that activate
 !  the different parts of thermo_pw. Sets also the number of tasks for each
@@ -238,11 +248,16 @@ SUBROUTINE initialize_thermo_work(nwork, part)
         CASE ('scf_polarization') 
            lpart2_pw=.TRUE.
            tot_ngeo=1
+        CASE ('scf_magnetic_susceptibility') 
+           lpart2_pw=.TRUE.
+           tot_ngeo=1
+        CASE ('scf_magnetoelectric_tensor') 
+           lpart2_pw=.TRUE.
+           tot_ngeo=1
 !
 !   here all the cases that require the determination of the minimization
 !   of the energy to find the equilibrium crystal parameters
 !
-           IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
         CASE ('mur_lc')
            lpart2_pw=lel_free_energy
            do_punch=lel_free_energy
@@ -406,13 +421,40 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            tot_ngeo=1
            IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
-           IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
 !
 !    Here all the cases that compute the free energy and minimize it
 !
            IF (save_distorted_energies) THEN
               IF (meta_ionode) ios = f_mkdir_safe( 'energy_dist' )
            ENDIF
+        CASE ('mur_lc_magnetic_susceptibility') 
+           do_punch=.FALSE.
+           lev_syn_1=.TRUE.
+           lpwscf_syn_1=do_scf_relax
+           CALL initialize_mur(nwork)
+           last_geometry1=nwork
+           start_geometry=MAX(1, start_geometry_save)
+           last_geometry=MIN(nwork, last_geometry_save)
+           lpart2_pw=.TRUE.
+           tot_ngeo=1
+           tot_ngeo_eos=tot_ngeo
+           IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
+        CASE ('mur_lc_magnetoelectric_tensor') 
+           do_punch=.FALSE.
+           lev_syn_1=.TRUE.
+           lpwscf_syn_1=do_scf_relax
+           CALL initialize_mur(nwork)
+           last_geometry1=nwork
+           start_geometry=MAX(1, start_geometry_save)
+           last_geometry=MIN(nwork, last_geometry_save)
+           lpart2_pw=.TRUE.
+           tot_ngeo=1
+           tot_ngeo_eos=tot_ngeo
+           IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
         CASE ('mur_lc_t')
            lev_syn_1=.TRUE.
            CALL initialize_mur(nwork)
@@ -598,6 +640,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
 !
 !  In this part we do the phonon calculations
 !
+
      SELECT CASE (TRIM(what))
         CASE ('scf_ph',        &
               'scf_disp',      &
@@ -679,6 +722,38 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            energy_geo=0.0_DP
            lpiezomagnetic_tensor=.TRUE.
            do_punch=.TRUE.
+        CASE ('scf_magnetic_susceptibility', 'mur_lc_magnetic_susceptibility')
+           lev_syn_2=.TRUE.
+           lmag_susc=.TRUE.
+           CALL set_magnetic_field_for_ms(do_field,mag_susc_nc,ibrav_save)
+           tot_ngeo=ngeo_b*mag_susc_nc
+           nwork=tot_ngeo
+           start_geometry_qha=1
+           last_geometry_qha=1
+           ALLOCATE(energy_geo(nwork))
+           CALL set_bfield_and_angle(do_field,mag_susc_nc,nwork)
+
+           IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
+        CASE ('scf_magnetoelectric_tensor', 'mur_lc_magnetoelectric_tensor')
+           lev_syn_2=.TRUE.
+           lmagnetoelec=.TRUE.
+           lmag_susc=check_magn_susc(a_birss_code)
+           CALL set_magnetic_field_for_mt(do_field,magnetoelec_nc,&
+                                                            a_birss_code)
+           tot_ngeo=ngeo_b*magnetoelec_nc
+           nwork=tot_ngeo
+           start_geometry_qha=1
+           last_geometry_qha=1
+           ALLOCATE(energy_geo(nwork))
+!
+!   Initialize the magnetic field and the starting magnetization
+!
+           CALL set_bfield_and_angle(do_field,magnetoelec_nc,nwork)
+!
+!   allocate variables to save the polarization and the Berry phase
+!
+           CALL allocate_piezo(nwork)
+           IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
         CASE ('scf_polarization', 'mur_lc_polarization')
            CALL deallocate_basic_variables()
            nwork=1
@@ -691,6 +766,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            ibrav_geo(1)=ibrav_save
            celldm_geo(:,1)=celldm0(:)
            do_punch=.TRUE.
+           IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
         CASE ('polarization_geo')
            CALL initialize_mur(nwork)
            ALLOCATE(no_ph(nwork))
@@ -740,6 +816,8 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               'mur_lc_elastic_constants',    &
               'mur_lc_piezoelectric_tensor', &
               'mur_lc_piezomagnetic_tensor', &
+              'mur_lc_magnetic_susceptibility', &
+              'mur_lc_magnetoelectric_tensor', &
               'mur_lc_polarization' )
            DO iwork=start_geometry1,last_geometry1
               lpwscf(iwork)=.TRUE.
@@ -786,6 +864,20 @@ SUBROUTINE initialize_thermo_work(nwork, part)
         CASE( 'mur_lc' )
            DO iwork=start_geometry, last_geometry
               lpwband(iwork)=.TRUE.
+           ENDDO
+!
+!   here the case of magnetic susceptibility. We compute the magnetization
+!
+        CASE ('scf_magnetic_susceptibility', 'mur_lc_magnetic_susceptibility')
+           DO iwork=1,nwork
+              lpwscf(iwork)=.TRUE.
+              lmag(iwork)=.TRUE.
+           ENDDO
+        CASE ('scf_magnetoelectric_tensor', 'mur_lc_magnetoelectric_tensor')
+           DO iwork=1,nwork
+              lpwscf(iwork)=.TRUE.
+              lmag(iwork)=.TRUE.
+              lberry(iwork)=.TRUE.
            ENDDO
 !
 !  Here the case of elastic_constants_geo. In this case we must
@@ -2068,3 +2160,93 @@ IF (ALLOCATED(omega_geo))  DEALLOCATE(omega_geo)
 
 RETURN
 END SUBROUTINE deallocate_basic_variables
+!
+!---------------------------------------------------------------------------
+SUBROUTINE set_bfield_and_angle(do_field,mag_susc_nc,nwork)
+!---------------------------------------------------------------------------
+!
+!  This routine sets a list of magnetic fields for each direction for
+!  which do_field is .TRUE.. mag_susc_nc contains the number of magnetic
+!  fields active (from 1 to 3). nwork the total number of works
+!
+USE kinds,        ONLY : DP
+USE ions_base,    ONLY : ntyp => nsp
+USE thermo_mod,   ONLY : angle1_geo, angle2_geo, bfield_geo
+USE initial_conf, ONLY : starting_magnetization_save, angle1_save, &
+                         angle2_save
+USE spherical_mod, ONLY : cartesian_to_spherical
+USE control_piezomagnetic_tensor, ONLY : mag_strain
+USE control_bfield, ONLY : delta_b, ngeo_b, dm
+USE io_global, ONLY : stdout
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: mag_susc_nc, nwork
+LOGICAL, INTENT(IN) :: do_field(3)
+
+REAL(DP) :: bfield_min, bmod, mag(3), mag_sph(3)
+INTEGER :: igeo, jgeo, ipol, jpol, ind, ityp, iwork
+
+bfield_min= - delta_b * (ngeo_b - 1 ) / 2.0_DP
+ALLOCATE(bfield_geo(3, nwork))
+ALLOCATE(angle1_geo(ntyp, nwork))
+ALLOCATE(angle2_geo(ntyp, nwork))
+ALLOCATE(mag_strain(3, nwork))
+bfield_geo=0.0_DP
+angle1_geo=0.0_DP
+angle2_geo=0.0_DP
+mag_strain=0.0_DP
+DO igeo=1,ngeo_b
+   jgeo=0
+   DO jpol=1,3 
+      IF (do_field(jpol)) THEN
+         jgeo=jgeo+1
+         ind=igeo+(jgeo-1)*ngeo_b
+         bfield_geo(jpol,ind)= bfield_min + delta_b * (igeo-1)
+      ENDIF
+   ENDDO
+!
+!   prepare now the starting angle adding to the initial magnetization
+!   a small component parallel to dm
+!
+   jgeo=0.0_DP
+   DO jpol=1,3
+      IF (do_field(jpol)) THEN
+         jgeo=jgeo+1
+         ind=igeo+(jgeo-1)*ngeo_b
+         bmod = SQRT( bfield_geo(1,ind)**2    +  &
+                      bfield_geo(2,ind)**2    +  &
+                      bfield_geo(3,ind)**2 )
+         DO ityp=1,ntyp
+!
+!    only atoms with a magnetization are tilted
+!
+            IF (ABS(starting_magnetization_save(ityp))<1.D-9) CYCLE
+            mag(1) = starting_magnetization_save(ityp) * &
+                     SIN( angle1_save(ityp) ) * COS( angle2_save(ityp) )
+            mag(2) = starting_magnetization_save(ityp) * &
+                     SIN( angle1_save(ityp) ) * SIN( angle2_save(ityp) )
+            mag(3) = starting_magnetization_save(ityp) * &
+                     COS( angle1_save(ityp) )
+            mag(:) = mag(:) + dm * bfield_geo(:,ind) / bmod
+            CALL cartesian_to_spherical(mag,mag_sph) 
+!
+!  the starting magnetization is not changed. We need only to break symmetry
+!  in the correct diretion, no need to be very precise on the modulus
+!
+            angle1_geo(ityp,ind) = mag_sph(2)
+            angle2_geo(ityp,ind) = mag_sph(3)
+         ENDDO
+      ENDIF
+   ENDDO
+ENDDO
+!
+!   Summarize the geometries and the B field
+!
+WRITE(stdout,'(/,5x,"Applying the following magnetic fields (Ry)")')
+WRITE(stdout,'(5x,"Geometry number",5x,"B_x",14x,"B_y",14x,"B_z")')
+DO iwork=1,nwork
+   WRITE(stdout,'(7x,i5,3f18.8)') iwork, (bfield_geo(ipol,iwork),ipol=1,3)
+ENDDO
+
+RETURN
+END SUBROUTINE set_bfield_and_angle

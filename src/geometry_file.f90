@@ -350,7 +350,6 @@ IF (linternal_thermo) THEN
    ENDDO
    CALL write_geometry_tau_file()
 ENDIF
-CALL deallocate_geometry_file()
 
 RETURN
 END SUBROUTINE write_geometry_output

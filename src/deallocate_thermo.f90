@@ -935,6 +935,7 @@ SUBROUTINE deallocate_thermo()
   ENDIF
   CALL deallocate_geometry_file()
   CALL deallocate_piezo()
+  CALL deallocate_geometry_file()
 
   RETURN
   !

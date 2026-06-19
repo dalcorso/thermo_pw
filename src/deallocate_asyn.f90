@@ -15,13 +15,14 @@ SUBROUTINE deallocate_asyn()
   USE control_thermo, ONLY : lpwscf, lphonon, lstress, lberry, geometry, &
                              iqw, irrw, comp_irr_iq_iw, comp_iq_iw,      &
                              done_irr_iq_iw, done_iq_iw, comp_f_iw, lpwband, &
-                             lef
+                             lef, lmag
   IMPLICIT NONE
   !
   IF (ALLOCATED(lpwscf))     DEALLOCATE(lpwscf) 
   IF (ALLOCATED(lpwband))    DEALLOCATE(lpwband) 
   IF (ALLOCATED(lef))        DEALLOCATE(lef) 
   IF (ALLOCATED(lberry))     DEALLOCATE(lberry) 
+  IF (ALLOCATED(lmag))       DEALLOCATE(lmag) 
   IF (ALLOCATED(lphonon))    DEALLOCATE(lphonon) 
   IF (ALLOCATED(lstress))    DEALLOCATE(lstress) 
   IF (ALLOCATED(geometry))   DEALLOCATE(geometry) 

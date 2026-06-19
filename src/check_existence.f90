@@ -26,7 +26,7 @@ SUBROUTINE check_existence(iwork, part, run)
   USE elastic_constants, ONLY : sigma_geo
   USE polarization_vector, ONLY : mod_tot
   USE piezoelectric_tensor, ONLY : polar_strain, tot_b_phase
-  USE piezomagnetic_tensor, ONLY : mag_strain
+  USE control_piezomagnetic_tensor, ONLY : mag_strain
 
   USE io_global,       ONLY : ionode, ionode_id, stdout
   USE mp_images,       ONLY : intra_image_comm
@@ -138,7 +138,7 @@ SUBROUTINE save_existence(iwork, part)
   USE thermo_mod,      ONLY : energy_geo, what
   USE elastic_constants, ONLY : sigma_geo
   USE piezoelectric_tensor, ONLY : polar_strain, tot_b_phase
-  USE piezomagnetic_tensor, ONLY : mag_strain
+  USE control_piezomagnetic_tensor, ONLY : mag_strain
 
   USE ener,            ONLY : etot
   USE force_mod,       ONLY : sigma

@@ -23,6 +23,7 @@ USE initial_conf,          ONLY : ibrav_save
 USE control_eldos,         ONLY : lel_free_energy, hot_electrons
 USE control_emp_free_ener, ONLY : add_empirical, emp_ener, emp_free_ener, &
                                   emp_entr, emp_ce
+USE control_mur,           ONLY : save_distorted_energies
 USE temperature,           ONLY : temp, ntemp, ntemp_plot, itemp_plot
 USE anharmonic,            ONLY : alpha_anis_t, celldm_t
 USE anharmonic_pt,         ONLY : alpha_anis_pt, celldm_pt
@@ -62,7 +63,7 @@ ELSEIF (lel_free_energy) THEN
    DO igeom=1, tot_ngeo
       CALL set_el_files_names(igeom)
       filedata="therm_files/"//TRIM(fleltherm)
-      CALL read_thermo(ntemp, temp, el_ener(:,igeom),           &
+      CALL read_el_thermo(ntemp, temp, el_ener(:,igeom),           &
                        el_free_ener(:,igeom), el_entr(:,igeom), &
                        el_ce(:,igeom), ldummy, filedata)
    ENDDO
@@ -139,6 +140,8 @@ IF (ltherm_dos) THEN
    ENDIF
    CALL compute_density_ptt()
    CALL interpolate_harmonic_ptt()
+
+   IF (save_distorted_energies) CALL free_energy_for_ec(tot_ngeo)
 !
 !  some quantities as a function of temperature are needed 
 !  at constant volume, they are computed here
@@ -258,6 +261,8 @@ IF (ltherm_freq) THEN
    ENDIF
    CALL compute_densityf_ptt()
    CALL interpolate_harmonicf_ptt()
+
+   IF (save_distorted_energies) CALL free_energy_for_ec_ph(tot_ngeo)
 !
 !  some quantities as a function of temperature are needed 
 !  at constant volume, they are computed here
@@ -357,7 +362,7 @@ IF (lgeo_from_file) THEN
       IF (ierr==0) THEN
          DO itemp=1, ntemp-1
             IF (ABS(temp_(itemp)-temp(itemp))>0.001_DP) &
-               CALL errore('write_anhar_anis','problem with temperature',1)
+               CALL errore('manage_anhar','problem with temperature',1)
          ENDDO
       ELSE
          CALL errore('manage_anhar',&
@@ -377,7 +382,7 @@ IF (lgeo_from_file) THEN
          IF (ierr==0) THEN
             DO itemp=1, ntemp-1
                IF (ABS(temp_(itemp)-temp(itemp))>0.001_DP) &
-                  CALL errore('write_anhar_anis','problem with temperature',1)
+                  CALL errore('manage_anhar','problem with temperature',1)
             ENDDO
          ELSE
             CALL errore('manage_anhar',&
@@ -401,7 +406,7 @@ IF (lgeo_from_file) THEN
          IF (ierr==0) THEN
             DO ipress=1, npress-1
                IF (ABS(press_(ipress)-press(ipress))>0.001_DP) &
-                  CALL errore('read_anhar_anis_ptt','problem with pressure',1)
+                  CALL errore('manage_anhar','problem with pressure',1)
             ENDDO
          ELSE
             CALL errore('manage_anhar',&
@@ -422,7 +427,7 @@ IF (lgeo_from_file) THEN
       IF (ierr==0) THEN
          DO itemp=1, ntemp-1
             IF (ABS(temp_(itemp)-temp(itemp))>0.001_DP) &
-               CALL errore('write_anhar_anis','problem with temperature',1)
+               CALL errore('manage_anhar','problem with temperature',1)
          ENDDO
       ELSE
          CALL errore('manage_anhar',&
@@ -442,7 +447,7 @@ IF (lgeo_from_file) THEN
          IF (ierr==0) THEN
             DO itemp=1, ntemp-1
                IF (ABS(temp_(itemp)-temp(itemp))>0.001_DP) &
-                  CALL errore('write_anhar_anis','problem with temperature',1)
+                  CALL errore('manage_anhar','problem with temperature',1)
             ENDDO
          ELSE
             CALL errore('manage_anhar',&
@@ -466,7 +471,7 @@ IF (lgeo_from_file) THEN
          IF (ierr==0) THEN
             DO ipress=1, npress-1
                IF (ABS(press_(ipress)-press(ipress))>0.001_DP) &
-                  CALL errore('read_anhar_anis_ptt','problem with pressure',1)
+                  CALL errore('manage_anhar','problem with pressure',1)
             ENDDO
          ELSE
             CALL errore('manage_anhar',&
@@ -571,6 +576,7 @@ USE control_piezoelectric_tensor, ONLY : piezo_qha_available, &
 USE control_gen_gruneisen, ONLY : ggrun_recipe
 USE control_atomic_pos,    ONLY : linternal_thermo
 USE control_eldos,         ONLY : lel_free_energy
+USE control_mur,           ONLY : save_distorted_energies
 USE thermodynamics,        ONLY : ph_free_ener_eos
 USE anharmonic,            ONLY : celldm_t
 USE ph_freq_anharmonic,    ONLY : celldmf_t
@@ -611,7 +617,7 @@ IF (lel_free_energy) THEN
    DO igeom=1, tot_ngeo
       CALL set_el_files_names(igeom)
       filedata="therm_files/"//TRIM(fleltherm)
-      CALL read_thermo(ntemp, temp, el_ener(:,igeom),           &
+      CALL read_el_thermo(ntemp, temp, el_ener(:,igeom),           &
                        el_free_ener(:,igeom), el_entr(:,igeom), &
                        el_ce(:,igeom), ldummy, filedata)
    ENDDO
@@ -708,6 +714,8 @@ IF (ltherm_dos) THEN
    CALL interpolate_harmonic_noe_t()
    CALL interpolate_harmonic_pt()
    CALL interpolate_harmonic_ptt()
+!
+   IF (save_distorted_energies) CALL free_energy_for_ec(tot_ngeo)
 !
 !  if there are internal degree of freedom interpolate them here
 !
@@ -814,7 +822,7 @@ IF (ltherm_freq) THEN
 !  Compute harmonic quantities for distorted configurations that do not
 !  modify the lattice parameter.
 !
-!   CALL free_energy_for_ec()
+   IF (save_distorted_energies) CALL free_energy_for_ec_ph(tot_ngeo)
 !
 !  if there are internal degree of freedom interpolate them here
 !

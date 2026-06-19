@@ -59,8 +59,9 @@ MODULE thermo_mod
                                                 ! in each geometry. 
                            tau_geo(:,:,:),    & ! coordinates of the atoms
                                                 ! in each geometry
-                           uint_geo(:,:)        ! for each geometry say which
+                           uint_geo(:,:),     & ! for each geometry say which
                                                 ! are the internal coordinates
+                           bfield_geo(:,:)      ! external magnetic field
 
   LOGICAL, ALLOCATABLE :: no_ph_eos(:)   ! decide in which external geometries
                                          ! the phonons are calculated 
@@ -94,6 +95,10 @@ MODULE thermo_mod
   COMPLEX(DP), ALLOCATABLE :: z_geo(:,:,:) ! the eigenvectors of the 
                                          ! dynamical matrix at gamma
 
+  REAL(DP), ALLOCATABLE :: angle1_geo(:,:) ! starting angle theta of the 
+                                           ! magnetization
+  REAL(DP), ALLOCATABLE :: angle2_geo(:,:) ! starting angle phi of the 
+                                           ! magnetization
   REAL(DP) ::              step_ngeo(6)         ! the difference of 
                                                 ! parameters among
                                                 ! different geometries.
@@ -113,7 +118,6 @@ MODULE thermo_mod
 
   LOGICAL :: lcubic=.FALSE.                     ! .TRUE. when the bravais
                                                 ! lattice is cubic
-
 END MODULE thermo_mod
 
 !----------------------------------------------------------------------------
@@ -1604,10 +1608,12 @@ MODULE control_thermo
   LOGICAL :: lconv_ke_test=.FALSE.! if .true. this writes the ke test on file
   LOGICAL :: lconv_nk_test=.FALSE.! if .true. this writes the k-point on file
   LOGICAL :: lelastic_const=.FALSE. ! if .true. compute elastic constants
-  LOGICAL :: lpiezoelectric_tensor=.FALSE. ! if .true. compute the piezoelectric 
-                                  ! tensor
+  LOGICAL :: lpiezoelectric_tensor=.FALSE. ! if .true. compute the 
+                                  ! piezoelectric tensor
   LOGICAL :: lpiezomagnetic_tensor=.FALSE. ! if .true. compute the 
                                   ! piezomagnetic tensor
+  LOGICAL :: lmag_susc=.FALSE.    ! magnetic susceptibility calculation
+  LOGICAL :: lmagnetoelec=.FALSE. ! magnetoelectric tensor calculation
   LOGICAL :: lpolarization=.FALSE. ! if .true. compute the piezoelectric 
   LOGICAL :: lph=.FALSE.    ! if .true. must calculate phonon
   LOGICAL :: ltherm=.FALSE. ! if .true. the thermodynamic properties are
@@ -1615,14 +1621,14 @@ MODULE control_thermo
   LOGICAL :: after_disp=.FALSE. ! if .true. dynamical matrix files are supposed
                             ! to be already on disk. fildyn must be read
                             ! from thermo_control.
+  LOGICAL :: lq2r=.FALSE.   ! if .true. the interatomic force constants 
+                            ! are calculated and the phonon are interpolated
+
   LOGICAL :: only_anhar=.FALSE. ! if .true. only the files in the therm_files
                             ! directory with the vibrational thermodynamic
                             ! functions and the energy files in restart
                             ! are read and used to compute the QHA 
                             ! quantities.
-  LOGICAL :: lq2r=.FALSE.   ! if .true. the interatomic force constants 
-                            ! are calculated and the phonon are interpolated
-
   LOGICAL :: do_scf_relax   ! to be used with cells with internal 
                             ! degrees of freedom. If .true. reoptimize
                             ! the atomic coordinates after finding 
@@ -2070,7 +2076,7 @@ MODULE control_piezomagnetic_tensor
 
   LOGICAL :: lpiezom      ! if true the piezomagnetic tensor is calculated
 
-  REAL(DP), ALLOCATABLE :: mag_strain(:,:,:) ! the magnetization of each
+  REAL(DP), ALLOCATABLE :: mag_strain(:,:) ! the magnetization of each
                                 ! each strained geometry
   REAL(DP), ALLOCATABLE :: piezom_tensor_geo(:,:,:) ! the 
                                 ! piezomagnetic tensor at each geometry
@@ -2190,6 +2196,23 @@ MODULE control_pyroelectric_tensor
 
   
 END MODULE control_pyroelectric_tensor
+!
+!----------------------------------------------------------------------------
+MODULE control_bfield
+!----------------------------------------------------------------------------
+!
+  USE kinds,  ONLY : DP
+
+  INTEGER  :: ngeo_b   ! number of magnetic fields for each direction
+!
+  REAL(DP) :: delta_b  ! interval between magnetic fields (in Ry) 
+
+  REAL(DP) :: dm       ! size of the vector in the direction of the 
+                       ! magnetic field added to the starting magnetization
+                       ! to break symmetry.
+
+END MODULE control_bfield
+!
 !----------------------------------------------------------------------------
 MODULE control_conv
 !----------------------------------------------------------------------------
@@ -2455,6 +2478,7 @@ MODULE initial_conf
 !----------------------------------------------------------------------------
   USE kinds, ONLY: DP
   USE collect_info, ONLY : collect_info_type
+  USE parameters, ONLY : ntypx
   SAVE
 
   INTEGER  :: ibrav_save       ! save the Bravais lattice
@@ -2480,6 +2504,9 @@ MODULE initial_conf
   INTEGER :: start_q_save, last_q_save ! save start_q and last_q
   INTEGER :: start_geometry_save, last_geometry_save ! save the initial and
                           ! final geometries
+  REAL(DP) :: starting_magnetization_save(ntypx) ! initial starting magnetiz
+  REAL(DP) :: angle1_save(ntypx)                 ! initial theta
+  REAL(DP) :: angle2_save(ntypx)                 ! initial phi
 
 END MODULE initial_conf
 
@@ -2745,6 +2772,10 @@ MODULE data_files
                                    ! written
   CHARACTER(LEN=256) :: fl_piezom ! the file where the piezomagnetic tensor is 
                                    ! written
+  CHARACTER(LEN=256) :: fl_magsusc ! the file where the magnetic 
+                                   ! susceptibility is written
+  CHARACTER(LEN=256) :: fl_magnetoelec ! the file where the magnetoelectric
+                                   ! tensor is written
   CHARACTER(LEN=256) :: fl_dielectric  ! the file where the dielectric
                                    ! constant and born effective charges are 
                                    ! written

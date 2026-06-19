@@ -20,7 +20,7 @@ USE control_phrun,        ONLY : auxdyn
 USE thermo_mod,           ONLY : energy_geo, ef_geo, iwho, tau_geo
 USE elastic_constants,    ONLY : sigma_geo
 USE piezoelectric_tensor, ONLY : polar_strain, tot_b_phase, nppl
-USE piezomagnetic_tensor, ONLY : mag_strain
+USE control_piezomagnetic_tensor, ONLY : mag_strain
 USE control_piezoelectric_tensor, ONLY : decompose_piezo
 USE ener,                 ONLY : etot, ef
 USE force_mod,            ONLY : sigma
@@ -66,6 +66,9 @@ IF (lpwscf(iwork).OR.lpwband(iwork)) THEN
       IF (lmag(iwork)) mag_strain(1:3,iwork) = magtot_nc(1:3)
       IF (lef(iwork)) ef_geo(iwork)=ef
       IF (lstress(iwork)) sigma_geo(:,:,iwork)=sigma(:,:)
+!
+!  pw.x for polarization calculation
+!
       IF (lberry(iwork)) CALL do_berry(exit_status, polar_strain(1,iwork), &
                                  tot_b_phase(1,iwork), nppl)
       IF (lpwscf(iwork)) THEN
@@ -75,9 +78,6 @@ IF (lpwscf(iwork).OR.lpwband(iwork)) THEN
       ENDIF
    ENDIF
 ENDIF
-!
-!  pw.x for polarization calculation
-!
 !
 !  A phonon calculation
 !

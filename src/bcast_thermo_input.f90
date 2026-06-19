@@ -23,7 +23,8 @@ SUBROUTINE bcast_thermo_input()
                               flpgrun, flenergy, flprojlayer, flpbs, flvec,   &
                               flepsilon, fleldos, fleltherm, fldosfrq,        &
                               fl_el_cons, flelanhar, flgeom, fl_piezo,        &
-                              fl_polar, fl_dielectric, fl_piezom
+                              fl_polar, fl_dielectric, fl_piezom, fl_magsusc, &
+                              fl_magnetoelec
   USE postscript_files, ONLY : flpsband, flpsdisp, flpsdos,                   &
                               flpstherm,  flpsanhar, flpsmur, flpskeconv,     &
                               flpsnkconv, flpsgrun, flpsenergy, flpsepsilon,  &
@@ -61,6 +62,7 @@ SUBROUTINE bcast_thermo_input()
                               int_ngeo_ec, int_step_ngeo_ec
   USE control_piezoelectric_tensor, ONLY : decompose_piezo, doberry
   USE piezoelectric_tensor, ONLY : nppl
+  USE control_bfield,   ONLY : ngeo_b, delta_b
   USE control_qe,       ONLY : force_band_calculation, use_ph_images, many_k
   USE many_k_mod,       ONLY : memgpu
   USE band_computation, ONLY : sym_for_diago
@@ -292,6 +294,11 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( decompose_piezo, meta_ionode_id, world_comm )
   CALL mp_bcast( doberry, meta_ionode_id, world_comm )
 !
+!  scf_magnetic_susceptibility
+!
+  CALL mp_bcast( ngeo_b, meta_ionode_id, world_comm )
+  CALL mp_bcast( delta_b, meta_ionode_id, world_comm )
+!
 !  mur_lc
 !
   CALL mp_bcast( ngeo, meta_ionode_id, world_comm )
@@ -369,6 +376,8 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( flgeom, meta_ionode_id, world_comm )
   CALL mp_bcast( fl_piezo, meta_ionode_id, world_comm )
   CALL mp_bcast( fl_piezom, meta_ionode_id, world_comm )
+  CALL mp_bcast( fl_magsusc, meta_ionode_id, world_comm )
+  CALL mp_bcast( fl_magnetoelec, meta_ionode_id, world_comm )
   CALL mp_bcast( fl_dielectric, meta_ionode_id, world_comm )
   CALL mp_bcast( fl_polar, meta_ionode_id, world_comm )
 !
