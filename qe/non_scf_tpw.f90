@@ -113,7 +113,7 @@ SUBROUTINE non_scf_tpw( )
   !
   ! ... do a Berry phase polarization calculation if required
   !
-  IF ( lberry ) CALL c_phase()
+  IF ( lberry ) CALL c_phase_tpw()
   !
   ! ... do an orbital magnetization (Kubo terms) calculation
   !

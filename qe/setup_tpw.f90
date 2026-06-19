@@ -59,7 +59,7 @@ SUBROUTINE setup_tpw()
                                  nk1, nk2, nk3, k1, k2, k3
   USE ktetra,             ONLY : tetra_type, opt_tetra_init, tetra_init
   USE symm_base,          ONLY : s, t_rev, irt, nrot, nsym, invsym, nosym, &
-                                 d1,d2,d3, time_reversal, sname, set_sym_bl, &
+                                 d1,d2,d3, time_reversal, set_sym_bl, &
                                  find_sym, inverse_s, no_t_rev, fft_fact,  &
                                  allfrac
   USE wvfct,              ONLY : nbnd, nbndx
@@ -123,8 +123,8 @@ SUBROUTINE setup_tpw()
   IF ( okvan .OR. okpaw ) THEN
      IF ( xclib_dft_is('meta') ) CALL errore( 'setup', &
                                'Meta-GGA not implemented with USPP/PAW', 1 )
-     IF ( noncolin .AND. lberry)  CALL errore( 'setup', &
-       'Noncolinear Berry Phase/electric not implemented with USPP/PAW', 1 )
+!     IF ( noncolin .AND. lberry)  CALL errore( 'setup', &
+!       'Noncolinear Berry Phase/electric not implemented with USPP/PAW', 1 )
      IF  (ts_vdw ) CALL errore ('setup',&
                    'Tkatchenko-Scheffler not implemented with USPP/PAW', 1 )
      IF ( lorbm ) CALL errore( 'setup', &
@@ -538,10 +538,10 @@ SUBROUTINE setup_tpw()
         !
      ELSE IF (lberry ) THEN
         !
-        CALL kp_strings( nppstr, gdir, nrot_, s, bg, npk, &
-                         k1, k2, k3, nk1, nk2, nk3, nkstot, xk, wk )
-        nosym = .TRUE.
-        nrot_ = 1
+!        CALL kp_strings_tpw( nppstr, gdir, nrot_, s, bg, npk,  &
+!                  k1, k2, k3, nk1, nk2, nk3, nkstot, xk, wk, time_reversal)
+!        nosym = .TRUE.
+!        nrot_ = 1
         !
      ELSE
         !
@@ -600,6 +600,17 @@ SUBROUTINE setup_tpw()
      IF ( allfrac ) fft_fact(:) = 1 
      !
   END IF
+  !
+  !  Now generate the strings for berry phase calculation with the true
+  !  symmetries of the point group of the crystal and then remove symmetry
+  !
+  IF (nks_start==0 .AND. lberry) THEN
+     CALL create_kp_strings_tpw( nppstr, nrot_, nsym, s, t_rev, at, bg, &
+                      gdir, nkstot, xk, wk, npk, time_reversal, nosym, &
+                      nk1, nk2, nk3, k1, k2, k3)
+     nosym = .TRUE.
+     nrot_ = 1
+  ENDIF               
   !
   ! ... nosym: do not use any point-group symmetry (s(:,:,1) is the identity)
   !
@@ -713,16 +724,25 @@ SUBROUTINE setup_tpw()
   !
   ! ... distribute k-points across processors of a pool
   !
-  kunit   = 1
+  IF (lberry) THEN
+!
+!   we keep each string inside the same pool, but the perpendicular k vectors
+!   can be distributed
+!
+     kunit=nppstr
+  ELSE
+     kunit   = 1
+  ENDIF
   CALL divide_et_impera ( nkstot, xk, wk, isk, nks )
   !
-  IF (nks==0) CALL errore('setup_nscf_tpw','some pools have no k point',1)
+  IF (nks==0) CALL errore('setup_tpw','some pools have no k point',1)
   !
   ! ... checks and initializations to be performed after parallelization setup
   !
-  IF ( lberry .OR. lelfield .OR. lorbm ) THEN
+  IF ( lelfield .OR. lorbm ) THEN
+!  IF ( lberry .OR. lelfield .OR. lorbm ) THEN
      IF ( npool > 1 ) CALL errore( 'setup', &
-          'Berry Phase/electric fields not implemented with pools', 1 )
+          'Electric fields not implemented with pools', 1 )
   END IF
   IF ( gamma_only .AND. nkstot == 1 .AND. npool > 1 ) CALL errore( 'setup', &
           'Gamma-only calculations not allowed with pools', 1 )
@@ -753,8 +773,153 @@ SUBROUTINE setup_tpw()
   ! ... with exactly the same "random" velocities
   !
   IF (lmd.AND.control_temp) CALL set_random_seed( )
+
   !
   RETURN
   !
 END SUBROUTINE setup_tpw
 !
+!------------------------------------------------------------------------ 
+SUBROUTINE create_kp_strings_tpw( nppstr, nrot, nsym, s, t_rev, at, bg, &
+                      gdir, nkstot, xk, wk, npk, time_reversal, nosym, &
+                      nk1, nk2, nk3, k1, k2, k3)
+!------------------------------------------------------------------------ 
+
+USE kinds, ONLY : DP
+USE io_global, ONLY : stdout
+
+IMPLICIT NONE
+
+INTEGER, INTENT(IN) :: nrot, nsym, nppstr, npk, gdir
+INTEGER, INTENT(IN) :: nk1, nk2, nk3, k1, k2, k3
+INTEGER, INTENT(IN) :: s(3,3,48)
+INTEGER, INTENT(IN) :: t_rev(48)
+INTEGER, INTENT(INOUT) :: nkstot
+REAL(DP), INTENT(IN) :: at(3,3), bg(3,3)
+REAL(DP), INTENT(INOUT) :: xk(3,npk), wk(npk)
+LOGICAL, INTENT(IN) :: time_reversal, nosym
+
+REAL(DP) :: gpar(3), dk(3)
+
+LOGICAL :: sym(48), minus_q, magnetic_sym, skip_equivalence
+INTEGER :: nrot_eff, nsym_eff, t_rev_eff(48), s_eff(3,3,48), no_t_rev(48), &
+           isym, kindex, irot, ipar, iort, ipol, jpol, code_group
+REAL(DP) :: xk0(3,npk), wk0(npk), sa(3,3), sb(3,3), sr(3,3,48)
+CHARACTER(LEN=11) :: gname
+
+
+magnetic_sym=.NOT.time_reversal
+no_t_rev=0  ! no t_rev for the Bravais lattice symmetries
+!
+!  Here we use the symmetries of the lattice that do not change the G vector.
+!  Find the operations that keep G fixed. We can use only these operations
+!  to symmetrize the points in the plane perpendicular to G. 
+!
+IF (nosym) THEN
+   sym=.FALSE.
+   sym(1)=.TRUE.
+ELSE   
+   sym=.FALSE.
+   DO irot=1,nrot
+      sym(irot)=.TRUE.
+   ENDDO
+   CALL small_g_g (bg(1,gdir), at, nrot, s, no_t_rev, sym )
+ENDIF
+!
+!  Now build the group, first the elements of the point group of the solid
+!
+nsym_eff=0
+DO isym=1,nsym
+   IF (sym(isym)) THEN
+      nsym_eff=nsym_eff+1
+      s_eff(:,:,nsym_eff)=s(:,:,isym)
+      t_rev_eff(nsym_eff)=t_rev(isym)
+   ENDIF
+ENDDO
+!
+!  Then the elements of the point group of the Bravais lattice that 
+!  do not change G
+!
+nrot_eff=nsym_eff
+DO irot=nsym+1,nrot
+   IF (sym(irot)) THEN
+      nrot_eff=nrot_eff+1
+      s_eff(:,:,nrot_eff)=s(:,:,irot)
+      t_rev_eff(nrot_eff)= 0
+   ENDIF
+ENDDO
+!
+!  Identify the two groups and write them on output
+!
+DO irot = 1,nrot_eff
+   sa(:,:) = DBLE( s_eff(:,:,irot) )
+   sb = MATMUL( bg, sa )
+   sr(:,:,irot) = MATMUL( at, TRANSPOSE(sb) )
+ENDDO
+
+!
+!  Now generate the points in the plane perpendicular to G.
+!  Since the k point mesh is 2D and this routine does not add k points
+!  but only recognise equivalent points on the 2D mesh,  
+!  in this step one can use also the full symmetry group of the Bravais
+!  lattice.
+!
+skip_equivalence=.FALSE.
+IF (time_reversal) THEN
+   WRITE(stdout,'(/,5x,"Time reversal is applied")') 
+ELSE 
+   WRITE(stdout,'(/,5x,"Time reversal is not applied")') 
+ENDIF
+IF (gdir == 1) THEN
+   CALL kpoint_grid (nrot_eff, time_reversal, skip_equivalence, s_eff, &
+                     no_t_rev, bg, npk, k1,k2,k3, 1,nk2,nk3, nkstot, xk0, wk0 )
+ELSE IF (gdir == 2) THEN
+   CALL kpoint_grid (nrot_eff, time_reversal, skip_equivalence, s_eff, &
+                     no_t_rev, bg, npk, k1,k2,k3, nk1,1,nk3, nkstot, xk0, wk0 )
+ELSE IF (gdir == 3) THEN
+   CALL kpoint_grid (nrot_eff, time_reversal, skip_equivalence, s_eff, &
+                     no_t_rev, bg, npk, k1,k2,k3, nk1,nk2,1, nkstot, xk0, wk0 )
+ELSE
+   CALL errore('create_kp_strings','gdir different from 1, 2, or 3',1)
+END IF
+CALL find_group(nrot_eff,sr,gname,code_group)
+WRITE(stdout,'(5x,"Point group of the 2D Bravais lattice: ",a)') TRIM(gname)
+WRITE(stdout,'(/,5x,"Number of point in the plane", i8)') nkstot
+!
+!  However k points have to be reopened and then reduced with the point 
+!  group of the solid. The reopening must be done with the point group 
+!  of the Bravais lattice that conserves G otherwise we obtain points not 
+!  orthogonal to G. Then for the reopening we use a subgroup of the point
+!  group of the Bravais lattice.
+!
+minus_q=.NOT. magnetic_sym
+CALL irreducible_bz(nrot_eff, s_eff, nsym_eff, minus_q, magnetic_sym, &
+                     at, bg, npk, nkstot, xk0, wk0, t_rev_eff)
+
+CALL find_group(nsym_eff,sr,gname,code_group)
+WRITE(stdout,'(5x,"Point in the plane reduced with the group: ",a)') &
+                                                  TRIM(gname)
+WRITE(stdout,'(/,5x,"Number of point in the plane", i8)') nkstot
+!
+!  --- Generate a string of k-points for every k-point in the 2D grid ---
+!
+kindex = 0
+dk(1) = bg(1,gdir) / REAL(nppstr-1,DP)
+dk(2) = bg(2,gdir) / REAL(nppstr-1,DP)
+dk(3) = bg(3,gdir) / REAL(nppstr-1,DP)
+DO iort = 1,nkstot
+   DO ipar = 1, nppstr
+      kindex = kindex+1
+      xk(1,kindex) = xk0(1,iort) + REAL(ipar-1,DP)*dk(1)
+      xk(2,kindex) = xk0(2,iort) + REAL(ipar-1,DP)*dk(2)
+      xk(3,kindex) = xk0(3,iort) + REAL(ipar-1,DP)*dk(3)
+      wk(kindex) = wk0(iort) / REAL(nppstr,DP)
+   END DO
+END DO
+
+nkstot=nkstot*nppstr
+WRITE(stdout,'(/,5x,"Number of strings", i8)') nppstr
+WRITE(stdout,'(/,5x,"Total number of points", i8)') nkstot
+
+RETURN
+END SUBROUTINE create_kp_strings_tpw
