@@ -66,6 +66,7 @@ find_mode_sym_proj.o \
 find_representations_mode_q.o \
 find_symmetry.o \
 fit_frequencies.o \
+free_energy_for_ec.o \
 gen_qpoints.o \
 generalized_phdos.o \
 generate_k_along_lines_kz.o \

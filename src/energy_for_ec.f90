@@ -83,9 +83,6 @@ CALL set_strain_for_ec(strain_list, nstep, with_same_lattice, laue, &
 
 ngeom=ngeom_
 IF (lgeo_to_file) ngeom=ngeo_file
-WRITE(6,*) 'number of steps', nstep
-WRITE(6,*) 'strain list', strain_list(1:nstep) 
-WRITE(6,*) 'with_same_lattice', with_same_lattice(1:nstep)
 
 IF (nstep<1.AND.elastic_algorithm=='energy') &
    CALL errore('energy_for_ec', 'Incorrect nstep, use energy_std algorithm',1)
@@ -132,8 +129,8 @@ ELSE
          el_con_ibrav_geo(igeom)=ibrav_geo_(igeom)
          el_con_celldm_geo(:,igeom)=celldm_geo_(:,igeom)
       ENDIF
-      CALL latgen(ibrav_geo_(igeom),celldm_geo_(1,igeom), &
-            at_geo(1,1,igeom),at_geo(1,2,igeom), at_geo(1,3,igeom), omega)
+      CALL latgen(el_con_ibrav_geo(igeom), el_con_celldm_geo(1,igeom), &
+           at_geo(1,1,igeom),at_geo(1,2,igeom), at_geo(1,3,igeom), omega)
       el_con_at_geo(:,:,igeom)=at_geo(:,:,igeom)
    ENDDO
 ENDIF
