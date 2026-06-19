@@ -28,6 +28,7 @@ allocate_lanczos.o \
 allocate_phq_tpw.o \
 apply_ac.o \
 apply_trev_r.o \
+bp_c_phase.o \
 c_bands_many_k.o \
 c_bands_tpw.o \
 calc_chi.o \
