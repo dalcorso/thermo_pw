@@ -369,11 +369,13 @@ We can write:
 \begin{equation}
 n({\bf r}) = {2 \over N_S} \sum_{i=1}^{N_S} \sum_{{\bf k} \in IBZ, v} \sum_l |\psi_{S_iS_l{\bf k}, v} ({\bf r}) |^2.
 \end{equation}
-The sum over ${\bf k}$ is limited to the IBZ and the sum over $l$ is over the $N_{\bf k}$ symmetries needed to obtain all the star of ${\bf k}$ from the 
+The sum over ${\bf k}$ is limited to the IBZ and the sum over $l$ is over the $N_{\bf k}$ symmetries needed to obtain all the points of the star of ${\bf k}$ that belong to the mesh from the 
 ${\bf k}$ in the IBZ. But now we can exchange the sum over $l$ and the sum over $i$ and notice that the sum over $i$ is over all the elements of the point group and for the rearrangement lemma the elements $\{ S_i S_l\}$ are still all the elements of the point group so the sum over $i$ is independent from $l$. It is convenient to introduce
-a weight $w_{\bf k}$ that gives the number of points in the star of ${\bf k}$ so that we can write
+a weight $w_{\bf k}$ (see next section for a more precise definition) 
+so that we can write
 \begin{equation}
 n({\bf r}) = {2 \over N_S} \sum_{i=1}^{N_S}  \sum_{{\bf k} \in IBZ, v} w_{\bf k}\ |\psi_{S_i{\bf k}, v} ({\bf r}) |^2.
+\label{charge_density}
 \end{equation}
 Now we can use Eq.~\ref{psisik} and write
 \begin{equation}
@@ -398,6 +400,102 @@ Since we are adding on all operations of the group, we obtain the same result ap
 n({\bf r}) = {1 \over N_S} \sum_{i=1}^{N_S} \tilde n ( \{S_i,{\bf f}_i\} {\bf r}).
 \label{symchden1}
 \end{equation}
+
+
+\section{The special point technique}
+
+Suppose we have a function of the reciprocal lattice vector $g({\bf k})$,
+periodic with the periodicity of the reciprocal lattice vectors
+${\bf G}$. We can expand this function in Fourier series:
+\begin{equation}
+g({\bf k})= g_0 + \sum_\mu g_\mu e^{i{\bf k}\cdot {\bf R}_\mu},
+\end{equation}
+${\bf R}_\mu$ are the direct lattice vectors (where ${\bf R}_\mu=0$ has 
+been separated from the sum). Suppose $G$ is the point group of the Bravais
+lattice and $h$ the number of symmetry elements of 
+$G=\left\{S_1,...,S_h\right\}$. We can consider the symmetric
+function
+\begin{equation}
+f({\bf k}) = {1\over h} \sum_{i=1}^h g(S_i {\bf k})
+\end{equation}
+We have 
+\begin{equation}
+f({\bf k}) = f_0 + \sum_\mu g_\mu A_\mu ({\bf k})
+\end{equation}
+where $f_0=g_0$ and 
+\begin{equation}
+A_\mu ({\bf k}) = {1\over h} \sum_{i=1}^h e^{i S_i {\bf k} \cdot {\bf R}_\mu} =
+{1\over h} \sum_{i=1}^h e^{i {\bf k} \cdot S_i^{-1}{\bf R}_\mu}.
+\end{equation}
+The integral over the Brillouin zone of $A_\mu ({\bf k})=0$ for all $\mu$ 
+except $\mu=0$ hence the average over the Brillouin zone of $f({\bf k})$ and
+of $g(\bf k)$ coincide:
+\begin{equation}
+{\Omega \over (2\pi)^3} \int_{BZ} d^3k g({\bf k}) = {\Omega \over (2\pi)^3} \int_{BZ} d^3k f({\bf k}) = f_0.
+\end{equation}
+The integral is discretized with a uniform mesh of $N_{\bf k}=N_1\times N_2 
+\times N_3$ points (see the routine \texttt{kpoint\_grid}) and therefore one
+calculates the sum
+\begin{equation}
+{\Omega \over (2\pi)^3} \int_{BZ} d^3k f({\bf k}) =
+{1\over N_{\bf k}h} \sum_{j=1}^{N_{\bf k}} \sum_{i=1}^h g(S_i {\bf k}_j).
+\label{sum}
+\end{equation}
+The mesh is usually chosen in such a way to set to zero the largest number
+of functions $A_{\mu}({\bf k})$. In practice however one chooses a uniform
+mesh. 
+All the points ${\bf k}_j$ that belong to the same star of ${\bf k}$
+give the same contribution to the sum (Eq.~\ref{sum}). So we can take 
+only one point
+in the irreducible Brillouin zone (reduced with the Bravais lattice point
+group) ($IBZ_{L}$) and put a weight equal to the number of {\bf k} point
+of the star of ${\bf k}_j$ that belong to the original mesh. We obtain
+\begin{equation}
+{\Omega \over (2\pi)^3} \int_{BZ} d^3k f({\bf k}) =
+{1\over N_{\bf k}h} \sum_{j\in IBZ_L} w_j \sum_{i=1}^h g(S_i {\bf k}_j) 
+={1\over h} \sum_{j\in IBZ_L} \tilde w_j \sum_{i=1}^h g(S_i {\bf k}_j),
+\end{equation}
+where in the last term $\tilde w_j = w_j / N_{\bf k}$ and the sum over
+all weights is equal to one.
+
+We note that the function $g({\bf k})$ has usually the symmetry of
+the solid, or as in the case of the charge density one can relate the values
+of $g(S_i {\bf k}_j)$ at one point ${\bf r}$ with those of a different
+point ${\bf r}'$, but only for the operations of the point group of the 
+solid which is usually a subgroup of $G$. We call it $H$, with elements 
+$S_p$ with $p=1,...,k$. 
+It is convenient then to divide the group $G$ into $N_c=h/k$ left cosets 
+of $H$ (see the
+routine \texttt{coset} for a definition):
+\begin{equation}
+G= H + S_i H + S_l H +...+ S_{N_c} H.
+\end{equation}
+When we apply the operations of $H$ to a ${\bf k}_j$ point we obtain the
+star of ${\bf k}_j$ (according to the group $H$) which is usually smaller than
+the star of ${\bf k}_j$ for the group $G$.
+So he have:
+\begin{equation}
+{\Omega \over (2\pi)^3} \int_{BZ} d^3k f({\bf k}) =
+{1\over h} \sum_{j\in IBZ_L} \tilde w_j \sum_{l=1}^{N_c}\sum_{p=1}^k g(S_l S_p {\bf k}_j).
+\end{equation}
+Now when we apply all the operations of $H$ to $S_l {\bf k}_j$ we obtain
+the star of $S_l {\bf k}_j$ for the group $H$. All the points of this star 
+give the same contribution to this sum. Therefore, we can take only 
+one point ${\bf k}_m$ in the irreducible brillouin zone (reduced with 
+the solid point group)
+($IBZ_S$) and put a weight equal to $\tilde w_j$ multiplied by the number 
+of times we find the same star varying $S_l$ among the $N_c$ cosets $w(m)$.
+\begin{equation}
+{\Omega \over (2\pi)^3} \int_{BZ} d^3k f({\bf k}) =
+{1\over h} \sum_{m\in IBZ_S} \tilde w_m \sum_{p=1}^k g(S_p {\bf k}_m) =
+{1\over k} \sum_{p=1}^k \sum_{m\in IBZ_S} \bar w_m g(S_p {\bf k}_m),
+\end{equation}
+where $\tilde w_m = \tilde w_j w(m)$ and $\bar w_m = {\tilde w_m \over N_c}$.
+This equation coincides with Eq.~\ref{charge_density} taking 
+\begin{equation}
+g({\bf k})= 2 |\psi_{{\bf k}, v} ({\bf r}) |^2,
+\end{equation}
+and defines how one has to calculate the weights that appear in that equation.
 
 \section{The charge density in reciprocal space}
 Eq.~\ref{symchden1} can be used to find a symmetrization formula in reciprocal space. Taking the Fourier transform at the reciprocal lattice vector ${\bf G}$, we have:
@@ -1271,6 +1369,80 @@ $S_i {\bf G}$. ${\bf G}$ is transformed in the basis of the principal reciprocal
 vectors and it is rotated with Eq.~\ref{rotreccomp}, so actually the rotation
 \texttt{ns} is applied not its inverse. \texttt{ft} is transformed in crystal coordinates at the beginning of the routine and the vector $S_i {\bf G}$ is actually \texttt{g\_(:,igs)}. Note also that \texttt{ft} contains $-{\bf f}_i$ so the
 applied phase is actually $e^{iS_i{\bf G}\cdot {\bf f}}$ as written in Eq.~\ref{symng}.
+
+\section{Appendix: Coset}
+
+Let's give a few definitions. Given a group $G=\{g_1,g_2,...,g_h\}$ with 
+$h$ elements, we call a subgroup $H=\{h_1,...,h_k\}$ a subset of the 
+elements of the group $G$ that are still a group. If $k$ is the number 
+of elements of $H$, one can show that $N_c=h/k$ is an integer. 
+Given $H$, we can define a left coset of $G$ by chosing an element 
+of $G$ that does not belong to $H$, let's say $g_i$, and forming all the
+products $g_i H = \{ g_i h_1,..., g_i h_k\}$. This set is composed by
+$k$ elements of $G$ and is called a left coset. 
+$H$ and $g_i H$ have no common elements, so we can write
+$G=H + g_i H + ...$. If $h/k=2$ then $G=H+g_i H$ and we have finished, 
+otherwise we can chose a $g_j$ not contained in $H+g_i H$ and form 
+another left coset $g_j H$. We continue in this way for $N_c$ times
+and finally write $G=H+g_i H + g_j H +...$. 
+
+The routine coset gives and integer array \texttt{irg} of size $h$ (called
+\texttt{nrot} inside the routine). The first $k$ elements (called 
+\texttt{nsym}) of \texttt{irg} give the elements of $H$, then the next
+$k$ elements are the indices of the first coset $g_i H$, the next
+$k$ elements are the indices of the second coset $g_j H$, and so on.
+
+In input the routine receives a logical array \texttt{sym} of size $h$ 
+such that \texttt{sym(l)} is \texttt{.TRUE.} if $g_l$
+belongs to $H$, and the multiplication table of
+the group $G$: $t(g_i,g_j)$, where $g_i g_j = g_{t(g_i,g_j)}$.
+
+
+\section{Appendix: Kpoint\_grid}
+
+This routine generates a mesh of ${\bf k}$ points given $N_1$ (called
+\texttt{nk1}), $N_2$ (called \texttt{nk2}) and $N_3$ (called \texttt{nk3})
+as:
+\begin{equation}
+{\bf k}_{ijk} = \left[{(i-1) \over N_1} + {k_1\over 2 N_1}\right] {\bf b}_1 +
+                \left[{(j-1) \over N_2} + {k_2\over 2 N_2}\right] {\bf b}_2 +
+                \left[{(k-1) \over N_3} + {k_3\over 2 N_3}\right] {\bf b}_3 
+\end{equation}
+where $1\le i \le N_1$, $1\le j \le N_2$, $1\le k \le N_3$ and $k_1$,
+$k_2$ and $k_3$ are $0$ or $1$.
+At a generic iteration, the routine takes the first ${\bf k}_i$ in the
+list not already found in previous iterations and rotates it with all 
+operations of the point group $G$ of the Bravais lattice. If the rotated 
+point is in the original list, it is removed from the list and the 
+weight of the point ${\bf k}_i$ is increased of 1. In output 
+for each star of ${\bf k}_i$ (for $G$) we have only one point and its weight 
+is the number of points of the star of ${\bf k}_i$ which were in the 
+original grid.
+So the total weight is $N_1 N_2 N_3$. The weight are finally normalized
+so as to have sum $1$.
+
+\section{Appendix: Irrek}
+This routine receives a list of ${\bf k}$ points (\texttt{nks} points) 
+$\{{\bf k}_1, {\bf k}_2,...,{\bf k}_N\}$ with their weights
+$\{w_1,...,w_N\}$ that have been reduced by a point group $G$ with $h$ 
+(\texttt{nrot}) elements. For instance those produced by 
+\texttt{kpoint\_grid}.
+Given a subgroup $H$ with $k$ (\texttt{nsym}) elements it gives all
+the ${\bf k}$ points and their weights reduced with the group $H$.
+
+The algorithm is the following: given ${\bf k}_i$ we rotate it with 
+all elements of $G$ and obtain the star of ${\bf k}_i$. Given ${\bf k}_i$
+rotating with all elements of $H$ we obtain the star of ${\bf k}_i$
+for $H$. Of this star we have to save only the point ${\bf k}_i$. 
+Let's consider now a generic coset $g_l H$ and let's apply all its
+elements to ${\bf k}_i$. This gives the point 
+$g_l {\bf k}_i$ and its star for $H$. Now if the point $g_l {\bf k}_i$ 
+is not contained in all previous stars, we have to add $g_l {\bf k}_i$ 
+to the list ${\bf k}$. If it is contained in the star of
+$g_j {\bf k}_i$ we have to account that the coset $g_jH$ has an additional
+star. The weight of each new $g_l {\bf k}_i$ will be the weight of
+${\bf k}_i$ when reduced with $G$, divided by the number of cosets and
+multiplied by the number of stars equivalent to $g_l {\bf k}_i$. 
 
 \section{Appendix: The irrep}
 In the phonon code we do not calculate derivatives of the charge density with respect to 
