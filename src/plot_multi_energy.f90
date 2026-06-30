@@ -50,7 +50,7 @@ SUBROUTINE plot_multi_energy()
   CHARACTER(LEN=50) :: xlabel, ylabel
   REAL(DP) :: emax, emin, deltae, ene_levels_int(ncontours)
   REAL(DP) :: xmin, xmax, ymin, ymax, x2
-  INTEGER :: nx, ny, icont, ifile, tot_n, iwork
+  INTEGER :: nx, ny, icont, ifile, tot_n, iwork, ncol
   INTEGER :: compute_nwork
   INTEGER :: ierr, system
 
@@ -201,7 +201,9 @@ SUBROUTINE plot_multi_energy()
 !   this set with points in the energy contour plot.
 !
            filename2='./'//TRIM(flgeom)//'.dat'
-           CALL gnuplot_write_file_mul_line_point(filename2, 3, 5, &
+           ncol=5
+           IF (ibrav_save==5) ncol=6
+           CALL gnuplot_write_file_mul_line_point(filename2, 3, ncol, &
                            'color_orange', .FALSE., .TRUE., .TRUE., .FALSE.)
 
         ENDIF   
