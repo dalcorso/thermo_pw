@@ -3654,8 +3654,8 @@ SELECT CASE (laue)
             strain_list(17) = 'EH'
             strain_list(18) = 'EI'
             strain_list(19) = 'GH'
-            strain_list(20) = 'IH'
-            strain_list(21) = 'GI'
+            strain_list(20) = 'GI'
+            strain_list(21) = 'IH'
             with_same_lattice(1:21)=1
          END IF
       ELSE
