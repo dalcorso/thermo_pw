@@ -262,7 +262,7 @@ DO i=1,6
          ELSEIF (poly_degree_elc==1) THEN
             CALL fit_multi_linear(ndata,nvar,lsolve,x,f,ec_p1(i,j))
          ELSE
-            CALL errore('write_elastic_t','wrong poly_degree_elc',1)
+            CALL errore('write_piezo_p','wrong poly_degree_elc',1)
          ENDIF
       ENDIF
    ENDDO

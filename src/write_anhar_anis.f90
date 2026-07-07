@@ -811,7 +811,8 @@ IF (lmurn.AND..NOT.lcubic) THEN
    IF (ierr==0) THEN
       DO itemp=1, ntemp-1
          IF (ABS(temp_(itemp)-temp(itemp))>0.001_DP) &
-            CALL errore('write_anhar_anis','problem with temperature',1)
+            CALL errore('write_ph_freq_anhar_anis',  &
+                                            'problem with temperature',1)
       ENDDO
    ENDIF
    DEALLOCATE(celldm_t_)
@@ -1307,7 +1308,7 @@ IF (lmurn.AND..NOT.lcubic) THEN
       IF (ierr==0) THEN
          DO itemp=1, ntemp-1
             IF (ABS(temp_(itemp)-temp(itemp))>0.001_DP) &
-               CALL errore('write_anhar_anis','problem with temperature',1)
+               CALL errore('write_anhar_anis_pt','problem with temperature',1)
          ENDDO
       ENDIF
    ENDDO
@@ -1604,7 +1605,8 @@ IF (lmurn.AND..NOT.lcubic) THEN
       IF (ierr==0) THEN
          DO itemp=1, ntemp-1
             IF (ABS(temp_(itemp)-temp(itemp))>0.001_DP) &
-               CALL errore('write_anhar_anis','problem with temperature',1)
+               CALL errore('write_ph_freq_anhar_anis_pt', &
+                                                'problem with temperature',1)
          ENDDO
       ENDIF
    ENDDO
@@ -1904,7 +1906,7 @@ IF (lmurn.AND..NOT.lcubic) THEN
       IF (ierr==0) THEN
          DO ipress=1, npress-1
             IF (ABS(press_(ipress)-press(ipress))>0.001_DP) &
-               CALL errore('read_anhar_anis_ptt','problem with pressure',1)
+               CALL errore('write_anhar_anis_ptt','problem with pressure',1)
          ENDDO
       ENDIF
    ENDDO
@@ -2224,7 +2226,8 @@ IF (lmurn.AND..NOT.lcubic) THEN
       IF (ierr==0) THEN
          DO ipress=1, npress-1
             IF (ABS(press_(ipress)-press(ipress))>0.001_DP) &
-               CALL errore('read_anhar_anis_ptt','problem with pressure',1)
+               CALL errore('write_ph_freq_anhar_anis_ptt',  &
+                                               'problem with pressure',1)
          ENDDO
       ENDIF
    ENDDO
@@ -2769,7 +2772,7 @@ IF (meta_ionode) THEN
    !  In this case we read nothing but do not stop
    !
    ELSE
-      CALL errore('read_alpha_anis','ibrav not programmed',1)
+      CALL errore('read_alpha_anis_lmurn','ibrav not programmed',1)
    END IF
    CLOSE(iu_therm)
    100 CONTINUE
@@ -4259,7 +4262,7 @@ SUBROUTINE fit_free_energy_noe_gruneisen_gen()
      IF (ndata.NE.nvar*(nvar+3)/2+1) CALL errore(&
                      'fit_free_energy_noe_gruneisen_gen','uncorrect ndata',3)
   ELSE
-     CALL errore('fit_free_energy_gruneisen_gen','recipe not programmed',1)
+     CALL errore('fit_free_energy_noe_gruneisen_gen','recipe not programmed',1)
   ENDIF
 
   ALLOCATE(x(nvar, ndata))
@@ -4469,7 +4472,8 @@ SUBROUTINE fit_free_energyf_noe_gruneisen_gen()
      IF (ndata.NE.nvar*(nvar+3)/2+1) CALL errore(&
                      'fit_free_energyf_noe_gruneisen_gen','uncorrect ndata',3)
   ELSE
-     CALL errore('fit_free_energyf_gruneisen_gen','recipe not programmed',1)
+     CALL errore('fit_free_energyf_noe_gruneisen_gen',&
+                                                    'recipe not programmed',1)
   ENDIF
 
   ALLOCATE(x(nvar, ndata))

@@ -39,7 +39,7 @@ IF (ltherm_dos) THEN
                                                         do_read, filetherm)
       IF (with_eigen.AND.do_read) &
          CALL read_b_factor(ntemp, ph_b_fact(1,1,1,1,igeom),filetherm) 
-      IF (.NOT.do_read) CALL errore('manage_thermo_read','problem readin',&
+      IF (.NOT.do_read) CALL errore('manage_thermal_read','problem readin',&
                                             igeom)
    ENDDO
 ENDIF
@@ -53,7 +53,7 @@ IF (ltherm_freq) THEN
                     do_read, filetherm)
       IF (with_eigen.AND.do_read) &
          CALL read_b_factor(ntemp, phf_b_fact(1,1,1,1,igeom),filetherm) 
-      IF (.NOT.do_read) CALL errore('manage_thermo_read','problem readin ph',&
+      IF (.NOT.do_read) CALL errore('manage_thermal_read','problem readin ph',&
                                             igeom)
    ENDDO
 ENDIF

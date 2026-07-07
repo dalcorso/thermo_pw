@@ -57,7 +57,7 @@ IF (lb0_t) THEN
 !  el_consf_t and el_compf_t have been already set 
 !
    ELSE
-      CALL errore('manage_anhar_anis','Temperature dependent elastic &
+      CALL errore('set_elastic_constants_t','Temperature dependent elastic &
                    &constants not available',-1)
    ENDIF
 ELSEIF(el_cons_qha_available.OR.el_consf_qha_available) THEN
