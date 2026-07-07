@@ -1400,7 +1400,8 @@ the group $G$: $t(g_i,g_j)$, where $g_i g_j = g_{t(g_i,g_j)}$.
 
 \section{Appendix: Kpoint\_grid}
 
-This routine generates a mesh of ${\bf k}$ points given $N_1$ (called
+This routine generates a mesh of $N_1\times N_2\times N_3$ ${\bf k}$ points 
+given $N_1$ (called
 \texttt{nk1}), $N_2$ (called \texttt{nk2}) and $N_3$ (called \texttt{nk3})
 as:
 \begin{equation}
@@ -1413,8 +1414,8 @@ $k_2$ and $k_3$ are $0$ or $1$.
 At a generic iteration, the routine takes the first ${\bf k}_i$ in the
 list not already found in previous iterations and rotates it with all 
 operations of the point group $G$ of the Bravais lattice. If the rotated 
-point is in the original list, it is removed from the list and the 
-weight of the point ${\bf k}_i$ is increased of 1. In output 
+point is in the original list, it is removed and the 
+weight of the point ${\bf k}_i$ is increased by 1. In output 
 for each star of ${\bf k}_i$ (for $G$) we have only one point and its weight 
 is the number of points of the star of ${\bf k}_i$ which were in the 
 original grid.
@@ -1425,15 +1426,16 @@ so as to have sum $1$.
 This routine receives a list of ${\bf k}$ points (\texttt{nks} points) 
 $\{{\bf k}_1, {\bf k}_2,...,{\bf k}_N\}$ with their weights
 $\{w_1,...,w_N\}$ that have been reduced by a point group $G$ with $h$ 
-(\texttt{nrot}) elements. For instance those produced by 
-\texttt{kpoint\_grid}.
-Given a subgroup $H$ with $k$ (\texttt{nsym}) elements it gives all
+(\texttt{nrot}) elements, for instance those produced by 
+the \texttt{kpoint\_grid} routine.
+Given a subgroup $H$ of $G$ with $k$ (\texttt{nsym}) elements, it gives 
 the ${\bf k}$ points and their weights reduced with the group $H$.
 
 The algorithm is the following: given ${\bf k}_i$ we rotate it with 
-all elements of $G$ and obtain the star of ${\bf k}_i$. Given ${\bf k}_i$
-rotating with all elements of $H$ we obtain the star of ${\bf k}_i$
-for $H$. Of this star we have to save only the point ${\bf k}_i$. 
+all elements of $G$ and obtain the star of ${\bf k}_i$ (for G). 
+Given ${\bf k}_i$ rotating with all elements of $H$ we obtain the star 
+of ${\bf k}_i$ for $H$. Of this star we have to save only the point 
+${\bf k}_i$. 
 Let's consider now a generic coset $g_l H$ and let's apply all its
 elements to ${\bf k}_i$. This gives the point 
 $g_l {\bf k}_i$ and its star for $H$. Now if the point $g_l {\bf k}_i$ 

@@ -58,7 +58,7 @@ ENDIF
 !IF (.NOT.all_geometry_done) RETURN
 IF (lel_free_energy) THEN
    CALL check_all_el_free_ener_done(all_el_free)
-   IF (.NOT.all_el_free) CALL errore('manage_anhar',&
+   IF (.NOT.all_el_free) CALL errore('manage_el_cons_qha',&
                         'missing electron thermodynamics',1)
    DO igeom=1, tot_ngeo
       CALL set_el_files_names(igeom)
