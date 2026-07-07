@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!---------------------------------------------------------------------------
 MODULE lattices
+!---------------------------------------------------------------------------
 !
 !  This module contains variables and routines to deal with Bravais
 !  lattices. 
@@ -2059,11 +2061,10 @@ SUBROUTINE lattice_parameters(at, a, b, c, alpha, beta, ggamma)
 !--------------------------------------------------------------
 !
 ! This routine receives the at (direct lattice vectors) and
-! give as output their lengths and angles among them.
-! Works only for conventional lattices (if you have a centered 
+! give as output their lengths and the angles among them.
+! It works only for conventional lattices (if you have a centered 
 ! lattice call the routine compute_conventional to find the 
 ! conventional lattice before calling this routine).
-!
 !
    REAL(DP), INTENT(IN)  :: at(3,3)
    REAL(DP), INTENT(OUT) :: a, b, c, alpha, beta, ggamma

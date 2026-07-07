@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!--------------------------------------------------------------------------
 MODULE color_mod
+!--------------------------------------------------------------------------
 !
 !  This module provides some support for using colors.
 !  Presently it offers only the 

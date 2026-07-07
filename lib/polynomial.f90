@@ -5,8 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-
+!-----------------------------------------------------------------------
 MODULE polynomial
+!-----------------------------------------------------------------------
 !
 !  This module contains the low level definitions of polynomials.
 !  It is used by the linear_surfaces, quadratic_surfaces, cubic_surfaces,

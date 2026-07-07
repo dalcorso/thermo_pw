@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!---------------------------------------------------------------------------
 MODULE gnuplot_color
+!---------------------------------------------------------------------------
 !
 !  This module provides some support for using colors in gnuplot.
 !  gnuplot supports 112 colors. This modules allows to define their

@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!--------------------------------------------------------------------------
 MODULE bz_2d_form
+!--------------------------------------------------------------------------
 !
 !  This module provides a type bz_2d that contains all the variables
 !  that describe a 2d Brillouin zone and subroutines to allocate and
@@ -151,7 +153,7 @@ ELSEIF (ibz==5) THEN
    bz_struc%nvertices=6
    bz_struc%nlett=3
 ELSE
-   CALL errore('allocate_bz','Brillouin zone type not available',1)
+   CALL errore('allocate_2d_bz','Brillouin zone type not available',1)
 ENDIF
 
 ALLOCATE(bz_struc%normal(3,bz_struc%nvertices))

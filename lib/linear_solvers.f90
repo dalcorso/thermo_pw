@@ -5,8 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-!
+!------------------------------------------------------------------------
 MODULE linear_solvers
+!------------------------------------------------------------------------
 
   USE io_global, ONLY : stdout
   IMPLICIT NONE

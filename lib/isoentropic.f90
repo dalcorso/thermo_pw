@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!---------------------------------------------------------------------------
 MODULE isoentropic
+!---------------------------------------------------------------------------
 !
 !   This module contains the support routines for the calculation
 !   of the isoentropic quantities given the corresponding isothermal

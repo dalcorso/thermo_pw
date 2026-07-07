@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!------------------------------------------------------------------------
 MODULE magnetic_point_group
+!------------------------------------------------------------------------
 !
 !  This module contains variables and routines to deal with the 
 !  crystallographic magnetic point group symmetry. 

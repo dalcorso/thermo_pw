@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-------------------------------------------------------------------------
 MODULE voigt
+!-------------------------------------------------------------------------
 !
 !   this module contains the support routines for the transformation
 !   of tensors in voigt notation
@@ -69,7 +71,7 @@ INTEGER :: mind(6), nind(6)
 DATA mind  / 1, 2, 3, 2, 1, 1 /
 DATA nind  / 1, 2, 3, 3, 3, 2 /
 
-IF (mn<1.OR.mn>6) CALL errore('oigt_extract_indeces','mn out of range',1)
+IF (mn<1.OR.mn>6) CALL errore('voigt_extract_indeces','mn out of range',1)
 m=mind(mn)
 n=nind(mn)
 

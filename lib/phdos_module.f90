@@ -15,7 +15,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!---------------------------------------------------------------------------
 MODULE phdos_module
+!---------------------------------------------------------------------------
 !
 !  This module provide methods to read phonon dos files and to calculate 
 !  their contribution to the free energy. It defines a type phdos that
@@ -229,7 +231,7 @@ DO na=1,nat
    IF (ionode) OPEN(FILE=TRIM(filename_loc), UNIT=iunit, STATUS='old', &
                        FORM='formatted', ERR=100, IOSTAT=ios)
 100 CALL mp_bcast(ios, ionode_id, intra_image_comm)
-   IF (ios /= 0) CALL errore('read_phdos_data', &
+   IF (ios /= 0) CALL errore('read_genphdos_data', &
                           'opening file'//TRIM(filename_loc), ABS(ios))
    IF (ionode) THEN
       DO i=1,ndivx

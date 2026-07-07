@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-----------------------------------------------------------------------
 MODULE polyfit_mod
+!-----------------------------------------------------------------------
 !
 !  This module contains routines for polynomial interpolation.
 !  The degree of the polynomial is arbitrary but there is only one 

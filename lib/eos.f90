@@ -4,7 +4,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!---------------------------------------------------------------------------
 MODULE eos
+!---------------------------------------------------------------------------
 !
 !   this module contains the support routines for the equations of
 !   state and their derivatives. Some of these formulas were contained

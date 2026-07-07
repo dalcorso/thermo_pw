@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!---------------------------------------------------------------------------
 MODULE mp_asyn
+!---------------------------------------------------------------------------
 !
 !  This module gives to the calling program the functionality of  
 !  master and workers. The master initializes the variables of the module 

@@ -5,7 +5,12 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!---------------------------------------------------------------------------
 MODULE gnuplot
+!---------------------------------------------------------------------------
+! 
+!  This module contains the routines to write gnuplot scripts used
+!  to produce the postscript plots.
 !
     USE kinds, ONLY : DP
     USE io_global, ONLY : ionode

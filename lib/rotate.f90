@@ -5,8 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-
+!-----------------------------------------------------------------------
 MODULE rotate
+!-----------------------------------------------------------------------
 !
 !  This module contains all the routines that have to do with rotations.
 !  Presently it has the following:

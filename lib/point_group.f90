@@ -4,8 +4,10 @@
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
-!
+! 
+!-----------------------------------------------------------------------
 MODULE point_group
+!-----------------------------------------------------------------------
 !
 !  This module contains variables and routines to deal with the 
 !  crystallographic point group symmetry. It complements the routines 
@@ -471,7 +473,7 @@ CONTAINS
           WRITE(stdout,'(5x, "case not programmed group in",i5," group_out", i5, &
         &" ptype in",3i5," ptype out", 3i5," rap",i5)') group_ext_in, &
                         group_ext_out, ptype_in, ptype_out, rap
-          CALL errore('convert_one_rap_proj','problem representation not found',1)
+          CALL errore('convert_rap_proj','problem representation not found',1)
        END IF
        DO ideg=1,ndeg
           IF (list_in(rap+ideg-1) /= irap) &
@@ -11259,7 +11261,7 @@ CONTAINS
           ENDDO
        ENDIF
      CASE DEFAULT
-       CALL errore('find_group_info_ext','group index not found',1)
+       CALL errore('set_group_desc','group index not found',1)
   END SELECT
 
   nsym=0
@@ -16323,7 +16325,8 @@ DO isym=1,nsym_out
       IF (group_desc_in(jsym)==group_desc_out(isym)) b_in_a(isym)=jsym
    ENDDO
    IF (b_in_a(isym)==0) &
-      CALL errore('convert_rap_proj','group_out not subgroup of group_in',1)
+      CALL errore('print_compatibility_table',&
+                                    'group_out not subgroup of group_in',1)
 ENDDO
    
 DO isym=1,nsym_out
@@ -16465,7 +16468,8 @@ DO isym=1,nsym_out
       IF (group_desc_in(jsym)==group_desc_out(isym)) b_in_a(isym)=jsym
    ENDDO
    IF (b_in_a(isym)==0) &
-      CALL errore('convert_rap_proj','group_out not subgroup of group_in',1)
+      CALL errore('print_kronecker_table',&
+                              'group_out not subgroup of group_in',1)
 ENDDO
    
 DO isym=1,nsym_out
@@ -16545,7 +16549,7 @@ DO irap=1,nrap1_in
          ndeg= NINT(DBLE(asum) / DBLE(nsym_out))
 !         WRITE(stdout,*) irap, jrap, asum, ndeg
          IF (ABS(ndeg - asum / DBLE(nsym_out)) > 1.D-6) &
-             CALL errore('compute_kronecker_table','problem with ndeg',1)
+             CALL errore('print_kronecker_table','problem with ndeg',1)
 
          CALL add_rap_name(rap_name, ndeg, name_rap_out(jrap)(1:8))
       ENDDO

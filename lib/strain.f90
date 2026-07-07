@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-------------------------------------------------------------------------
 MODULE strain_mod
+!-------------------------------------------------------------------------
 !
 !   This module contains the support routines for the application of strain
 !   to a crystal lattice. This module defines the following strains

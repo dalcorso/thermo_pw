@@ -2838,7 +2838,7 @@ IF (meta_ionode) &
    OPEN(UNIT=iu_el_cons, FILE=TRIM(filename), FORM='formatted', &
                                        STATUS='UNKNOWN', ERR=30, IOSTAT=ios)
 30 CALL mp_bcast(ios, meta_ionode_id, world_comm)
-   CALL errore('read_el_cons_on_file','opening elastic constants (T) file',&
+   CALL errore('read_el_cons_from_file','opening elastic constants (T) file',&
                                                              ABS(ios))
 
 el_cons_t=0.0_DP
@@ -2855,7 +2855,7 @@ IF (meta_ionode) THEN
                  el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
                  el_cons_t(4,4,itemp)
             IF (ABS(rdum-temp(itemp))>1D-5) &
-               CALL errore('read_el_cons_on_file','incorrect temperature', 1) 
+               CALL errore('read_el_cons_from_file','incorrect temperature', 1) 
          ENDDO
       CASE(25)
 !
@@ -2869,7 +2869,7 @@ IF (meta_ionode) THEN
                   el_cons_t(4,4,itemp), el_cons_t(1,4,itemp), &
                   el_cons_t(3,1,itemp), el_cons_t(4,1,itemp)
             IF (ABS(rdum-temp(itemp))>1D-5) &
-               CALL errore('read_el_cons_on_file','incorrect temperature', 1) 
+               CALL errore('read_el_cons_from_file','incorrect temperature', 1) 
          ENDDO
       CASE(27)
 !
@@ -2885,7 +2885,7 @@ IF (meta_ionode) THEN
                   el_cons_t(4,1,itemp), el_cons_t(5,2,itemp)
 
             IF (ABS(rdum-temp(itemp))>1D-5) &
-               CALL errore('read_el_cons_on_file','incorrect temperature', 1) 
+               CALL errore('read_el_cons_from_file','incorrect temperature', 1) 
          ENDDO
       CASE(19,23)
 !
@@ -2898,7 +2898,7 @@ IF (meta_ionode) THEN
                   el_cons_t(1,3,itemp), el_cons_t(3,3,itemp), &
                   el_cons_t(4,4,itemp), el_cons_t(3,1,itemp)
             IF (ABS(rdum-temp(itemp))>1D-5) &
-               CALL errore('read_el_cons_on_file','incorrect temperature', 1) 
+               CALL errore('read_el_cons_from_file','incorrect temperature', 1) 
          ENDDO
       CASE(22)
 !
@@ -2912,7 +2912,7 @@ IF (meta_ionode) THEN
                   el_cons_t(4,4,itemp), el_cons_t(6,6,itemp), &
                   el_cons_t(3,1,itemp)
             IF (ABS(rdum-temp(itemp))>1D-5) &
-               CALL errore('read_el_cons_on_file','incorrect temperature', 1) 
+               CALL errore('read_el_cons_from_file','incorrect temperature', 1) 
          ENDDO
       CASE(20)
 !
@@ -2929,7 +2929,7 @@ IF (meta_ionode) THEN
                   el_cons_t(3,1,itemp), el_cons_t(3,2,itemp)
 
             IF (ABS(rdum-temp(itemp))>1D-5) &
-               CALL errore('read_el_cons_on_file','incorrect temperature', 1) 
+               CALL errore('read_el_cons_from_file','incorrect temperature', 1) 
          ENDDO
       CASE(18)
 !
@@ -2944,7 +2944,7 @@ IF (meta_ionode) THEN
                   el_cons_t(1,6,itemp), el_cons_t(3,1,itemp), &
                   el_cons_t(6,1,itemp)
             IF (ABS(rdum-temp(itemp))>1D-5) &
-               CALL errore('read_el_cons_on_file','incorrect temperature', 1) 
+               CALL errore('read_el_cons_from_file','incorrect temperature', 1) 
          ENDDO
       CASE(16)
 !
@@ -2969,8 +2969,8 @@ IF (meta_ionode) THEN
                      el_cons_t(5,3,itemp), el_cons_t(6,4,itemp)
 
                IF (ABS(rdum-temp(itemp))>1D-5) &
-                  CALL errore('read_el_cons_on_file','incorrect temperature',&
-                                                                         1) 
+                  CALL errore('read_el_cons_from_file', &
+                                                 'incorrect temperature', 1) 
             ENDDO
          ELSE
             !
@@ -2990,8 +2990,8 @@ IF (meta_ionode) THEN
                      el_cons_t(6,1,itemp), el_cons_t(6,2,itemp), &
                      el_cons_t(6,3,itemp), el_cons_t(5,4,itemp)
                IF (ABS(rdum-temp(itemp))>1D-5) &
-                  CALL errore('read_el_cons_on_file','incorrect temperature',&
-                                                                         1) 
+                  CALL errore('read_el_cons_from_file', &
+                                              'incorrect temperature',1) 
             ENDDO
          ENDIF
       CASE(2)
@@ -3021,7 +3021,7 @@ IF (meta_ionode) THEN
                   el_cons_t(6,4,itemp), el_cons_t(6,5,itemp)
 
             IF (ABS(rdum-temp(itemp))>1D-5) &
-               CALL errore('read_el_cons_on_file','incorrect temperature',1) 
+               CALL errore('read_el_cons_from_file','incorrect temperature',1) 
          ENDDO
    END SELECT
    CLOSE(iu_el_cons)
@@ -3718,7 +3718,5 @@ ENDIF
 get_ec_type=aux_type
 RETURN
 END FUNCTION get_ec_type
-
-
 
 END MODULE elastic_constants

@@ -5,10 +5,12 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!---------------------------------------------------------------------------
 MODULE ph_freq_module
+!---------------------------------------------------------------------------
 !
-!  This module provide methods to calculate their vibrational contribution 
-!  to the free energy, energy, entropy and constant volume specific heat.
+!  This module provides methods to calculate the vibrational contribution 
+!  to the free energy, energy, entropy and constant volume heat capacity.
 !  It defines a type ph_freq_type that contains the phonon frequencies on 
 !  a uniform mesh of k points.
 !

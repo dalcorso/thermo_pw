@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!---------------------------------------------------------------------------
 MODULE optical_module
+!---------------------------------------------------------------------------
 !
 !  This module provides subroutines to deal with optical properties.
 !  It offers the following functions:

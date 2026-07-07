@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-------------------------------------------------------------------------
 MODULE xrdp_module
+!-------------------------------------------------------------------------
 !
 !  This module provides routines to compute the X-ray powder diffraction 
 !  pattern. It has routines to:

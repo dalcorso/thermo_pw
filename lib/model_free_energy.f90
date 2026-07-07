@@ -4,10 +4,12 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!---------------------------------------------------------------------------
 MODULE model_free_energy
+!---------------------------------------------------------------------------
 !
 !   This module contains routines to add to the free 
-!   energy contributions non computed by ab-initio, but derived
+!   energy contributions not computed by ab-initio, but derived
 !   from model fits to experiment. The parameters of the free energy
 !   must be given in input by the user. The module contains a few
 !   of the commonly used functions.

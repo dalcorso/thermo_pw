@@ -180,7 +180,7 @@ aux_type=0
 DO itype=1,m_types
    IF (m_code_group(itype)==code_group) aux_type=itype
 ENDDO
-IF (aux_type==0) CALL errore('get_py_type','code_group not available',1)
+IF (aux_type==0) CALL errore('get_m_type','code_group not available',1)
 !
 !  for code group 3 (C_s) and 4 (C_2) we must distinguish if the 
 !  monoclinic lattice is b unique or c unique

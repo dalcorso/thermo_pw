@@ -5,8 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-
+!-------------------------------------------------------------------------
 MODULE space_groups
+!-------------------------------------------------------------------------
 !
 !  This module contains variables and routines to deal with the space group
 !  symmetry.

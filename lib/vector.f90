@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-------------------------------------------------------------------------
 MODULE vector_mod
+!-------------------------------------------------------------------------
 !
 !   This module contains the routines for dealing with vectors.
 !   Presently it has only a routine to print the vector components.

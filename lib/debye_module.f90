@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!--------------------------------------------------------------------------
 MODULE debye_module
+!--------------------------------------------------------------------------
 !
 !  This module provides routines to compute the thermodynamical quantities
 !  within the Debye model.

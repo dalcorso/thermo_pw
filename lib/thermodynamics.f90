@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-------------------------------------------------------------------------
 MODULE thermodynamics_mod
+!-------------------------------------------------------------------------
 !
 !  This module provide methods to calculate various thermodynamic quantities. 
 !  Presently it provides:

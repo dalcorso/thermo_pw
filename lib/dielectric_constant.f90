@@ -11,7 +11,8 @@ MODULE dielectric_constant
 !
 !   this module contains the support routines for the calculation
 !   of the dielectric constant. Presently it contains routines to read
-!   and write it on file.
+!   and write it on file. It has also the routine that computes epsilon_zero
+!   from epsilon_infinity (imported from QE).
 !
   USE kinds, ONLY : DP
   USE io_global, ONLY : stdout
@@ -58,7 +59,7 @@ IF (ionode) THEN
         FORM='formatted', ERR=100, IOSTAT=ios)
 ENDIF
 100 CALL mp_bcast(ios,ionode_id,intra_image_comm)
-    CALL errore('write_dielectric_properties_on_file',&
+    CALL errore('write_dielectric_properties_to_file',&
                            'ploblem opening output file', ABS(ios))
 
 IF (ionode) THEN
@@ -116,7 +117,7 @@ IF (ionode) THEN
         FORM='formatted', ERR=100, IOSTAT=ios)
 ENDIF
 100 CALL mp_bcast(ios,ionode_id,intra_image_comm)
-    CALL errore('write_dielectric_properties_on_file',&
+    CALL errore('read_dielectric_properties_from_file',&
                            'ploblem opening output file', ABS(ios))
 
 IF (ionode) THEN

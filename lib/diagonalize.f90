@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!--------------------------------------------------------------------------
 MODULE diagonalize
+!--------------------------------------------------------------------------
 !
 !   This module contains the routines to diagonalize a matrix
 !   not available in QE.

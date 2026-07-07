@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!---------------------------------------------------------------------------
 MODULE eldos_module
+!---------------------------------------------------------------------------
 !
 !  This module provides methods to read electron dos files and to calculate 
 !  their contribution to the free energy assuming independent electrons. 

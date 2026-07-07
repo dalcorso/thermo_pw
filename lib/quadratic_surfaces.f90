@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-----------------------------------------------------------------------
 MODULE quadratic_surfaces
+!-----------------------------------------------------------------------
 !
 !   This module contains the support routines for dealing with quadratic
 !   surfaces interpolation. 

@@ -1975,7 +1975,7 @@ IF (meta_ionode) &
    OPEN(UNIT=iu_piezo, FILE=TRIM(filename), FORM='formatted', &
                                        STATUS='UNKNOWN', ERR=30, IOSTAT=ios)
 30 CALL mp_bcast(ios, meta_ionode_id, world_comm)
-   CALL errore('write_piezo_on_file','opening piezo tensor (T) file',&
+   CALL errore('write_piezo_tensor_on_file','opening piezo tensor (T) file',&
                                                              ABS(ios))
 !
 !  Choose if to plot as a function of temperature or pressure
@@ -2452,7 +2452,7 @@ IF (meta_ionode) &
    OPEN(UNIT=iu_piezo, FILE=TRIM(filename), FORM='formatted', &
                                        STATUS='UNKNOWN', ERR=30, IOSTAT=ios)
 30 CALL mp_bcast(ios, meta_ionode_id, world_comm)
-   CALL errore('read_piezo_from_file','opening piezo tensor (T) file',&
+   CALL errore('read_piezo_tensor_from_file','opening piezo tensor (T) file',&
                                                              ABS(ios))
 IF (meta_ionode) THEN
 
@@ -2468,7 +2468,8 @@ IF (meta_ionode) THEN
          DO itemp=2,ntemp-1
             READ(iu_piezo,*) rdum, e_piezo_tensor_t(1,4,itemp)
             IF (ABS(rdum-temp(itemp))>1D-5) &
-               CALL errore('read_piezo_from_file','incorrect temperature', 1)
+               CALL errore('read_piezo_tensor_from_file',&
+                                              'incorrect temperature', 1)
          ENDDO
       CASE(26)
 !
@@ -2482,7 +2483,8 @@ IF (meta_ionode) THEN
                 e_piezo_tensor_t(1,5,itemp),  &
                 e_piezo_tensor_t(3,6,itemp)
             IF (ABS(rdum-temp(itemp))>1D-5) &
-               CALL errore('read_piezo_from_file','incorrect temperature', 1)
+               CALL errore('read_piezo_tensor_from_file', &
+                                              'incorrect temperature', 1)
          ENDDO
       CASE(24)
 !
@@ -2494,7 +2496,8 @@ IF (meta_ionode) THEN
             WRITE(iu_piezo,*) rdum, e_piezo_tensor_t(1,4,itemp),   &  
                                            e_piezo_tensor_t(3,6,itemp) 
             IF (ABS(rdum-temp(itemp))>1D-5) &
-               CALL errore('read_piezo_from_file','incorrect temperature', 1)
+               CALL errore('read_piezo_tensor_from_file', &
+                                             'incorrect temperature', 1)
          ENDDO
       CASE(21)
 !
@@ -2506,14 +2509,14 @@ IF (meta_ionode) THEN
             DO itemp=2,ntemp-1
                READ(iu_piezo,*) rdum, e_piezo_tensor_t(2,2,itemp)                
                IF (ABS(rdum-temp(itemp))>1D-5) &
-                  CALL errore('read_piezo_from_file',&
+                  CALL errore('read_piezo_tensor_from_file',&
                                         'incorrect temperature', 1)
             ENDDO
          ELSEIF (code_group_ext==106) THEN
             DO itemp=2,ntemp-1
                READ(iu_piezo,*) rdum, e_piezo_tensor_t(1,1,itemp)                
                IF (ABS(rdum-temp(itemp))>1D-5) &
-                  CALL errore('read_piezo_from_file',&
+                  CALL errore('read_piezo_tensor_from_file',&
                                         'incorrect temperature', 1)
             ENDDO
          ENDIF
@@ -2527,7 +2530,8 @@ IF (meta_ionode) THEN
             READ(iu_piezo,*) rdum, e_piezo_tensor_t(1,1,itemp),  &  
                 e_piezo_tensor_t(2,2,itemp)                
             IF (ABS(rdum-temp(itemp))>1D-5) &
-               CALL errore('read_piezo_from_file','incorrect temperature', 1)
+               CALL errore('read_piezo_tensor_from_file', &
+                                        'incorrect temperature', 1)
          ENDDO
 
       CASE(14,15)
@@ -2539,7 +2543,8 @@ IF (meta_ionode) THEN
             READ(iu_piezo,*) rdum, e_piezo_tensor_t(3,1,itemp), &
                  e_piezo_tensor_t(3,3,itemp), e_piezo_tensor_t(1,5,itemp)
             IF (ABS(rdum-temp(itemp))>1D-5) &
-               CALL errore('read_piezo_from_file','incorrect temperature', 1)
+               CALL errore('read_piezo_tensor_from_file', &
+                                              'incorrect temperature', 1)
          ENDDO
       CASE(13)
 !
@@ -2554,7 +2559,7 @@ IF (meta_ionode) THEN
                    e_piezo_tensor_t(3,3,itemp),                &  
                    e_piezo_tensor_t(1,5,itemp)                
                IF (ABS(rdum-temp(itemp))>1D-5) &
-                  CALL errore('read_piezo_from_file',&
+                  CALL errore('read_piezo_tensor_from_file',&
                                       'incorrect temperature', 1)
             ENDDO
          ELSEIF (code_group_ext==73) THEN
@@ -2564,7 +2569,7 @@ IF (meta_ionode) THEN
                    e_piezo_tensor_t(3,3,itemp),                &  
                    e_piezo_tensor_t(1,5,itemp)                
                IF (ABS(rdum-temp(itemp))>1D-5) &
-                  CALL errore('read_piezo_from_file',&
+                  CALL errore('read_piezo_tensor_from_file',&
                                       'incorrect temperature', 1)
             ENDDO
          ENDIF
@@ -2581,7 +2586,8 @@ IF (meta_ionode) THEN
                 e_piezo_tensor_t(1,5,itemp),                &
                 e_piezo_tensor_t(2,4,itemp)                
             IF (ABS(rdum-temp(itemp))>1D-5) &
-               CALL errore('read_piezo_from_file','incorrect temperature', 1)
+               CALL errore('read_piezo_tensor_from_file', &
+                                           'incorrect temperature', 1)
          ENDDO
       CASE(11,10)
 !
@@ -2592,7 +2598,8 @@ IF (meta_ionode) THEN
          DO itemp=2,ntemp-1
             READ(iu_piezo,*) rdum, e_piezo_tensor_t(1,4,itemp)
             IF (ABS(rdum-temp(itemp))>1D-5) &
-               CALL errore('read_piezo_from_file','incorrect temperature', 1)
+               CALL errore('read_piezo_tensor_from_file', &
+                                          'incorrect temperature', 1)
          ENDDO
 
       CASE(9)
@@ -2605,7 +2612,8 @@ IF (meta_ionode) THEN
             READ(iu_piezo,*) rdum, e_piezo_tensor_t(1,1,itemp),  &  
                 e_piezo_tensor_t(1,4,itemp)
             IF (ABS(rdum-temp(itemp))>1D-5) &
-               CALL errore('read_piezo_from_file','incorrect temperature', 1)
+               CALL errore('read_piezo_tensor_from_file', &
+                                         'incorrect temperature', 1)
          ENDDO
       CASE(8)
 !
@@ -2618,7 +2626,8 @@ IF (meta_ionode) THEN
                 e_piezo_tensor_t(2,5,itemp),                &  
                 e_piezo_tensor_t(3,6,itemp)  
             IF (ABS(rdum-temp(itemp))>1D-5) &
-               CALL errore('read_piezo_from_file','incorrect temperature', 1)
+               CALL errore('read_piezo_tensor_from_file',&
+                                       'incorrect temperature', 1)
          ENDDO
       CASE(6,7)
 !
@@ -2632,7 +2641,8 @@ IF (meta_ionode) THEN
                 e_piezo_tensor_t(1,4,itemp),                &  
                 e_piezo_tensor_t(1,5,itemp)
             IF (ABS(rdum-temp(itemp))>1D-5) &
-               CALL errore('read_piezo_from_file','incorrect temperature', 1)
+               CALL errore('read_piezo_tensor_from_file', &
+                                          'incorrect temperature', 1)
          ENDDO
       CASE(5)
 !
@@ -2648,7 +2658,8 @@ IF (meta_ionode) THEN
                 e_piezo_tensor_t(1,4,itemp),                &  
                 e_piezo_tensor_t(1,5,itemp) 
             IF (ABS(rdum-temp(itemp))>1D-5) &
-               CALL errore('read_piezo_from_file','incorrect temperature', 1)
+               CALL errore('read_piezo_tensor_from_file', &
+                                         'incorrect temperature', 1)
          ENDDO
       CASE(4)
 !
@@ -2668,7 +2679,8 @@ IF (meta_ionode) THEN
                 e_piezo_tensor_t(3,4,itemp),                &  
                 e_piezo_tensor_t(3,6,itemp)  
                 IF (ABS(rdum-temp(itemp))>1D-5) &
-                   CALL errore('read_piezo_from_file','incorrect temperature',1)
+                   CALL errore('read_piezo_tensor_from_file', &
+                                            'incorrect temperature',1)
             ENDDO
          ELSE
             DO itemp=2,ntemp-1
@@ -2682,7 +2694,8 @@ IF (meta_ionode) THEN
                 e_piezo_tensor_t(2,5,itemp),                &  
                 e_piezo_tensor_t(3,6,itemp)  
                 IF (ABS(rdum-temp(itemp))>1D-5) &
-                   CALL errore('read_piezo_from_file','incorrect temperature',1)
+                   CALL errore('read_piezo_tensor_from_file', &
+                                           'incorrect temperature',1)
             ENDDO
          ENDIF
 
@@ -2705,7 +2718,7 @@ IF (meta_ionode) THEN
                    e_piezo_tensor_t(3,3,itemp),                &
                    e_piezo_tensor_t(3,5,itemp)  
                    IF (ABS(rdum-temp(itemp))>1D-5) &
-                      CALL errore('read_piezo_from_file',      &
+                      CALL errore('read_piezo_tensor_from_file',      &
                                   'incorrect temperature',1)
             ENDDO
          ELSE
@@ -2721,7 +2734,7 @@ IF (meta_ionode) THEN
                    e_piezo_tensor_t(3,4,itemp),                &
                    e_piezo_tensor_t(3,5,itemp)  
                    IF (ABS(rdum-temp(itemp))>1D-5) &
-                      CALL errore('read_piezo_from_file',      &
+                      CALL errore('read_piezo_tensor_from_file',      &
                                   'incorrect temperature',1)
             ENDDO
 
@@ -2742,7 +2755,8 @@ IF (meta_ionode) THEN
                   e_piezo_tensor_t(3,3,itemp), e_piezo_tensor_t(3,4,itemp), &
                   e_piezo_tensor_t(3,5,itemp), e_piezo_tensor_t(3,6,itemp)
             IF (ABS(rdum-temp(itemp))>1D-5) &
-                CALL errore('read_piezo_from_file','incorrect temperature',1)
+                CALL errore('read_piezo_tensor_from_file', &
+                                                 'incorrect temperature',1)
          ENDDO
    END SELECT
    CLOSE(iu_piezo)
