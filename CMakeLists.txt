@@ -7,6 +7,7 @@ set(src_tpw_lib
     lib/cubic_surfaces.f90
     lib/debye_module.f90
     lib/diagonalize.f90
+    lib/dielectric_constant.f90
     lib/elastic_const.f90
     lib/eldos_module.f90
     lib/eos.f90
@@ -18,6 +19,8 @@ set(src_tpw_lib
     lib/linear_solvers.f90
     lib/linear_surfaces.f90
     lib/magnetic_point_group.f90
+    lib/magnetization.f90
+    lib/magnetoelectric_tensor.f90
     lib/model_free_energy.f90
     lib/mp_asyn.f90
     lib/numerical_diff.f90
@@ -26,13 +29,16 @@ set(src_tpw_lib
     lib/phdos_module.f90
     lib/ph_freq_module.f90
     lib/piezoelectric_tensor.f90
+    lib/piezomagnetic_tensor.f90
     lib/point_group.f90
+    lib/polarization.f90
     lib/polyfit.f90
     lib/polynomial.f90
     lib/quadratic_surfaces.f90
     lib/quartic_surfaces.f90
     lib/rotate.f90
     lib/space_groups.f90
+    lib/spherical_mod.f90
     lib/strain.f90
     lib/thermodynamics.f90
     lib/vector.f90
@@ -194,6 +200,7 @@ set(src_tpw_qe
     qe/allocate_phq_tpw.f90
     qe/apply_ac.f90
     qe/apply_trev_r.f90
+    qe/bp_c_phase.f90
     qe/calc_chi.f90
     qe/c_bands_tpw.f90
     qe/c_bands_many_k.f90
@@ -227,7 +234,6 @@ set(src_tpw_qe
     qe/do_cg_ph.f90
     qe/do_lanczos.f90
     qe/do_lanczos_psh.f90
-    qe/drhodvus.f90
     qe/drho_tpw.f90
     qe/dveqpsi_us.f90
     qe/dveqpsi_us_only.f90
@@ -237,9 +243,7 @@ set(src_tpw_qe
     qe/dvqpsi_dev.f90
     qe/dv_of_drho_clf.f90
     qe/dv_of_drho_tran.f90
-    qe/dvqpsi_us_tpw.f90
     qe/dyndiag.f90
-    qe/ef_shift.f90
     qe/electrons_tpw.f90
     qe/ev_xml.f90
     qe/find_band_sym.f90
@@ -276,6 +280,7 @@ set(src_tpw_qe
     qe/mix_pot.f90
     qe/nh_lanczos_step.f90
     qe/non_scf_tpw.f90
+    qe/non_scf_qe_tpw.f90
     qe/openfilq_tpw.f90
     qe/orthogonalize_omega.f90
     qe/orthogonalize_tpw.f90
@@ -319,6 +324,7 @@ set(src_tpw_qe
     qe/set_kplusq_nc.f90
     qe/set_kup_and_kdw.f90
     qe/setup_tpw.f90
+    qe/small_g_g.f90
     qe/solve_e_fpolc.f90
     qe/solve_eq.f90
     qe/solve_eq_tran.f90
@@ -376,12 +382,14 @@ set(src_tpw
     src/allocate_thermo.f90
     src/bands_sub.f90
     src/bcast_thermo_input.f90
+    src/build_el_cons_d.f90
     src/b_factor_reduction.f90
     src/check_all_geometries_done.f90
     src/check_dynmat_all_geo_on_file.f90
     src/check_el_cons.f90
     src/check_el_cons_qha.f90
     src/check_existence.f90
+    src/check_for_early_return.f90
     src/check_file_exists.f90
     src/check_initial_status_all_geo.f90
     src/check_thermo_all_geo.f90
@@ -407,6 +415,7 @@ set(src_tpw
     src/dos_sub.f90
     src/dynmatrix_tpw.f90
     src/empirical_free_energy.f90
+    src/energy_for_ec.f90
     src/evaluate_celldm.f90
     src/evaluate_vm.f90
     src/ev_mod.f90
@@ -418,17 +427,22 @@ set(src_tpw
     src/find_t_debye.f90
     src/find_symmetry.f90
     src/fit_frequencies.f90
+    src/free_energy_for_ec.f90
     src/generalized_phdos.f90
     src/generate_k_along_lines_kz.f90
     src/gen_qpoints.f90
     src/geometry_file.f90
+    src/interpolate_atomic_positions.f90
     src/initialize_elastic_cons.f90
+    src/initialize_piezo_tensor.f90
+    src/initialize_piezom_tensor.f90
     src/initialize_thermo_work.f90
     src/interpolate_bfact.f90
     src/interpolate_el_cons.f90
     src/interpolate_free_ener_strain.f90
     src/interpolate_freq.f90
     src/interpolate_thermo.f90
+    src/interpolate_uint.f90
     src/io_bands.f90
     src/local_dos1d_so.f90
     src/manage_anhar.f90
@@ -441,17 +455,23 @@ set(src_tpw
     src/manage_el_free_energy.f90
     src/manage_energy_minimum.f90
     src/manage_hot_electrons.f90
+    src/manage_magnetic_susceptibility.f90
+    src/manage_magnetoelectric_tensor.f90
     src/manage_ph_all_geometries.f90
     src/manage_ph.f90
     src/manage_ph_postproc.f90
     src/manage_ph_run.f90
     src/manage_ph_symmetry.f90
     src/manage_piezo_tensor.f90
+    src/manage_piezo_tensor_qha.f90
+    src/manage_piezom_tensor.f90
     src/manage_plot_anhar.f90
+    src/manage_polarization.f90
     src/manage_surface_states.f90
     src/manage_syn_1.f90
     src/manage_syn_2.f90
     src/manage_sync_pw.f90
+    src/manage_thermal_read.f90
     src/manage_xrdp.f90
     src/matdyn_sub.f90
     src/plan_avg_sub.f90
@@ -475,7 +495,9 @@ set(src_tpw
     src/plot_multi_energy.f90
     src/plot_mur.f90
     src/plot_optical_const.f90
+    src/plot_piezo_t.f90
     src/plot_phdos.f90
+    src/plot_pyro_t.f90
     src/plot_thermo.f90
     src/plot_xrdp.f90
     src/prepare_do_phonon.f90
@@ -488,9 +510,11 @@ set(src_tpw
     src/readmodes.f90
     src/read_state_densities.f90
     src/redefine_energies.f90
+    src/remove_internal_coordinates.f90
     src/run_iwork.f90
     src/run_thermo_asyncronously.f90
     src/save_ph_variables.f90
+    src/save_tau_on_tpw.f90
     src/set_2d_bz_path.f90
     src/set_bz_path.f90
     src/set_dos_kpoints.f90
@@ -500,10 +524,11 @@ set(src_tpw
     src/set_geometry_el_cons.f90
     src/set_k_points.f90
     src/set_paths_disp.f90
-    src/set_piezo_tensor_work.f90
+    src/set_tau_acc.f90
     src/set_temperature.f90
     src/set_thermo_work_todo.f90
     src/set_work_for_elastic_const.f90
+    src/set_work_for_piezo_tensor.f90
     src/simple_nonanal.f90
     src/simple_plot.f90
     src/summarize_anhar.f90
@@ -520,12 +545,14 @@ set(src_tpw
     src/write_anhar.f90
     src/write_anhar_glob.f90
     src/write_e_ke.f90
-    src/write_elastic_qha.f90
     src/write_elastic_t.f90
     src/write_elastic_t_qha.f90
     src/write_el_thermo.f90
     src/write_e_nk.f90
     src/write_e_omega.f90
+    src/write_epsilon_infty_t.f90
+    src/write_epsilon_zero.f90
+    src/write_epsilonm1_t.f90
     src/write_ev_input.f90
     src/write_free_energy.f90
     src/write_gnuplot_energy.f90
@@ -536,8 +563,12 @@ set(src_tpw
     src/write_ph_dispersions.f90
     src/write_phdos.f90
     src/write_ph_freq.f90
+    src/write_piezo_t.f90
+    src/write_piezo_t_qha.f90
+    src/write_pyro_t_qha.f90
     src/write_quadratic.f90
-    src/write_thermo.f90)
+    src/write_thermo.f90
+    src/write_zeu_t.f90)
 qe_enable_cuda_fortran("${src_tpw}")
 
 qe_add_library(qe_tpw ${src_tpw})
