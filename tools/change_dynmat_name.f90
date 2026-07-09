@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-------------------------------------------------------------------------
 PROGRAM change_dynmat_name
+!-------------------------------------------------------------------------
 !
 ! This program changes the geometry number of all the dynamical matrices
 ! files indicated in input.
@@ -60,7 +62,7 @@ DO i=1,n
    READ(28,*) ndyn(i)
    CLOSE(28)
 ENDDO
-100 CALL errore('change_name','opening fildyn',ABS(ios))
+100 CALL errore('change_dynmat_name','opening fildyn',ABS(ios))
 
 nfiles=0
 DO i=1, n
@@ -91,7 +93,7 @@ DO i=1,n
                                  &//TRIM(int_to_char(j))//TRIM(ext)//'_b'
          ierr=system('mv '//TRIM(fildyn_in)//' '//TRIM(fildyn_out))
          nfiles=nfiles+1
-         IF (nfiles>nfiles_tot) CALL errore('change_name',&
+         IF (nfiles>nfiles_tot) CALL errore('change_dynmat_name',&
                                                 'wrong number of files',1)
          save_name(nfiles)=fildyn_out
       ENDIF

@@ -139,7 +139,7 @@ PROGRAM epsilon_tpw
   !
   IF (meta_ionode) READ( stdin, input_epsilon, IOSTAT = ios )
   CALL mp_bcast(ios, meta_ionode_id, world_comm )
-  CALL errore( 'epsilon', 'reading input_epsilon namelist', ABS( ios ) )
+  CALL errore( 'epsilon_tpw', 'reading input_epsilon namelist', ABS( ios ) )
   !
   CALL mp_bcast( prefix, ionode_id, world_comm )
   CALL mp_bcast( outdir, ionode_id, world_comm )

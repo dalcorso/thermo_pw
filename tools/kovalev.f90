@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-------------------------------------------------------------------------
 PROGRAM kovalev
+!-------------------------------------------------------------------------
 !
 !  This program contains a few useful tools to help the reading of the
 !  Kovalev tables for space group representations
@@ -194,7 +196,7 @@ SUBROUTINE set_sym_su2_kov(sym_num, smat, sinv)
   COMPLEX(DP) :: a(32), b(32)
   REAL(DP) :: sqrt2=SQRT(2.0_DP), sqrt3=SQRT(3.0_DP)
 
-  IF (sym_num < 1 .OR. sym_num > 64) CALL errore('set_sym_su2', &
+  IF (sym_num < 1 .OR. sym_num > 64) CALL errore('set_sym_su2_kov', &
               'problem with symmetry number',1)
 
 !
@@ -372,7 +374,7 @@ SUBROUTINE set_sym_su2_kov(sym_num, smat, sinv)
     END IF
  END DO
  IF (pcount/=1) &
-    CALL errore('product_sym_su2','The product of these matrices is &
+    CALL errore('product_sym_su2_kov','The product of these matrices is &
                                    &not among the allowed symmetries',1)
  RETURN
  END SUBROUTINE product_sym_su2_kov

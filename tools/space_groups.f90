@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!--------------------------------------------------------------------------
 PROGRAM crystal_space_groups
+!--------------------------------------------------------------------------
 !
 !  This is a simple code that reads three direct lattice vectors and
 !  finds ibrav and celldm of that lattice. It can be used to transform
@@ -135,7 +137,7 @@ ELSEIF (work_choice==3) THEN
    WRITE(stdout,'(/,5x,"input/output space group",i5," / ",i4, 2x, a)') sgc, &
                                                       sgc_, TRIM(sg_name1)
 
-   IF (sgc /= sgc_) CALL errore('space_group','problem with space',1)
+   IF (sgc /= sgc_) CALL errore('crystal_space_groups','problem with space',1)
 
 !   ENDDO
 
