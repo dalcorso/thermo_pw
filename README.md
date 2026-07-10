@@ -1,4 +1,4 @@
-![thermo-logo](Doc/thermo_pw.jpg)
+![thermo-logo](Doc/thermo_pw_logo.png)
 
 > This is the distribution of the thermo\_pw package 
 > (see https://dalcorso.github.io/thermo_pw). This program is
