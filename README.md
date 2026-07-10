@@ -6,7 +6,7 @@
 > Quantum ESPRESSO (QE) (see http://www.quantum-espresso.org)
 > as the underlying engine.
 
-Thermo\_pw uses the same input format as Quantum ESPRESSO's <code>pw.x</code> code and generates PostScript figures of various material properties. While less flexible than QE for certain aspects, it offers a simpler and faster learning curve for properties such as electronic band structures, phonon dispersions, and both harmonic and anharmonic thermodynamic quantities. Additionally, it supports parallel execution, allowing multiple instances to run asynchronously for image generation. For an overview, refer to [Doc/tutorial.pdf](https://people.sissa.it/~dalcorso/thermo_pw/tutorial.pdf) (or [here](https://people.sissa.it/~dalcorso/thermo_pw/tutorial/tutorial.html)), and for a detailed description of its options, consult [Doc/user\_guide.pdf](https://people.sissa.it/~dalcorso/thermo_pw/user_guide.pdf) (or [here](https://people.sissa.it/~dalcorso/thermo_pw/user_guide/user_guide.html)).
+Thermo\_pw uses the same input format as Quantum ESPRESSO's <code>pw.x</code> code and generates PostScript figures of various material properties. While less flexible than QE for certain aspects, it offers a simpler and faster learning curve for properties such as electronic band structures, phonon dispersions, and both harmonic and quasi-harmonic thermodynamic quantities. Additionally, it supports parallel execution, allowing multiple instances to run asynchronously for image generation. For an overview, refer to [Doc/tutorial.pdf](https://people.sissa.it/~dalcorso/thermo_pw/tutorial.pdf) (or [here](https://people.sissa.it/~dalcorso/thermo_pw/tutorial/tutorial.html)), and for a detailed description of its options, consult [Doc/user\_guide.pdf](https://people.sissa.it/~dalcorso/thermo_pw/user_guide.pdf) (or [here](https://people.sissa.it/~dalcorso/thermo_pw/user_guide/user_guide.html)).
 
 [![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
 
@@ -49,6 +49,8 @@ Dal Corso
 Some routines have been contributed by SISSA PhD students and post-docs.
 Among them I mention M. Palumbo, O. Motornyi, A. Urru, C. Malica, X. Gong,
 B. Thakur, and A. Ahmed.
+
+The <code>thermo_pw</code> logo has been made by X. Gong.
 
 I would like also to thank all the people that contributed with comments,
 requests for improvements, and bug reports.
