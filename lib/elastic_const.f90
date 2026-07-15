@@ -944,9 +944,11 @@ SUBROUTINE compute_elastic_constants_ene(energy_geo, epsil_geo, nwork, &
 !  22    D_4h          6,7             E   C   B   B1  G   H
 !  18    C_4h          6,7             E   C   B   B1  G   H   CG
 !  20    D_2h          8,9,10,11       C   D   E   B   B1  B2  G   H  I
-!  25,27 D_3d,S_6      4               C   E   B1  A   H
-!  25,   D_3d,         5               C   E   B1  A   H   CI
-!  27,   S_6           5               C   E   B1  A   H   CI  CG
+!  25,27 D_3d,S_6      4               C   E   B1  A   H    old_ec=0
+!  25,27 D_3d,S_6      4               C   E   B1  B   H    old_ec=1
+!  25,27 D_3d,S_6      4               C   E   B   A   H    old_ec=2
+!  25,   D_3d,         5               C   E   B   A   I   CI
+!  27,   S_6           5               C   E   B   A   I   CI  CG
 !  16    C_2h          12, 13,         C   D   E   B   B1  B2  G   H  I
 !                                      CG  DG  EG  HI
 !  16    C_2h          -12,-13,        C   D   E   B   B1  B2  G   H  I
@@ -1162,44 +1164,45 @@ SELECT CASE (laue)
       WRITE(stdout,'("S33=",f15.8, " kbar")') s33*ry_kbar
       el_con(3,3) = 1.0_DP / omega * ( 2.0_DP * alpha(3) )
 !
-!  C_13=C_23
+!  C_12
 !
       base_data=2*ngeo_strain+1
+      CALL el_cons_ij_ene(1, 1, 'C_12', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+      s22=- alpha(2) / omega / 2.0_DP - s11
+      WRITE(stdout,'("S22", f15.8," kbar", f15.8," kbar")') &
+                     s22*ry_kbar, s11*ry_kbar
+
+      el_con(1,2) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - 
+                                        2.0_DP*el_con(1,1) ) * 0.5_DP 
+      el_con(2,1) = el_con(1,2)
+!
+!  C_13
+!
+      base_data=3*ngeo_strain+1
       CALL el_cons_ij_ene(1, 1, 'C_13', ngeo_strain, &
              epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
 
-      press=- alpha(2) / omega / 2.0_DP
-      WRITE(stdout,'("-(S11+S33)/2",f15.8," kbar",f15.8," kbar")') &
-                                press*ry_kbar, -(s11+s33)*0.5_DP*ry_kbar
-
-      el_con(1,3) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(1,1) &
-                                                     - el_con(3,3)) * 0.5_DP 
-      el_con(3,1) = el_con(1,3)
-      el_con(2,3) = el_con(1,3)
-      el_con(3,2) = el_con(2,3)
-!
-!  C_12
-!
-      base_data=3*ngeo_strain+1
-      CALL el_cons_ij_ene(1, 1, 'C_12', ngeo_strain, &
-             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
       press=- alpha(2) / omega / 3.0_DP
       WRITE(stdout,'("-(2*S11+S33)/3", f15.8," kbar", f15.8," kbar")') &
                      press*ry_kbar, -(2.0_DP*s11+s33)/3.0_DP*ry_kbar
 
-      el_con(1,2) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - &
+      el_con(1,3) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - &
                                 2.0_DP * el_con(1,1) - el_con(3,3) &
-                              - 4.0_DP * el_con(1,3) ) * 0.5_DP 
-      el_con(2,1) = el_con(1,2)
+                              - 2.0_DP * el_con(1,2) ) * 0.25_DP 
+      el_con(3,1) = el_con(1,3)
+      el_con(2,3) = el_con(1,3)
+      el_con(3,2) = el_con(2,3)
 !
 !  C_44=C_55. The factor 1/4 is due to the definition of epsilon_4
 !
       base_data=4*ngeo_strain+1
-      CALL el_cons_ij_ene(1, 3, 'C_55', ngeo_strain, &
+      CALL el_cons_ij_ene(2, 3, 'C_44', ngeo_strain, &
              epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
 
-      el_con(5,5) = 0.25_DP / omega * ( 2.0_DP * alpha(3) ) 
-      el_con(4,4) = el_con(5,5)
+      el_con(4,4) = 0.25_DP / omega * ( 2.0_DP * alpha(3) ) 
+      el_con(5,5) = el_con(4,4)
 
       el_con(6,6) = (el_con(1,1) - el_con(1,2)) * 0.5_DP
 !
@@ -3545,16 +3548,20 @@ SELECT CASE (laue)
             nstep = 6
             strain_list(1) = 'C '
             strain_list(2) = 'E '
-            strain_list(3) = 'B1'
+            strain_list(3) = 'B '
             strain_list(4) = 'A '
-            strain_list(5) = 'H '
+            strain_list(5) = 'I '
             strain_list(6) = 'CI'
             IF (laue==27) THEN
                nstep = 7
                strain_list(7) = 'CG'
+!
+!   CG is not available in the advanced mode
+!
+               IF (elastic_algorithm=='energy') nstep=0
             ENDIF
-            IF (elastic_algorithm=='energy') nstep=0
             with_same_lattice(2)=1
+            with_same_lattice(3)=1
             with_same_lattice(4)=1
          END IF
       ELSE

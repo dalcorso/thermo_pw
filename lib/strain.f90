@@ -221,7 +221,7 @@ SUBROUTINE set_strain_adv(strain_code, ibrav, celldm, epsil, epsilon_voigt, &
 !  axis of the unstrained lattice to those of the strained lattice.
 !  
 !  TODO:      ibrav        strain
-!               5           B1, CI, CG
+!               5           CG
 !               6,7         CG
 !               12,13       B B1 B2 CG DG EG HI
 !              -12,-13      B B1 B2 CH DH EH GI
@@ -465,6 +465,23 @@ ELSEIF (ibrav==5) THEN
       ibrav_strain=ibrav
       celldm_strain(1) = celldm(1) * (1.0_DP + epsil)
       celldm_strain(4) = celldm(4)
+   ELSEIF (strain_code=='B ') THEN
+      ibrav_strain=ibrav
+      celldm_strain(1) = celldm(1) * SQRT((1.0_DP + epsil)**2*sint**2 &
+                                 + cost**2)
+      celldm_strain(4) = (2.0_DP * cost**2 - (1.0_DP + epsil)**2*sint**2)/ &
+                         (2.0_DP * cost**2 + (1.0_DP + epsil)**2*sint**2)
+                  
+   ELSEIF (strain_code=='B1') THEN
+      ibrav_strain=-13
+      den = SQRT(sint**2 + 4.0_DP *(1.0_DP+epsil)**2 * cost**2)
+      den1 = SQRT(sint**2 + (1.0_DP+epsil)**2 * cost**2)
+      celldm_strain(1) = celldm(1) * den
+      celldm_strain(2) = sqrt3 * (1.0_DP + epsil) * sint / den
+      celldm_strain(3) = den1 / den
+      celldm_strain(5) = (2.0_DP * (1.0_DP + epsil)**2 * cost**2 - &
+                          sint**2) / den / den1
+      CALL set_rot_p(rot, epsil, sint, cost)
    ELSEIF (strain_code=='C ') THEN
       ibrav_strain=-13
       den = SQRT(1.0_DP + 3.0_DP * cost**2)
@@ -487,6 +504,18 @@ ELSEIF (ibrav==5) THEN
 
       celldm_strain(1) = celldm(1) * den
       celldm_strain(2) = sqrt3 * sint / den
+      celldm_strain(3) = den1 / den
+      celldm_strain(5) = ((1.0_DP + epsil**2)*(3.0_DP* cost**2 - 1.0_DP) &
+                        + 2.0_DP * epsil * sint * cost) / den / den1
+      CALL set_rot_i(rot, epsil, sint, cost)
+   ELSEIF (strain_code=='CI') THEN
+      ibrav_strain=-13
+      den= SQRT((1.0_DP+epsil**2)*(1.0_DP + 3.0_DP * cost**2)- &
+                              8.0_DP * epsil * sint * cost )
+      den1 = SQRT(1.0_DP + epsil**2 + 4.0_DP * epsil * sint * cost )
+
+      celldm_strain(1) = celldm(1) * den
+      celldm_strain(2) = (1.0_DP+epsil) * sqrt3 * sint / den
       celldm_strain(3) = den1 / den
       celldm_strain(5) = ((1.0_DP + epsil**2)*(3.0_DP* cost**2 - 1.0_DP) &
                         + 2.0_DP * epsil * sint * cost) / den / den1
@@ -1083,6 +1112,31 @@ rot(3,3) = -a / den
 
 RETURN
 END SUBROUTINE set_rot_i
+
+!-----------------------------------------------------------------------
+SUBROUTINE set_rot_p(rot, epsil, sint, cost)
+!-----------------------------------------------------------------------
+
+IMPLICIT NONE
+REAL(DP), INTENT(IN) :: epsil, sint, cost
+REAL(DP), INTENT(OUT) :: rot(3,3)
+
+REAL(DP) :: den, a, b
+
+rot(:,:)=0.0_DP
+rot(2,1)=1.0_DP
+den= SQRT(sint**2 + 4.0_DP * (1.0_DP+epsil)**2 * cost**2 )
+
+a= - sint
+b= 2.0_DP * (1.0_DP + epsil) * cost 
+
+rot(1,2) = a / den
+rot(1,3) = b / den
+rot(3,2) = b / den
+rot(3,3) = -a / den
+
+RETURN
+END SUBROUTINE set_rot_p
 
 END MODULE strain_mod
 

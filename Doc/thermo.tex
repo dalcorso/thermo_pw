@@ -425,7 +425,28 @@ and $\cos{\theta}=\sqrt{1\over 3}\sqrt{1 + 2 \cos{\alpha}}$. \\
 The volume of the unit cell is $\Omega={3 \sqrt{3} \over 2} a^3 \sin^2\theta
 \cos\theta$. \\
 The lattice is characterized by two parameters $\zeta_1=a$ and 
-$\zeta_2=\cos\alpha$.
+$\zeta_2=\cos\alpha$. $a$ is the modulus of the three primitive vectors 
+and $\alpha$ their angle.
+
+It is also useful to associate to the rhombohedral lattice an hexagonal 
+lattice whose unit cell contains three points of the rhombohedral lattice.
+Indicating with $a_h$ and $c_h$ the parameters of the hexagonal lattice we
+have:
+\begin{eqnarray}
+a_h&=&a \sqrt{2} \sqrt{1-\cos\alpha} \\
+c_h&=&a \sqrt{3} \sqrt{1+2\cos\alpha}.
+\end{eqnarray}
+
+From the hexagonal lattice parameters we can derive the size of
+the rhombohedral lattice:
+\begin{eqnarray}
+a&=& {1\over 3} \sqrt{3 a_h^2 + c_h^2} \\
+\cos\alpha&=&{2 c_h^2-3 a_h^2 \over 2 ( 3 a_h^2+c_h^2)}
+\end{eqnarray}
+or equivalently:
+\begin{equation}
+\cos\alpha={ (c_h/a_h)^2-3/2 \over  3 +(c_h/a_h)^2}
+\end{equation}
 
 \newpage
 
@@ -1457,11 +1478,23 @@ $R^D$ and ${\rm tg}\phi=-\epsilon_{1,3}$.
 {\color{web-blue}\subsection{Trigonal system}}
 \color{black}
 
-Applying $\epsilon_A$ or $\epsilon_E$ to a rhombohedral lattice does
-not change its shape. 
+Applying $\epsilon_A$, $\epsilon_B$ or $\epsilon_E$ to a rhombohedral 
+lattice does not change its shape. 
 
 Applying $\epsilon_A$ changes $a_r$ to $a_r (1+\epsilon_{1,1})$ while the
 rhombohedral angle does not change.
+
+Applying $\epsilon_B$ changes both $a_r$ and the rhombohedral angle 
+$\alpha_r$. We have 
+\begin{eqnarray}
+a&=&a_t \sqrt{(1 + \epsilon_{1,1})^2 \sin^2\theta_r + \cos^2\theta_r}, \\
+\cos\alpha &=& {
+2 \cos^2\theta_r -(1 + \epsilon_{1,1})^2 \sin^2\theta_r  \over
+ \left[(1 + \epsilon_{1,1})^2 \sin^2\theta_r+ 2 \cos^2\theta_r\right]}
+\end{eqnarray}
+where 
+$\sin{\theta_r}=\sqrt{2\over 3}\sqrt{1-\cos{\alpha_r}}$
+and $\cos{\theta_r}=\sqrt{1\over 3}\sqrt{1 + 2 \cos{\alpha_r}}$. \\
 
 Applying $\epsilon_E$ changes both $a_r$ and the rhombohedral angle
 $\alpha_r$. We have 
@@ -1471,9 +1504,6 @@ a&=&a_t \sqrt{\sin^2\theta_r + (1 + \epsilon_{1,1})^2 \cos^2\theta_r}, \\
 2(1 + \epsilon_{1,1})^2 \cos^2\theta_r -\sin^2\theta_r  \over
 2 \left[\sin^2\theta_r+ (1 + \epsilon_{1,1})^2 \cos^2\theta_r\right]}
 \end{eqnarray}
-where 
-$\sin{\theta_r}=\sqrt{2\over 3}\sqrt{1-\cos{\alpha_r}}$
-and $\cos{\theta_r}=\sqrt{1\over 3}\sqrt{1 + 2 \cos{\alpha_r}}$. \\
 
 Applying $\epsilon_C$ to a rhombohedral lattice transforms it into a
 base-centered $b$-unique monoclinic lattice with parameters:
@@ -1497,6 +1527,14 @@ R^H=\left( \begin{array}{ccc}
 \right).
 \end{equation}
 
+In order to derive these equations it is useful to note that given the
+strained vector ${\bf a}'_1$, ${\bf a}'_2$ and ${\bf a}'_3$ the basis
+vectors of a monoclinic lattice can be taken as ${\bf a}_{1M}= {\bf a}'_1+
+{\bf a}'_3$, ${\bf a}_{2M}= {\bf a}'_1- {\bf a}'_3$ and
+${\bf a}_{3M}={\bf a}'_2$. In the rotated reference system $y'$ is along
+$x$ (parallel to ${\bf a}_{2M}$), $x'$ is parallel to ${\bf a}_{1M}$, 
+while $z'$ is orthogonal to $x'$ and $y'$.
+
 Applying $\epsilon_I$ to a rhombohedral lattice transforms it into a
 base-centered $b$-unique monoclinic lattice with parameters:
 \begin{eqnarray}
@@ -1511,25 +1549,60 @@ c&=&a_r \sqrt{1+\epsilon_{2,3}^2+4\epsilon_{2,3}\sin \theta_r\cos \theta_r}, \\
 \end{eqnarray}
 
 The reference system of the base-centered monoclinic lattice is rotated 
-with respect to the reference system of the rhombohedral lattice.
+with respect to the reference system of the rhombohedral lattice, as 
+described before, but this time the rotation angle depends on strain.
 The change of coordinates can be written as above with the rotation matrix 
 \begin{equation}
 R^I=\left( \begin{array}{ccc}
-0, & a, &  b\\
+0, & A, &  B\\
 1, & 0, & 0  
 \\
-0, & b, & -a 
+0, & B, & -A 
 \end{array}
 \right)
 \end{equation}
 where
 \begin{eqnarray}
-a&=& {2 \epsilon_{2,3} \cos \theta_r - \sin \theta_r \over 
+A&=& {2 \epsilon_{2,3} \cos \theta_r - \sin \theta_r \over 
 \sqrt{(1+\epsilon_{2,3}^2)(1 + 3 \cos^2 \theta_r)-
 8\epsilon_{2,3}\sin \theta_r\cos \theta_r}}, \\
-b&=& {2 \cos \theta_r - \epsilon_{2,3} \sin \theta_r \over 
+B&=& {2 \cos \theta_r - \epsilon_{2,3} \sin \theta_r \over 
 \sqrt{(1+\epsilon_{2,3}^2)(1 + 3 \cos^2 \theta_r)-
 8\epsilon_{2,3}\sin \theta_r\cos \theta_r}}.
+\end{eqnarray}
+
+Applying $\epsilon_{CI}=\epsilon_C+\epsilon_I$ to a rhombohedral lattice 
+transforms it into a base centered monoclinic lattice with:
+\begin{eqnarray}
+a&=&a_r \sqrt{(1+\epsilon_{2,3}^2)(1 + 3 \cos^2 \theta_r)-
+8\epsilon_{2,3}\sin \theta_r\cos \theta_r}, \\
+b&=&a_r \sqrt{3}(1+\epsilon_{1,1}) \sin \theta_r, \\
+c&=&a_r \sqrt{1+\epsilon_{2,3}^2+4\epsilon_{2,3}\sin \theta_r\cos \theta_r}, \\
+\cos\beta &=& {(1+\epsilon_{2,3}^2) (3 \cos^2 \theta_r-1) 
++ 2 \epsilon_{2,3} \sin \theta_r\cos \theta_r
+\over \sqrt{(1+\epsilon_{2,3}^2)(1 + 3 \cos^2 \theta_r)-
+8\epsilon_{2,3}\sin \theta_r\cos \theta_r} \sqrt{1+\epsilon_{2,3}^2+4\epsilon_{2,3}\sin \theta_r\cos \theta_r}}.
+\end{eqnarray}
+The rotation matrix remains the same of the case $\epsilon_I$.
+
+Applying $\epsilon_{B'}$ to a rhombohedral lattice transforms it into a
+base-centered $b$-unique monoclinic lattice with parameters:
+\begin{eqnarray}
+a&=&a_r \sqrt{ \sin^2 \theta_r + 4 (1+\epsilon_{1,1})^2 \cos^2 \theta_r} \\
+b&=&a_r \sqrt{3}(1+\epsilon_{1,1})\sin \theta_r, \\
+c&=&a_r \sqrt{\sin^2 \theta_r + (1+\epsilon_{1,1})^2 \cos^2 \theta_r}\\
+\cos\beta &=& { -\sin^2 \theta_r + 2 (1+\epsilon_{1,1})^2 \cos^2 \theta_r
+\over 
+\sqrt{\sin^2 \theta_r + (1+\epsilon_{1,1})^2 \cos^2 \theta_r}
+\sqrt{\sin^2 \theta_r + 4 (1+\epsilon_{1,1})^2 \cos^2 \theta_r}}
+\end{eqnarray}
+
+The rotation matrix has the same form seen for $\epsilon_I$ but with
+\begin{eqnarray}
+A&=& {- \sin \theta_r \over 
+\sqrt{\sin^2 \theta_r + 4 (1+\epsilon_{1,1})^2 \cos^2 \theta_r}}, \\
+B&=& {2 (1+\epsilon_{1,1}) \cos \theta_r \over 
+\sqrt{\sin^2 \theta_r + 4 (1+\epsilon_{1,1})^2 \cos^2 \theta_r}}, \\
 \end{eqnarray}
 
 \newpage
