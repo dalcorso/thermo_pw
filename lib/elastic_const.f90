@@ -1174,7 +1174,7 @@ SELECT CASE (laue)
       WRITE(stdout,'("S22", f15.8," kbar", f15.8," kbar")') &
                      s22*ry_kbar, s11*ry_kbar
 
-      el_con(1,2) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - 
+      el_con(1,2) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - &
                                         2.0_DP*el_con(1,1) ) * 0.5_DP 
       el_con(2,1) = el_con(1,2)
 !
