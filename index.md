@@ -12,7 +12,13 @@ User's Guide (Version 2.1.1):<a href="https://people.sissa.it/dalcorso/thermo_pw
 
 <p align="justify">The following publications describe new
 features implemented in <code>thermo_pw</code>:</p>
-
+<p align="justify">
+21. X. Gong and A. Dal Corso,
+Ab initio quasi-harmonic thermoelasticity, piezoelectricity, 
+and thermoelectricity of polar solids at finite temperature 
+and pressure: Application to wurtzite ZnO, 
+<a href="https://link.aps.org/doi/10.1103/xhvy-8hqf">
+Phys. Rev. B <b>114</b>, 045204 (2026)</a>.</p>
 <p align="justify">
 20. X. Gong and A. Dal Corso,
 High pressure and temperature thermoelasticity of hcp osmium from ab initio quasi-harmonic theory, 
@@ -123,7 +129,7 @@ Clean Ir(111) and Pt(111) electronic surface states: a first-principle fully rel
 <p align="justify">Refs.12,10 describe how <code>thermo_pw</code> computes temperature
 dependent elastic constants, Ref.14,16,17,19,20 pressure and temperature 
 dependent
-elastic constants, Ref.2 elastic constants at T=0 K,
+elastic constants, Ref.2 elastic constants at T=0 K, Ref.21 elastic constants in piezoelectric solids,
 Ref.1,5,7 surface band structures, Refs.6,11 eels and optical properties,
 Ref.8 the calculation of the atomic B factor,
 Ref.9 DFPT with fully relativistic pseudopotentials, and Ref.3,4
