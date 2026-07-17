@@ -34,21 +34,21 @@ MODULE strain_mod
 
 !  and some strain that are the composition of two of the previous 
 !
-!   CG  e  e  0     CH  e  0  e    CI  e  0  0 
-!       e  0  0         0  0  0        0  0  e
-!       0  0  0         e  0  0        0  e  0
+!   CG  e   e/2  0     CH  e   0  e/2    CI  e   0   0 
+!       e/2  0   0         0   0   0         0   0  e/2
+!       0    0   0         e/2 0   0         0  e/2  0
 !
-!   DG  0  e  0     DH  0  0  e    DI  0  0  0
-!       e  e  0         0  e  0        0  e  e 
-!       0  0  0         e  0  0        0  e  0
+!   DG  0   e/2  0     DH  0   0  e/2    DI  0   0   0
+!       e/2  e   0         0   e   0         0   e  e/2 
+!       0    0   0         e/2 0   0         0  e/2  0
 !
-!   EG  0  e  0     EH  0  0  e    EI  0  0  0
-!       e  0  0         0  0  0        0  0  e
-!       0  0  e         e  0  e        0  e  e
+!   EG  0   e/2  0     EH  0   0  e/2    EI  0   0   0
+!       e/2  0   0         0   0   0         0   0  e/2
+!       0    0   e         e/2 0   e         0  e/2  e
 !
-!   GH  0  e  e     GI  0  e  0    IH  0  0  e
-!       e  0  0         e  0  e        0  0  e
-!       e  0  0         0  e  0        e  e  0
+!   GH  0   e/2  e/2   GI  0  e/2  0    IH   0   0  e/2
+!       e/2  0   0         e/2 0  e/2        0   0  e/2
+!       e/2  0   0         0  e/2  0        e/2  e/2 0
 !
 !
 ! Not all strains are available for all Bravais lattices. 
@@ -244,7 +244,8 @@ REAL(DP), INTENT(INOUT) :: celldm_strain(6), epsilon_voigt(6), rot(3,3)
 
 REAL(DP), PARAMETER :: sqrt2=SQRT(2.0_DP), sqrt3=SQRT(3.0_DP), &
                                            sqrt6=SQRT(6.0_DP)
-REAL(DP) :: phi, den, den1, den2, sing, sint, cost, aepsilon, rotcr(3,3)
+REAL(DP) :: phi, den, den1, den2, sing, sint, cost, aepsilon, rotcr(3,3), &
+            epsil23
 !
 ! some defaults
 !
@@ -467,11 +468,9 @@ ELSEIF (ibrav==5) THEN
       celldm_strain(4) = celldm(4)
    ELSEIF (strain_code=='B ') THEN
       ibrav_strain=ibrav
-      celldm_strain(1) = celldm(1) * SQRT((1.0_DP + epsil)**2*sint**2 &
-                                 + cost**2)
-      celldm_strain(4) = (2.0_DP * cost**2 - (1.0_DP + epsil)**2*sint**2)/ &
-                         (2.0_DP * cost**2 + (1.0_DP + epsil)**2*sint**2)
-                  
+      den = (1.0_DP + epsil)**2*sint**2 + cost**2
+      celldm_strain(1) = celldm(1) * SQRT(den)
+      celldm_strain(4) = (cost**2 - 0.5_DP * (1.0_DP + epsil)**2*sint**2)/den
    ELSEIF (strain_code=='B1') THEN
       ibrav_strain=-13
       den = SQRT(sint**2 + 4.0_DP *(1.0_DP+epsil)**2 * cost**2)
@@ -510,16 +509,17 @@ ELSEIF (ibrav==5) THEN
       CALL set_rot_i(rot, epsil, sint, cost)
    ELSEIF (strain_code=='CI') THEN
       ibrav_strain=-13
-      den= SQRT((1.0_DP+epsil**2)*(1.0_DP + 3.0_DP * cost**2)- &
-                              8.0_DP * epsil * sint * cost )
-      den1 = SQRT(1.0_DP + epsil**2 + 4.0_DP * epsil * sint * cost )
+      epsil23=epsil/2.0_DP
+      den= SQRT((1.0_DP+epsil23**2)*(1.0_DP + 3.0_DP * cost**2)- &
+                              8.0_DP * epsil23 * sint * cost )
+      den1 = SQRT(1.0_DP + epsil23**2 + 4.0_DP * epsil23 * sint * cost )
 
       celldm_strain(1) = celldm(1) * den
       celldm_strain(2) = (1.0_DP+epsil) * sqrt3 * sint / den
       celldm_strain(3) = den1 / den
-      celldm_strain(5) = ((1.0_DP + epsil**2)*(3.0_DP* cost**2 - 1.0_DP) &
-                        + 2.0_DP * epsil * sint * cost) / den / den1
-      CALL set_rot_i(rot, epsil, sint, cost)
+      celldm_strain(5) = ((1.0_DP + epsil23**2)*(3.0_DP* cost**2 - 1.0_DP) &
+                        + 2.0_DP * epsil23 * sint * cost) / den / den1
+      CALL set_rot_i(rot, epsil23, sint, cost)
    ELSE
       CALL errore('set_strain_adv','strain not programmed',ibrav)
    ENDIF
