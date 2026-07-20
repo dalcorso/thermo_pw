@@ -386,7 +386,7 @@ IF (lgeo_from_file) THEN
             ENDDO
          ELSE
             CALL errore('manage_anhar',&
-                         'lgeo_from_file but celldm_pt files not found',1)
+                        'lgeo_from_file but celldm_press files not found',1)
          ENDIF
       ENDDO
       DEALLOCATE(temp_)
@@ -410,7 +410,7 @@ IF (lgeo_from_file) THEN
             ENDDO
          ELSE
             CALL errore('manage_anhar',&
-                         'lgeo_from_file but celldm_ptt files not found',1)
+                         'lgeo_from_file but celldm_temp files not found',1)
          ENDIF
       ENDDO
       DEALLOCATE(press_)
@@ -451,7 +451,7 @@ IF (lgeo_from_file) THEN
             ENDDO
          ELSE
             CALL errore('manage_anhar',&
-                         'lgeo_from_file but celldm_ph_pt files not found',1)
+                    'lgeo_from_file but celldm_ph_press files not found',1)
          ENDIF
       ENDDO
       DEALLOCATE(temp_)
@@ -475,7 +475,7 @@ IF (lgeo_from_file) THEN
             ENDDO
          ELSE
             CALL errore('manage_anhar',&
-                         'lgeo_from_file but celldm_ph_ptt files not found',1)
+                      'lgeo_from_file but celldm_ph_temp files not found',1)
          ENDIF
       ENDDO
       DEALLOCATE(press_)
