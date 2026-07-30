@@ -1604,8 +1604,8 @@ USE kinds,    ONLY : DP
 USE ph_freq_thermodynamics, ONLY : phf_e0_eos, phf_ce_eos, phf_b_fact, &
                                    phf_ener_eos, phf_free_ener_eos,    &
                                    phf_entropy_eos
-USE el_thermodynamics,  ONLY : el_ener_eos, el_free_ener_eos, el_entr_eos, &
-                               el_ce_eos
+USE el_thermodynamics,  ONLY : elf_ener_eos, elf_free_ener_eos, elf_entr_eos, &
+                               elf_ce_eos
 USE control_emp_free_ener,  ONLY : add_empirical, emp_ener, emp_free_ener, &
                                emp_entr, emp_ce
 USE ph_freq_anharmonic, ONLY : vminf_t, celldmf_t, cvf_t, cef_t, enerf_t,&
@@ -1634,18 +1634,18 @@ CALL interpolate_thermo(vminf_t, celldmf_t, phf_ce_eos, cef_t)
 cvf_t=cef_t
 
 IF (with_eigen) CALL interpolate_b_fact(vminf_t, phf_b_fact, bfactf_t)
-!
+
 !  If available interpolate the electronic part and add it
 !  to the vibrational one
 !
 IF (lel_free_energy) THEN
-   CALL interpolate_thermo(vminf_t, celldmf_t, el_ener_eos, el_energyf_t)
+   CALL interpolate_thermo(vminf_t, celldmf_t, elf_ener_eos, el_energyf_t)
    enerf_t = enerf_t + el_energyf_t
-   CALL interpolate_thermo(vminf_t, celldmf_t, el_free_ener_eos, el_free_energyf_t)
+   CALL interpolate_thermo(vminf_t, celldmf_t, elf_free_ener_eos, el_free_energyf_t)
    free_enerf_t = free_enerf_t + el_free_energyf_t
-   CALL interpolate_thermo(vminf_t, celldmf_t, el_entr_eos, el_entropyf_t)
+   CALL interpolate_thermo(vminf_t, celldmf_t, elf_entr_eos, el_entropyf_t)
    entropyf_t = entropyf_t + el_entropyf_t
-   CALL interpolate_thermo(vminf_t, celldmf_t, el_ce_eos, el_cef_t)
+   CALL interpolate_thermo(vminf_t, celldmf_t, elf_ce_eos, el_cef_t)
    cef_t = cef_t + el_cef_t
    cvf_t=cef_t
 ELSE
@@ -1671,6 +1671,8 @@ ELSE
    emp_entropyf_t=0.0_DP
    emp_cef_t=0.0_DP
 ENDIF
+
+!
 
 RETURN
 END SUBROUTINE interpolate_harmonic_ph
