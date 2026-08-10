@@ -74,10 +74,11 @@ SAVE
 
 INTEGER :: asyu = 56
 REAL(DP) :: asy_proj(3) = (/ 5.0_DP, 2.0_DP, 1.0_DP /)
+LOGICAL :: asy_lbackspace=.TRUE.
 PUBLIC asy_writepoint, asy_putlabel, asy_writesurface, asy_openplot, &
        asy_closeplot, asy_join, asy_plotaxis, asy_proj, asy_open2dplot, &
        asy_write_2d_point, asy_put2dlabel, asy_2d_join, asy_write_2d_surface, &
-       asy_2d_plotaxis
+       asy_2d_plotaxis, asy_lbackspace
 
 CONTAINS
 !
@@ -133,23 +134,54 @@ CALL asy_writepoint(a,pointl)
 IF (ionode) THEN
    lens=LEN_TRIM(label)
    IF (label=='gG ') THEN
-      WRITE(asyu,'("label(scale(1.6)*""$\Gamma$"",",a,",",a,",red);")') &
+      IF (asy_lbackspace) THEN
+         WRITE(asyu,'("label(scale(1.6)*""$\Gamma$"",",a,",",a,",red);")') &
                  TRIM(pointl), TRIM(pos)
+      ELSE
+         WRITE(asyu,'("label(scale(1.6)*""$\\Gamma$"",",a,",",a,",red);")') &
+                 TRIM(pointl), TRIM(pos)
+      ENDIF
    ELSEIF (label=='gS ') THEN
-      WRITE(asyu,'("label(scale(1.6)*""$\Sigma$"",",a,",",a,",red);")') &
+      IF (asy_lbackspace) THEN
+         WRITE(asyu,'("label(scale(1.6)*""$\Sigma$"",",a,",",a,",red);")') &
                  TRIM(pointl), TRIM(pos)
+      ELSE
+         WRITE(asyu,'("label(scale(1.6)*""$\\Sigma$"",",a,",",a,",red);")') &
+                 TRIM(pointl), TRIM(pos)
+      ENDIF
+
    ELSEIF (label=='gS0') THEN
-      WRITE(asyu,'("label(scale(1.6)*""$\Sigma_0$"",",a,",",a,",red);")') &
+      IF (asy_lbackspace) THEN
+         WRITE(asyu,'("label(scale(1.6)*""$\Sigma_0$"",",a,",",a,",red);")') &
                  TRIM(pointl), TRIM(pos)
+      ELSE
+         WRITE(asyu,'("label(scale(1.6)*""$\\Sigma_0$"",",a,",",a,",red);")') &
+                 TRIM(pointl), TRIM(pos)
+      ENDIF
    ELSEIF (label=='gS1') THEN
-      WRITE(asyu,'("label(scale(1.6)*""$\Sigma_1$"",",a,",",a,",red);")') &
+      IF (asy_lbackspace) THEN
+         WRITE(asyu,'("label(scale(1.6)*""$\Sigma_1$"",",a,",",a,",red);")') &
                  TRIM(pointl), TRIM(pos)
+      ELSE
+         WRITE(asyu,'("label(scale(1.6)*""$\\Sigma_1$"",",a,",",a,",red);")') &
+                 TRIM(pointl), TRIM(pos)
+      ENDIF
    ELSEIF (label=='gD0') THEN
-      WRITE(asyu,'("label(scale(1.6)*""$\Delta_0$"",",a,",",a,",red);")') &
+      IF (asy_lbackspace) THEN
+         WRITE(asyu,'("label(scale(1.6)*""$\Delta_0$"",",a,",",a,",red);")') &
                  TRIM(pointl), TRIM(pos)
+      ELSE
+         WRITE(asyu,'("label(scale(1.6)*""$\\Delta_0$"",",a,",",a,",red);")')&
+                 TRIM(pointl), TRIM(pos)
+      ENDIF
    ELSEIF (label=='gL0') THEN
-      WRITE(asyu,'("label(scale(1.6)*""$\Lambda_0$"",",a,",",a,",red);")')  &
+      IF (asy_lbackspace) THEN
+         WRITE(asyu,'("label(scale(1.6)*""$\Lambda_0$"",",a,",",a,",red);")') &
                  TRIM(pointl), TRIM(pos)
+      ELSE
+         WRITE(asyu,'("label(scale(1.6)*""$\\Lambda_0$"",",a,",",a,",red);")') &
+                 TRIM(pointl), TRIM(pos)
+      ENDIF
    ELSEIF (lens>1.AND.TRIM(label(lens:lens))/=' ') THEN
       label_1=label(lens-1:lens-1)//"_"//label(lens:lens)
       WRITE(asyu,'("label(scale(1.6)*""$",a,"$"",",a,",",a,",red);")') &

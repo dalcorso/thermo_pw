@@ -99,7 +99,8 @@ SUBROUTINE thermo_setup()
   USE klist,                ONLY : degauss, ltetra
   USE control_flags,        ONLY : ethr
   USE noncollin_module,     ONLY : noncolin, domag, angle1, angle2
-  USE gnuplot,              ONLY : determine_backspace
+  USE gnuplot,              ONLY : determine_backspace, lbackspace
+  USE asy,                  ONLY : asy_lbackspace
   USE io_global,            ONLY : stdout
   USE mp_images,            ONLY : nimage
   USE mp_asyn,              ONLY : with_asyn_images
@@ -114,7 +115,7 @@ SUBROUTINE thermo_setup()
   REAL(DP), ALLOCATABLE :: tau_aux(:,:)
   REAL(DP) :: compute_omega_geo
   INTEGER :: group_tags(48), nsym_is, code_group_is
-  LOGICAL :: magnetic_sym
+  LOGICAL :: magnetic_sym, set_backspace
   CHARACTER(LEN=11) :: gname_is
   !
   !
@@ -420,7 +421,9 @@ SUBROUTINE thermo_setup()
 !  Determine how the backspace is written on file. This is required by the
 !  gnuplot library
 !
-   CALL determine_backspace()
+   CALL determine_backspace(set_backspace)
+   lbackspace=set_backspace
+   asy_lbackspace=set_backspace
 
    IF (lgruneisen_gen) THEN
       nvar=crystal_parameters(ibrav)

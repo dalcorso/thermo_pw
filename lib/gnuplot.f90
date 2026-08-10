@@ -49,7 +49,7 @@ MODULE gnuplot
            gnuplot_put_label, gnuplot_put_label_yl, gnuplot_circle, &
            gnuplot_line_v, gnuplot_rectangle_yl,&
            gnuplot_line, gnuplot_print_objects, gnuplot_close_2dplot_prep, &
-           determine_backspace
+           determine_backspace, lbackspace
 
 CONTAINS
 
@@ -1391,7 +1391,7 @@ RETURN
 END SUBROUTINE set_ws_from_label
 
 !----------------------------------------------------------------------------
-  SUBROUTINE determine_backspace()
+  SUBROUTINE determine_backspace(lbackspace_)
 !----------------------------------------------------------------------------
   !
   ! This routine has to be called once. It determines if the 
@@ -1407,6 +1407,7 @@ END SUBROUTINE set_ws_from_label
   USE mp_world,  ONLY : world_comm
   USE io_global, ONLY : meta_ionode, meta_ionode_id
   IMPLICIT NONE
+  LOGICAL, INTENT(OUT) :: lbackspace_
   INTEGER :: outunit, filesize
   INTEGER :: find_free_unit
 
@@ -1421,9 +1422,9 @@ END SUBROUTINE set_ws_from_label
   ENDIF
   CALL mp_bcast(filesize, meta_ionode_id, world_comm)
   IF (filesize==3) THEN
-     lbackspace=.TRUE.
+     lbackspace_=.TRUE.
   ELSE
-     lbackspace=.FALSE.
+     lbackspace_=.FALSE.
   ENDIF
    
   END SUBROUTINE determine_backspace
