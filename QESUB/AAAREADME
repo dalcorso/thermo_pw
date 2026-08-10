@@ -7,6 +7,10 @@ bfgs_module.f90  If the bfgs routine exceedes the maximum number of
             allowed iterations there is no way to change the 
             bfgs_file in a different pw.x run. Added line 1147.
 
+bp_mod.f90 In QE Berry phase works only without pools. This change is
+           needed to make it work with both pools and G parallelization in
+           thermo_pw.
+
 clocks_handler.f90 we increase the defaults number of clocks.
                    At line 45 maxclocks=2048
 
