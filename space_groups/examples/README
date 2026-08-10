@@ -23,6 +23,8 @@ a .asy file of the Brillouin zone and of the BZ path, to be seen by
        asy -V asy_tmp.asy
        (only for supported Bravais lattice (all except base-centered 
         monoclinic and triclinic))
+a .pdf file with the Brillouin zone. It requires that you write in the file
+       ASY_PATH the path to your asymptote code.
 an output_xrdp.ps postscript file with the XPD diffraction lines and intensities
 a description of the point group, of the Bravais lattice, and of the
 space group of the solid and the form of the main tensors that describe

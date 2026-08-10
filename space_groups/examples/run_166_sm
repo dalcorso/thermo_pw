@@ -84,6 +84,14 @@ cat > thermo_control << EOF
  /
 EOF
 
+# Put here the path to the asymptote code to produce a pdf of the
+# Brillouin zone automatically
+. ../ASY_PATH
+cat > asy_tmp.sh << EOF
+alias asymptote=$ASYMPTOTE_PATH
+asymptote -f pdf -noprc asy_tmp.asy
+EOF
+
 cat > sm.scf_bands.in << EOF
  &control
   calculation = 'scf'
@@ -114,7 +122,7 @@ cat > sm.scf_bands.in << EOF
   conv_thr =  1.0d-8
  /
 ATOMIC_SPECIES
-Sm  0.0  Sm.pz-spfn-kjpaw_psl.1.0.0.UPF
+Sm  0.0  Sm.pz-spdn-kjpaw_psl.1.0.0.UPF
 ATOMIC_POSITIONS crystal_sg
 Sm  3a
 Sm  6c   0.22222
@@ -126,5 +134,6 @@ $THERMO_PW_COMMAND < sm.scf_bands.in > sm.scf_bands.out
 check_failure $?
 $ECHO " done"
 
+. ./asy_tmp.sh
 $ECHO
 $ECHO "$EXAMPLE_DIR : done"
