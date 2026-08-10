@@ -108,6 +108,15 @@ ATOMIC_POSITIONS (alat)
 K_POINTS AUTOMATIC
 4 4 4 1 1 1 
 EOF
+
+
+# Put here the path to the asymptote code to produce a pdf of the
+# Brillouin zone automatically
+cat > asy_tmp.sh << EOF
+alias asymptote="/home/espresso/SOFTWARE/ASYMPTOTE261/bin/asy"
+asymptote -f pdf -noprc asy_tmp.asy
+EOF
+
 $ECHO "  running thermo_pw for plotting the BZ of Silicon."
 $ECHO "  to see it run asy -V asy_tmp.asy"
 $ECHO "  to produce a pdf file run asy -f pdf -noprc asy_tmp.asy \c"
@@ -115,5 +124,6 @@ $THERMO_PW_COMMAND < si.plot_bz.in > si.plot_bz.out
 check_failure $?
 $ECHO " done"
 
+. ./asy_tmp.sh
 $ECHO
 $ECHO "$EXAMPLE_DIR : done"
