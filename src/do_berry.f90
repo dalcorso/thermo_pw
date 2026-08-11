@@ -34,6 +34,7 @@ SUBROUTINE do_berry ( exit_status, polar, tot_b_phase, nppl )
   USE starting_scf,     ONLY : starting_pot, startingconfig
   USE control_flags,    ONLY : gamma_only, lscf, lbands, ethr, &
                                istep, nstep, lbfgs
+  USE many_k_mod,       ONLY : deallocate_many_k
   USE initial_conf,     ONLY : nosym_save
   USE initial_param,    ONLY : ethr0
   USE polarization_vector,  ONLY : mod_tot
@@ -99,6 +100,8 @@ SUBROUTINE do_berry ( exit_status, polar, tot_b_phase, nppl )
      !   We divide here by the volume that might change for each strain. 
      !
      polar_at(idir) = pdl_tot / omega
+     !
+     IF (many_k) CALL deallocate_many_k()
      !
      CALL close_files(.TRUE.)
      !
