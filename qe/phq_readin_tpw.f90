@@ -495,6 +495,8 @@ SUBROUTINE phq_readin_tpw()
                                                   &not running on GPU',1)
   IF (lcg) CALL errore('phq_reading','Conjugate gradient algorithm &
                                                   &not running on GPU',1)
+  IF (fpol) CALL errore('phq_readin','Frequency dependent algorithms &
+                                                  &not running on GPU',1)
 #endif
   IF (modenum < 0) CALL errore ('phq_readin', ' Wrong modenum ', 1)
   IF (dek <= 0.d0) CALL errore ( 'phq_readin', ' Wrong dek ', 1)

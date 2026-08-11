@@ -74,7 +74,7 @@ PROGRAM epsilon_tpw
   USE lrus,        ONLY : dpqq, dpqq_so
   USE klist,       ONLY : lgauss, ltetra
   USE wvfct,       ONLY : nbnd
-  USE gnuplot,     ONLY : determine_backspace
+  USE gnuplot,     ONLY : determine_backspace, lbackspace
 
   USE mp_world,    ONLY : world_comm
   USE mp,          ONLY : mp_bcast
@@ -111,6 +111,7 @@ PROGRAM epsilon_tpw
   ! local variables
   !
   INTEGER :: ios, stdin
+  LOGICAL :: lbackspace_
   !
   ! initialise environment
   !
@@ -160,7 +161,8 @@ PROGRAM epsilon_tpw
   !  Determine how the backspace is written on file. This is required by the
   !  gnuplot library
   !
-   CALL determine_backspace()
+   CALL determine_backspace(lbackspace_)
+   lbackspace=lbackspace_
   !
   ! read PW simulation parameters from prefix.save/data-file.xml
   !
