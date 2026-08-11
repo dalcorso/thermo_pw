@@ -109,6 +109,7 @@ DO ikb=1,nkblocks
            evck(1:npwx*npol,nbnd*(ik1-1)+1:nbnd*ik1)=evc(1:npwx*npol,1:nbnd)
            !
          ELSEIF (nks==1) THEN
+           !$acc update self(evc)
            evck(1:npwx*npol,nbnd*(ik1-1)+1:nbnd*ik1)=evc(1:npwx*npol,1:nbnd)
          ENDIF
       ENDDO
