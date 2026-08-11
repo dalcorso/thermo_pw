@@ -220,6 +220,9 @@ Seek Further Assistance: If the problem persists, please post details to the <a 
 <br>
 **Thermo_pw downloads**:
 <br>
+* <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.2.2.0.tar.gz">
+thermo_pw.2.2.0.tar.gz</a>  (released 12-08-2026) compatible with QE-7.5
+<br>
 * <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.2.1.1.tar.gz">
 thermo_pw.2.1.1.tar.gz</a>  (released 13-10-2025) compatible with QE-7.5
 <br>

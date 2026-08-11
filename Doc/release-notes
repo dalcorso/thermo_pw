@@ -1,4 +1,5 @@
-New in version 2.2.0:
+11/8/2026 Version 2.2.0 is now frozen:
+This version is compatible with Quantum ESPRESSO 7.5
 
 Added calculation of elastic constants at constant 
 electric displacement (in collaboration with X. Gong).

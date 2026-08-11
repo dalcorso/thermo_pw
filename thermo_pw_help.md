@@ -1,12 +1,12 @@
 # THERMO_PW QUICK HELP
 
 <p align="justify"> 
-To use <code>thermo_pw</code>, a functional version of the <a href="http://www.quantum-espresso.org/">Quantum ESPRESSO (QE)</a> package is required. <code>Thermo_pw</code> can be downloaded from its <a href="http://dalcorso.github.io/thermo_pw/">main page</a> as a <code>.tar.gz</code> file. The current production version is <code>2.1.1</code>, compatible with <code>QE-7.5</code>.</p>
+To use <code>thermo_pw</code>, a functional version of the <a href="http://www.quantum-espresso.org/">Quantum ESPRESSO (QE)</a> package is required. <code>Thermo_pw</code> can be downloaded from its <a href="http://dalcorso.github.io/thermo_pw/">main page</a> as a <code>.tar.gz</code> file. The current production version is <code>2.2.0</code>, compatible with <code>QE-7.5</code>.</p>
 
 <p align="justify"> 
 Copy the <code>thermo_pw</code> archive into the main <code>QE</code> directory and unpack it using the command:</p>
 <p align="center"> 
-<code>tar -xzvf thermo_pw.2.1.1.tar.gz</code>
+<code>tar -xzvf thermo_pw.2.2.0.tar.gz</code>
 </p>
 <p align="justify"> 
 This command will create a directory named <code>thermo_pw</code>.
@@ -57,11 +57,13 @@ Although thermo_pw has been in use for several years and is considered reasonabl
 **Compatibility with Older <code>QE</code> Versions:**
 
 <p align="justify"> 
-Older versions of <code>QE</code> (earlier than <code>7.4.1</code>) can still be used with <code>thermo_pw</code> by carefully matching the <code>thermo_pw</code> and <code>QE</code> versions, as detailed on the main <code>thermo_pw</code> page.</p>
+Older versions of <code>QE</code> (earlier than <code>7.5.0</code>) can still be used with <code>thermo_pw</code> by carefully matching the <code>thermo_pw</code> and <code>QE</code> versions, as detailed on the main <code>thermo_pw</code> page.</p>
 
 <p align="justify"> Before using <code>thermo_pw</code>, please apply the 
 patches given below.</p>
 
+**Patches for thermo_pw.2.2.0**:
+<br>
 **Patches for thermo_pw.2.1.1**:
 <br>
 The Fermi energy shift is not computed in phonon calculations.
