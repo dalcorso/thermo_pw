@@ -1070,6 +1070,19 @@ target_link_libraries(qe_tpw_analyze_dynmat_exe
         qe_modules)
 
 ###########################################################
+# spherical.x
+###########################################################
+set(src_spherical_x tools/spherical.f90)
+qe_enable_cuda_fortran("${src_spherical_x}")
+qe_add_executable(qe_tpw_spherical_exe ${src_spherical_x})
+set_target_properties(qe_tpw_spherical_exe 
+    PROPERTIES 
+        OUTPUT_NAME spherical.x)
+target_link_libraries(qe_tpw_spherical_exe
+    PRIVATE
+        qe_modules)
+
+###########################################################
 
 qe_install_targets(
     qe_tpw_lapack
@@ -1105,6 +1118,7 @@ qe_install_targets(
     qe_tpw_rotate_tensors_exe
     qe_tpw_supercell_exe
     qe_tpw_space_groups_exe
+    qe_tpw_spherical_exe
     qe_tpw_test_colors_exe
     qe_tpw_translate_exe
     qe_tpw_units_exe
