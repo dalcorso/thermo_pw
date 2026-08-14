@@ -209,7 +209,7 @@ CONTAINS
     INTEGER :: ibnd, ig
 
     k = nbnd_occ (ikqs(ik))
-    CALL start_clock_gpu ('ch_psi_all_k')
+    CALL start_clock ('ch_psi_all_k')
     !$acc data present(evq, ps, hpsi, spsi)
 #if ! defined(__CUDA)
     CALL start_clock ('chp:lo1')
@@ -254,7 +254,7 @@ CONTAINS
     !$acc end host_data
     CALL stop_clock ('chp:lo2')
 #endif    
-    CALL start_clock_gpu ('ch_psi_calbec')
+    CALL start_clock ('ch_psi_calbec')
 !    !$acc kernels present(spsi, hpsi)
 !    spsi(:,:) = hpsi(:,:)
 !    !$acc end  kernels
@@ -293,7 +293,7 @@ CONTAINS
        ENDIF
     endif
 #endif
-    CALL stop_clock_gpu ('ch_psi_calbec')
+    CALL stop_clock ('ch_psi_calbec')
 #if defined(__CUDA)
     !$acc host_data use_device(hpsi, spsi)
     CALL s_psi_ch_gpu (npwx, n, m, hpsi, spsi, ik, id)
@@ -319,7 +319,7 @@ CONTAINS
        ENDDO
        !$acc end parallel loop
     END IF
-    CALL stop_clock_gpu ('ch_psi_all_k')
+    CALL stop_clock ('ch_psi_all_k')
     return
   END SUBROUTINE ch_psi_all_k_many_k
 

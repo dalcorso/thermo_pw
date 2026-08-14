@@ -149,7 +149,7 @@ DO ikb=1,nkblocks
             ENDDO
          END DO
          !
-         CALL usnldiag( ngk(ik), h_diagk_d(:,:,ik1), s_diagk_d(:,:,ik1))
+         CALL usnldiag( ngk(ik), npol, h_diagk_d(:,:,ik1), s_diagk_d(:,:,ik1))
       ENDDO
 #endif
    ENDIF

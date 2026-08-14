@@ -48,7 +48,7 @@ SUBROUTINE phq_init_tpw()
   USE uspp,                 ONLY : okvan, vkb, nlcc_any, nkb
   USE phus,                 ONLY : alphap
   USE nlcc_ph,              ONLY : drc
-  USE control_ph,           ONLY : trans, zue, zeu, epsil, all_done
+  USE control_ph,           ONLY : trans, zue, zeu, epsil, all_done, lmultipole
   USE units_lr,             ONLY : lrwfc, iuwfc
   USE efield_mod,           ONLY : zstareu0, zstarue0
 
@@ -62,7 +62,7 @@ SUBROUTINE phq_init_tpw()
   USE qpoint,               ONLY : xq, nksq, eigqts, ikks, ikqs
   USE qpoint_aux,           ONLY : becpt, alphapt, ikmks
   USE eqv,                  ONLY : evq
-  USE control_lr,           ONLY : nbnd_occ, lgamma, lmultipole
+  USE control_lr,           ONLY : nbnd_occ, lgamma
   USE ldaU,                 ONLY : lda_plus_u
   USE uspp_init,            ONLY : init_us_2
   USE control_qe,           ONLY : many_k

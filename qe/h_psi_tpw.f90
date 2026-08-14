@@ -245,16 +245,7 @@ SUBROUTINE h_psii_( lda, n, m, psi, hpsi, ik )
   !
   ! ... Here we add the Hubbard potential times psi
   !
-  IF ( lda_plus_u .AND. Hubbard_projectors.NE."pseudo" ) THEN
-     !
-     CALL errore('h_psii_', 'multiple k and hubbard U not available',1)
-     IF ( noncolin ) THEN
-        CALL vhpsi_nc( lda, n, m, psi, hpsi )
-     ELSE
-        CALL vhpsi( lda, n, m, psi, hpsi )
-     ENDIF
-     !
-  ENDIF
+  IF ( lda_plus_u ) CALL vhpsi( lda, n, m, psi, hpsi )
   !
   ! ... apply scissor operator
   !

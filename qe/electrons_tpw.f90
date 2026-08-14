@@ -22,8 +22,8 @@ SUBROUTINE electrons_tpw()
                                    vtxc, etxc, etxcc, ewld, demet, epaw, &
                                    elondon, edftd3, vsol, esol, ef_up, ef_dw
   USE tsvdw_module,         ONLY : EtsvdW
-  USE scf,                  ONLY : rho, rho_core, rhog_core, v, vltot, vrs, &
-                                   kedtau, vnew
+  USE scf,                  ONLY : rho, rho_core, rhog_core, tau_core, v, vltot, &
+                                   vrs, kedtau, vnew
   USE control_flags,        ONLY : tr2, nexxiter, conv_elec, restart, lmd, &
                                    do_makov_payne, sic
   USE sic_mod,              ONLY : sic_energy, occ_f2fn, occ_fn2f, save_rhon, sic_first
@@ -35,7 +35,7 @@ SUBROUTINE electrons_tpw()
   USE mp_asyn,              ONLY : asyn_master, with_asyn_images
   USE mp_images,            ONLY : my_image_id, root_image
   USE uspp,                 ONLY : okvan
-  USE exx,                  ONLY : aceinit,exxinit, exxenergy2, exxbuff, &
+  USE exx,                  ONLY : aceinit,exxinit, exxenergy2, exxenergyace, exxbuff, &
                                    fock0, fock1, fock2, fock3, dexx, use_ace, local_thr, &
                                    domat
   USE xc_lib,               ONLY : xclib_dft_is, exx_is_active, stop_exx
@@ -61,8 +61,6 @@ SUBROUTINE electrons_tpw()
   REAL(DP) :: charge
   !! the total charge
   REAL(DP) :: exxen
-  !! used to compute exchange energy
-  REAL(DP), EXTERNAL :: exxenergyace
   INTEGER :: idum
   !! dummy counter on iterations
   INTEGER :: iter
@@ -118,8 +116,8 @@ SUBROUTINE electrons_tpw()
            ! FIXME: et and wg should be read from xml file
            READ (iunres, *) (wg(1:nbnd,ik),ik=1,nks)
            READ (iunres, *) (et(1:nbnd,ik),ik=1,nks)
-           CLOSE ( unit=iunres, status='delete')
            !$acc update device(et)
+           CLOSE ( unit=iunres, status='delete')
            ! ... if restarting here, exx was already active
            ! ... initialize stuff for exx
            first = .false.
@@ -141,7 +139,7 @@ SUBROUTINE electrons_tpw()
            domat = .false.
 ! 
            !
-           CALL v_of_rho( rho, rho_core, rhog_core, &
+           CALL v_of_rho( rho, rho_core, rhog_core, tau_core, &
                ehart, etxc, vtxc, eth, etotefield, charge, v)
            IF (lrism) CALL rism_calc3d(rho%of_g(:, 1), esol, vsol, v%of_r, tr2)
            IF (okpaw) CALL PAW_potential(rho%bec, ddd_paw, epaw,etot_cmp_paw)
@@ -155,6 +153,7 @@ SUBROUTINE electrons_tpw()
      CLOSE ( unit=iunres, status='delete')
   ENDIF
   !  ... energy calculation of neutral case
+  !  ... FIXME: these lines should be called before electrons, not inside it
   !
   IF (sic .and. sic_energy) THEN
      WRITE(stdout,'(5x,"Energy calculation for the neutral polaron")')
@@ -234,7 +233,7 @@ SUBROUTINE electrons_tpw()
         ! Recalculate potential because XC functional has changed,
         ! start self-consistency loop on exchange
         !
-        CALL v_of_rho( rho, rho_core, rhog_core, &
+        CALL v_of_rho( rho, rho_core, rhog_core, tau_core, &
              ehart, etxc, vtxc, eth, etotefield, charge, v)
         etot = etot + etxc + exxen
         !
@@ -391,7 +390,7 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
   USE mp_asyn,              ONLY : asyn_master, with_asyn_images
   USE mp_images,            ONLY : my_image_id, root_image
   USE io_global,            ONLY : stdout, ionode
-  USE cell_base,            ONLY : at, bg, alat, omega, tpiba2
+  USE cell_base,            ONLY : at, bg, alat, omega, tpiba2, pbc
   USE ions_base,            ONLY : zv, nat, nsp, ityp, tau, compute_eextfor, atm, &
                                    ntyp => nsp
   USE starting_scf,         ONLY : starting_pot
@@ -412,9 +411,9 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
                                    egrand, vsol, esol, esic, esci
   USE scf,                  ONLY : scf_type, scf_type_COPY, bcast_scf_type,&
                                    create_scf_type, destroy_scf_type, &
-                                   open_mix_file, close_mix_file, &
-                                   rho, rho_core, rhog_core, v, vltot, vrs, &
-                                   kedtau, vnew
+                                   scf_ns_copy, rho, rho_core, rhog_core, tau_core, &
+                                   v, vltot, vrs, kedtau, vnew
+  USE mix,                  ONLY : open_mix_file, close_mix_file, mix_rho
   USE control_flags,        ONLY : mixing_beta, tr2, ethr, niter, nmix, &
                                    conv_elec, sic, &
                                    restart, io_level, do_makov_payne,  &
@@ -427,9 +426,9 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
   USE io_files,             ONLY : iunmix, output_drho
   USE ldaU,                 ONLY : eth, lda_plus_u, lda_plus_u_kind, &
                                    niter_with_fixed_ns, hub_pot_fix, &
-                                   nsg, nsgnew, v_nsg, at_sc, neighood, &
+                                   v_nsg, at_sc, neighood, &
                                    ldim_u, is_hubbard_back, apply_U, orbital_resolved
-  USE extfield,             ONLY : tefield, etotefield, gate, etotgatefield !TB
+  USE extfield,             ONLY : tefield, dipfield, etotefield, gate, etotgatefield, edir !TB
   USE noncollin_module,     ONLY : noncolin, magtot_nc, i_cons,  bfield, &
                                    lambda, report, domag, nspin_mag, npol
   USE io_rho_xml,           ONLY : write_scf
@@ -450,6 +449,7 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
   USE paw_symmetry,         ONLY : PAW_symmetrize_ddd
   USE dfunct,               ONLY : newd
   USE esm,                  ONLY : do_comp_esm, esm_printpot, esm_ewald
+  USE printpot_module,      ONLY : printpot
   USE gcscf_module,         ONLY : lgcscf, gcscf_mu, gcscf_ignore_mun, gcscf_set_nelec
   USE clib_wrappers,        ONLY : memstat
   USE fcp_module,           ONLY : lfcp, fcp_mu
@@ -578,14 +578,11 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
      CALL start_clock('energy_dftd3')
      ! taupbc are atomic positions in alat units, centered around r=0
      ALLOCATE ( taupbc(3,nat) )
-     taupbc(:,:) = tau(:,:)
-     CALL cryst_to_cart( nat, taupbc, bg, -1 ) 
-     taupbc(:,:) = taupbc(:,:) - NINT(taupbc(:,:))
-     CALL cryst_to_cart( nat, taupbc, at,  1 ) 
      DO na = 1, nat
+        taupbc(:,na) = pbc( tau(:,na)*alat )
         atnum(na) = get_atomic_number(TRIM(atm(ityp(na))))
      ENDDO
-     call dftd3_pbc_dispersion(dftd3, alat*taupbc, atnum, alat*at, edftd3)
+     call dftd3_pbc_dispersion(dftd3, taupbc, atnum, alat*at, edftd3)
      edftd3=edftd3*2.d0
      DEALLOCATE( taupbc)
      CALL stop_clock('energy_dftd3')
@@ -751,27 +748,8 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
            !
            ! Write the occupation matrices
            !
-           IF ( iverbosity > 0 .OR. first ) THEN
-              IF (lda_plus_u_kind.EQ.0) THEN
-                IF (noncolin) THEN
-                    CALL write_ns_nc()
-                ELSE        
-                    CALL write_ns()
-                ENDIF 
-              ELSEIF (lda_plus_u_kind.EQ.1) THEN
-                 IF (noncolin) THEN
-                    CALL write_ns_nc()
-                 ELSE
-                    CALL write_ns()
-                 ENDIF
-              ELSEIF (lda_plus_u_kind.EQ.2) THEN
-                 IF (noncolin) THEN
-                    CALL write_nsg_nc()   
-                 ELSE 
-                    CALL write_nsg()
-                 ENDIF
-              ENDIF
-           ENDIF
+           IF ( iverbosity > 0 .OR. first ) &
+                CALL write_ns_hubbard ( noncolin ) 
            !
            ! Keep the Hubbard potential fixed, i.e. keep the 
            ! occupation matrix equal to the ground-state one.
@@ -779,66 +757,29 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
            ! in a self-consistent way.
            !
            IF (hub_pot_fix) THEN
-             IF (lda_plus_u_kind.EQ.0) THEN
-                IF (noncolin) THEN
-                   ! call occupation counting routine before resetting ns
-                   IF (orbital_resolved) CALL alpha_m_nc_trace(rho%ns_nc)
-                   rho%ns_nc = rhoin%ns_nc
-                ELSE
-                   ! call occupation counting routine before resetting ns
-                   IF (orbital_resolved) CALL alpha_m_trace(rho%ns)
-                   rho%ns = rhoin%ns ! back to input values
-                ENDIF
-                !
-                IF (lhb) rho%nsb = rhoin%nsb
-             ELSEIF (lda_plus_u_kind.EQ.1) THEN
-                CALL errore('electrons_scf', &
-                  & 'hub_pot_fix is not implemented for lda_plus_u_kind=1',1)
-             ELSEIF (lda_plus_u_kind.EQ.2) THEN
-                IF (noncolin) CALL errore('electrons_scf', &
-                & 'hub_pot_fix is not implemented for (lda_plus_u_kind=2 .AND. noncolin)',1)
-                nsgnew = nsg
-             ENDIF
+              IF (lda_plus_u_kind == 0) THEN
+                 IF (noncolin) THEN
+                    ! call occupation counting routine before resetting ns
+                    IF (orbital_resolved) CALL alpha_m_nc_trace(rho%ns_nc) 
+                 ELSE
+                    ! call occupation counting routine before resetting ns
+                    IF (orbital_resolved) CALL alpha_m_trace(rho%ns) 
+                 ENDIF
+              ELSE
+                 ! FIXME: this check should be done earlier
+                 CALL errore('electrons_scf', &
+                 & 'hub_pot_fix not implemented for lda_plus_u_kind /= 0',1)
+              END IF
+              CALL scf_ns_copy ( rhoin, rho ) ! back to input values
            ENDIF
            !
            IF ( first .AND. starting_pot == 'atomic' ) THEN
-              IF (lda_plus_u_kind.EQ.0) THEN
-                 CALL ns_adj()     
-                 IF (noncolin) THEN
-                    rhoin%ns_nc = rho%ns_nc                    
-                 ELSE
-                    rhoin%ns = rho%ns
-                    IF (lhb) rhoin%nsb = rho%nsb
-                 ENDIF   
-              ELSEIF (lda_plus_u_kind.EQ.1) THEN
-                 CALL ns_adj()
-                 IF (noncolin) THEN
-                    rhoin%ns_nc = rho%ns_nc
-                 ELSE
-                    rhoin%ns = rho%ns
-                 ENDIF
-              ELSEIF (lda_plus_u_kind.EQ.2) THEN
-                 CALL nsg_adj()
-              ENDIF
+              CALL ns_hubbard_adj()
+              CALL scf_ns_copy ( rho, rhoin )
            ENDIF
            IF ( iter <= niter_with_fixed_ns ) THEN
               WRITE( stdout, '(/,5X,"RESET ns to initial values (iter <= mixing_fixed_ns)",/)')
-              IF (lda_plus_u_kind.EQ.0) THEN
-                 IF (noncolin) THEN   
-                    rho%ns_nc = rhoin%ns_nc  
-                 ELSE        
-                    rho%ns = rhoin%ns
-                    IF (lhb) rhoin%nsb = rho%nsb
-                 ENDIF
-              ELSEIF (lda_plus_u_kind.EQ.1) THEN
-                 IF (noncolin) THEN
-                    rho%ns_nc = rhoin%ns_nc
-                 ELSE
-                    rho%ns = rhoin%ns
-                 ENDIF
-              ELSEIF (lda_plus_u_kind.EQ.2) THEN
-                 nsgnew = nsg
-              ENDIF
+              CALL scf_ns_copy ( rhoin, rho )
            ENDIF
            !
         ENDIF
@@ -858,8 +799,10 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
         ! ... The mixing is done on pool 0 only (image parallelization
         ! ... inside mix_rho => rho_ddot => PAW_ddot is no longer there)
         !
-        IF ( my_pool_id == root_pool ) CALL mix_rho( rho, rhoin, &
+        IF ( my_pool_id == root_pool ) THEN
+            CALL mix_rho( rho, rhoin, &
                 mixing_beta, dr2, tr2_min, iter, nmix, iunmix, conv_elec )
+        END IF
         !
         ! ... Results are broadcast from pool 0 to others to prevent trouble
         ! ... on machines unable to yield the same results for the same 
@@ -868,15 +811,11 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
         IF ( lda_plus_u )  THEN
            ! ... For DFT+U, ns and ns_nc are also broadcast inside each pool
            ! ... to ensure consistency on all processors of all pools
-           IF (noncolin) THEN
-              IF (ALLOCATED(rhoin%ns_nc)) CALL mp_bcast( rhoin%ns_nc, root_pool, intra_pool_comm )
-           ELSE
-              IF (ALLOCATED(rhoin%ns)) CALL mp_bcast( rhoin%ns, root_pool, intra_pool_comm )
-           ENDIF
-           ! DFT+U+V: this variable is not in "mix-type" variable rhoin
-           IF (lda_plus_u_kind.EQ.2) THEN
-              IF (ALLOCATED(nsg) ) CALL mp_bcast ( nsg, root_pool, inter_pool_comm)
-           ENDIF
+           IF (ALLOCATED(rhoin%ns)) CALL mp_bcast( rhoin%ns, root_pool, intra_pool_comm )
+           IF (ALLOCATED(rhoin%nsb) ) CALL mp_bcast ( rhoin%nsb, root_pool, inter_pool_comm)
+           IF (ALLOCATED(rhoin%ns_nc)) CALL mp_bcast( rhoin%ns_nc, root_pool, intra_pool_comm )
+           IF (ALLOCATED(rhoin%nsg) ) CALL mp_bcast ( rhoin%nsg, root_pool, inter_pool_comm)
+
         ENDIF
         !
         CALL bcast_scf_type( rhoin, root_pool, inter_pool_comm )
@@ -928,8 +867,8 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
               IF ( ethr .LE. 1.D-4 .OR. iter .GT. 10 ) THEN
                  !
                  ! ... activate the orbital-resolved Hubbard corrections
-                 ! ... once the eigenstates (and thus, the eigenvectors)
-                 ! ... have stablilized. Also turn them on after 10 iterations
+                 ! ... once the eigenstates (and thus, the eigenvectors) 
+                 ! ... have stabilized. Also turn them on after 10 iterations
                  ! ... but print a warning message in this case.
                  WRITE( stdout, '(/,5X,47("="))')
                  WRITE( stdout, '(/,5X,"Switching ON", &
@@ -942,7 +881,7 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
               ENDIF
            ENDIF
            !
-           CALL v_of_rho( rhoin, rho_core, rhog_core, &
+           CALL v_of_rho( rhoin, rho_core, rhog_core, tau_core, &
                           ehart, etxc, vtxc, eth, etotefield, charge, v )
            !
            IF (lrism) THEN
@@ -967,18 +906,11 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
            !
            CALL scf_type_COPY( rhoin, rho )
 #if defined (__OSCDFT)
-           IF (use_oscdft .AND. (oscdft_ctx%inp%oscdft_type==2)) THEN
-              IF (lda_plus_u .AND. .NOT.oscdft_ctx%conv) THEN
-                 IF (lda_plus_u_kind.EQ.0) THEN
-                    CALL write_ns()
-                 ELSEIF (lda_plus_u_kind.EQ.2) THEN
-                    CALL write_nsg()
-                 ENDIF
-              ENDIF
+           IF ( use_oscdft .AND. (oscdft_ctx%inp%oscdft_type==2) &
+               .AND. lda_plus_u .AND. .NOT.oscdft_ctx%conv) THEN
+               CALL write_ns_hubbard ( noncolin )
            ENDIF
 #endif
-           !
-           IF (lda_plus_u .AND. lda_plus_u_kind.EQ.2) nsgnew = nsg
            !
            IF ( lgcscf ) THEN
               CALL gcscf_set_nelec( charge )
@@ -991,8 +923,7 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
            ! ... 2) vnew contains V(out)-V(in) ( used to correct the forces ).
            !
            vnew%of_r(:,:) = v%of_r(:,:)
-           IF (lda_plus_u .AND. lda_plus_u_kind.EQ.2) nsg = nsgnew
-           CALL v_of_rho( rho,rho_core,rhog_core, &
+           CALL v_of_rho( rho,rho_core,rhog_core,tau_core, &
                           ehart, etxc, vtxc, eth, etotefield, charge, v )
            IF (lrism) THEN
               CALL rism_calc3d(rho%of_g(:, 1), esol, vsol, v%of_r, tr2)
@@ -1075,43 +1006,21 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
            !
            ! Recompute the occupation matrix:
            ! needed when computing U (and V) in a SCF way
-           IF (hub_pot_fix) THEN
-              IF (lda_plus_u_kind.EQ.0) THEN
-                 IF (noncolin) THEN
-                    CALL new_ns_nc(rho%ns_nc)
-                 ELSE
-                    CALL new_ns(rho%ns)
-                 ENDIF
-                 IF (lhb) CALL new_nsb(rho%nsb)
-              ELSEIF (lda_plus_u_kind.EQ.2) THEN
-                 CALL new_nsg()
-              ENDIF
-           ENDIF
+           IF (hub_pot_fix) CALL new_ns_hubbard ( noncolin, rho )
            !
+           ! Not sure why the following is needed and what
+           ! happens if lda_plus_u != 0 : not implemented?
+           !
+           IF ( orbital_resolved .AND. hub_pot_fix .AND. &
+                lda_plus_u_kind == 0) THEN
+              IF ( noncolin) THEN
+                 CALL alpha_m_nc_trace(rho%ns_nc)
+              ELSE
+                 CALL alpha_m_trace(rho%ns)
+              END IF
+           END IF
            ! Write the occupation matrices
-           IF (lda_plus_u_kind == 0) THEN
-              IF (noncolin) THEN
-                 IF ( orbital_resolved .AND. hub_pot_fix ) &
-                    CALL alpha_m_nc_trace(rho%ns_nc)      
-                 CALL write_ns_nc()
-              ELSE
-                 IF ( orbital_resolved .AND. hub_pot_fix ) &
-                    CALL alpha_m_trace(rho%ns)
-                 CALL write_ns()
-              ENDIF
-           ELSEIF (lda_plus_u_kind == 1) THEN
-              IF (noncolin) THEN
-                 CALL write_ns_nc()
-              ELSE
-                 CALL write_ns()
-              ENDIF
-           ELSEIF (lda_plus_u_kind == 2) THEN
-              IF (noncolin) THEN 
-                 CALL write_nsg_nc()
-              ELSE
-                 CALL write_nsg()
-              ENDIF
-           ENDIF
+           CALL write_ns_hubbard ( noncolin )
            !
         ENDIF
 #if defined (__OSCDFT)
@@ -1225,6 +1134,7 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
         ! ... print out ESM potentials if desired
         !
         IF ( do_comp_esm ) CALL esm_printpot( rho%of_g )
+        IF ( tefield .AND. dipfield ) CALL printpot( rho%of_g(:,1), rho%of_r, edir )
         !
         ! ... print out 3D-RISM potentials if desired
         !
@@ -1437,7 +1347,7 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
                               DO m1 = 1, ldim_u(nt1)
                                  DO m2 = 1, ldim_u(nt2)
                                     delta_e_hub = delta_e_hub - &
-                                       nsgnew(m2,m1,viz,na1,i)*v_nsg(m2,m1,viz,na1,i)
+                                       rho%nsg(m2,m1,viz,na1,i)*v_nsg(m2,m1,viz,na1,i)
                                  ENDDO
                               ENDDO
                            ENDIF
@@ -1457,7 +1367,7 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
                            DO m1 = 1, ldim_u(nt1)
                               DO m2 = 1, ldim_u(nt2)
                                  delta_e_hub = delta_e_hub - &
-                                     nsgnew(m2,m1,viz,na1,is)*v_nsg(m2,m1,viz,na1,is)
+                                     rho%nsg(m2,m1,viz,na1,is)*v_nsg(m2,m1,viz,na1,is)
                               ENDDO
                            ENDDO
                         ENDIF
@@ -1554,7 +1464,8 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
                               DO m1 = 1, ldim_u(nt1)
                                  DO m2 = 1, ldim_u(nt2)
                                     delta_escf_hub = delta_escf_hub - &
-                                          (nsg(m2,m1,viz,na1,i)-nsgnew(m2,m1,viz,na1,i)) * &
+                                         (rhoin%nsg(m2,m1,viz,na1,i) - &
+                                            rho%nsg(m2,m1,viz,na1,i)) * &
                                           v_nsg(m2,m1,viz,na1,i)
                                  ENDDO
                               ENDDO
@@ -1575,7 +1486,8 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
                            DO m1 = 1, ldim_u(nt1)
                               DO m2 = 1, ldim_u(nt2)
                                  delta_escf_hub = delta_escf_hub - &
-                                      (nsg(m2,m1,viz,na1,is)-nsgnew(m2,m1,viz,na1,is)) * &
+                                      (rhoin%nsg(m2,m1,viz,na1,is)- &
+                                         rho%nsg(m2,m1,viz,na1,is)) * &
                                        v_nsg(m2,m1,viz,na1,is)
                               ENDDO
                            ENDDO

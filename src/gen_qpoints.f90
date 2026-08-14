@@ -63,7 +63,7 @@ SUBROUTINE gen_qpoints_tpw (ibrav, at_, bg_, nat, tau, ityp, nk1, nk2, nk3, &
   !  magnetic_sym has to be considered .FALSE. because .TRUE. should
   !  be used only for the electronic bands.
   !
-  CALL irreducible_BZ (nrot, s, nsym, minus_q, .FALSE., &
+  CALL irreducible_BZ_old (nrot, s, nsym, minus_q, .FALSE., &
                        at, bg, nqx, nq, q, wq, t_rev)
   !
   RETURN

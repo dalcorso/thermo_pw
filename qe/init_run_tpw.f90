@@ -15,7 +15,7 @@ SUBROUTINE init_run_tpw()
   USE symme,              ONLY : sym_rho_init
   USE wvfct,              ONLY : nbnd, nbndx, npwx, et, wg, btype
   USE control_flags,      ONLY : lmd, gamma_only, smallmem, ts_vdw, mbd_vdw, &
-                                 lforce => tprnfor, tstress, tqr, use_gpu
+                                 lforce, tstress, tqr, use_gpu
   USE gvect,              ONLY : g, gg, mill, gcutm, ig_l2g, ngm, ngm_g, &
                                  gshells, gstart ! to be communicated to the Solvers if gamma_only
   USE gvecs,              ONLY : gcutms, ngms
@@ -62,6 +62,9 @@ SUBROUTINE init_run_tpw()
   !
   IMPLICIT NONE
   INTEGER :: ierr
+  !! If .TRUE., run the NSCF band structure calculation. It writes the wavefunctions to
+  !! buffer prefix.wfc#, which is later read by the PHonon code on unit iuwfc.
+  !! If .FALSE., skip the NSCF calculation.
   !
 #if defined (__ENVIRON)
   REAL(DP) :: at_scaled(3, 3)
@@ -114,11 +117,11 @@ SUBROUTINE init_run_tpw()
   !
   ! ... variable initialization for parallel symmetrization
   !
-  CALL sym_rho_init (gamma_only )
+  CALL sym_rho_init ( gamma_only )
   !
   ! ... allocate memory for all other arrays (potentials, wavefunctions etc)
   !
-  CALL allocate_uspp(use_gpu,noncolin,lspinorb,tqr,nhm,nsp,nat,nspin)
+  call allocate_uspp(use_gpu,noncolin,lspinorb,tqr,nhm,nsp,nat,nspin)
   IF (okpaw) THEN
      CALL allocate_paw_internals()
      CALL paw_init_onecenter()
@@ -173,7 +176,7 @@ SUBROUTINE init_run_tpw()
   IF ( xclib_dft_is('hybrid') ) THEN
      IF ( lmovecell ) CALL infomsg('iosys', &
           'Variable cell and hybrid XC little tested')
-     CALL aceinit0()
+     CALL aceinit0( nbnd )
   END IF
   !
   CALL hinit0()

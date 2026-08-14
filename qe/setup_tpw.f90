@@ -629,7 +629,7 @@ SUBROUTINE setup_tpw()
   ! ... "irreducible_BZ" computes the missing k-points.
   !
   IF ( .NOT. lbands ) THEN
-     CALL irreducible_BZ (nrot_, s, nsym, time_reversal, &
+     CALL irreducible_BZ_old (nrot_, s, nsym, time_reversal, &
                           magnetic_sym, at, bg, npk, nkstot, xk, wk, t_rev )
   ELSE
      one = SUM (wk(1:nkstot))
@@ -893,7 +893,7 @@ WRITE(stdout,'(/,5x,"Number of point in the plane", i8)') nkstot
 !  group of the Bravais lattice.
 !
 minus_q=.NOT. magnetic_sym
-CALL irreducible_bz(nrot_eff, s_eff, nsym_eff, minus_q, magnetic_sym, &
+CALL irreducible_bz_old(nrot_eff, s_eff, nsym_eff, minus_q, magnetic_sym, &
                      at, bg, npk, nkstot, xk0, wk0, t_rev_eff)
 
 CALL find_group(nsym_eff,sr,gname,code_group)

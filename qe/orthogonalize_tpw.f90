@@ -240,9 +240,8 @@ SUBROUTINE orthogonalize_tpw(dvpsi, evq, ikk, ikq, dpsi, npwq, dpsi_computed)
      !
      CALL stop_clock ('ortho:2')
      CALL start_clock ('ortho:3')
-     !$acc host_data use_device(evq, dpsi)
-     CALL s_psi_acc (npwx, npwq, nbnd_eff, evq, dpsi)
-     !$acc end host_data
+
+     CALL s_psi (npwx, npwq, nbnd_eff, evq, dpsi)
      !
      CALL stop_clock ('ortho:3')
   ENDIF

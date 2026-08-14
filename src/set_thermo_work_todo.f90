@@ -480,7 +480,7 @@ SUBROUTINE initialize_relaxation()
 !
 USE control_elastic_constants, ONLY : frozen_ions 
 USE input_parameters, ONLY : etot_conv_thr, forc_conv_thr
-USE control_flags,    ONLY : lbfgs, nstep, lforce=>tprnfor
+USE control_flags,    ONLY : lbfgs, nstep, lforce
 USE relax,            ONLY : epse, epsf
 
 IMPLICIT NONE

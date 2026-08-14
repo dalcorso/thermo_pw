@@ -43,7 +43,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   USE many_k_mod,           ONLY : deallocate_many_k, alloc_many_k
   USE control_flags,        ONLY : conv_elec, gamma_only, ethr, lscf, treinit_gvecs
   USE control_flags,        ONLY : conv_ions, istep, nstep, restart, lmd, &
-                                   lbfgs, io_level, lensemb, lforce=>tprnfor, &
+                                   lbfgs, io_level, lensemb, lforce, &
                                    tstress
   USE cellmd,               ONLY : lmovecell
   USE command_line_options, ONLY : command_line
