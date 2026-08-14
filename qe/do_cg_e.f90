@@ -44,9 +44,9 @@ SUBROUTINE do_cg_e(drhoscfs)
   USE paw_onecenter,         ONLY : paw_dpotential
   USE paw_symmetry,          ONLY : paw_desymmetrize
   USE paw_add_symmetry,      ONLY : paw_deqsymmetrize
-  USE control_ph,            ONLY : lnoloc, zeu
+  USE control_ph,            ONLY : zeu
   USE control_lr,            ONLY : alpha_pv, nbnd_occ, lgamma, tr2_ph, convt,&
-                                    niter_ph, lgamma_gamma
+                                    niter_ph, lgamma_gamma, lnoloc
   USE lrus,                  ONLY : int3, int3_paw
   USE dv_of_drho_lr,         ONLY : dv_of_drho
   USE lr_global,             ONLY : rpert, evc0, evq0, sevq0, &
@@ -59,6 +59,7 @@ SUBROUTINE do_cg_e(drhoscfs)
   USE mp_bands,              ONLY : intra_bgrp_comm, ntask_groups
   USE mp,                    ONLY : mp_sum
   USE fft_interfaces,        ONLY : fft_interpolate
+  USE incdrhoscf_mod,        ONLY : incdrhoscf, incdrhoscf_nc
 
 
   IMPLICIT NONE
@@ -80,7 +81,7 @@ SUBROUTINE do_cg_e(drhoscfs)
   REAL(DP), ALLOCATABLE :: h_dia(:,:), & ! used to build the preconditioning
                            s_dia(:,:)
 
-
+  LOGICAL :: time_reversed
   INTEGER :: kter, iter, iter0, ipol, jpol, ibnd, ik, ikp, ikk, ikq, is, &
              npw, npwq, incr, v_siz, ig
   ! counters or indices
@@ -129,6 +130,7 @@ SUBROUTINE do_cg_e(drhoscfs)
   !
   !   The outside loop is over the conjugate gradient steps
   !
+  time_reversed=.FALSE.
   DO kter = 1, niter_ph
 
 !     WRITE(stdout,*) 'kter', kter
@@ -164,7 +166,7 @@ SUBROUTINE do_cg_e(drhoscfs)
 !
            h_dia=0.0_DP
            s_dia=0.0_DP
-           CALL usnldiag( npwq, h_dia, s_dia )
+           CALL usnldiag( npwq, npol, h_dia, s_dia )
 
            DO ibnd = 1, nbnd_occ (ikk)
               DO ig = 1, npwq
@@ -258,7 +260,7 @@ SUBROUTINE do_cg_e(drhoscfs)
               !
               !  Add the US contribution if any
               !
-              CALL adddvscf(ipol,ik)
+              CALL adddvscf(ipol,ik,time_reversed)
               !
               ! Apply -P_c^+
               !
@@ -371,7 +373,7 @@ SUBROUTINE do_cg_e(drhoscfs)
      !
      !  And add the augmentation part of the induced charge    
      !
-     CALL addusddense (drhoscf, dbecsum)
+     CALL lr_addusddens (rpert, drhoscf, dbecsum)
      !
      !  Collect the contribution of all pools. At self-consistence 
      !  the uncollected charge is needed

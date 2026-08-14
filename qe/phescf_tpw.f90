@@ -21,8 +21,7 @@ SUBROUTINE phescf_tpw()
   USE ions_base,       ONLY : nat
   USE noncollin_module,ONLY : noncolin, nspin_mag, npol, domag
   USE lsda_mod,        ONLY : nspin
-  USE control_ph,      ONLY : zeu, lnoloc, done_epsil, done_zeu, epsil
-  USE eqv,             ONLY : drhos
+  USE control_ph,      ONLY : zeu, done_epsil, done_zeu, epsil
   USE io_files,        ONLY : tmp_dir
   USE wvfct,           ONLY : nbnd, npwx
   USE control_flags,   ONLY : io_level
@@ -48,7 +47,7 @@ SUBROUTINE phescf_tpw()
   USE ldaU_ph,         ONLY : dnsscf_all_modes
   USE control_flags,   ONLY : iverbosity
   USE magnetic_charges, ONLY : alpha_me
-  USE control_lr,       ONLY : lgamma
+  USE control_lr,       ONLY : lgamma, lnoloc
   USE write_hub
 
   !
@@ -61,6 +60,8 @@ SUBROUTINE phescf_tpw()
   INTEGER, ALLOCATABLE :: computed(:)
   !
   LOGICAL :: exst_mem, exst
+
+  COMPLEX(DP), ALLOCATABLE :: drhos(:,:,:)
   !
   IF ( .NOT. comp_irr(0)  ) RETURN
 
@@ -155,6 +156,9 @@ SUBROUTINE phescf_tpw()
         ENDIF
         CALL deallocate_lanczos()
      ELSE
+!
+!   Sternhaimer calculation frequency dependent
+!
         epsilonm1c = (0.0_DP,0.0_DP)
         DO iu = start_freq, last_freq
            !
@@ -199,6 +203,8 @@ SUBROUTINE phescf_tpw()
      WRITE( stdout, '(/,5X,"End of Frequency Dependent Polarizability Calculation")' )
      !
   ELSE
+  !
+  !  Static case
   !
      IF (((epsil.AND..NOT.done_epsil).OR.(zeu.AND..NOT.done_zeu).OR.  &
          (lraman.AND..NOT.done_lraman).OR.(elop.AND..NOT.done_elop))  &

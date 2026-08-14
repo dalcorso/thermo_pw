@@ -13,7 +13,7 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   !! the \(\texttt{PHonon}\) code.
   !
   !
-  USE control_flags,   ONLY : conv_ions, lforce=>tprnfor, tstress
+  USE control_flags,   ONLY : conv_ions, lforce, tstress
   USE bp,              ONLY : lberry
   USE starting_scf,    ONLY : starting_wfc, starting_pot, startingconfig
   USE io_files,        ONLY : prefix, tmp_dir, wfc_dir, seqopn

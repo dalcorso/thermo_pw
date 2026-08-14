@@ -20,7 +20,7 @@ add_zstar_ue_tpw.o \
 add_zstar_us.o \
 adddvscf_tran.o \
 addnlcc_zstar_eu_us_tpw.o \
-addusdbec_tpw.o \
+addusddenseq.o \
 add_vuspsi_tpw.o \
 add_vuspsi_gpu_tpw.o \
 allocate_cg.o \
@@ -52,6 +52,7 @@ compute_drhous_tpw.o \
 compute_drhous_nc_tpw.o \
 compute_int3_coeff.o \
 control_qe.o \
+coset.o \
 ccg_psi.o \
 deallocate_ph_tpw.o \
 dielec_tpw.o \
@@ -93,6 +94,7 @@ init_representations_tpw.o \
 init_run_tpw.o \
 init_us_2_kernel.o \
 irrek.o \
+irrek_old.o \
 ke_g2kin_dev.o \
 kpoint_grid.o \
 kpoint_grid_serial_tpw.o \

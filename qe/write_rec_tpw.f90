@@ -19,7 +19,7 @@ MODULE recover_mod_tpw
 
 CONTAINS
 
-  SUBROUTINE read_rec_tpw(dr2, iter0, npe, dvscfin, dvscfins, drhoscfh, dbecsum)
+  SUBROUTINE read_rec_tpw(dr2, iter0, dfpt_data)
     !
     !  General restart reading routine
     !
@@ -29,6 +29,7 @@ CONTAINS
     USE gvecs, ONLY : doublegrid
     USE fft_base, ONLY : dfftp, dffts
     USE fft_interfaces, ONLY : fft_interpolate
+    USE paw_variables,  ONLY : okpaw
     USE uspp,  ONLY : okvan, nlcc_any
     USE lsda_mod, ONLY : nspin
     USE noncollin_module, ONLY : noncolin, nspin_mag, domag
@@ -37,37 +38,36 @@ CONTAINS
     USE efield_mod, ONLY : zstareu0, zstarue0
     USE phus, ONLY : int1, int2
     USE io_files, ONLY : seqopn
+    USE dfpt_type, ONLY : dfpt_data_type
 
     USE lrus, ONLY : int3
-    USE eqv,  ONLY : drhos
 
     IMPLICIT NONE
-    INTEGER, INTENT(OUT) :: iter0
-    INTEGER, INTENT(IN)  :: npe
-    REAL(DP), INTENT(OUT) :: dr2
-    COMPLEX(DP), INTENT(OUT) :: dvscfin (dfftp%nnr, nspin_mag, npe)
-    COMPLEX(DP), INTENT(OUT) :: dvscfins (dffts%nnr, nspin_mag, npe)
-    COMPLEX(DP), INTENT(OUT), OPTIONAL :: drhoscfh (dfftp%nnr, nspin_mag, npe)
-    COMPLEX(DP), INTENT(OUT), OPTIONAL :: dbecsum((nhm*(nhm+1))/2,nat,nspin_mag,npe)
+    TYPE(dfpt_data_type), INTENT(INOUT) :: dfpt_data
+    !! Output: Data that describes linear response quantities
 
-    INTEGER :: is, ipol
+    INTEGER, INTENT(OUT) :: iter0
+    REAL(DP), INTENT(OUT) :: dr2
+
+    INTEGER :: is, ipol, npe
     LOGICAL :: exst
 
     CALL start_clock ('read_rec')
+    npe=dfpt_data%npert
     CALL seqopn (iunrec, 'recover', 'unformatted', exst)
     READ (iunrec) iter0, dr2, convt
     READ (iunrec) this_pcxpsi_is_on_file
     READ (iunrec) zstareu0, zstarue0
-    READ (iunrec) dvscfin
-    IF (convt.AND.nlcc_any) READ(iunrec) drhoscfh
-    IF (convt.AND.ALLOCATED(drhos)) READ(iunrec) drhos
-    IF (PRESENT(dbecsum)) READ(iunrec) dbecsum
+    READ (iunrec) dfpt_data%dvscfp
+    IF (convt.AND.nlcc_any) READ(iunrec) dfpt_data%drhop
+    IF (convt.AND.ALLOCATED(dfpt_data%drhos)) READ(iunrec) dfpt_data%drhos
+    IF (okpaw) READ(iunrec) dfpt_data%dbecsum
     IF (okvan) THEN
        READ (iunrec) int1, int2, int3
        IF (noncolin) THEN
           IF (domag) THEN
              CALL set_int12_nc(0)
-             CALL compute_int3_coeff(dvscfin, dbecsum, npe)
+             CALL compute_int3_coeff(dfpt_data%dvscfp, dfpt_data%dbecsum, npe)
           ELSE
              CALL set_int12_nc(0)
              CALL set_int3_nc(npe)
@@ -78,7 +78,8 @@ CONTAINS
     IF (doublegrid) THEN
        DO is=1,nspin_mag
           DO ipol=1,npe
-             CALL fft_interpolate (dfftp, dvscfin(:,is,ipol), dffts, dvscfins(:,is,ipol))
+             CALL fft_interpolate (dfftp, dfpt_data%dvscfp(:,is,ipol), &
+                                   dffts, dfpt_data%dvscfs(:,is,ipol))
           END DO
        END DO
     END IF

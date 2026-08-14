@@ -47,10 +47,12 @@ subroutine solve_e_tpw(drhoscf)
   USE units_lr,              ONLY : lrdwf, iudwf, lrwfc, iuwfc
   USE output,                ONLY : fildrho
   USE control_flags,         ONLY : use_gpu
-  USE control_ph,            ONLY : ext_recover, lnoloc, zeu
+  USE control_ph,            ONLY : ext_recover, zeu
   USE control_lr,            ONLY : nmix_ph, alpha_mix, lgamma_gamma, &
                                     niter_ph, flmixdpot, rec_code_read, &
-                                    rec_code, convt, tr2_ph
+                                    rec_code, convt, tr2_ph, lnoloc
+  USE dfpt_type,             ONLY : dfpt_data_type, allocate_dfpt_data,   &
+                                    deallocate_dfpt_data, dfpt_dvscfp_to_dvscfs
   USE recover_mod,           ONLY : read_rec, write_rec
 
   USE mp_pools,              ONLY : inter_pool_comm
@@ -70,6 +72,7 @@ subroutine solve_e_tpw(drhoscf)
   USE gvect,                 ONLY : gg
   USE uspp_init,             ONLY : init_us_2
   USE apply_dpot_mod,        ONLY : apply_dpot_bands
+  USE incdrhoscf_mod,        ONLY : incdrhoscf, incdrhoscf_nc
 
   implicit none
 
@@ -81,17 +84,10 @@ subroutine solve_e_tpw(drhoscf)
   real(DP), allocatable :: h_diag (:,:)
   ! h_diag: diagonal part of the Hamiltonian
 
-  complex(DP) , allocatable, target ::      &
-                   dvscfin (:,:,:)     ! change of the scf potential (input)
-  complex(DP) , pointer ::      &
-                   dvscfins (:,:,:)    ! change of the scf potential (smooth)
   complex(DP) :: drhoscf (dffts%nnr, nspin_mag, 3)
   complex(DP), allocatable:: drhoscf_aux(:,:,:), alpha_work(:,:)
-  complex(DP), pointer ::  drhoscfh (:,:,:) ! change of the scf potential (output)
-  complex(DP), allocatable, target :: &
-                   dvscfout (:,:,:) ! change of the scf potential (output)
   complex(DP) , allocatable ::   &
-                   dbecsum(:,:,:,:), & ! the becsum with dpsi
+                   dvscfout(:,:,:), & ! the potential before mixing
                    dbecsum_nc(:,:,:,:,:), & ! the becsum with dpsi
                    mixin(:), mixout(:), &  ! auxiliary for paw mixing
                    ps (:,:), &
@@ -100,7 +96,7 @@ subroutine solve_e_tpw(drhoscf)
 
   complex(DP), EXTERNAL :: zdotc      ! the scalar product function
 
-  logical :: conv_root, exst
+  logical :: conv_root, exst, time_reversed
   ! conv_root: true if linear system is converged
 
   integer :: npw, npwq
@@ -112,40 +108,31 @@ subroutine solve_e_tpw(drhoscf)
 
   real(DP) :: tcpu, get_clock
   ! timing variables
-
+  TYPE(dfpt_data_type) :: dfpt_data
+  !! Data that describes linear response quantities
+  !
   external ch_psi_all, cg_psi
 
   call start_clock ('solve_e')
   !
   !  This routine is task group aware
   !
+  CALL allocate_dfpt_data(dfpt_data, 3)
   IF (noncolin.AND.domag) then 
      allocate (drhoscf_aux(dfftp%nnr, nspin_mag, 3))
      allocate (alpha_work(3,3))
      drhoscf_aux = (0.0_DP, 0.0_DP)
      alpha_work = (0.0_DP, 0.0_DP)
   END IF
-  allocate (dvscfin( dfftp%nnr, nspin_mag, 3))
   nnr=dfftp%nnr
-  if (doublegrid) then
-     allocate (dvscfins(dffts%nnr, nspin_mag, 3))
-     nnrs=dffts%nnr
-  else
-     dvscfins => dvscfin
-     nnrs=nnr
-  endif
-  !$acc enter data create(dvscfins(1:nnrs, 1:nspin_mag, 1:3))
-  allocate (dvscfout(dfftp%nnr, nspin_mag, 3))
+  nnrs=dffts%nnr
+
+  !$acc enter data create(dfpt_data, dfpt_data%dvscfs(1:nnrs, 1:nspin_mag, 1:3))
+  ALLOCATE (dvscfout(dfftp%nnr, nspin_mag, 3))
   IF (okpaw) THEN
      ALLOCATE (mixin(dfftp%nnr*nspin_mag*3+(nhm*(nhm+1)*nat*nspin_mag*3)/2) )
      ALLOCATE (mixout(dfftp%nnr*nspin_mag*3+(nhm*(nhm+1)*nat*nspin_mag*3)/2) )
   ENDIF
-  IF (nlcc_any.AND.zeu) THEN
-     ALLOCATE(drhoscfh(dfftp%nnr, nspin_mag, 3))
-  ELSE
-    drhoscfh => dvscfout
-  ENDIF
-  allocate (dbecsum( nhm*(nhm+1)/2, nat, nspin_mag, 3))
   IF (noncolin) allocate (dbecsum_nc (nhm, nhm, nat, nspin, 3))
   allocate (h_diag(npwx*npol, nbnd))
   allocate (aux2(npwx*npol, nbnd))
@@ -155,11 +142,11 @@ subroutine solve_e_tpw(drhoscf)
   if (rec_code_read == -20.AND.ext_recover) then
      ! restarting in Electric field calculation
      IF (okpaw) THEN
-        CALL read_rec(dr2, iter0, 3, dvscfin, dvscfins, dvscfout, dbecsum)
+        CALL read_rec(dr2, iter0, dfpt_data)
         CALL setmixout(3*dfftp%nnr*nspin_mag,(nhm*(nhm+1)*nat*nspin_mag*3)/2, &
-                    mixin, dvscfin, dbecsum, ndim, -1 )
+                    mixin, dfpt_data%dvscfp, dfpt_data%dbecsum, ndim, -1 )
      ELSE
-        CALL read_rec(dr2, iter0, 3, dvscfin, dvscfins)
+        CALL read_rec(dr2, iter0, dfpt_data)
      ENDIF
   else if (rec_code_read > -20 .AND. rec_code_read <= -10) then
      ! restarting in Raman: proceed
@@ -195,6 +182,7 @@ subroutine solve_e_tpw(drhoscf)
   !
   !   The outside loop is over the iterations
   !
+  time_reversed=.FALSE.
   do kter = 1, niter_ph
 
 !     write(6,*) 'kter', kter
@@ -204,8 +192,8 @@ subroutine solve_e_tpw(drhoscf)
      lintercall = 0
 
      dvscfout(:,:,:)=(0.d0,0.d0)
-     drhoscf(:,:,:)=(0.d0,0.d0)
-     dbecsum(:,:,:,:)=(0.d0,0.d0)
+     dfpt_data%drhos(:,:,:)=(0.d0,0.d0)
+     dfpt_data%dbecsum(:,:,:,:)=(0.d0,0.d0)
      IF (noncolin) dbecsum_nc=(0.d0,0.d0)
      !
      ! DFPT+U: at each iteration calculate dnsscf,
@@ -253,11 +241,11 @@ subroutine solve_e_tpw(drhoscf)
               ! dvscf_q from previous iteration (mix_potential)
               !
               CALL apply_dpot_bands(ik, nbnd_occ(ikk), &
-                                dvscfins(:, :, ipol), evc, aux2)
+                                dfpt_data%dvscfs(:, :, ipol), evc, aux2)
               !
               dvpsi=dvpsi+aux2
               !
-              call adddvscf(ipol,ik)
+              call adddvscf(ipol,ik,time_reversed)
               !
               ! DFPT+U: add to dvpsi the scf part of the response
               ! Hubbard potential dV_hub
@@ -275,7 +263,7 @@ subroutine solve_e_tpw(drhoscf)
               !  At the first iteration dpsi and dvscfin are set to zero,
               !
               dpsi(:,:)=(0.d0,0.d0)
-              dvscfin(:,:,:)=(0.d0,0.d0)
+              dfpt_data%dvscfp(:,:,:)=(0.d0,0.d0)
               !
               ! starting threshold for the iterative solution of the linear
               ! system
@@ -315,11 +303,11 @@ subroutine solve_e_tpw(drhoscf)
            ! calculates dvscf, sum over k => dvscf_q_ipert
            !
            IF (noncolin) THEN
-              call incdrhoscf_nc(drhoscf(1,1,ipol),wk(ikk),ik, &
+              call incdrhoscf_nc(dfpt_data%drhos(1,1,ipol),wk(ikk),ik, &
                                  dbecsum_nc(1,1,1,1,ipol), dpsi, 1.0_DP)
            ELSE
-              call incdrhoscf (drhoscf(1,current_spin,ipol), wk(ikk), &
-                            ik, dbecsum(1,1,current_spin,ipol), dpsi)
+              call incdrhoscf (dfpt_data%drhos(1,current_spin,ipol), wk(ikk), &
+                            ik, dfpt_data%dbecsum(1,1,current_spin,ipol), dpsi)
            ENDIF
         enddo   ! on polarizations
      enddo      ! on k points
@@ -331,46 +319,44 @@ subroutine solve_e_tpw(drhoscf)
      IF (noncolin) THEN
         call mp_sum ( dbecsum_nc, intra_bgrp_comm )
      ELSE
-        call mp_sum ( dbecsum, intra_bgrp_comm )
+        call mp_sum ( dfpt_data%dbecsum, intra_bgrp_comm )
      END IF
 
      if (doublegrid) then
         do is=1,nspin_mag
            do ipol=1,3
-              call fft_interpolate (dffts, drhoscf(:,is,ipol), &
-                                    dfftp, drhoscfh(:,is,ipol))
+              call fft_interpolate (dffts, dfpt_data%drhos(:,is,ipol), &
+                                    dfftp, dfpt_data%drhop(:,is,ipol))
            enddo
         enddo
      else
-        CALL zcopy (nspin_mag*dfftp%nnr*3, drhoscf, 1, drhoscfh, 1)
+        CALL zcopy (nspin_mag*dfftp%nnr*3, dfpt_data%drhos, 1, &
+                                                      dfpt_data%drhop, 1)
      endif
      !
-     IF (noncolin.and.okvan) CALL set_dbecsum_nc(dbecsum_nc, dbecsum, 3)
+     IF (noncolin.and.okvan) CALL set_dbecsum_nc(dbecsum_nc, &
+                                                 dfpt_data%dbecsum, 3)
      !
-     call addusddense (drhoscfh, dbecsum)
+     call lr_addusddens(3, dfpt_data%dbecsum, dfpt_data%drhop)
      !
      !   dvscfout contains the (unsymmetrized) linear charge response
      !   for the three polarizations - symmetrize it
      !
-     call mp_sum ( drhoscfh, inter_pool_comm )
-     IF (okpaw) call mp_sum ( dbecsum, inter_pool_comm )
-     CALL symmetrize_drho(drhoscfh, dbecsum, 0, 3, 2)
-!     if (.not.lgamma_gamma) then
-!        call psyme (drhoscfh)
-!        IF ( noncolin.and.domag ) CALL psym_dmage(drhoscfh)
-!     endif
+     call mp_sum ( dfpt_data%drhop, inter_pool_comm )
+     IF (okpaw) call mp_sum ( dfpt_data%dbecsum, inter_pool_comm )
+     CALL symmetrize_drho(dfpt_data%drhop, dfpt_data%dbecsum, 0, 3, 2)
      !
      !   save the symmetrized linear charge response to file
      !   calculate the corresponding linear potential response
      !
      do ipol=1,3
-        if (fildrho.ne.' ') call davcio_drho(drhoscfh(1,1,ipol),lrdrho, &
+        if (fildrho.ne.' ') call davcio_drho(dfpt_data%drhos(1,1,ipol),lrdrho, &
              iudrho,ipol,+1)
         IF (lnoloc) then
            dvscfout(:,:,ipol)=(0.d0,0.d0)
         ELSE
-          IF (nlcc_any.and.zeu) call zcopy (dfftp%nnr*nspin_mag,&
-                         drhoscfh(1,1,ipol),1,dvscfout(1,1,ipol),1)
+           call zcopy (dfftp%nnr*nspin_mag, &
+             dfpt_data%drhop(1,1,ipol),1,dvscfout(1,1,ipol),1)
            call dv_of_drho (dvscfout (1, 1, ipol))
         ENDIF
      enddo
@@ -382,36 +368,31 @@ subroutine solve_e_tpw(drhoscf)
      !  In this case we mix also dbecsum
      !
         call setmixout(3*dfftp%nnr*nspin_mag,(nhm*(nhm+1)*nat*nspin_mag*3)/2, &
-                    mixout, dvscfout, dbecsum, ndim, -1 )
+                    mixout, dvscfout, dfpt_data%dbecsum, ndim, -1 )
         call mix_potential (2*3*dfftp%nnr*nspin_mag+2*ndim, mixout, mixin, &
                          alpha_mix(kter), dr2, 3*tr2_ph/npol, iter, &
                          nmix_ph, flmixdpot, convt)
         call setmixout(3*dfftp%nnr*nspin_mag,(nhm*(nhm+1)*nat*nspin_mag*3)/2, &
-                       mixin, dvscfin, dbecsum, ndim, 1 )
+                       mixin, dfpt_data%dvscfp, dfpt_data%dbecsum, ndim, 1 )
 
      ELSE
-        call mix_potential (2*3*dfftp%nnr*nspin_mag, dvscfout, dvscfin, alpha_mix ( &
-          kter), dr2, 3 * tr2_ph / npol, iter, nmix_ph, flmixdpot, convt)
+        call mix_potential (2*3*dfftp%nnr*nspin_mag, dvscfout,  &
+             dfpt_data%dvscfp, alpha_mix (kter), dr2, 3 * tr2_ph / npol, &
+             iter, nmix_ph, flmixdpot, convt)
      ENDIF
-     if (doublegrid) then
-        do is=1,nspin_mag
-           do ipol = 1, 3
-              call fft_interpolate (dfftp, dvscfin(:,is,ipol), dffts, &
-                                           dvscfins(:,is,ipol))
-           enddo
-        enddo
-     endif
+
+     CALL dfpt_dvscfp_to_dvscfs(dfpt_data)
 
      IF (okpaw) THEN
 !
 !    The presence of c.c. in the formula gives a factor 2.0
 !
-        dbecsum=2.0_DP * dbecsum
-        IF (.NOT. lgamma_gamma) CALL PAW_desymmetrize(dbecsum)
-        call PAW_dpotential(dbecsum,rho%bec,int3_paw,3)
+        dfpt_data%dbecsum=2.0_DP * dfpt_data%dbecsum
+        IF (.NOT. lgamma_gamma) CALL PAW_desymmetrize(dfpt_data%dbecsum)
+        call PAW_dpotential(dfpt_data%dbecsum,rho%bec,int3_paw,3)
      ENDIF
 
-     call newdq(dvscfin,3)
+     call newdq(dfpt_data%dvscfp,3)
 
      CALL mp_sum(ltaver, inter_pool_comm)
      CALL mp_sum(lintercall, inter_pool_comm)
@@ -431,10 +412,9 @@ subroutine solve_e_tpw(drhoscf)
      !
      rec_code=-20
      IF (okpaw) THEN
-        CALL write_rec('solve_e...', 0, dr2, iter, convt, 3, dvscfin, &
-                                                       dvscfout, dbecsum)
+        CALL write_rec('solve_e...', 0, dr2, iter, convt, dfpt_data)
      ELSE
-        CALL write_rec('solve_e...', 0, dr2, iter, convt, 3, dvscfin)
+        CALL write_rec('solve_e...', 0, dr2, iter, convt, dfpt_data)
      ENDIF
 
      if (check_stop_now()) call stop_smoothly_ph (.false.)
@@ -449,10 +429,15 @@ IF (convt) THEN
 !    to the effective charges
 !
    IF (zeu) THEN
-      CALL addnlcc_zstar_eu_us_tpw( drhoscfh )
-      CALL zstar_eu_us_tpw (dvscfin)
+      CALL addnlcc_zstar_eu_us_tpw( dfpt_data%drhop )
+      CALL zstar_eu_us_tpw (dfpt_data%dvscfp)
    ENDIF
 ENDIF
+!
+! The dfpt_data are deallocated but the smooth charge is used in the
+! zstar. We copy it here
+!
+drhoscf=dfpt_data%drhos
 !
 !   In the noncolinear magnetic case, we compute the integral of the response 
 !   of the magnetization to the electric field, which allows 
@@ -461,7 +446,7 @@ ENDIF
 IF (noncolin.AND.domag) then 
    alpha_me(:,:) = (0.0_DP, 0.0_DP)
    DO ipol = 1, 3
-      drhoscf_aux(:,:,:) = drhoscfh(:,:,:)
+      drhoscf_aux(:,:,:) = dfpt_data%drhop(:,:,:)
       DO is=2,nspin_mag
          CALL fwfft ('Rho', drhoscf_aux(:,is,ipol), dfftp)
          IF (ABS(gg(1)).LT.1.d-8) THEN 
@@ -484,16 +469,10 @@ IF (noncolin.AND.domag) then
 ENDIF
 
   deallocate (h_diag)
-  deallocate (dbecsum)
-  deallocate (dvscfout)
-  IF (nlcc_any.AND.zeu) DEALLOCATE(drhoscfh)
   IF (okpaw) THEN
      DEALLOCATE(mixin)
      DEALLOCATE(mixout)
   ENDIF
-  !$acc exit data delete(dvscfins)
-  if (doublegrid) deallocate (dvscfins)
-  deallocate (dvscfin)
   if (noncolin) deallocate(dbecsum_nc)
   !$acc exit data delete(aux2)
   deallocate(aux2)
@@ -503,8 +482,13 @@ ENDIF
      DEALLOCATE( tg_psic)
      !
   ENDIF
+  deallocate(dvscfout)
   IF (allocated(drhoscf_aux)) deallocate(drhoscf_aux)
   IF (allocated(alpha_work)) deallocate(alpha_work)
+
+  !$acc exit data delete(dfpt_data, dfpt_data%dvscfs)
+  CALL deallocate_dfpt_data(dfpt_data)
+
 
   call stop_clock ('solve_e')
   return

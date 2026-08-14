@@ -6,7 +6,7 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !-----------------------------------------------------------------------
-SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf, drhoscfh)
+SUBROUTINE solve_linter_tpw (irr, imode0, npe, dfpt_data)
   !-----------------------------------------------------------------------
   !
   !    Driver routine for the solution of the linear system which
@@ -42,12 +42,17 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf, drhoscfh)
   USE control_flags,        ONLY : use_gpu
   USE control_lr,           ONLY : rec_code, niter_ph, convt, &
                                    alpha_mix, rec_code_read, &
-                                   where_rec, ext_recover, lmultipole
+                                   where_rec, ext_recover
+  USE dfpt_type,            ONLY : dfpt_data_type, dfpt_ldos_type,  &
+                                   allocate_dfpt_ldos, deallocate_dfpt_ldos, &
+                                   dfpt_dvscfp_to_dvscfs
+  USE control_ph,           ONLY : lmultipole
   USE el_phon,              ONLY : elph
   USE modes,                ONLY : u
   USE uspp,                 ONLY : nlcc_any
   USE units_ph,             ONLY : iudrho, lrdrho, iubar, lrbar, &
-                                   iudvscf, iuint3paw, lint3paw
+                                   iudvscf, iuint3paw, lint3paw, lrdrhous, &
+                                   iudrhous
   USE units_lr,             ONLY : iuwfc, lrwfc, iudwf, lrdwf
   USE output,               ONLY : fildrho, fildvscf
   USE phus,                 ONLY : becsumort, alphap, int1_nc
@@ -76,6 +81,8 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf, drhoscfh)
   USE magnetic_charges,     ONLY : mag_charge_mode
   USE gvect,                ONLY : gg
   USE uspp_init,            ONLY : init_us_2
+  USE incdrhoscf_mod,       ONLY : incdrhoscf, incdrhoscf_nc
+  USE localdos_mod,         ONLY : localdos_new
 
   IMPLICIT NONE
 
@@ -83,11 +90,6 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf, drhoscfh)
   ! input: the irreducible representation
   ! input: the number of perturbation
   ! input: the position of the modes
-
-  COMPLEX(DP) :: drhoscf (dffts%nnr, nspin_mag, npe)
-  ! output: the change of the scf charge, only smooth part
-  COMPLEX(DP) :: drhoscfh (dfftp%nnr, nspin_mag, npe)
-  ! output: the change of the scf charge total charge
 
   REAL(DP) , ALLOCATABLE :: h_diag (:,:)
   ! h_diag: diagonal part of the Hamiltonian
@@ -100,22 +102,19 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf, drhoscfh)
   ! Misc variables for metals
   ! dos_ef: density of states at Ef
 
-  COMPLEX(DP), ALLOCATABLE, TARGET :: dvscfin(:,:,:)
-  ! change of the scf potential
-  COMPLEX(DP), POINTER :: dvscfins (:,:,:)
-  ! change of the scf potential (smooth part only)
+  TYPE(dfpt_data_type), INTENT(INOUT) :: dfpt_data
+  !! Output: Data that describes linear response quantities
+
   COMPLEX(DP), ALLOCATABLE :: dvscfout (:,:,:), & 
        drhoscf_aux(:,:,:)
   ! change of rho / scf potential (output)
+   TYPE(dfpt_ldos_type) :: ldos_data
+   !! Local density of states at Ef (encapsulates ldos, ldoss, becsum_dos,
+   !dos_ef)
+
   ! change of scf potential (output)
-  COMPLEX(DP), ALLOCATABLE :: ldos (:,:), ldoss (:,:), mixin(:),  &
-       dbecsum (:,:,:,:), dbecsum_nc(:,:,:,:,:,:), &
-       drhoc(:), dbecsum_aux (:,:,:,:)
-  ! Misc work space
-  ! ldos : local density of states af Ef
-  ! ldoss: as above, without augmentation charges
-  ! dbecsum: the derivative of becsum
-  REAL(DP), ALLOCATABLE :: becsum1(:,:,:)
+  COMPLEX(DP), ALLOCATABLE :: mixin(:), dbecsum_nc(:,:,:,:,:,:), &
+       dbecsum_aux (:,:,:,:)
 
   LOGICAL ::             &
              exst,       & ! used to open the recover file
@@ -154,24 +153,19 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf, drhoscfh)
 !
 !  This routine is task group aware
 !
+  npe = dfpt_data%npert
+  !
+  nnr=dfftp%nnr
+  nnrs = dffts%nnr
+  !$acc enter data create(dfpt_data, dfpt_data%dvscfs(1:nnrs, 1:nspin_mag, 1:npe))
+
   nsolv=1
   IF (noncolin.AND.domag) THEN 
      nsolv=2
      ALLOCATE (drhoscf_aux(dfftp%nnr, nspin_mag, npe))
   ENDIF
 
-  ALLOCATE (dvscfin ( dfftp%nnr , nspin_mag , npe))
-  nnr=dfftp%nnr
-  IF (doublegrid) THEN
-     allocate (dvscfins (dffts%nnr , nspin_mag , npe))
-     nnrs=dffts%nnr
-  ELSE
-     dvscfins => dvscfin
-     nnrs=nnr
-  ENDIF
-  !$acc enter data create(dvscfins(1:nnrs, 1:nspin_mag, 1:npe))
   ALLOCATE (dvscfout ( dfftp%nnr, nspin_mag , npe))
-  ALLOCATE (dbecsum ( (nhm * (nhm + 1))/2 , nat , nspin_mag , npe))
   IF (okpaw) THEN
      ALLOCATE (mixin(dfftp%nnr*nspin_mag*npe+&
                                     (nhm*(nhm+1)*nat*nspin_mag*npe)/2) )
@@ -181,7 +175,6 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf, drhoscfh)
   ENDIF
   IF (noncolin) ALLOCATE (dbecsum_nc (nhm,nhm, nat , nspin , npe, nsolv))
   ALLOCATE (h_diag ( npwx*npol, nbnd))
-  ALLOCATE (drhoc(dfftp%nnr))
   IF (noncolin.AND.domag.AND.okvan) THEN
      ALLOCATE (int3_nc_save( nhm, nhm, nat, nspin_mag, npe, 2))
      ALLOCATE (dbecsum_aux ( (nhm * (nhm + 1))/2 , nat , nspin_mag , npe))
@@ -191,16 +184,16 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf, drhoscfh)
   IF (rec_code_read == 10.AND.ext_recover) THEN
      ! restart from Phonon calculation
      IF (okpaw) THEN
-        CALL read_rec_tpw(dr2, iter0, npe, dvscfin, dvscfins, drhoscfh, &
-                                                              dbecsum)
+        CALL read_rec_tpw(dr2, iter0, dfpt_data) 
         IF (convt) THEN
-           CALL PAW_dpotential(dbecsum,rho%bec,int3_paw,npe)
+           CALL PAW_dpotential(dfpt_data%dbecsum,rho%bec,int3_paw,npe)
         ELSE
            CALL setmixout(npe*dfftp%nnr*nspin_mag,&
-           (nhm*(nhm+1)*nat*nspin_mag*npe)/2,mixin,dvscfin,dbecsum,ndim,-1)
+           (nhm*(nhm+1)*nat*nspin_mag*npe)/2,mixin,dfpt_data%dvscfp,&
+                                               dfpt_data%dbecsum,ndim,-1)
         ENDIF
      ELSE
-        CALL read_rec_tpw(dr2, iter0, npe, dvscfin, dvscfins, drhoscfh)
+        CALL read_rec_tpw(dr2, iter0, dfpt_data )
      ENDIF
      rec_code=0
   ELSE
@@ -217,7 +210,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf, drhoscfh)
       where_rec='no_recover'
     ELSE
       convt=.TRUE.
-      CALL init_rho(npe,drhoscf,drhoscfh,iq_dummy)
+      CALL init_rho(npe,dfpt_data%drhos,dfpt_data%drhop,iq_dummy)
     ENDIF
     !
   ENDIF
@@ -236,11 +229,8 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf, drhoscfh)
   !
   lmetq0 = (lgauss .OR. ltetra) .AND. lgamma
   IF (lmetq0) THEN
-     ALLOCATE ( ldos ( dfftp%nnr  , nspin_mag) )
-     ALLOCATE ( ldoss( dffts%nnr , nspin_mag) )
-     ALLOCATE (becsum1 ( (nhm * (nhm + 1))/2 , nat , nspin_mag))
-     CALL localdos ( ldos , ldoss , becsum1, dos_ef )
-     IF (.NOT.okpaw) DEALLOCATE(becsum1)
+      CALL allocate_dfpt_ldos(ldos_data)
+      CALL localdos_new(ldos_data, dos_ef)
   endif
   !
   ! In this case it has recovered after computing the contribution
@@ -248,6 +238,38 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf, drhoscfh)
   ! start from the beginning.
   !
   IF (iter0==-1000) iter0=0
+  !
+  ! Compute the change of core charge due to atomic displacement
+  ! drhoc is computed only once, stored in drhoc.
+  !
+  ! If lmultipole is .TRUE., one is actually considering a exp(iqr)
+  ! perturbation, not a phonon perturbation. So we do not compute the 
+  ! core charge perturbation.
+  !
+  IF (.NOT. lmultipole) THEN
+     ALLOCATE(dfpt_data%drhoc(dfftp%nnr, npe))
+     DO ipert = 1, npe
+        CALL addcore(u(1, imode0+ipert), dfpt_data%drhoc(1, ipert))
+     ENDDO
+     !
+     ! Set Pulay correction terms
+     !
+     IF (okvan) THEN
+        ! Pulay correction to density due to augmentation charge
+        ALLOCATE(dfpt_data%drhop_pulay(dfftp%nnr, nspin_mag, npe))
+        DO ipert = 1, npe
+           CALL get_buffer(dfpt_data%drhop_pulay(1, 1, ipert), lrdrhous, iudrhous, imode0 + ipert)
+        ENDDO
+     ENDIF
+     !
+     IF (okpaw) THEN
+        ! Pulay correction to dbecsum due to augmentation charge
+        ALLOCATE(dfpt_data%dbecsum_pulay((nhm * (nhm + 1))/2, nat, nspin_mag, npe))
+        DO ipert = 1, npe
+           dfpt_data%dbecsum_pulay(:,:,:,ipert) = becsumort(:,:,:,imode0+ipert)
+        ENDDO
+     ENDIF
+  ENDIF
   !
   !   The outside loop is over the iterations
   !
@@ -257,8 +279,8 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf, drhoscfh)
      ltaver = 0
 
      lintercall = 0
-     drhoscf(:,:,:) = (0.d0, 0.d0)
-     dbecsum(:,:,:,:) = (0.d0, 0.d0)
+     dfpt_data%drhos(:,:,:) = (0.d0, 0.d0)
+     dfpt_data%dbecsum(:,:,:,:) = (0.d0, 0.d0)
      IF (noncolin) dbecsum_nc = (0.d0, 0.d0)
      !
      ! DFPT+U: at each ph iteration calculate dnsscf,
@@ -331,7 +353,8 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf, drhoscfh)
                  !
                  ! calculates dvscf_q*psi_k in G_space, for all bands, k=kpoint
                  !
-                 CALL add_dvscf_rhs( dvscfins, isolv, ipert, ik, npe, .TRUE. )
+                 CALL add_dvscf_rhs( dfpt_data%dvscfs, isolv, ipert, ik, &
+                                                                 npe, .TRUE. )
 
               ELSE
                  !
@@ -384,7 +407,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf, drhoscfh)
                  !  At the first iteration dpsi and dvscfin are set to zero
                  !
                  dpsi(:,:) = (0.d0, 0.d0)
-                 dvscfin (:, :, ipert) = (0.d0, 0.d0)
+                 dfpt_data%dvscfs (:, :, ipert) = (0.d0, 0.d0)
                  !
                  ! starting threshold for iterative solution of the linear system
                  !
@@ -410,11 +433,12 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf, drhoscfh)
               weight = wk (ikk)
               IF (nsolv==2) weight=weight/2.0_DP
               IF (noncolin) THEN
-                 CALL incdrhoscf_nc(drhoscf(1,1,ipert),weight,ik, &
+                 CALL incdrhoscf_nc(dfpt_data%drhos(1,1,ipert),weight,ik, &
                                  dbecsum_nc(1,1,1,1,ipert,isolv), dpsi, rsign)
               ELSE
-                 CALL incdrhoscf (drhoscf(1,current_spin,ipert), weight, ik, &
-                            dbecsum(1,1,current_spin,ipert), dpsi)
+                 CALL incdrhoscf (dfpt_data%drhos(1,current_spin,ipert), &
+                         weight, ik, &
+                         dfpt_data%dbecsum(1,1,current_spin,ipert), dpsi)
               END IF
               ! on perturbations
            ENDDO
@@ -429,7 +453,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf, drhoscfh)
      IF (noncolin) THEN
         call mp_sum ( dbecsum_nc, intra_bgrp_comm )
      ELSE
-        call mp_sum ( dbecsum, intra_bgrp_comm )
+        call mp_sum ( dfpt_data%dbecsum, intra_bgrp_comm )
      ENDIF
 
 !     CALL compute_augmented_drho(drhoscf, dbecsum, drhoscfh, npe)
@@ -437,50 +461,69 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf, drhoscfh)
      IF (doublegrid) THEN
         DO is = 1, nspin_mag
            DO ipert = 1, npe
-              CALL fft_interpolate (dffts, drhoscf(:,is,ipert), &
-                                               dfftp, drhoscfh(:,is,ipert))
+              CALL fft_interpolate (dffts, dfpt_data%drhos(:,is,ipert), &
+                                          dfftp, dfpt_data%drhop(:,is,ipert))
            ENDDO
         ENDDO
      ELSE
-        CALL zcopy (npe*nspin_mag*dfftp%nnr, drhoscf, 1, drhoscfh, 1)
+        CALL zcopy (npe*nspin_mag*dfftp%nnr, dfpt_data%drhos, 1, &
+                                                      dfpt_data%drhop, 1)
      ENDIF
      !
      !  In the noncolinear, spin-orbit case rotate dbecsum
      !
      IF (noncolin.and.okvan) THEN
-        CALL set_dbecsum_nc(dbecsum_nc, dbecsum, npe)
+        CALL set_dbecsum_nc(dbecsum_nc, dfpt_data%dbecsum, npe)
         IF (nsolv==2) THEN
            dbecsum_aux=(0.0_DP,0.0_DP)
            CALL set_dbecsum_nc(dbecsum_nc(1,1,1,1,1,2), dbecsum_aux, npe)
-           dbecsum(:,:,1,:)=dbecsum(:,:,1,:)+dbecsum_aux(:,:,1,:)
-           dbecsum(:,:,2:4,:)=dbecsum(:,:,2:4,:)-dbecsum_aux(:,:,2:4,:)
+           dfpt_data%dbecsum(:,:,1,:)=dfpt_data%dbecsum(:,:,1,:)+&
+                                                     dbecsum_aux(:,:,1,:)
+           dfpt_data%dbecsum(:,:,2:4,:)=dfpt_data%dbecsum(:,:,2:4,:)-&
+                                              dbecsum_aux(:,:,2:4,:)
         ENDIF
      ENDIF
      !
      !    Now we compute for all perturbations the total charge and potential
      !
-     CALL addusddens (drhoscfh, dbecsum, imode0, npe, 0)
+     CALL lr_addusddens (npe, dfpt_data%dbecsum, dfpt_data%drhop )
+     !
+     ! Add Pulay correction to drhop if present
+     !
+     IF (ALLOCATED(dfpt_data%drhop_pulay)) THEN
+        CALL zaxpy(dfftp%nnr * nspin_mag * npe, (1.d0, 0.d0), &
+             dfpt_data%drhop_pulay, 1, dfpt_data%drhop, 1)
+     ENDIF
      !
      !   Reduce the delta rho across pools
      !
-     CALL mp_sum ( drhoscf, inter_pool_comm )
-     CALL mp_sum ( drhoscfh, inter_pool_comm )
-     IF (okpaw) CALL mp_sum ( dbecsum, inter_pool_comm )
+     CALL mp_sum ( dfpt_data%drhos, inter_pool_comm )
+     CALL mp_sum ( dfpt_data%drhop, inter_pool_comm )
+     !
+     ! If .NOT. okpaw, dbecsum is not used below. So, postprocess dbecsum only
+     ! if okpaw.
+     !
+     IF (okpaw) CALL mp_sum ( dfpt_data%dbecsum, inter_pool_comm )
+     IF (okpaw) THEN
+        !
+        ! The presence of c.c. in the formula gives a factor 2.0
+        !
+        dfpt_data%dbecsum = 2.0_DP * dfpt_data%dbecsum
+        !
+        ! Add Pulay correction to dbecsum
+        IF (ALLOCATED(dfpt_data%dbecsum_pulay)) THEN
+           dfpt_data%dbecsum = dfpt_data%dbecsum + dfpt_data%dbecsum_pulay
+        ENDIF
+     ENDIF
      !
      ! q=0 in metallic case deserve special care (e_Fermi can shift)
      !
-     IF (okpaw) THEN
-        DO ipert=1,npe
-           dbecsum(:,:,:,ipert)=2.0_DP *dbecsum(:,:,:,ipert) &
-                               +becsumort(:,:,:,imode0+ipert)
-        ENDDO
-     ENDIF
-
      IF (lmetq0) THEN
         IF (okpaw) THEN
-           CALL ef_shift(npe, dos_ef, ldos, drhoscfh, dbecsum, becsum1)
+           CALL ef_shift(npe, dos_ef, ldos_data%ldos, dfpt_data%drhop, &
+                              dfpt_data%dbecsum, ldos_data%becsum_dos)
         ELSE
-           CALL ef_shift(npe, dos_ef, ldos, drhoscfh)
+           CALL ef_shift(npe, dos_ef, ldos_data%ldos, dfpt_data%drhop)
         ENDIF
      ENDIF
      !
@@ -488,34 +531,26 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf, drhoscfh)
      !   in the charge density for each mode of this representation.
      !   Here we symmetrize them ...
      !
-     CALL symmetrize_drho(drhoscfh, dbecsum, irr, npe, 1)
-
+     CALL symmetrize_drho(dfpt_data%drhop, dfpt_data%dbecsum, irr, npe, 1)
      !
      !   ... save them on disk and
      !   compute the corresponding change in scf potential
      !
      DO ipert = 1, npe
         IF (fildrho.NE.' ') then 
-           CALL davcio_drho (drhoscfh(1,1,ipert), lrdrho, iudrho, &
+           CALL davcio_drho (dfpt_data%drhop(1,1,ipert), lrdrho, iudrho, &
                                                       imode0+ipert, +1)
 !           close(iudrho)
         ENDIF
         
-        CALL zcopy (dfftp%nnr*nspin_mag,drhoscfh(1,1,ipert),1,&
-                                                      dvscfout(1,1,ipert),1)
-        !
-        ! Compute the response of the core charge density
-        ! IT: Should the condition "imode0+ipert > 0" be removed?
-        !
-        IF (imode0+ipert > 0) THEN
-           CALL addcore(u(1, imode0+ipert), drhoc)
-        ELSE
-           drhoc(:) = (0.0_DP,0.0_DP) 
-        ENDIF
+        CALL zcopy (dfftp%nnr*nspin_mag,dfpt_data%drhop(1,1,ipert),1,&
+                                             dvscfout(1,1,ipert),1)
         !
         ! Compute the response HXC potential
+        !
         IF (.NOT. lmultipole) THEN
-           CALL dv_of_drho (dvscfout(1,1,ipert), drhoc=drhoc)
+           CALL dv_of_drho (dvscfout(1,1,ipert), &
+                                        drhoc=dfpt_data%drhoc(:,ipert))
         ELSE !FM: as the case of solve_e
            CALL dv_of_drho(dvscfout(1, 1, ipert))
         ENDIF
@@ -524,35 +559,30 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf, drhoscfh)
      !
      !   And we mix with the old potential
      !
-     CALL manage_mixing(dvscfout, dvscfin, dbecsum, mixin, npe, iter, kter, &
-                                                             dr2, convt ) 
+     CALL manage_mixing(dvscfout, dfpt_data%dvscfp, dfpt_data%dbecsum, &
+                             mixin, npe, iter, kter, dr2, convt ) 
      !
      !  put the fermi energy shift if needed
      !
      IF (lmetq0.AND.convt) THEN
         DO ipert = 1, npe
-           dvscfin(:, 1, ipert) = dvscfin(:, 1, ipert) - def(ipert)
+           dfpt_data%dvscfp(:, 1, ipert) = dfpt_data%dvscfp(:, 1, ipert) - &
+                                                              def(ipert)
            IF (lsda) THEN
-              dvscfin(:, 2, ipert) = dvscfin(:, 2, ipert) - def(ipert)
+              dfpt_data%dvscfp(:, 2, ipert) = dfpt_data%dvscfp(:, 2, ipert) -&
+                                                                 def(ipert)
            ENDIF
         ENDDO
 
-        CALL ef_shift_wfc (npe, ldoss, drhoscf) 
+        CALL ef_shift_wfc (npe, ldos_data%ldoss, dfpt_data%drhos) 
      ENDIF
 
-     IF (doublegrid) THEN
-        DO ipert = 1, npe
-           DO is = 1, nspin_mag
-              CALL fft_interpolate (dfftp, dvscfin(:,is,ipert), dffts, &
-                                                        dvscfins(:,is,ipert))
-           ENDDO
-        ENDDO
-     ENDIF
+     CALL dfpt_dvscfp_to_dvscfs(dfpt_data)
 !
 !   calculate here the change of the D1-~D1 coefficients due to the phonon
 !   perturbation in the PAW case and the int3 integrals in the US/PAW case
 !
-     CALL compute_int3_coeff(dvscfin, dbecsum, npe)
+     CALL compute_int3_coeff(dfpt_data%dvscfp, dfpt_data%dbecsum, npe)
 
      CALL mp_sum ( ltaver, inter_pool_comm )
      CALL mp_sum ( lintercall, inter_pool_comm )
@@ -571,13 +601,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf, drhoscfh)
      FLUSH( stdout )
      !
      rec_code=10
-     IF (okpaw) THEN
-        CALL write_rec('solve_lint', irr, dr2, iter, convt, npe, &
-                                               dvscfin, drhoscfh, dbecsum)
-     ELSE
-        CALL write_rec('solve_lint', irr, dr2, iter, convt, npe, &
-                                               dvscfin, drhoscfh)
-     ENDIF
+     CALL write_rec('solve_lint', irr, dr2, iter, convt, dfpt_data)
 
      IF ( check_stop_now() ) CALL stop_smoothly_ph (.false.)
      IF ( with_asyn_images.AND.my_image_id==root_image.AND.ionode ) &
@@ -591,7 +615,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf, drhoscfh)
   !
   IF (noncolin.AND.domag.AND.lgamma) THEN 
      DO ipert = 1, npe
-        drhoscf_aux(:,:,:) = drhoscfh(:,:,:)
+        drhoscf_aux(:,:,:) = dfpt_data%drhop(:,:,:)
         DO is=2,nspin_mag
            CALL fwfft ('Rho', drhoscf_aux(:,is,ipert), dfftp)
            IF (ABS(gg(1)).LT.1.d-8) THEN 
@@ -610,44 +634,43 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf, drhoscfh)
   !
   IF (convt) THEN
      !
-     IF (lmultipole) CALL write_epsilon(npe, drhoscfh)
+     IF (lmultipole) CALL write_epsilon(npe, dfpt_data%drhop)
      !
-     CALL drhodvus (irr, imode0, dvscfin, npe)
+     CALL drhodvus (irr, imode0, dfpt_data%dvscfp, npe)
      IF (fildvscf.NE.' ') THEN
         DO ipert = 1, npe
            IF (lmetq0) then
-                dvscfin(:,:,ipert) = dvscfin(:,:,ipert)-def(ipert)
-                IF (doublegrid) dvscfins(:,:,ipert) = dvscfins(:,:,ipert) &
-                                                                 -def(ipert)
+                dfpt_data%dvscfp(:,:,ipert) = dfpt_data%dvscfp(:,:,ipert)&
+                                                               -def(ipert)
+                IF (doublegrid) dfpt_data%dvscfs(:,:,ipert) = &
+                                   dfpt_data%dvscfs(:,:,ipert) -def(ipert)
            ENDIF
-           CALL davcio_drho ( dvscfin(1,1,ipert),  lrdrho, iudvscf, &
+           CALL davcio_drho ( dfpt_data%dvscfp(1,1,ipert),  lrdrho, iudvscf, &
                          imode0 + ipert, +1 )
            IF (okpaw.AND.me_bgrp==0) CALL davcio( int3_paw(:,:,:,:,ipert), &
                                      lint3paw, iuint3paw, imode0+ipert, + 1 )
         ENDDO
-        IF (elph) CALL elphel (irr, npe, imode0, dvscfins)
+        IF (elph) CALL elphel (irr, npe, imode0, dfpt_data%dvscfs)
      ENDIF
   ENDIF
 
-  IF (convt.AND.nlcc_any) CALL dynmat_nlcc (imode0, drhoscfh, npe)
+  IF (convt.AND.nlcc_any) CALL dynmat_nlcc (imode0, dfpt_data%drhop, npe)
 
-  IF (ALLOCATED(ldoss)) DEALLOCATE (ldoss)
-  IF (ALLOCATED(ldos)) DEALLOCATE (ldos)
   DEALLOCATE (h_diag)
-  DEALLOCATE (dbecsum)
-  IF (ALLOCATED(becsum1)) DEALLOCATE (becsum1)
   DEALLOCATE (mixin)
   IF (noncolin) DEALLOCATE (dbecsum_nc)
   DEALLOCATE (dvscfout)
-  !$acc exit data delete(dvscfins)
-  IF (doublegrid) DEALLOCATE (dvscfins)
-  DEALLOCATE (dvscfin)
-  DEALLOCATE (drhoc)
   IF (noncolin.AND.domag.AND.okvan) THEN
      DEALLOCATE (int3_nc_save)
      DEALLOCATE (dbecsum_aux)
   ENDIF
   IF (ALLOCATED(drhoscf_aux)) DEALLOCATE(drhoscf_aux)
+
+
+  IF (lmetq0) THEN
+     CALL deallocate_dfpt_ldos(ldos_data)
+  ENDIF
+  !$acc exit data delete(dfpt_data, dfpt_data%dvscfs)
 
   CALL stop_clock ('solve_linter')
   RETURN

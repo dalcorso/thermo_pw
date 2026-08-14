@@ -207,7 +207,7 @@ CONTAINS
     !
     !    And apply S again
     !
-    CALL start_clock_gpu ('ch_psi_calbec')
+    CALL start_clock ('ch_psi_calbec')
     if (use_bgrp_in_hpsi .AND. .NOT. exx_is_active() .AND. m > 1) then
        call divide (inter_bgrp_comm, m, m_start, m_end)
        if (m_end >= m_start) then
@@ -217,9 +217,10 @@ CONTAINS
     else
        CALL calbec (offload_type, n, vkb, hpsi, becp, m)
     endif
-    CALL stop_clock_gpu ('ch_psi_calbec')
+    CALL stop_clock ('ch_psi_calbec')
     !$acc host_data use_device(hpsi, spsi)
-    CALL s_psi_acc (npwx, n, m, hpsi, spsi)
+!    CALL s_psi_acc (npwx, n, m, hpsi, spsi)
+    CALL s_psi (npwx, n, m, hpsi, spsi)
     !$acc end host_data
     !$acc parallel loop collapse(2) present(ah, spsi)
     DO ibnd = 1, m

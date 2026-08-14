@@ -34,7 +34,6 @@ SUBROUTINE phqscf_tpw
   USE mp_bands,         ONLY : intra_bgrp_comm
   USE mp,               ONLY : mp_sum
   USE lrus,             ONLY : int3, int3_nc, int3_paw
-  USE eqv,              ONLY : drhos
   USE dynmat,           ONLY : dyn_hub_scf
   USE ldaU,             ONLY : lda_plus_u, Hubbard_lmax
   USE ldaU_lr,          ONLY : dnsscf
@@ -46,6 +45,7 @@ SUBROUTINE phqscf_tpw
   USE magnetic_charges, ONLY : mag_charge_mode, mag_charge
   USE control_lr,       ONLY : lgamma
   USE control_qe,       ONLY : many_k
+  USE dfpt_type,        ONLY : dfpt_data_type, allocate_dfpt_data, deallocate_dfpt_data
 
   IMPLICIT NONE
 
@@ -62,6 +62,8 @@ SUBROUTINE phqscf_tpw
 
   EXTERNAL get_clock
   ! the change of density due to perturbations
+  TYPE(dfpt_data_type) :: dfpt_data
+  !! Data that describes linear response quantities
 
   CALL start_clock ('phqscf')
   !
@@ -87,8 +89,7 @@ SUBROUTINE phqscf_tpw
   DO irr = 1, nirr
      IF ( (comp_irr (irr)) .AND. (.NOT.done_irr (irr)) ) THEN
         npe=npert(irr)
-        ALLOCATE (drhos( dffts%nnr, nspin_mag, npe))
-        ALLOCATE (drhop( dfftp%nnr, nspin_mag, npe))
+        CALL allocate_dfpt_data(dfpt_data, npe)
         imode0 = 0
         DO irr1 = 1, irr - 1
            imode0 = imode0 + npert (irr1)
@@ -125,13 +126,13 @@ SUBROUTINE phqscf_tpw
         WRITE( stdout, '(/,5x,"Self-consistent Calculation")')
         IF (lcg) THEN
            CALL allocate_cg(npe,1)
-           CALL do_cg_ph (irr, imode0, drhos, drhop)
+           CALL do_cg_ph (irr, imode0, dfpt_data)
            CALL deallocate_cg()
         ELSE
            IF (many_k) THEN
-              CALL solve_linter_many_k (irr, imode0, npe, drhos, drhop)
+              CALL solve_linter_many_k (irr, imode0, npe, dfpt_data)
            ELSE
-              CALL solve_linter_tpw (irr, imode0, npe, drhos, drhop)
+              CALL solve_linter_tpw (irr, imode0, npe, dfpt_data)
            ENDIF
         ENDIF
         !
@@ -140,7 +141,7 @@ SUBROUTINE phqscf_tpw
         !   Add the contribution of this mode to the dynamical matrix
         !
         IF (convt) THEN
-           CALL drhodv (imode0, npe, drhos)
+           CALL drhodv (imode0, npe, dfpt_data%drhos)
            !
            !   add the contribution of the modes imode0+1 -> imode+npe
            !   to the effective charges Z(Us,E) (Us=scf,E=bare)
@@ -160,8 +161,7 @@ SUBROUTINE phqscf_tpw
            CALL stop_smoothly_ph (.FALSE.)
         ENDIF
         rec_code=20
-        CALL write_rec('done_drhod',irr,0.0_DP,-1000,.false.,npe,&
-                        drhop)
+        CALL write_rec('done_drhod',irr,0.0_DP,-1000,.false.,dfpt_data)
         !
         IF (okvan) THEN
            DEALLOCATE (int3)
@@ -170,11 +170,10 @@ SUBROUTINE phqscf_tpw
         ENDIF
         CALL deallocate_dnsorth()
         CALL ph_deallocate_upert()
+        CALL deallocate_dfpt_data(dfpt_data)
 
         tcpu = get_clock ('PHONON')
         !
-        DEALLOCATE (drhos)
-        DEALLOCATE (drhop)
      ENDIF
 
   ENDDO

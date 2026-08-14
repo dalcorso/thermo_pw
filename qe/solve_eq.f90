@@ -57,11 +57,13 @@ subroutine solve_eq(iu, flag)
   USE units_ph,              ONLY : lrdrho, iudrho, lrbar, iubar
   USE output,                ONLY : fildrho
   USE control_flags,         ONLY : use_gpu
-  USE control_ph,            ONLY : ext_recover, lnoloc
+  USE control_ph,            ONLY : ext_recover
   USE control_lr,            ONLY : lgamma, alpha_pv, nbnd_occ, rec_code, &
                                     alpha_mix, lgamma_gamma, niter_ph, &
                                     flmixdpot, rec_code_read, convt, tr2_ph, &
-                                    rec_code
+                                    rec_code, lnoloc
+  USE dfpt_type,             ONLY : dfpt_data_type, allocate_dfpt_data,   &
+                                    deallocate_dfpt_data, dfpt_dvscfp_to_dvscfs
   USE lrus,                  ONLY : int3_paw
   USE qpoint,                ONLY : xq, nksq, ikks, ikqs
   USE recover_mod,           ONLY : read_rec, write_rec
@@ -80,6 +82,7 @@ subroutine solve_eq(iu, flag)
   USE fft_helper_subroutines, ONLY : fftx_ntgrp
   USE uspp_init,            ONLY : init_us_2
   USE apply_dpot_mod,       ONLY : apply_dpot_bands
+  USE incdrhoscf_mod,       ONLY : incdrhoscf, incdrhoscf_nc
 
   implicit none
 
@@ -99,15 +102,12 @@ subroutine solve_eq(iu, flag)
   real(DP), allocatable :: h_dia (:,:), s_dia(:,:)
   ! h_diag: diagonal part of the Hamiltonian
 
-  complex(DP) , allocatable, target ::      &
-                   dvscfin (:,:,:)     ! change of the scf potential (input)
-  complex(DP) , pointer ::      &
-                   dvscfins (:,:,:)    ! change of the scf potential (smooth)
+  TYPE(dfpt_data_type) :: dfpt_data
+  !! Data that describes linear response quantities
+ 
   complex(DP) , allocatable ::   &
                    dpsi1(:,:),   &
                    dvscfout (:,:,:), & ! change of the scf potential (output)
-                   drhoscfout (:,:), & ! change of the scf charge (output)
-                   dbecsum(:,:,:,:), & ! the becsum with dpsi
                    dbecsum_nc(:,:,:,:,:), & ! the becsum with dpsi
                    mixin(:), mixout(:), &  ! auxiliary for paw mixing
                    aux1 (:,:),  ps (:,:), &
@@ -116,7 +116,7 @@ subroutine solve_eq(iu, flag)
 
   complex(DP), EXTERNAL :: zdotc      ! the scalar product function
 
-  logical :: conv_root, exst, all_done_asyn
+  logical :: conv_root, exst, all_done_asyn, time_reversed
   ! conv_root: true if linear system is converged
 
   integer :: kter, iter0, ipol, ibnd, iter, lter, ik, ikk, ikq, &
@@ -147,23 +147,16 @@ subroutine solve_eq(iu, flag)
   alpha_pv=alpha_pv0 + REAL(w)
 
 
-  allocate (dvscfin( dfftp%nnr, nspin_mag, 1))
   nnr=dfftp%nnr
-  if (doublegrid) then
-     allocate (dvscfins(dffts%nnr, nspin_mag, 1))
-     nnrs=dffts%nnr
-  else
-     dvscfins => dvscfin
-     nnrs=nnr
-  endif
-  !$acc enter data create(dvscfins(1:nnrs, 1:nspin_mag, 1:3))
+  nnrs=dffts%nnr
+
+  CALL allocate_dfpt_data(dfpt_data, 1)
+  !$acc enter data create(dfpt_data, dfpt_data%dvscfs(1:nnrs, 1:nspin_mag, 1:1))
   allocate (dvscfout(dfftp%nnr, nspin_mag, 1))
-  allocate (drhoscfout(dfftp%nnr, nspin_mag))
   IF (okpaw) THEN
      ALLOCATE (mixin(dfftp%nnr*nspin_mag+(nhm*(nhm+1)*nat*nspin_mag)/2) )
      ALLOCATE (mixout(dfftp%nnr*nspin_mag+(nhm*(nhm+1)*nat*nspin_mag)/2) )
   ENDIF
-  allocate (dbecsum( nhm*(nhm+1)/2, nat, nspin_mag, 1))
   IF (noncolin) allocate (dbecsum_nc (nhm, nhm, nat, nspin, 1))
   IF (ldpsi1) THEN
      allocate (dpsi1(npwx*npol,nbnd))
@@ -183,11 +176,11 @@ subroutine solve_eq(iu, flag)
   if (rec_code_read == -20.AND.ext_recover) then
      ! restarting in Electric field calculation
      IF (okpaw) THEN
-        CALL read_rec(dr2, iter0, 1, dvscfin, dvscfins, dvscfout, dbecsum)
+        CALL read_rec(dr2, iter0, dfpt_data)
         CALL setmixout(3*dfftp%nnr*nspin_mag,(nhm*(nhm+1)*nat*nspin_mag*3)/2, &
-                    mixin, dvscfin, dbecsum, ndim, -1 )
+                    mixin, dfpt_data%dvscfp, dfpt_data%dbecsum, ndim, -1 )
      ELSE
-        CALL read_rec(dr2, iter0, 1, dvscfin, dvscfins)
+        CALL read_rec(dr2, iter0, dfpt_data)
      ENDIF
   else if (rec_code_read > -20 .AND. rec_code_read <= -10) then
      ! restarting in Raman: proceed
@@ -221,6 +214,7 @@ subroutine solve_eq(iu, flag)
   !
   !   The outside loop is over the iterations
   !
+  time_reversed=.FALSE.
   do kter = 1, niter_ph
 
 !     write(6,*) 'kter', kter
@@ -229,8 +223,8 @@ subroutine solve_eq(iu, flag)
      ltaver = 0
      lintercall = 0
 
-     dvscfout(:,:,:)=(0.d0,0.d0)
-     dbecsum(:,:,:,:)=(0.d0,0.d0)
+     dfpt_data%drhos(:,:,:)=(0.d0,0.d0)
+     dfpt_data%dbecsum(:,:,:,:)=(0.d0,0.d0)
      IF (noncolin) dbecsum_nc=(0.d0,0.d0)
 
      do ik = 1, nksq
@@ -263,7 +257,7 @@ subroutine solve_eq(iu, flag)
            h_diag1=(0.0_DP,0.0_DP)
            h_dia=0.0_DP
            s_dia=0.0_DP
-           CALL usnldiag( npwq, h_dia, s_dia )
+           CALL usnldiag( npwq, npol, h_dia, s_dia )
 
            DO ibnd = 1, nbnd_occ (ikk)
               !
@@ -321,10 +315,10 @@ subroutine solve_eq(iu, flag)
               ! dvscf_q from previous iteration (mix_potential)
               !
               CALL apply_dpot_bands(ik, nbnd_occ(ikk), &
-                                dvscfins(:, :, ipol), evc, aux2)
+                                dfpt_data%dvscfs(:, :, ipol), evc, aux2)
               dvpsi=dvpsi+aux2
               !
-              call adddvscf(ipol,ik)
+              call adddvscf(ipol,ik,time_reversed)
               !
            else
               !
@@ -354,7 +348,7 @@ subroutine solve_eq(iu, flag)
 
               dpsi(:,:)=(0.d0,0.d0)
               IF (ldpsi1) dpsi1(:,:)=(0.d0,0.d0)
-              dvscfin(:,:,:)=(0.d0,0.d0)
+              dfpt_data%dvscfp(:,:,:)=(0.d0,0.d0)
               !
               ! starting threshold for the iterative solution of the linear
               ! system
@@ -437,11 +431,11 @@ subroutine solve_eq(iu, flag)
               CALL DAXPY(npwx*nbnd_occ(ikk)*npol*2, 1.0_DP, dpsi1, 1, dpsi, 1)
            END IF
            IF (noncolin) THEN
-              CALL incdrhoscf_nc(dvscfout(1,1,ipol), weight, ik, &
+              CALL incdrhoscf_nc(dfpt_data%drhos(1,1,ipol), weight, ik, &
                                  dbecsum_nc(1,1,1,1,ipol), dpsi, 1.0_DP)
            ELSE
-              CALL incdrhoscf (dvscfout(1,current_spin,ipol), weight, &
-                         ik, dbecsum(1,1,current_spin,ipol), dpsi)
+              CALL incdrhoscf (dfpt_data%drhos(1,current_spin,ipol), weight, &
+                         ik, dfpt_data%dbecsum(1,1,current_spin,ipol), dpsi)
            END IF
         ENDDO   ! on polarizations
         IF ( with_asyn_images.AND.my_image_id==root_image.AND.ionode ) &
@@ -456,30 +450,34 @@ subroutine solve_eq(iu, flag)
      IF (noncolin) THEN
         call mp_sum ( dbecsum_nc, intra_bgrp_comm )
      ELSE
-        call mp_sum ( dbecsum, intra_bgrp_comm )
+        call mp_sum ( dfpt_data%dbecsum, intra_bgrp_comm )
      END IF
 
      if (doublegrid) then
         do is=1,nspin_mag
-           call fft_interpolate (dffts, dvscfout(:,is,1), dfftp, &
+           call fft_interpolate (dffts, dfpt_data%drhos(:,is,1), dfftp, &
                                                       dvscfout(:,is,1))
         enddo
+     else
+       CALL zcopy (nspin_mag*dfftp%nnr, dfpt_data%drhos, 1, &
+                                                      dvscfout, 1)
      endif
      !
-     IF (noncolin.and.okvan) CALL set_dbecsum_nc(dbecsum_nc, dbecsum, 1)
+     IF (noncolin.and.okvan) CALL set_dbecsum_nc(dbecsum_nc, &
+                                              dfpt_data%dbecsum, 1)
      !
-     call addusddenseq (dvscfout, dbecsum)
+     call addusddenseq (dvscfout, dfpt_data%dbecsum)
      !
      !   dvscfout contains the (unsymmetrized) linear charge response
      !   for the three polarizations - symmetrize it
      !
      call mp_sum ( dvscfout, inter_pool_comm )
      
-     IF (okpaw) call mp_sum ( dbecsum, inter_pool_comm )
+     IF (okpaw) call mp_sum ( dfpt_data%dbecsum, inter_pool_comm )
 
-     CALL symmetrize_drho(dvscfout, dbecsum, 0, 3, 3)
+     CALL symmetrize_drho(dvscfout, dfpt_data%dbecsum, 0, 3, 3)
 
-     drhoscfout(:,:)=dvscfout(:,:,1)
+     dfpt_data%drhop(:,:,1)=dvscfout(:,:,1)
      !
      !   save the symmetrized linear charge response to file
      !   calculate the corresponding linear potential response
@@ -497,23 +495,19 @@ subroutine solve_eq(iu, flag)
      !  In this case we mix also dbecsum
      !
         call setmixout(dfftp%nnr*nspin_mag,(nhm*(nhm+1)*nat*nspin_mag)/2, &
-                    mixout, dvscfout, dbecsum, ndim, -1 )
+                    mixout, dvscfout, dfpt_data%dbecsum, ndim, -1 )
         CALL mix_potential_tpw (2*dfftp%nnr*nspin_mag+2*ndim, mixout, mixin, &
                          alpha_mix(kter), dr2, tr2_ph/npol, iter, flmixdpot, &
                          convt)
         call setmixout(dfftp%nnr*nspin_mag,(nhm*(nhm+1)*nat*nspin_mag)/2, &
-                       mixin, dvscfin, dbecsum, ndim, 1 )
+                       mixin, dfpt_data%dvscfp, dfpt_data%dbecsum, ndim, 1 )
      ELSE
-        CALL mix_potential_tpw(2*dfftp%nnr*nspin_mag, dvscfout, dvscfin,  &
+        CALL mix_potential_tpw(2*dfftp%nnr*nspin_mag, dvscfout, &
+                                             dfpt_data%dvscfp,  &
              alpha_mix (kter), dr2,  tr2_ph / npol, iter, flmixdpot, convt)
      ENDIF
 
-     if (doublegrid) then
-        do is=1,nspin_mag
-           call fft_interpolate (dfftp, dvscfin(:,is,1), dffts, &
-                                               dvscfins(:,is,1))
-        enddo
-     endif
+     CALL dfpt_dvscfp_to_dvscfs(dfpt_data)
 
      IF (okpaw) THEN
         IF (noncolin.AND.domag) THEN
@@ -522,13 +516,13 @@ subroutine solve_eq(iu, flag)
 !
 !    The presence of c.c. in the formula gives a factor 2.0
 !
-           dbecsum=2.0_DP * dbecsum
-           IF (.NOT. lgamma_gamma) CALL PAW_deqsymmetrize(dbecsum)
-           call PAW_dpotential(dbecsum,rho%bec,int3_paw,1)
+           dfpt_data%dbecsum=2.0_DP * dfpt_data%dbecsum
+           IF (.NOT. lgamma_gamma) CALL PAW_deqsymmetrize(dfpt_data%dbecsum)
+           call PAW_dpotential(dfpt_data%dbecsum,rho%bec,int3_paw,1)
         ENDIF
      ENDIF
 
-     call newdq(dvscfin,1)
+     call newdq(dfpt_data%dvscfp,1)
 
 1001 CONTINUE
 
@@ -550,10 +544,9 @@ subroutine solve_eq(iu, flag)
      !
      rec_code=-20
      IF (okpaw) THEN
-        CALL write_rec('solve_e...', 0, dr2, iter, convt, 1, dvscfin, &
-                                                       dvscfout, dbecsum)
+        CALL write_rec('solve_e...', 0, dr2, iter, convt, dfpt_data)
      ELSE
-        CALL write_rec('solve_e...', 0, dr2, iter, convt, 1, dvscfin)
+        CALL write_rec('solve_e...', 0, dr2, iter, convt, dfpt_data)
      ENDIF
 
      if (check_stop_now()) call stop_smoothly_ph (.false.)
@@ -569,7 +562,7 @@ subroutine solve_eq(iu, flag)
 !  CALL compute_susceptibility(drhoscfout)
 
   DO is=1,nspin_mag
-     CALL fwfft ('Rho', drhoscfout(:,is), dfftp)
+     CALL fwfft ('Rho', dfpt_data%drhop(:,is,1), dfftp)
   END DO
   IF (flag==1) THEN
      chirr(iu)=(0.0_DP,0.0_DP)
@@ -582,14 +575,14 @@ subroutine solve_eq(iu, flag)
   xqmod2=(xq(1)**2+xq(2)**2+xq(3)**2)*tpiba2
   IF (ABS(gg(1))<1.d-8) THEN
      IF (flag==1) THEN
-        chirr(iu) = drhoscfout(dfftp%nl(1),1) 
-        IF (lsda) chirr(iu) = chirr(iu) + drhoscfout(dfftp%nl(1),2)
+        chirr(iu) = dfpt_data%drhop(dfftp%nl(1),1,1) 
+        IF (lsda) chirr(iu) = chirr(iu) + dfpt_data%drhop(dfftp%nl(1),2,1)
         epsm1(iu) = CMPLX(1.0_DP,0.0_DP)+ chirr(iu)*fpi*e2/xqmod2
-        IF (lsda) chizr(iu) = drhoscfout(dfftp%nl(1),1) - &
-                              drhoscfout(dfftp%nl(1),2)
+        IF (lsda) chizr(iu) = dfpt_data%drhop(dfftp%nl(1),1,1) - &
+                              dfpt_data%drhop(dfftp%nl(1),2,1)
      ELSE IF (lsda) THEN
-        chizz(iu)=drhoscfout(dfftp%nl(1),1)-drhoscfout(dfftp%nl(1),2)
-        chirz(iu)=drhoscfout(dfftp%nl(1),1)+drhoscfout(dfftp%nl(1),2)
+        chizz(iu)=dfpt_data%drhop(dfftp%nl(1),1,1)-dfpt_data%drhop(dfftp%nl(1),2,1)
+        chirz(iu)=dfpt_data%drhop(dfftp%nl(1),1,1)+dfpt_data%drhop(dfftp%nl(1),2,1)
      END IF
   END IF
 
@@ -635,16 +628,11 @@ subroutine solve_eq(iu, flag)
   ELSE
      deallocate (h_diagr)
   ENDIF
-  deallocate (dbecsum)
   deallocate (dvscfout)
   IF (okpaw) THEN
      DEALLOCATE(mixin)
      DEALLOCATE(mixout)
   ENDIF
-  deallocate (drhoscfout)
-  !$acc exit data delete(dvscfins)
-  if (doublegrid) deallocate (dvscfins)
-  deallocate (dvscfin)
   if (noncolin) deallocate(dbecsum_nc)
   !$acc exit data delete(aux2)
   deallocate(aux2)
@@ -655,6 +643,10 @@ subroutine solve_eq(iu, flag)
      !
   ENDIF
   alpha_pv=alpha_pv0
+
+  !$acc exit data delete(dfpt_data, dfpt_data%dvscfs)
+  CALL deallocate_dfpt_data(dfpt_data)
+
 
   call stop_clock ('solve_eq')
   return
