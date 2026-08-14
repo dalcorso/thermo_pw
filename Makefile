@@ -3,7 +3,7 @@ sinclude ../make.inc
 
 default: all
 
-all: thermo_pw thermo_tools 
+all: thermo_pw 
 
 thermo_tools: thermo_lib
 	( cd tools ; $(MAKE) all || exit 1 )
@@ -50,10 +50,6 @@ join_qe:
           ./QESUB/bfgs_module.f90_qe ; mv ./QESUB/bfgs_module.f90 ../Modules ; fi
 	if test -f ./QESUB/clocks_handler.f90 ; then mv ../UtilXlib/clocks_handler.f90 \
           ./QESUB/clocks_handler.f90_qe ; mv ./QESUB/clocks_handler.f90 ../UtilXlib ; fi
-	if test -f ./QESUB/io_dyn_mat.f90 ; then mv ../PHonon/PH/io_dyn_mat.f90 \
-          ./QESUB/io_dyn_mat.f90_qe ; mv ./QESUB/io_dyn_mat.f90 ../PHonon/PH ; fi
-	if test -f ./QESUB/phq_init.f90 ; then mv ../PHonon/PH/phq_init.f90 \
-          ./QESUB/phq_init.f90_qe ; mv ./QESUB/phq_init.f90 ../PHonon/PH ; fi
 	if test -f ./QESUB/bp_mod.f90 ; then mv ../PW/src/bp_mod.f90 \
           ./QESUB/bp_mod.f90_qe ; mv ./QESUB/bp_mod.f90 ../PW/src ; fi
 leave_qe:
@@ -91,17 +87,9 @@ leave_qe:
 	if test -f ./QESUB/clocks_handler.f90_qe ; then mv ../UtilXlib/clocks_handler.f90 \
            ./QESUB/clocks_handler.f90 ; \
 	mv ./QESUB/clocks_handler.f90_qe ../UtilXlib/clocks_handler.f90 ; fi
-	if test -f ./QESUB/io_dyn_mat.f90_qe ; then mv ../PHonon/PH/io_dyn_mat.f90 \
-           ./QESUB/io_dyn_mat.f90 ; \
-	   mv ./QESUB/io_dyn_mat.f90_qe ../PHonon/PH/io_dyn_mat.f90 ; fi
-	if test -f ./QESUB/phq_init.f90_qe ; then mv ../PHonon/PH/phq_init.f90 \
-           ./QESUB/phq_init.f90 ; \
-	   mv ./QESUB/phq_init.f90_qe ../PHonon/PH/phq_init.f90 ; fi
 	if test -f ./QESUB/bp_mod.f90_qe ; then mv ../PW/src/bp_mod.f90 \
            ./QESUB/bp_mod.f90 ; \
-	   mv ./QESUB/bp_mod.f90_qe ../PW/src/bp_mod.f90 ; fi
-
-
+           mv ./QESUB/bp_mod.f90_qe ../PW/src/bp_mod.f90 ; fi
 
 clean: thermo_tools_clean thermo_pw_clean thermo_lib_clean thermo_lapack_clean thermo_fft_clean thermo_qe_clean examples_clean examples_qe_clean space_groups_clean doc_clean
 
