@@ -176,7 +176,6 @@ tra_write_zstar.o \
 vloc_psi_tpw.o \
 vloc_psi_gpu_tpw.o \
 write_group_info_ph.o \
-write_rec_tpw.o \
 ylm2_dev.o \
 ylmr2_dev.o \
 zstar_eu_tpw.o \
