@@ -55,7 +55,6 @@ control_qe.o \
 coset.o \
 ccg_psi.o \
 deallocate_ph_tpw.o \
-dielec_tpw.o \
 diago_dev.o \
 divide_class.o \
 divide_class_so.o \
@@ -72,7 +71,6 @@ dvkb3_tpw.o \
 dvqpsi_us_only_tpw.o \
 dvqpsi_us_many_k.o \
 dvqpsi_dev.o \
-dyndiag.o \
 electrons_tpw.o \
 ev_xml.o \
 find_band_sym.o \
@@ -85,7 +83,6 @@ g_psi_dev.o \
 hdiag_dev.o \
 h_pcg_step.o \
 h_psi_dev.o \
-h_psi_gpu_tpw.o \
 h_psi_tpw.o \
 incdrhoscf_dev.o \
 initialize_ph_tpw.o \
@@ -111,8 +108,6 @@ nh_lanczos_step.o \
 non_scf_qe_tpw.o \
 non_scf_tpw.o \
 openfilq_tpw.o \
-orthogonalize_omega.o \
-orthogonalize_tpw.o \
 orthog_dev.o \
 paw_add_onecenter.o \
 paw_add_symmetry.o \
@@ -143,7 +138,6 @@ scal_prod.o \
 select_c_bands.o \
 set_fxc_tran.o \
 set_int3q.o \
-set_intq_nc.o \
 set_irr_tpw.o \
 set_irr_sym_tpw.o \
 set_kplusq.o \
@@ -160,17 +154,12 @@ solve_linter_tpw.o \
 solve_linter_many_k.o \
 solve_linear_system.o \
 solve_linear_system_many_k.o \
-s_psi_gpu_tpw.o \
 s_psi_tpw.o \
 s_psi_ch.o \
 s_psi_ch_gpu.o \
-star_q.o \
 summarize_alpha.o \
 sym_and_write_magnetic_charges.o \
-sym_def.o \
 symmetrize_drho.o \
-transform_intq_nc.o \
-transform_intq_so.o \
 tra_write_zstar.o \
 vloc_psi_tpw.o \
 vloc_psi_gpu_tpw.o \
