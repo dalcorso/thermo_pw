@@ -141,7 +141,6 @@ rotate_charges.o \
 run_nscf_tpw.o \
 scal_prod.o \
 select_c_bands.o \
-set_defaults_pw.o \
 set_fxc_tran.o \
 set_int3q.o \
 set_intq_nc.o \
@@ -151,6 +150,7 @@ set_kplusq.o \
 set_kplusq_nc.o \
 set_kup_and_kdw.o \
 setup_tpw.o \
+setup_nscf_tpw.o \
 small_g_g.o \
 solve_e_tpw.o \
 solve_e_fpolc.o \
