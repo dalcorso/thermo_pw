@@ -49,16 +49,22 @@ SUBROUTINE s_psii( lda, n, m, psi, spsi, ik )
   !
   CALL start_clock( 's_psi_bgrp' )
   !
+  !$acc data present_or_copyin(psi) present_or_copyout(spsi)
+  !
   IF (use_bgrp_in_hpsi .AND. .NOT. exx_is_active() .AND. m > 1) THEN
      ! use band parallelization here
      ALLOCATE( recv_counts(mp_size(inter_bgrp_comm)), displs(mp_size(inter_bgrp_comm)) )
      CALL divide_all( inter_bgrp_comm,m,m_start,m_end, recv_counts,displs )
+     !$acc host_data use_device(spsi)
      CALL mp_type_create_column_section( spsi(1,1), 0, lda*npol, lda*npol, column_type )
+     !$acc end host_data
      !
      ! Check if there at least one band in this band group
      IF (m_end >= m_start) &
         CALL s_psii_( lda, n, m_end-m_start+1, psi(1,m_start), spsi(1,m_start), ik )
+     !$acc host_data use_device(spsi)
      CALL mp_allgather( spsi, column_type, recv_counts, displs, inter_bgrp_comm )
+     !$acc end host_data
      !
      CALL mp_type_free( column_type )
      DEALLOCATE( recv_counts )
@@ -68,8 +74,9 @@ SUBROUTINE s_psii( lda, n, m, psi, spsi, ik )
      CALL s_psii_( lda, n, m, psi, spsi, ik )
   ENDIF
   !
-  CALL stop_clock( 's_psi_bgrp' )
+  !$acc end data
   !
+  CALL stop_clock( 's_psi_bgrp' )
   !
   RETURN
   !
@@ -97,6 +104,9 @@ SUBROUTINE s_psii_( lda, n, m, psi, spsi, ik )
                               fwfft_orbital_k, calbec_rs_k, s_psir_k
   USE wavefunctions,    ONLY: psic
   USE fft_base,         ONLY: dffts
+#if defined (__CUDA)
+  USE device_memcpy_m,  ONLY : dev_memcpy
+#endif
   !
   IMPLICIT NONE
   !
@@ -120,7 +130,13 @@ SUBROUTINE s_psii_( lda, n, m, psi, spsi, ik )
   !
   ! ... initialize  spsi
   !
+#if defined(__CUDA)  
+  !$acc host_data use_device(psi, spsi)
+  CALL dev_memcpy( spsi , psi )
+  !$acc end host_data
+#else
   CALL threaded_memcpy( spsi, psi, lda*npol*m*2 )
+#endif
   !
   IF ( nkb == 0 .OR. .NOT. okvan ) RETURN
   !
@@ -178,8 +194,17 @@ SUBROUTINE s_psii_( lda, n, m, psi, spsi, ik )
        !
        INTEGER :: ikb, jkb, ih, jh, na, nt, ibnd, ierr
        ! counters
-       COMPLEX(DP), ALLOCATABLE :: ps(:,:), qqc(:,:)
+       COMPLEX(DP), ALLOCATABLE :: ps(:,:), qqc(:,:), becpk(:,:)
+       !$acc declare device_resident(ps, qqc, becpk)
        ! ps = product vkb and psi ; qqc = complex version of qq
+       !
+       !$acc data present_or_copyin( becp )
+       !$acc data present_or_copyin( becp%k, vkb )
+       !
+       ALLOCATE( becpk( size(becp%k,1), size(becp%k,2)) )
+       !$acc kernels 
+       becpk(:,:) = becp%k(:,:)
+       !$acc end  kernels
        !
        ALLOCATE( ps( nkb, m ), STAT=ierr )
        !
@@ -195,10 +220,14 @@ SUBROUTINE s_psii_( lda, n, m, psi, spsi, ik )
              ALLOCATE( qqc(nh(nt),nh(nt)) )
              DO na = 1, nat
                 IF ( ityp(na) == nt ) THEN
+                   !$acc kernels
                    qqc(:,:) = CMPLX ( qq_at(1:nh(nt),1:nh(nt),na), 0.0_DP, KIND=DP )
-                   CALL ZGEMM('N','N', nh(nt), m, nh(nt), (1.0_DP,0.0_DP), &
-                        qqc, nh(nt), becp%k(ofsbeta(na)+1,1), nkb, &
+                   !$acc end kernels
+                   !$acc host_data use_device( qqc, becpk, ps)
+                   CALL MYZGEMM('N','N', nh(nt), m, nh(nt), (1.0_DP,0.0_DP), &
+                        qqc, nh(nt), becpk(ofsbeta(na)+1,1), nkb, &
                         (0.0_DP,0.0_DP), ps(ofsbeta(na)+1,1), nkb )
+                   !$acc end host_data
                 ENDIF
              ENDDO
              DEALLOCATE( qqc )
@@ -206,11 +235,13 @@ SUBROUTINE s_psii_( lda, n, m, psi, spsi, ik )
           ELSE
              !
              IF (nh(nt)>0) THEN
+                !$acc kernels present_or_copyin(ityp, ofsbeta, nh)
                 DO na = 1, nat
                    IF ( ityp(na) == nt ) THEN
                       ps(ofsbeta(na)+1:ofsbeta(na)+nh(nt),1:m) = (0.0_DP,0.0_DP)
                    ENDIF
                 ENDDO
+                !$acc end kernels
              ENDIF
              !
           ENDIF
@@ -219,19 +250,25 @@ SUBROUTINE s_psii_( lda, n, m, psi, spsi, ik )
        !
        IF ( m == 1 ) THEN
           !
-          CALL ZGEMV( 'N', n, nkb, ( 1.D0, 0.D0 ), vkbk_d(1,nkb*(ik-1)+1), &
+          !$acc host_data use_device(vkb, ps, spsi)
+          CALL MYZGEMV( 'N', n, nkb, ( 1.D0, 0.D0 ), vkbk_d(1,nkb*(ik-1)+1), &
                       lda, ps, 1, ( 1.D0, 0.D0 ), spsi, 1 )
+          !$acc end host_data
           !
        ELSE
           !
-          CALL ZGEMM( 'N', 'N', n, m, nkb, ( 1.D0, 0.D0 ), &
+          !$acc host_data use_device(vkb, ps, spsi)
+          CALL MYZGEMM( 'N', 'N', n, m, nkb, ( 1.D0, 0.D0 ), &
                       vkbk_d(1,nkb*(ik-1)+1), lda, ps, nkb,   &
                       ( 1.D0, 0.D0 ), spsi, lda )
+          !$acc end host_data
           !
        ENDIF
        !
-       DEALLOCATE( ps )
+       DEALLOCATE( ps, becpk )
        !
+       !$acc end data
+       !$acc end data
        !
        RETURN
        !
@@ -248,58 +285,81 @@ SUBROUTINE s_psii_( lda, n, m, psi, spsi, ik )
        ! ... local variables
        !
        INTEGER :: ikb, jkb, ih, jh, na, nt, ibnd, ipol, ierr
+       INTEGER :: nh_nt, ofs_na 
        ! counters
-       COMPLEX (DP), ALLOCATABLE :: ps(:,:,:)
+       COMPLEX (DP), ALLOCATABLE :: ps(:,:,:), becpnc(:,:,:)
+       !$acc declare device_resident(ps, becpnc)
        ! the product vkb and psi
        !
+       !$acc data present_or_copyin(becp)
+       !$acc data present_or_copyin(vkb, becp%nc)
+       !
+       ALLOCATE( becpnc(size(becp%nc,1),size(becp%nc,2),size(becp%nc,3)) )
+       !$acc kernels
+       becpnc(:,:,:) = becp%nc(:,:,:)
+       !$acc end kernels
        !
        ALLOCATE( ps(nkb,npol,m), STAT=ierr )
        IF( ierr /= 0 ) &
           CALL errore( ' s_psi_nc ', ' cannot allocate memory (ps) ', ABS(ierr) )
+       !$acc kernels
        ps(:,:,:) = (0.D0,0.D0)
+       !$acc end kernels
        !
        DO nt = 1, nsp
           !
           IF ( upf(nt)%tvanp ) THEN
              !
+             nh_nt = nh(nt)
+             !
+             !$acc parallel present_or_copyin(ityp, nh_nt, nt, ofsbeta) 
+             !$acc loop gang private(ofs_na, ikb, jkb) 
              DO na = 1, nat
                 IF ( ityp(na) == nt ) THEN
-                   DO ih = 1, nh(nt)
-                      ikb = ofsbeta(na) + ih
-                      DO jh = 1, nh(nt)
-                         jkb = ofsbeta(na) + jh
+                   ofs_na = ofsbeta(na)
+                   DO ih = 1, nh_nt
+                      ikb = ofs_na + ih
+                      DO jh = 1, nh_nt
+                         jkb = ofs_na + jh
                          IF ( .NOT. lspinorb ) THEN
+                            !$acc loop vector collapse(2)
                             DO ipol = 1, npol
                                DO ibnd = 1, m
                                   ps(ikb,ipol,ibnd) = ps(ikb,ipol,ibnd) + &
-                                       qq_at(ih,jh,na)*becp%nc(jkb,ipol,ibnd)
+                                       qq_at(ih,jh,na)*becpnc(jkb,ipol,ibnd)
                                ENDDO
                             ENDDO
                          ELSE
+                            !$acc loop vector 
                             DO ibnd = 1, m
                                ps(ikb,1,ibnd) = ps(ikb,1,ibnd) + &
-                                    qq_so(ih,jh,1,nt)*becp%nc(jkb,1,ibnd)+ &
-                                    qq_so(ih,jh,2,nt)*becp%nc(jkb,2,ibnd)
+                                    qq_so(ih,jh,1,nt)*becpnc(jkb,1,ibnd)+ &
+                                    qq_so(ih,jh,2,nt)*becpnc(jkb,2,ibnd)
                                ps(ikb,2,ibnd) = ps(ikb,2,ibnd) + &
-                                    qq_so(ih,jh,3,nt)*becp%nc(jkb,1,ibnd)+ &
-                                    qq_so(ih,jh,4,nt)*becp%nc(jkb,2,ibnd)
+                                    qq_so(ih,jh,3,nt)*becpnc(jkb,1,ibnd)+ &
+                                    qq_so(ih,jh,4,nt)*becpnc(jkb,2,ibnd)
                             ENDDO
                          ENDIF
                       ENDDO
                    ENDDO
                 ENDIF
              ENDDO
+             !$acc end parallel 
              !
           ENDIF
           !
        ENDDO
        !
-       CALL ZGEMM ( 'N', 'N', n, m*npol, nkb, (1.d0,0.d0), &
+       !$acc host_data use_device(vkb, ps, spsi)
+       CALL MYZGEMM ( 'N', 'N', n, m*npol, nkb, (1.d0,0.d0), &
             vkbk_d(1,nkb*(ik-1)+1), lda, ps, nkb, (1.d0,0.d0), &
             spsi(1,1), lda )
+       !$acc end host_data
        !
-       DEALLOCATE( ps )
+       DEALLOCATE( ps, becpnc )
        !
+       !$acc end data
+       !$acc end data
        !
        RETURN
        !

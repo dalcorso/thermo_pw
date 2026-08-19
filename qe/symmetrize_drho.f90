@@ -32,9 +32,8 @@ USE uspp,             ONLY : okvan
 USE paw_variables,    ONLY : okpaw
 USE control_lr,       ONLY : lgamma_gamma
 USE qpoint,           ONLY : xq
-!USE lr_sym_mod,       ONLY : psyme_tpw, psymeq_tpw
-USE lr_sym_mod,       ONLY : psymdvscf_tpw, psyme_tpw, psyme_fpol_tpw, &
-                             psymeq_tpw
+USE lr_sym_mod_tpw,   ONLY : psymdvscf_tpw, psyme_tpw, psyme_fpol_tpw
+USE lr_sym_mod,       ONLY : psymeq
 
 IMPLICIT NONE
 
@@ -56,7 +55,7 @@ SELECT CASE (code)
       CALL psyme_tpw (drhoscf)
 !      IF (okpaw) CALL PAW_desymmetrize(dbecsum)
    CASE (3)
-      CALL psymeq_tpw (drhoscf)
+      CALL psymeq (drhoscf)
 !      IF (okpaw) CALL PAW_deqsymmetrize(dbecsum)
    CASE (4)
       CALL psyme_fpol_tpw (drhoscf)

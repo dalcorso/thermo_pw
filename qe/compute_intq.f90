@@ -21,7 +21,7 @@ SUBROUTINE compute_intq
   USE uspp,                 ONLY : okvan
   USE uspp_param,           ONLY : upf, lmaxq, nh, nhm
 
-  USE optical,              ONLY : intq
+  USE lrus,                 ONLY : intq
   USE qpoint,               ONLY : xq, eigqts
 
   IMPLICIT NONE

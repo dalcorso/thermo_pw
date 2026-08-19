@@ -41,11 +41,11 @@ SUBROUTINE phqscf_tpw
   USE units_ph,         ONLY : iundnsscf
   USE control_flags,    ONLY : iverbosity
   USE control_lr,       ONLY : convt, rec_code
-  USE write_hub
   USE magnetic_charges, ONLY : mag_charge_mode, mag_charge
   USE control_lr,       ONLY : lgamma
   USE control_qe,       ONLY : many_k
   USE dfpt_type,        ONLY : dfpt_data_type, allocate_dfpt_data, deallocate_dfpt_data
+  USE write_hub
 
   IMPLICIT NONE
 
@@ -57,13 +57,12 @@ SUBROUTINE phqscf_tpw
 
   REAL(DP) :: tcpu, get_clock
   ! timing variables
-  complex(DP), allocatable :: drhop (:,:,:)
-  ! change of rho including augmentation (dfftp)
 
-  EXTERNAL get_clock
-  ! the change of density due to perturbations
   TYPE(dfpt_data_type) :: dfpt_data
   !! Data that describes linear response quantities
+  !
+  EXTERNAL get_clock
+  ! the change of density due to perturbations
 
   CALL start_clock ('phqscf')
   !
@@ -130,9 +129,9 @@ SUBROUTINE phqscf_tpw
            CALL deallocate_cg()
         ELSE
            IF (many_k) THEN
-              CALL solve_linter_many_k (irr, imode0, npe, dfpt_data)
+              CALL solve_linter_many_k (irr, imode0, dfpt_data)
            ELSE
-              CALL solve_linter_tpw (irr, imode0, npe, dfpt_data)
+              CALL solve_linter_tpw (irr, imode0, dfpt_data)
            ENDIF
         ENDIF
         !

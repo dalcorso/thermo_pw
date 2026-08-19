@@ -10,7 +10,7 @@
 !
 ! Since some of the routines of paw_onecenter.f90 needed by the present
 ! routines are private to the module, they had to be copied here.
-! These routines will propably disapper from the next versions.
+! These routines will probably disappear from the next versions.
 ! The copyright for these routines is:
 !
 ! Copyright (C) 2007-2010 Quantum ESPRESSO group

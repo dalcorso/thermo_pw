@@ -6,7 +6,7 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !-----------------------------------------------------------------------
-SUBROUTINE solve_linter_many_k (irr, imode0, npe, dfpt_data)
+SUBROUTINE solve_linter_many_k (irr, imode0, dfpt_data)
   !-----------------------------------------------------------------------
   !
   !    Driver routine for the solution of the linear system which
@@ -61,8 +61,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, dfpt_data)
   USE units_lr,             ONLY : iuwfc, lrwfc, iudwf, lrdwf
   USE output,               ONLY : fildrho, fildvscf
   USE phus,                 ONLY : becsumort, alphap, int1_nc
-  USE recover_mod,          ONLY : write_rec
-  USE recover_mod_tpw,      ONLY : read_rec_tpw
+  USE recover_mod,          ONLY : write_rec, read_rec
   ! used to write fildrho:
   USE dfile_autoname,       ONLY : dfile_name
   USE save_ph,              ONLY : tmp_dir_save
@@ -104,9 +103,8 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, dfpt_data)
 #include<init_us_2_interf.f90>
 #include<ylm2_interf.f90>
 #endif
-  INTEGER :: irr, npe, imode0
+  INTEGER :: irr, imode0
   ! input: the irreducible representation
-  ! input: the number of perturbation
   ! input: the position of the modes
 
   TYPE(dfpt_data_type), INTENT(INOUT) :: dfpt_data
@@ -171,7 +169,8 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, dfpt_data)
              npw,        & ! number of plane waves at k  
              npwq,       & ! number of plane waves at k+q
              ierr,       & ! 
-             mode          ! mode index
+             mode,       & ! mode index
+             npe           ! the number of perturbations
 
   INTEGER, ALLOCATABLE :: lter(:), st(:), ikt(:), npwk(:), nbndk(:), &
                           kdimk(:), nb1k(:), nveck(:), ikblk(:), npwkr(:), &
@@ -205,6 +204,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, dfpt_data)
 !
 !  This routine is task group aware
 !
+  npe = dfpt_data%npert
   nsolv=1
   IF (noncolin.AND.domag) THEN 
      nsolv=2
@@ -212,7 +212,6 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, dfpt_data)
   ENDIF
   nnr = dfftp%nnr
   nnrs=dffts%nnr
-  npe = dfpt_data%npert
   !$acc enter data create(dfpt_data, dfpt_data%dvscfs(1:nnrs, 1:nspin_mag,1:npe))
 
   CALL init_k_blocks_ph(npwx,npol,nksq,nbnd,nspin,nhm,nkb,nat,nnr,&
@@ -251,7 +250,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, dfpt_data)
   IF (rec_code_read == 10.AND.ext_recover) THEN
      ! restart from Phonon calculation
      IF (okpaw) THEN
-        CALL read_rec_tpw(dr2, iter0, dfpt_data)
+        CALL read_rec(dr2, iter0, dfpt_data)
         IF (convt) THEN
            CALL PAW_dpotential(dfpt_data%dbecsum,rho%bec,int3_paw,npe)
         ELSE
@@ -260,7 +259,7 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, dfpt_data)
             dfpt_data%dbecsum,ndim,-1)
         ENDIF
      ELSE
-        CALL read_rec_tpw(dr2, iter0, dfpt_data)
+        CALL read_rec(dr2, iter0, dfpt_data)
      ENDIF
      rec_code=0
   ELSE
@@ -748,8 +747,8 @@ SUBROUTINE solve_linter_many_k (irr, imode0, npe, dfpt_data)
                  ! Ortogonalize dvpsi to valence states: ps = <evq|dvpsi>
                  ! Apply -P_c^+.
                  !
-                 CALL orthogonalize_tpw(dvpsi, evq, ikmk, ikmkmq, dpsi, &
-                                                              npwq, .false.)
+                 CALL orthogonalize(dvpsi, evq, ikmk, ikmkmq, dpsi, npwq, &
+                                                                    .false.)
                  dvpsik_d(1:npwx*npol,st_+1:st_+nbnd)=dvpsi(1:npwx*npol,1:nbnd)
 #endif
                  !

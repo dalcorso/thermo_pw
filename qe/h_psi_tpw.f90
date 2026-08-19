@@ -1,10 +1,13 @@
 !
-! Copyright (C) 2002-2022 Quantum ESPRESSO group
+! Copyright (C) 2002-2025 Quantum ESPRESSO Foundation
 ! Copyright (C) 2023 Andrea Dal Corso (generalization to many k)
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
+!civn: h_psi_gpu merged in h_psi on July, 3rd 2025.
+!      Last commit with h_psi_gpu: c83b4ac816a69f140a4bd67a4299b640aac3a569
+!
 !
 !----------------------------------------------------------------------------
 SUBROUTINE h_psii( lda, n, m, psi, hpsi, ik )
@@ -33,7 +36,7 @@ SUBROUTINE h_psii( lda, n, m, psi, hpsi, ik )
   !! number of states psi
   INTEGER, INTENT(IN) :: ik
   !! k point
-  COMPLEX(DP), INTENT(IN) :: psi(lda*npol,m) 
+  COMPLEX(DP), INTENT(IN) :: psi(lda*npol,m)
   !! the wavefunction
   COMPLEX(DP), INTENT(OUT) :: hpsi(lda*npol,m)
   !! Hamiltonian dot psi
@@ -58,12 +61,16 @@ SUBROUTINE h_psii( lda, n, m, psi, hpsi, ik )
      ! use band parallelization here
      ALLOCATE( recv_counts(mp_size(inter_bgrp_comm)), displs(mp_size(inter_bgrp_comm)) )
      CALL divide_all( inter_bgrp_comm, m, m_start, m_end, recv_counts,displs )
+     !$acc host_data use_device(hpsi)
      CALL mp_type_create_column_section( hpsi(1,1), 0, lda*npol, lda*npol, column_type )
+     !$acc end host_data
      !
      ! Check if there at least one band in this band group
      IF (m_end >= m_start) &
         CALL h_psii_( lda, n, m_end-m_start+1, psi(1,m_start), hpsi(1,m_start), ik )
-     CALL mp_allgather( hpsi, column_type, recv_counts, displs, inter_bgrp_comm )
+     !$acc host_data use_device(hpsi)
+     CALL mp_allgather( hpsi, column_type, recv_counts, displs, inter_bgrp_comm)
+     !$acc end host_data
      !
      CALL mp_type_free( column_type )
      DEALLOCATE( recv_counts )
@@ -94,19 +101,27 @@ SUBROUTINE h_psii_( lda, n, m, psi, hpsi, ik )
   USE scf,                     ONLY: vrs  
   USE many_k_mod,              ONLY: g2kink_d, vkbk_d
   USE uspp,                    ONLY: nkb
-  USE ldaU,                    ONLY: lda_plus_u, Hubbard_projectors
+  USE ldaU,                    ONLY: lda_plus_u
   USE gvect,                   ONLY: gstart
-  USE control_flags,           ONLY: gamma_only, scissor
+  USE control_flags,           ONLY: gamma_only, offload_type, scissor, use_gpu
   USE noncollin_module,        ONLY: npol, noncolin
   USE realus,                  ONLY: real_space, invfft_orbital_gamma, fwfft_orbital_gamma, &
                                      calbec_rs_gamma, add_vuspsir_gamma, invfft_orbital_k,  &
                                      fwfft_orbital_k, calbec_rs_k, add_vuspsir_k,           & 
                                      v_loc_psir_inplace
   USE fft_base,                ONLY: dffts
-  USE exx,                     ONLY: use_ace, vexx, vexxace_gamma, vexxace_k
+  USE exx,                     ONLY: use_ace, vexx, vexxace_gamma, vexxace_k, &
+                                                    vexxace_gamma_gpu, vexxace_k_gpu
   USE xc_lib,                  ONLY: exx_is_active, xclib_dft_is
   USE sci_mod,                 ONLY: p_psi
   USE fft_helper_subroutines
+#if defined(__OSCDFT)
+  USE plugin_flags,            ONLY : use_oscdft
+  USE oscdft_base,             ONLY : oscdft_ctx
+  USE oscdft_functions,        ONLY : oscdft_h_psi
+  USE oscdft_functions_gpu,    ONLY : oscdft_h_psi_gpu
+#endif
+  !
   !
   IMPLICIT NONE
   !
@@ -125,8 +140,7 @@ SUBROUTINE h_psii_( lda, n, m, psi, hpsi, ik )
   !
   ! ... local variables
   !
-#if ! defined (__CUDA)
-  INTEGER :: ipol, ibnd
+  INTEGER :: ipol, ibnd, i
   REAL(DP) :: ee
   !
   !
@@ -135,16 +149,29 @@ SUBROUTINE h_psii_( lda, n, m, psi, hpsi, ik )
   !
   ! ... Here we set the kinetic energy (k+G)^2 psi and clean up garbage
   !
+#if defined(__CUDA)
+  !$acc parallel loop collapse(2) present(g2kink_d, hpsi, psi)
+#else
   !$omp parallel do
+#endif
   DO ibnd = 1, m
-     hpsi(1:n,ibnd) = g2kink_d(1:n,ik) * psi(1:n,ibnd)
-     IF (n<lda) hpsi(n+1:lda, ibnd) = (0.0_dp, 0.0_dp)
-     IF ( noncolin ) THEN
-        hpsi(lda+1:lda+n, ibnd) = g2kink_d(1:n,ik) * psi(lda+1:lda+n, ibnd)
-        IF (n<lda) hpsi(lda+n+1:lda+lda, ibnd) = (0.0_dp, 0.0_dp)
-     ENDIF
-  ENDDO
+     DO i=1, lda
+        IF (i <= n) THEN
+           hpsi (i, ibnd) = g2kink_d (i,ik) * psi (i, ibnd)
+           IF ( noncolin ) THEN
+              hpsi (lda+i, ibnd) = g2kink_d (i,ik) * psi (lda+i, ibnd)
+           END IF
+        ELSE
+           hpsi (i, ibnd) = (0.0_dp, 0.0_dp)
+           IF ( noncolin ) THEN
+              hpsi (lda+i, ibnd) = (0.0_dp, 0.0_dp)
+           END IF
+        END IF
+     END DO
+  END DO
+#if !defined(__CUDA)
   !$omp end parallel do
+#endif
 
   CALL start_clock( 'h_psi:pot' ); !write (*,*) 'start h_psi:pot';FLUSH(6)
   !
@@ -158,16 +185,17 @@ SUBROUTINE h_psii_( lda, n, m, psi, hpsi, ik )
         ! ... real-space algorithm
         ! ... fixme: real_space without beta functions does not make sense
         !
-        IF ( dffts%has_task_groups ) &
+        IF ( dffts%has_task_groups .and. use_gpu ) &
              CALL errore( 'h_psi', 'task_groups not implemented with real_space', 1 )
 
         DO ibnd = 1, m, 2
            ! ... transform psi to real space -> psic 
-           CALL invfft_orbital_gamma( psi, ibnd, m )
+           CALL invfft_orbital_gamma(psi, ibnd, m )
            ! ... compute becp%r = < beta|psi> from psic in real space
-     CALL start_clock( 'h_psi:calbec' ) 
+           CALL start_clock( 'h_psi:calbec' )
            CALL calbec_rs_gamma( ibnd, m, becp%r )
-     CALL stop_clock( 'h_psi:calbec' )
+           !$acc update device(becp%r)
+           CALL stop_clock( 'h_psi:calbec' )
            ! ... psic -> vrs * psic (psic overwritten will become hpsi)
            CALL v_loc_psir_inplace( ibnd, m ) 
            ! ... psic (hpsi) -> psic + vusp
@@ -176,18 +204,22 @@ SUBROUTINE h_psii_( lda, n, m, psi, hpsi, ik )
            CALL fwfft_orbital_gamma( hpsi, ibnd, m, add_to_orbital=.TRUE. )
         ENDDO
         !
-     ELSE IF ( dffts%has_task_groups ) THEN
+     ELSE IF ( dffts%has_task_groups .and..not. use_gpu) THEN
         ! ... usual reciprocal-space algorithm, with task groups
-        CALL vloc_psi_tg_gamma( lda, n, m, psi, vrs(1,current_spin), hpsi )
+        CALL vloc_psi_tg_gamma( lda, n, m, psi, vrs(1,current_spin), hpsi ) 
      ELSE
         ! ... usual reciprocal-space algorithm
-        CALL vloc_psi_gamma_acc( lda, n, m, psi, vrs(1,current_spin), hpsi )
+        CALL vloc_psi_gamma_acc( lda, n, m, psi, vrs(1,current_spin), hpsi ) 
         !
      ENDIF 
      !
   ELSEIF ( noncolin ) THEN 
      !
-     CALL vloc_psik_nc( lda, n, m, psi, vrs, hpsi, ik )
+     IF ( dffts%has_task_groups .and..not. use_gpu ) THEN
+        CALL vloc_psi_tg_nc( lda, n, m, psi, vrs, hpsi )
+     ELSE
+        CALL vloc_psi_nc_acc( lda, n, m, psi, vrs, hpsi )
+     END IF
      !
   ELSE  
      ! 
@@ -197,16 +229,17 @@ SUBROUTINE h_psii_( lda, n, m, psi, hpsi, ik )
         ! ... real-space algorithm
         ! ... fixme: real_space without beta functions does not make sense
         !
-        IF ( dffts%has_task_groups ) &
+        IF ( dffts%has_task_groups .and..not. use_gpu ) &
              CALL errore( 'h_psi', 'task_groups not implemented with real_space', 1 )
         !
         DO ibnd = 1, m
            ! ... transform psi to real space -> psic 
            CALL invfft_orbital_k( psi, ibnd, m )
            ! ... compute becp%r = < beta|psi> from psic in real space
-     CALL start_clock( 'h_psi:calbec' )
+           CALL start_clock( 'h_psi:calbec' )
            CALL calbec_rs_k( ibnd, m )
-     CALL stop_clock( 'h_psi:calbec' )
+           !$acc update device(becp%k)
+           CALL stop_clock( 'h_psi:calbec' )
            ! ... psic -> vrs * psic (psic overwritten will become hpsi)
            CALL v_loc_psir_inplace( ibnd, m )
            ! ... psic (hpsi) -> psic + vusp
@@ -231,9 +264,13 @@ SUBROUTINE h_psii_( lda, n, m, psi, hpsi, ik )
      !
      !
      CALL start_clock( 'h_psi:calbec' )
-     CALL calbec( n, vkbk_d(:,nkb*(ik-1)+1:nkb*ik), psi, becp, m )
+     CALL calbec(offload_type, n, vkbk_d(:,nkb*(ik-1)+1:nkb*ik), psi, becp, m )
      CALL stop_clock( 'h_psi:calbec' )
-     CALL add_vuspsik( lda, n, m, hpsi, ik )
+     if (use_gpu) then
+        CALL errore('h_psii','Should not arrive here',1)
+     else
+       CALL add_vuspsik( lda, n, m, hpsi, ik )
+     end if 
      !
   ENDIF
   !
@@ -250,7 +287,11 @@ SUBROUTINE h_psii_( lda, n, m, psi, hpsi, ik )
   ! ... apply scissor operator
   !
   IF (scissor) CALL errore('h_psii_', 'multiple k and scissor not available',1)
-  IF (scissor) call p_psi(lda,n,m,psi,hpsi) 
+  IF (scissor) then
+    !$acc update host(psi, hpsi)
+    call p_psi(lda,n,m,psi,hpsi) 
+    !$acc update device(psi, hpsi)
+  END IF
   !
   ! ... Here the exact-exchange term Vxx psi
   !
@@ -258,12 +299,26 @@ SUBROUTINE h_psii_( lda, n, m, psi, hpsi, ik )
      CALL errore('h_psii_', 'multiple k and exx not available',1)
      IF ( use_ace ) THEN
         IF ( gamma_only ) THEN
-           CALL vexxace_gamma( lda, m, psi, ee, hpsi )
+             IF( use_gpu ) THEN
+               !$acc host_data use_device(psi, hpsi)
+               CALL vexxace_gamma_gpu(lda,m,psi,ee,hpsi)
+               !$acc end host_data
+             ELSE
+               CALL vexxace_gamma( lda, m, psi, ee, hpsi )
+             END IF 
         ELSE
-           CALL vexxace_k( lda, m, psi, ee, hpsi )
+           IF (use_gpu) THEN
+             !$acc host_data use_device(psi, hpsi)
+             CALL vexxace_k_gpu(lda,m,psi,ee,hpsi)
+             !$acc end host_data
+           ELSE
+             CALL vexxace_k( lda, m, psi, ee, hpsi )
+           END IF
         ENDIF
      ELSE
+        !$acc update host (psi,hpsi)
         CALL vexx( lda, n, m, psi, hpsi, becp )
+        !$acc update device(hpsi)
      ENDIF
   ENDIF
   !
@@ -272,6 +327,7 @@ SUBROUTINE h_psii_( lda, n, m, psi, hpsi, ik )
   IF ( lelfield ) THEN
      CALL errore('h_psii_', 'multiple k and lelfield not available',1)
      !
+     !$acc update host (psi,hpsi)
      IF ( .NOT.l3dstring ) THEN
         CALL h_epsi_her_apply( lda, n, m, psi, hpsi,gdir, efield )
      ELSE
@@ -279,22 +335,28 @@ SUBROUTINE h_psii_( lda, n, m, psi, hpsi, ik )
            CALL h_epsi_her_apply( lda, n, m, psi, hpsi,ipol,efield_cry(ipol) )
         ENDDO
      ENDIF
+     !$acc update device(hpsi)
      !
   ENDIF
 #if defined(__OSCDFT)
-  IF ( use_oscdft ) THEN
-     CALL oscdft_h_psi(oscdft_ctx, lda, n, m, psi, hpsi)
+  IF ( use_oscdft .AND. (oscdft_ctx%inp%oscdft_type==1)) THEN
+     IF( use_gpu) THEN
+       CALL oscdft_h_psi_gpu(oscdft_ctx, lda, n, m, psi, hpsi)
+     ELSE
+       CALL oscdft_h_psi(oscdft_ctx, lda, n, m, psi, hpsi)
+     END IF 
   END IF
 #endif
   !
   ! ... With Gamma-only trick, Im(H*psi)(G=0) = 0 by definition,
   ! ... but it is convenient to explicitly set it to 0 to prevent trouble
   !
+  !$acc kernels
   IF ( gamma_only .AND. gstart == 2 ) &
       hpsi(1,1:m) = CMPLX( DBLE( hpsi(1,1:m) ), 0.D0, KIND=DP)
+  !$acc end kernels
   !
   CALL stop_clock( 'h_psi' )
-#endif
   !
   !
   RETURN

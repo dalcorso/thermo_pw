@@ -23,7 +23,7 @@ SUBROUTINE drho_tpw
   !
   !
   USE kinds,      ONLY : DP
-  USE gvecs,         ONLY : doublegrid
+  USE gvecs,      ONLY : doublegrid
   USE fft_base,   ONLY : dfftp, dffts
   USE lsda_mod,   ONLY : nspin
   USE cell_base,  ONLY : omega
@@ -37,8 +37,6 @@ SUBROUTINE drho_tpw
   USE control_ph, ONLY : all_done
 
   USE lrus,       ONLY : becp1
-  USE klist,      ONLY : lgauss
-  USE two_chem,   ONLY : twochem
   USE qpoint,     ONLY : nksq
   USE control_lr, ONLY : lgamma, rec_code_read
 

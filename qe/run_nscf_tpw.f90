@@ -13,12 +13,12 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   !! the \(\texttt{PHonon}\) code.
   !
   !
-  USE control_flags,   ONLY : conv_ions, lforce, tstress
+  USE control_flags,   ONLY : conv_ions, restart, io_level, lscf, lforce, &
+                              tstress
   USE bp,              ONLY : lberry
   USE starting_scf,    ONLY : starting_wfc, starting_pot, startingconfig
   USE io_files,        ONLY : prefix, tmp_dir, wfc_dir, seqopn
   USE lsda_mod,        ONLY : nspin
-  USE control_flags,   ONLY : restart, lscf, io_level
   USE check_stop,      ONLY : check_stop_now
   USE fft_base,        ONLY : dffts, dfftp
   !!!
@@ -35,7 +35,6 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   USE control_ph,      ONLY : recover, tmp_dir_phq, &
                               ext_restart, bands_computed, newgrid, qplot, &
                               only_wfc
-  USE control_lr,      ONLY : reduce_io
   USE io_global,       ONLY : stdout
   USE uspp,            ONLY : okvan
   USE grid_irr_iq,     ONLY : done_bands
@@ -43,15 +42,15 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   USE scf,             ONLY : vrs
   USE mp_bands,        ONLY : intra_bgrp_comm, nyfft
   USE mp_pools,        ONLY : kunit
-  USE mp_images,       ONLY : intra_image_comm
-  USE mp,              ONLY : mp_barrier
 
   USE lr_symm_base,    ONLY : minus_q, nsymq, invsymq
-  USE control_lr,      ONLY : ethr_nscf
+  USE control_lr,      ONLY : ethr_nscf, reduce_io
   USE qpoint,          ONLY : xq
   USE noncollin_module,ONLY : noncolin, domag, npol
   USE el_phon,         ONLY : elph_mat
   USE ahc,             ONLY : elph_ahc
+  USE mp_images,       ONLY : intra_image_comm
+  USE mp,              ONLY : mp_barrier
   USE rism_module,     ONLY : lrism, rism_set_restart
   USE control_qe,      ONLY : many_k
   USE many_k_mod,      ONLY : deallocate_many_k, allocate_many_k, init_k_blocks
@@ -62,6 +61,9 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   IMPLICIT NONE
   !
   LOGICAL, INTENT(IN) :: do_band
+  !! If .TRUE., run the NSCF band structure calculation. It writes the wavefunctions to
+  !! buffer prefix.wfc#, which is later read by the PHonon code on unit iuwfc.
+  !! If .FALSE., skip the NSCF calculation.
   INTEGER, INTENT(IN) :: iq
   !
   LOGICAL :: exst

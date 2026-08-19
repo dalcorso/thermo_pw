@@ -153,7 +153,7 @@ SUBROUTINE dynmatrix_tpw(iq_)
   !
   !   Generates the star of q
   !
-  CALL star_q_tpw (xq, at, bg, nsym, s, invs, t_rev, nq, sxq, isq, imq, .TRUE. )
+  CALL star_q1 (xq, at, bg, nsym, s, invs, nq, sxq, isq, imq, .TRUE., t_rev )
   !
   ! write on file information on the system
   !

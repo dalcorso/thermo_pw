@@ -35,10 +35,10 @@ SUBROUTINE pheqscf()
   USE control_flags,   ONLY : io_level
   USE output,          ONLY : fildrho
   USE ph_restart,      ONLY : ph_writefile
-  USE lrus,            ONLY : int3, int3_nc, int3_paw
+  USE lrus,            ONLY : int3, int3_nc, int3_paw, intq, intq_nc
   USE freq_ph,         ONLY : fiu, fpol, nfs
   USE optical,         ONLY : current_w, fru, polarc, epsilonc, epsilonm1c,   &
-                              intq, intq_nc, dmuxc_tran, chirr, chirz, chizz, &
+                              dmuxc_tran, chirr, chirz, chizz, &
                               chipm, chimp, chixx, chixy, chizr, lmagnon,     &
                               lall_tensor, lcharge, lchimag, epsm1,           &
                               lr1dwf, iu1dwf, start_freq, last_freq
@@ -225,8 +225,9 @@ SUBROUTINE write_chi_on_disk(iu)
 !-----------------------------------------------------------------------
 USE kinds, ONLY : DP
 USE optical,          ONLY : current_w, fru, lcharge, &
-                             intq, intq_nc, dmuxc_tran, chirr, chirz, chizz, &
+                             dmuxc_tran, chirr, chirz, chizz, &
                              chipm, chimp, chixx, chixy, chizr, epsm1
+USE lrus,             ONLY : intq, intq_nc
 USE lsda_mod,         ONLY : nspin, lsda
 USE freq_ph,          ONLY : fiu
 USE mp_images,        ONLY : my_image_id

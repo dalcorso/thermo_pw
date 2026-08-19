@@ -6,7 +6,7 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !-----------------------------------------------------------------------
-SUBROUTINE solve_linter_tpw (irr, imode0, npe, dfpt_data)
+SUBROUTINE solve_linter_tpw (irr, imode0, dfpt_data)
   !-----------------------------------------------------------------------
   !
   !    Driver routine for the solution of the linear system which
@@ -56,8 +56,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, dfpt_data)
   USE units_lr,             ONLY : iuwfc, lrwfc, iudwf, lrdwf
   USE output,               ONLY : fildrho, fildvscf
   USE phus,                 ONLY : becsumort, alphap, int1_nc
-  USE recover_mod,          ONLY : write_rec
-  USE recover_mod_tpw,      ONLY : read_rec_tpw
+  USE recover_mod,          ONLY : read_rec, write_rec
   ! used to write fildrho:
   USE dfile_autoname,       ONLY : dfile_name
   USE save_ph,              ONLY : tmp_dir_save
@@ -86,9 +85,8 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, dfpt_data)
 
   IMPLICIT NONE
 
-  INTEGER :: irr, npe, imode0
+  INTEGER :: irr, imode0
   ! input: the irreducible representation
-  ! input: the number of perturbation
   ! input: the position of the modes
 
   REAL(DP) , ALLOCATABLE :: h_diag (:,:)
@@ -141,7 +139,8 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, dfpt_data)
              npw,        & ! number of plane waves at k  
              npwq,       & ! number of plane waves at k+q
              nnr, nnrs,  & ! number of FFT mesh point
-             mode          ! mode index
+             mode,       & ! mode index
+             npe 
 
   INTEGER  :: iq_dummy
   REAL(DP) :: tcpu, get_clock ! timing variables
@@ -184,7 +183,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, dfpt_data)
   IF (rec_code_read == 10.AND.ext_recover) THEN
      ! restart from Phonon calculation
      IF (okpaw) THEN
-        CALL read_rec_tpw(dr2, iter0, dfpt_data) 
+        CALL read_rec(dr2, iter0, dfpt_data) 
         IF (convt) THEN
            CALL PAW_dpotential(dfpt_data%dbecsum,rho%bec,int3_paw,npe)
         ELSE
@@ -193,7 +192,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, dfpt_data)
                                                dfpt_data%dbecsum,ndim,-1)
         ENDIF
      ELSE
-        CALL read_rec_tpw(dr2, iter0, dfpt_data )
+        CALL read_rec(dr2, iter0, dfpt_data )
      ENDIF
      rec_code=0
   ELSE

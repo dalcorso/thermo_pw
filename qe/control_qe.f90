@@ -42,11 +42,6 @@ MODULE optical
              lmagnon,       &    ! if .true. computes \chi_+-
              lall_tensor         ! if .true. computes \chi_-+
 
-  COMPLEX (DP), ALLOCATABLE ::      &
-                  intq(:,:,:),      &! nhm, nhm, nat),    integral of e^iqr Q 
-                  intq_nc(:,:,:,:)   ! nhm, nhm, nat, nspin), integral of 
-                                     ! e^iqr Q in the noncollinear case
-
   REAL(DP), ALLOCATABLE :: dmuxc_tran(:)  ! contains 1\|m| d B_xc / d|m|
 
 

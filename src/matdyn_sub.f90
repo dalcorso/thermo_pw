@@ -102,7 +102,7 @@ SUBROUTINE matdyn_interp(nq, q, freq_save, startq, lastq, z_save)
                   rws(0:3,nrwsx)   ! nearest neighbor list, rws(0,*) = norm^2
   REAL(DP) :: qhat(3), qh, masst
   !
-  INTEGER :: nr1, nr2, nr3, ibrav, iq, nstart, nlast
+  INTEGER :: nr1, nr2, nr3, ibrav, iq, nstart, nlast, nta, ipol
   INTEGER :: nrws, nqs
   INTEGER :: n, i, it, na, nqtot
   !
@@ -199,10 +199,21 @@ SUBROUTINE matdyn_interp(nq, q, freq_save, startq, lastq, z_save)
         !
      END IF
      !
-     !  The -1 flag is used to get the eigenvectors of the dynamical matrix
      !  in z
      !
-     CALL dyndiag_tpw(nat,ntyp,amass,ityp,dyn,w2(1,n),z,-1)
+     CALL dyndiag(nat,ntyp,amass,ityp,dyn,w2(1,n),z)
+     !
+     !  The routine gives the displacements, return to the eigenvectors of 
+     !  the dynamical matrix
+     !
+     do i = 1,3*nat
+       do na = 1,nat
+          nta = ityp(na)
+          do ipol = 1,3
+             z((na-1)*3+ipol,i) = z((na-1)*3+ipol,i)* sqrt(amu_ry*amass(nta))
+          end do
+        end do
+     end do
      !
      !  The eigenvectors of the dynamical matrix are saved in z_save
      !

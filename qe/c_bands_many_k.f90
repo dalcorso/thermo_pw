@@ -52,7 +52,7 @@ INTEGER  :: ik, ik1, ikb, i, j, ipol, ntry, ierr
 REAL(DP) :: avg_iter, time, scnds
 LOGICAL  :: lrot
 EXTERNAL h_psii, s_psii, g_psii
-EXTERNAL h_psii_gpu, s_psii_gpu, g_psii_dev
+EXTERNAL g_psii_dev
 #if defined(__CUDA)
 REAL(DP), DEVICE, ALLOCATABLE :: et_d(:,:)
 REAL(DP), DEVICE, ALLOCATABLE :: ylm_d(:,:,:)
@@ -159,7 +159,7 @@ DO ikb=1,nkblocks
    david_loop: DO
       IF (use_gpu) THEN
 #if defined(__CUDA)
-         CALL cegterg_vk ( h_psii_gpu, s_psii_gpu, okvan, g_psii_dev, &
+         CALL cegterg_vk ( h_psii, s_psii, okvan, g_psii_dev, &
          ngk(startkb(ikb)+1), npwx, nbnd, nbndx, npol, evck_d, ethr, &
          et_d(:,startkb(ikb)+1), btype(:,startkb(ikb)+1), notcnv, lrot, &
          dav_iter, nhpsi, nksb(ikb), nkb)
