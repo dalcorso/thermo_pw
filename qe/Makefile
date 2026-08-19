@@ -80,7 +80,6 @@ find_irrep_tpw.o \
 find_info_group.o \
 find_inverse_s.o \
 find_mode_sym.o \
-float_to_char.o \
 g_psi_tpw.o \
 g_psi_dev.o \
 hdiag_dev.o \

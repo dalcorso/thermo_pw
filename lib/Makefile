@@ -20,6 +20,7 @@ dielectric_constant.o \
 elastic_const.o \
 eldos_module.o \
 eos.o \
+float_to_char.o \
 gnuplot.o \
 gnuplot_color.o \
 isoentropic.o \
