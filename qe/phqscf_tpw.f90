@@ -130,8 +130,10 @@ SUBROUTINE phqscf_tpw
         ELSE
            IF (many_k) THEN
               CALL solve_linter_many_k (irr, imode0, dfpt_data)
-           ELSE
+           ELSEIF (.FALSE.) THEN
               CALL solve_linter_tpw (irr, imode0, dfpt_data)
+           ELSE
+              CALL new_solve_linter_tpw (irr, imode0, dfpt_data)
            ENDIF
         ENDIF
         !

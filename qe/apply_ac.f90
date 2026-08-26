@@ -92,17 +92,10 @@ SUBROUTINE apply_ac (ndmx, n, h, ah, ik, m, indi, iflag)
   !   compute the product of the hamiltonian with the h vector
   !
   current_k = ikqs(ik)
-#if defined(__CUDA)
-  !$acc data present(h, hpsi, spsi)
-  !$acc host_data use_device(h, hpsi, spsi)
-  CALL h_psi_gpu (npwx, n, m, h, hpsi)
-  CALL s_psi_acc (npwx, n, m, h, spsi)
-  !$acc end host_data
-  !$acc end data
-#else
+
   CALL h_psi (npwx, n, m, h, hpsi)
   CALL s_psi (npwx, n, m, h, spsi)
-#endif
+
   CALL start_clock ('last')
   !
   !   then we compute the operator H-epsilon S
@@ -128,7 +121,7 @@ SUBROUTINE apply_ac (ndmx, n, h, ah, ik, m, indi, iflag)
 
   IF (ABS(alpha_pv)>1.D-10) THEN
      IF (gamma_only) THEN
-        CALL ch_psi_all_gamma_complex()
+        CALL ch_psi_all_gamma_complex_tpw()
      ELSE
         IF (tddfpt) THEN
           ikq = ik
@@ -136,7 +129,7 @@ SUBROUTINE apply_ac (ndmx, n, h, ah, ik, m, indi, iflag)
         ELSE
           ikq = ikqs(ik)
         ENDIF
-        CALL ch_psi_all_k_complex()
+        CALL ch_psi_all_k_complex_tpw()
      ENDIF
   ENDIF
   !$acc exit data delete(hpsi, spsi, ps, e)
@@ -156,7 +149,7 @@ CONTAINS
 !K-point part
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !-----------------------------------------------------------------------
-  SUBROUTINE ch_psi_all_k_complex()
+  SUBROUTINE ch_psi_all_k_complex_tpw()
 !-----------------------------------------------------------------------
 
     USE becmod, ONLY : becp, calbec
@@ -237,9 +230,9 @@ CONTAINS
        ENDDO
     END IF
     return
-  END SUBROUTINE ch_psi_all_k_complex
+  END SUBROUTINE ch_psi_all_k_complex_tpw
 
-  SUBROUTINE ch_psi_all_gamma_complex()
+  SUBROUTINE ch_psi_all_gamma_complex_tpw()
     !
     ! gamma_only case
     !  
@@ -303,6 +296,6 @@ CONTAINS
        ENDDO
     ENDIF
     return
-  END SUBROUTINE ch_psi_all_gamma_complex
+  END SUBROUTINE ch_psi_all_gamma_complex_tpw
  
 END SUBROUTINE apply_ac

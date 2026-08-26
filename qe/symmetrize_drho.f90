@@ -53,13 +53,13 @@ SELECT CASE (code)
       END IF
    CASE (2)
       CALL psyme_tpw (drhoscf)
-!      IF (okpaw) CALL PAW_desymmetrize(dbecsum)
+      IF (okpaw) CALL PAW_desymmetrize(dbecsum)
    CASE (3)
       CALL psymeq (drhoscf)
-!      IF (okpaw) CALL PAW_deqsymmetrize(dbecsum)
+      IF (okpaw) CALL PAW_deqsymmetrize(dbecsum)
    CASE (4)
       CALL psyme_fpol_tpw (drhoscf)
-!      IF (okpaw) CALL PAW_desymmetrize(dbecsum)
+      IF (okpaw) CALL PAW_desymmetrize(dbecsum)
    CASE DEFAULT
       CALL errore('symmetrize_drho','case not programmed',1)
 END SELECT

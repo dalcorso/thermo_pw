@@ -377,7 +377,11 @@ SUBROUTINE do_cg_e(drhoscfs)
      !
      !  Collect the contribution of all pools. At self-consistence 
      !  the uncollected charge is needed
+     !  NB if you use the new_solve_e_tpw the smooth charge in output is
+     !     collected on pools. If you use the old one solve_e_tpw it is
+     !     not. Comment the following instruction in this case.
      !
+     CALL mp_sum ( drhoscfs, inter_pool_comm )
      CALL mp_sum ( drhoscf, inter_pool_comm )
      IF (okpaw) CALL mp_sum ( dbecsum, inter_pool_comm )
      !

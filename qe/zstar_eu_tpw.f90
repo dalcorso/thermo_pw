@@ -108,12 +108,17 @@ SUBROUTINE zstar_eu_tpw(drhoscf)
         imode0 = imode0 + npert (irr)
      ENDDO
   ENDDO
+!
+!  the new solve_e gives a drhoscf already collected on pools
+!  the old one gave a drhoscf not collected on pools. Exchange the
+!  following two instructions if you use the old solve_e.
+!
+  CALL mp_sum ( zstareu0_wrk, inter_pool_comm )
   CALL zstar_eu_loc (drhoscf, zstareu0_wrk)
 
   CALL mp_sum ( zstareu0_wrk, intra_bgrp_comm )
-  CALL mp_sum ( zstareu0_wrk, inter_pool_comm )
 
-!  WRITE(6,*) ' term Z^{(1} wrk'
+!  WRITE(6,*) ' term Z^{(1} wrk local'
 !  CALL tra_write_zstar(zstareu0_wrk, zstareu, .TRUE.)
 !  WRITE(6,*) ' term Z^{(1} 0'
 !  CALL tra_write_zstar(zstareu0, zstareu, .TRUE.)

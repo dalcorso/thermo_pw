@@ -171,9 +171,14 @@ SUBROUTINE phescf_tpw()
                 &frequency",f9.4," +",f9.4," i Ry", i6," /",i6)') current_w, &
                 iu, nfs
            !
-           CALL solve_e_fpolc( iu )
+           IF (.FALSE.) THEN
+              CALL solve_e_fpolc( iu )
+              IF ( convt ) CALL polarizc (iu)
+           ELSE
+              CALL new_solve_e_fpolc( iu )
+              IF ( convt ) CALL new_polarizc (iu)
+           ENDIF
 
-           IF ( convt ) CALL polarizc (iu)
            !
            !  Save also the inverse of the macroscopic dielectric constant
            !  and its square root, the refractive_index
@@ -216,8 +221,10 @@ SUBROUTINE phescf_tpw()
            CALL allocate_cg(3,1)
            CALL do_cg_e(drhos)
            CALL deallocate_cg()
-        ELSE
+        ELSEIF (.FALSE.) THEN
            CALL solve_e_tpw(drhos)
+        ELSE
+           CALL new_solve_e_tpw(drhos)
         ENDIF
         !
         WRITE( stdout, '(/,5X,"End of electric fields calculation")' )

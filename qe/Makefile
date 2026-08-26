@@ -55,6 +55,7 @@ control_qe.o \
 coset.o \
 ccg_psi.o \
 deallocate_ph_tpw.o \
+dfpt_kernels_tpw.o \
 diago_dev.o \
 divide_class.o \
 divide_class_so.o \
@@ -107,6 +108,11 @@ mix_pot.o \
 nh_lanczos_step.o \
 non_scf_qe_tpw.o \
 non_scf_tpw.o \
+new_polarizc.o \
+new_solve_e_fpolc.o \
+new_solve_e_tpw.o \
+new_solve_eq.o \
+new_solve_linter_tpw.o \
 openfilq_tpw.o \
 orthog_dev.o \
 paw_add_onecenter.o \
@@ -129,6 +135,7 @@ q2qstar_ph.o \
 read_dyn_from_file.o \
 read_lanczos_chain.o \
 realspace_grid_init.o \
+response_kernels_tpw.o \
 rotate_all_psi.o \
 rotate_all_psi_r.o \
 rotate_and_add_dyn.o \
@@ -143,8 +150,8 @@ set_irr_sym_tpw.o \
 set_kplusq.o \
 set_kplusq_nc.o \
 set_kup_and_kdw.o \
-setup_tpw.o \
 setup_nscf_tpw.o \
+setup_tpw.o \
 small_g_g.o \
 solve_e_tpw.o \
 solve_e_fpolc.o \
@@ -162,7 +169,6 @@ sym_and_write_magnetic_charges.o \
 symmetrize_drho.o \
 tra_write_zstar.o \
 vloc_psi_tpw.o \
-vloc_psi_gpu_tpw.o \
 write_group_info_ph.o \
 ylm2_dev.o \
 ylmr2_dev.o \

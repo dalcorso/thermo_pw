@@ -145,7 +145,11 @@ SUBROUTINE pheqscf()
                                                          iu, nfs
         !
         IF (.NOT.lsda) THEN
-           CALL solve_eq( iu, 1 )
+           IF (.FALSE.) THEN
+              CALL solve_eq( iu, 1 )
+           ELSE
+              CALL new_solve_eq( iu, 1 )
+           ENDIF
         ELSE
 !
 !   lchange computes the charge-charge and z-magnetization-charge response
@@ -153,7 +157,11 @@ SUBROUTINE pheqscf()
 !
            IF (lcharge) THEN
               WRITE( stdout, '(/10x,"Applying V and computing n and m_z")')
-              CALL solve_eq( iu, 1)
+              IF (.TRUE.) THEN
+                 CALL solve_eq( iu, 1)
+              ELSE
+                 CALL new_solve_eq( iu, 1)
+              ENDIF
            END IF
 !
 !   lchimag computes the z-magnetization-z-magnetization response
@@ -161,7 +169,11 @@ SUBROUTINE pheqscf()
            IF (lchimag) THEN
               WRITE( stdout, '(/,5x,70("_"))') 
               WRITE( stdout, '(/10x,"Applying B_z and computing n and m_z")')
-              CALL solve_eq( iu, 2)
+              IF (.FALSE.) THEN
+                 CALL solve_eq( iu, 2)
+              ELSE
+                 CALL new_solve_eq( iu, 2)
+              ENDIF
            END IF
 !
 !   lmagnon computes the \chi+- susceptibility whose peaks give the

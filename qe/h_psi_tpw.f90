@@ -100,7 +100,7 @@ SUBROUTINE h_psii_( lda, n, m, psi, hpsi, ik )
   USE lsda_mod,                ONLY: current_spin, isk
   USE scf,                     ONLY: vrs  
   USE many_k_mod,              ONLY: g2kink_d, vkbk_d
-  USE uspp,                    ONLY: nkb
+  USE uspp,                    ONLY: vkb, nkb
   USE ldaU,                    ONLY: lda_plus_u
   USE gvect,                   ONLY: gstart
   USE control_flags,           ONLY: gamma_only, offload_type, scissor, use_gpu
@@ -262,9 +262,9 @@ SUBROUTINE h_psii_( lda, n, m, psi, hpsi, ik )
   !
   IF ( nkb > 0 .AND. .NOT. real_space) THEN
      !
-     !
      CALL start_clock( 'h_psi:calbec' )
-     CALL calbec(offload_type, n, vkbk_d(:,nkb*(ik-1)+1:nkb*ik), psi, becp, m )
+     vkb(:,1:nkb)=vkbk_d(:,nkb*(ik-1)+1:nkb*ik)
+     CALL calbec(offload_type, n, vkb, psi, becp, m )
      CALL stop_clock( 'h_psi:calbec' )
      if (use_gpu) then
         CALL errore('h_psii','Should not arrive here',1)
