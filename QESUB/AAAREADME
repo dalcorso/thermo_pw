@@ -13,6 +13,8 @@ bp_mod.f90 In QE Berry phase works only without pools. This change is
 clocks_handler.f90 we increase the defaults number of clocks.
                    At line 45 maxclocks=2048
 
+lr_sym_mod.f90 the routine ccryst_to_cart_t made public.
+
 lmdif.f90 we use at line 95 epsdiff=1.d-6 instead of zero.
 
 parameters.f90  we increase the maximum number of k points
