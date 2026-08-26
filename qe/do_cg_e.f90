@@ -373,7 +373,7 @@ SUBROUTINE do_cg_e(drhoscfs)
      !
      !  And add the augmentation part of the induced charge    
      !
-     CALL lr_addusddens (rpert, drhoscf, dbecsum)
+     CALL lr_addusddens (rpert, dbecsum, drhoscf)
      !
      !  Collect the contribution of all pools. At self-consistence 
      !  the uncollected charge is needed
@@ -390,7 +390,7 @@ SUBROUTINE do_cg_e(drhoscfs)
      !   q /= 0 case) - symmetrize it
      !
      IF (.NOT.lgamma_gamma) THEN
-        CALL psymdvscf (drhoscf)
+        CALL psymdvscf (drhoscf, dfftp)
      ENDIF
      !
      !   calculate the corresponding linear potential response

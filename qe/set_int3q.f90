@@ -77,7 +77,7 @@ SUBROUTINE set_int3q(irr, imode0, rpert, drhoscf, int3_paw0, dvscfin)
   !   Symmetrize the charge
   !
   IF (.NOT.lgamma_gamma) THEN
-     CALL psymdvscf (rpert, irr, drhoscf)
+     CALL psymdvscf (drhoscf, dfftp)
      IF (okpaw) THEN
         IF (minus_q) CALL PAW_dumqsymmetrize(dbecsum,rpert,irr, &
                                              npertx,irotmq,rtau,xq,tmq)

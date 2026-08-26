@@ -38,7 +38,7 @@ SUBROUTINE do_cg_ph(irr, imode0, dfpt_data)
   USE scf,                   ONLY : rho, v_of_0
   USE uspp,                  ONLY : okvan, vkb, nlcc_any
   USE uspp_param,            ONLY : nhm
-  USE phus,                  ONLY : becsumort
+  USE phus,                  ONLY : becsumort, alphap
   USE modes,                 ONLY : npertx, u, t, tmq
   USE paw_variables,         ONLY : okpaw
   USE paw_onecenter,         ONLY : paw_dpotential
@@ -49,7 +49,7 @@ SUBROUTINE do_cg_ph(irr, imode0, dfpt_data)
   USE dfpt_type,             ONLY : dfpt_data_type, dfpt_ldos_type, &
                                     allocate_dfpt_ldos, deallocate_dfpt_ldos, &
                                     dfpt_dvscfp_to_dvscfs
-  USE lrus,                  ONLY : int3, int3_paw
+  USE lrus,                  ONLY : int3, int3_paw, becp1
   USE dv_of_drho_lr,         ONLY : dv_of_drho
   USE lr_global,             ONLY : rpert, evc0, evq0, sevq0, d0psi
   USE lr_cg,                 ONLY : evc1, res, pres, dir, dir_new, prec_vec
@@ -251,7 +251,7 @@ SUBROUTINE do_cg_ph(irr, imode0, dfpt_data)
               ! at q/=0 it is e^{iqr}. In the US case there is also an
               ! augmentation term computed here.
               !
-              CALL dvqpsi_us (ik, u(1, imode0+ipol), .FALSE. )
+              CALL dvqpsi_us (ik, u(1, imode0+ipol), .FALSE., becp1, alphap )
               CALL save_buffer (dvpsi, lrbar, iubar, ikp)
               aux2=(0.0_DP,0.0_DP)
               do ibnd = 1, nbnd_occ (ikk), incr
@@ -485,7 +485,7 @@ SUBROUTINE do_cg_ph(irr, imode0, dfpt_data)
      !   Here we symmetrize them ...
      !
      IF (.NOT.lgamma_gamma) THEN
-        CALL psymdvscf (rpert, irr, dfpt_data%drhop)
+        CALL psymdvscf (dfpt_data%drhop, dfftp)
         IF (okpaw) THEN
            IF (minus_q) CALL PAW_dumqsymmetrize(dfpt_data%dbecsum,rpert,irr, &
                                                 npertx,irotmq,rtau,xq,tmq)
