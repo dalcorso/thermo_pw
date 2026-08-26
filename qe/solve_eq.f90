@@ -331,6 +331,7 @@ subroutine solve_eq(iu, flag)
               !
               IF (lsda.AND.current_spin==2.AND.flag==2) dvpsi=-dvpsi
               call save_buffer (dvpsi, lrbar, iubar, nrec)
+
            endif
            !
            ! Orthogonalize dvpsi to valence states: ps = <evq|dvpsi>
@@ -416,6 +417,7 @@ subroutine solve_eq(iu, flag)
                              dpsi1, h_diag1, npwx*npol, npwq, thresh, ik, &
                              lter, conv_root, anorm, nbnd_occ(ikk))
               ltaver = ltaver + lter
+
               lintercall = lintercall + 1
               if (.not.conv_root) WRITE( stdout, "(5x,'kpoint',i4,' ibnd',i4, &
                 &         ' solve_e: root not converged ',es10.3)") ik &
@@ -442,6 +444,7 @@ subroutine solve_eq(iu, flag)
                            CALL asyn_master(all_done_asyn)
      ENDDO      ! on k points
      current_w=w
+
      !
      !  The calculation of dbecsum is distributed across processors
      !  (see addusdbec) - we sum over processors the contributions
@@ -475,7 +478,7 @@ subroutine solve_eq(iu, flag)
      
      IF (okpaw) call mp_sum ( dfpt_data%dbecsum, inter_pool_comm )
 
-     CALL symmetrize_drho(dvscfout, dfpt_data%dbecsum, 0, 3, 3)
+     CALL symmetrize_drho(dvscfout, dfpt_data%dbecsum, 0, 1, 3)
 
      dfpt_data%drhop(:,:,1)=dvscfout(:,:,1)
      !

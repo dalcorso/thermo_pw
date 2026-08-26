@@ -277,35 +277,6 @@ SUBROUTINE solve_e_fpolc(iu)
               ! calculates dvscf_q*psi_k in G_space, for all bands, k=kpoint
               ! dvscf_q from previous iteration (mix_potential)
               !
-!              IF ( dffts%has_task_groups ) THEN
-!                 IF (noncolin) THEN
-!                    CALL tg_cgather( dffts, dvscfins(:,1,ipol), &
-!                                                                tg_dv(:,1))
-!                    IF (domag) THEN
-!                       DO jpol=2,4
-!                          CALL tg_cgather( dffts, dvscfins(:,jpol,ipol), &
-!                                                             tg_dv(:,jpol))
-!                       ENDDO
-!                    ENDIF
-!                 ELSE
-!                    CALL tg_cgather( dffts, dvscfins(:,current_spin,ipol), &
-!                                                             tg_dv(:,1))
-!                 ENDIF
-!              ENDIF
-!              aux2=(0.0_DP,0.0_DP)
-!              do ibnd = 1, nbnd_occ (ik), incr
-!                 IF ( dffts%has_task_groups ) THEN
-!                    call cft_wave_tg (ik, evc, tg_psic, 1, v_siz, ibnd, &
-!                                      nbnd_occ (ik) )
-!                    call apply_dpot(v_siz, tg_psic, tg_dv, 1)
-!                    call cft_wave_tg (ik, aux2, tg_psic, -1, v_siz, ibnd, &
-!                                      nbnd_occ (ik))
-!                 ELSE
-!                    call cft_wave (ik, evc (1, ibnd), aux1, +1)
-!                    call apply_dpot(dffts%nnr, aux1, dvscfins(1,1,ipol), current_spin)
-!                    call cft_wave (ik, aux2 (1, ibnd), aux1, -1)
-!                 ENDIF
-!              enddo
               CALL apply_dpot_bands(ik, nbnd_occ(ik), &
                                 dfpt_data%dvscfs(:, :, ipol), evc, aux2)
 

@@ -138,7 +138,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, dfpt_data)
              ikmkmq,     & ! index of mk-mq
              npw,        & ! number of plane waves at k  
              npwq,       & ! number of plane waves at k+q
-             nnr, nnrs,  & ! number of FFT mesh point
+             nnrs,       & ! number of FFT mesh point
              mode,       & ! mode index
              npe 
 
@@ -154,7 +154,6 @@ SUBROUTINE solve_linter_tpw (irr, imode0, dfpt_data)
 !
   npe = dfpt_data%npert
   !
-  nnr=dfftp%nnr
   nnrs = dffts%nnr
   !$acc enter data create(dfpt_data, dfpt_data%dvscfs(1:nnrs, 1:nspin_mag, 1:npe))
 

@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!----------------------------------------------------------------------------
 SUBROUTINE compute_int3_coeff(dvscfin, dbecsum, npe)
+!----------------------------------------------------------------------------
 
 USE kinds,            ONLY : DP
 USE ions_base,        ONLY : nat
