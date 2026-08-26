@@ -1,0 +1,6 @@
+ &INPUT_THERMO
+  what='scf_disp',
+  nq1_d=128, 
+  nq2_d=128, 
+  nq3_d=128,
+ /

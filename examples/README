@@ -212,3 +212,10 @@ what='scf_piezoelectric_tensor':
               calculations for four distorted geometries and for each one 
               of them it makes three Berry phase calculations. 
               Finally it collects all the results and computes e_{14}.
+example26:
+what = 'scf_disp'  : 
+              a phonon dispersion calculation after a scf run.
+              This is identical to example04 but uses a global conjugate
+              gradient minimization avoinding the necessity of mixing.
+              Uses more memory. 
+
