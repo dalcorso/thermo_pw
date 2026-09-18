@@ -481,7 +481,7 @@ So he have:
 Now when we apply all the operations of $H$ to $S_l {\bf k}_j$ we obtain
 the star of $S_l {\bf k}_j$ for the group $H$. All the points of this star 
 give the same contribution to this sum. Therefore, we can take only 
-one point ${\bf k}_m$ in the irreducible brillouin zone (reduced with 
+one point ${\bf k}_m$ in the irreducible Brillouin zone (reduced with 
 the solid point group)
 ($IBZ_S$) and put a weight equal to $\tilde w_j$ multiplied by the number 
 of times we find the same star varying $S_l$ among the $N_c$ cosets $w(m)$.
@@ -530,10 +530,20 @@ or
 
 \section{The forces}
 
+The force acting on atom $s$ is defined as minus the derivatives of the 
+total energy with respect to the same displacement of all the atoms
+$I=\{\mu,s\}$ as $\mu$ varies in all the Bravais lattice vectors and
+$s$ is given:
+\begin{equation}
+{\bf F}_{s,\alpha} = -{1\over N} \sum_\mu {d E_{tot} \over d 
+{\bf u}_{\mu, s,\alpha}},
+\end{equation}
+where $N$ is the number of unit cells of the solid.
+
 Let us now consider a set of displacements of each atom of the solid. We indicate with ${\bf u}_{I}$ the displacement of the atom that in equilibrium is in
 ${\bf R}_I$. Suppose that we compute the total energy
 with the atomic coordinates $\{{\bf R}_I + {\bf u}_I\}$.
-If we do an opertion of the solid space group
+If we do an operation of the solid space group
 $\{S_i,{\bf a}_i\}$ the atomic positions becomes
 \begin{equation}
 \{S_i,{\bf a}_i\} ({\bf R}_I + {\bf u}_I) = 
@@ -544,7 +554,8 @@ So if in the rotated solids we choose the displacements
 {\bf u}'_{\bar I} =  S_i {\bf u}_I,
 \label{rotated_disp}
 \end{equation}
-the energy cannot change and we can write:
+the energy do not change since we have rigidly rotated the solid and its
+displacements and we can write:
 \begin{equation}
 E_{tot}\left(\{{\bf R}_I + {\bf u}_I\}\right) = E_{tot}\left (\{\{S_i,{\bf a}_i\} ({\bf R}_I + {\bf u}_I)\}\right )=
 E_{tot}\left(\{ {\bf R}_{\bar I} + {\bf u}'_{\bar I}\}\right).
@@ -552,18 +563,19 @@ E_{tot}\left(\{ {\bf R}_{\bar I} + {\bf u}'_{\bar I}\}\right).
 Computing the derivatives with respect to ${\bf u}_{I,\alpha}$ we have:
 \begin{equation}
 {d E_{tot} \over d {\bf u}_{\mu,s,\alpha}} = \sum_{\beta=1}^3
-{d E_{tot} \over d {\bf u}_{{\bar \mu},{\bar s},\beta}} 
-{d {\bf u}_{{\bar \mu},{\bar s},\beta} \over
+{d E_{tot} \over d {\bf u}'_{{\bar \mu},{\bar s},\beta}} 
+{d {\bf u}'_{{\bar \mu},{\bar s},\beta} \over
 d {\bf u}_{\mu, s,\alpha}}=\sum_{\beta=1}^3
-{d E_{tot} \over d {\bf u}_{{\bar \mu},{\bar s},\beta}} 
+{d E_{tot} \over d {\bf u}'_{{\bar \mu},{\bar s},\beta}} 
 S_{i,\beta,\alpha}=\sum_{\beta=1}^3 S^{-1}_{i,\alpha,\beta}
-{d E_{tot} \over d {\bf u}_{{\bar \mu},{\bar s},\beta}},
+{d E_{tot} \over d {\bf u}'_{{\bar \mu},{\bar s},\beta}},
 \end{equation}
-where we used the fact that $S_{i,\alpha,\beta}$ is an orthogonal matrix.
+where we used the fact that $S_{i,\alpha,\beta}$ is an orthogonal matrix and
+only ${\bf u}'_{\bar I}$ depends on ${\bf u}_{I}$.
 
 This relation can be used by adding on all the operations of the point group $S_i$ and dividing by
 $N_S$. In the left hand side that does not depend on
-$S_i$ we obtain the symmetrised forces:
+$S_i$ we obtain the symmetrized forces:
 \begin{equation}
 {\bf F}_{s,\alpha} ={1 \over N_S} \sum_{i=1}^{N_S} \sum_{\beta=1}^3 S^{-1}_{i,\alpha,\beta}
 {\bf F}_{\bar s,\beta}.
@@ -616,7 +628,7 @@ S^{-1}_{\beta,\delta}
 The working symmetrization formula is obtained adding on the $N_S$ symmetry operations of the point group
 and dividing by $N_S$. We have:
 \begin{equation}
-\sigma_{\alpha,\beta}= {1 \over N_S} \sum_{i=1}^3
+\sigma_{\alpha,\beta}= {1 \over N_S} \sum_{i=1}^{N_S}
 \sum_{\gamma,\delta=1}^3 S^{-1}_{i,\alpha,\gamma}
 S^{-1}_{i,\beta,\delta}
 \sigma_{\gamma,\delta}.
@@ -651,7 +663,7 @@ e^{i {\bf q} \cdot ({\bf R}_\nu - S^{-1}{\bf R}_{\bar \nu})}
 and now we can use Eq.\ref{secondder} to write
 \begin{eqnarray}
 D_{s,\alpha,s',\beta}({\bf q}) =
-{1 \over N^3 \sqrt{M_s M_s'}} \sum_{\mu,\bar \mu, \nu,\bar \nu} \sum_{\gamma,\delta=1}^3  S^{-1}_{i,\alpha,\gamma} S^{-1}_{i,\beta,\delta}
+{1 \over N^3 \sqrt{M_s M_s'}} \sum_{\mu,\bar \mu, \nu,\bar \nu} \sum_{\gamma,\delta=1}^3  S^{-1}_{\alpha,\gamma} S^{-1}_{\beta,\delta}
 e^{-i {\bf q} \cdot ({\bf R}_\mu - S^{-1}{\bf R}_{\bar \mu}) } \times \nonumber \\
 e^{-i S{\bf q} \cdot {\bf R}_{\bar \mu}}
 {d^2 E_{tot} \over d {\bf u}_{{\bar \mu},{\bar s},\gamma}d {\bf u}_{{\bar \nu},{\bar s}',\delta} }
@@ -661,7 +673,7 @@ e^{i {\bf q} \cdot ({\bf R}_\nu - S^{-1}{\bf R}_{\bar \nu})}
 or
 \begin{equation}
 D_{s,\alpha,s',\beta}({\bf q}) =
-{1 \over N^2 }\sum_{\mu, \nu} \sum_{\gamma,\delta=1}^3  S^{-1}_{i,\alpha,\gamma} S^{-1}_{i,\beta,\delta}
+{1 \over N^2 }\sum_{\mu, \nu} \sum_{\gamma,\delta=1}^3  S^{-1}_{\alpha,\gamma} S^{-1}_{\beta,\delta}
 e^{-i {\bf q} \cdot ({\bf R}_\mu - S^{-1}{\bf R}_{\bar \mu}) }
 D_{\bar s,\gamma,\bar s',\delta}(S{\bf q})
 e^{i {\bf q} \cdot ({\bf R}_\nu - S^{-1}{\bf R}_{\bar \nu})}.
@@ -688,7 +700,7 @@ Calling
 we obtain the equation:
 \begin{equation}
 D_{s,\alpha,s',\beta}({\bf q}) =
-\sum_{\gamma,\delta=1}^3  S^{-1}_{i,\alpha,\gamma} S^{-1}_{i,\beta,\delta}
+\sum_{\gamma,\delta=1}^3  S^{-1}_{\alpha,\gamma} S^{-1}_{\beta,\delta}
 e^{i S {\bf q} \cdot {\bf R}^{S}_{\boldsymbol{\tau}_s} }
 D_{\bar s,\gamma,\bar s',\delta}(S{\bf q})
 e^{-i S{\bf q} \cdot {\bf R}^{S}_{\boldsymbol{\tau}_{s'}}}.
@@ -710,7 +722,7 @@ Eq.~\ref{symdyn0} can be used in the form:
 \begin{equation}
 D_{s,\alpha,s',\beta}({\bf q}) ={1\over N_S}
 \sum_{i=1}^{N_S}
-\sum_{\gamma,\delta=1}^3  S^{-1}_{i,\alpha,\gamma} S^{-1}_{i,\beta,\delta}
+\sum_{\gamma,\delta=1}^3  S^{-1}_{\alpha,\gamma} S^{-1}_{\beta,\delta}
 e^{i S {\bf q} \cdot {\bf R}^{S}_{\boldsymbol{\tau}_s} }
 \tilde D_{\bar s,\gamma,\bar s',\delta}(S{\bf q})
 e^{-i S{\bf q} \cdot {\bf R}^{S}_{\boldsymbol{\tau}_{s'}}},
@@ -725,7 +737,7 @@ Eq.~\ref{symdyn1} simplifies as:
 \begin{equation}
 D_{s,\alpha,s',\beta}({\bf q}) ={1\over N_{S_{\bf q}}}
 \sum_{i=1}^{N_{S_{\bf q}}}
-\sum_{\gamma,\delta=1}^3  S^{-1}_{i,\alpha,\gamma} S^{-1}_{i,\beta,\delta}
+\sum_{\gamma,\delta=1}^3  S^{-1}_{\alpha,\gamma} S^{-1}_{\beta,\delta}
 \tilde D_{\bar s,\gamma,\bar s',\delta}({\bf q})
 e^{i {\bf q} \cdot \left( {\bf R}^{S}_{\boldsymbol{\tau}_s} - {\bf R}^{S}_{\boldsymbol{\tau}_{s'}} \right) },
 \label{symdyn2}
@@ -737,9 +749,9 @@ Bravais lattice vector.
 Also Eq.~\ref{dynmat_inv} can be specialized to the symmetries of the cogroup of ${\bf q}$
 \begin{equation}
 D_{\bar s,\alpha,\bar s',\beta}({\bf q}) =
-\sum_{\gamma,\delta=1}^3  S_{i,\alpha,\gamma} S_{i,\beta,\delta}
+\sum_{\gamma,\delta=1}^3  S_{\alpha,\gamma} S_{\beta,\delta}
 D_{s,\gamma,s',\delta}({\bf q})
-e^{-i {\bf q} \cdot ({\bf R}^{S}_{\boldsymbol{\tau}_s} - {\bf R}^{S}_{\boldsymbol{\tau}_{s'}})},
+e^{-i {\bf q} \cdot \left({\bf R}^{S}_{\boldsymbol{\tau}_s} - {\bf R}^{S}_{\boldsymbol{\tau}_{s'}} \right)},
 \label{dynmat_inv_smallq}
 \end{equation}
 and used to calculate all the matrix elements  
@@ -918,7 +930,7 @@ S^{-1}_{\alpha,\gamma} S^{-1}_{\beta,\delta}
 The working symmetrization formula is obtained adding on the $N_S$ symmetry operations of the point group
 and dividing by $N_S$. We have:
 \begin{equation}
-\epsilon_{\alpha,\beta}= {1 \over N_S} \sum_{i=1}^3
+\epsilon_{\alpha,\beta}= {1 \over N_S} \sum_{i=1}^{N_S}
 \sum_{\gamma,\delta=1}^3 S^{-1}_{i,\alpha,\gamma}
 S^{-1}_{i,\beta,\delta}
 \epsilon_{\gamma,\delta}.
@@ -928,20 +940,21 @@ S^{-1}_{i,\beta,\delta}
 \section{The Born effective charges}
 Born effective charges are second derivative of the total energy with respect to phonon displacements and electric field component:
 \begin{equation}
-qZ^*_{s,\alpha,\beta}= {1\over N} {\partial E_{tot} \over \partial {\bf u}_{s,\alpha} \partial {\bf E}_\beta}.
+qZ^*_{s,\alpha,\beta}= {1\over N} \sum_\mu {\partial E_{tot} \over \partial {\bf u}_{\mu,s,\alpha} \partial {\bf E}_\beta}.
 \end{equation}
 
 So we use the fact that for an operation $\{S,{\bf a}\}$ of the point group of the solid in which the atoms goes in $\{S,{\bf a}\} ({\bf R}_I+{\bf u}_I)$ and the electric field becomes 
 ${\bf E}'=S{\bf E}$ the total energy should not change.
 \begin{equation}
 E_{tot}(\{{\bf R}_I+{\bf u}_I\},{\bf E}) =
-E_{tot}(\{\{S,{\bf a}\}({\bf R}_I+{\bf u}_I)\},{\bf E}'),
+E_{tot}(\{\{S,{\bf a}\}({\bf R}_I+{\bf u}_I)\},{\bf E}')
+=E_{tot}(\{({\bf R}_{\bar I}+{\bf u}'_{\bar I})\},{\bf E}'),
 \end{equation}
 and performing the derivatives we have:
 \begin{equation}
-{\partial E_{tot}(\{{\bf R}_I+{\bf u}_I\},{\bf E}) \over  \partial {\bf u}_{s,\alpha} \partial {\bf E}_\beta} = \sum_{\gamma,\delta} S^{-1}_{\alpha,\gamma} S^{-1}_{\beta,\delta} {\partial 
-E_{tot}(\{\{S,{\bf a}\}({\bf R}_I+{\bf u}_I)\},{\bf E}')
-\over \partial {\bf u}_{\bar s,\gamma} \partial {\bf E}'_\delta},
+{\partial E_{tot}(\{{\bf R}_I+{\bf u}_I\},{\bf E}) \over  \partial {\bf u}_{\mu,s,\alpha} \partial {\bf E}_\beta} = \sum_{\gamma,\delta} S^{-1}_{\alpha,\gamma} S^{-1}_{\beta,\delta} {\partial 
+E_{tot}(\{({\bf R}_{\bar I}+{\bf u}'_{\bar I})\},{\bf E}')
+\over \partial {\bf u}'_{\bar \mu,\bar s,\gamma} \partial {\bf E}'_\delta},
 \end{equation}
 or equivalently
 \begin{equation}
@@ -952,7 +965,7 @@ Z^*_{\bar s,\gamma,\delta}.
 
 \newpage
 {\color{dark-blue}\chapter{Symmetry with spinors}}
-In this chapter we present the modifications of the previous considerantions needed to deal with spinor wavefunctions.
+In this chapter we present the modifications of the previous considerations needed to deal with spinor wavefunctions.
 Spinors can be used together with fully relativistic pseudopotentials to include the effects of spin-orbit coupling. In this case, we can distinguish calculations performed in presence of time-reversal symmetry (nonmagnetic material) or without time reversal symmetry (magnetic material). In the latter case there might be symmetry operations that belong to the solid space group only when coupled with time reversal. If this happens, half rotations of the point group require time reversal and half do not require it. We indicate with $\{\mathcal{T}S,{\bf a}\}$ an operation of the space group that requires time reversal. 
 
 In the context of spinors it is also useful to define for each symmetry operation (with or without time reversal), the operator $\tilde S$ defined as $\tilde S=S$ if $S$ is a proper rotation or $\tilde S= I S$ if $S$ is an improper rotation. Here $I$ is the inversion operator. Therefore $\tilde S$ is always a proper rotation. The inversion operation is defined as $I {\bf r }=-{\bf r}$.
@@ -1206,10 +1219,10 @@ The main symmetry variables available in Quantum ESPRESSO and their relationship
 \begin{itemize}
 
 \item
-\texttt{at(3,3)} contains the principal lattice vectors ${\bf a}_{\alpha,i}$ with this order for the two indices (the first is cartesian, the second indicates the vector). 
+\texttt{at(3,3)} contains the principal lattice vectors ${\bf a}_{\alpha,i}$ with this order for the two indexes (the first is Cartesian, the second indicates the vector). 
 
 \item
-\texttt{bg(3,3)} contains the principal reciprocal lattice vectors ${\bf b}_{\alpha,i}$ with this order for the two indices (the first is cartesian, the second indicates the vector).
+\texttt{bg(3,3)} contains the principal reciprocal lattice vectors ${\bf b}_{\alpha,i}$ with this order for the two indices (the first is Cartesian, the second indicates the vector).
 
 \item 
 \texttt{nsym} is $N_S$ the number of symmetry operations of the point group.
@@ -1280,7 +1293,7 @@ which is the expression implemented in this routine.
 \section{Appendix: Symmatrix}
 This routine symmetrizes $3\times 3$ matrices such as the stress or the dielectric constants. These two quantities can be symmetrized with the same formula
 (see Eq.~\ref{symstress} and \ref{symepsilon}).
-We write the espression for stress:
+We write the expression for stress:
 \begin{equation}
 \sigma_{\alpha,\beta}={1 \over N_S} \sum_{i=1}^{N_S}
 \sum_{\gamma, \delta, \epsilon, \eta, \nu, \rho} \sum_{l, m, n, p} {\bf b}_{\alpha,l} {\bf a}_{\epsilon,l} S^{-1}_{i,\epsilon,\eta} {\bf b}_{\eta,m} {\bf a}_{\gamma,m} {\bf b}_{\beta,n} {\bf a}_{\nu,n} S^{-1}_{i,\nu,\rho} {\bf b}_{\rho,p} {\bf a}_{\delta,p} \sigma_{\gamma,\delta}.
@@ -1376,7 +1389,7 @@ Let's give a few definitions. Given a group $G=\{g_1,g_2,...,g_h\}$ with
 $h$ elements, we call a subgroup $H=\{h_1,...,h_k\}$ a subset of the 
 elements of the group $G$ that are still a group. If $k$ is the number 
 of elements of $H$, one can show that $N_c=h/k$ is an integer. 
-Given $H$, we can define a left coset of $G$ by chosing an element 
+Given $H$, we can define a left coset of $G$ by choosing an element 
 of $G$ that does not belong to $H$, let's say $g_i$, and forming all the
 products $g_i H = \{ g_i h_1,..., g_i h_k\}$. This set is composed by
 $k$ elements of $G$ and is called a left coset. 
@@ -1533,7 +1546,7 @@ and we have the relationship:
 \sum_q t_{q,p}^S {d \tilde n\left(\{S,{\bf a}\} {\bf r}, \{{\bf R}_{\bar I} + {\bf u}_{\bar I}\}\right) \over d \lambda^q}\right]. 
 \end{equation}
 Eq.~\ref{drho_irrep} can be generalized
-in the noncolinear magnetic case as:
+in the noncollinear magnetic case as:
 \begin{equation}
 {d \tilde n\left({\bf r}, \{{\bf R}_I + {\bf u}_I\}\right) \over d \lambda^p} = {1\over N_{S_{\bf q}}} \sum_{i=1}^{N_{S_{\bf q}}} O(S_i)\left[ e^{i{\bf G}_{S_i^{-1}} \cdot {\bf r}}
 \sum_q t_{q,p}^{S_i} {d \tilde n\left(\{S_i,{\bf a}_i\} {\bf r}, \{{\bf R}_{\bar I} + {\bf u}_{\bar I}\}\right) \over d \lambda^q} \right].
@@ -1616,7 +1629,7 @@ D_{s,\alpha,s',\beta}({\bf q}) =\sum_{p,q}  A^{p}_{s,\alpha} D_{p,q}({\bf q}) A^
 
 \section{Appendix: symdynph\_gq}
 This routine uses the Eqs.~\ref{symdyn2} and
-\ref{dynmat_inv_smallq} to symmetryze the dynamical matrix. We can rewrite Eq.~\ref{symdyn2} in the basis of the primitive reciprocal lattice vectors inserting four
+\ref{dynmat_inv_smallq} to symmetrize the dynamical matrix. We can rewrite Eq.~\ref{symdyn2} in the basis of the primitive reciprocal lattice vectors inserting four
 $\delta$ in it:
 \begin{eqnarray}
 D_{s,\alpha,s',\beta}({\bf q}) &=& {1\over N_{S_{\bf q}}}
@@ -1708,7 +1721,7 @@ e^{-i {\bf q} \cdot {\bf R}^{S}_{\boldsymbol{\tau}_{s'}}}
 \right]^*.
 \label{symdyn0_mq}
 \end{eqnarray}
-So if we have a nonsymmetrized dynamical matrix we can use it with the equation
+So if we have a unsymmetrized dynamical matrix we can use it with the equation
 \begin{equation}
 D_{s,\alpha,s',\beta}({\bf q})=
 {1\over 2}
@@ -1848,6 +1861,40 @@ D_{s,\alpha,s',\beta}(S{\bf q})
 =\sum_{p,r}  {\bf b}_{\alpha,p}{\bf b}_{\beta,r}
 D_{s,p,s',r}(S{\bf q})
 \end{equation}
+
+
+\section{Appendix: Input variables}
+
+Input variables which might influence the symmetry. 
+
+\begin{itemize}
+\item
+\texttt{nosym=.TRUE.}. When this flag is set to \texttt{.TRUE.} the code 
+removes all symmetries. The ${\bf k}$ points given in input are used as 
+they are. If a grid of ${\bf k}$ points is specified in input, the mesh
+is generated and only $-{\bf k}$, ${\bf k}$ 
+equivalence due to time reversal is exploited when time reversal is present.
+To remove time reversal set $\texttt{noinv=.TRUE.}$ or do a noncollinear
+calculation with a starting magnetization. 
+Note that in general this is not equivalent to a self consistent calculation
+in which symmetry is used when the original mesh does not transform in
+itself with the point group symmetries of the Bravais lattice.
+
+\item
+\texttt{nosym\_evc=.TRUE.}. When this flag is set to \texttt{.TRUE.}
+the ${\bf k}$ points in input or the ${\bf k}$ points of a grid are
+used together with all the points generated by the point group symmetries
+of the Bravais lattice. However the point group of the solid is assumed
+to contain only identity so ${\bf k}$ points are not reduced with
+the symmetry of the point group of the solid. This calculation is 
+equivalent to a self-consistent calculation in which symmetry is used
+and should give the same results. $-{\bf k}$, ${\bf k}$
+equivalence due to time reversal is exploited when time reversal is
+present. To remove time reversal set $\texttt{noinv=.TRUE.}$ or do a 
+noncollinear calculation with a starting magnetization.
+
+
+\end{itemize}
 
 {\color{dark-blue}\chapter{Bibliography}}
 \color{black}
