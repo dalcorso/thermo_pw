@@ -64,22 +64,29 @@ patches given below.</p>
 
 **Patches for thermo_pw.2.2.0**:
 <br>
+* Correct as in commit 2c1c025 of 23/09/2026 for phonon in insulators
+
 **Patches for thermo_pw.2.1.1**:
 <br>
 The Fermi energy shift is not computed in phonon calculations.
 Please correct as in commit 71e7c41 of 3/12/2025.
 but put the two lines, CALL deallocate_dnsorth()
 and CALL ph_deallocate_upert() at line 171,172.
-
+<br>
+* Correct as in commit 2c1c025 of 23/09/2026 for phonon in insulators.
 
 **Patches for thermo_pw.2.1.0**:
 <br>
+* Correct as in commit 2c1c025 of 23/09/2026 for phonon in insulators.
 
 **Patches for thermo_pw.2.0.3**:
 <br>
+* Correct as in commit 2c1c025 of 23/09/2026 for phonon in insulators.
 
 **Patches for thermo_pw.2.0.2**:
 <br>
+* A problem with long range correction to interatomic force constants
+in insulators. Correct as in commit 2c1c025 of 23/09/2026.
 
 **Patches for thermo_pw.2.0.1**:
 <br>
