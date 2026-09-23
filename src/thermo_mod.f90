@@ -1494,6 +1494,7 @@ MODULE ifc
   REAL(DP), ALLOCATABLE :: frc(:,:,:,:,:,:,:), zeu(:,:,:), &
                m_loc(:,:), wscache(:,:,:,:,:)
   REAL(DP) :: epsil_ifc(3,3)
+  REAL(DP) :: alph
   LOGICAL :: has_zstar
   ! frc : interatomic force constants in real space
   ! zeu : effective charges for the original cell

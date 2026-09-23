@@ -48,7 +48,7 @@ SUBROUTINE q2r_sub(fildyn)
   USE kinds,      ONLY : DP
   USE mp,         ONLY : mp_bcast
   USE dynamicalq, ONLY : phiq, tau, ityp, zeu
-  USE ifc,        ONLY : zasr
+  USE ifc,        ONLY : zasr, alph
   USE constants,  ONLY : amu_ry, tpi
   USE fft_scalar, ONLY : cfft3d
   USE io_global,  ONLY : stdout, meta_ionode, meta_ionode_id
@@ -84,7 +84,7 @@ SUBROUTINE q2r_sub(fildyn)
   COMPLEX(DP), ALLOCATABLE :: phid(:,:,:,:,:)
   REAL(DP),    ALLOCATABLE :: m_loc(:,:)
   !
-  REAL(DP) :: celldm(6), at(3,3), bg(3,3), alph
+  REAL(DP) :: celldm(6), at(3,3), bg(3,3)
   REAL(DP) :: q(3,48), omega, xq, amass(ntypx), resi
   REAL(DP) :: epsil(3,3), smat(3,3)
   !

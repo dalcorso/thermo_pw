@@ -78,7 +78,7 @@ SUBROUTINE matdyn_interp(nq, q, freq_save, startq, lastq, z_save)
   USE cell_base,      ONLY : at, bg, celldm, omega, alat
   USE constants,      ONLY : RY_TO_CMM1, amu_ry
   USE ifc,            ONLY : frc, atm, has_zstar, zeu, epsil_ifc, m_loc, &
-                             zasr, wscache
+                             zasr, wscache, alph
   USE control_ph,     ONLY : xmldyn
   USE disp,           ONLY : nq1, nq2, nq3
   USE data_files,     ONLY : flfrc
@@ -151,7 +151,7 @@ SUBROUTINE matdyn_interp(nq, q, freq_save, startq, lastq, z_save)
      dyn(:,:,:,:) = (0.d0, 0.d0)
      lo_to_split=.FALSE.
      CALL setupmat_simple (q(1,n),dyn,nat,at,bg,tau,omega,alat, &
-     &              epsil_ifc,zeu,frc,nr1,nr2,nr3,has_zstar,rws,nrws,do_init)
+     &         epsil_ifc,zeu,frc,nr1,nr2,nr3,has_zstar,rws,nrws,do_init,alph)
      do_init=.FALSE.
 
      qhat(1) = q(1,n)*at(1,1)+q(2,n)*at(2,1)+q(3,n)*at(3,1)
@@ -840,7 +840,7 @@ END SUBROUTINE set_asr_tpw
 !
 !-----------------------------------------------------------------------
 SUBROUTINE setupmat_simple (q,dyn,nat,at,bg,tau,omega,alat, &
-     &                 epsil,zeu,frc,nr1,nr2,nr3,has_zstar,rws,nrws,do_init)
+     &             epsil,zeu,frc,nr1,nr2,nr3,has_zstar,rws,nrws,do_init,alph)
   !-----------------------------------------------------------------------
   ! compute the dynamical matrix (the analytic part only)
   !
@@ -864,7 +864,6 @@ SUBROUTINE setupmat_simple (q,dyn,nat,at,bg,tau,omega,alat, &
   ! local variables
   !
   !
-  alph=1.0_DP
   dyn(:,:,:,:) = (0.d0,0.d0)
   CALL frc_blk (dyn,q,tau,nat,nr1,nr2,nr3,frc,at,bg,rws,nrws,do_init)
   IF (has_zstar) CALL rgd_blk(nr1,nr2,nr3,nat,dyn,q,tau,epsil,zeu,alph,&
