@@ -1662,7 +1662,7 @@ LOGICAL :: select_ph_to_do
 !
 !   Here we set no_ph_eos taking a grid of
 !   2*nvar+1 (ggrun_recipe=1)
-!   3**nvar (ggrun_recipe=2) 
+!   2*nvar*nvar+1 (ggrun_recipe=2) 
 !   (nvar*(nvar+3))/2+1 (ggrun_recipe=3)
 !   points about a geometry selected with icenter_grun. 
 !   The derivatives of the free energy are then calculated numerically.
@@ -1868,13 +1868,14 @@ ENDIF
 RETURN
 END SUBROUTINE initialize_flags_for_ph
 !
+!
 !---------------------------------------------------------------------
 LOGICAL FUNCTION select_ph_to_do(iwork,nvar,inde,ipoint,ggrun_recipe)
 !---------------------------------------------------------------------
 !
 !  This routine selects on which points to compute the phonon
 !  dispersions in the case lgruneisen_gen=.TRUE.. It selects the 
-!  point ipoint and all the 3^nvar
+!  point ipoint and all the 2*nvar*nvar+1
 !  points about it (grun_recipe=2) or all the 2*nvar
 !  points about it obtained by increasing or decreasing only 
 !  one coordinate (grun_recipe=1) or the nvar * (nvar+3) /2 
@@ -1890,7 +1891,7 @@ LOGICAL FUNCTION select_ph_to_do(iwork,nvar,inde,ipoint,ggrun_recipe)
 !
 !---------------------------------------------------------------------
 USE control_gen_gruneisen, ONLY : njump
-
+USE numerical_derivatives_module, ONLY : build_stencil_19
 IMPLICIT NONE
 
 INTEGER, INTENT(IN) :: nvar, iwork, ggrun_recipe
@@ -1900,6 +1901,11 @@ INTEGER, INTENT(IN) :: inde(nvar)
 INTEGER :: ivar
 INTEGER :: ndiff, npos
 LOGICAL :: laux
+
+! NEW VARIABLES FOR 1+2n^2 STENCIL
+INTEGER, ALLOCATABLE :: stencil(:,:)
+INTEGER :: ip
+LOGICAL :: match
 
 !-------------------------------------------------------------
 ! Count displaced coordinates
@@ -1921,24 +1927,39 @@ DO ivar = 1, nvar
 ENDDO
 
 !-------------------------------------------------------------
+! Build the 1 + 2*n*n stencil
+!-------------------------------------------------------------
+ALLOCATE(stencil(nvar, 1 + 2*nvar*nvar))
+CALL build_stencil_19(nvar, njump, stencil)
+
+!-------------------------------------------------------------
 ! Selection rules
 !-------------------------------------------------------------
 laux = .FALSE.
 
 IF (ggrun_recipe == 1) THEN
 
-   ! center or ± one coordinate
+   ! center or plus or minus one coordinate
    laux = (ndiff == 0) .OR. (ndiff == 1)
 
 ELSEIF (ggrun_recipe == 2) THEN
 
-   ! full 3^nvar cube
-   laux = .TRUE.
-   DO ivar = 1, nvar
-      laux = laux .AND. ( ((inde(ivar)-ipoint(ivar)) == 0) .OR. &
-                          ((inde(ivar)-ipoint(ivar)) == njump) .OR. &
-                          ((inde(ivar)-ipoint(ivar)) == -njump) )
-   ENDDO
+   ! 1 + 2*n*n stencil selection
+   laux = .FALSE.
+
+   DO ip = 1, SIZE(stencil,2)
+      match = .TRUE.
+      DO ivar = 1, nvar
+         IF ( (inde(ivar)-ipoint(ivar)) /= stencil(ivar,ip) ) THEN
+            match = .FALSE.
+            EXIT
+         ENDIF
+      END DO
+      IF (match) THEN
+         laux = .TRUE.
+         EXIT
+      ENDIF
+   END DO
 
 ELSEIF (ggrun_recipe == 3) THEN
 
@@ -1954,10 +1975,10 @@ ELSEIF (ggrun_recipe == 3) THEN
 ENDIF
 
 select_ph_to_do = laux
+DEALLOCATE(stencil)     
 
 RETURN
 END FUNCTION select_ph_to_do
-!
 !---------------------------------------------------------------------
 SUBROUTINE find_ipoint(iwork,nvar,nd,ipoint)
 !---------------------------------------------------------------------

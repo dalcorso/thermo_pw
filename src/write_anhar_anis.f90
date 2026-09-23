@@ -4114,7 +4114,7 @@ SUBROUTINE fit_free_energy_gruneisen_gen()
   USE kinds,       ONLY : DP
   USE cell_base,   ONLY : ibrav
   USE thermo_mod,  ONLY : celldm_geo_eos, no_ph_eos
-  USE control_gen_gruneisen,  ONLY : ggrun_recipe, ind_rec3
+  USE control_gen_gruneisen,  ONLY : ggrun_recipe, ind_rec3, njump
   USE temperature, ONLY : ntemp, temp
   USE thermodynamics,    ONLY : ph_free_ener_eos
   USE el_thermodynamics, ONLY : el_free_ener_eos
@@ -4147,7 +4147,7 @@ SUBROUTINE fit_free_energy_gruneisen_gen()
      IF (ndata.NE.2*nvar+1) CALL errore('fit_free_energy_gruneisen_gen',&
                                                         'uncorrect ndata',1)
   ELSEIF (ggrun_recipe==2) THEN
-     IF (ndata.NE.3**nvar) CALL errore('fit_free_energy_gruneisen_gen',&
+     IF (ndata.NE.(1+2*nvar*nvar)) CALL errore('fit_free_energy_gruneisen_gen',&
                                                         'uncorrect ndata',2)
   ELSEIF (ggrun_recipe==3) THEN
      IF (ndata.NE.nvar*(nvar+3)/2+1) CALL errore(&
@@ -4178,7 +4178,8 @@ SUBROUTINE fit_free_energy_gruneisen_gen()
 
      IF (ggrun_recipe>1) THEN
         IF (ggrun_recipe==2) THEN
-           CALL numerical_derivatives_nd(f, x, nvar, xi0, f0, dfdx, d2fdxdy ) 
+           CALL numerical_derivatives_nd(f, x, nvar, xi0, f0, njump, &
+                                                         dfdx, d2fdxdy ) 
         ELSE
            CALL numerical_derivatives_nd_3(f, x, nvar, xi0, f0, dfdx, &
                                            d2fdxdy, ind_rec3)
@@ -4222,7 +4223,7 @@ SUBROUTINE fit_free_energy_noe_gruneisen_gen()
   USE kinds,       ONLY : DP
   USE cell_base,   ONLY : ibrav
   USE thermo_mod,  ONLY : celldm_geo_eos, no_ph_eos
-  USE control_gen_gruneisen,  ONLY : ggrun_recipe, ind_rec3
+  USE control_gen_gruneisen,  ONLY : ggrun_recipe, ind_rec3, njump
   USE temperature, ONLY : ntemp, temp
   USE thermodynamics,    ONLY : ph_free_ener_eos
   USE control_eldos,     ONLY : lel_free_energy
@@ -4256,7 +4257,7 @@ SUBROUTINE fit_free_energy_noe_gruneisen_gen()
      IF (ndata.NE.2*nvar+1) CALL errore('fit_free_energy_noe_gruneisen_gen',&
                                                         'uncorrect ndata',1)
   ELSEIF (ggrun_recipe==2) THEN
-     IF (ndata.NE.3**nvar) CALL errore('fit_free_energy_noe_gruneisen_gen',&
+     IF (ndata.NE.(1+2*nvar*nvar)) CALL errore('fit_free_energy_noe_gruneisen_gen',&
                                                         'uncorrect ndata',2)
   ELSEIF (ggrun_recipe==3) THEN
      IF (ndata.NE.nvar*(nvar+3)/2+1) CALL errore(&
@@ -4286,7 +4287,8 @@ SUBROUTINE fit_free_energy_noe_gruneisen_gen()
 
      IF (ggrun_recipe>1) THEN
         IF (ggrun_recipe==2) THEN
-           CALL numerical_derivatives_nd(f, x, nvar, xi0, f0, dfdx, d2fdxdy ) 
+           CALL numerical_derivatives_nd(f, x, nvar, xi0, f0, njump, &
+                                                        dfdx, d2fdxdy ) 
         ELSE
            CALL numerical_derivatives_nd_3(f, x, nvar, xi0, f0, dfdx, &
                                            d2fdxdy, ind_rec3)
@@ -4330,7 +4332,7 @@ SUBROUTINE fit_free_energyf_gruneisen_gen()
   USE kinds,       ONLY : DP
   USE cell_base,   ONLY : ibrav
   USE thermo_mod,  ONLY : celldm_geo_eos, no_ph_eos
-  USE control_gen_gruneisen,  ONLY : ggrun_recipe, ind_rec3
+  USE control_gen_gruneisen,  ONLY : ggrun_recipe, ind_rec3, njump
   USE temperature, ONLY : ntemp, temp
   USE ph_freq_thermodynamics,    ONLY : phf_free_ener_eos
   USE el_thermodynamics, ONLY : el_free_ener_eos
@@ -4364,7 +4366,7 @@ SUBROUTINE fit_free_energyf_gruneisen_gen()
      IF (ndata.NE.2*nvar+1) CALL errore('fit_free_energyf_gruneisen_gen',&
                                                         'uncorrect ndata',1)
   ELSEIF (ggrun_recipe==2) THEN
-     IF (ndata.NE.3**nvar) CALL errore('fit_free_energyf_gruneisen_gen',&
+     IF (ndata.NE.(1+2*nvar*nvar)) CALL errore('fit_free_energyf_gruneisen_gen',&
                                                         'uncorrect ndata',2)
   ELSEIF (ggrun_recipe==3) THEN
      IF (ndata.NE.nvar*(nvar+3)/2+1) CALL errore(&
@@ -4395,7 +4397,8 @@ SUBROUTINE fit_free_energyf_gruneisen_gen()
 
      IF (ggrun_recipe>1) THEN
         IF (ggrun_recipe==2) THEN
-           CALL numerical_derivatives_nd(f, x, nvar, xi0, f0, dfdx, d2fdxdy )
+           CALL numerical_derivatives_nd(f, x, nvar, xi0, f0, njump, &
+                                                          dfdx, d2fdxdy )
         ELSE
            CALL numerical_derivatives_nd_3(f, x, nvar, xi0, f0, dfdx, &
                                            d2fdxdy,ind_rec3)
@@ -4432,7 +4435,7 @@ SUBROUTINE fit_free_energyf_noe_gruneisen_gen()
   USE kinds,       ONLY : DP
   USE cell_base,   ONLY : ibrav
   USE thermo_mod,  ONLY : celldm_geo_eos, no_ph_eos
-  USE control_gen_gruneisen,  ONLY : ggrun_recipe, ind_rec3
+  USE control_gen_gruneisen,  ONLY : ggrun_recipe, ind_rec3, njump
   USE temperature, ONLY : ntemp, temp
   USE ph_freq_thermodynamics,    ONLY : phf_free_ener_eos
   USE control_eldos,     ONLY : lel_free_energy
@@ -4497,7 +4500,8 @@ SUBROUTINE fit_free_energyf_noe_gruneisen_gen()
 
      IF (ggrun_recipe>1) THEN
         IF (ggrun_recipe==2) THEN
-           CALL numerical_derivatives_nd(f, x, nvar, xi0, f0, dfdx, d2fdxdy ) 
+           CALL numerical_derivatives_nd(f, x, nvar, xi0, f0, njump, &
+                                                        dfdx, d2fdxdy ) 
         ELSE
            CALL numerical_derivatives_nd_3(f, x, nvar, xi0, f0, dfdx, &
                                            d2fdxdy, ind_rec3)
