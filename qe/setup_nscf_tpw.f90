@@ -130,7 +130,7 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
 !      Reduce the k points with the point group of the solid, all these points
 !      must be explicitely diagonalized
 !
-       CALL irreducible_BZ(nrot, s, nsym, minus_q, magnetic_sym, &
+       CALL irreducible_BZ_old(nrot, s, nsym, minus_q, magnetic_sym, &
                        at, bg, npk, nkstot, xk, wk, t_rev)
        diago_bands(1:nkstot)=.TRUE.
        isym_bands(1:nkstot)=1
@@ -146,7 +146,7 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
                        at, bg, npk, nkstot, xk, wk, t_rev)
        CALL distribute_diago()
     ELSE
-       CALL irreducible_BZ(nrot, s, nsymq, minus_q, magnetic_sym, &
+       CALL irreducible_BZ_old(nrot, s, nsymq, minus_q, magnetic_sym, &
                        at, bg, npk, nkstot, xk, wk, t_rev)
        diago_bands(1:nkstot)=.TRUE.
     ENDIF
