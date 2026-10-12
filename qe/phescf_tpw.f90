@@ -12,6 +12,7 @@ SUBROUTINE phescf_tpw()
   !! This is the main driver for the calculation of the
   !! response to an electric field and related quantities.
   !
+  USE kinds,           ONLY : DP
   USE io_global,       ONLY : stdout
   USE paw_variables,   ONLY : okpaw
   USE klist,           ONLY : lgauss
@@ -27,7 +28,7 @@ SUBROUTINE phescf_tpw()
   USE control_flags,   ONLY : io_level
   USE output,          ONLY : fildrho
   USE ph_restart,      ONLY : ph_writefile
-  USE freq_ph
+  USE freq_ph,         ONLY : nfs, fiu, fpol
   USE optical,         ONLY : current_w, fru, polarc, epsilonc, epsilonm1c, &
                               lr1dwf, iu1dwf, lcfreq, start_freq, last_freq
   USE lr_lanczos,      ONLY : llanczos, iulanczos, only_spectrum
@@ -60,7 +61,7 @@ SUBROUTINE phescf_tpw()
   INTEGER, ALLOCATABLE :: computed(:)
   !
   LOGICAL :: exst_mem, exst
-
+  !
   COMPLEX(DP), ALLOCATABLE :: drhos(:,:,:)
   !
   IF ( .NOT. comp_irr(0)  ) RETURN

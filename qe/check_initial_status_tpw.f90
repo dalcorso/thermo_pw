@@ -129,7 +129,7 @@ SUBROUTINE check_initial_status_tpw(auxdyn, iflag)
   ! point the code has read the q mesh from the files contained in 
   ! prefix.phsave
   !
-  IF (.NOT.recover.AND..NOT.ALLOCATED(x_q)) THEN
+  IF (.NOT.recover) THEN
      !
      ! recover file not found or not looked for
      !
@@ -151,9 +151,9 @@ SUBROUTINE check_initial_status_tpw(auxdyn, iflag)
         !
         nqs = 1
         last_q = 1
-        ALLOCATE(x_q(3,1))
-        ALLOCATE(wq(1))
-        ALLOCATE(lgamma_iq(1))
+        IF (.NOT.ALLOCATED(x_q)) ALLOCATE(x_q(3,1))
+        IF (.NOT.ALLOCATED(wq)) ALLOCATE(wq(1))
+        IF (.NOT.ALLOCATED(lgamma_iq)) ALLOCATE(lgamma_iq(1))
         x_q(:,1)=xq(:)
         wq(1)=1.0d0
         lgamma_iq(1)=lgamma
@@ -166,8 +166,8 @@ SUBROUTINE check_initial_status_tpw(auxdyn, iflag)
      !
      !   Initialize the representations and write them on file.
      !
-     IF (trans .OR. epsil .OR. ldvscf_interpolate) THEN
-        CALL init_representations_tpw()
+     IF (trans .OR. epsil .OR. ldvscf_interpolate.OR.elph_mat) THEN
+        CALL init_representations()
      ELSE
         u_from_file = .TRUE.
      ENDIF

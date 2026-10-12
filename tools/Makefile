@@ -206,6 +206,7 @@ clean :
 	- /bin/rm -rf ../../bin/density.x 
 	- /bin/rm -rf ../../bin/analyze_dynmat.x 
 	- /bin/rm -rf ../../bin/wurtzite.x 
+	- /bin/rm -rf ../../bin/spherical.x
 	- /bin/rm -rf ../../bin/template.x 
 
 veryclean : clean

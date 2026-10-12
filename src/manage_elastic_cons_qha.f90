@@ -52,6 +52,7 @@ LOGICAL :: all_geometry_done, all_el_free, exst, ldummy, check_file_exists, &
 
 IF (only_anhar) THEN
    all_geometry_done=.TRUE.
+   all_geometry_done_geo=.TRUE.
 ELSE
    CALL check_all_geometries_done(all_geometry_done)
 ENDIF
