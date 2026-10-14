@@ -251,7 +251,7 @@ IF (ionode) THEN
 
    WRITE(asyu,"(a)") TRIM(linesur)
    WRITE(asyu,'("surface y=surface(yp);")')
-   WRITE(asyu,'("draw(y,blue+opacity(0.7));")')
+   WRITE(asyu,'("draw(y,GreenYellow+opacity(0.3));")')
    WRITE(asyu,'("draw(yp);")')
 ENDIF
 
@@ -307,6 +307,7 @@ IF (ionode) THEN
    WRITE(asyu,'("defaultpen(1.6);")')
 
    WRITE(asyu,'("import three;")')
+   WRITE(asyu,'("import texcolors;")')
    WRITE(asyu,'("currentprojection=orthographic(",2(f8.3,","),f8.3,");")') &
               asy_proj(1), asy_proj(2), asy_proj(3)
    WRITE(asyu,'("size(15cm);")')
