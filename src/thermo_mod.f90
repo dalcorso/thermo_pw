@@ -2280,6 +2280,8 @@ MODULE control_paths
   LOGICAL :: is_a_path=.TRUE.    ! if .true. the k point are in a path
   LOGICAL :: lbar_label=.FALSE.  ! if .TRUE. put a bar on each label 
                                  ! (needed for surface band plot)
+  CHARACTER(LEN=6) :: bz_color   ! color of the Brillouin zone.
+
 END MODULE control_paths
 
 !----------------------------------------------------------------------------

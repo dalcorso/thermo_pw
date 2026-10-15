@@ -89,7 +89,7 @@ USE asy, ONLY : asy_openplot, asy_closeplot, asy_writepoint, asy_writesurface, &
                 asy_plotaxis, asy_join, asy_putlabel
 USE bz_form, ONLY : bz, find_letter_coordinate
 USE bz_asy_mod, ONLY : bz_asy, find_letter_position
-USE control_paths, ONLY : q_in_band_form 
+USE control_paths, ONLY : q_in_band_form, bz_color 
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: npkt, npk_label
@@ -107,7 +107,7 @@ CHARACTER(LEN=3) :: let_pos
 REAL(DP) :: x0(3), vect(3), ak(3), xk1(3), xmod, xmod1
 REAL(DP) :: letter_coordinates(3)
 
-CALL asy_openplot(asy_filename)
+CALL asy_openplot(asy_filename,bz_color)
 
 DO i=1,bz_struc%nvertices
    label="F"//TRIM(int_to_char(i))
@@ -119,10 +119,15 @@ DO i=1,bz_struc%nfaces
 ENDDO
 
 DO i = 1, npk_label
-   CALL find_letter_coordinate(bz_struc, letter(i), &
+   IF (letter(i)/='') THEN
+      CALL find_letter_coordinate(bz_struc, letter(i), &
                                           letter_coordinates )
-   xk(:,label_list(i))=letter_coordinates
-   CALL find_letter_position(bz_struc, bz_asy_struc, letter(i), let_pos)
+      xk(:,label_list(i))=letter_coordinates
+      CALL find_letter_position(bz_struc, bz_asy_struc, letter(i), let_pos)
+   ELSE
+      let_pos='SE'
+      letter_coordinates(:)=xk(:,label_list(i))
+   ENDIF
    CALL asy_putlabel(letter_path(label_list(i)), letter_coordinates, let_pos)
 END DO
 

@@ -286,7 +286,8 @@ You should have received a copy of the GNU General Public License along with thi
 \hline
 \thermo\ & \qe & release date \\
 \hline
-2.2.1 & 7.6   &            \\
+2.3.0 & 7.6   &            \\
+2.2.1 & 7.6   & 12/10/2026 \\
 2.2.0 & 7.5   & 13/08/2026 \\
 2.1.1 & 7.5   & 13/10/2025 \\
 2.1.0 & 7.4.1 & 24/09/2025 \\
@@ -1183,6 +1184,10 @@ asymptote_command  : the command that invokes asymptote and
               produces the pdf file of the BZ.
               Default: character(len=*) 'asy -f pdf -noprc 
               flasy.asy'
+bz_color    : a string that gives the color of the plotted Brillouin 
+              zone. Options 'orange', 'blue', 'yellow', 'green',
+              'violet', and 'gray'.
+              Default : 'blue'
 npx         : used only in the monoclinic cell, this parameter 
               is needed to determine the shape of the Brillouin 
               zone. The default value is usually large enough, 

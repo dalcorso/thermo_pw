@@ -59,7 +59,7 @@ SUBROUTINE thermo_readin()
                                    disp_q, disp_nqs, npx, &
                                    letter_path, nrap_plot_in, &
                                    label_disp_q, rap_plot_in, long_path, &
-                                   old_path, path_fact, is_a_path
+                                   old_path, path_fact, is_a_path, bz_color
   USE control_gen_gruneisen, ONLY : ggrun_recipe, icenter_grun, njump
   USE control_gnuplot,      ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
   USE postscript_files,     ONLY : flpsband, flpsdisp, flpsmur, flpsdos, &
@@ -200,6 +200,7 @@ SUBROUTINE thermo_readin()
                             old_path,                       &
                             path_fact,                      &
                             q2d, is_a_path,                 &
+                            bz_color,                       &
                             q_in_band_form,                 &
                             q_in_cryst_coord,               &
                             point_label_type,               &
@@ -449,6 +450,7 @@ SUBROUTINE thermo_readin()
   flpsband='output_band'
   q2d=.FALSE.
   is_a_path=.TRUE.
+  bz_color='blue'
   q_in_band_form=.TRUE.
   q_in_cryst_coord=.FALSE.
   point_label_type='SC'
@@ -896,6 +898,7 @@ SUBROUTINE thermo_readin()
 
      npk_label=0
      letter_path='   '
+     letter=''
      DO iq=1, nqaux
         IF (my_image_id==root_image) &
            CALL read_line( input_line, end_of_file = tend, error = terr )
@@ -938,6 +941,8 @@ SUBROUTINE thermo_readin()
 !
               DO k=j,256
                  IF (ICHAR(input_line(k:k)) == 39) THEN
+                    npk_label=npk_label+1
+                    label_list(npk_label)=iq
                     letter_path(iq)=''
                     letter_path(iq)(1:1) = input_line(k+1:k+1)
                     IF (ICHAR(input_line(k+2:k+2)) /= 39) &

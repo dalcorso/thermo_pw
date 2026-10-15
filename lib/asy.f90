@@ -251,7 +251,7 @@ IF (ionode) THEN
 
    WRITE(asyu,"(a)") TRIM(linesur)
    WRITE(asyu,'("surface y=surface(yp);")')
-   WRITE(asyu,'("draw(y,GreenYellow+opacity(0.3));")')
+   WRITE(asyu,'("draw(y,glass);")')
    WRITE(asyu,'("draw(yp);")')
 ENDIF
 
@@ -285,12 +285,12 @@ RETURN
 END SUBROUTINE asy_write_2d_surface
 
 !------------------------------------------------------------------
-SUBROUTINE asy_openplot(filename_asy)
+SUBROUTINE asy_openplot(filename_asy, color)
 !------------------------------------------------------------------
 !
 USE mp, ONLY : mp_bcast
 IMPLICIT NONE
-CHARACTER(LEN=*) :: filename_asy
+CHARACTER(LEN=*) :: filename_asy, color
 INTEGER :: find_free_unit
 INTEGER :: ios
 
@@ -313,6 +313,43 @@ IF (ionode) THEN
    WRITE(asyu,'("size(15cm);")')
    WRITE(asyu,'("size3(40cm,40cm,40cm);")')
    WRITE(asyu,*)
+   IF (color=='orange') THEN
+      WRITE(asyu,'("material glass = material(")')
+      WRITE(asyu,'("diffusepen=YellowOrange+opacity(0.3),")') 
+      WRITE(asyu,'("emissivepen=YellowOrange*0.1,")') 
+      WRITE(asyu,'("specularpen=white,")') 
+      WRITE(asyu,'("shininess=0.8);")')
+   ELSEIF (color=='blue') THEN
+      WRITE(asyu,'("material glass = material(")')
+      WRITE(asyu,'("diffusepen=NavyBlue+opacity(0.3),")') 
+      WRITE(asyu,'("emissivepen=NavyBlue*0.1,")') 
+      WRITE(asyu,'("specularpen=white,")') 
+      WRITE(asyu,'("shininess=0.8);")')
+   ELSEIF (color=='yellow') THEN
+      WRITE(asyu,'("material glass = material(")')
+      WRITE(asyu,'("diffusepen=Goldenrod +opacity(0.3),")') 
+      WRITE(asyu,'("emissivepen=Goldenrod*0.1,")') 
+      WRITE(asyu,'("specularpen=white,")') 
+      WRITE(asyu,'("shininess=0.8);")')
+   ELSEIF (color=='green') THEN
+      WRITE(asyu,'("material glass = material(")')
+      WRITE(asyu,'("diffusepen=OliveGreen+opacity(0.3),")') 
+      WRITE(asyu,'("emissivepen=OliveGreen*0.1,")') 
+      WRITE(asyu,'("specularpen=white,")') 
+      WRITE(asyu,'("shininess=0.8);")')
+   ELSEIF (color=='violet') THEN
+      WRITE(asyu,'("material glass = material(")')
+      WRITE(asyu,'("diffusepen=Violet +opacity(0.3),")') 
+      WRITE(asyu,'("emissivepen=Violet*0.1,")') 
+      WRITE(asyu,'("specularpen=white,")') 
+      WRITE(asyu,'("shininess=0.8);")')
+   ELSE
+      WRITE(asyu,'("material glass = material(")')
+      WRITE(asyu,'("diffusepen=gray(0.4)+opacity(0.3),")') 
+      WRITE(asyu,'("emissivepen=gray(0.7)*0.7,")') 
+      WRITE(asyu,'("specularpen=white,")') 
+      WRITE(asyu,'("shininess=0.9);")')
+   ENDIF
 ENDIF
 
 RETURN
