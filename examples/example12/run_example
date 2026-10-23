@@ -82,6 +82,7 @@ cat > thermo_control << EOF
  &INPUT_THERMO
   what='plot_bz',
   lasymptote=.FALSE.
+  bz_color='orange'
  /
 EOF
 

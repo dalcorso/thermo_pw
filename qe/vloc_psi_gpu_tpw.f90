@@ -63,7 +63,7 @@ SUBROUTINE vloc_psii_k_gpu( lda, n, m, psi_d, v_d, hpsi_d, ik )
   INTEGER :: dffts_nnr, idx, group_size, hm_vec(3)
   INTEGER :: ierr, brange
   !
-  CALL start_clock_gpu ('vloc_psi')
+  CALL start_clock ('vloc_psi')
   use_tg = dffts%has_task_groups
   !
   ALLOCATE( psi(lda,m) )
@@ -75,13 +75,13 @@ SUBROUTINE vloc_psii_k_gpu( lda, n, m, psi_d, v_d, hpsi_d, ik )
   incr = many_fft
   !
   IF( use_tg ) THEN
-     CALL start_clock_gpu ('vloc_psi:tg_gather')
+     CALL start_clock ('vloc_psi:tg_gather')
      dffts_nnr =  dffts%nnr_tg
      incr = fftx_ntgrp(dffts)
      CALL dev_buf%lock_buffer( tg_v_d, dffts_nnr, ierr )
      ALLOCATE( tg_psic(dffts_nnr), tg_vpsi(dffts_nnr,incr) )
      CALL tg_gather_gpu( dffts, v_d, tg_v_d )
-     CALL stop_clock_gpu ('vloc_psi:tg_gather')
+     CALL stop_clock ('vloc_psi:tg_gather')
   ELSE
      dffts_nnr = dffts%nnr
      ALLOCATE( psic(dffts_nnr*incr), vpsi(dffts_nnr,incr) )
@@ -204,7 +204,7 @@ SUBROUTINE vloc_psii_k_gpu( lda, n, m, psi_d, v_d, hpsi_d, ik )
      DEALLOCATE( psic, vpsi )
   ENDIF
   !
-  CALL stop_clock_gpu( 'vloc_psi' )
+  CALL stop_clock( 'vloc_psi' )
 #endif
   !
 99 format ( 20 ('(',2f12.9,')') )
